@@ -7,6 +7,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useGuidedTour: jest.fn(() => ({
     isGuidedTourVisible: true,
+    userRole: 'super-admin',
     guidedTourState: {
       apiTokens: {
         create: false,
@@ -29,7 +30,7 @@ describe('<GuidedTourModal />', () => {
   it('should match the snapshot with contentTypeBuilder.create layout', async () => {
     render(<GuidedTourModal />);
 
-    expect(screen.getByText('🧠 Create a first Collection type')).toBeInTheDocument();
+    expect(screen.getByText('🧠 Create a first Collection Type')).toBeInTheDocument();
 
     expect(document.body).toMatchInlineSnapshot(`
       .c2 {
@@ -589,7 +590,7 @@ describe('<GuidedTourModal />', () => {
                       class="c16 c21"
                       id="title"
                     >
-                      🧠 Create a first Collection type
+                      🧠 Create a first Collection Type
                     </h3>
                   </div>
                   <div
@@ -674,6 +675,7 @@ describe('<GuidedTourModal />', () => {
     // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: true,
+      userRole: 'super-admin',
       guidedTourState: {
         apiTokens: {
           create: false,
@@ -700,6 +702,7 @@ describe('<GuidedTourModal />', () => {
     // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: false,
+      userRole: 'super-admin',
       guidedTourState: {
         apiTokens: {
           create: false,

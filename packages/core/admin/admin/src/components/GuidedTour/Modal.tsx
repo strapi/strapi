@@ -10,14 +10,21 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, pxToRem, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import { pxToRem, useGuidedTour, useTracking, useAppInfo } from '@strapi/helper-plugin';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { LAYOUT_DATA, STATES } from './constants';
+import {
+  LAYOUT_DATA,
+  SUPER_ADMIN_LAYOUT_DATA,
+  STATES,
+  LayoutData,
+  SuperAdminLayoutData,
+  TrackingEvents,
+} from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 
 /* -------------------------------------------------------------------------------------------------
@@ -25,27 +32,28 @@ import { Number, VerticalDivider } from './Ornaments';
  * -----------------------------------------------------------------------------------------------*/
 
 const GuidedTourModal = () => {
-  const {
-    currentStep,
-    guidedTourState,
-    setCurrentStep,
-    setStepState,
-    isGuidedTourVisible,
-    setSkipped,
-  } = useGuidedTour();
+  const { currentStep, guidedTourState, setCurrentStep, setStepState, userRole, setSkipped } =
+    useGuidedTour();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const appInfo = useAppInfo();
 
-  if (!currentStep || !isGuidedTourVisible) {
+  if (!currentStep || !userRole) {
     return null;
   }
 
-  const stepData = get(LAYOUT_DATA, currentStep);
+  const layout: SuperAdminLayoutData | LayoutData =
+    userRole === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
+  const triggeredBySA = userRole === 'super-admin' ? true : false;
+
+  // Remove the inviteUser step  if we are in the development env
+  if (appInfo?.currentEnvironment === 'development') {
+    delete layout.inviteUser;
+  }
+
+  const stepData = get(layout, currentStep) as StepData | undefined;
   const sectionKeys = Object.keys(guidedTourState);
-  const [sectionName, stepName] = currentStep.split('.') as [
-    keyof GuidedTourContextValue['guidedTourState'],
-    string
-  ];
+  const [sectionName, stepName] = currentStep.split('.');
   const sectionIndex = sectionKeys.indexOf(sectionName);
   const stepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
   const hasSectionAfter = sectionIndex < sectionKeys.length - 1;
@@ -54,8 +62,8 @@ const GuidedTourModal = () => {
   const handleCtaClick = () => {
     setStepState(currentStep, true);
 
-    if (stepData) {
-      trackUsage(stepData.trackingEvent);
+    if (stepData && stepData.trackingEvent) {
+      trackUsage(stepData.trackingEvent, { triggeredBySA });
     }
 
     setCurrentStep(null);
@@ -64,7 +72,7 @@ const GuidedTourModal = () => {
   const handleSkip = () => {
     setSkipped(true);
     setCurrentStep(null);
-    trackUsage('didSkipGuidedtour');
+    trackUsage('didSkipGuidedtour', { triggeredBySA });
   };
 
   return (
@@ -107,8 +115,9 @@ const GuidedTourModal = () => {
                 sectionIndex={sectionIndex}
                 stepIndex={stepIndex}
                 hasSectionAfter={hasSectionAfter}
+                stepCount={Object.keys(layout).length}
               >
-                {stepData && 'content' in stepData && <GuidedTourContent {...stepData.content} />}
+                {stepData?.content ? <GuidedTourContent {...stepData.content} /> : null}
               </GuidedTourStepper>
             </Box>
             {!(!hasStepAfter && !hasSectionAfter) && (
@@ -136,6 +145,13 @@ const ModalWrapper = styled(Flex)`
   background: ${({ theme }) => `${theme.colors.neutral800}1F`};
 `;
 
+interface StepData {
+  trackingEvent?: TrackingEvents;
+  title?: GuidedTourStepperProps['title'];
+  cta?: GuidedTourStepperProps['cta'];
+  content?: GuidedTourContentProps;
+}
+
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourStepper
  * -----------------------------------------------------------------------------------------------*/
@@ -150,6 +166,7 @@ interface GuidedTourStepperProps {
   onCtaClick: () => void;
   sectionIndex: number;
   stepIndex: number;
+  stepCount: number;
   hasSectionAfter: boolean;
 }
 
@@ -160,6 +177,7 @@ const GuidedTourStepper = ({
   onCtaClick,
   sectionIndex,
   stepIndex,
+  stepCount,
   hasSectionAfter,
 }: GuidedTourStepperProps) => {
   const { formatMessage } = useIntl();
@@ -175,9 +193,10 @@ const GuidedTourStepper = ({
           {hasSectionBefore && <VerticalDivider state={STATES.IS_DONE} minHeight={pxToRem(24)} />}
         </Flex>
         <Typography variant="sigma" textColor="primary600">
+          {stepCount}
           {formatMessage({
             id: 'app.components.GuidedTour.title',
-            defaultMessage: '3 steps to get started',
+            defaultMessage: ' steps to get started',
           })}
         </Typography>
       </Flex>

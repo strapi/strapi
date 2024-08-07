@@ -1,24 +1,51 @@
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, pxToRem, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import {
+  GuidedTourContextValue,
+  pxToRem,
+  useGuidedTour,
+  useTracking,
+  useAppInfo,
+} from '@strapi/helper-plugin';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import { LAYOUT_DATA, States, STATES } from './constants';
+import {
+  SUPER_ADMIN_LAYOUT_DATA,
+  LAYOUT_DATA,
+  States,
+  STATES,
+  LayoutData,
+  SuperAdminLayoutData,
+} from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 
-const GuidedTourHomepage = () => {
+interface GuidedTourHomepageProps {
+  userRole: string;
+}
+
+const GuidedTourHomepage = ({ userRole }: GuidedTourHomepageProps) => {
   const { guidedTourState, setSkipped } = useGuidedTour();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const appInfo = useAppInfo();
 
-  const sections = Object.entries(LAYOUT_DATA).map(([key, val]) => ({
+  const layout: SuperAdminLayoutData | LayoutData =
+    userRole === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
+  const triggeredBySA = userRole === 'super-admin' ? true : false;
+
+  // Remove the inviteUser step  if we are in the development env
+  if (appInfo?.currentEnvironment === 'development') {
+    delete layout.inviteUser;
+  }
+
+  const sections = Object.entries(layout).map(([key, val]) => ({
     key: key,
     title: val.home.title,
     content: (
       <LinkButton
-        onClick={() => trackUsage(val.home.trackingEvent)}
+        onClick={() => trackUsage(val.home.trackingEvent, { triggeredBySA })}
         as={NavLink}
         // @ts-expect-error - types are not inferred correctly through the as prop.
         to={val.home.cta.target}
@@ -36,7 +63,7 @@ const GuidedTourHomepage = () => {
 
   const handleSkip = () => {
     setSkipped(true);
-    trackUsage('didSkipGuidedtour');
+    trackUsage('didSkipGuidedtour', { triggeredBySA });
   };
 
   return (
@@ -51,10 +78,13 @@ const GuidedTourHomepage = () => {
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
         <Typography variant="beta" as="h2">
-          {formatMessage({
-            id: 'app.components.GuidedTour.title',
-            defaultMessage: '3 steps to get started',
-          })}
+          {formatMessage(
+            {
+              id: 'app.components.GuidedTour.title',
+              defaultMessage: '{count} steps to get started',
+            },
+            { count: Object.keys(layout).length }
+          )}
         </Typography>
         <Box>
           {sections.map((section, index) => {

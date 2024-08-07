@@ -28,6 +28,7 @@ import {
   useOverlayBlocker,
   useTracking,
   useAPIErrorHandler,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Check, Eye, EyeStriked } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
@@ -74,6 +75,8 @@ const ProfilePage = () => {
   const { notifyStatus } = useNotifyAT();
   const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
   const dispatch = useTypedDispatch();
+  const { startSection, setCurrentStep } = useGuidedTour();
+
   const {
     _unstableFormatValidationErrors: formatValidationErrors,
     _unstableFormatAPIError: formatApiError,
@@ -82,6 +85,10 @@ const ProfilePage = () => {
   useFocusWhenNavigate();
 
   const { user } = useAuth('ProfilePage');
+
+  React.useEffect(() => {
+    startSection('profile');
+  }, [startSection]);
 
   React.useEffect(() => {
     if (user) {
@@ -150,6 +157,8 @@ const ProfilePage = () => {
       dispatch(setAppTheme(currentTheme));
 
       trackUsage('didChangeMode', { newMode: currentTheme });
+
+      setCurrentStep('profile.success');
 
       toggleNotification({
         type: 'success',

@@ -15,27 +15,16 @@ type Step = `${SectionKey}.${StepKey}`;
 interface GuidedTourContextValue {
   currentStep: Step | null;
   guidedTourState: {
-    contentTypeBuilder: {
-      create: boolean;
-      success: boolean;
-    };
-    contentManager: {
-      create: boolean;
-      success: boolean;
-    };
-    apiTokens: {
-      create: boolean;
-      success: boolean;
-    };
-    transferTokens: {
+    [key: string]: {
       create: boolean;
       success: boolean;
     };
   };
+  userRole: string;
   isGuidedTourVisible: boolean;
   isSkipped: boolean;
   setCurrentStep: (step: Step | null) => void | null;
-  setGuidedTourVisibility: (isVisible: boolean) => void;
+  setGuidedTourVisibility: (isVisible: boolean, userRole: string) => void;
   setSkipped: (isSkipped: boolean) => void;
   setStepState: (step: Step, state: boolean) => void;
   startSection: (section: SectionKey) => void;
@@ -56,11 +45,24 @@ const GuidedTourContext = React.createContext<GuidedTourContextValue>({
       create: false,
       success: false,
     },
+    mediaLibrary: {
+      create: false,
+      success: false,
+    },
+    profile: {
+      create: false,
+      success: false,
+    },
+    inviteUser: {
+      create: false,
+      success: false,
+    },
     transferTokens: {
       create: false,
       success: false,
     },
   },
+  userRole: 'super-admin',
   isGuidedTourVisible: false,
   isSkipped: true,
   setCurrentStep: () => null,
@@ -83,6 +85,7 @@ const GuidedTourProvider = ({
   currentStep = null,
   guidedTourState,
   isGuidedTourVisible = false,
+  userRole = 'super-admin',
   isSkipped,
   setCurrentStep,
   setGuidedTourVisibility,
@@ -94,6 +97,7 @@ const GuidedTourProvider = ({
     () => ({
       currentStep,
       guidedTourState,
+      userRole,
       isGuidedTourVisible,
       isSkipped,
       setCurrentStep,
@@ -105,6 +109,7 @@ const GuidedTourProvider = ({
     [
       currentStep,
       guidedTourState,
+      userRole,
       isGuidedTourVisible,
       isSkipped,
       setCurrentStep,

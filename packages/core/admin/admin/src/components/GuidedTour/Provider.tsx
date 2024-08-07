@@ -7,6 +7,7 @@ import {
   GuidedTourStep,
   GuidedTourStepKey,
   auth,
+  useAppInfo,
 } from '@strapi/helper-plugin';
 import produce from 'immer';
 import get from 'lodash/get';
@@ -21,8 +22,10 @@ interface GuidedTourProviderProps {
 }
 
 const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
-  const [{ currentStep, guidedTourState, isGuidedTourVisible, isSkipped }, dispatch] =
+  const [{ currentStep, guidedTourState, isGuidedTourVisible, userRole, isSkipped }, dispatch] =
     React.useReducer(reducer, initialState, initialiseState);
+
+  const appInfo = useAppInfo();
 
   const setCurrentStep = (step: SetCurrentStepAction['step']) => {
     // if step is null it is intentional, we need to dispatch it
@@ -49,10 +52,38 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
     });
   };
 
-  const setGuidedTourVisibility = (value: SetGuidedTourVisibilityAction['value']) => {
+  const setGuidedTourVisibility = (
+    value: SetGuidedTourVisibilityAction['value'],
+    userRole: SetGuidedTourVisibilityAction['userRole']
+  ) => {
+    // Update the initial guidedTourState depending on the visibility (executed once)
+    if (!isGuidedTourVisible) {
+      const guidedTourState = JSON.parse(JSON.stringify(initialState?.guidedTourState));
+
+      // Remove the inviteUser step if we are in the development env
+      if (appInfo?.currentEnvironment === 'development') {
+        delete guidedTourState.inviteUser;
+      }
+
+      // Remove non-related steps to specific guided tour (super-admin or admin)
+      if (userRole === 'admin') {
+        delete guidedTourState.contentTypeBuilder;
+        delete guidedTourState.apiTokens;
+      } else if (userRole === 'super-admin') {
+        delete guidedTourState.mediaLibrary;
+        delete guidedTourState.profile;
+      }
+
+      dispatch({
+        type: 'SET_GUIDED_TOUR_STATE',
+        value: guidedTourState,
+      });
+    }
+
     dispatch({
       type: 'SET_GUIDED_TOUR_VISIBILITY',
       value,
+      userRole,
     });
   };
 
@@ -71,7 +102,6 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
 
     if (sectionSteps) {
       const guidedTourArray = Object.entries(guidedTourState);
-
       // Find current section position in the guidedTourArray
       // Get only previous sections based on current section position
       const currentSectionIndex = guidedTourArray.findIndex(([key]) => key === sectionName);
@@ -81,7 +111,6 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       const isSectionToShow = previousSections.every(([, sectionValue]) =>
         Object.values(sectionValue).every(Boolean)
       );
-
       const [firstStep] = Object.keys(sectionSteps) as [GuidedTourStepKey];
       const isFirstStepDone = sectionSteps[firstStep];
 
@@ -109,6 +138,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       setSkipped={setSkipped}
       setStepState={setStepState}
       startSection={startSection}
+      userRole={userRole}
       isGuidedTourVisible={isGuidedTourVisible}
       isSkipped={isSkipped}
     >
@@ -119,7 +149,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
 
 type State = Pick<
   GuidedTourContextValue,
-  'guidedTourState' | 'currentStep' | 'isGuidedTourVisible' | 'isSkipped'
+  'guidedTourState' | 'currentStep' | 'isGuidedTourVisible' | 'isSkipped' | 'userRole'
 >;
 
 const initialState = {
@@ -137,12 +167,25 @@ const initialState = {
       create: false,
       success: false,
     },
+    mediaLibrary: {
+      create: false,
+      success: false,
+    },
+    profile: {
+      create: false,
+      success: false,
+    },
+    inviteUser: {
+      create: false,
+      success: false,
+    },
     transferTokens: {
       create: false,
       success: false,
     },
   },
   isGuidedTourVisible: false,
+  userRole: 'super-admin',
   isSkipped: false,
 } satisfies State;
 
@@ -157,6 +200,16 @@ interface SetStepStateAction {
   value: boolean;
 }
 
+interface SetGuidedTourStateAction {
+  type: 'SET_GUIDED_TOUR_STATE';
+  value: {
+    [key: string]: {
+      create: boolean;
+      success: boolean;
+    };
+  };
+}
+
 interface SetSkippedAction {
   type: 'SET_SKIPPED';
   value: boolean;
@@ -165,13 +218,15 @@ interface SetSkippedAction {
 interface SetGuidedTourVisibilityAction {
   type: 'SET_GUIDED_TOUR_VISIBILITY';
   value: boolean;
+  userRole: string;
 }
 
 type Action =
   | SetCurrentStepAction
   | SetStepStateAction
   | SetSkippedAction
-  | SetGuidedTourVisibilityAction;
+  | SetGuidedTourVisibilityAction
+  | SetGuidedTourStateAction;
 
 const reducer: React.Reducer<State, Action> = (state: State = initialState, action: Action) =>
   produce(state, (draftState) => {
@@ -192,8 +247,13 @@ const reducer: React.Reducer<State, Action> = (state: State = initialState, acti
         draftState.isSkipped = action.value;
         break;
       }
+      case 'SET_GUIDED_TOUR_STATE': {
+        draftState.guidedTourState = action.value;
+        break;
+      }
       case 'SET_GUIDED_TOUR_VISIBILITY': {
         draftState.isGuidedTourVisible = action.value;
+        draftState.userRole = action.userRole;
         break;
       }
       default: {

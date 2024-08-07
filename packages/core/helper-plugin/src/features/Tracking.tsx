@@ -61,22 +61,15 @@ interface EventWithoutProperties {
     | 'didBulkDeleteEntries'
     | 'didChangeDisplayedFields'
     | 'didCheckDraftRelations'
-    | 'didClickGuidedTourHomepageApiTokens'
-    | 'didClickGuidedTourHomepageContentManager'
-    | 'didClickGuidedTourHomepageContentTypeBuilder'
-    | 'didClickGuidedTourStep1CollectionType'
-    | 'didClickGuidedTourStep2ContentManager'
-    | 'didClickGuidedTourStep3ApiTokens'
     | 'didClickonBlogSection'
     | 'didClickonCodeExampleSection'
     | 'didClickonReadTheDocumentationSection'
     | 'didClickOnTryStrapiCloudSection'
     | 'didClickonTutorialSection'
-    | 'didCreateGuidedTourCollectionType'
-    | 'didCreateGuidedTourEntry'
     | 'didCreateNewRole'
     | 'didCreateRole'
     | 'didDeleteToken'
+    | 'didLaunchGuidedtour'
     | 'didDuplicateRole'
     | 'didEditEditSettings'
     | 'didEditEmailTemplates'
@@ -84,9 +77,7 @@ interface EventWithoutProperties {
     | 'didEditListSettings'
     | 'didEditMediaLibraryConfig'
     | 'didEditNameOfContentType'
-    | 'didGenerateGuidedTourApiTokens'
     | 'didGoToMarketplace'
-    | 'didLaunchGuidedtour'
     | 'didMissMarketplacePlugin'
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'
@@ -96,7 +87,6 @@ interface EventWithoutProperties {
     | 'didSaveComponent'
     | 'didSaveContentType'
     | 'didSearch'
-    | 'didSkipGuidedtour'
     | 'didSubmitPlugin'
     | 'didSubmitProvider'
     | 'didUpdateConditions'
@@ -299,6 +289,33 @@ interface DidPublishRelease {
   };
 }
 
+interface GuidedTourEvents {
+  name:
+    | 'didCreateGuidedTourCollectionType'
+    | 'didCreateGuidedTourEntry'
+    | 'didGenerateGuidedTourApiTokens'
+    | 'didCreateGuidedTourMedia'
+    | 'didUpdateGuidedTourProfile'
+    | 'didGenerateGuidedTourUsers'
+    | 'didClickGuidedTourHomepageContentTypeBuilder'
+    | 'didClickGuidedTourHomepageContentManager'
+    | 'didClickGuidedTourHomepageApiTokens'
+    | 'didClickGuidedTourHomepageMediaLibrary'
+    | 'didClickGuidedTourHomepageProfile'
+    | 'didClickGuidedTourHomepageUsers'
+    | 'didClickGuidedTourStep1CollectionType'
+    | 'didClickGuidedTourStep2ContentManager'
+    | 'didClickGuidedTourStep3ApiTokens'
+    | 'didClickGuidedTourStep1ContentManager'
+    | 'didClickGuidedTourStep2MediaLibrary'
+    | 'didClickGuidedTourStep3Profile'
+    | 'didClickGuidedTourStep4Users'
+    | 'didSkipGuidedtour';
+  properties: {
+    triggeredBySA?: boolean;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | DidAccessTokenListEvent
@@ -317,7 +334,8 @@ type EventsWithProperties =
   | UpdateEntryEvents
   | WillModifyTokenEvent
   | WillNavigateEvent
-  | DidPublishRelease;
+  | DidPublishRelease
+  | GuidedTourEvents;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

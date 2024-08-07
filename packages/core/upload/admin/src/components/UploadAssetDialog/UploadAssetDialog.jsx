@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { ModalLayout } from '@strapi/design-system';
+import { useGuidedTour } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -27,6 +28,8 @@ export const UploadAssetDialog = ({
   const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
   const [assets, setAssets] = useState(initialAssetsToAdd || []);
   const [assetToEdit, setAssetToEdit] = useState(undefined);
+
+  const { setCurrentStep } = useGuidedTour();
 
   const handleAddToPendingAssets = (nextAssets) => {
     validateAssetsTypes(nextAssets, () => {
@@ -56,6 +59,8 @@ export const UploadAssetDialog = ({
     if (nextAssets.length === 0) {
       onClose();
     }
+
+    setCurrentStep('mediaLibrary.success');
   };
 
   const handleAssetEditValidation = (nextAsset) => {

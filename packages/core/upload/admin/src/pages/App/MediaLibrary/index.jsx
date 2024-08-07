@@ -24,6 +24,7 @@ import {
   useQueryParams,
   useSelectionState,
   useTracking,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Cog, Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -93,6 +94,7 @@ export const MediaLibrary = () => {
   const isFiltering = Boolean(query._q || query.filters);
   const [view, setView] = usePersistentState(localStorageKeys.view, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
+  const { startSection } = useGuidedTour();
 
   const {
     data: assetsData,
@@ -119,6 +121,10 @@ export const MediaLibrary = () => {
   } = useFolder(query?.folder, {
     enabled: canRead && !!query?.folder,
   });
+
+  React.useEffect(() => {
+    startSection('mediaLibrary');
+  }, [startSection]);
 
   // Folder was not found: redirect to the media library root
   if (currentFolderError?.response?.status === 404) {

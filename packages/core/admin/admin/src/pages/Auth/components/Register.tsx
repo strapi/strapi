@@ -152,6 +152,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   ) => {
     const res = await registerAdmin(body);
 
+    // eslint-disable-next-line no-console
+    console.log(news);
     if ('data' in res) {
       setToken(res.data.token);
 

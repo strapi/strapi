@@ -83,8 +83,8 @@ const AuthenticatedApp = () => {
     if (userRoles) {
       const isUserSuperAdmin = userRoles.find(({ code }) => code === 'strapi-super-admin');
 
-      if (isUserSuperAdmin && appInfo?.autoReload) {
-        setGuidedTourVisibility(true);
+      if (appInfo?.autoReload) {
+        setGuidedTourVisibility(true, isUserSuperAdmin ? 'super-admin' : 'admin');
       }
     }
   }, [userRoles, appInfo?.autoReload, setGuidedTourVisibility]);

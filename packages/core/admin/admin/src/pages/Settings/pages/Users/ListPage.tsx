@@ -23,6 +23,7 @@ import {
   PaginationURLQuery,
   CheckPagePermissions,
   TableHeader,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import * as qs from 'qs';
 import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
@@ -51,6 +52,8 @@ const ListPageCE = () => {
   } = useRBAC(permissions.settings?.users);
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
+  const { startSection, setCurrentStep } = useGuidedTour();
+
   const { search } = useLocation();
   useFocusWhenNavigate();
   const { data, isError, isLoading } = useAdminUsers(
@@ -59,6 +62,10 @@ const ListPageCE = () => {
       skip: !canRead,
     }
   );
+
+  React.useEffect(() => {
+    startSection('inviteUser');
+  }, [startSection]);
 
   const { pagination, users } = data ?? {};
 
@@ -85,7 +92,10 @@ const ListPageCE = () => {
     defaultMessage: 'Users',
   });
 
-  const handleToggle = () => {
+  const handleToggle = (step: unknown) => {
+    if (step === 'magic-link') {
+      setCurrentStep('inviteUser.success');
+    }
     setIsModalOpen((prev) => !prev);
   };
 

@@ -35,7 +35,7 @@ import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
 interface ModalFormProps {
-  onToggle: () => void;
+  onToggle: (type?: unknown) => void;
 }
 
 const ModalForm = ({ onToggle }: ModalFormProps) => {
@@ -255,7 +255,11 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
                   ) : (
-                    <Button type="button" loading={isSubmitting} onClick={onToggle}>
+                    <Button
+                      type="button"
+                      loading={isSubmitting}
+                      onClick={() => onToggle('magic-link')}
+                    >
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
                   )
