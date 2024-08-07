@@ -88,13 +88,14 @@ const getInitialProviders = ({ purest }) => ({
     const google = purest({ provider: 'google' });
 
     return google
-      .query('oauth')
-      .get('tokeninfo')
-      .qs({ accessToken })
+      .get('/oauth2/v3/userinfo')
+      .auth(accessToken)
       .request()
       .then(({ body }) => ({
         username: body.email.split('@')[0],
         email: body.email,
+        name: body.name,
+        picture: body.picture,
       }));
   },
   async github({ accessToken }) {
