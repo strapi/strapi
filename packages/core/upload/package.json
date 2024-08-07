@@ -42,6 +42,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
+    "@mux/mux-player-react": "2.8.1",
     "@strapi/design-system": "1.19.0",
     "@strapi/helper-plugin": "4.25.7",
     "@strapi/icons": "1.19.0",

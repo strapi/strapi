@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import React, { forwardRef } from 'react';
 
+import MuxPlayer from '@mux/mux-player-react';
 import { Flex } from '@strapi/design-system';
-import { usePersistentState } from '@strapi/helper-plugin';
 import { File, FilePdf } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -15,25 +15,19 @@ const CardAsset = styled(Flex)`
 `;
 
 export const AssetPreview = forwardRef(({ mime, url, name, ...props }, ref) => {
-  const [lang] = usePersistentState('strapi-admin-language', 'en');
-
   if (mime.includes(AssetType.Image)) {
     return <img ref={ref} src={url} alt={name} {...props} />;
   }
 
-  if (mime.includes(AssetType.Video)) {
+  if (mime.includes(AssetType.Video) || mime.includes(AssetType.Audio)) {
     return (
-      <video controls src={url} ref={ref} {...props}>
-        <track label={name} default kind="captions" srcLang={lang} src="" />
-      </video>
-    );
-  }
-
-  if (mime.includes(AssetType.Audio)) {
-    return (
-      <audio controls src={url} ref={ref} {...props}>
-        {name}
-      </audio>
+      <MuxPlayer
+        src={url}
+        title={name}
+        audio={mime.includes(AssetType.Audio)}
+        accentColor="#4945FF"
+        {...props}
+      />
     );
   }
 
