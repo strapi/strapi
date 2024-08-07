@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "Alapértelmezett API metódusokkal rendelkező GraphQL végpont hozzáadása.",
+  "plugin.description.short": "Alapértelmezett API metódusokkal rendelkező GraphQL végpont hozzáadása.",
+  "plugin.name": "GraphQL"
+}

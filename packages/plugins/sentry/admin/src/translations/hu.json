@@ -1,0 +1,5 @@
+{
+  "plugin.description.long": "A Strapi hiba eseményeinek küldése a Sentry felé.",
+  "plugin.description.short": "A Strapi hiba eseményeinek küldése a Sentry felé.",
+  "plugin.name": "Sentry"
+}

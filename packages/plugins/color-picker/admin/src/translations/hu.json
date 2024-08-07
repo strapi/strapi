@@ -1,0 +1,15 @@
+{
+  "color-picker.description": "Válassz bármilyen színt",
+  "color-picker.input.aria-label": "Színválasztó input",
+  "color-picker.input.format": "HEX",
+  "color-picker.label": "Szín",
+  "color-picker.options.advanced.regex": "RegExp minta",
+  "color-picker.options.advanced.regex.description": "Adj meg egy reguláris kifejezést a HEX érték ellenőrzéséhez",
+  "color-picker.options.advanced.requiredField": "Kötelező mező",
+  "color-picker.options.advanced.requiredField.description": "Nem leszel képes bejegyzést létrehozni, ha ez a mező üres",
+  "color-picker.settings": "Beállítások",
+  "color-picker.toggle.aria-label": "Színválasztó kapcsoló",
+  "plugin.description.long": "Egy Strapi által karbantartott színválasztó egyedi mező. Használj telítettség- és árnyalat-csúszkákat egy szín kiválasztásához és a HEX érték mentéséhez stringként.",
+  "plugin.description.short": "Egy Strapi által karbantartott színválasztó egyedi mező.",
+  "plugin.name": "Színválasztó"
+}

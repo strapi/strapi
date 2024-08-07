@@ -1,0 +1,8 @@
+{
+  "Analytics": "Analitika",
+  "Auth.components.Oops.text": "A fiókod felfüggesztésre került.",
+  "Auth.components.Oops.text.admin": "Ha ez tévedés, kérjük, lépj kapcsolatba az adminisztrátoroddal.",
+  "Auth.components.Oops.title": "Hoppá...",
+  "Auth.form.button.forgot-password": "E-mail küldése",
+  "Auth.form.button.go-home": "Vissza a főoldalra"
+}

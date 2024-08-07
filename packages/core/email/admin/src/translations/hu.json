@@ -1,0 +1,23 @@
+{
+  "link": "Hivatkozás",
+  "Settings.email.plugin.button.test-email": "Teszt e-mail küldése",
+  "Settings.email.plugin.label.defaultFrom": "Alapértelmezett feladó e-mail",
+  "Settings.email.plugin.label.defaultReplyTo": "Alapértelmezett válasz e-mail",
+  "Settings.email.plugin.label.provider": "E-mail szolgáltató",
+  "Settings.email.plugin.label.testAddress": "Címzett e-mail",
+  "Settings.email.plugin.notification.config.error": "Nem sikerült lekérni az e-mail konfigurációt",
+  "Settings.email.plugin.notification.data.loaded": "Az e-mail beállítások adatai betöltődtek",
+  "Settings.email.plugin.notification.test.error": "Nem sikerült teszt e-mailt küldeni a következő címre: {to}",
+  "Settings.email.plugin.notification.test.success": "Az e-mail teszt sikeres volt, ellenőrizd a {to} postaládát",
+  "Settings.email.plugin.placeholder.defaultFrom": "pl.: Strapi No-Reply no-reply@strapi.io",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "pl.: Strapi example@strapi.io",
+  "Settings.email.plugin.placeholder.testAddress": "pl.: fejlesztő@example.com",
+  "Settings.email.plugin.subTitle": "Az E-mail plugin beállításainak tesztelése",
+  "Settings.email.plugin.text.configuration": "A bővítményt a(z) {file} fájl segítségével lehet konfigurálni, tekintsd meg ezt a linket ({link}) a dokumentációhoz.",
+  "Settings.email.plugin.title": "Beállítás",
+  "Settings.email.plugin.title.config": "Beállítás",
+  "Settings.email.plugin.title.test": "Teszt e-mail küldés",
+  "SettingsNav.link.settings": "Beállítások",
+  "SettingsNav.section-label": "E-mail plugin",
+  "components.Input.error.validation.email": "Ez egy érvénytelen e-mail"
+}
