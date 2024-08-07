@@ -3,7 +3,20 @@ import type { Common } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
 
-const errorMiddleware: Common.MiddlewareFactory = (/* _, { strapi } */) => {
+export type Config = {
+  log: boolean;
+};
+
+const defaults: Config = {
+  log: true,
+};
+
+const errorMiddleware: Common.MiddlewareFactory = (config: Config, { strapi }) => {
+  const { log } = {
+    ...defaults,
+    ...config,
+  };
+
   return async (ctx, next) => {
     try {
       await next();
@@ -26,7 +39,9 @@ const errorMiddleware: Common.MiddlewareFactory = (/* _, { strapi } */) => {
         return;
       }
 
-      strapi.log.error(error);
+      if (log === true) {
+        strapi.log.error(error);
+      }
 
       const { status, body } = formatInternalError(error);
       ctx.status = status;
