@@ -50,6 +50,11 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
     await expect(item).toBeVisible();
     await item.click();
   }
+
+  // Verify header is correct
+  const header = page.getByRole('heading', { name: headerText, exact: true });
+  await expect(header).toBeVisible();
+  return header;
 };
 
 /**
