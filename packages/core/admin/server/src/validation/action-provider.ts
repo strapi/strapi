@@ -56,6 +56,14 @@ const registerProviderActionSchema = yup
         options: yup.object({
           applyToProperties: yup.array().of(yup.string()),
         }),
+        aliases: yup
+          .array(
+            yup.object({
+              actionId: yup.string(),
+              subjects: yup.array(yup.string()).nullable(),
+            })
+          )
+          .nullable(),
       })
       .noUnknown()
   );

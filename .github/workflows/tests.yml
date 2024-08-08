@@ -161,6 +161,7 @@ jobs:
       fail-fast: false
       matrix:
         project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -183,7 +184,7 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
-          jestOptions: --project=${{ matrix.project }}
+          jestOptions: -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -203,6 +204,7 @@ jobs:
       fail-fast: false
       matrix:
         project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -226,7 +228,7 @@ jobs:
         with:
           runEE: true
           enableFutureFeatures: true
-          jestOptions: --project=${{ matrix.project }}
+          jestOptions: -- --project=${{ matrix.project }} --shard=${{ matrix.shard }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -523,3 +525,34 @@ jobs:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
           jestOptions: '--shard=${{ matrix.shard }}'
+
+  test_result:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: aggregate_test_result
+    needs:
+      [
+        pretty,
+        lint,
+        build,
+        typescript,
+        unit_back,
+        unit_front,
+        e2e_ce,
+        e2e_ee,
+        cli,
+        api_ce_pg,
+        api_ce_mysql,
+        api_ce_mysql_5,
+        api_ce_sqlite,
+        api_ee_pg,
+        api_ee_mysql,
+        api_ee_sqlite,
+      ]
+    steps:
+      - run: exit 1
+        if: >-
+          ${{
+                contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+          }}

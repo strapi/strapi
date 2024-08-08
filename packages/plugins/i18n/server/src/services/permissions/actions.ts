@@ -1,14 +1,43 @@
-import { capitalize, isArray, getOr, prop } from 'lodash/fp';
+import { isArray, getOr, prop } from 'lodash/fp';
 import { getService } from '../../utils';
 
-const actions = ['create', 'read', 'update', 'delete'].map((uid) => ({
-  section: 'settings',
-  category: 'Internationalization',
-  subCategory: 'Locales',
-  pluginName: 'i18n',
-  displayName: capitalize(uid),
-  uid: `locale.${uid}`,
-}));
+const actions = [
+  {
+    section: 'settings',
+    category: 'Internationalization',
+    subCategory: 'Locales',
+    pluginName: 'i18n',
+    displayName: 'Create',
+    uid: 'locale.create',
+  },
+  {
+    section: 'settings',
+    category: 'Internationalization',
+    subCategory: 'Locales',
+    pluginName: 'i18n',
+    displayName: 'Read',
+    uid: 'locale.read',
+    aliases: [
+      { actionId: 'plugin::content-manager.explorer.read', subjects: ['plugin::i18n.locale'] },
+    ],
+  },
+  {
+    section: 'settings',
+    category: 'Internationalization',
+    subCategory: 'Locales',
+    pluginName: 'i18n',
+    displayName: 'Update',
+    uid: 'locale.update',
+  },
+  {
+    section: 'settings',
+    category: 'Internationalization',
+    subCategory: 'Locales',
+    pluginName: 'i18n',
+    displayName: 'Delete',
+    uid: 'locale.delete',
+  },
+];
 
 const addLocalesPropertyIfNeeded = ({ value: action }: any) => {
   const {
