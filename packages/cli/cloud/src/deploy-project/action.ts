@@ -100,18 +100,7 @@ async function upload(
       return data.build_id;
     } catch (e: any) {
       progressBar.stop();
-      if (e instanceof AxiosError && e.response?.data) {
-        if (e.response.status === 404) {
-          ctx.logger.warn(
-            `The project does not exist. Please link your local project to a Strapi Cloud project using the link command.`
-          );
-        } else {
-          ctx.logger.error(e.response.data);
-        }
-      } else {
-        ctx.logger.error('An error occurred while deploying the project. Please try again later.');
-      }
-
+      ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       ctx.logger.debug(e);
     } finally {
       await fse.remove(tarFilePath);
@@ -178,15 +167,25 @@ export default async (ctx: CLIContext) => {
       ctx.logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}`));
       return;
     }
+    console.log('paso por checkeo de info');
   } catch (e: Error | unknown) {
-    ctx.logger.debug(e);
-    if (e instanceof Error) {
-      ctx.logger.error(e.message);
+    if (e instanceof AxiosError && e.response?.data) {
+      if (e.response.status === 404) {
+        ctx.logger.warn(
+          `The project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+            'link'
+          )} command before deploying.`
+        );
+      } else {
+        ctx.logger.error(e.response.data);
+      }
     } else {
       ctx.logger.error(
         "An error occurred while retrieving the project's information. Please try again later."
       );
     }
+    ctx.logger.debug(e);
+    return;
   }
 
   await trackEvent(ctx, cloudApiService, 'willDeployWithCLI', {
