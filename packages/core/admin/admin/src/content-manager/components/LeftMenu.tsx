@@ -22,7 +22,7 @@ const LeftMenu = () => {
   );
   const singleTypeLinks = useTypedSelector((state) => state['content-manager_app'].singleTypeLinks);
 
-  const { startsWith } = useFilter(locale, {
+  const { includes } = useFilter(locale, {
     sensitivity: 'base',
   });
 
@@ -57,7 +57,7 @@ const LeftMenu = () => {
           /**
            * Filter by the search value
            */
-          .filter((link) => startsWith(link.title, search))
+          .filter((link) => includes(link.title, search))
           /**
            * Sort correctly using the language
            */
@@ -72,7 +72,7 @@ const LeftMenu = () => {
             };
           }),
       })),
-    [collectionTypeLinks, search, singleTypeLinks, startsWith, formatMessage, formatter]
+    [collectionTypeLinks, search, singleTypeLinks, includes, formatMessage, formatter]
   );
 
   const handleClear = () => {
