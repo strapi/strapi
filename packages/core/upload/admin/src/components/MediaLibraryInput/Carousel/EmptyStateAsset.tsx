@@ -34,7 +34,11 @@ interface EmptyStateAssetProps {
   onDropAsset?: (assets: AssetFromRawFileProps[]) => void;
 }
 
-export const EmptyStateAsset = ({ disabled = false, onClick, onDropAsset }: EmptyStateAssetProps) => {
+export const EmptyStateAsset = ({
+  disabled = false,
+  onClick,
+  onDropAsset,
+}: EmptyStateAssetProps) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = React.useState(false);
 
@@ -55,23 +59,23 @@ export const EmptyStateAsset = ({ disabled = false, onClick, onDropAsset }: Empt
 
   const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
-  
+
     if (e?.dataTransfer?.files) {
       const files = e.dataTransfer.files;
       const assets: AssetFromRawFileProps[] = [];
-  
+
       for (let i = 0; i < files.length; i++) {
         const file = files.item(i) as RawFile;
         const asset = rawFileToAsset(file, AssetSource.Computer);
-  
+
         assets.push(asset);
       }
-  
+
       if (onDropAsset) {
         onDropAsset(assets);
       }
     }
-  
+
     setDragOver(false);
   };
 

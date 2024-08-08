@@ -57,10 +57,18 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
   const { alternativeText, ext, formats, mime, name, url } = content;
 
   if (mime?.includes(AssetType.Image)) {
-    const mediaURL =
-    formats?.thumbnail?.url ? prefixFileUrlWithBackendUrl(formats.thumbnail.url) : prefixFileUrlWithBackendUrl(url);
+    const mediaURL = formats?.thumbnail?.url
+      ? prefixFileUrlWithBackendUrl(formats.thumbnail.url)
+      : prefixFileUrlWithBackendUrl(url);
 
-    return <Avatar.Item src={mediaURL} alt={alternativeText || undefined} preview fallback={alternativeText} />;
+    return (
+      <Avatar.Item
+        src={mediaURL}
+        alt={alternativeText || undefined}
+        preview
+        fallback={alternativeText}
+      />
+    );
   }
 
   if (mime?.includes(AssetType.Video)) {

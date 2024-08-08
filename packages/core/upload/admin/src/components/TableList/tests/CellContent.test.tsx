@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -23,7 +21,7 @@ const PROPS_FIXTURE = {
   name: 'preview',
 };
 
-const ComponentFixture = (props) => {
+const ComponentFixture = (props: any) => {
   const customProps = {
     ...PROPS_FIXTURE,
     ...props,
@@ -38,12 +36,12 @@ const ComponentFixture = (props) => {
   );
 };
 
-const setup = (props) => render(<ComponentFixture {...props} />);
+const setup = (props: any) => render(<ComponentFixture {...props} />);
 
 describe('TableList | CellContent', () => {
   it('should render image cell type when element type is asset and mime does not include image', () => {
     const { container, getByText } = setup({
-      content: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },
+      content: { ...PROPS_FIXTURE.content, mime: 'application/pdf', ext: 'pdf' },
     });
 
     expect(getByText('pdf')).toBeInTheDocument();
