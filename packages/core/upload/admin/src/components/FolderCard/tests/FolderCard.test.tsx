@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Flex, DesignSystemProvider, Typography } from '@strapi/design-system';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -12,7 +10,7 @@ import { FolderCardCheckbox } from '../FolderCardCheckbox';
 const ID_FIXTURE = 'folder';
 
 // eslint-disable-next-line react/prop-types
-const ComponentFixture = ({ to, ...props }) => {
+const ComponentFixture = ({ to, ...props }: { to: string }) => {
   return (
     <DesignSystemProvider>
       <MemoryRouter>
@@ -24,7 +22,7 @@ const ComponentFixture = ({ to, ...props }) => {
           to={to}
           {...props}
         >
-          <FolderCardBody tag="h2">
+          <FolderCardBody>
             <FolderCardBodyAction onClick={() => {}} to={to}>
               <Flex direction="column" alignItems="flex-start">
                 <Typography variant="omega" fontWeight="semiBold">
@@ -39,11 +37,11 @@ const ComponentFixture = ({ to, ...props }) => {
   );
 };
 
-const setup = (props) => render(<ComponentFixture {...props} />);
+const setup = (props: any) => render(<ComponentFixture {...props} />);
 
 describe('FolderCard', () => {
   test('renders and matches the snapshot', () => {
-    const { container } = setup();
+    const { container } = setup({});
     expect(container).toMatchSnapshot();
   });
 
@@ -51,16 +49,19 @@ describe('FolderCard', () => {
     const callback = jest.fn();
     const { container } = setup({ onClick: callback });
 
-    act(() => {
-      fireEvent(container.querySelector('button'), new MouseEvent('click', { bubbles: true }));
-    });
+    const button = container.querySelector('button');
+    if (button) {
+      act(() => {
+        fireEvent(button, new MouseEvent('click', { bubbles: true }));
+      });
+    }
 
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
   test('has all required ids set when rendering a start action', () => {
     const { container } = setup({
-      startAction: <FolderCardCheckbox value={false} />,
+      startAction: <FolderCardCheckbox value={''} />,
     });
 
     expect(container).toMatchSnapshot();
@@ -70,7 +71,7 @@ describe('FolderCard', () => {
     ).toBeInTheDocument();
   });
 
-  test.only('renders as a link with to prop', () => {
+  test('renders as a link with to prop', () => {
     const { container } = setup({
       to: '/michka-page',
     });
@@ -80,7 +81,7 @@ describe('FolderCard', () => {
   });
 
   test('renders as a button without to prop', () => {
-    const { container } = setup();
+    const { container } = setup({});
 
     expect(container.querySelector('button[aria-hidden=true]')).toBeInTheDocument();
   });

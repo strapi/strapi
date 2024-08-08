@@ -54,7 +54,7 @@ const Card = styled(Box)`
   }
 `;
 
-interface FolderCardProps extends Omit<BoxProps, 'id'> {
+export interface FolderCardProps extends Omit<BoxProps, 'id'> {
   ariaLabel: string;
   children: React.ReactNode;
   id: Data.ID;
@@ -65,7 +65,10 @@ interface FolderCardProps extends Omit<BoxProps, 'id'> {
 }
 
 export const FolderCard = React.forwardRef<any, FolderCardProps>(
-  ({ children, id, startAction = null, cardActions = null, ariaLabel, onClick, to, ...props }, ref) => {
+  (
+    { children, id, startAction = null, cardActions = null, ariaLabel, onClick, to, ...props },
+    ref
+  ) => {
     const generatedId = useId(id);
     const fodlerCtxValue = React.useMemo(() => ({ id: generatedId }), [generatedId]);
 
@@ -111,7 +114,9 @@ export const FolderCard = React.forwardRef<any, FolderCardProps>(
             {children}
 
             <CardActionDisplay>
-              <CardAction right={4} position='end'>{cardActions}</CardAction>
+              <CardAction right={4} position="end">
+                {cardActions}
+              </CardAction>
             </CardActionDisplay>
           </Flex>
         </Card>
