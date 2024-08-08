@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Checkbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
 import { Eye, Pencil } from '@strapi/icons';
@@ -7,7 +7,10 @@ import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
-import { getTrad } from '../../utils';
+// TODO: replace with the import from the constants file when it will be migrated to TypeScript
+// import { tableHeaders as cells } from '../../newConstants';
+// TODO: replace with the import from the constants index util file when it will be migrated to TypeScript
+import { getTrad } from '../../utils/getTrad';
 
 import { CellContent } from './CellContent';
 

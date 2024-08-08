@@ -1,15 +1,23 @@
-import React from 'react';
-
 import { Avatar, Box, Flex } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../constants';
-import { createAssetUrl, getFileExtension } from '../../utils';
+// TODO: replace this import with the one from constants when the file is migrated to typescript
+import { AssetType } from '../../newConstants';
+// TODO: replace this import with the one from utils when the index file is migrated to typescript
+import { createAssetUrl } from '../../utils/createAssetUrl';
+// TODO: replace this import with the one from utils when the index file is migrated to typescript
+import { getFileExtension } from '../../utils/getFileExtension';
 // TODO: replace this import with the one from utils when the index file is migrated to typescript
 import { prefixFileUrlWithBackendUrl } from '../../utils/prefixFileUrlWithBackendUrl';
 import { VideoPreview } from '../AssetCard/VideoPreview';
+import type { Asset } from '../../../../shared/contracts/files';
+
+interface AssetProps extends Asset {
+  type?: string;
+  isSelectable?: boolean;
+  isLocal?: boolean;
+}
 
 const VideoPreviewWrapper = styled(Box)`
   figure {
@@ -26,7 +34,12 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-export const PreviewCell = ({ type, content }) => {
+interface PreviewCellProps {
+  type: string;
+  content: AssetProps;
+}
+
+export const PreviewCell = ({ type, content }: PreviewCellProps) => {
   if (type === 'folder') {
     return (
       <Flex
@@ -43,14 +56,14 @@ export const PreviewCell = ({ type, content }) => {
 
   const { alternativeText, ext, formats, mime, name, url } = content;
 
-  if (mime.includes(AssetType.Image)) {
+  if (mime?.includes(AssetType.Image)) {
     const mediaURL =
-      prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
+    formats?.thumbnail?.url ? prefixFileUrlWithBackendUrl(formats.thumbnail.url) : prefixFileUrlWithBackendUrl(url);
 
-    return <Avatar.Item src={mediaURL} alt={alternativeText} preview />;
+    return <Avatar.Item src={mediaURL} alt={alternativeText || undefined} preview fallback={alternativeText} />;
   }
 
-  if (mime.includes(AssetType.Video)) {
+  if (mime?.includes(AssetType.Video)) {
     return (
       <VideoPreviewWrapper>
         <VideoPreview
@@ -67,20 +80,4 @@ export const PreviewCell = ({ type, content }) => {
       {getFileExtension(ext)}
     </Box>
   );
-};
-
-PreviewCell.propTypes = {
-  content: PropTypes.shape({
-    alternativeText: PropTypes.string,
-    ext: PropTypes.string,
-    formats: PropTypes.shape({
-      thumbnail: PropTypes.shape({
-        url: PropTypes.string,
-      }),
-    }),
-    mime: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-  }).isRequired,
-  type: PropTypes.string.isRequired,
 };
