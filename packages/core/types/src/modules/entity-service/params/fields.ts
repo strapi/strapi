@@ -48,7 +48,7 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * type F = ['populatableField']; // ❌
  * type G = ['<random_string>']; // ❌
  */
-export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Exclude<
+export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = readonly Exclude<
   StringNotation<TSchemaUID>,
   WildcardNotation
 >[];
