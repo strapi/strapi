@@ -1,55 +1,77 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
 import { PlusCircle as PicturePlus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetSource } from '../../../constants';
+// TODO: replace it with the correct import to the constants.js file when it will be migrated to TypeScript
+import { AssetSource } from '../../../newConstants';
 import { getTrad } from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
+import type { RawFile } from '../../../types';
+
+interface AssetFromRawFileProps {
+  size: number;
+  createdAt: string;
+  name: string;
+  source: AssetSource;
+  type?: string;
+  url: string;
+  ext?: string;
+  mime: string | null;
+  rawFile: RawFile;
+  isLocal: boolean;
+}
 
 const TextAlignTypography = styled(Typography)`
   align-items: center;
 `;
 
-export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
-  const { formatMessage } = useIntl();
-  const [dragOver, setDragOver] = useState(false);
+interface EmptyStateAssetProps {
+  disabled: boolean;
+  onClick: () => void;
+  onDropAsset?: (assets: AssetFromRawFileProps[]) => void;
+}
 
-  const handleDragEnter = (e) => {
+export const EmptyStateAsset = ({ disabled = false, onClick, onDropAsset }: EmptyStateAssetProps) => {
+  const { formatMessage } = useIntl();
+  const [dragOver, setDragOver] = React.useState(false);
+
+  const handleDragEnter = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setDragOver(true);
   };
 
-  const handleDragLeave = (e) => {
-    if (!e.currentTarget.contains(e.relatedTarget)) {
+  const handleDragLeave = (e: React.DragEvent<HTMLButtonElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setDragOver(false);
     }
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
-
+  
     if (e?.dataTransfer?.files) {
       const files = e.dataTransfer.files;
-      const assets = [];
-
+      const assets: AssetFromRawFileProps[] = [];
+  
       for (let i = 0; i < files.length; i++) {
-        const file = files.item(i);
+        const file = files.item(i) as RawFile;
         const asset = rawFileToAsset(file, AssetSource.Computer);
-
+  
         assets.push(asset);
       }
-
-      onDropAsset(assets);
+  
+      if (onDropAsset) {
+        onDropAsset(assets);
+      }
     }
-
+  
     setDragOver(false);
   };
 
@@ -94,15 +116,4 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       </TextAlignTypography>
     </Flex>
   );
-};
-
-EmptyStateAsset.defaultProps = {
-  disabled: false,
-  onDropAsset: undefined,
-};
-
-EmptyStateAsset.propTypes = {
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
-  onDropAsset: PropTypes.func,
 };
