@@ -1,3 +1,13 @@
+/**
+ * Validators check if the entry data meets specific criteria before saving or publishing.
+ * (e.g., length, range, format).
+ *
+ * Drafts have limited validations (mainly max constraints),
+ * while published content undergoes full validation.
+ *
+ * The system also takes locales into account when validating data.
+ * E.g, unique fields must be unique within the same locale.
+ */
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Schema, Struct, Modules } from '@strapi/types';
@@ -80,8 +90,9 @@ const addMinIntegerValidator = (
     attr,
   }: {
     attr: Schema.Attribute.Integer | Schema.Attribute.BigInteger;
-  }
-) => (_.isNumber(attr.min) ? validator.min(_.toInteger(attr.min)) : validator);
+  },
+  { isDraft }: ValidatorOptions
+) => (_.isNumber(attr.min) && !isDraft ? validator.min(_.toInteger(attr.min)) : validator);
 
 /**
  * Adds max integer validator
@@ -104,8 +115,9 @@ const addMinFloatValidator = (
     attr,
   }: {
     attr: Schema.Attribute.Decimal | Schema.Attribute.Float;
-  }
-) => (_.isNumber(attr.min) ? validator.min(attr.min) : validator);
+  },
+  { isDraft }: ValidatorOptions
+) => (_.isNumber(attr.min) && !isDraft ? validator.min(attr.min) : validator);
 
 /**
  * Adds max float/decimal validator
@@ -134,9 +146,10 @@ const addStringRegexValidator = (
       | Schema.Attribute.Password
       | Schema.Attribute.Email
       | Schema.Attribute.UID;
-  }
+  },
+  { isDraft }: ValidatorOptions
 ) => {
-  return 'regex' in attr && !_.isUndefined(attr.regex)
+  return 'regex' in attr && !_.isUndefined(attr.regex) && !isDraft
     ? validator.matches(new RegExp(attr.regex), { excludeEmptyString: !attr.required })
     : validator;
 };
@@ -325,8 +338,6 @@ const addUniqueValidator = <T extends yup.AnySchema>(
   };
 
   return validator.test('unique', 'This attribute must be unique', async (value) => {
-    const isPublish = options.isDraft === false;
-
     /**
      * If the attribute value is `null` we want to skip the unique validation.
      * Otherwise it'll only accept a single `null` entry in the database.
@@ -336,12 +347,9 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     }
 
     /**
-     * If we are updating a draft and the value is unchanged we skip the unique verification. This will
-     * prevent the validator to be triggered in case the user activated the
-     * unique constraint after already creating multiple entries with
-     * the same attribute value for that field.
+     * We don't validate any unique constraint for draft entries.
      */
-    if (!isPublish && value === entity?.[updatedAttribute.name]) {
+    if (options.isDraft) {
       return true;
     }
 
@@ -367,9 +375,8 @@ const addUniqueValidator = <T extends yup.AnySchema>(
      */
     const scalarAttributeWhere: Record<string, any> = {
       [updatedAttribute.name]: value,
+      publishedAt: { $notNull: true },
     };
-
-    scalarAttributeWhere.publishedAt = options.isDraft ? null : { $notNull: true };
 
     if (options?.locale) {
       scalarAttributeWhere.locale = options.locale;
@@ -380,8 +387,9 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     }
 
     // The validation should pass if there is no other record found from the query
-    const queryUid = model.uid;
-    return !(await strapi.db.query(queryUid).findOne({ where: scalarAttributeWhere }));
+    return !(await strapi.db
+      .query(model.uid)
+      .findOne({ where: scalarAttributeWhere, select: ['id'] }));
   });
 };
 
@@ -402,7 +410,7 @@ const stringValidator = (
 
   schema = addMinLengthValidator(schema, metas, options);
   schema = addMaxLengthValidator(schema, metas);
-  schema = addStringRegexValidator(schema, metas);
+  schema = addStringRegexValidator(schema, metas, options);
   schema = addUniqueValidator(schema, metas, options);
 
   return schema;
@@ -413,6 +421,11 @@ export const emailValidator = (
   options: ValidatorOptions
 ) => {
   const schema = stringValidator(metas, options);
+
+  if (options.isDraft) {
+    return schema;
+  }
+
   return schema.email().min(
     1,
     // eslint-disable-next-line no-template-curly-in-string
@@ -425,6 +438,10 @@ export const uidValidator = (
   options: ValidatorOptions
 ) => {
   const schema = stringValidator(metas, options);
+
+  if (options.isDraft) {
+    return schema;
+  }
 
   return schema.matches(/^[A-Za-z0-9-_.~]*$/);
 };
@@ -441,7 +458,7 @@ export const integerValidator = (
 ) => {
   let schema = yup.number().integer();
 
-  schema = addMinIntegerValidator(schema, metas);
+  schema = addMinIntegerValidator(schema, metas, options);
   schema = addMaxIntegerValidator(schema, metas);
   schema = addUniqueValidator(schema, metas, options);
 
@@ -453,7 +470,8 @@ export const floatValidator = (
   options: ValidatorOptions
 ) => {
   let schema = yup.number();
-  schema = addMinFloatValidator(schema, metas);
+
+  schema = addMinFloatValidator(schema, metas, options);
   schema = addMaxFloatValidator(schema, metas);
   schema = addUniqueValidator(schema, metas, options);
 
