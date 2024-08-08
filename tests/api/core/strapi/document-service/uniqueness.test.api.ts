@@ -22,15 +22,13 @@ describe('Document Service', () => {
   });
 
   describe('Scalar unique fields', () => {
-    it('cannot create a document with a duplicated unique field value in the same publication state', async () => {
-      expect(async () => {
-        await strapi.documents(CATEGORY_UID).create({
-          data: { name: testName },
-        });
-      }).rejects.toThrow();
+    it('can create a draft document with a duplicated unique field value', async () => {
+      await strapi.documents(CATEGORY_UID).create({
+        data: { name: testName },
+      });
     });
 
-    it('cannot update a document to have a duplicated unique field value in the same publication state', async () => {
+    it('can update a draft document to have a duplicated unique field value', async () => {
       const uniqueName = `${testName}-1`;
 
       const category: Category = await strapi.documents(CATEGORY_UID).create({
@@ -38,12 +36,10 @@ describe('Document Service', () => {
       });
       createdCategory = category;
 
-      expect(async () => {
-        await strapi.documents(CATEGORY_UID).update({
-          documentId: category.documentId,
-          data: { name: testName },
-        });
-      }).rejects.toThrow();
+      await strapi.documents(CATEGORY_UID).update({
+        documentId: category.documentId,
+        data: { name: testName },
+      });
     });
 
     it('cannot publish a document to have a duplicated unique field value in the same publication state', async () => {
@@ -114,7 +110,9 @@ describe('Document Service', () => {
     ) => {
       if (field.includes('Number')) {
         return (currentValue as number) + options.increment;
-      } else if (field.includes('Date')) {
+      }
+
+      if (field.includes('Date')) {
         return (currentValue as string).replace(/(\d+)(?=\D*$)/, (match) => {
           const num = parseInt(match, 10) + options.increment;
           return num < 10 ? `0${num}` : num.toString();
@@ -165,9 +163,13 @@ describe('Document Service', () => {
           if (isRepeatable) {
             // When testing the repeatable component, we first need to ensure that the
             // unique field value must be unique within the current entity.
+            const createdArticle = await strapi.documents(ARTICLE_UID).create({
+              data: createData(field, value, true),
+            });
+
             await expect(
-              strapi.documents(ARTICLE_UID).create({
-                data: createData(field, value, true),
+              strapi.documents(ARTICLE_UID).publish({
+                documentId: createdArticle.documentId,
               })
             ).rejects.toThrow('2 errors occurred');
           }
@@ -192,18 +194,22 @@ describe('Document Service', () => {
             .publish({ documentId: articleDifferentLocale.documentId, locale: otherLocale });
 
           // Attempt to create another article in the default locale with the same unique value.
-          // The draft articles should collide and trigger a uniqueness error.
+          // The draft articles should collide and NOT trigger a uniqueness error, as this is a draft
+          const createdArticle = await strapi.documents(ARTICLE_UID).create({
+            data: isRepeatable
+              ? // In testing the repeatable we now want to test that it is
+                // validated against other entities and don't want to trigger a
+                // validation error internal to the current entity.
+                {
+                  [description]: [createData(field, value)[description][0]],
+                }
+              : createData(field, value),
+          });
+
+          // Attempt to publish the draft article with the same unique value.
+          // This should trigger a uniqueness error as the published article has the same value.
           await expect(
-            strapi.documents(ARTICLE_UID).create({
-              data: isRepeatable
-                ? // In testing the repeatable we now want to test that it is
-                  // validated against other entities and don't want to trigger a
-                  // validation error internal to the current entity.
-                  {
-                    [description]: [createData(field, value)[description][0]],
-                  }
-                : createData(field, value),
-            })
+            strapi.documents(ARTICLE_UID).publish({ documentId: createdArticle.documentId })
           ).rejects.toThrow('This attribute must be unique');
 
           const modificationOptions = isRepeatable

@@ -13,7 +13,7 @@ const { ApplicationError } = errors;
  * Creates a new instance of an action provider
  */
 const createActionProvider = (options?: Options) => {
-  const provider = providerFactory(options);
+  const provider = providerFactory<Action>(options);
   const actionHooks = {
     appliesPropertyToSubject: hooks.createAsyncParallelHook(),
   };
@@ -78,6 +78,41 @@ const createActionProvider = (options?: Options) => {
       });
 
       return results.every((result) => result !== false);
+    },
+
+    /**
+     * @experimental
+     */
+    unstable_aliases(actionId: string, subject?: string | null): string[] {
+      const isRegistered = this.has(actionId);
+
+      if (!isRegistered) {
+        return [];
+      }
+
+      return this.values()
+        .filter((action) =>
+          action.aliases?.some((alias) => {
+            // Only look at alias with the correct actionId
+            if (alias.actionId !== actionId) {
+              return false;
+            }
+
+            // If the alias don't have a list of required subjects, keep it
+            if (!Array.isArray(alias.subjects)) {
+              return true;
+            }
+
+            // If the alias require specific subjects but none is provided, skip it
+            if (!subject) {
+              return false;
+            }
+
+            // Else, make sure the given subject is allowed
+            return alias.subjects.includes(subject);
+          })
+        )
+        .map((action) => action.actionId);
     },
   };
 };
