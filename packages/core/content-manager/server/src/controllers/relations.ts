@@ -443,11 +443,15 @@ export default {
     const loadedIds = res.results.map((item: any) => item.id);
     addFiltersClause(permissionQuery, { id: { $in: loadedIds } });
 
+    /**
+     * Load the relations with the main field, the sanitized permission query
+     * will exclude the relations the user does not have access to.
+     *
+     * Pagination is not necessary as the permissionQuery contains the ids to load.
+     */
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
       ...strapi.get('query-params').transform(targetUid, permissionQuery),
       ordering: 'desc',
-      page: ctx.request.query.page,
-      pageSize: ctx.request.query.pageSize,
     });
 
     const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
