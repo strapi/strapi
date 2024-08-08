@@ -146,6 +146,10 @@ When we can't know by the controller name the type of the returned response (lik
 
 You can use the `tag` key in your route. If you provide a `tag` which is a string like `"tag": "Product"` the algorithm will know that the end-point retrieves data from the **`Product`** table. Creating a tag object `{ "tag": { "name": "User", "plugin": "User-Permissions } }` will result in generating a response with the **`User`** model from the plugin users-permissions.
 
+#### How to access the full documentation in JSON via the API ?
+
+There is a route that you can use to access the full documentation in JSON format via the API. The endpoint is `/documentation/swagger.json` or `/documentation/:documentationVersion/swagger.json` if you want to access a specific version. You can use it to access your own documentation.
+
 ---
 
 Each entry of the object is easily customisable take look at the users-permissions ones they are a good example on how to do it.
