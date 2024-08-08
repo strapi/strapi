@@ -166,7 +166,28 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  const cloudApiService = await cloudApiFactory(ctx);
+  const cloudApiService = await cloudApiFactory(ctx, token);
+
+  try {
+    const { data: projectInfo } = await cloudApiService.getProject({ name: project.name });
+    const isProjectSuspended = projectInfo.suspendedAt;
+    if (isProjectSuspended) {
+      ctx.logger.warn(
+        'Oops! This project has been suspended. \n Please reactivate it from the dashboard to continue deploying: '
+      );
+      ctx.logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}`));
+      return;
+    }
+  } catch (e: Error | unknown) {
+    ctx.logger.debug(e);
+    if (e instanceof Error) {
+      ctx.logger.error(e.message);
+    } else {
+      ctx.logger.error(
+        "An error occurred while retrieving the project's information. Please try again later."
+      );
+    }
+  }
 
   await trackEvent(ctx, cloudApiService, 'willDeployWithCLI', {
     projectInternalName: project.name,
@@ -178,7 +199,7 @@ export default async (ctx: CLIContext) => {
   const cliConfig = await getConfig({ ctx, cloudApiService });
   if (!cliConfig) {
     ctx.logger.error(
-      'An error occurred while retrieving data from Strapi Cloud. Please try check your network or again later.'
+      'An error occurred while retrieving data from Strapi Cloud. Please check your network or try again later.'
     );
     return;
   }

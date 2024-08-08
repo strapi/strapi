@@ -64,6 +64,8 @@ export interface CloudApiService {
 
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
 
+  getProject(project: { name: string }): Promise<AxiosResponse>;
+
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
 
@@ -176,6 +178,23 @@ export async function cloudApiFactory(
       } catch (error) {
         logger.debug(
           "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async getProject({ name }): Promise<AxiosResponse<unknown>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}`);
+
+        if (response.status !== 200) {
+          throw new Error("Error fetching project's info from the server.");
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's info from the server. Please try again."
         );
         throw error;
       }
