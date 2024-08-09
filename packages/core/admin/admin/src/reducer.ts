@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import Cookies from 'js-cookie';
 
 import { PermissionMap } from './types/permissions';
 
@@ -28,9 +29,7 @@ const THEME_LOCAL_STORAGE_KEY = 'STRAPI_THEME';
 const LANGUAGE_LOCAL_STORAGE_KEY = 'strapi-admin-language';
 
 export const getStoredToken = (): string | null => {
-  const token =
-    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
-
+  const token = localStorage.getItem(STORAGE_KEYS.TOKEN) ?? Cookies.get(STORAGE_KEYS.TOKEN);
   if (typeof token === 'string') {
     return JSON.parse(token);
   }
@@ -75,7 +74,7 @@ const adminSlice = createSlice({
       const { token, persist } = action.payload;
 
       if (!persist) {
-        window.sessionStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+        Cookies.set(STORAGE_KEYS.TOKEN, JSON.stringify(token));
       } else {
         window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
       }
@@ -86,8 +85,7 @@ const adminSlice = createSlice({
       state.token = null;
       window.localStorage.removeItem(STORAGE_KEYS.TOKEN);
       window.localStorage.removeItem(STORAGE_KEYS.USER);
-      window.sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
-      window.sessionStorage.removeItem(STORAGE_KEYS.USER);
+      Cookies.remove(STORAGE_KEYS.TOKEN);
     },
   },
 });
