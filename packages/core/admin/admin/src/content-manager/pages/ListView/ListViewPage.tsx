@@ -187,6 +187,7 @@ const ListViewPage = ({
   useFocusWhenNavigate();
 
   const params = React.useMemo(() => buildValidGetParams(query), [query]);
+
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const displayedAttributeFilters = allowedAttributes.map((name) => {
@@ -604,13 +605,15 @@ const ListViewPage = ({
         }
       />
       {!canRead && (
-        <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />
+        <ActionLayout
+          endActions={<InjectionZone area="contentManager.listView.actions" key={params.locale} />}
+        />
       )}
       {canRead && (
         <ActionLayout
           endActions={
             <>
-              <InjectionZone area="contentManager.listView.actions" />
+              <InjectionZone area="contentManager.listView.actions" key={params.locale} />
               <ViewSettingsMenu slug={slug} />
             </>
           }
