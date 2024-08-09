@@ -342,8 +342,10 @@ const applyOperator = (qb: Knex.QueryBuilder, column: any, operator: Operator, v
       qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}`]);
       break;
     }
-    case '$contains': {
-      qb.where(column, 'like', `%${value}%`);
+    case "$contains": {
+      const escapedValue = value.replace(/_/g, '\\_');
+
+      qb.whereRaw(`${column} LIKE ? ESCAPE '\\'`, [`%${escapedValue}%`]);
       break;
     }
 
