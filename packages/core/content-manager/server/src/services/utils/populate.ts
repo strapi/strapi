@@ -156,7 +156,7 @@ const getDeepPopulate = (
           model,
           {
             // @ts-expect-error - improve types
-            initialPopulate: initialPopulate?.[attributeName],
+            initialPopulate: initialPopulate?.[attributeName] || initialPopulate?.populate?.[attributeName],
             countMany,
             countOne,
             maxLevel,
