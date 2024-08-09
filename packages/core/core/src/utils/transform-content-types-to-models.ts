@@ -318,7 +318,7 @@ export const transformContentTypesToModels = (
       },
       indexes: contentType.indexes as Model['indexes'],
       foreignKeys: contentType.foreignKeys as Model['foreignKeys'],
-      lifecycles: contentType?.lifecycles ?? {}, 
+      lifecycles: contentType?.lifecycles ?? {},
     };
 
     // Add indexes to model
