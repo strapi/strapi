@@ -28,11 +28,28 @@ const {
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
 const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
 
-const sanitizeUser = (user, ctx) => {
+const sanitizeUser = async(user, ctx) => {
   const { auth } = ctx.state;
+  // Ensure the role relation is populated
+  const populatedUser = await strapi.query('plugin::users-permissions.user').findOne({
+    where: { id: user.id },
+    populate: ['role'], // Populate the role relation
+  });
+  
   const userSchema = strapi.getModel('plugin::users-permissions.user');
 
-  return sanitize.contentAPI.output(user, userSchema, { auth });
+  const sanitizedData = await sanitize.contentAPI.output(user, userSchema, { auth });
+  // Attach role information
+  sanitizedData.role = {
+    id: populatedUser.role.id,
+    name: populatedUser.role.name,
+    description: populatedUser.role.description,
+    type: populatedUser.role.type,
+    createdAt: populatedUser.role.createdAt,
+    updatedAt: populatedUser.role.updatedAt,
+  };
+
+  return sanitizedData;
 };
 
 module.exports = {
@@ -347,12 +364,24 @@ module.exports = {
 
     await validateRegisterBody(params);
 
-    const role = await strapi
-      .query('plugin::users-permissions.role')
-      .findOne({ where: { type: settings.default_role } });
+     // Determine role to assign
+    let role;
+    if (ctx.request.body.role) {
+      role = await strapi.query('plugin::users-permissions.role').findOne({
+        where: { id: ctx.request.body.role },
+      });
 
-    if (!role) {
-      throw new ApplicationError('Impossible to find the default role');
+      if (!role) {
+        throw new ApplicationError('Invalid role specified');
+      }
+    } else {
+      role = await strapi.query('plugin::users-permissions.role').findOne({
+        where: { type: settings.default_role },
+      });
+
+      if (!role) {
+        throw new ApplicationError('Impossible to find the default role');
+      }
     }
 
     const { email, username, provider } = params;
@@ -383,7 +412,7 @@ module.exports = {
         throw new ApplicationError('Email or Username are already taken');
       }
     }
-
+    console.log('role.id >>',role.id)
     const newUser = {
       ...params,
       role: role.id,
