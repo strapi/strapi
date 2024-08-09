@@ -1,34 +1,58 @@
-import * as React from 'react';
-
 import { Checkbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
 import { Eye, Pencil } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import { AssetDefinition, FolderDefinition, tableHeaders as cells } from '../../constants';
 // TODO: replace with the import from the constants file when it will be migrated to TypeScript
-// import { tableHeaders as cells } from '../../newConstants';
+import { tableHeaders as cells } from '../../newConstants';
 // TODO: replace with the import from the constants index util file when it will be migrated to TypeScript
 import { getTrad } from '../../utils/getTrad';
+import type { Asset } from '../../../../shared/contracts/files';
+import type { Folder } from '../../../../shared/contracts/folders';
 
 import { CellContent } from './CellContent';
+import type { Data } from '@strapi/types';
+
+interface TableAsset extends Asset {
+  folderURL?: string;
+  path: string;
+  type: string;
+  isSelectable?: boolean;
+  isLocal?: boolean;
+}
+
+interface TableFolder extends Folder {
+  isSelectable?: boolean;
+  folderURL?: string;
+  type: string;
+}
+
+interface TableRowsProps {
+  onChangeFolder?: (folderId: Data.ID, folderPath?: string) => void;
+  onEditAsset: (element: TableAsset) => void;
+  onEditFolder: (element: TableFolder) => void;
+  onSelectOne: (element: TableAsset | TableFolder) => void;
+  rows: TableAsset[] | TableFolder[];
+  selected: TableAsset[] | TableFolder[];
+}
 
 export const TableRows = ({
   onChangeFolder,
   onEditAsset,
   onEditFolder,
   onSelectOne,
-  rows,
-  selected,
-}) => {
+  rows = [],
+  selected = [],
+}: TableRowsProps) => {
   const { formatMessage } = useIntl();
 
-  const handleRowClickFn = (element, elementType, id, path) => {
+  const handleRowClickFn = (element: Asset | Folder, elementType: string, id: Data.ID, path: string) => {
     if (elementType === 'asset') {
-      onEditAsset(element);
+      onEditAsset(element as TableAsset);
     } else {
-      onChangeFolder(id, path);
+      if (onChangeFolder) {
+        onChangeFolder(id, path);
+      }
     }
   };
 
@@ -62,7 +86,7 @@ export const TableRows = ({
               return (
                 <Td key={name}>
                   <CellContent
-                    content={element}
+                    content={element as TableAsset}
                     cellType={cellType}
                     contentType={contentType}
                     name={name}
@@ -74,18 +98,31 @@ export const TableRows = ({
             <Td onClick={(e) => e.stopPropagation()}>
               <Flex justifyContent="flex-end">
                 {contentType === 'folder' && (
-                  <IconButton
-                    tag={folderURL ? Link : 'button'}
-                    label={formatMessage({
-                      id: getTrad('list.folders.link-label'),
-                      defaultMessage: 'Access folder',
-                    })}
-                    to={folderURL}
-                    onClick={() => !folderURL && onChangeFolder(id)}
-                    variant="ghost"
-                  >
-                    <Eye />
-                  </IconButton>
+                  folderURL ? (
+                    <IconButton
+                      tag={Link}
+                      label={formatMessage({
+                        id: getTrad('list.folders.link-label'),
+                        defaultMessage: 'Access folder',
+                      })}
+                      to={folderURL}
+                      variant="ghost"
+                    >
+                      <Eye />
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      tag='button'
+                      label={formatMessage({
+                        id: getTrad('list.folders.link-label'),
+                        defaultMessage: 'Access folder',
+                      })}
+                      onClick={() => onChangeFolder && onChangeFolder(id)}
+                      variant="ghost"
+                    >
+                      <Eye />
+                    </IconButton>
+                  )
                 )}
                 <IconButton
                   label={formatMessage({
@@ -93,7 +130,7 @@ export const TableRows = ({
                     defaultMessage: 'Edit',
                   })}
                   onClick={() =>
-                    contentType === 'asset' ? onEditAsset(element) : onEditFolder(element)
+                    contentType === 'asset' ? onEditAsset(element as TableAsset) : onEditFolder(element as TableFolder)
                   }
                   variant="ghost"
                 >
@@ -106,19 +143,4 @@ export const TableRows = ({
       })}
     </Tbody>
   );
-};
-
-TableRows.defaultProps = {
-  onChangeFolder: null,
-  rows: [],
-  selected: [],
-};
-
-TableRows.propTypes = {
-  onChangeFolder: PropTypes.func,
-  onEditAsset: PropTypes.func.isRequired,
-  onEditFolder: PropTypes.func.isRequired,
-  onSelectOne: PropTypes.func.isRequired,
-  rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
 };

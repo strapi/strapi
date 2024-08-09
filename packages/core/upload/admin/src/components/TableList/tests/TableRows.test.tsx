@@ -40,17 +40,17 @@ const PROPS_FIXTURE = {
   selected: [],
 };
 
-const setup = (props) =>
+const setup = (props: any) =>
   render(<TableRows {...PROPS_FIXTURE} {...props} />, {
     renderOptions: {
-      wrapper: ({ children }) => <RawTable>{children}</RawTable>,
+      wrapper: ({ children }) => <RawTable colCount={4} rowCount={2}>{children}</RawTable>,
     },
   });
 
 describe('TableList | TableRows', () => {
   describe('rendering assets', () => {
     it('should properly render every asset attribute', () => {
-      const { getByText } = setup();
+      const { getByText } = setup({});
 
       expect(getByText('michka')).toBeInTheDocument();
       expect(getByText('JPEG')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('TableList | TableRows', () => {
     });
 
     it('should reflect non selected assets state', () => {
-      const { getByRole } = setup();
+      const { getByRole } = setup({});
 
       expect(getByRole('checkbox', { name: 'Select michka asset' })).not.toBeChecked();
     });

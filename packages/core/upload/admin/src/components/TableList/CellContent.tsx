@@ -15,18 +15,20 @@ interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
+  path: string;
+  folderURL?: string;
 }
 
 interface CellContentProps {
   cellType: string;
   contentType: string;
   content: AssetProps;
-  name: keyof AssetProps;
+  name: string;
 }
 
 export const CellContent = ({ cellType, contentType, content, name }: CellContentProps) => {
   const { formatDate, formatMessage } = useIntl();
-  const contentValue = content[name];
+  const contentValue = content[name as  Extract<keyof AssetProps, string>];
 
   switch (cellType) {
     case 'image':

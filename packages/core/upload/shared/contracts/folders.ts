@@ -36,7 +36,9 @@ export interface Folder {
   pathId: Data.ID;
   path: `/${Data.ID}`;
   createdAt: string;
+  createdBy?: string;
   updatedAt: string;
+  updatedBy?: string;
   publishedAt: string | null;
   locale: string | null;
   children?: {
