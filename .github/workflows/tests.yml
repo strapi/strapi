@@ -154,7 +154,7 @@ jobs:
 
   e2e_ce:
     timeout-minutes: 60
-    needs: [changes, build, typescript, unit_front]
+    needs: [changes, build]
     name: '[CE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
@@ -195,7 +195,7 @@ jobs:
 
   e2e_ee:
     timeout-minutes: 60
-    needs: [changes, build, typescript, unit_front]
+    needs: [changes, build]
     name: '[EE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     env:
@@ -239,7 +239,7 @@ jobs:
 
   cli:
     timeout-minutes: 60
-    needs: [changes, build, typescript]
+    needs: [changes, build]
     name: 'CLI Tests'
     runs-on: ubuntu-latest
     steps:
@@ -263,7 +263,7 @@ jobs:
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -305,7 +305,7 @@ jobs:
   api_ce_mysql:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -345,7 +345,7 @@ jobs:
   api_ce_mysql_5:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[CE] API Integration (mysql:5, client: ${{ matrix.db_client }} , node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -385,7 +385,7 @@ jobs:
   api_ce_sqlite:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -411,7 +411,7 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
@@ -456,7 +456,7 @@ jobs:
 
   api_ee_mysql:
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[EE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
@@ -499,7 +499,7 @@ jobs:
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
