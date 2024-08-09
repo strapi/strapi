@@ -66,6 +66,7 @@ const SortSelect = ({ sortQuery, handleSelectChange }: SortSelectProps) => {
           id: 'admin.pages.MarketPlacePage.sort.label',
           defaultMessage: 'Sort by',
         })}
+        size="S"
       >
         {Object.entries(SORT_TYPES).map(([sortName, messages]) => {
           return (

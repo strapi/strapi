@@ -2,34 +2,37 @@
 
 exports[`<FilterList /> renders and matches the snapshot 1`] = `
 .c0 {
-  background: #f0f0ff;
-  color: #4945ff;
-  padding-block: 4px;
-  padding-inline: 4px;
+  padding-block-start: 4px;
   padding-inline-end: 4px;
+  padding-block-end: 4px;
   padding-inline-start: 12px;
-  border-radius: 4px;
-  border-color: #d9d8ff;
-  border: 1px solid #d9d8ff;
   height: 3.2rem;
+  color: #4945ff;
+  background: #f0f0ff;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d8ff;
 }
 
 .c4 {
-  padding-block: 8px;
-  padding-inline: 8px;
+  padding-block-start: 8px;
+  padding-inline-end: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 8px;
 }
 
 .c1 {
   align-items: center;
-  display: inline-flex;
   flex-direction: row;
+  display: inline-flex;
 }
 
 .c2 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c6 {

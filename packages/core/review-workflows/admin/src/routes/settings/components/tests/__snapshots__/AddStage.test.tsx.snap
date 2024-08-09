@@ -3,43 +3,44 @@
 exports[`AddStage should render a list of stages 1`] = `
 .c0 {
   margin-inline-start: -250px;
-  position: fixed;
-  left: 50%;
   top: 4.6rem;
-  z-index: 700;
+  left: 50%;
   width: 50rem;
+  z-index: 700;
+  position: fixed;
 }
 
 .c2 {
-  background: #ffffff;
   padding-block-start: 12px;
-  padding-inline-end: 16px;
   padding-block-end: 12px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  background: #ffffff;
+  border-style: solid;
+  border-width: 1px;
   border-color: #eaeaef;
-  border: 1px solid #eaeaef;
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
 }
 
 .c1 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c5 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c4 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c6 {

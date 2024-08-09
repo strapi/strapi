@@ -35,9 +35,9 @@ describe('SearchAsset', () => {
 
       .c1 {
         align-items: center;
-        display: inline-flex;
-        flex-direction: row;
         justify-content: center;
+        flex-direction: row;
+        display: flex;
       }
 
       .c3 {
@@ -53,8 +53,8 @@ describe('SearchAsset', () => {
 
       .c2 {
         text-decoration: none;
-        padding-block: 0.9rem;
-        padding-inline: 0.9rem;
+        padding-block: 0.7rem;
+        padding-inline: 0.7rem;
         border: 1px solid #dcdce4;
         background: #ffffff;
         color: #32324d;

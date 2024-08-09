@@ -25,23 +25,17 @@ const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
           ref={composedRefs}
           autoComplete="password"
           endAction={
-            <button
-              aria-label={formatMessage({
+            <Field.Action
+              label={formatMessage({
                 id: 'Auth.form.password.show-password',
                 defaultMessage: 'Show password',
               })}
               onClick={() => {
                 setShowPassword((prev) => !prev);
               }}
-              style={{
-                border: 'none',
-                padding: 0,
-                background: 'transparent',
-              }}
-              type="button"
             >
               {showPassword ? <Eye fill="neutral500" /> : <EyeStriked fill="neutral500" />}
-            </button>
+            </Field.Action>
           }
           onChange={field.onChange}
           value={field.value}

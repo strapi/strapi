@@ -456,7 +456,6 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
             tag="span"
             height={2}
             background={value}
-            // @ts-expect-error - transparent doesn't exist in theme.colors
             borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
             hasRadius
             shrink={0}
@@ -476,7 +475,6 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
                   tag="span"
                   height={2}
                   background={color}
-                  // @ts-expect-error - transparent doesn't exist in theme.colors
                   borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
                   hasRadius
                   shrink={0}

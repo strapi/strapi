@@ -6,8 +6,8 @@ exports[`BulkActions renders 1`] = `
 }
 
 .c3 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -17,24 +17,24 @@ exports[`BulkActions renders 1`] = `
 }
 
 .c1 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c4 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c7 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c2 {
@@ -46,8 +46,8 @@ exports[`BulkActions renders 1`] = `
 .c8 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c10 {

@@ -6,8 +6,8 @@ import {
   IconButton,
   Typography,
   useCollator,
-  Link,
   Dialog,
+  LinkButton,
 } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -173,31 +173,24 @@ const DefaultButton = ({
   const { formatMessage } = useIntl();
 
   return (
-    <LinkStyled
+    <LinkButtonStyled
       tag={NavLink}
       to={tokenId.toString()}
-      onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => e.stopPropagation()}
+      onClick={(e: React.MouseEvent) => e.stopPropagation()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
+      variant="ghost"
+      size="S"
     >
       {children}
-    </LinkStyled>
+    </LinkButtonStyled>
   );
 };
 
-const LinkStyled = styled(Link)`
-  svg {
-    path {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
-  }
+const LinkButtonStyled = styled(LinkButton)`
+  padding: 0.7rem;
 
-  &:hover,
-  &:focus {
-    svg {
-      path {
-        fill: ${({ theme }) => theme.colors.neutral800};
-      }
-    }
+  & > span {
+    display: flex;
   }
 `;
 
@@ -247,7 +240,7 @@ interface ButtonProps {
 const UpdateButton = ({ tokenName, tokenId }: ButtonProps) => {
   return (
     <DefaultButton tokenName={tokenName} tokenId={tokenId}>
-      <Pencil width={12} />
+      <Pencil />
     </DefaultButton>
   );
 };

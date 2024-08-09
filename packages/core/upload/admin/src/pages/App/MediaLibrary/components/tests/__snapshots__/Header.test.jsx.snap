@@ -2,11 +2,11 @@
 
 exports[`Header renders 1`] = `
 .c0 {
-  background: #f6f6f9;
   padding-block-start: 24px;
-  padding-inline-end: 56px;
   padding-block-end: 40px;
   padding-inline-start: 56px;
+  padding-inline-end: 56px;
+  background: #f6f6f9;
 }
 
 .c1 {
@@ -22,8 +22,8 @@ exports[`Header renders 1`] = `
 }
 
 .c11 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -34,30 +34,30 @@ exports[`Header renders 1`] = `
 
 .c6 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c8 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c10 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c12 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c5 {
@@ -76,8 +76,8 @@ exports[`Header renders 1`] = `
 .c15 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c17 {
@@ -166,7 +166,7 @@ exports[`Header renders 1`] = `
   fill: #4945ff;
 }
 
-.c4:hover span {
+.c4:hover>span {
   color: #7b79ff;
 }
 

@@ -200,10 +200,10 @@ exports[`TableList | CellContent should render extension cell type with "-" when
 
 exports[`TableList | CellContent should render image cell type when element type is asset and mime does not include image 1`] = `
 .c0 {
-  background: #eaf5ff;
-  color: #0c75af;
   width: 3.2rem;
   height: 3.2rem;
+  color: #0c75af;
+  background: #eaf5ff;
 }
 
 .c1 {
@@ -250,17 +250,17 @@ exports[`TableList | CellContent should render image cell type when element type
 
 exports[`TableList | CellContent should render image cell type when element type is folder 1`] = `
 .c0 {
-  background: #eaf5ff;
-  border-radius: 50%;
   width: 3.2rem;
   height: 3.2rem;
+  background: #eaf5ff;
+  border-radius: 50%;
 }
 
 .c1 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c2 {

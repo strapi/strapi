@@ -1,8 +1,7 @@
 import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
-import { Box, Flex, Popover, Typography, useCollator } from '@strapi/design-system';
+import { Box, Flex, Popover, Typography, useCollator, Button } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { Locale } from '../../../shared/contracts/locales';
 import { useGetLocalesQuery } from '../services/locales';
@@ -65,21 +64,15 @@ const LocaleListCell = ({
   return (
     <Popover.Root>
       <Popover.Trigger>
-        <Button type="button" onClick={(e) => e.stopPropagation()}>
-          <ActionWrapper
-            minWidth="100%"
-            alignItems="center"
-            justifyContent="center"
-            height="3.2rem"
-            width="3.2rem"
-          >
-            <Typography textColor="neutral800" ellipsis>
+        <Button variant="ghost" type="button" onClick={(e) => e.stopPropagation()}>
+          <Flex minWidth="100%" alignItems="center" justifyContent="center" fontWeight="regular">
+            <Typography textColor="neutral800" ellipsis marginRight={2}>
               {localesForDocument.join(', ')}
             </Typography>
             <Flex>
-              <CaretDown />
+              <CaretDown width="1.2rem" height="1.2rem" />
             </Flex>
-          </ActionWrapper>
+          </Flex>
         </Button>
       </Popover.Trigger>
       <Popover.Content sideOffset={16}>
@@ -94,39 +87,6 @@ const LocaleListCell = ({
     </Popover.Root>
   );
 };
-
-const Button = styled.button`
-  width: 100%;
-
-  svg {
-    > g,
-    path {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
-  }
-  &:hover {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral600};
-      }
-    }
-  }
-  &:active {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral400};
-      }
-    }
-  }
-`;
-
-const ActionWrapper = styled(Flex)`
-  svg {
-    height: 0.4rem;
-  }
-`;
 
 export { LocaleListCell };
 export type { LocaleListCellProps };

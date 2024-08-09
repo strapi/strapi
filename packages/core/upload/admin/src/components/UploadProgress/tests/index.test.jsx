@@ -61,22 +61,22 @@ describe('<UploadProgress />', () => {
 
       .c1 {
         align-items: center;
-        display: flex;
         flex-direction: row;
+        display: flex;
       }
 
       .c4 {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
         gap: 8px;
+        align-items: center;
+        flex-direction: column;
+        display: flex;
       }
 
       .c8 {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
         gap: 8px;
+        align-items: center;
+        flex-direction: row;
+        display: flex;
       }
 
       .c9 {
@@ -199,8 +199,8 @@ describe('<UploadProgress />', () => {
 
       .c1 {
         align-items: center;
-        display: flex;
         flex-direction: row;
+        display: flex;
       }
 
       .c2 {
