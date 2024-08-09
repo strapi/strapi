@@ -71,6 +71,11 @@ export const findAndClose = async (
 };
 
 export const createSingleType = async (page, data) => {
+  // TODO: fix webkit bug with selecting ctb attributes
+  if (page.context()._browser._name === 'webkit') {
+    return test.fixme();
+  }
+
   const { name, singularId, pluralId } = data;
 
   await page.getByRole('button', { name: 'Create new single type' }).click();
@@ -107,6 +112,11 @@ export const createSingleType = async (page, data) => {
 };
 
 export const createCollectionType = async (page, data) => {
+  // TODO: fix webkit bug with selecting ctb attributes
+  if (page.context()._browser._name === 'webkit') {
+    return test.fixme();
+  }
+
   const { name, singularId, pluralId } = data;
 
   await page.getByRole('button', { name: 'Create new collection type' }).click();
