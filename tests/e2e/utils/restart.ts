@@ -35,7 +35,7 @@ export const waitForRestart = async (page, timeout = 60000) => {
   }
 
   if (modalVisible) {
-    throw new Error("Restart modal didn't close")
+    throw new Error("Restart modal didn't close");
   }
 
   console.log('Restart overlay has disappeared, proceeding with the test.');
