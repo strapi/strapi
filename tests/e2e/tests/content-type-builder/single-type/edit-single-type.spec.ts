@@ -10,8 +10,7 @@ import {
   skipCtbTour,
 } from '../../../utils/shared';
 
-// TODO: fix the test so that it doesn't fail on CI
-describeOnCondition(!process.env.CI)('Edit single type', () => {
+test.describe('Edit single type', () => {
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
