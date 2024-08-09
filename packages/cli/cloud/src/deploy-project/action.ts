@@ -100,18 +100,7 @@ async function upload(
       return data.build_id;
     } catch (e: any) {
       progressBar.stop();
-      if (e instanceof AxiosError && e.response?.data) {
-        if (e.response.status === 404) {
-          ctx.logger.warn(
-            `The project does not exist. Please link your local project to a Strapi Cloud project using the link command.`
-          );
-        } else {
-          ctx.logger.error(e.response.data);
-        }
-      } else {
-        ctx.logger.error('An error occurred while deploying the project. Please try again later.');
-      }
-
+      ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       ctx.logger.debug(e);
     } finally {
       await fse.remove(tarFilePath);
@@ -166,7 +155,38 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  const cloudApiService = await cloudApiFactory(ctx);
+  const cloudApiService = await cloudApiFactory(ctx, token);
+
+  try {
+    const { data: projectInfo } = await cloudApiService.getProject({ name: project.name });
+    const isProjectSuspended = projectInfo.suspendedAt;
+    if (isProjectSuspended) {
+      ctx.logger.warn(
+        'Oops! This project has been suspended. \n Please reactivate it from the dashboard to continue deploying: '
+      );
+      ctx.logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}`));
+      return;
+    }
+    console.log('paso por checkeo de info');
+  } catch (e: Error | unknown) {
+    if (e instanceof AxiosError && e.response?.data) {
+      if (e.response.status === 404) {
+        ctx.logger.warn(
+          `The project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+            'link'
+          )} command before deploying.`
+        );
+      } else {
+        ctx.logger.error(e.response.data);
+      }
+    } else {
+      ctx.logger.error(
+        "An error occurred while retrieving the project's information. Please try again later."
+      );
+    }
+    ctx.logger.debug(e);
+    return;
+  }
 
   await trackEvent(ctx, cloudApiService, 'willDeployWithCLI', {
     projectInternalName: project.name,
@@ -178,7 +198,7 @@ export default async (ctx: CLIContext) => {
   const cliConfig = await getConfig({ ctx, cloudApiService });
   if (!cliConfig) {
     ctx.logger.error(
-      'An error occurred while retrieving data from Strapi Cloud. Please try check your network or again later.'
+      'An error occurred while retrieving data from Strapi Cloud. Please check your network or try again later.'
     );
     return;
   }
