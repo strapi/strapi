@@ -23,6 +23,24 @@ module.exports = [
   },
   {
     method: 'GET',
+    path: '/openapi.json',
+    handler: 'documentation.openapiJson',
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)/openapi.json',
+    handler: 'documentation.openapiJson',
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: 'GET',
     path: '/login',
     handler: 'documentation.loginView',
     config: {
