@@ -26,7 +26,7 @@ const {
 } = require('./validation/auth');
 
 const { getAbsoluteAdminUrl, getAbsoluteServerUrl, sanitize } = utils;
-const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
+const { ApplicationError, ValidationError, ForbiddenError, NotFoundError } = utils.errors;
 
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
@@ -242,7 +242,7 @@ module.exports = {
       .findOne({ where: { email: email.toLowerCase() } });
 
     if (!user || user.blocked) {
-      return ctx.send({ ok: true });
+      throw new NotFoundError('Email not registered!')
     }
 
     // Generate random token.
