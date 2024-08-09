@@ -47,6 +47,10 @@ const generateComponentsDefinitions = async (options = {}) => {
 
     // Global
     generateSharedExtensionDefinition('Components', componentsDefinitions),
+
+    // export {}
+    factory.createIdentifier('\n'),
+    factory.createExportDeclaration([], false, factory.createNamedExports([])),
   ];
 
   const output = emitDefinitions(allDefinitions);
