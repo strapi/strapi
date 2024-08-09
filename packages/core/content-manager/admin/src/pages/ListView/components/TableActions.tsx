@@ -6,7 +6,7 @@ import {
   useStrapiApp,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Button, Flex, LinkButton } from '@strapi/design-system';
+import { Button, LinkButton, Modal } from '@strapi/design-system';
 import { Duplicate, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -201,7 +201,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
       content: <AutoCloneFailureModalBody prohibitedFields={prohibitedFields} />,
       footer: ({ onClose }) => {
         return (
-          <Flex justifyContent="space-between">
+          <Modal.Footer>
             <Button onClick={onClose} variant="tertiary">
               {formatMessage({
                 id: 'cancel',
@@ -219,7 +219,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
                 defaultMessage: 'Create',
               })}
             </LinkButton>
-          </Flex>
+          </Modal.Footer>
         );
       },
     },
