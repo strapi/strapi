@@ -118,13 +118,13 @@ export const FilterPopoverURLQuery = ({
           filterToAdd = {
             [modifiedData.name]: {
               [foundAttribute.fieldSchema.mainField.name]: {
-                [modifiedData.filter]: modifiedData.value,
+                [modifiedData.filter]: encodeURIComponent(modifiedData.value),
               },
             },
           } as Filter;
         } else {
           filterToAdd = {
-            [modifiedData.name]: { [modifiedData.filter]: modifiedData.value },
+            [modifiedData.name]: { [modifiedData.filter]: encodeURIComponent(modifiedData.value) },
           } as Filter;
         }
 
