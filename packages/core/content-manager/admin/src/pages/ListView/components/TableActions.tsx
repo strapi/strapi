@@ -6,7 +6,7 @@ import {
   useStrapiApp,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Button, Flex, LinkButton } from '@strapi/design-system';
+import { Button, LinkButton, Modal } from '@strapi/design-system';
 import { Duplicate, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -52,9 +52,10 @@ const TableActions = ({ document }: TableActionsProps) => {
   return (
     <DescriptionComponentRenderer
       props={props}
-      descriptions={(
-        plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-      ).getDocumentActions()}
+      descriptions={(plugins['content-manager'].apis as ContentManagerPlugin['config']['apis'])
+        .getDocumentActions()
+        // We explicitly remove the PublishAction from description so we never render it and we don't make unnecessary requests.
+        .filter((action) => action.name !== 'PublishAction')}
     >
       {(actions) => {
         const tableRowActions = actions.filter((action) => {
@@ -200,7 +201,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
       content: <AutoCloneFailureModalBody prohibitedFields={prohibitedFields} />,
       footer: ({ onClose }) => {
         return (
-          <Flex justifyContent="space-between">
+          <Modal.Footer>
             <Button onClick={onClose} variant="tertiary">
               {formatMessage({
                 id: 'cancel',
@@ -218,7 +219,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
                 defaultMessage: 'Create',
               })}
             </LinkButton>
-          </Flex>
+          </Modal.Footer>
         );
       },
     },

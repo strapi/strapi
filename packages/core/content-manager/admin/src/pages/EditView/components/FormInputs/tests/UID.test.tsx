@@ -4,6 +4,11 @@ import { Route, Routes } from 'react-router-dom';
 
 import { UIDInput, UIDInputProps } from '../UID';
 
+const waitForInput = async () => {
+  await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+  await screen.findByRole('textbox');
+};
+
 const render = ({
   initialValues = { name: 'test' },
   ...props
@@ -23,6 +28,9 @@ const render = ({
         </Routes>
       ),
     },
+    userEventOptions: {
+      advanceTimers: jest.advanceTimersByTime,
+    },
     initialEntries: ['/content-manager/collection-types/api::address.address/create'],
   });
 
@@ -32,8 +40,11 @@ describe('UIDInput', () => {
       hint: 'hint',
       required: true,
     });
+    await waitForInput();
 
-    await screen.findByText('Unavailable');
+    // The value wasn't changed so the availability check should not be shown
+    expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();
+    expect(screen.queryByText('Available')).not.toBeInTheDocument();
 
     expect(screen.getByText('Label')).toBeInTheDocument();
     expect(screen.getByText('*')).toBeInTheDocument();
@@ -46,6 +57,7 @@ describe('UIDInput', () => {
    */
   test.skip('renders an error', async () => {
     render();
+    await waitForInput();
 
     await screen.findByText('Unavailable');
 
@@ -53,23 +65,23 @@ describe('UIDInput', () => {
   });
 
   test('Hides the regenerate label when disabled', async () => {
-    render({ disabled: true });
-
-    await screen.findByText('Unavailable');
+    render({ disabled: true, initialValues: {} });
+    await waitForInput();
 
     expect(screen.queryByRole('button', { name: /regenerate/i })).not.toBeInTheDocument();
   });
 
   test('Regenerates the value based on the target field', async () => {
-    const { user } = render();
+    jest.useFakeTimers();
+    const { user } = render({ initialValues: { name: 'foo' } });
+    await waitForInput();
 
-    expect(screen.getByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
-
+    expect(await screen.findByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
     await user.click(screen.getByRole('button', { name: /regenerate/i }));
-
     await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
     expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('regenerated');
+    jest.useRealTimers();
   });
 
   test('If the field is required and the value is empty it should automatically fill it', async () => {
@@ -77,8 +89,7 @@ describe('UIDInput', () => {
       initialValues: {},
       required: true,
     });
-
-    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitForInput();
 
     await waitFor(() =>
       expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('regenerated')
@@ -92,50 +103,46 @@ describe('UIDInput', () => {
       },
       required: true,
     });
-
-    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitForInput();
 
     expect(screen.getByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
   });
 
-  test('Checks the initial availability (isAvailable)', async () => {
-    jest.useFakeTimers();
-
-    render({
+  test('Checks the availability', async () => {
+    const { user } = render({
       required: true,
       initialValues: {
-        name: 'available',
+        name: 'init',
       },
     });
+    await waitForInput();
 
-    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    // The value wasn't changed so the availability check should not be shown
+    expect(screen.queryByText('Available')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unvailable')).not.toBeInTheDocument();
 
-    expect(screen.getByText('Available')).toBeInTheDocument();
+    jest.useFakeTimers();
+    const input = screen.getByRole('textbox');
+    await user.clear(input);
+    await user.type(input, 'not-taken');
 
+    // Skip debouncing delay
     act(() => {
       jest.advanceTimersByTime(4000);
     });
 
-    await waitFor(() => expect(screen.queryByText('Available')).not.toBeInTheDocument(), {
-      timeout: 10000,
+    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    expect(await screen.findByText(/^Available$/)).toBeInTheDocument();
+
+    // Change the value to make it unavailable
+    await user.type(input, 'taken');
+    act(() => {
+      jest.advanceTimersByTime(4000);
     });
+    expect(await screen.findByText(/^Unavailable$/)).toBeInTheDocument();
 
     jest.runOnlyPendingTimers();
     jest.useRealTimers();
-  });
-
-  test('Checks the initial availability (!isAvailable)', async () => {
-    render({
-      required: true,
-    });
-
-    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
-
-    expect(screen.getByText('Unavailable')).toBeInTheDocument();
-
-    await waitFor(() => expect(screen.queryByText('Available')).not.toBeInTheDocument(), {
-      timeout: 10000,
-    });
   });
 
   test('Does not check the initial availability without a value', async () => {
@@ -145,8 +152,7 @@ describe('UIDInput', () => {
         name: '',
       },
     });
-
-    await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
+    await waitForInput();
 
     expect(screen.queryByText('Available')).not.toBeInTheDocument();
     expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();

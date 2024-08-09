@@ -52,16 +52,6 @@ const getInitialRoutes = (): RouteObject[] => [
     },
   },
   {
-    path: 'list-plugins',
-    lazy: async () => {
-      const { ProtectedInstalledPluginsPage } = await import('./pages/InstalledPluginsPage');
-
-      return {
-        Component: ProtectedInstalledPluginsPage,
-      };
-    },
-  },
-  {
     path: 'marketplace',
     lazy: async () => {
       const { ProtectedMarketplacePage } = await import('./pages/Marketplace/MarketplacePage');
