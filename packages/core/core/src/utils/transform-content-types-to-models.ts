@@ -60,7 +60,8 @@ export const getComponentFkIndexName = (contentType: string, identifiers: Identi
 // const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order } = identifiers;
 
 export type LoadedContentTypeModel = Struct.ContentTypeSchema &
-  Required<Pick<Struct.ContentTypeSchema, 'collectionName' | 'uid' | 'modelName'>>;
+  Required<Pick<Struct.ContentTypeSchema, 'collectionName' | 'uid' | 'modelName'>> &
+  Pick<Model, 'lifecycles'>;
 
 // Transforms an attribute (particularly for relation types) into the format that strapi/database accepts
 export const transformAttribute = (
@@ -317,6 +318,7 @@ export const transformContentTypesToModels = (
       },
       indexes: contentType.indexes as Model['indexes'],
       foreignKeys: contentType.foreignKeys as Model['foreignKeys'],
+      lifecycles: contentType?.lifecycles ?? {},
     };
 
     // Add indexes to model
