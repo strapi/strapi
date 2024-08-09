@@ -133,7 +133,12 @@ export const advancedForm = {
             id: 'global.settings',
             defaultMessage: 'Settings',
           },
-          items: [attributeOptions.required, attributeOptions.max, attributeOptions.min],
+          items: [
+            attributeOptions.required,
+            attributeOptions.max,
+            attributeOptions.min,
+            attributeOptions.collapse,
+          ],
         },
       ],
     };

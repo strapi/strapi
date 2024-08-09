@@ -12,6 +12,7 @@ import {
 import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { Drag, More, Trash } from '@strapi/icons';
+import { Attribute } from '@strapi/types';
 import get from 'lodash/get';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -35,6 +36,7 @@ interface DynamicComponentProps
   index?: number;
   isFieldAllowed?: boolean;
   name: string;
+  fieldSchema?: Attribute.DynamicZone;
   onAddComponent?: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
@@ -46,6 +48,7 @@ const DynamicComponent = ({
   index = 0,
   isFieldAllowed = false,
   name,
+  fieldSchema,
   onRemoveComponentClick,
   onMoveComponent,
   onGrabItem,
@@ -54,7 +57,9 @@ const DynamicComponent = ({
   dynamicComponentsByCategory = {},
   onAddComponent,
 }: DynamicComponentProps) => {
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(
+    fieldSchema?.collapse !== undefined ? !fieldSchema.collapse : true
+  );
   const { formatMessage } = useIntl();
   const { getComponentLayout } = useContentTypeLayout();
   const { modifiedData } = useCMEditViewDataManager();
@@ -248,8 +253,8 @@ const DynamicComponent = ({
 };
 
 const ActionsFlex = styled(Flex)`
-  /* 
-    we need to remove the background from the button but we can't 
+  /*
+    we need to remove the background from the button but we can't
     wrap the element in styled because it breaks the forwardedAs which
     we need for drag handler to work on firefox
   */
