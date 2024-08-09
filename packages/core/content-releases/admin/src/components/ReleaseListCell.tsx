@@ -2,8 +2,7 @@ import * as React from 'react';
 
 import { useTable, useQueryParams } from '@strapi/admin/strapi-admin';
 import { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
-import { Box, Flex, Popover, Typography, Button } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Popover, Typography, Button, Link } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { Modules, UID } from '@strapi/types';
 import { useIntl } from 'react-intl';

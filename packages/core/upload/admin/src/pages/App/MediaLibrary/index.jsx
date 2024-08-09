@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import {
   Page,
@@ -24,7 +24,7 @@ import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { AssetGridList } from '../../../components/AssetGridList';
+import { AssetGridList } from '../../../components/AssetGridList/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
 import { EditFolderDialog } from '../../../components/EditFolderDialog';
 import {
@@ -80,7 +80,7 @@ export const MediaLibrary = () => {
     canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
-  const currentFolderToEditRef = useRef();
+  const currentFolderToEditRef = React.useRef();
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const { trackUsage } = useTracking();
@@ -135,10 +135,10 @@ export const MediaLibrary = () => {
   const totalAssetCount = assetsData?.pagination?.total;
 
   const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
-  const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
-  const [showEditFolderDialog, setShowEditFolderDialog] = useState(false);
-  const [assetToEdit, setAssetToEdit] = useState(undefined);
-  const [folderToEdit, setFolderToEdit] = useState(undefined);
+  const [showUploadAssetDialog, setShowUploadAssetDialog] = React.useState(false);
+  const [showEditFolderDialog, setShowEditFolderDialog] = React.useState(false);
+  const [assetToEdit, setAssetToEdit] = React.useState(undefined);
+  const [folderToEdit, setFolderToEdit] = React.useState(undefined);
   const [selected, { selectOne, selectAll }] = useSelectionState(['type', 'id'], []);
   const indeterminateBulkSelect =
     selected?.length > 0 && selected?.length !== assetCount + folderCount;

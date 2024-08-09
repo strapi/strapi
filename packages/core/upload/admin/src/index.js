@@ -6,7 +6,7 @@ import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput';
 import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
-import getTrad from './utils/getTrad';
+import { getTrad } from './utils/getTrad';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = pluginPkg.strapi.name;
@@ -32,7 +32,11 @@ export default {
         defaultMessage: 'Media Library',
       },
       to: 'media-library',
-      Component: () => import('./pages/SettingsPage'),
+      async Component() {
+        const { ProtectedSettingsPage } = await import('./pages/SettingsPage');
+
+        return { default: ProtectedSettingsPage };
+      },
       permissions: PERMISSIONS.settings,
     });
 

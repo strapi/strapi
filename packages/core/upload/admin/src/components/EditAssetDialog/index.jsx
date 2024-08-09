@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import {
@@ -28,7 +28,7 @@ import { AssetDefinition } from '../../constants';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { findRecursiveFolderByValue, getTrad, getFileExtension } from '../../utils';
-import formatBytes from '../../utils/formatBytes';
+import { formatBytes } from '../../utils/formatBytes';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
@@ -58,9 +58,9 @@ export const EditAssetContent = ({
 }) => {
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();
-  const submitButtonRef = useRef(null);
-  const [isCropping, setIsCropping] = useState(false);
-  const [replacementFile, setReplacementFile] = useState();
+  const submitButtonRef = React.useRef(null);
+  const [isCropping, setIsCropping] = React.useState(false);
+  const [replacementFile, setReplacementFile] = React.useState();
   const { editAsset, isLoading } = useEditAsset();
 
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
