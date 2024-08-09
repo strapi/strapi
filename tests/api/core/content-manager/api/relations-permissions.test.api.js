@@ -59,10 +59,11 @@ const createEntry = async (model, data, populate) => {
   return body;
 };
 
-const getRelations = async (rq, uid, field, id) => {
+const getRelations = async (rq, uid, field, id, params = {}) => {
   return rq({
     method: 'GET',
     url: `/content-manager/relations/${uid}/${id}/${field}`,
+    qs: params,
   });
 };
 
@@ -167,6 +168,46 @@ describe('Relation permissions', () => {
     expect(products.results).toHaveLength(1);
     // The main field should be visible
     expect(products.results[0].name).toBe(product.name);
+  });
+
+  /**
+   * Prevent relations being loaded without the main field if user has appropriate permissions.
+   * Ref: https://github.com/strapi/strapi/issues/19625
+   */
+  test('Permissive user can read multiple pages of shop products', async () => {
+    // Add more products
+    const products = [];
+
+    for (let i = 0; i < 10; i += 1) {
+      const productEntry = await createEntry('api::product.product', { name: `Product ${i}` });
+      products.push(productEntry.data.id);
+    }
+
+    const shop = await createEntry('api::shop.shop', { name: 'Shop', products }, populateShop);
+
+    const { body: firstPage } = await getRelations(
+      rqPermissive,
+      'api::shop.shop',
+      'products',
+      shop.data.documentId,
+      { page: 1, pageSize: 5 }
+    );
+
+    expect(firstPage.results).toHaveLength(5);
+    // Expect results to have the name field (main field)
+    expect(firstPage.results[0].name).toBeDefined();
+
+    const { body: secondPage } = await getRelations(
+      rqPermissive,
+      'api::shop.shop',
+      'products',
+      shop.data.documentId,
+      { page: 2, pageSize: 5 }
+    );
+
+    expect(secondPage.results).toHaveLength(5);
+    // Expect results to have the name field (main field)
+    expect(secondPage.results[0].name).toBeDefined();
   });
 
   test('Restricted user cannot read shop products mainField', async () => {

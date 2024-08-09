@@ -276,7 +276,7 @@ export const handlers: RequestHandler[] = [
 
     return res(
       ctx.json({
-        isAvailable: body?.value === 'available',
+        isAvailable: body?.value === 'not-taken',
       })
     );
   }),

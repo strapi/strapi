@@ -8,6 +8,7 @@ import {
   useAPIErrorHandler,
 } from '@strapi/admin/strapi-admin';
 import { useIntl, type MessageDescriptor } from 'react-intl';
+import { useNavigate } from 'react-router-dom';
 
 import {
   useAutoCloneDocumentMutation,
@@ -191,6 +192,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const navigate = useNavigate();
 
   const [deleteDocument] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
@@ -621,7 +623,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [autoCloneDocument, formatAPIError, formatMessage, toggleNotification]
+    [autoCloneDocument, formatMessage, toggleNotification]
   );
 
   const [cloneDocument] = useCloneDocumentMutation();
@@ -659,6 +661,9 @@ const useDocumentActions: UseDocumentActions = () => {
           }),
         });
 
+        // Redirect to normal edit view
+        navigate(`../../${res.data.data.documentId}`, { relative: 'path' });
+
         return res.data;
       } catch (err) {
         toggleNotification({
@@ -671,7 +676,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [cloneDocument, trackUsage, toggleNotification, formatMessage, formatAPIError]
+    [cloneDocument, trackUsage, toggleNotification, formatMessage, formatAPIError, navigate]
   );
 
   const [getDoc] = useLazyGetDocumentQuery();

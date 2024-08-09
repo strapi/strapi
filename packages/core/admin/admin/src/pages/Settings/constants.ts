@@ -153,6 +153,17 @@ export const ROUTES_CE: RouteObject[] = [
   },
   {
     lazy: async () => {
+      const { ProtectedInstalledPlugins } = await import('./pages/InstalledPlugins');
+
+      return {
+        Component: ProtectedInstalledPlugins,
+      };
+    },
+    path: 'list-plugins',
+  },
+
+  {
+    lazy: async () => {
       const { PurchaseAuditLogs } = await import('./pages/PurchaseAuditLogs');
 
       return {

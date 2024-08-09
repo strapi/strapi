@@ -57,7 +57,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_result, _error, { model }) => [
+        { type: 'Document', id: `${model}_LIST` },
+        { type: 'UidAvailability', id: model },
+      ],
     }),
     /**
      * Creates a new collection-type document. This should ONLY be used for collection-types.
@@ -81,6 +84,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (result, _error, { model }) => [
         { type: 'Document', id: `${model}_LIST` },
         'Relations',
+        { type: 'UidAvailability', id: model },
       ],
     }),
     deleteDocument: builder.mutation<
@@ -145,6 +149,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
+          { type: 'UidAvailability', id: model },
         ];
       },
     }),
@@ -339,6 +344,7 @@ const documentApi = contentManagerApi.injectEndpoints({
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           'Relations',
+          { type: 'UidAvailability', id: model },
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
