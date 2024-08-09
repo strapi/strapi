@@ -119,6 +119,7 @@ export declare namespace Plugins {
     name: string;
     displayName: string;
     description: string;
+    packageName: string;
   }
 
   export interface Request {
