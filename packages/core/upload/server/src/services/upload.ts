@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import fse from 'fs-extra';
 import _ from 'lodash';
-import { extension } from 'mime-types';
+import { extension, lookup } from 'mime-types';
 import {
   sanitize,
   strings,
@@ -553,9 +553,48 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
   }
 
+  /**
+   * Uploads a file by path, buffer or stream programmaticaly
+   * @public
+   */
+  async function uploadFile(file: string | Buffer | fs.ReadStream, options: FileInfo) {
+    let filepath: string;
+
+    if (Buffer.isBuffer(file)) {
+      filepath = path.resolve(os.tmpdir(), crypto.randomBytes(10).toString('hex'));
+      await fse.writeFile(filepath, file);
+    } else if (file instanceof fs.ReadStream) {
+      filepath = path.resolve(os.tmpdir(), crypto.randomBytes(10).toString('hex'));
+      await fse.createWriteStream(filepath).write(file);
+    } else {
+      filepath = path.resolve(file);
+    }
+
+    const fileObject = {
+      filepath,
+      newFilename: options.name ?? path.basename(filepath),
+      originalFilename: options.name ?? path.basename(filepath),
+      mimetype: lookup(filepath) || 'application/octet-stream',
+      size: fs.statSync(filepath).size,
+    } as InputFile;
+
+    const tmpDir = await createAndAssignTmpWorkingDirectoryToFiles(fileObject);
+
+    try {
+      const fileData = await enhanceAndValidateFile(fileObject, options, {
+        tmpWorkingDirectory: tmpDir,
+      });
+      return await uploadFileAndPersist(fileData);
+    } catch (error) {
+      // delete temporary folder
+      await fse.remove(tmpDir);
+    }
+  }
+
   return {
     formatFileInfo,
     upload,
+    uploadFile,
     updateFileInfo,
     replace,
     findOne,
