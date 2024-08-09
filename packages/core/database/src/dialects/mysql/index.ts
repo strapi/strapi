@@ -67,14 +67,14 @@ export default class MysqlDialect extends Dialect {
   async startSchemaUpdate() {
     try {
       await this.db.connection.raw(`set foreign_key_checks = 0;`);
-      await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+      await this.db.connection.raw(`begin; set session sql_require_primary_key = 0; commit;`);
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
   }
 
   async endSchemaUpdate() {
-    await this.db.connection.raw(`set foreign_key_checks = 1;`);
+    await this.db.connection.raw(`begin; set foreign_key_checks = 1; commit;`);
   }
 
   supportsUnsigned() {
