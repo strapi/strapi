@@ -45,6 +45,7 @@ import {
   cleanOrderColumns,
 } from './regular-relations';
 import { relationsOrderer } from './relations-orderer';
+import { cloneMorphMediaRelations } from './relations/cloning/morph-relations';
 import {
   replaceRegularRelations,
   cloneRegularRelations,
@@ -472,15 +473,22 @@ export const createEntityManager = (db: Database): EntityManager => {
           // TODO: handle components in the db layer
           if (
             types.isRelationalAttribute(attr) &&
-            'joinTable' in attr &&
-            attr.joinTable &&
-            !('component' in attr)
+            (
+              (
+                'joinTable' in attr &&
+                attr.joinTable &&
+                !('component' in attr)
+              ) ||
+              (
+                'target' in attr &&
+                attr.target === 'plugin::upload.file'
+              )
+            )
           ) {
             acc.push(attrName);
           }
           return acc;
         }, [] as string[]);
-
         await this.cloneRelations(uid, id, cloneId, data, { cloneAttrs, transaction: trx.get() });
         await trx.commit();
       } catch (e) {
@@ -1351,6 +1359,9 @@ export const createEntityManager = (db: Database): EntityManager => {
         }
 
         if (isPolymorphic(attribute)) {
+          if ('target' in attribute && attribute.target === 'plugin::upload.file') {
+            await cloneMorphMediaRelations({ uid, targetId, sourceId, attribute, transaction });
+          }
           // TODO: add support for cloning polymorphic relations
           return;
         }
