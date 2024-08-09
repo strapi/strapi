@@ -65,6 +65,18 @@ describe('Document Service', () => {
         strapi.documents(CATEGORY_UID).publish({ documentId: newCategory.documentId })
       ).rejects.toThrow();
     });
+
+    it('can save and publish multiple entries with an empty string in a unique field', async () => {
+      // Create two categories with empty names (which is a unique field)
+      const category = await strapi.documents(CATEGORY_UID).create({ data: { name: '' } });
+      expect(category).toBeDefined();
+      const category2 = await strapi.documents(CATEGORY_UID).create({ data: { name: '' } });
+      expect(category2).toBeDefined();
+
+      // Publish categories, no error should be thrown
+      await strapi.documents(CATEGORY_UID).publish({ documentId: category.documentId });
+      await strapi.documents(CATEGORY_UID).publish({ documentId: category2.documentId });
+    });
   });
 
   describe('Component unique fields', () => {
