@@ -51,10 +51,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   border-radius: 4px;
 }
 
-.c31 {
-  display: flex;
-}
-
 .c37 {
   padding-inline-end: 12px;
 }
@@ -165,7 +161,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #4a4a6a;
 }
 
-.c32 {
+.c31 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -280,11 +276,12 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c11:hover {
   background-color: #f6f6f9;
+  color: #666687;
 }
 
 .c11:active {
@@ -296,6 +293,10 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
   color: #666687;
   cursor: default;
+}
+
+.c32 {
+  display: flex;
 }
 
 .c35 {

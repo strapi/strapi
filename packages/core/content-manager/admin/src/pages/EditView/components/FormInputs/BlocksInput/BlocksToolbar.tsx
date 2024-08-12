@@ -144,7 +144,7 @@ const ToolbarButton = ({
           height={7}
           hasRadius
         >
-          <Icon width="1.2rem" height="1.2rem" fill={disabled ? 'neutral300' : enabledColor} />
+          <Icon fill={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>

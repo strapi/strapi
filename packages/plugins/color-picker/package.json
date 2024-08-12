@@ -53,8 +53,8 @@
     "watch": "strapi-plugin watch"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.8",
-    "@strapi/icons": "2.0.0-rc.8",
+    "@strapi/design-system": "2.0.0-rc.9",
+    "@strapi/icons": "2.0.0-rc.9",
     "react-colorful": "5.6.1",
     "react-intl": "6.6.2"
   },

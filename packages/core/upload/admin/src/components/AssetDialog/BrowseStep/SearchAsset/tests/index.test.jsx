@@ -58,11 +58,12 @@ describe('SearchAsset', () => {
         border: 1px solid #dcdce4;
         background: #ffffff;
         color: #32324d;
-        color: #666687;
+        color: #8e8ea9;
       }
 
       .c2:hover {
         background-color: #f6f6f9;
+        color: #666687;
       }
 
       .c2:active {

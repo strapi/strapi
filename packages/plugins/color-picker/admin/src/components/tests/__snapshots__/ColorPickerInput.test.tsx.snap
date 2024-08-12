@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
-.c1 {
-  display: flex;
-}
-
 .c3 {
   padding-inline-start: 16px;
   padding-inline-end: 16px;
@@ -33,7 +29,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c2 {
+.c1 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -89,6 +85,10 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
   color: #666687;
   cursor: default;
+}
+
+.c2 {
+  display: flex;
 }
 
 .c9 {

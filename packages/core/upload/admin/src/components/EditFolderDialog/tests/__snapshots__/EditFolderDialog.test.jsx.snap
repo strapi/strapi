@@ -24,10 +24,6 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c19 {
-  display: flex;
-}
-
 .c24 {
   padding-inline-end: 12px;
 }
@@ -103,7 +99,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   font-weight: 600;
 }
 
-.c20 {
+.c19 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -187,11 +183,12 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c11:hover {
   background-color: #f6f6f9;
+  color: #666687;
 }
 
 .c11:active {
@@ -203,6 +200,10 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background: #eaeaef;
   color: #666687;
   cursor: default;
+}
+
+.c20 {
+  display: flex;
 }
 
 .c23 {

@@ -11,10 +11,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
 }
 
-.c5 {
-  display: flex;
-}
-
 .c7 {
   background: #ffffff;
   border-radius: 4px;
@@ -55,7 +51,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   display: flex;
 }
 
-.c6 {
+.c5 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -93,6 +89,10 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   width: 1px;
 }
 
+.c6 {
+  display: flex;
+}
+
 .c9 {
   border: 1px solid #dcdce4;
   padding-block: 8px;
@@ -105,7 +105,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 .c9[aria-disabled='true'] {
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c9:focus-visible {
@@ -117,8 +117,12 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c15 {
+  display: flex;
+}
+
 .c15>svg {
-  fill: #666687;
+  fill: #8e8ea9;
 }
 
 .c13 {

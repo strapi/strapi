@@ -51,10 +51,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
 }
 
-.c26 {
-  display: flex;
-}
-
 .c28 {
   background: #ffffff;
   border-radius: 4px;
@@ -142,7 +138,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   color: #666687;
 }
 
-.c27 {
+.c26 {
   font-size: 1.2rem;
   line-height: 1.33;
   display: block;
@@ -266,6 +262,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
+.c27 {
+  display: flex;
+}
+
 .c30 {
   border: 1px solid #dcdce4;
   padding-block: 8px;
@@ -278,7 +278,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c30[aria-disabled='true'] {
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c30:focus-visible {
@@ -290,8 +290,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c36 {
+  display: flex;
+}
+
 .c36>svg {
-  fill: #666687;
+  fill: #8e8ea9;
 }
 
 .c34 {

@@ -11,10 +11,8 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c8 {
-  padding-block-start: 4px;
-  padding-block-end: 4px;
-  padding-inline-start: 12px;
-  padding-inline-end: 12px;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }

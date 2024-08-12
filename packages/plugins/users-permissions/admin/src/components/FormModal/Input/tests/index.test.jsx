@@ -36,10 +36,6 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        display: flex;
-      }
-
       .c0 {
         gap: 4px;
         align-items: stretch;
@@ -55,7 +51,7 @@ describe('<Input />', () => {
         display: flex;
       }
 
-      .c2 {
+      .c1 {
         font-size: 1.2rem;
         line-height: 1.33;
         display: block;
@@ -64,6 +60,10 @@ describe('<Input />', () => {
         text-overflow: ellipsis;
         color: #32324d;
         font-weight: 600;
+      }
+
+      .c2 {
+        display: flex;
       }
 
       .c5 {

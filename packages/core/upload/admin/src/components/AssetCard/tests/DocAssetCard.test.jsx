@@ -157,11 +157,12 @@ describe('DocAssetCard', () => {
         border: 1px solid #dcdce4;
         background: #ffffff;
         color: #32324d;
-        color: #666687;
+        color: #8e8ea9;
       }
 
       .c12:hover {
         background-color: #f6f6f9;
+        color: #666687;
       }
 
       .c12:active {
@@ -272,12 +273,6 @@ describe('DocAssetCard', () => {
       @media (prefers-reduced-motion: no-preference) {
         .c12 {
           transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-      }
-
-      @media (prefers-reduced-motion: no-preference) {
-        .c7 {
-          transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
       }
 

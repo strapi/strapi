@@ -381,11 +381,12 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c25:hover {
   background-color: #f6f6f9;
+  color: #666687;
 }
 
 .c25:active {
@@ -416,7 +417,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 }
 
 .c7[aria-disabled='true'] {
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c7:focus-visible {
@@ -428,8 +429,12 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c13 {
+  display: flex;
+}
+
 .c13>svg {
-  fill: #666687;
+  fill: #8e8ea9;
 }
 
 .c11 {
