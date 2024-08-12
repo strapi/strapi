@@ -48,6 +48,7 @@ describe('Content Type Builder - Content types', () => {
     await restart();
   });
 
+  // TODO FIXME: this depends on all tests to run or else it throws an error
   afterAll(async () => {
     const modelsUIDs = [
       'api::test-collection-type.test-collection-type',
@@ -195,6 +196,50 @@ describe('Content Type Builder - Content types', () => {
             ],
           },
           message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
+          name: 'ValidationError',
+        },
+      });
+    });
+
+    // TODO: fix derror message to include prefixes
+    test('Cannot use strapi prefix for content type name', async () => {
+      const res = await rq({
+        method: 'POST',
+        url: '/content-type-builder/content-types',
+        body: {
+          contentType: {
+            displayName: 'unique string',
+            singularName: 'strapi-singular',
+            pluralName: 'strapi-plural',
+            attributes: {
+              title: {
+                type: 'string',
+              },
+            },
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        error: {
+          details: {
+            errors: [
+              {
+                message:
+                  'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then',
+                name: 'ValidationError',
+                path: ['contentType', 'singularName'],
+              },
+              {
+                message:
+                  'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then',
+                name: 'ValidationError',
+                path: ['contentType', 'pluralName'],
+              },
+            ],
+          },
+          message: '2 errors occurred',
           name: 'ValidationError',
         },
       });
