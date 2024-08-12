@@ -3,10 +3,10 @@ import execa from 'execa';
 const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
 
 function delay(seconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1_000));
 }
 
-export const pollHealthCheck = async (interval = 1000, timeout = 30000) => {
+export const pollHealthCheck = async (interval = 1_000, timeout = 30_000) => {
   const url = `http://127.0.0.1:${process.env.PORT ?? 1337}/_health`;
   console.log(`Starting to poll: ${url}`);
 
@@ -19,18 +19,18 @@ export const pollHealthCheck = async (interval = 1000, timeout = 30000) => {
         console.log('The service is up and running!');
         return; // Exit if the service is up
       }
-      // If the response is not okay, throw an error to catch it below
-      throw new Error('Service not ready');
     } catch (error) {
-      console.log('Waiting for the service to come up...');
-      // Wait for the specified interval before trying again
-      await new Promise((resolve) => setTimeout(resolve, interval));
-      elapsed += interval; // Update the elapsed time
+      // do nothing
     }
+
+    console.log('Waiting for the service to come up...');
+    // Wait for the specified interval before trying again
+    await new Promise((resolve) => setTimeout(resolve, interval));
+    elapsed += interval; // Update the elapsed time
   }
 
   // If we've exited the loop because of the timeout
-  console.error('Timeout reached, service did not become available in time.');
+  throw new Error('Timeout reached, service did not become available in time.');
 };
 
 export const resetFiles = async () => {
@@ -50,6 +50,6 @@ export const resetFiles = async () => {
   // wait for server to restart after modifying files
   console.log('Waiting for Strapi to restart...');
   // TODO: this is both a waste of time and flaky. We need to find a way to access playwright server output and watch for the "up" log to appear
-  await delay(3); // give it time to detect file changes and begin its restart
+  await delay(4); // give it time to detect file changes and begin its restart
   await pollHealthCheck(); // give it time to come back up
 };
