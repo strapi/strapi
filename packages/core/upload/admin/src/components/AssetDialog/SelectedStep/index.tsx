@@ -3,20 +3,11 @@ import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils/getTrad';
 import { AssetGridList } from '../../AssetGridList/AssetGridList';
-import type { Asset } from '../../../../../shared/contracts/files';
-import type { RawFile } from '../../../types';
-
-interface AssetProps extends Asset {
-  type?: string;
-  isSelectable?: boolean;
-  isLocal?: boolean;
-  allowedTypes?: string[];
-  rawFile: RawFile;
-}
+import type { AssetEnriched } from '../../../../../shared/contracts/files';
 
 interface SelectedStepProps {
-  onSelectAsset: (asset: AssetProps) => void;
-  selectedAssets: AssetProps[];
+  onSelectAsset: (asset: AssetEnriched) => void;
+  selectedAssets: AssetEnriched[];
   onReorderAsset?: (hoverIndex: number, destIndex: number) => void;
 }
 

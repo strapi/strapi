@@ -2,7 +2,7 @@ import { typeFromMime } from './typeFromMime';
 // TODO: import this file from the constants file when it will be migrated to TS
 import { AssetSource } from '../newConstants';
 
-import type { RawFile } from '../types';
+import type { RawFile } from '../../../shared/contracts/files';
 
 export const rawFileToAsset = (rawFile: RawFile, assetSource: AssetSource) => {
   return {

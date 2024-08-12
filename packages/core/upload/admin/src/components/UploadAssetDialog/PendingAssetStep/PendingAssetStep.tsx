@@ -7,8 +7,7 @@ import type { Data } from '@strapi/types';
 import { getTrad } from '../../../utils/getTrad';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
-import { AssetProps } from '../../../hooks/useUpload';
-import type { Asset } from '../../../../../shared/contracts/files';
+import type { Asset, AssetEnriched } from '../../../../../shared/contracts/files';
 
 const Status = {
   Idle: 'IDLE',
@@ -18,14 +17,14 @@ const Status = {
 
 interface PendingAssetStepProps {
   addUploadedFiles?: (files: Asset[]) => void;
-  assets: AssetProps[];
+  assets: AssetEnriched[];
   folderId: Data.ID | null;
   onClose: () => void;
-  onEditAsset: (asset: AssetProps) => void;
-  onRemoveAsset: (asset: AssetProps) => void;
+  onEditAsset: (asset: AssetEnriched) => void;
+  onRemoveAsset: (asset: AssetEnriched) => void;
   onClickAddAsset: () => void;
-  onUploadSucceed: (file: AssetProps['rawFile']) => void;
-  onCancelUpload: (file: AssetProps['rawFile']) => void;
+  onUploadSucceed: (file: AssetEnriched['rawFile']) => void;
+  onCancelUpload: (file: AssetEnriched['rawFile']) => void;
   trackedLocation: string;
 }
 
@@ -76,7 +75,7 @@ export const PendingAssetStep = ({
     setUploadStatus(Status.Uploading);
   };
 
-  const handleStatusChange = (status: string, file: AssetProps['rawFile']) => {
+  const handleStatusChange = (status: string, file: AssetEnriched['rawFile']) => {
     if (status === 'success' || status === 'error') {
       assetCountRef.current++;
 

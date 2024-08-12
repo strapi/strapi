@@ -3,23 +3,14 @@ import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system'
 import { AssetCard } from '../AssetCard/AssetCard';
 
 import { Draggable } from './Draggable';
-import type { Asset } from '../../../../shared/contracts/files';
-import type { RawFile } from '../../types';
-
-interface AssetProps extends Asset {
-  type?: string;
-  isSelectable?: boolean;
-  isLocal?: boolean;
-  allowedTypes?: string[];
-  rawFile: RawFile;
-}
+import type { AssetEnriched } from '../../../../shared/contracts/files';
 
 interface AssetGridListProps {
   allowedTypes?: string[];
-  assets: AssetProps[];
-  onEditAsset?: (asset: AssetProps) => void;
-  onSelectAsset: (asset: AssetProps) => void;
-  selectedAssets: AssetProps[];
+  assets: AssetEnriched[];
+  onEditAsset?: (asset: AssetEnriched) => void;
+  onSelectAsset: (asset: AssetEnriched) => void;
+  selectedAssets: AssetEnriched[];
   onReorderAsset?: (hoverIndex: number, destIndex: number) => void;
   size?: 'S' | 'M';
   title?: string;

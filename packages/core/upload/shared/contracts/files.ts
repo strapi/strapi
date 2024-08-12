@@ -95,6 +95,23 @@ export interface Asset {
   publishedAt?: string | null;
 }
 
+export interface RawFile extends Blob {
+  size: number;
+  lastModified: number;
+  name: string;
+  type: string;
+}
+
+export interface AssetEnriched extends Asset {
+  type?: string;
+  isSelectable?: boolean;
+  isLocal?: boolean;
+  allowedTypes?: string[];
+  rawFile?: RawFile;
+  path?: string;
+  folderURL?: string;
+}
+
 export interface Pagination {
   page: number;
   pageSize: number;

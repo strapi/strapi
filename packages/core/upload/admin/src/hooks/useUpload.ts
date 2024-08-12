@@ -3,21 +3,12 @@ import * as React from 'react';
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
 import { CreateFile } from '../../../shared/contracts/files';
-import type { Asset } from '../../../shared/contracts/files';
+import type { Asset, AssetEnriched } from '../../../shared/contracts/files';
 import type { Data } from '@strapi/types';
-import type { RawFile } from '../types';
 
 import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
-
-export interface AssetProps extends Asset {
-  type?: string;
-  isSelectable?: boolean;
-  isLocal?: boolean;
-  allowedTypes?: string[];
-  rawFile: RawFile;
-}
 
 type FetchResponse<TData = any> = {
   data: TData;
@@ -46,7 +37,7 @@ type PostType = <TData = any, TSend = any>(
 ) => Promise<FetchResponse<TData>>;
 
 const uploadAsset = (
-  asset: AssetProps,
+  asset: AssetEnriched,
   folderId: Data.ID | null,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
@@ -55,7 +46,9 @@ const uploadAsset = (
   const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
-  formData.append('files', rawFile);
+  if (rawFile) {
+    formData.append('files', rawFile);
+  }
 
   formData.append(
     'fileInfo',
@@ -91,7 +84,7 @@ export const useUpload = () => {
   const mutation = useMutation<
     Asset[],
     ErrorMutation,
-    { asset: AssetProps; folderId: Data.ID | null }
+    { asset: AssetEnriched; folderId: Data.ID | null }
   >(
     ({ asset, folderId }) => {
       return uploadAsset(asset, folderId, signal, setProgress, post);
@@ -104,7 +97,7 @@ export const useUpload = () => {
     }
   );
 
-  const upload = (asset: AssetProps, folderId: Data.ID | null) =>
+  const upload = (asset: AssetEnriched, folderId: Data.ID | null) =>
     mutation.mutateAsync({ asset, folderId });
 
   const cancel = () => abortController.abort();

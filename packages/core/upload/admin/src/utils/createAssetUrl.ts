@@ -1,13 +1,7 @@
 import { prefixFileUrlWithBackendUrl } from './prefixFileUrlWithBackendUrl';
-import type { Asset } from '../../../shared/contracts/files';
+import type { AssetEnriched } from '../../../shared/contracts/files';
 
-interface AssetProps extends Asset {
-  type?: string;
-  isSelectable?: boolean;
-  isLocal?: boolean;
-}
-
-export const createAssetUrl = (asset: AssetProps, forThumbnail = true) => {
+export const createAssetUrl = (asset: AssetEnriched, forThumbnail = true) => {
   if (asset.isLocal) {
     return asset.url;
   }

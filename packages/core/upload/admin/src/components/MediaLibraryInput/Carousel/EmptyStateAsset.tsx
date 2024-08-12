@@ -9,7 +9,7 @@ import { styled } from 'styled-components';
 import { AssetSource } from '../../../newConstants';
 import { getTrad } from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
-import type { RawFile } from '../../../types';
+import type { RawFile } from '../../../../../shared/contracts/files';
 
 interface AssetFromRawFileProps {
   size: number;

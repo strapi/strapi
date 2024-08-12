@@ -49,6 +49,12 @@ export interface Folder {
   };
 }
 
+export interface FolderEnriched extends Folder {
+  isSelectable?: boolean;
+  folderURL?: string;
+  type: string;
+}
+
 export declare namespace GetFolders {
   export interface Request {
     body: {};

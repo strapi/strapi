@@ -8,8 +8,7 @@ import { FromUrlForm } from './FromUrlForm';
 
 // TODO: replace it with the import from the costants file when it will be migrated to typescript
 import { AssetSource } from '../../../newConstants';
-import type { Asset } from '../../../../../shared/contracts/files';
-import type { RawFile } from '../../../types';
+import type { Asset, RawFile } from '../../../../../shared/contracts/files';
 
 export type UploadAsset = Pick<Asset, 'name' | 'url' | 'ext' | 'mime'> & {
   rawFile: RawFile;

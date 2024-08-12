@@ -7,33 +7,19 @@ import { Link } from 'react-router-dom';
 import { tableHeaders as cells } from '../../newConstants';
 // TODO: replace with the import from the constants index util file when it will be migrated to TypeScript
 import { getTrad } from '../../utils/getTrad';
-import type { Asset } from '../../../../shared/contracts/files';
-import type { Folder } from '../../../../shared/contracts/folders';
+import type { AssetEnriched, Asset } from '../../../../shared/contracts/files';
+import type { Folder, FolderEnriched } from '../../../../shared/contracts/folders';
 
 import { CellContent } from './CellContent';
 import type { Data } from '@strapi/types';
 
-interface TableAsset extends Asset {
-  folderURL?: string;
-  path: string;
-  type: string;
-  isSelectable?: boolean;
-  isLocal?: boolean;
-}
-
-interface TableFolder extends Folder {
-  isSelectable?: boolean;
-  folderURL?: string;
-  type: string;
-}
-
 interface TableRowsProps {
   onChangeFolder?: (folderId: Data.ID, folderPath?: string) => void;
-  onEditAsset: (element: TableAsset) => void;
-  onEditFolder: (element: TableFolder) => void;
-  onSelectOne: (element: TableAsset | TableFolder) => void;
-  rows: TableAsset[] | TableFolder[];
-  selected: TableAsset[] | TableFolder[];
+  onEditAsset: (element: AssetEnriched) => void;
+  onEditFolder: (element: FolderEnriched) => void;
+  onSelectOne: (element: AssetEnriched | FolderEnriched) => void;
+  rows: AssetEnriched[] | FolderEnriched[];
+  selected: AssetEnriched[] | FolderEnriched[];
 }
 
 export const TableRows = ({
@@ -46,9 +32,14 @@ export const TableRows = ({
 }: TableRowsProps) => {
   const { formatMessage } = useIntl();
 
-  const handleRowClickFn = (element: Asset | Folder, elementType: string, id: Data.ID, path: string) => {
+  const handleRowClickFn = (
+    element: Asset | Folder,
+    id: Data.ID,
+    path?: string,
+    elementType?: string
+  ) => {
     if (elementType === 'asset') {
-      onEditAsset(element as TableAsset);
+      onEditAsset(element as AssetEnriched);
     } else {
       if (onChangeFolder) {
         onChangeFolder(id, path);
@@ -66,7 +57,7 @@ export const TableRows = ({
         );
 
         return (
-          <Tr key={id} onClick={() => handleRowClickFn(element, contentType, id, path)}>
+          <Tr key={id} onClick={() => handleRowClickFn(element, id, path, contentType)}>
             <Td onClick={(e) => e.stopPropagation()}>
               <Checkbox
                 aria-label={formatMessage(
@@ -86,7 +77,7 @@ export const TableRows = ({
               return (
                 <Td key={name}>
                   <CellContent
-                    content={element as TableAsset}
+                    content={element as AssetEnriched}
                     cellType={cellType}
                     contentType={contentType}
                     name={name}
@@ -97,8 +88,8 @@ export const TableRows = ({
 
             <Td onClick={(e) => e.stopPropagation()}>
               <Flex justifyContent="flex-end">
-                {contentType === 'folder' && (
-                  folderURL ? (
+                {contentType === 'folder' &&
+                  (folderURL ? (
                     <IconButton
                       tag={Link}
                       label={formatMessage({
@@ -112,7 +103,7 @@ export const TableRows = ({
                     </IconButton>
                   ) : (
                     <IconButton
-                      tag='button'
+                      tag="button"
                       label={formatMessage({
                         id: getTrad('list.folders.link-label'),
                         defaultMessage: 'Access folder',
@@ -122,15 +113,16 @@ export const TableRows = ({
                     >
                       <Eye />
                     </IconButton>
-                  )
-                )}
+                  ))}
                 <IconButton
                   label={formatMessage({
                     id: getTrad('control-card.edit'),
                     defaultMessage: 'Edit',
                   })}
                   onClick={() =>
-                    contentType === 'asset' ? onEditAsset(element as TableAsset) : onEditFolder(element as TableFolder)
+                    contentType === 'asset'
+                      ? onEditAsset(element as AssetEnriched)
+                      : onEditFolder(element as FolderEnriched)
                   }
                   variant="ghost"
                 >

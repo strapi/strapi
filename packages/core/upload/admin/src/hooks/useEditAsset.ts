@@ -4,8 +4,7 @@ import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 import { UpdateFile } from '../../../shared/contracts/files';
-import type { Asset } from '../../../shared/contracts/files';
-import type { RawFile } from '../types';
+import type { Asset, RawFile } from '../../../shared/contracts/files';
 
 import pluginId from '../pluginId';
 // TODO: replace it with the import from the index file when it will be migrated to typescript

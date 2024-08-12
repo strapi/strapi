@@ -16,13 +16,13 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 // TODO: replace tne import below with the one from the constants file when the file is migrated to ts
-import { useUpload, AssetProps } from '../../hooks/useUpload';
+import { useUpload } from '../../hooks/useUpload';
 import { AssetType } from '../../newConstants';
 // TODO: replace the import below with the one from the utils file when the file is migrated to ts
 import { getTrad } from '../../utils/getTrad';
 import { UploadProgress } from '../UploadProgress/UploadProgress';
 import type { Data } from '@strapi/types';
-import type { Asset } from '../../../../shared/contracts/files';
+import type { Asset, AssetEnriched } from '../../../../shared/contracts/files';
 
 const UploadProgressWrapper = styled.div`
   height: 8.8rem;
@@ -35,9 +35,9 @@ const Extension = styled.span`
 
 interface UploadingAssetCardProps {
   addUploadedFiles?: (files: Asset[]) => void;
-  asset: AssetProps;
+  asset: AssetEnriched;
   folderId: Data.ID | null;
-  onCancel: (file: AssetProps['rawFile']) => void;
+  onCancel: (file: AssetEnriched['rawFile']) => void;
   onStatusChange: (status: string) => void;
   id?: string;
   size?: 'S' | 'M';

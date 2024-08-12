@@ -11,13 +11,7 @@ import { getFileExtension } from '../../utils/getFileExtension';
 // TODO: replace this import with the one from utils when the index file is migrated to typescript
 import { prefixFileUrlWithBackendUrl } from '../../utils/prefixFileUrlWithBackendUrl';
 import { VideoPreview } from '../AssetCard/VideoPreview';
-import type { Asset } from '../../../../shared/contracts/files';
-
-interface AssetProps extends Asset {
-  type?: string;
-  isSelectable?: boolean;
-  isLocal?: boolean;
-}
+import type { AssetEnriched } from '../../../../shared/contracts/files';
 
 const VideoPreviewWrapper = styled(Box)`
   figure {
@@ -35,8 +29,8 @@ const VideoPreviewWrapper = styled(Box)`
 `;
 
 interface PreviewCellProps {
-  type: string;
-  content: AssetProps;
+  type?: string;
+  content: AssetEnriched;
 }
 
 export const PreviewCell = ({ type, content }: PreviewCellProps) => {

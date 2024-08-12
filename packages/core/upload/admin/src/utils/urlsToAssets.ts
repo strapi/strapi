@@ -3,7 +3,7 @@ import { AssetSource } from '../newConstants';
 
 import { typeFromMime } from './typeFromMime';
 
-import type { RawFile } from '../types';
+import type { RawFile } from '../../../shared/contracts/files';
 
 export interface RawFileWithOptionalProperties
   extends Omit<RawFile, 'lastModified' | 'name'>,

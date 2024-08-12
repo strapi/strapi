@@ -11,16 +11,7 @@ import { AudioAssetCard } from './AudioAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
-import type { Asset } from '../../../../shared/contracts/files';
-import type { RawFile } from '../../types';
-
-interface AssetProps extends Asset {
-  type?: string;
-  isSelectable?: boolean;
-  isLocal?: boolean;
-  allowedTypes?: string[];
-  rawFile: RawFile;
-}
+import type { AssetEnriched } from '../../../../shared/contracts/files';
 
 export const AssetCard = ({
   asset,
@@ -31,11 +22,11 @@ export const AssetCard = ({
   local = false,
   isSelected = false,
 }: {
-  asset: AssetProps;
+  asset: AssetEnriched;
   isSelected?: boolean;
-  onSelect?: (asset: AssetProps) => void;
-  onEdit?: (asset: AssetProps) => void;
-  onRemove?: (asset: AssetProps) => void;
+  onSelect?: (asset: AssetEnriched) => void;
+  onEdit?: (asset: AssetEnriched) => void;
+  onRemove?: (asset: AssetEnriched) => void;
   size?: 'S' | 'M';
   local?: boolean;
   allowedTypes?: string[];

@@ -27,26 +27,16 @@ import {
   Wrapper,
 } from './components';
 import { CroppingActions } from './CroppingActions';
-import type { Asset } from '../../../../../shared/contracts/files';
-
-import type { RawFile } from '../../../types';
+import type { AssetEnriched } from '../../../../../shared/contracts/files';
 
 import 'cropperjs/dist/cropper.css';
-
-interface AssetProps extends Asset {
-  isSelectable?: boolean;
-  type?: string;
-  isLocal?: boolean;
-  allowedTypes?: string[];
-  rawFile?: RawFile;
-}
 
 interface PreviewBoxProps {
   canUpdate: boolean;
   canCopyLink: boolean;
   canDownload: boolean;
-  asset: AssetProps;
-  onDelete: (asset: AssetProps | null) => void;
+  asset: AssetEnriched;
+  onDelete: (asset: AssetEnriched | null) => void;
   onCropFinish: () => void;
   onCropStart: () => void;
   onCropCancel: () => void;
