@@ -201,7 +201,6 @@ describe('Content Type Builder - Content types', () => {
       });
     });
 
-    // TODO: fix derror message to include prefixes
     test('Cannot use strapi prefix for content type name', async () => {
       const res = await rq({
         method: 'POST',
@@ -227,13 +226,13 @@ describe('Content Type Builder - Content types', () => {
             errors: [
               {
                 message:
-                  'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then',
+                  'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
                 name: 'ValidationError',
                 path: ['contentType', 'singularName'],
               },
               {
                 message:
-                  'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then',
+                  'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
                 name: 'ValidationError',
                 path: ['contentType', 'pluralName'],
               },
