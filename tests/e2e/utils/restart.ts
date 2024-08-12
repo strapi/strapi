@@ -19,7 +19,7 @@ export const waitForRestart = async (page, timeout = 60000) => {
   const initialWaitForModal = 3_000; // Time to wait for the modal to initially appear
   let elapsedTime = 0;
   const checkInterval = 2_000; // millseconds to poll for server coming back up
-  const reloadTimeout = 30_000; // millseconds before trying to reload the page
+  const waitForRestartTimeout = 30_000; // millseconds before trying to reload the page
 
   // Initially wait for the modal to become visible
   try {
@@ -34,7 +34,7 @@ export const waitForRestart = async (page, timeout = 60000) => {
 
   // Now wait until the modal is not visible or until the reloadTimeout
   let modalVisible = await isModalVisible(page);
-  while (modalVisible && elapsedTime < reloadTimeout) {
+  while (modalVisible && elapsedTime < waitForRestartTimeout) {
     await new Promise((r) => setTimeout(r, checkInterval));
     elapsedTime += checkInterval;
     modalVisible = await isModalVisible(page);
