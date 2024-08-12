@@ -33,6 +33,8 @@ export const pollHealthCheck = async (interval = 1_000, timeout = 30_000) => {
   throw new Error('Timeout reached, service did not become available in time.');
 };
 
+// resetFiles resets the filesystem state back to the original state, removing uploaded files, schemas, etc
+// NOTE: in some cases, call resetFiles without first using resetDatabase* can cause the restart to fail
 export const resetFiles = async () => {
   if (process.env.TEST_APP_PATH) {
     console.log('Restoring filesystem');
