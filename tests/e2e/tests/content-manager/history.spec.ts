@@ -48,6 +48,7 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test.afterAll(async () => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await resetFiles();
   });
 

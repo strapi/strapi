@@ -6,8 +6,8 @@ import { resetFiles } from '../../../utils/file-reset';
 
 test.describe('Create collection type', () => {
   test.beforeEach(async ({ page }) => {
-    await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetFiles();
     await page.goto('/admin');
     await login({ page });
 
@@ -24,6 +24,7 @@ test.describe('Create collection type', () => {
   // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
   // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
   test.afterAll(async () => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await resetFiles();
   });
 

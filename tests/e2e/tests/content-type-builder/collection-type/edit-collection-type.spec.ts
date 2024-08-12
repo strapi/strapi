@@ -15,8 +15,8 @@ test.describe('Edit collection type', () => {
   const ctName = 'Secret Document';
 
   test.beforeEach(async ({ page }) => {
-    await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetFiles();
     await page.goto('/admin');
 
     await login({ page });
