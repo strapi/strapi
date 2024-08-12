@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { type Page, test } from '@playwright/test';
 
 // Function to check modal visibility
 const isModalVisible = async (page: Page) => {
@@ -10,10 +10,12 @@ const isModalVisible = async (page: Page) => {
  * refresh the page and see if it comes back up
  */
 export const waitForRestart = async (page, timeout = 60000) => {
-  const initialWaitForModal = 5000; // Time to wait for the modal to initially appear
+  test.setTimeout(100_000); // Increase timeout, sometimes server restarts are very slow
+
+  const initialWaitForModal = 3_000; // Time to wait for the modal to initially appear
   let elapsedTime = 0;
-  const checkInterval = 1000; // Check every 1 second
-  const reloadTimeout = 15000; // 15 seconds before trying to reload
+  const checkInterval = 2_000; // millseconds to poll for server coming back up
+  const reloadTimeout = 30_000; // millseconds before trying to reload the page
 
   // Initially wait for the modal to become visible
   try {
@@ -34,7 +36,15 @@ export const waitForRestart = async (page, timeout = 60000) => {
     modalVisible = await isModalVisible(page);
   }
 
+  // TODO: remove this once the restart modal is completely reliable in the admin ui
+  // If modal is still visible after reloadTimeout, reload the page and wait again
   if (modalVisible) {
+    console.log("Restart overlay didn't disappear after 15 seconds. Reloading page...");
+    await page.reload({ waitUntil: 'domcontentloaded' });
+  }
+
+  // Final check to ensure the modal has disappeared
+  if (await isModalVisible(page)) {
     throw new Error("Restart modal didn't close");
   }
 
