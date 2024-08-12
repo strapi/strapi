@@ -160,6 +160,7 @@ export default async (ctx: CLIContext) => {
   try {
     const { data: projectInfo } = await cloudApiService.getProject({ name: project.name });
     const isProjectSuspended = projectInfo.suspendedAt;
+
     if (isProjectSuspended) {
       ctx.logger.warn(
         'Oops! This project has been suspended. \n Please reactivate it from the dashboard to continue deploying: '
@@ -167,7 +168,6 @@ export default async (ctx: CLIContext) => {
       ctx.logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}`));
       return;
     }
-    console.log('paso por checkeo de info');
   } catch (e: Error | unknown) {
     if (e instanceof AxiosError && e.response?.data) {
       if (e.response.status === 404) {

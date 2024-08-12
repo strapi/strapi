@@ -188,13 +188,13 @@ export async function cloudApiFactory(
         const response = await axiosCloudAPI.get(`/projects/${name}`);
 
         if (response.status !== 200) {
-          throw new Error("Error fetching project's info from the server.");
+          throw new Error("Error fetching project's details.");
         }
 
         return response;
       } catch (error) {
         logger.debug(
-          "🥲 Oops! Couldn't retrieve your project's info from the server. Please try again."
+          "🥲 Oops! There was a problem retrieving your project's details. Please try again."
         );
         throw error;
       }
