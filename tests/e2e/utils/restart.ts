@@ -11,8 +11,7 @@ const isModalVisible = async (page: Page) => {
 };
 
 /**
- * Wait for a restart modal to appear, but instead of failing if it doesn't, attempt to
- * refresh the page and see if it comes back up
+ * Wait for a restart modal to appear and then disappear
  */
 export const waitForRestart = async (page, timeout = 60000) => {
   test.setTimeout(100_000); // Increase timeout, sometimes server restarts are very slow
