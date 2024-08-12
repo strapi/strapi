@@ -339,10 +339,10 @@ const addUniqueValidator = <T extends yup.AnySchema>(
 
   return validator.test('unique', 'This attribute must be unique', async (value) => {
     /**
-     * If the attribute value is `null` we want to skip the unique validation.
-     * Otherwise it'll only accept a single `null` entry in the database.
+     * If the attribute value is `null` or an empty string we want to skip the unique validation.
+     * Otherwise it'll only accept a single entry with that value in the database.
      */
-    if (_.isNil(value)) {
+    if (_.isNil(value) || value === '') {
       return true;
     }
 
