@@ -31,6 +31,7 @@ export interface FilterPopoverURLQueryProps extends Pick<PopoverProps, 'source'>
   isVisible: boolean;
   onBlur?: () => void;
   onToggle: () => void;
+  initialFilter?: Filter;
 }
 
 export const FilterPopoverURLQuery = ({
@@ -39,6 +40,7 @@ export const FilterPopoverURLQuery = ({
   onBlur,
   onToggle,
   source,
+  initialFilter,
 }: FilterPopoverURLQueryProps) => {
   const [{ query }, setQuery] = useQueryParams<{
     filters: {
@@ -49,14 +51,27 @@ export const FilterPopoverURLQuery = ({
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const defaultFieldSchema = { fieldSchema: { type: 'string' } };
+
+  const initialFilterField = initialFilter
+    ? Object.keys(initialFilter)[0]
+    : displayedFilters[0]?.name || '';
+  const initialFilterOperator = initialFilter
+    ? (Object.keys(
+        initialFilter[initialFilterField]
+      )[0] as EntityService.Params.Filters.Operator.Where)
+    : getFilterList((displayedFilters[0] || defaultFieldSchema).fieldSchema)[0].value;
+  const initialFilterValue = initialFilter
+    ? initialFilter[initialFilterField][initialFilterOperator]
+    : '';
+
   const [modifiedData, setModifiedData] = React.useState<{
     name: string;
     filter: EntityService.Params.Filters.Operator.Where;
     value: string | null;
   }>({
-    name: displayedFilters[0]?.name || '',
-    filter: getFilterList((displayedFilters[0] || defaultFieldSchema).fieldSchema)[0].value,
-    value: '',
+    name: initialFilterField,
+    filter: initialFilterOperator,
+    value: initialFilterValue?.toString() || '',
   });
 
   if (!isVisible) {
@@ -101,6 +116,10 @@ export const FilterPopoverURLQuery = ({
         );
       }) !== undefined;
 
+    const existingFilterIndex = query?.filters?.$and.findIndex((filter) => {
+      return filter[modifiedData.name];
+    });
+
     if (modifiedData.value && !hasFilter) {
       const foundAttribute = displayedFilters.find(({ name }) => name === modifiedData.name);
 
@@ -128,7 +147,15 @@ export const FilterPopoverURLQuery = ({
           } as Filter;
         }
 
-        const filters = [...(query?.filters?.$and || []), filterToAdd];
+        const filters = [...(query?.filters?.$and || [])];
+
+        if (existingFilterIndex !== undefined && existingFilterIndex !== -1) {
+          // Update the existing filter
+          filters[existingFilterIndex] = filterToAdd;
+        } else {
+          // Add the new filter
+          filters.push(filterToAdd);
+        }
 
         setQuery({ filters: { $and: filters }, page: 1 });
       }
