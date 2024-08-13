@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
   ContentBox,
@@ -28,7 +28,6 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
 
@@ -91,55 +90,47 @@ const HomePageCE = () => {
                 <Box paddingLeft={6} paddingBottom={10}>
                   <Flex direction="column" alignItems="flex-start" gap={5}>
                     <Typography as="h1" variant="alpha">
-                      {hasAlreadyCreatedContentTypes
-                        ? formatMessage({
-                            id: 'app.components.HomePage.welcome.again',
-                            defaultMessage: 'Welcome 👋',
-                          })
-                        : formatMessage({
-                            id: 'app.components.HomePage.welcome',
-                            defaultMessage: 'Welcome on board!',
-                          })}
+                      {formatMessage({
+                        id: 'mustluik.hello',
+                        defaultMessage: 'Hi 👋',
+                      })}
                     </Typography>
                     <WordWrap textColor="neutral600" variant="epsilon">
-                      {hasAlreadyCreatedContentTypes
-                        ? formatMessage({
-                            id: 'app.components.HomePage.welcomeBlock.content.again',
-                            defaultMessage:
-                              'We hope you are making progress on your project! Feel free to read the latest news about Strapi. We are giving our best to improve the product based on your feedback.',
-                          })
-                        : formatMessage({
-                            id: 'app.components.HomePage.welcomeBlock.content',
-                            defaultMessage:
-                              'Congrats! You are logged as the first administrator. To discover the powerful features provided by Strapi, we recommend you to create your first Content type!',
-                          })}
+                      {formatMessage({
+                        id: 'mustluik.intro',
+                        defaultMessage:
+                          'Here you can prepare, conduct and analyze media trainings.',
+                      })}
                     </WordWrap>
-                    {hasAlreadyCreatedContentTypes ? (
-                      <Link isExternal href="https://strapi.io/blog">
-                        {formatMessage({
-                          id: 'app.components.HomePage.button.blog',
-                          defaultMessage: 'See more on the blog',
-                        })}
-                      </Link>
-                    ) : (
-                      <Button size="L" onClick={handleClick} endIcon={<ArrowRight />}>
-                        {formatMessage({
-                          id: 'app.components.HomePage.create',
-                          defaultMessage: 'Create your first Content type',
-                        })}
-                      </Button>
-                    )}
+                    <Link
+                      startIcon={<ArrowRight />}
+                      isExternal={false}
+                      href="/admin/plugins/mustluik/game"
+                    >
+                      {formatMessage({
+                        id: 'mustluik.plan-game',
+                        defaultMessage: 'Go directly to game view.',
+                      })}
+                    </Link>
+                    <Link
+                      startIcon={<ArrowRight />}
+                      isExternal={false}
+                      href="/admin/content-manager/collectionType/api::article.article"
+                    >
+                      {formatMessage({
+                        id: 'mustluik.add-articles',
+                        defaultMessage: 'Go directly to content management.',
+                      })}
+                    </Link>
+                    <Link startIcon={<ArrowRight />} disabled href="#">
+                      {formatMessage({
+                        id: 'mustluik.invite-players',
+                        defaultMessage: 'Read manual',
+                      })}
+                    </Link>
                   </Flex>
                 </Box>
               </div>
-            </GridItem>
-          </Grid>
-          <Grid gap={6}>
-            <GridItem col={8} s={12}>
-              {showGuidedTour ? <GuidedTourHomepage /> : <ContentBlocks />}
-            </GridItem>
-            <GridItem col={4} s={12}>
-              <SocialLinks />
             </GridItem>
           </Grid>
         </Box>
