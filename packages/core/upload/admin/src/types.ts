@@ -1,27 +1,12 @@
-export interface ParentFolderInterface {
-  id: number;
-  createdAt: string;
-  name: string;
-  updatedAt: string;
-  pathId: number;
-  path: string;
-  parent?: ParentFolderInterface;
-}
+import type { Data } from '@strapi/types';
 
-export interface FolderInterface {
-  id: number;
-  children: {
-    count: number;
-  };
-  createdAt: string;
-  createdBy: string;
-  files: {
-    count: number;
-  };
-  name: string;
-  updatedAt: string;
-  updatedBy: string;
-  pathId: number;
-  path: string;
-  parent?: ParentFolderInterface;
-}
+import type { SortKey, SortOrder } from '../../shared/contracts/folders';
+
+export type Query = {
+  _q?: string;
+  folderPath?: string;
+  folder?: Data.ID;
+  page?: string;
+  pageSize?: string;
+  sort?: `${SortKey}:${SortOrder}`;
+};

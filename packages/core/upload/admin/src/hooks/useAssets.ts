@@ -6,27 +6,20 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { Data } from '@strapi/types';
-import type { SortKey, SortOrder } from '../../../shared/contracts/folders';
 import { GetFiles } from '../../../shared/contracts/files';
+import type { Query } from '../types';
 
-type Query = {
-  _q?: string;
-  folderPath?: string;
+interface CustomQuery extends Query {
   filters?: {
     $and?: {
       folderPath: { $eq: string };
     }[];
   };
-  folder?: Data.ID;
-  page?: string;
-  pageSize?: string;
-  sort?: `${SortKey}:${SortOrder}`;
-};
+}
 
 interface UseAssetsOptions {
   skipWhen?: boolean;
-  query?: Query;
+  query?: CustomQuery;
 }
 
 export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {}) => {
@@ -36,7 +29,7 @@ export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {
   const { get } = useFetchClient();
   const { folderPath, _q, ...paramsExceptFolderAndQ } = query;
 
-  let params: Query;
+  let params: CustomQuery;
 
   if (_q) {
     params = {
