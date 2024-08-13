@@ -1,6 +1,7 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
 
-import { PERMISSIONS } from '../constants';
+// TODO: Remove this import when the permissions are available in the constants
+import { PERMISSIONS } from '../newConstants';
 
 const { main, ...restPermissions } = PERMISSIONS;
 
