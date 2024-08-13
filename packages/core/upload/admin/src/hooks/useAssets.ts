@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
@@ -6,15 +6,37 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
+import { Data } from '@strapi/types';
+import type { SortKey, SortOrder } from '../../../shared/contracts/folders';
+import { GetFiles } from '../../../shared/contracts/files';
 
-export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
+type Query = {
+  _q?: string;
+  folderPath?: string;
+  filters?: {
+    $and?: {
+      folderPath: { $eq: string };
+    }[];
+  };
+  folder?: Data.ID;
+  page?: string;
+  pageSize?: string;
+  sort?: `${SortKey}:${SortOrder}`;
+};
+
+interface UseAssetsOptions {
+  skipWhen?: boolean;
+  query?: Query;
+}
+
+export const useAssets = ({ skipWhen = false, query = {} }: UseAssetsOptions = {}) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { get } = useFetchClient();
   const { folderPath, _q, ...paramsExceptFolderAndQ } = query;
 
-  let params;
+  let params: Query;
 
   if (_q) {
     params = {
@@ -35,7 +57,10 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
     };
   }
 
-  const { data, error, isLoading } = useQuery(
+  const { data, error, isLoading } = useQuery<
+    GetFiles.Response['data'],
+    GetFiles.Response['error']
+  >(
     [pluginId, 'assets', params],
     async () => {
       const { data } = await get('/upload/files', { params });
@@ -74,7 +99,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
     }
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (data) {
       notifyStatus(
         formatMessage({
@@ -85,7 +110,7 @@ export const useAssets = ({ skipWhen = false, query = {} } = {}) => {
     }
   }, [data, formatMessage, notifyStatus]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (error) {
       toggleNotification({
         type: 'danger',

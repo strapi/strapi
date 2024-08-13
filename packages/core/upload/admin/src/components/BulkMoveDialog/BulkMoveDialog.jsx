@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Button, Flex, Grid, Field, Loader, Modal, Typography } from '@strapi/design-system';
 import { Form, Formik } from 'formik';

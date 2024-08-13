@@ -1,9 +1,9 @@
 import type { Data, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-type SortOrder = 'ASC' | 'DESC';
+export type SortOrder = 'ASC' | 'DESC';
 
-type SortKey = 'createdAt' | 'name';
+export type SortKey = 'createdAt' | 'name';
 
 export interface FolderStructure {
   id: Data.ID;
