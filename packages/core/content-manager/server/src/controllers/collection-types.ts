@@ -137,10 +137,10 @@ export default {
       .countRelations({ toOne: false, toMany: true })
       .build();
 
-    const { locale, status } = await getDocumentLocaleAndStatus(query, model);
+    const { locale } = await getDocumentLocaleAndStatus(query, model);
 
     const { results: documents, pagination } = await documentManager.findPage(
-      { ...permissionQuery, populate, locale, status },
+      { ...permissionQuery, populate, locale },
       model
     );
 
