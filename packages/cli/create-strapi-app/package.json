@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-app",
-  "version": "5.0.0-rc.9",
+  "version": "5.0.0-rc.10",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-app",
