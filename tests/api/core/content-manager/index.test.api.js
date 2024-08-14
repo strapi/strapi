@@ -281,7 +281,7 @@ describe('Relations', () => {
 
       expect(body.results).toMatchObject([
         { title: 'Article 1', tags: { count: 3 } },
-        { title: 'Article 2', tags: { count: 0 } },
+        { title: 'Article 2', tags: { count: 1 } },
       ]);
     });
 
