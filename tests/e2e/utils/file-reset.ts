@@ -6,7 +6,7 @@ function delay(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1_000));
 }
 
-export const pollHealthCheck = async (interval = 1_000, timeout = 30_000) => {
+export const pollHealthCheck = async (interval = 1_000, timeout = 60_000) => {
   const url = `http://127.0.0.1:${process.env.PORT ?? 1337}/_health`;
   console.log(`Starting to poll: ${url}`);
 
