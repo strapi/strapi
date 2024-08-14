@@ -7,12 +7,13 @@ const transform: Transform = (file, api) => {
   const j = api.jscodeshift;
   const root = j(file.source);
 
-  if (file.path.endsWith('lifecycles.js') || file.path.endsWith('lifecycles.ts')) {
+  // check if file path follows this pattern `content-types/[content-type-name]/lifecycles`
+  if (/content-types\/[^/]+\/lifecycles\.(js|ts)$/.test(file.path)) {
     // Get the entire source code as a string
     const sourceCode = root.toSource();
 
     // Split the source code into lines and prepend // to each line
-    // we are use line comments instead of block comments so we don't face issues with existing block comments
+    // we are using line comments instead of block comments so we don't face issues with existing block comments
     const commentedCode = sourceCode
       .split('\n')
       .map((line) => `// ${line}`)
@@ -38,7 +39,7 @@ const transform: Transform = (file, api) => {
  * MIGRATION GUIDE:
  *
  * For a thorough guide on migrating your lifecycles to document service middlewares, please refer to the following link:
- * [Document Services Middlewares Migration Guide](https://docs-next.strapi.io/dev-docs/migration/v4-to-v5/breaking-changes/lifecycle-hooks-document-service)
+ * [Document Services Middlewares Migration Guide](https://docs.strapi.io/dev-docs/migration/v4-to-v5/breaking-changes/lifecycle-hooks-document-service)
  *
  * IMPORTANT:
  *
