@@ -273,6 +273,18 @@ describe('Relations', () => {
       expect(tags.length).toBe(3);
     });
 
+    test('Get tags count in articles list', async () => {
+      const { body } = await rq({
+        url: '/content-manager/collection-types/api::article.article',
+        method: 'GET',
+      });
+
+      expect(body.results).toMatchObject([
+        { title: 'Article 1', tags: { count: 3 } },
+        { title: 'Article 2', tags: { count: 0 } },
+      ]);
+    });
+
     test('Update article1 remove one tag', async () => {
       const { body } = await rq({
         url: `/content-manager/collection-types/api::article.article/${data.articles[0].documentId}`,
