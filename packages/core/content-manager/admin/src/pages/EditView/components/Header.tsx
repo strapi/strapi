@@ -77,6 +77,13 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
  * HeaderToolbar
  * -----------------------------------------------------------------------------------------------*/
 
+interface DialogOptions {
+  type: 'dialog';
+  title: string;
+  content?: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
 interface HeaderButtonAction {
   disabled?: boolean;
   label: string;
@@ -85,7 +92,8 @@ interface HeaderButtonAction {
    * @default 'default'
    */
   type?: 'icon' | 'default';
-  onClick?: (event: React.SyntheticEvent) => void;
+  onClick?: (event: React.SyntheticEvent) => Promise<boolean | void> | boolean | void;
+  dialog?: DialogOptions;
 }
 
 interface HeaderSelectAction {
@@ -102,7 +110,12 @@ interface HeaderSelectAction {
   value?: string;
 }
 
-type HeaderActionDescription = HeaderButtonAction | HeaderSelectAction;
+interface HeaderCustomAction {
+  type: 'custom';
+  render: () => React.ReactNode;
+}
+
+type HeaderActionDescription = HeaderButtonAction | HeaderSelectAction | HeaderCustomAction;
 
 /**
  * @description Contains the document actions that have `position: header`, if there are
@@ -333,6 +346,11 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
   return (
     <Flex>
       {actions.map((action) => {
+        // Header actions can be custom components (For example, the multibutton added by i18n)
+        if ('type' in action && action.type === 'custom') {
+          return action.render();
+        }
+
         if ('options' in action) {
           return (
             <SingleSelect

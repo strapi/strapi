@@ -5,7 +5,7 @@ import { CheckboxConfirmation } from './components/CheckboxConfirmation';
 import {
   BulkLocalePublishAction,
   DeleteLocaleAction,
-  LocalePickerAction,
+  IntlHeaderAction,
 } from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
@@ -68,7 +68,7 @@ export default {
 
     const contentManager = app.getPlugin('content-manager');
 
-    contentManager.apis.addDocumentHeaderAction([LocalePickerAction]);
+    contentManager.apis.addDocumentHeaderAction([IntlHeaderAction]);
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
