@@ -44,7 +44,6 @@ const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
             </button>
           }
           onChange={field.onChange}
-          defaultValue={field.initialValue}
           value={field.value}
           {...props}
           type={showPassword ? 'text' : 'password'}

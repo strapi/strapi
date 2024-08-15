@@ -1,7 +1,8 @@
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../constants/workflows';
+import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
 import { getService } from '../utils';
 
 const { ApplicationError, ValidationError } = errors;
@@ -196,13 +197,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     /**
      * Update the stage of an entity
-     *
-     * @param {object} entityInfo
-     * @param {number} entityInfo.id - Entity id
-     * @param {string} entityInfo.modelUID - the content-type of the entity
-     * @param {number} stageId - The id of the stage to assign to the entity
      */
-    async updateEntity(entityInfo: any, stageId: any) {
+    async updateEntity(documentId: string, locale: string, model: UID.ContentType, stageId: any) {
       const stage = await this.findById(stageId);
 
       await workflowValidator.validateWorkflowCount();
@@ -211,11 +207,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new ApplicationError(`Selected stage does not exist`);
       }
 
-      const entity = await strapi.db.query(entityInfo.modelUID).update({
-        where: {
-          id: entityInfo.id,
-        },
-        data: { [ENTITY_STAGE_ATTRIBUTE]: stageId },
+      const entity = await strapi.documents(model).update({
+        documentId,
+        locale,
+        data: { [ENTITY_STAGE_ATTRIBUTE]: stage },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
 

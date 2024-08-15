@@ -21,7 +21,6 @@ const EmailInput = forwardRef<HTMLInputElement, StringProps>(
           ref={composedRefs}
           autoComplete="email"
           onChange={field.onChange}
-          defaultValue={field.initialValue}
           value={field.value}
           {...props}
           type="email"

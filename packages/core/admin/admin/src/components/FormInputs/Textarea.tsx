@@ -19,7 +19,6 @@ const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
         <Field.Label action={labelAction}>{label}</Field.Label>
         <Textarea
           ref={composedRefs}
-          defaultValue={field.initialValue}
           onChange={field.onChange}
           value={field.value ?? ''}
           {...props}
