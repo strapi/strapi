@@ -181,7 +181,7 @@ const ListPage = () => {
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
                           { target: `${log.action} action` }
                         )}
-                        borderWidth={0}
+                        variant="ghost"
                       >
                         <Eye />
                       </IconButton>

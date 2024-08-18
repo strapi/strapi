@@ -202,7 +202,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
             ]
               .filter(filterFieldsBasedOnAttributeType(attribute.type))
               .map(({ size, ...field }) => (
-                <Grid.Item key={field.name} col={size}>
+                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                   <InputRenderer {...field} />
                 </Grid.Item>
               ))}

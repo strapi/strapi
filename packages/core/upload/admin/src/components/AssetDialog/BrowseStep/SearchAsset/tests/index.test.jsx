@@ -28,23 +28,19 @@ describe('SearchAsset', () => {
 
     expect(container).toMatchInlineSnapshot(`
       .c0 {
-        background: #ffffff;
-        padding-block: 8px;
-        padding-inline: 8px;
         border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
+        display: inline-flex;
         cursor: pointer;
       }
 
       .c1 {
         align-items: center;
-        display: flex;
+        display: inline-flex;
         flex-direction: row;
         justify-content: center;
       }
 
-      .c4 {
+      .c3 {
         border: 0;
         clip: rect(0 0 0 0);
         height: 1px;
@@ -56,64 +52,41 @@ describe('SearchAsset', () => {
       }
 
       .c2 {
-        position: relative;
-        outline: none;
+        text-decoration: none;
+        padding-block: 0.9rem;
+        padding-inline: 0.9rem;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+        color: #32324d;
+        color: #666687;
+      }
+
+      .c2:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c2:active {
+        background-color: #eaeaef;
       }
 
       .c2[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c2:after {
-        transition-property: all;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c2:focus-visible {
-        outline: none;
-      }
-
-      .c2:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c3 {
-        border-color: #dcdce4;
-        height: 3.2rem;
-        width: 3.2rem;
-        color: #8e8ea9;
-      }
-
-      .c3:hover,
-      .c3:focus {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
         color: #666687;
+        cursor: default;
       }
 
-      .c3[aria-disabled='true'] {
-        color: #666687;
+      @media (prefers-reduced-motion: no-preference) {
+        .c2 {
+          transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
       }
 
       <div>
         <button
           aria-disabled="false"
-          class="c0 c1 c2 c3"
+          class="c0 c1 c2"
           data-state="closed"
-          type="button"
         >
           <svg
             aria-hidden="true"
@@ -129,13 +102,13 @@ describe('SearchAsset', () => {
             />
           </svg>
           <span
-            class="c4"
+            class="c3"
           >
             Search
           </span>
         </button>
         <span
-          class="c4"
+          class="c3"
         >
           <p
             aria-live="polite"
@@ -173,7 +146,7 @@ describe('SearchAsset', () => {
   it('should call handleChange when submitting search input', () => {
     const { container } = render(makeApp(null));
 
-    fireEvent.click(container.querySelector('button[type="button"]'));
+    fireEvent.click(container.querySelector('button'));
     const input = container.querySelector('input[name="search"]');
 
     fireEvent.change(input, { target: { value: 'michka' } });

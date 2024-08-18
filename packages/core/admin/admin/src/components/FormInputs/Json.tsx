@@ -1,4 +1,4 @@
-import { forwardRef, memo } from 'react';
+import * as React from 'react';
 
 import {
   JSONInput as JSONInputImpl,
@@ -12,7 +12,7 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const JsonInput = forwardRef<JSONInputRef, InputProps>(
+const JsonInput = React.forwardRef<JSONInputRef, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField(name);
@@ -24,7 +24,9 @@ const JsonInput = forwardRef<JSONInputRef, InputProps>(
         <Field.Label action={labelAction}>{label}</Field.Label>
         <JSONInputImpl
           ref={composedRefs}
-          value={field.value}
+          value={
+            typeof field.value == 'object' ? JSON.stringify(field.value, null, 2) : field.value
+          }
           onChange={(json) => {
             // Default to null when the field is not required and there is no input value
             const value = required && !json.length ? null : json;
@@ -41,6 +43,6 @@ const JsonInput = forwardRef<JSONInputRef, InputProps>(
   }
 );
 
-const MemoizedJsonInput = memo(JsonInput);
+const MemoizedJsonInput = React.memo(JsonInput);
 
 export { MemoizedJsonInput as JsonInput };

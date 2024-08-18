@@ -128,7 +128,7 @@ export const SettingsPage = () => {
                     </Typography>
                   </Flex>
                   <Grid.Root gap={6}>
-                    <Grid.Item col={6} s={12}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.responsiveDimensions.description'),
@@ -162,7 +162,7 @@ export const SettingsPage = () => {
                         <Field.Hint />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6} s={12}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.sizeOptimization.description'),
@@ -196,7 +196,7 @@ export const SettingsPage = () => {
                         <Field.Hint />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6} s={12}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.autoOrientation.description'),

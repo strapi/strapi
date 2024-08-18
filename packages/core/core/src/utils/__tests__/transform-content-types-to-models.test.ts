@@ -236,6 +236,7 @@ const expectedModels = [
         columns: ['document_id'],
       },
     ],
+    lifecycles: {},
   },
   {
     uid: 'api::categories.categories',
@@ -252,12 +253,14 @@ const expectedModels = [
         columns: ['document_id'],
       },
     ],
+    lifecycles: {},
   },
   {
     uid: 'api::empty.empty',
     singularName: 'empty',
     tableName: 'empty',
     attributes: { id: { type: 'increments' } },
+    lifecycles: {},
   },
 ];
 

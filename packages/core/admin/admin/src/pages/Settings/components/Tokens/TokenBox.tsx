@@ -46,7 +46,7 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
                 defaultMessage: 'Copy to clipboard',
               })}
               onClick={handleClick(token)}
-              borderWidth={0}
+              variant="ghost"
               style={{ padding: 0, height: '1.6rem' }}
             >
               <Duplicate />

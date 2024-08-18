@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 import { update, map, property } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
-import { async, errors } from '@strapi/utils';
+import { async } from '@strapi/utils';
 
 import { getService } from '../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
@@ -154,33 +154,6 @@ export default {
       meta: {
         workflowCount,
       },
-    };
-  },
-  /**
-   * Get one workflow based on its id contained in request parameters
-   * Returns count of workflows in meta, used to prevent workflow edition when
-   * max workflow count is reached for the current plan
-   * @param {import('koa').BaseContext} ctx - koa context
-   */
-  async findById(ctx: Context) {
-    const { id } = ctx.params;
-    const { query } = ctx.request;
-    const { sanitizeOutput, sanitizedQuery } = getWorkflowsPermissionChecker(
-      { strapi },
-      ctx.state.userAbility
-    );
-    const { populate } = await sanitizedQuery.read(query);
-
-    const workflowService = getService('workflows');
-
-    const [workflow, workflowCount] = await Promise.all([
-      workflowService.findById(id, { populate }).then(formatWorkflowToAdmin),
-      workflowService.count(),
-    ]);
-
-    ctx.body = {
-      data: await sanitizeOutput(workflow),
-      meta: { workflowCount },
     };
   },
 };

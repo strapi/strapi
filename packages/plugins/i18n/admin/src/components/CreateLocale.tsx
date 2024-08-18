@@ -302,7 +302,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   return (
     <Grid.Root gap={4}>
       {translatedForm.map(({ size, ...field }) => (
-        <Grid.Item key={field.name} col={size}>
+        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
         </Grid.Item>
       ))}
@@ -345,7 +345,7 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
   return (
     <Grid.Root gap={4}>
       {form.map(({ size, ...field }) => (
-        <Grid.Item key={field.name} col={size}>
+        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
         </Grid.Item>
       ))}

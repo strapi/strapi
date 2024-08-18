@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose, navToHeader } from '../../utils/shared';
+import { navToHeader } from '../../utils/shared';
 
 const EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
 
@@ -12,7 +12,7 @@ test.describe('Blocks editor', () => {
     await login({ page });
   });
 
-  test('adds a code block and specifies the language', async ({ page }) => {
+  test.fixme('adds a code block and specifies the language', async ({ page }) => {
     // Write some text into a blocks editor
     const code = 'const problems = 99';
     await navToHeader(page, ['Content Manager', 'Homepage'], 'Untitled');

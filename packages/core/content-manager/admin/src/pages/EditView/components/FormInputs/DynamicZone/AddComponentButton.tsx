@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BaseButton, Flex, Typography, TypographyComponent } from '@strapi/design-system';
+import { Button, Flex, Typography, TypographyComponent } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
 import { styled } from 'styled-components';
 
@@ -25,11 +25,8 @@ const AddComponentButton = ({
       onClick={onClick}
       disabled={isDisabled}
       background="neutral0"
-      paddingTop={3}
-      paddingBottom={3}
-      paddingLeft={4}
-      paddingRight={4}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+      variant="tertiary"
     >
       <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
@@ -62,10 +59,11 @@ const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolea
 
 const AddComponentTitle = styled<TypographyComponent>(Typography)``;
 
-const StyledButton = styled(BaseButton)`
+const StyledButton = styled(Button)`
   border-radius: 26px;
   border-color: ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+  height: 5rem;
 
   &:hover {
     ${AddComponentTitle} {
@@ -77,7 +75,7 @@ const StyledButton = styled(BaseButton)`
         fill: ${({ theme }) => theme.colors.primary600};
       }
       > path {
-        fill: ${({ theme }) => theme.colors.neutral100};
+        fill: ${({ theme }) => theme.colors.primary600};
       }
     }
   }

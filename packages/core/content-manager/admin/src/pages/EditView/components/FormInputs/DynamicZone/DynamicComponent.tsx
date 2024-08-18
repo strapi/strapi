@@ -105,7 +105,7 @@ const DynamicComponent = ({
   const accordionActions = disabled ? null : (
     <>
       <IconButton
-        borderWidth={0}
+        variant="ghost"
         label={formatMessage(
           {
             id: getTranslation('components.DynamicZone.delete-label'),
@@ -118,7 +118,7 @@ const DynamicComponent = ({
         <Trash />
       </IconButton>
       <IconButton
-        borderWidth={0}
+        variant="ghost"
         onClick={(e) => e.stopPropagation()}
         data-handler-id={handlerId}
         ref={dragRef}
@@ -225,7 +225,14 @@ const DynamicComponent = ({
                           const fieldName = `${name}.${index}.${field.name}`;
 
                           return (
-                            <Grid.Item col={size} key={fieldName} s={12} xs={12}>
+                            <Grid.Item
+                              col={size}
+                              key={fieldName}
+                              s={12}
+                              xs={12}
+                              direction="column"
+                              alignItems="stretch"
+                            >
                               <InputRenderer {...field} name={fieldName} />
                             </Grid.Item>
                           );

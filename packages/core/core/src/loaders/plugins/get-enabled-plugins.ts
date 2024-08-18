@@ -90,7 +90,13 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
 
   for (const dep of INTERNAL_PLUGINS) {
     const packagePath = join(dep, 'package.json');
-    const packageInfo = require(packagePath);
+
+    // NOTE: internal plugins should be resolved from the strapi package
+    const packageModulePath = require.resolve(packagePath, {
+      paths: [require.resolve('@strapi/strapi/package.json'), process.cwd()],
+    });
+
+    const packageInfo = require(packageModulePath);
 
     validatePluginName(packageInfo.strapi.name);
     internalPlugins[packageInfo.strapi.name] = {

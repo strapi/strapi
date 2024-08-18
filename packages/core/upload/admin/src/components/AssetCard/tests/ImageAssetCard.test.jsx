@@ -50,12 +50,8 @@ describe('ImageAssetCard', () => {
       }
 
       .c11 {
-        background: #ffffff;
-        padding-block: 8px;
-        padding-inline: 8px;
         border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
+        display: inline-flex;
         cursor: pointer;
       }
 
@@ -96,6 +92,13 @@ describe('ImageAssetCard', () => {
         gap: 8px;
       }
 
+      .c12 {
+        align-items: center;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
       .c18 {
         align-items: flex-start;
         display: flex;
@@ -106,13 +109,6 @@ describe('ImageAssetCard', () => {
         align-items: center;
         display: flex;
         flex-direction: row;
-      }
-
-      .c28 {
-        align-items: center;
-        display: inline-flex;
-        flex-direction: row;
-        justify-content: center;
       }
 
       .c21 {
@@ -128,7 +124,7 @@ describe('ImageAssetCard', () => {
         color: #666687;
       }
 
-      .c31 {
+      .c30 {
         font-weight: 600;
         font-size: 1.1rem;
         line-height: 1.45;
@@ -148,46 +144,9 @@ describe('ImageAssetCard', () => {
         width: 1px;
       }
 
-      .c29 {
+      .c28 {
         border-radius: 4px;
         padding-block: 0.7rem;
-      }
-
-      .c12 {
-        position: relative;
-        outline: none;
-      }
-
-      .c12[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c12:after {
-        transition-property: all;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c12:focus-visible {
-        outline: none;
-      }
-
-      .c12:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
       }
 
       .c6 {
@@ -225,7 +184,7 @@ describe('ImageAssetCard', () => {
         flex-shrink: 0;
       }
 
-      .c30 {
+      .c29 {
         margin-left: 4px;
       }
 
@@ -274,19 +233,28 @@ describe('ImageAssetCard', () => {
       }
 
       .c13 {
-        border-color: #dcdce4;
-        height: 3.2rem;
-        width: 3.2rem;
-        color: #8e8ea9;
+        text-decoration: none;
+        padding-block: 0.9rem;
+        padding-inline: 0.9rem;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+        color: #32324d;
+        color: #666687;
       }
 
-      .c13:hover,
-      .c13:focus {
-        color: #666687;
+      .c13:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c13:active {
+        background-color: #eaeaef;
       }
 
       .c13[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
         color: #666687;
+        cursor: default;
       }
 
       .c23 {
@@ -312,6 +280,12 @@ describe('ImageAssetCard', () => {
       @media (prefers-reduced-motion: no-preference) {
         .c7 {
           transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .c13 {
+          transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
       }
 
@@ -345,9 +319,8 @@ describe('ImageAssetCard', () => {
             >
               <button
                 aria-disabled="false"
-                class="c11 c3 c12 c13"
+                class="c11 c12 c13"
                 data-state="closed"
-                type="button"
               >
                 <svg
                   aria-hidden="true"
@@ -417,10 +390,10 @@ describe('ImageAssetCard', () => {
                   class="c26"
                 >
                   <div
-                    class="c27 c28 c29 c30"
+                    class="c27 c12 c28 c29"
                   >
                     <span
-                      class="c31"
+                      class="c30"
                     >
                       Image
                     </span>

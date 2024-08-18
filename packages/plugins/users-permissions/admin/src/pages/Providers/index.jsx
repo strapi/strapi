@@ -220,7 +220,7 @@ export const ProvidersPage = () => {
                     {canUpdate && (
                       <IconButton
                         onClick={() => handleClickEdit(provider)}
-                        borderWidth={0}
+                        variant="ghost"
                         label="Edit"
                       >
                         <Pencil />

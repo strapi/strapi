@@ -86,7 +86,7 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
               {checkCanDeleteRole(role) && (
                 <IconButton
                   onClick={() => handleClickDelete(role.id.toString())}
-                  borderWidth={0}
+                  variant="ghost"
                   label={formatMessage(
                     { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
                     { target: `${role.name}` }

@@ -184,7 +184,7 @@ const App = () => {
                             tag="a"
                             disabled={!allowedActions.canRead}
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
-                            borderWidth={0}
+                            variant="ghost"
                             target="_blank"
                             rel="noopener noreferrer"
                             label={formatMessage(
@@ -200,7 +200,7 @@ const App = () => {
                           {allowedActions.canRegenerate ? (
                             <IconButton
                               onClick={() => handleRegenerateDoc(doc.version)}
-                              borderWidth={0}
+                              variant="ghost"
                               label={formatMessage(
                                 {
                                   id: getTrad('pages.PluginPage.table.icon.regenerate'),
@@ -215,7 +215,7 @@ const App = () => {
                           {allowedActions.canUpdate && doc.version !== data.currentVersion ? (
                             <IconButton
                               onClick={() => handleClickDelete(doc.version)}
-                              borderWidth={0}
+                              variant="ghost"
                               label={formatMessage(
                                 {
                                   id: 'global.delete-target',

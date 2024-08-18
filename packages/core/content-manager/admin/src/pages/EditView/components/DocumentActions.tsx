@@ -8,7 +8,6 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
-  Box,
   Button,
   Dialog,
   Flex,
@@ -29,7 +28,7 @@ import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { CLONE_PATH } from '../../../router';
+import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
@@ -184,12 +183,14 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
   return (
     <>
       <Button
-        flex={1}
+        flex="auto"
         startIcon={action.icon}
         disabled={action.disabled}
         onClick={handleClick(action)}
         justifyContent="center"
         variant={action.variant || 'default'}
+        paddingTop="7px"
+        paddingBottom="7px"
       >
         {action.label}
       </Button>
@@ -264,13 +265,13 @@ const DocumentActionsMenu = ({
 
   return (
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Menu.Trigger
+      <StyledMoreButton
         disabled={isDisabled}
         size="S"
         endIcon={null}
-        paddingTop="7px"
-        paddingLeft="9px"
-        paddingRight="9px"
+        paddingTop="4px"
+        paddingLeft="7px"
+        paddingRight="7px"
         variant={variant}
       >
         <More aria-hidden focusable={false} />
@@ -281,7 +282,7 @@ const DocumentActionsMenu = ({
               defaultMessage: 'More document actions',
             })}
         </VisuallyHidden>
-      </Menu.Trigger>
+      </StyledMoreButton>
       <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -293,10 +294,19 @@ const DocumentActionsMenu = ({
               key={action.id}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
-                  <Box tag="span" color={convertActionVariantToIconColor(action.variant)}>
+                <Flex
+                  color={!action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'}
+                  gap={2}
+                  tag="span"
+                >
+                  <Flex
+                    tag="span"
+                    color={
+                      !action.disabled ? convertActionVariantToIconColor(action.variant) : 'inherit'
+                    }
+                  >
                     {action.icon}
-                  </Box>
+                  </Flex>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
@@ -378,6 +388,12 @@ const convertActionVariantToIconColor = (
       return 'primary600';
   }
 };
+
+const StyledMoreButton = styled(Menu.Trigger)`
+  & > span {
+    display: flex;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionConfirmDialog
@@ -499,12 +515,10 @@ const PublishAction: DocumentActionComponent = ({
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
+  const isListView = useMatch(LIST_PATH) !== null;
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
-  const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
-    'PublishAction',
-    ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
-  );
+  const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { publish } = useDocumentActions();
   const [
     countDraftRelations,
@@ -574,7 +588,9 @@ const PublishAction: DocumentActionComponent = ({
   }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
   React.useEffect(() => {
-    if (documentId) {
+    if (documentId && !isListView) {
+      // We don't want to call count draft relations if in the list view. There is no
+      // use for the response.
       const fetchDraftRelationsCount = async () => {
         const { data, error } = await countDraftRelations({
           collectionType,
@@ -594,7 +610,7 @@ const PublishAction: DocumentActionComponent = ({
 
       fetchDraftRelationsCount();
     }
-  }, [documentId, countDraftRelations, collectionType, model, params]);
+  }, [isListView, documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -666,8 +682,6 @@ const PublishAction: DocumentActionComponent = ({
      *  - the document is already published & not modified
      *  - the document is being created & not modified
      *  - the user doesn't have the permission to publish
-     *  - the user doesn't have the permission to create a new document
-     *  - the user doesn't have the permission to update the document
      */
     disabled:
       isCloning ||
@@ -676,8 +690,7 @@ const PublishAction: DocumentActionComponent = ({
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
       (!modified && !document?.documentId) ||
-      !canPublish ||
-      Boolean((!document?.documentId && !canCreate) || (document?.documentId && !canUpdate)),
+      !canPublish,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -732,10 +745,6 @@ const UpdateAction: DocumentActionComponent = ({
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { canCreate, canUpdate } = useDocumentRBAC('UpdateAction', ({ canCreate, canUpdate }) => ({
-    canCreate,
-    canUpdate,
-  }));
   const { create, update, clone } = useDocumentActions();
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -754,14 +763,8 @@ const UpdateAction: DocumentActionComponent = ({
      * - the form is submitting
      * - the document is not modified & we're not cloning (you can save a clone entity straight away)
      * - the active tab is the published tab
-     * - the user doesn't have the permission to create a new document
-     * - the user doesn't have the permission to update the document
      */
-    disabled:
-      isSubmitting ||
-      (!modified && !isCloning) ||
-      activeTab === 'published' ||
-      Boolean((!documentId && !canCreate) || (documentId && !canUpdate)),
+    disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',
@@ -770,19 +773,23 @@ const UpdateAction: DocumentActionComponent = ({
       setSubmitting(true);
 
       try {
-        const { errors } = await validate();
+        // TODO: This is not what we should do. We should just run some validation and skip others instead.
+        // Don't run the validation for drafts
+        if (activeTab !== 'draft') {
+          const { errors } = await validate();
 
-        if (errors) {
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: 'content-manager.validation.error',
-              defaultMessage:
-                'There are validation errors in your document. Please fix them before saving.',
-            }),
-          });
+          if (errors) {
+            toggleNotification({
+              type: 'danger',
+              message: formatMessage({
+                id: 'content-manager.validation.error',
+                defaultMessage:
+                  'There are validation errors in your document. Please fix them before saving.',
+              }),
+            });
 
-          return;
+            return;
+          }
         }
 
         if (isCloning) {

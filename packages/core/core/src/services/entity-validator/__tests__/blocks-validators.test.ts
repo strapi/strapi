@@ -1,5 +1,5 @@
 import strapiUtils, { errors } from '@strapi/utils';
-import validators from '../validators';
+import { Validators } from '../validators';
 
 const validParagraph = [
   {
@@ -190,7 +190,7 @@ describe('Blocks validator', () => {
   describe('Paragraph', () => {
     it('Should accept a valid paragraph schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -201,7 +201,7 @@ describe('Blocks validator', () => {
     });
     it('Should throw an error given an invalid paragraph schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -223,7 +223,7 @@ describe('Blocks validator', () => {
   describe('Heading', () => {
     it('Should accept a valid paragraph schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -234,7 +234,7 @@ describe('Blocks validator', () => {
     });
     it('Should throw an error given an invalid heading schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -254,7 +254,7 @@ describe('Blocks validator', () => {
   describe('Quote', () => {
     it('Should accept a valid quote schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -265,7 +265,7 @@ describe('Blocks validator', () => {
     });
     it('Should throw an error given an invalid quote schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -281,7 +281,7 @@ describe('Blocks validator', () => {
   describe('List', () => {
     it('Should accept a valid list schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -292,7 +292,7 @@ describe('Blocks validator', () => {
     });
     it('Should throw an error given an invalid list schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -345,7 +345,7 @@ describe('Blocks validator', () => {
   describe('Image', () => {
     it('Should accept a valid image schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -356,7 +356,7 @@ describe('Blocks validator', () => {
     });
     it('Should throw an error given an invalid image schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -381,7 +381,7 @@ describe('Blocks validator', () => {
   describe('Code', () => {
     it('Should accept a valid code schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'code' },
           },
@@ -392,7 +392,7 @@ describe('Blocks validator', () => {
     });
     it('Should throw an error given an invalid code schema', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'code' },
           },
@@ -414,7 +414,7 @@ describe('Blocks validator', () => {
   describe('Mixed', () => {
     it('Should accept a valid schema of mixed blocks', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
@@ -432,7 +432,7 @@ describe('Blocks validator', () => {
     });
     it('Should throw an error given mixed valid and invalid blocks', () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.blocks(
+        Validators.blocks(
           {
             attr: { type: 'blocks' },
           },
