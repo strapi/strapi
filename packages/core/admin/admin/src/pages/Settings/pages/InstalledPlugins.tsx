@@ -2,16 +2,15 @@ import * as React from 'react';
 
 import { Table, Tbody, Td, Th, Thead, Tr, Typography, useNotifyAT } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { useSelector } from 'react-redux';
 
-import { Layouts } from '../components/Layouts/Layout';
-import { Page } from '../components/PageHelpers';
-import { useNotification } from '../features/Notifications';
-import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
-import { selectAdminPermissions } from '../selectors';
-import { useGetPluginsQuery } from '../services/admin';
+import { Layouts } from '../../../components/Layouts/Layout';
+import { Page } from '../../../components/PageHelpers';
+import { useTypedSelector } from '../../../core/store/hooks';
+import { useNotification } from '../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
+import { useGetPluginsQuery } from '../../../services/admin';
 
-const InstalledPluginsPage = () => {
+const InstalledPlugins = () => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const { toggleNotification } = useNotification();
@@ -115,9 +114,9 @@ const InstalledPluginsPage = () => {
   );
 };
 
-const ProtectedInstalledPluginsPage = () => {
+const ProtectedInstalledPlugins = () => {
   const { formatMessage } = useIntl();
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
 
   return (
     <Page.Protect permissions={permissions.marketplace?.main}>
@@ -127,9 +126,9 @@ const ProtectedInstalledPluginsPage = () => {
           defaultMessage: 'Plugins',
         })}
       </Page.Title>
-      <InstalledPluginsPage />
+      <InstalledPlugins />
     </Page.Protect>
   );
 };
 
-export { ProtectedInstalledPluginsPage, InstalledPluginsPage };
+export { ProtectedInstalledPlugins, InstalledPlugins };

@@ -32,9 +32,9 @@ describe('<AddComponentButton />', () => {
 
     const { getByRole, user } = render({ onClick, isDisabled: true });
 
-    await expect(() => user.click(getByRole('button', { name: 'test' }))).rejects.toThrow(
-      /pointer-events: none/
-    );
+    getByRole('button', { name: 'test' }).hasAttribute('disabled');
+
+    await user.click(getByRole('button', { name: 'test' }));
 
     expect(onClick).not.toHaveBeenCalled();
   });

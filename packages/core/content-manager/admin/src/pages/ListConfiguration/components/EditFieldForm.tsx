@@ -108,7 +108,13 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                   (field.name === 'sortable' && shouldDisplaySortToggle)
               )
               .map(({ size, ...field }) => (
-                <Grid.Item key={field.name} s={12} col={size}>
+                <Grid.Item
+                  key={field.name}
+                  s={12}
+                  col={size}
+                  direction="column"
+                  alignItems="stretch"
+                >
                   <InputRenderer {...field} />
                 </Grid.Item>
               ))}

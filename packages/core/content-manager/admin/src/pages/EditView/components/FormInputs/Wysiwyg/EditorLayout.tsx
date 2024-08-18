@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import {
-  BaseButton,
+  Button,
   Box,
   BoxComponent,
   Flex,
@@ -78,7 +78,7 @@ const EditorLayout = ({
                     shrink={0}
                     width="100%"
                   >
-                    <ExpandButton onClick={onCollapse}>
+                    <ExpandButton onClick={onCollapse} variant="tertiary" size="M">
                       <Typography>
                         {formatMessage({
                           id: 'components.Wysiwyg.collapse',
@@ -102,14 +102,16 @@ const EditorLayout = ({
   }
 
   return (
-    <Box
+    <Flex
       borderColor={error ? 'danger600' : 'neutral200'}
       borderStyle="solid"
       borderWidth="1px"
       hasRadius
+      direction="column"
+      alignItems="stretch"
     >
       {children}
-    </Box>
+    </Flex>
   );
 };
 
@@ -124,10 +126,18 @@ const BoxWithBorder = styled<BoxComponent>(Box)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
-const ExpandButton = styled(BaseButton)`
+const ExpandButton = styled(Button)`
   background-color: transparent;
   border: none;
   align-items: center;
+
+  & > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-weight: ${({ theme }) => theme.fontWeights.regular};
+  }
 
   svg {
     margin-left: ${({ theme }) => `${theme.spaces[2]}`};

@@ -35,14 +35,14 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
 
     const isEntryInRelease = release.actions.some(
       (action) =>
-        Number(action.entryDocumentId) === Number(releaseActionArgs.entryDocumentId) &&
+        action.entryDocumentId === releaseActionArgs.entryDocumentId &&
         action.contentType === releaseActionArgs.contentType &&
-        action.locale === releaseActionArgs.locale
+        (releaseActionArgs.locale ? action.locale === releaseActionArgs.locale : true)
     );
 
     if (isEntryInRelease) {
       throw new AlreadyOnReleaseError(
-        `Entry with documentId ${releaseActionArgs.entryDocumentId} ${releaseActionArgs.locale ? `(${releaseActionArgs.locale})` : ''} and contentType ${releaseActionArgs.contentType} already exists in release with id ${releaseId}`
+        `Entry with documentId ${releaseActionArgs.entryDocumentId}${releaseActionArgs.locale ? `( ${releaseActionArgs.locale})` : ''} and contentType ${releaseActionArgs.contentType} already exists in release with id ${releaseId}`
       );
     }
   },

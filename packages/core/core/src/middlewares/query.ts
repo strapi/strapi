@@ -48,5 +48,5 @@ export const query: Core.MiddlewareFactory = (
   config: Partial<Config>,
   { strapi }: { strapi: Core.Strapi }
 ) => {
-  addQsParser(strapi.server.app, { ...defaults, ...config });
+  addQsParser(strapi.server.app, { ...defaults, ...config } as Config);
 };

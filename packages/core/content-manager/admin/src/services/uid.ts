@@ -56,6 +56,9 @@ const uidApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
+      providesTags: (_res, _error, params) => [
+        { type: 'UidAvailability', id: params.contentTypeUID },
+      ],
     }),
   }),
 });

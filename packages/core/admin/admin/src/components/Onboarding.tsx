@@ -162,9 +162,13 @@ const HelperButton = styled(Button)`
   height: unset;
   width: unset;
 
-  & > span > svg {
-    width: 1.6rem;
-    height: 1.6rem;
+  & > span {
+    display: flex;
+
+    svg {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
   }
 `;
 

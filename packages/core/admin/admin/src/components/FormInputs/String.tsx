@@ -17,7 +17,6 @@ const StringInput = forwardRef<HTMLInputElement, InputProps>(
         <Field.Label action={labelAction}>{label}</Field.Label>
         <TextInput
           ref={composedRefs}
-          defaultValue={field.initialValue}
           onChange={field.onChange}
           value={field.value ?? ''}
           {...props}

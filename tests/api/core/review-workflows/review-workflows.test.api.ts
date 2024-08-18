@@ -170,32 +170,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Get one workflow', () => {
-    test("It shouldn't be available for public", async () => {
-      const res = await requests.public.get(`/review-workflows/workflows/${testWorkflow.id}`);
-
-      if (hasRW) {
-        expect(res.status).toBe(401);
-      } else {
-        expect(res.status).toBe(404);
-        expect(res.body.data).toBeUndefined();
-      }
-    });
-    test('It should be available for every connected users (admin)', async () => {
-      const res = await requests.admin.get(`/review-workflows/workflows/${testWorkflow.id}`);
-
-      if (hasRW) {
-        expect(res.status).toBe(200);
-        expect(res.body.data).toBeInstanceOf(Object);
-        expect(res.body.data).toEqual(testWorkflow);
-        expect(typeof res.body.meta.workflowCount).toBe('number');
-      } else {
-        expect(res.status).toBe(404);
-        expect(res.body.data).toBeUndefined();
-      }
-    });
-  });
-
   describe('Create workflow', () => {
     test('It should create a workflow without stages', async () => {
       const res = await requests.admin.post('/review-workflows/workflows', {
@@ -309,36 +283,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
   });
 
-  describe('Get workflow stages', () => {
-    test("It shouldn't be available for public", async () => {
-      const res = await requests.public.get(
-        `/review-workflows/workflows/${testWorkflow.id}?populate=stages`
-      );
-
-      if (hasRW) {
-        expect(res.status).toBe(401);
-      } else {
-        expect(res.status).toBe(404);
-        expect(res.body.data).toBeUndefined();
-      }
-    });
-    test('It should be available for every connected users (admin)', async () => {
-      const res = await requests.admin.get(
-        `/review-workflows/workflows/${testWorkflow.id}?populate=stages`
-      );
-
-      if (hasRW) {
-        expect(res.status).toBe(200);
-        expect(res.body.data).toBeInstanceOf(Object);
-        expect(res.body.data.stages).toBeInstanceOf(Array);
-        expect(res.body.data.stages).toHaveLength(2);
-      } else {
-        expect(res.status).toBe(404);
-        expect(Array.isArray(res.body)).toBeFalsy();
-      }
-    });
-  });
-
   describe('Get stages', () => {
     test("It shouldn't be available for public", async () => {
       const res = await requests.public.get(
@@ -426,15 +370,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       expect(workflowRes.body.data.stages[1].color).toBe('#000000');
     });
     test("It shouldn't be available for public", async () => {
-      const workflowRes = await requests.public.get(
-        `/review-workflows/workflows/${testWorkflow.id}?populate=*`
-      );
+      const workflowsRes = await requests.public.get(`/review-workflows/workflows?populate=*`);
 
       if (hasRW) {
-        expect(workflowRes.status).toBe(401);
+        expect(workflowsRes.status).toBe(401);
       } else {
-        expect(workflowRes.status).toBe(404);
-        expect(workflowRes.body.data).toBeUndefined();
+        expect(workflowsRes.status).toBe(404);
+        expect(workflowsRes.body.data).toBeUndefined();
       }
     });
     test('It should be available for every connected users (admin)', async () => {

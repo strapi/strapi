@@ -329,7 +329,13 @@ const SelectedEntriesModalContent = ({
   // Validate the entries based on the schema to show errors if any
   const { rows, validationErrors } = React.useMemo(() => {
     if (data.length > 0 && schema) {
-      const validate = createYupSchema(schema.attributes, components);
+      const validate = createYupSchema(
+        schema.attributes,
+        components,
+        // Since this is the "Publish" action, the validation
+        // schema must enforce the rules for published entities
+        { status: 'published' }
+      );
       const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
       const rows = data.map((entry: Document) => {
         try {

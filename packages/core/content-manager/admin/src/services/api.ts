@@ -9,6 +9,7 @@ const contentManagerApi = adminApi.enhanceEndpoints({
     'InitialData',
     'HistoryVersion',
     'Relations',
+    'UidAvailability',
   ],
 });
 

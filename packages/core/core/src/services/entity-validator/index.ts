@@ -7,7 +7,7 @@ import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import { Modules, UID, Struct, Schema } from '@strapi/types';
-import validators from './validators';
+import { Validators, ValidatorMetas } from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
 
@@ -34,6 +34,7 @@ export type ComponentContext = {
   // If working with a repeatable component this contains the
   // full data of the repeatable component in the current entity.
   repeatableData: Modules.EntityValidator.Entity[];
+  fullDynamicZoneContent?: Schema.Attribute.Value<Schema.Attribute.DynamicZone>;
 };
 
 interface WithComponentContext {
@@ -48,13 +49,6 @@ interface ValidatorMeta<TAttribute = Schema.Attribute.AnyAttribute> extends With
 interface ValidatorContext {
   isDraft?: boolean;
   locale?: string | null;
-}
-
-interface AttributeValidatorMetas extends WithComponentContext {
-  attr: Schema.Attribute.AnyAttribute;
-  updatedAttribute: { name: string; value: unknown };
-  model: Struct.Schema;
-  entity?: Modules.EntityValidator.Entity;
 }
 
 interface ModelValidatorMetas extends WithComponentContext {
@@ -251,8 +245,8 @@ const createScalarAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
     let validator;
 
-    if (has(metas.attr.type, validators)) {
-      validator = (validators as any)[metas.attr.type](metas, options);
+    if (has(metas.attr.type, Validators)) {
+      validator = (Validators as any)[metas.attr.type](metas, options);
     } else {
       // No validators specified - fall back to mixed
       validator = yup.mixed();
@@ -267,8 +261,7 @@ const createScalarAttributeValidator =
   };
 
 const createAttributeValidator =
-  (createOrUpdate: CreateOrUpdate) =>
-  (metas: AttributeValidatorMetas, options: ValidatorContext) => {
+  (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMetas, options: ValidatorContext) => {
     let validator = yup.mixed();
 
     if (isMediaAttribute(metas.attr)) {
@@ -276,7 +269,7 @@ const createAttributeValidator =
     } else if (isScalarAttribute(metas.attr)) {
       validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
     } else {
-      if (metas.attr.type === 'component') {
+      if (metas.attr.type === 'component' && metas.componentContext) {
         // Build the path to the component within the parent content type schema.
         const pathToComponent = [
           ...(metas?.componentContext?.pathToComponent ?? []),
@@ -296,37 +289,30 @@ const createAttributeValidator =
             : metas.componentContext?.repeatableData
         ) as Modules.EntityValidator.Entity[];
 
-        const newComponentContext = {
-          ...(metas?.componentContext ?? {}),
+        const newComponentContext: ComponentContext = {
+          ...metas.componentContext,
           pathToComponent,
           repeatableData,
         };
 
         validator = createComponentValidator(createOrUpdate)(
           {
-            componentContext: newComponentContext as ComponentContext,
+            componentContext: newComponentContext,
             attr: metas.attr,
             updatedAttribute: metas.updatedAttribute,
           },
           options
         );
-      } else if (metas.attr.type === 'dynamiczone') {
-        // TODO: fix! query layer fails when building a where for dynamic
-        // zones
-        const pathToComponent = [
-          ...(metas?.componentContext?.pathToComponent ?? []),
-          metas.updatedAttribute.name,
-        ];
-
-        const newComponentContext = {
-          ...(metas?.componentContext ?? {}),
-          pathToComponent,
+      } else if (metas.attr.type === 'dynamiczone' && metas.componentContext) {
+        const newComponentContext: ComponentContext = {
+          ...metas.componentContext,
+          fullDynamicZoneContent: metas.updatedAttribute.value,
+          pathToComponent: [...metas.componentContext.pathToComponent, metas.updatedAttribute.name],
         };
 
-        validator = createDzValidator(createOrUpdate)(
-          { ...metas, componentContext: newComponentContext as ComponentContext },
-          options
-        );
+        Object.assign(metas, { componentContext: newComponentContext });
+
+        validator = createDzValidator(createOrUpdate)(metas, options);
       } else if (metas.attr.type === 'relation') {
         validator = createRelationValidator({
           attr: metas.attr,

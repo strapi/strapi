@@ -56,7 +56,7 @@ describe('Upload plugin bootstrap function', () => {
               registerCron() {},
             },
             extensions: {
-              contentManager: { entityManager: { addSignedFileUrlsToAdmin: jest.fn() } },
+              signFileUrlsOnDocumentService: jest.fn(),
             },
           },
         },

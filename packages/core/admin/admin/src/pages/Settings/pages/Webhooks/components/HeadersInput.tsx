@@ -50,7 +50,7 @@ const HeadersInput = () => {
         {value.map((_, index) => {
           return (
             <Grid.Root key={index} gap={4} padding={2}>
-              <Grid.Item col={6}>
+              <Grid.Item col={6} direction="column" alignItems="stretch">
                 <HeaderCombobox
                   name={`headers.${index}.key`}
                   aria-label={`row ${index + 1} key`}
@@ -60,7 +60,7 @@ const HeadersInput = () => {
                   })}
                 />
               </Grid.Item>
-              <Grid.Item col={6}>
+              <Grid.Item col={6} direction="column" alignItems="stretch">
                 <Flex alignItems="flex-end" gap={2}>
                   <Box style={{ flex: 1 }}>
                     <StringInput

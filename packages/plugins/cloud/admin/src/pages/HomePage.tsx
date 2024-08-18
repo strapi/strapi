@@ -40,7 +40,7 @@ const RightSideCloudContainer = styled(Box)`
 const LeftSideCloudContainer = styled(Box)`
   position: absolute;
   top: 150px;
-  left: 220px;
+  left: 56px;
 
   img {
     width: 15rem;

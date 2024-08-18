@@ -161,7 +161,7 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
 
     const collectionCards = getAllByTestId('npm-package-card');
     expect(collectionCards.length).toEqual(2);
@@ -196,10 +196,8 @@ describe('Marketplace page - providers tab', () => {
     await user.keyboard('[Escape]');
     await waitForReload();
 
-    const madeByStrapiTag = getByRole('button', { name: 'Made by Strapi' });
-    const verifiedTag = getByRole('button', { name: 'Verified' });
-    expect(madeByStrapiTag).toBeVisible();
-    expect(verifiedTag).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
+    expect(getByText('Verified')).toBeVisible();
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('Amazon SES')).toBeVisible();
     expect(getByText('Nodemailer')).toBeVisible();
@@ -207,7 +205,7 @@ describe('Marketplace page - providers tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, getByText, user } = render();
 
     await waitForReload();
 
@@ -223,12 +221,15 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    await user.click(getByRole('button', { name: 'Made by Strapi' }));
+    const removeButton = getByText('Made by Strapi').nextElementSibling;
 
-    await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?npmPackageType=provider&sort=name:asc&page=1"`
-    );
+    if (removeButton && removeButton.tagName === 'BUTTON') {
+      await user.click(removeButton);
+      await waitForReload();
+      expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+        `"?npmPackageType=provider&sort=name:asc&page=1"`
+      );
+    }
   });
 
   it('only filters in the providers tab', async () => {

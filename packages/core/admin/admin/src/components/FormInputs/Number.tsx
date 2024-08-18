@@ -19,7 +19,6 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
         <Field.Label action={labelAction}>{label}</Field.Label>
         <NumberInput
           ref={composedRefs}
-          defaultValue={field.initialValue}
           onValueChange={(value) => {
             field.onChange(name, value);
           }}
