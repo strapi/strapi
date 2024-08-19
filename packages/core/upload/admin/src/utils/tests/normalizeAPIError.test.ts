@@ -24,7 +24,6 @@ const API_VALIDATION_ERROR_FIXTURE = new FetchError('ValidationError', {
       },
     },
   },
-  status: 422,
 });
 
 const API_APPLICATION_ERROR_FIXTURE = new FetchError('ApplicationError', {
