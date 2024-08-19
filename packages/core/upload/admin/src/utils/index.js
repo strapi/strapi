@@ -5,7 +5,7 @@ export { findRecursiveFolderByValue } from './findRecursiveFolderByValue';
 export { formatBytes } from './formatBytes';
 export * from './formatDuration';
 export { getBreadcrumbDataCM } from './getBreadcrumbDataCM';
-export { default as getBreadcrumbDataML } from './getBreadcrumbDataML';
+export { getBreadcrumbDataML } from './getBreadcrumbDataML';
 export { default as getFolderParents } from './getFolderParents';
 export { getFolderURL } from './getFolderURL';
 export { getTrad } from './getTrad';
