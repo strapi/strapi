@@ -1,4 +1,4 @@
-import findRecursiveFolderByValue from '../findRecursiveFolderByValue';
+import { findRecursiveFolderByValue } from '../findRecursiveFolderByValue';
 
 const FIXTURE = [
   {
@@ -30,6 +30,7 @@ describe('findRecursiveFolderByValue', () => {
   });
 
   test('does return undefined, when no folder was found', () => {
+    // @ts-expect-error: Passing a wrong type to test the return value
     expect(findRecursiveFolderByValue(FIXTURE, { value: 3 })).toEqual(undefined);
   });
 });
