@@ -1,7 +1,18 @@
+import type { Data } from '@strapi/types';
 import { getTrad } from './getTrad';
+import type { FolderStructure } from '../../../shared/contracts/folders';
 
-const getBreadcrumbDataML = (folder) => {
-  let data = [
+type GetBreadcrumbDataCMReturn = (
+  | {
+      id?: Data.ID | null;
+      label?: string | { id: string; defaultMessage: string };
+      path?: string;
+    }
+  | never[]
+)[];
+
+export const getBreadcrumbDataCM = (folder: FolderStructure | null): GetBreadcrumbDataCMReturn => {
+  let data: GetBreadcrumbDataCMReturn = [
     {
       id: null,
       label: { id: getTrad('plugin.name'), defaultMessage: 'Media Library' },
@@ -30,5 +41,3 @@ const getBreadcrumbDataML = (folder) => {
 
   return data;
 };
-
-export default getBreadcrumbDataML;

@@ -11,6 +11,8 @@ export interface FolderStructure {
   name?: string;
   label?: string;
   children?: [] | FolderStructure | FolderStructure[];
+  parent?: FolderStructure;
+  path?: string;
 }
 
 /**

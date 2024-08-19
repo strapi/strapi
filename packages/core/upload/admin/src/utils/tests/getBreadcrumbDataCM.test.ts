@@ -1,4 +1,4 @@
-import { getBreadcrumbDataCM } from '..';
+import { getBreadcrumbDataCM } from '../getBreadcrumbDataCM';
 
 const FIXTURE_FOLDER = {
   id: 1,
