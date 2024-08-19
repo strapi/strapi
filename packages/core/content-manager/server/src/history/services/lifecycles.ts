@@ -131,13 +131,20 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         // All schemas related to the content type
         const uid = context.contentType.uid;
         const schemas = getSchemas(uid);
+        const model = strapi.getModel(uid);
+
+        const isLocalizedContentType = serviceUtils.isLocalizedContentType(model);
 
         // Find all affected entries
         const localeEntries = await strapi.db.query(uid).findMany({
           where: {
             documentId,
-            locale: { $in: locales },
-            publishedAt: null,
+            ...(isLocalizedContentType
+              ? {
+                  locale: { $in: locales },
+                  publishedAt: null,
+                }
+              : {}),
           },
           populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
         });
