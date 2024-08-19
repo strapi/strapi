@@ -311,6 +311,7 @@ const getInitialProviders = ({ purest }) => ({
             origin: 'https://www.patreon.com',
             path: 'api/oauth2/{path}',
             headers: {
+              'user-agent': 'strapi',
               authorization: 'Bearer {auth}',
             },
           },
@@ -328,6 +329,21 @@ const getInitialProviders = ({ purest }) => ({
         return {
           username: patreonData.full_name,
           email: patreonData.email,
+        };
+      });
+  },
+  async keycloak({ accessToken, providers }) {
+    const keycloak = purest({ provider: 'keycloak' });
+
+    return keycloak
+      .subdomain(providers.keycloak.subdomain)
+      .get('protocol/openid-connect/userinfo')
+      .auth(accessToken)
+      .request()
+      .then(({ body }) => {
+        return {
+          username: body.preferred_username,
+          email: body.email,
         };
       });
   },

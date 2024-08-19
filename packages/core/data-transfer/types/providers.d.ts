@@ -1,5 +1,5 @@
-import type { Schema, Utils } from '@strapi/strapi';
 import type { Readable, Writable } from 'stream';
+import type { Schema, Utils } from '@strapi/types';
 import type {
   IDestinationProviderTransferResults,
   IProviderTransferResults,
@@ -48,6 +48,7 @@ export interface IDestinationProvider extends IProvider {
   rollback?<T extends Error = Error>(e: T): MaybePromise<void>;
 
   setMetadata?(target: ProviderType, metadata: IMetadata): IDestinationProvider;
+  onWarning?: (message: string) => void;
 
   createEntitiesWriteStream?(): MaybePromise<Writable>;
   createLinksWriteStream?(): MaybePromise<Writable>;

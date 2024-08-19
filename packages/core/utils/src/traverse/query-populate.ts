@@ -2,8 +2,7 @@ import {
   curry,
   isString,
   isArray,
-  eq,
-  constant,
+  isEmpty,
   split,
   isObject,
   trim,
@@ -12,6 +11,7 @@ import {
   join,
   first,
   omit,
+  merge,
 } from 'lodash/fp';
 
 import traverseFactory from './factory';
@@ -27,15 +27,37 @@ const isKeyword = (keyword: string) => {
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
 
+const isWildCardConstant = (value: unknown): value is '*' => value === '*';
+
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
 const populate = traverseFactory()
   // Array of strings ['foo', 'foo.bar'] => map(recurse), then filter out empty items
   .intercept(isStringArray, async (visitor, options, populate, { recurse }) => {
-    return Promise.all(populate.map((nestedPopulate) => recurse(visitor, options, nestedPopulate)));
+    const visitedPopulate = await Promise.all(
+      populate.map((nestedPopulate) => recurse(visitor, options, nestedPopulate))
+    );
+
+    return visitedPopulate.filter((item) => !isNil(item));
   })
-  // Return wildcards as is
-  .intercept((value): value is string => eq('*', value), constant('*'))
+  // Transform wildcard populate to an exhaustive list of attributes to populate.
+  .intercept(isWildCardConstant, (visitor, options, _data, { recurse }) => {
+    const attributes = options.schema?.attributes;
+
+    // This should never happen, but adding the check in
+    // case this method is called with wrong parameters
+    if (!attributes) {
+      return '*';
+    }
+
+    const parsedPopulate = Object.entries(attributes)
+      // Get the list of all attributes that can be populated
+      .filter(([, value]) => ['relation', 'component', 'dynamiczone', 'media'].includes(value.type))
+      // Only keep the attributes key
+      .reduce((acc, [key]) => ({ ...acc, [key]: true }), {});
+
+    return recurse(visitor, options, parsedPopulate);
+  })
   // Parse string values
   .parse(isString, () => {
     const tokenize = split('.');
@@ -57,7 +79,7 @@ const populate = traverseFactory()
           return data;
         }
 
-        return isNil(value) ? root : `${root}.${value}`;
+        return isNil(value) || isEmpty(value) ? root : `${root}.${value}`;
       },
 
       keys(data) {
@@ -77,6 +99,7 @@ const populate = traverseFactory()
     transform: cloneDeep,
 
     remove(key, data) {
+      // eslint-disable-next-line no-unused-vars
       const { [key]: ignored, ...rest } = data;
 
       return rest;
@@ -117,15 +140,17 @@ const populate = traverseFactory()
       const model = strapi.getModel(uid);
       const newPath = { ...path, raw: `${path.raw}[${uid}]` };
 
-      const newSubPopulate = await recurse(visitor, { schema: model, path: newPath }, subPopulate);
-
-      newOn[uid] = newSubPopulate;
+      newOn[uid] = await recurse(visitor, { schema: model, path: newPath }, subPopulate);
     }
 
     set(key, newOn);
   })
   // Handle populate on relation
   .onRelation(async ({ key, value, attribute, visitor, path, schema }, { set, recurse }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     if (isMorphToRelationalAttribute(attribute)) {
       // Don't traverse values that cannot be parsed
       if (!isObject(value) || !('on' in value && isObject(value?.on))) {
@@ -147,6 +172,10 @@ const populate = traverseFactory()
   })
   // Handle populate on media
   .onMedia(async ({ key, path, visitor, value }, { recurse, set }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = strapi.getModel(targetSchemaUID);
 
@@ -156,6 +185,10 @@ const populate = traverseFactory()
   })
   // Handle populate on components
   .onComponent(async ({ key, value, visitor, path, attribute }, { recurse, set }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     const targetSchema = strapi.getModel(attribute.component);
 
     const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
@@ -164,6 +197,10 @@ const populate = traverseFactory()
   })
   // Handle populate on dynamic zones
   .onDynamicZone(async ({ key, value, attribute, schema, visitor, path }, { set, recurse }) => {
+    if (isNil(value)) {
+      return;
+    }
+
     if (isObject(value)) {
       const { components } = attribute;
 
@@ -174,7 +211,9 @@ const populate = traverseFactory()
 
       for (const componentUID of components) {
         const componentSchema = strapi.getModel(componentUID);
-        newProperties = await recurse(visitor, { schema: componentSchema, path }, newProperties);
+
+        const properties = await recurse(visitor, { schema: componentSchema, path }, value);
+        newProperties = merge(newProperties, properties);
       }
 
       Object.assign(newValue, newProperties);

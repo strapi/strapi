@@ -1,163 +1,252 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs-extra');
-const webpack = require('webpack');
-const WebpackDevServer = require('webpack-dev-server');
-const { isUsingTypeScript } = require('@strapi/typescript-utils');
+const fs = require('fs/promises');
+const os = require('os');
 const chalk = require('chalk');
+const ora = require('ora');
+const ts = require('typescript');
+const strapi = require('@strapi/strapi');
+const { build: nodeBuild, develop: nodeDevelop } = require('./dist/cli');
 
-const {
-  createCacheDir,
-  getCustomWebpackConfig,
-  shouldBuildAdmin,
-  watchAdminFiles,
-} = require('./utils');
+/**
+ * @typedef {Object} BuildArgs
+ * @property {boolean} optimize
+ */
 
-async function build({ appDir, buildDestDir, env, forceBuild, optimize, options, plugins }) {
-  const buildAdmin = await shouldBuildAdmin({ appDir, plugins });
+/**
+ * @deprecated From V5 we will not be exporting build functions from the root export of the admin package.
+ *
+ * @type {(args: BuildArgs) => Promise<void>}
+ */
+async function build({ optimize }) {
+  console.warn(
+    "[@strapi/admin]: the build api exported from this package is now deprecated. We don't plan to expose this for public consumption and this will be removed in V5."
+  );
 
-  const useTypeScript = await isUsingTypeScript(path.join(appDir, 'src', 'admin'), 'tsconfig.json');
+  const enforceSourceMaps = process.env.STRAPI_ENFORCE_SOURCEMAPS === 'true' ?? false;
 
-  if (!buildAdmin && !forceBuild) {
-    return;
+  const cwd = process.cwd();
+  const logger = createLogger({ debug: true, silent: false, timestamp: false });
+
+  const tsconfig = loadTsConfig({
+    cwd,
+    path: 'tsconfig.json',
+    logger,
+  });
+
+  const distDir = tsconfig?.config.options.outDir ?? '';
+
+  const strapiInstance = strapi({
+    // Directories
+    appDir: cwd,
+    distDir,
+    // Options
+    autoReload: true,
+    serveAdminPanel: false,
+  });
+
+  await nodeBuild({
+    cwd,
+    logger,
+    minify: optimize,
+    sourcemaps: enforceSourceMaps,
+    strapi: strapiInstance,
+    tsconfig,
+  });
+}
+
+/**
+ * @typedef {Object} CleanArgs
+ * @property {string} appDir
+ * @property {string} buildDestDir
+ */
+
+/**
+ * @deprecated From V5 we will not be exporting clean functions from the root export of the admin package.
+ *
+ * @type {(args: CleanArgs) => Promise<void>}
+ */
+async function clean({ appDir, buildDestDir }) {
+  console.warn(
+    "[@strapi/admin]: the clean api exported from this package is now deprecated. We don't plan to expose this for public consumption and this will be removed in V5."
+  );
+
+  const DIRECTORIES = [
+    path.join(buildDestDir, 'build'),
+    path.join(appDir, '.cache'),
+    path.join(appDir, '.strapi'),
+  ];
+
+  await Promise.all(DIRECTORIES.map((dir) => fs.rmdir(dir, { recursive: true, force: true })));
+}
+
+/**
+ * @typedef {Object} WatchArgs
+ * @property {boolean} browser
+ * @property {boolean} open
+ * @property {boolean} polling
+ */
+
+/**
+ * @deprecated From V5 we will not be exporting watch functions from the root export of the admin package.
+ *
+ * @type {(args: WatchArgs) => Promise<void>}
+ */
+async function watchAdmin({ browser, open, polling }) {
+  console.warn(
+    [
+      "[@strapi/admin]: the watchAdmin api exported from this package is now deprecated. We don't plan to expose this for public consumption and this will be removed in V5.",
+      "This command is no longer necessary, the admin's dev server is now injected as a middleware to the strapi server. This is why we're about to start a strapi instance for you.",
+    ].join(os.EOL)
+  );
+
+  const cwd = process.cwd();
+  const logger = createLogger({ debug: false, silent: false, timestamp: false });
+
+  const tsconfig = loadTsConfig({
+    cwd,
+    path: 'tsconfig.json',
+    logger,
+  });
+
+  const distDir = tsconfig?.config.options.outDir ?? '';
+
+  const strapiInstance = strapi({
+    // Directories
+    appDir: cwd,
+    distDir,
+    // Options
+    autoReload: true,
+    serveAdminPanel: false,
+  });
+
+  await nodeDevelop({
+    cwd,
+    logger,
+    browser,
+    open,
+    polling,
+    strapi: strapiInstance,
+    tsconfig,
+  });
+}
+
+/**
+ * @internal
+ */
+const createLogger = (options = {}) => {
+  const { silent = false, debug = false, timestamp = true } = options;
+
+  const state = { errors: 0, warning: 0 };
+
+  return {
+    get warnings() {
+      return state.warning;
+    },
+
+    get errors() {
+      return state.errors;
+    },
+
+    debug(...args) {
+      if (silent || !debug) {
+        return;
+      }
+
+      console.log(
+        chalk.cyan(`[DEBUG]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        ...args
+      );
+    },
+
+    info(...args) {
+      if (silent) {
+        return;
+      }
+
+      console.info(
+        chalk.blue(`[INFO]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        ...args
+      );
+    },
+
+    log(...args) {
+      if (silent) {
+        return;
+      }
+
+      console.info(chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`), ...args);
+    },
+
+    warn(...args) {
+      state.warning += 1;
+
+      if (silent) {
+        return;
+      }
+
+      console.warn(
+        chalk.yellow(`[WARN]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        ...args
+      );
+    },
+
+    error(...args) {
+      state.errors += 1;
+
+      if (silent) {
+        return;
+      }
+
+      console.error(
+        chalk.red(`[ERROR]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        ...args
+      );
+    },
+
+    spinner(text) {
+      if (silent) {
+        return {
+          succeed() {
+            return this;
+          },
+          fail() {
+            return this;
+          },
+          start() {
+            return this;
+          },
+          text: '',
+        };
+      }
+
+      return ora(text);
+    },
+  };
+};
+
+/**
+ * @internal
+ */
+const loadTsConfig = ({ cwd, path, logger }) => {
+  const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, path);
+
+  if (!configPath) {
+    return undefined;
   }
 
-  // Create the cache dir containing the front-end files.
-  await createCacheDir({ appDir, plugins });
+  const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
 
-  const cacheDir = path.resolve(appDir, '.cache');
-  const entry = path.resolve(cacheDir, 'admin', 'src');
-  const dest = path.resolve(buildDestDir, 'build');
+  const parsedConfig = ts.parseJsonConfigFileContent(configFile.config, ts.sys, cwd);
 
-  const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
+  logger.debug(`Loaded user TS config:`, os.EOL, parsedConfig);
 
-  // Either use the tsconfig file from the generated app or the one inside the .cache folder
-  // so we can develop plugins in TS while being in a JS app
-  const tsConfigFilePath = useTypeScript
-    ? path.join(appDir, 'src', 'admin', 'tsconfig.json')
-    : path.resolve(entry, 'tsconfig.json');
-
-  const config = getCustomWebpackConfig(appDir, {
-    appDir,
-    cacheDir,
-    dest,
-    entry,
-    env,
-    optimize,
-    options,
-    pluginsPath,
-    tsConfigFilePath,
-  });
-
-  const compiler = webpack(config);
-
-  return new Promise((resolve, reject) => {
-    compiler.run((err, stats) => {
-      if (err) {
-        console.error(err.stack || err);
-
-        if (err.details) {
-          console.error(err.details);
-        }
-        return reject(err);
-      }
-
-      const info = stats.toJson();
-
-      if (stats.hasErrors()) {
-        console.error(info.errors);
-      }
-
-      return resolve({
-        stats,
-
-        warnings: info.warnings,
-      });
-    });
-  });
-}
-
-async function clean({ appDir, buildDestDir }) {
-  // FIXME rename admin build dir and path to build dir
-  const buildDir = path.join(buildDestDir, 'build');
-  // .cache dir is always located at the root of the app
-  const cacheDir = path.join(appDir, '.cache');
-
-  fs.removeSync(buildDir);
-  fs.removeSync(cacheDir);
-}
-
-async function watchAdmin({ appDir, browser, buildDestDir, host, options, plugins, port }) {
-  const useTypeScript = await isUsingTypeScript(path.join(appDir, 'src', 'admin'), 'tsconfig.json');
-  // Create the cache dir containing the front-end files.
-  const cacheDir = path.join(appDir, '.cache');
-  await createCacheDir({ appDir, plugins });
-
-  const entry = path.join(cacheDir, 'admin', 'src');
-  const dest = path.join(buildDestDir, 'build');
-  const env = 'development';
-
-  const pluginsPath = Object.keys(plugins).map((pluginName) => plugins[pluginName].pathToPlugin);
-
-  // Either use the tsconfig file from the generated app or the one inside the .cache folder
-  // so we can develop plugins in TS while being in a JS app
-  const tsConfigFilePath = useTypeScript
-    ? path.join(appDir, 'src', 'admin', 'tsconfig.json')
-    : path.resolve(entry, 'tsconfig.json');
-
-  const args = {
-    appDir,
-    cacheDir,
-    dest,
-    entry,
-    env,
-    options,
-    pluginsPath,
-    devServer: {
-      port,
-      client: {
-        logging: 'none',
-        overlay: {
-          errors: true,
-          warnings: false,
-        },
-      },
-      open: browser === 'true' ? true : browser,
-      devMiddleware: {
-        publicPath: options.adminPath,
-      },
-      historyApiFallback: {
-        index: options.adminPath,
-        disableDotRule: true,
-      },
-    },
-    tsConfigFilePath,
+  return {
+    config: parsedConfig,
+    path: configPath,
   };
-
-  const webpackConfig = getCustomWebpackConfig(appDir, args);
-
-  const compiler = webpack(webpackConfig);
-
-  const devServerArgs = {
-    ...args.devServer,
-    ...webpackConfig.devServer,
-  };
-
-  const server = new WebpackDevServer(devServerArgs, compiler);
-
-  const runServer = async () => {
-    console.log(chalk.green('Starting the development server...'));
-    console.log();
-    console.log(chalk.green(`Admin development at http://${host}:${port}${options.adminPath}`));
-
-    await server.start();
-  };
-
-  runServer();
-
-  watchAdminFiles(appDir, useTypeScript);
-}
+};
 
 module.exports = {
   clean,

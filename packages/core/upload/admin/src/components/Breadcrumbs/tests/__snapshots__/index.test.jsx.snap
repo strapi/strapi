@@ -1,0 +1,364 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
+.c15 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c6 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c12 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c14 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c4 {
+  padding-right: 4px;
+  padding-left: 4px;
+}
+
+.c7 {
+  background: #4945ff;
+  padding: 8px;
+  padding-top: 4px;
+  padding-right: 12px;
+  padding-bottom: 4px;
+  padding-left: 12px;
+  border-radius: 4px;
+  border-color: #4945ff;
+  border: 1px solid #4945ff;
+  cursor: pointer;
+}
+
+.c13 {
+  padding-top: 4px;
+  padding-right: 8px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+}
+
+.c0 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c2 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c8 {
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c9 {
+  position: relative;
+  outline: none;
+}
+
+.c9 > svg {
+  height: 12px;
+  width: 12px;
+}
+
+.c9 > svg > g,
+.c9 > svg path {
+  fill: #ffffff;
+}
+
+.c9[aria-disabled='true'] {
+  pointer-events: none;
+}
+
+.c9:after {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c9:focus-visible {
+  outline: none;
+}
+
+.c9:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c10 {
+  height: 2rem;
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+.c10 svg {
+  height: 0.75rem;
+  width: auto;
+}
+
+.c10[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c10[aria-disabled='true'] .c5 {
+  color: #666687;
+}
+
+.c10[aria-disabled='true'] svg > g,
+.c10[aria-disabled='true'] svg path {
+  fill: #666687;
+}
+
+.c10[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+}
+
+.c10[aria-disabled='true']:active .c5 {
+  color: #666687;
+}
+
+.c10[aria-disabled='true']:active svg > g,
+.c10[aria-disabled='true']:active svg path {
+  fill: #666687;
+}
+
+.c10:hover {
+  background-color: #f6f6f9;
+}
+
+.c10:active {
+  border: 1px solid undefined;
+  background: undefined;
+}
+
+.c10 .c5 {
+  color: #32324d;
+}
+
+.c10 svg > g,
+.c10 svg path {
+  fill: #8e8ea9;
+}
+
+.c1:first-child {
+  margin-left: calc(-1*8px);
+}
+
+.c3 {
+  border-radius: 4px;
+  color: #666687;
+  font-size: 0.75rem;
+  line-height: 1.43;
+  padding: 4px 8px;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.c3:hover,
+.c3:focus {
+  background-color: #dcdce4;
+  color: #4a4a6a;
+}
+
+.c11 {
+  padding: 4px 8px;
+  height: unset;
+}
+
+.c11:hover,
+.c11:focus {
+  background-color: #dcdce4;
+}
+
+<div>
+  <nav
+    aria-label="Navigation"
+    class=""
+  >
+    <ol
+      class="c0 c1"
+    >
+      <li
+        class="c2"
+      >
+        <a
+          aria-current="page"
+          class="c3 active"
+          href="/"
+        >
+          Media Library
+        </a>
+        <div
+          aria-hidden="true"
+          class="c4"
+        >
+          <span
+            class="c5 c6"
+          >
+            /
+          </span>
+        </div>
+      </li>
+      <li
+        class="c2"
+      >
+        <button
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="Get more ascendants folders"
+          class="c7 c8 c9 c10 c11 sc-iwjdpV c10"
+          data-state="closed"
+          id="radix-:r1:"
+          label="..."
+          type="button"
+        >
+          <span
+            class="c5 c12"
+          >
+            <span
+              class="c5 c12"
+            >
+              ...
+            </span>
+          </span>
+        </button>
+        <div
+          aria-hidden="true"
+          class="c4"
+        >
+          <span
+            class="c5 c6"
+          >
+            /
+          </span>
+        </div>
+      </li>
+      <li
+        class="c2"
+      >
+        <a
+          aria-current="page"
+          class="c3 active"
+          href="/"
+        >
+          parent folder
+        </a>
+        <div
+          aria-hidden="true"
+          class="c4"
+        >
+          <span
+            class="c5 c6"
+          >
+            /
+          </span>
+        </div>
+      </li>
+      <li
+        class="c2"
+      >
+        <div
+          class="c13"
+        >
+          <span
+            aria-current="true"
+            class="c5 c14"
+          >
+            current folder
+          </span>
+        </div>
+      </li>
+    </ol>
+  </nav>
+  <div
+    class="c15"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </div>
+</div>
+`;

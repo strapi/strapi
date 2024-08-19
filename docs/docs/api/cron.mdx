@@ -2,12 +2,13 @@
 title: Cron Service
 slug: /api/Cron
 tags:
-- module
-- public
+  - module
+  - public
 
 toc_min_heading_level: 2
 toc_max_heading_level: 3
 ---
+
 import Type from '@site/docs/api/components/type';
 
 # Cron
@@ -19,7 +20,6 @@ Current state: **Stable**
 :::
 
 The Strapi Cron Service provides a way to add, remove, start, and stop cron jobs in a Strapi application.
-
 
 ## Module: Cron Service
 
@@ -43,6 +43,7 @@ Adds one or more cron tasks to the service.
 - If the value is an object, its `task` property is used as the task function, and its `options` property is used as the cron expression options.
 
 #### Example
+
 ```javascript
 const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
 
@@ -71,6 +72,7 @@ Removes a cron task from the service.
 - The `name` parameter is the name of the task to remove.
 
 #### Example
+
 ```javascript
 const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
 
@@ -99,6 +101,7 @@ Starts the cron service.
 - Schedules all the cron jobs.
 
 #### Example
+
 ```javascript
 const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
 
@@ -127,6 +130,7 @@ Stops the cron service.
 - Cancels all the scheduled jobs.
 
 #### Example
+
 ```javascript
 const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
 
@@ -159,6 +163,7 @@ Destroys the cron service.
 - Clears the list of cron jobs.
 
 #### Example
+
 ```javascript
 const { createCronService } = require('packages/core/strapi/lib/services/cron.js');
 
@@ -184,12 +189,13 @@ cron.destroy();
 ## Properties
 
 ### `cron.jobs`
+
 - <Type>Array</Type>
 
   - <Type>Object</Type>
 
     - `job`: [<Type>Job</Type>](https://github.com/node-schedule/node-schedule) - Job object by node-schedule
-    - `options`: <Type>String</Type> - String representing the recurrence of the job ( like '*/5 * * * *' )
+    - `options`: <Type>String</Type> - String representing the recurrence of the job ( like '_/5 _ \* \* \*' )
     - `name`: <Type>String</Type> - The name of the task associated to the job
 
 An array of the cron jobs added to the service.

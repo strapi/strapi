@@ -1,8 +1,8 @@
-import { WebSocket } from 'ws';
 import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
+import { WebSocket } from 'ws';
 import { once } from 'lodash/fp';
-import type { Schema, Utils } from '@strapi/strapi';
+import type { Schema, Utils } from '@strapi/types';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 

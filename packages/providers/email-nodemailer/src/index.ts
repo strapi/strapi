@@ -32,7 +32,7 @@ const emailFields = [
   'attachments',
 ];
 
-export = {
+export default {
   provider: 'nodemailer',
   name: 'Nodemailer',
 

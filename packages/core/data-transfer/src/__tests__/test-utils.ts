@@ -1,4 +1,5 @@
 import { Readable } from 'stream';
+import type { LoadedStrapi } from '@strapi/types';
 import type { ITransferEngine, ISourceProvider, IDestinationProvider } from '../../types';
 
 /**
@@ -24,13 +25,13 @@ export const collect = <T = unknown>(stream: Readable): Promise<T[]> => {
 export const getStrapiFactory =
   <
     T extends {
-      [key in keyof Partial<Strapi.Strapi>]: unknown;
+      [key in keyof Partial<LoadedStrapi>]: unknown;
     }
   >(
     properties?: T
   ) =>
-  (additionalProperties?: T) => {
-    return { ...properties, ...additionalProperties } as Strapi.Strapi;
+  (additionalProperties?: Partial<T>) => {
+    return { ...properties, ...additionalProperties } as LoadedStrapi;
   };
 
 /**
@@ -105,7 +106,7 @@ export const destinationStages = [
 /**
  * Update the global store with the given strapi value
  */
-export const setGlobalStrapi = (strapi: Strapi.Strapi): void => {
+export const setGlobalStrapi = (strapi: LoadedStrapi): void => {
   (global as unknown as Global).strapi = strapi;
 };
 
@@ -144,7 +145,28 @@ export const extendExpectForDataTransferTests = () => {
         message: () => 'Expected engine not to be valid',
       };
     },
-    toHaveSourceStagesCalledTimes(provider: ISourceProvider, times: number) {
+    toHaveSourceStagesCalledTimes(
+      provider: ISourceProvider,
+      stages: (keyof ISourceProvider)[],
+      times: number
+    ) {
+      try {
+        stages.forEach((stage) => {
+          expect(provider[stage as string].mock.results.length).toEqual(times);
+        });
+        return {
+          pass: true,
+          message: () => 'Expected source provider not to have all stages called',
+        };
+      } catch (e) {
+        return {
+          pass: false,
+          message: () =>
+            `Expected destination sources to have stages ${stages} called ${times} times`,
+        };
+      }
+    },
+    toHaveAllSourceStagesCalledTimes(provider: ISourceProvider, times: number) {
       const missing = sourceStages.filter((stage) => {
         if (provider[stage]) {
           try {
@@ -171,7 +193,28 @@ export const extendExpectForDataTransferTests = () => {
         message: () => 'Expected source provider not to have all stages called',
       };
     },
-    toHaveDestinationStagesCalledTimes(provider: IDestinationProvider, times: number) {
+    toHaveDestinationStagesCalledTimes(
+      provider: IDestinationProvider,
+      stages: (keyof IDestinationProvider)[],
+      times = 1
+    ) {
+      try {
+        stages.forEach((stage) => {
+          expect(provider[stage as string].mock.results.length).toEqual(times);
+        });
+        return {
+          pass: true,
+          message: () => 'Expected destination provider not to have all stages called',
+        };
+      } catch (e) {
+        return {
+          pass: false,
+          message: () =>
+            `Expected destination provider to have stages ${stages} called ${times} times`,
+        };
+      }
+    },
+    toHaveAllDestinationStagesCalledTimes(provider: IDestinationProvider, times: number) {
       const missing = destinationStages.filter((stage) => {
         if (provider[stage]) {
           try {

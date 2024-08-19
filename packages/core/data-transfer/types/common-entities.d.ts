@@ -1,5 +1,5 @@
-import type { Attribute, Common } from '@strapi/strapi';
 import type { Readable } from 'stream';
+import type { Attribute, Common } from '@strapi/types';
 
 export interface IMetadata {
   strapi?: {
@@ -130,6 +130,7 @@ export interface IConfiguration<T = unknown> {
 }
 
 interface IFile {
+  id: number;
   name: string;
   alternativeText?: string;
   caption?: string;

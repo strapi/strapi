@@ -1,0 +1,37 @@
+---
+title: Check
+tags:
+  - pack-up
+  - CLI
+---
+
+## Usage
+
+```bash
+$ yarn pack-up check
+```
+
+Checks your current package to ensure it's interoperable in the real world. In short, validates the files
+in your dist have been produced as we expect & then `esbuild` can actually build, using your exported code.
+
+## API
+
+### Usage
+
+```ts
+import { check } from '@strapi/pack-up';
+
+check();
+```
+
+## Typescript
+
+```ts
+interface CheckOptions {
+  cwd?: string;
+  debug?: boolean;
+  silent?: boolean;
+}
+
+type Check = (options?: CheckOptions) => Promise<void>;
+```

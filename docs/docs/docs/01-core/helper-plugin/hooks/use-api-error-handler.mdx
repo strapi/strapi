@@ -24,25 +24,23 @@ import { useAPIErrorHandler, useFetchClient, useNotification } from '@strapi/hel
 import getTrad from '../utils';
 
 const Component = () => {
-    const { get } = useFetchClient();
-    const { formatAPIError } = useAPIErrorHandler(getTrad);
-    const toggleNotification = useNotification();
+  const { get } = useFetchClient();
+  const { formatAPIError } = useAPIErrorHandler(getTrad);
+  const toggleNotification = useNotification();
 
-    const handleDeleteItem = async () => {
-        try {
-            return await get('/admin');
-        } catch(error) {
-            toggleNotification({
-                type: 'warning',
-                message: formatAPIError(error)
-            })
-        }
+  const handleDeleteItem = async () => {
+    try {
+      return await get('/admin');
+    } catch (error) {
+      toggleNotification({
+        type: 'warning',
+        message: formatAPIError(error),
+      });
     }
+  };
 
-    return (
-        <button onClick={handleDeleteItem}>Delete item</button>
-    )
-}
+  return <button onClick={handleDeleteItem}>Delete item</button>;
+};
 ```
 
 ## Methods

@@ -1,11 +1,11 @@
 'use strict';
 
+const path = require('path');
+const assert = require('assert');
 const ts = require('typescript');
 const prettier = require('prettier');
 const fse = require('fs-extra');
-const path = require('path');
 const chalk = require('chalk');
-const assert = require('assert');
 
 const { factory } = ts;
 
@@ -92,7 +92,7 @@ const generateSharedExtensionDefinition = (registry, definitions) => {
 
   return factory.createModuleDeclaration(
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
-    factory.createStringLiteral('@strapi/strapi', true),
+    factory.createStringLiteral('@strapi/types', true),
     factory.createModuleBlock([
       factory.createModuleDeclaration(
         [factory.createModifier(ts.SyntaxKind.ExportKeyword)],

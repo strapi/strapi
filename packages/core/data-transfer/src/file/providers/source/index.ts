@@ -1,14 +1,14 @@
 import type { Readable } from 'stream';
 
-import fs from 'fs-extra';
 import zip from 'zlib';
-import tar from 'tar';
 import path from 'path';
+import { pipeline, PassThrough } from 'stream';
+import fs from 'fs-extra';
+import tar from 'tar';
 import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
-import { pipeline, PassThrough } from 'stream';
 import { parser } from 'stream-json/jsonl/Parser';
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
 
@@ -286,8 +286,8 @@ class LocalFileSourceProvider implements ISourceProvider {
               const content = await entry.collect();
 
               try {
-                // Parse from buffer to string to JSON
-                const parsedContent = JSON.parse(content.toString());
+                // Parse from buffer array to string to JSON
+                const parsedContent = JSON.parse(Buffer.concat(content).toString());
 
                 // Resolve the Promise with the parsed content
                 resolve(parsedContent);

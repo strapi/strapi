@@ -8,7 +8,10 @@ tags:
 ---
 
 An abstraction around `react-dnd`'s `useDrag` and `useDrop` hooks. It provides a simple API to handle drag and drop
-events maintaining the same behaviour across the application e.g. when we consider the item to be above a new drop zone.
+events maintaining the same behaviour across the application e.g.
+
+1. When we consider the item to be above a new drop zone and move it immediately.
+2. Item is above the drop zone, we move it when user drops it.
 
 This hook also wraps an internal hook `useKeyboardDragAndDrop` which implements keyboard accessibile drag and drop by
 returning an onKeyDown handler to be passed to the component's drag icon button.
@@ -20,10 +23,10 @@ The following examples assume that you have already set up the `DndProvider` wit
 that you are somewhat familiar with `@strapi/design-system` components.
 :::
 
-### Basic usage
+### Basic usage - Move items on hovering over drop zone
 
-Below is a basic example usage where we're not interested in rendering custom previews in the DragLayer. However, we do replace
-the current item with a placeholder.
+Below is a basic example usage where we move items immediately and we're not interested in rendering custom previews in the DragLayer.
+However, we do replace the current item with a placeholder.
 
 ```jsx
 import { Box, Flex, IconButton } from '@strapi/design-system';
@@ -67,10 +70,55 @@ const MyComponent = ({ onMoveItem }) => {
 };
 ```
 
+### Basic usage - Move items on dropping over drop zone
+
+Below is a basic example usage where we move items immediately without custom previews in the DragLayer. We do not replace
+the current item until its dropped and show a drop placeholder instead next to drop target using drag direction.
+
+```jsx
+import { Box, Flex, IconButton } from '@strapi/design-system';
+import { Drag } from '@strapi/icons';
+
+import { useDragAndDrop } from 'path/to/hooks';
+import { composeRefs } from 'path/to/utils';
+
+import { Placeholder } from './Placeholder';
+
+const MyComponent = ({ onDropItem }) => {
+  const [{ handlerId, handleKeyDown, isOverDropTarget, direction }, myRef, dropRef, dragRef] =
+    useDragAndDrop(true, {
+      type: 'my-type',
+      index,
+      onDropItem,
+    });
+
+  const composedRefs = composeRefs(myRef, dragRef);
+
+  return (
+    <Box ref={dropRef} cursor={'all-scroll'}>
+      {isOverDropTarget && <Placeholder direction={direction} />}
+      <Flex ref={composedRefs} data-handler-id={handlerId}>
+        <IconButton
+          forwardedAs="div"
+          role="button"
+          tabIndex={0}
+          aria-label="Drag"
+          noBorder
+          onKeyDown={handleKeyDown}
+        >
+          <Drag />
+        </IconButton>
+        {'My item'}
+      </Flex>
+    </Box>
+  );
+};
+```
+
 ### Using custom previews
 
-The only really difference between the previous example and this one is
-that we're using the `getEmptyImage` function from `react-dnd-html5-backend`.
+The only really difference between the previous example and this one is that
+we're using the `getEmptyImage` function from `react-dnd-html5-backend` to render custom previews in the DragLayer.
 
 ```jsx
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -129,8 +177,8 @@ import { Identifier } from 'dnd-core';
 import { ConnectDropTarget, ConnectDragSource, ConnectDragPreview } from 'react-dnd';
 
 interface UseDragAndDropOptions {
-  index: number;
-  onMoveItem: (newIndex: number, currentIndex: number) => void;
+  index: number | Array<number>;
+  onMoveItem?: (newIndex: number | Array<number>, currentIndex: number | Array<number>) => void;
   /**
    * @default "regular"
    * Defines whether the change in index should be immediately over another
@@ -143,7 +191,7 @@ interface UseDragAndDropOptions {
    */
   type?: string;
   onCancel?: (index: number) => void;
-  onDropItem?: (index: number) => void;
+  onDropItem?: (currentIndex: number | Array<number>, newIndex: number | Array<number>) => void;
   onEnd?: () => void;
   onGrabItem?: (index: number) => void;
   onStart?: () => void;
@@ -154,6 +202,8 @@ type UseDragAndDropReturn = [
     handlerId: Identifier;
     isDragging: boolean;
     handleKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+    isOverDropTarget: boolean;
+    direction: string;
   },
   objectRef: React.RefObject<HTMLElement>,
   dropRef: ConnectDropTarget,

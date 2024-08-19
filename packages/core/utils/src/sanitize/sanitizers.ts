@@ -1,7 +1,7 @@
 import { curry, isEmpty, isNil, isArray, isObject } from 'lodash/fp';
 
 import { pipeAsync } from '../async';
-import traverseEntity, { Data } from '../traverse-entity';
+import traverseEntity from '../traverse-entity';
 import { isScalarAttribute } from '../content-types';
 
 import {
@@ -19,13 +19,19 @@ import {
 } from './visitors';
 import { isOperator } from '../operators';
 
-import type { Model } from '../types';
+import type { Model, Data } from '../types';
 
 const sanitizePasswords = (schema: Model) => async (entity: Data) => {
+  if (!schema) {
+    throw new Error('Missing schema in sanitizePasswords');
+  }
   return traverseEntity(removePassword, { schema }, entity);
 };
 
 const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeOutput');
+  }
   return traverseEntity(
     (...args) => {
       removePassword(...args);
@@ -37,13 +43,22 @@ const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
 };
 
 const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeFilters');
+  }
   return pipeAsync(
     // Remove keys that are not attributes or valid operators
     traverseQueryFilters(
       ({ key, attribute }, { remove }) => {
         const isAttribute = !!attribute;
 
-        if (!isAttribute && !isOperator(key) && key !== 'id') {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not checking it
+        if (key === 'id') {
+          return;
+        }
+
+        if (!isAttribute && !isOperator(key)) {
           remove(key);
         }
       },
@@ -70,12 +85,15 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
 });
 
 const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeSort');
+  }
   return pipeAsync(
     // Remove non attribute keys
     traverseQuerySort(
       ({ key, attribute }, { remove }) => {
         // ID is not an attribute per se, so we need to make
-        // an extra check to ensure we're not removing it
+        // an extra check to ensure we're not checking it
         if (key === 'id') {
           return;
         }
@@ -97,6 +115,12 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
     // Remove keys for empty non-scalar values
     traverseQuerySort(
       ({ key, attribute, value }, { remove }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not removing it
+        if (key === 'id') {
+          return;
+        }
+
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
           remove(key);
         }
@@ -107,10 +131,19 @@ const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
 });
 
 const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizeFields');
+  }
   return pipeAsync(
     // Only keep scalar attributes
     traverseQueryFields(
       ({ key, attribute }, { remove }) => {
+        // ID is not an attribute per se, so we need to make
+        // an extra check to ensure we're not checking it
+        if (key === 'id') {
+          return;
+        }
+
         if (isNil(attribute) || !isScalarAttribute(attribute)) {
           remove(key);
         }
@@ -127,6 +160,9 @@ const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
 });
 
 const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
+  if (!schema) {
+    throw new Error('Missing schema in defaultSanitizePopulate');
+  }
   return pipeAsync(
     traverseQueryPopulate(
       async ({ key, value, schema, attribute }, { set }) => {

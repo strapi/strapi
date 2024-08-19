@@ -1,8 +1,8 @@
 'use strict';
 
+const path = require('path');
 const utils = require('@strapi/utils');
 const { isString, has, toLower } = require('lodash/fp');
-const path = require('path');
 
 const { RateLimitError } = utils.errors;
 

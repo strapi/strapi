@@ -1,20 +1,19 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    
-    "compilerOptions": {
-        "module": "ES2020",
-        "moduleResolution": "node",
-        "lib": ["ES2020", "DOM"],
-        "target": "ES5",
-
-        "jsx": "react",
-        "sourceMap": true,
-        "incremental": true,
-
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        "resolveJsonModule": true,
-        "noEmit": true,
-        "skipLibCheck": true
-    }
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  }
 }

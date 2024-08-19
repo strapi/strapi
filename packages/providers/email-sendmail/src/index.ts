@@ -19,7 +19,7 @@ interface SendOptions {
 
 type ProviderOptions = Options;
 
-export = {
+export default {
   init(providerOptions: ProviderOptions, settings: Settings) {
     const sendmail = sendmailFactory({
       silent: true,

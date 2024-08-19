@@ -25,7 +25,10 @@ export default async (scope: Scope) => {
       defaultConfigs[client as keyof typeof defaultConfigs] || {},
       scope.database
     ),
-    dependencies: clientDependencies({ scope, client } as { scope: Scope; client: ClientName }),
+    dependencies: {
+      ...clientDependencies({ scope, client } as { scope: Scope; client: ClientName }),
+      ...scope.additionalsDependencies,
+    },
   };
 
   return createProject(scope, configuration);

@@ -45,6 +45,6 @@ function getCodeCommands(files) {
 }
 
 module.exports = {
-  '*.{js,ts}': getCodeCommands,
-  '*.{md,css,scss,yaml,yml}': ['prettier --write'],
+  '*.{js,ts,jsx,tsx,json}': getCodeCommands,
+  '*.{md,mdx,css,scss,yaml,yml}': ['prettier --write'],
 };
