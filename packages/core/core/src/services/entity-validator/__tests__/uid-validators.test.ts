@@ -38,167 +38,180 @@ describe('UID validator', () => {
   };
 
   describe('unique', () => {
-    test('it validates the unique constraint if there is no other record in the database', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
+    describe('draft', () => {
+      test('ignores unique validation', async () => {
+        fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unique-uid' });
+        const valueToCheck = 'non-unique-uid';
 
-      const validator = strapiUtils.validateYupSchema(
-        Validators.uid(
-          {
-            attr: { type: 'uid' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
-            entity: null,
-          },
-          mockOptions
-        )
-      );
+        const validator = strapiUtils.validateYupSchema(
+          Validators.uid(
+            {
+              attr: { type: 'uid' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
+              entity: null,
+            },
+            mockOptions
+          )
+        );
 
-      expect(await validator('non-unique-uid')).toBe('non-unique-uid');
-      expect(fakeFindOne).toHaveBeenCalled();
-    });
-
-    test('it does not validates the unique constraint if the attribute value is `null`', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
-
-      const validator = strapiUtils.validateYupSchema(
-        Validators.uid(
-          {
-            attr: { type: 'uid' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrUidUnique', value: null },
-            entity: null,
-          },
-          mockOptions
-        ).nullable()
-      );
-
-      await validator(null);
-
-      expect(fakeFindOne).not.toHaveBeenCalled();
-    });
-
-    test.only('it always validates the unique constraint even if the attribute is not set as unique', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
-      const valueToCheck = 'non-unique-uid';
-
-      const validator = strapiUtils.validateYupSchema(
-        Validators.uid(
-          {
-            attr: { type: 'uid' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
-            entity: null,
-          },
-          mockOptions
-        )
-      );
-
-      expect(await validator(valueToCheck)).toBe(valueToCheck);
-      expect(fakeFindOne).toHaveBeenCalledWith({
-        where: {
-          locale: 'en',
-          publishedAt: null,
-          attrUidUnique: valueToCheck,
-        },
+        expect(await validator(valueToCheck)).toBe(valueToCheck);
       });
     });
 
-    test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
-      expect.assertions(1);
-      fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unique-uid' });
+    describe('published', () => {
+      const options = { ...mockOptions, isDraft: false };
 
-      const validator = strapiUtils.validateYupSchema(
-        Validators.uid(
-          {
-            attr: { type: 'uid' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
-            entity: null,
-          },
-          mockOptions
-        )
-      );
+      test('it validates the unique constraint if there is no other record in the database', async () => {
+        fakeFindOne.mockResolvedValueOnce(null);
 
-      try {
-        await validator('unique-uid');
-      } catch (err) {
-        expect(err).toBeInstanceOf(errors.YupValidationError);
-      }
-    });
+        const validator = strapiUtils.validateYupSchema(
+          Validators.uid(
+            {
+              attr: { type: 'uid' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
+              entity: null,
+            },
+            options
+          )
+        );
 
-    test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unchanged-unique-uid' });
-
-      const validator = strapiUtils.validateYupSchema(
-        Validators.uid(
-          {
-            attr: { type: 'uid' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrUidUnique', value: 'unchanged-unique-uid' },
-            entity: { id: 1, attrUidUnique: 'unchanged-unique-uid' },
-          },
-          mockOptions
-        )
-      );
-
-      expect(await validator('unchanged-unique-uid')).toBe('unchanged-unique-uid');
-    });
-
-    const valueToCheck = 'unique-uid';
-    test('it checks the database for records with the same value for the checked attribute', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
-
-      const validator = strapiUtils.validateYupSchema(
-        Validators.uid(
-          {
-            attr: { type: 'uid' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
-            entity: null,
-          },
-          mockOptions
-        )
-      );
-
-      await validator(valueToCheck);
-
-      expect(fakeFindOne).toHaveBeenCalledWith({
-        where: {
-          locale: 'en',
-          publishedAt: null,
-          attrUidUnique: valueToCheck,
-        },
+        expect(await validator('non-unique-uid')).toBe('non-unique-uid');
+        expect(fakeFindOne).toHaveBeenCalled();
       });
-    });
 
-    test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
-      fakeFindOne.mockResolvedValueOnce(null);
+      test('it does not validates the unique constraint if the attribute value is `null`', async () => {
+        fakeFindOne.mockResolvedValueOnce(null);
 
-      const validator = strapiUtils.validateYupSchema(
-        Validators.uid(
-          {
-            attr: { type: 'uid' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
-            entity: { id: 1, attrUidUnique: 'other-uid' },
+        const validator = strapiUtils.validateYupSchema(
+          Validators.uid(
+            {
+              attr: { type: 'uid' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: null },
+              entity: null,
+            },
+            options
+          ).nullable()
+        );
+
+        await validator(null);
+
+        expect(fakeFindOne).not.toHaveBeenCalled();
+      });
+
+      test('it always validates the unique constraint even if the attribute is not set as unique', async () => {
+        fakeFindOne.mockResolvedValueOnce(null);
+        const valueToCheck = 'non-unique-uid';
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.uid(
+            {
+              attr: { type: 'uid' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        expect(await validator(valueToCheck)).toBe(valueToCheck);
+        expect(fakeFindOne).toHaveBeenCalledWith({
+          where: {
+            locale: 'en',
+            publishedAt: { $notNull: true },
+            attrUidUnique: valueToCheck,
           },
-          mockOptions
-        )
-      );
+          select: ['id'],
+        });
+      });
 
-      await validator(valueToCheck);
+      test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
+        expect.assertions(1);
+        fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unique-uid' });
 
-      expect(fakeFindOne).toHaveBeenCalledWith({
-        where: {
-          locale: 'en',
-          publishedAt: null,
-          attrUidUnique: valueToCheck,
-        },
+        const validator = strapiUtils.validateYupSchema(
+          Validators.uid(
+            {
+              attr: { type: 'uid' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: 'unique-uid' },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        try {
+          await validator('unique-uid');
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
+      });
+
+      const valueToCheck = 'unique-uid';
+      test('it checks the database for records with the same value for the checked attribute', async () => {
+        fakeFindOne.mockResolvedValueOnce(null);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.uid(
+            {
+              attr: { type: 'uid' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
+              entity: null,
+            },
+            options
+          )
+        );
+
+        await validator(valueToCheck);
+
+        expect(fakeFindOne).toHaveBeenCalledWith({
+          where: {
+            locale: 'en',
+            publishedAt: { $notNull: true },
+            attrUidUnique: valueToCheck,
+          },
+          select: ['id'],
+        });
+      });
+
+      test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
+        fakeFindOne.mockResolvedValueOnce(null);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.uid(
+            {
+              attr: { type: 'uid' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrUidUnique', value: valueToCheck },
+              entity: { id: 1, attrUidUnique: 'other-uid' },
+            },
+            options
+          )
+        );
+
+        await validator(valueToCheck);
+
+        expect(fakeFindOne).toHaveBeenCalledWith({
+          where: {
+            locale: 'en',
+            id: { $ne: 1 },
+            publishedAt: { $notNull: true },
+            attrUidUnique: valueToCheck,
+          },
+          select: ['id'],
+        });
       });
     });
   });
 
   describe('regExp', () => {
+    const options = { ...mockOptions, isDraft: false };
+
     test('it fails to validate the uid if it does not fit the requried format', async () => {
       expect.assertions(1);
       fakeFindOne.mockResolvedValueOnce(null);
@@ -211,7 +224,7 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,
           },
-          mockOptions
+          options
         )
       );
 
@@ -233,7 +246,7 @@ describe('UID validator', () => {
             updatedAttribute: { name: 'attrUidUnique', value: 'non-unique-uid' },
             entity: null,
           },
-          mockOptions
+          options
         )
       );
 

@@ -410,7 +410,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         <FormProvider
           disabled={disabled}
           onChange={handleChange}
-          initialValues={initialValues}
+          initialValues={initialValues.current}
           modified={modified}
           addFieldRow={addFieldRow}
           moveFieldRow={moveFieldRow}

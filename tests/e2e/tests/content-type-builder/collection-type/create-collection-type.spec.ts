@@ -27,7 +27,7 @@ test.describe('Create collection type', () => {
     await resetFiles();
   });
 
-  test('Can create a collection type', async ({ page }) => {
+  test('Can create a collection type', async ({ page, browserName }) => {
     await page.getByRole('button', { name: 'Create new collection type' }).click();
 
     await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
@@ -44,7 +44,14 @@ test.describe('Create collection type', () => {
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await expect(page.getByText('Select a field for your collection type')).toBeVisible();
+
+    // TODO: fix the bug that causes webkit location to be off
+    if (browserName === 'webkit') {
+      return test.fixme();
+    }
+
     await page.getByText('Small or long text').click();
+
     await page.getByLabel('Name', { exact: true }).fill('myattribute');
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();

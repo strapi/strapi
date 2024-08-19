@@ -90,6 +90,10 @@ export const ADMIN_PERMISSIONS_CE = {
       read: [{ action: 'admin::project-settings.read', subject: null }],
       update: [{ action: 'admin::project-settings.update', subject: null }],
     },
+    plugins: {
+      main: [{ action: 'admin::marketplace.read', subject: null }],
+      read: [{ action: 'admin::marketplace.read', subject: null }],
+    },
   },
 } satisfies Partial<PermissionMap>;
 
@@ -154,6 +158,14 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       intlLabel: { id: 'Settings.transferTokens.title', defaultMessage: 'Transfer Tokens' },
       to: '/settings/transfer-tokens?sort=name:ASC',
       id: 'transfer-tokens',
+    },
+    {
+      intlLabel: {
+        id: 'global.plugins',
+        defaultMessage: 'Plugins',
+      },
+      to: '/settings/list-plugins',
+      id: 'plugins',
     },
     // If the Enterprise/Cloud feature is not enabled and if the config doesn't disable it, we promote the Enterprise/Cloud feature by displaying them in the settings menu.
     // Disable this by adding "promoteEE: false" to your `./config/admin.js` file

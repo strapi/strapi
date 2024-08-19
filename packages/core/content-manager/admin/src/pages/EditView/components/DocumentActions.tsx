@@ -8,7 +8,6 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
-  Box,
   Button,
   Dialog,
   Flex,
@@ -29,7 +28,7 @@ import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { CLONE_PATH } from '../../../router';
+import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
@@ -516,12 +515,10 @@ const PublishAction: DocumentActionComponent = ({
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
+  const isListView = useMatch(LIST_PATH) !== null;
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
-  const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
-    'PublishAction',
-    ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
-  );
+  const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { publish } = useDocumentActions();
   const [
     countDraftRelations,
@@ -591,7 +588,9 @@ const PublishAction: DocumentActionComponent = ({
   }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
   React.useEffect(() => {
-    if (documentId) {
+    if (documentId && !isListView) {
+      // We don't want to call count draft relations if in the list view. There is no
+      // use for the response.
       const fetchDraftRelationsCount = async () => {
         const { data, error } = await countDraftRelations({
           collectionType,
@@ -611,7 +610,7 @@ const PublishAction: DocumentActionComponent = ({
 
       fetchDraftRelationsCount();
     }
-  }, [documentId, countDraftRelations, collectionType, model, params]);
+  }, [isListView, documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -746,10 +745,6 @@ const UpdateAction: DocumentActionComponent = ({
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { canCreate, canUpdate } = useDocumentRBAC('UpdateAction', ({ canCreate, canUpdate }) => ({
-    canCreate,
-    canUpdate,
-  }));
   const { create, update, clone } = useDocumentActions();
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -778,19 +773,23 @@ const UpdateAction: DocumentActionComponent = ({
       setSubmitting(true);
 
       try {
-        const { errors } = await validate();
+        // TODO: This is not what we should do. We should just run some validation and skip others instead.
+        // Don't run the validation for drafts
+        if (activeTab !== 'draft') {
+          const { errors } = await validate();
 
-        if (errors) {
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: 'content-manager.validation.error',
-              defaultMessage:
-                'There are validation errors in your document. Please fix them before saving.',
-            }),
-          });
+          if (errors) {
+            toggleNotification({
+              type: 'danger',
+              message: formatMessage({
+                id: 'content-manager.validation.error',
+                defaultMessage:
+                  'There are validation errors in your document. Please fix them before saving.',
+              }),
+            });
 
-          return;
+            return;
+          }
         }
 
         if (isCloning) {
