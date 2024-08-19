@@ -37,7 +37,7 @@ const getEnvBool = (envVar, defaultValue) => {
 const createConfig = ({ port, testDir, appDir }) => ({
   testDir,
 
-  /* default timeout for a test to 30s */
+  /* default timeout for a test */
   timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
 
   expect: {
