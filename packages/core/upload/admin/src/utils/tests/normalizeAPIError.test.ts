@@ -35,7 +35,6 @@ const API_APPLICATION_ERROR_FIXTURE = new FetchError('ApplicationError', {
       details: {},
     },
   },
-  status: 400,
 });
 
 describe('normalizeAPIError', () => {
@@ -66,7 +65,7 @@ describe('normalizeAPIError', () => {
   });
 
   test('Handle ValidationError with custom prefix function', () => {
-    const prefixFunction = (id) => `custom.${id}`;
+    const prefixFunction = (id: string) => `custom.${id}`;
 
     expect(normalizeAPIError(API_VALIDATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ValidationError',
@@ -103,7 +102,7 @@ describe('normalizeAPIError', () => {
   });
 
   test('Handle ApplicationError with custom prefix function', () => {
-    const prefixFunction = (id) => `custom.${id}`;
+    const prefixFunction = (id: string) => `custom.${id}`;
 
     expect(normalizeAPIError(API_APPLICATION_ERROR_FIXTURE, prefixFunction)).toStrictEqual({
       name: 'ApplicationError',
