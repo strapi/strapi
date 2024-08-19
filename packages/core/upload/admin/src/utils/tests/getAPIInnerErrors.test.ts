@@ -1,6 +1,6 @@
 import { FetchError } from '@strapi/admin/strapi-admin';
 
-import getAPIInnerErrors from '../getAPIInnerErrors';
+import { getAPIInnerErrors } from '../getAPIInnerErrors';
 
 const API_VALIDATION_ERROR_FIXTURE = new FetchError('ValidationError', {
   data: {
@@ -24,7 +24,6 @@ const API_VALIDATION_ERROR_FIXTURE = new FetchError('ValidationError', {
       },
     },
   },
-  status: 422,
 });
 
 const API_APPLICATION_ERROR_FIXTURE = new FetchError('ApplicationError', {
@@ -35,10 +34,9 @@ const API_APPLICATION_ERROR_FIXTURE = new FetchError('ApplicationError', {
       details: {},
     },
   },
-  status: 400,
 });
 
-describe('getAPIInnerError', () => {
+describe('getAPIInnerErrors', () => {
   test('handles ValidationError errors', () => {
     expect(
       getAPIInnerErrors(API_VALIDATION_ERROR_FIXTURE, { getTrad: (translation) => translation })

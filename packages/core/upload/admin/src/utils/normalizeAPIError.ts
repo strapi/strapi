@@ -1,7 +1,7 @@
 import type { errors } from '@strapi/utils';
 import type { FetchError } from '@strapi/admin/strapi-admin';
 
-type ApiError =
+export type ApiError =
   | errors.ApplicationError
   | errors.ForbiddenError
   | errors.NotFoundError
@@ -14,13 +14,13 @@ type ApiError =
   | errors.ValidationError
   | errors.YupValidationError;
 
-interface YupFormattedError {
+export interface YupFormattedError {
   path: string[];
   message: string;
   name: string;
 }
 
-interface NormalizeErrorOptions {
+export interface NormalizeErrorOptions {
   name?: string;
   intlMessagePrefixCallback?: (id: string) => string;
 }

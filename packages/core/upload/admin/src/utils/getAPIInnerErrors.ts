@@ -1,15 +1,26 @@
 import { normalizeAPIError } from './normalizeAPIError';
+import type { FetchError } from '@strapi/admin/strapi-admin';
+
+type GetAPIInnerErrorsReturn = {
+  [key: string]: {
+    id: string;
+    defaultMessage: string;
+  };
+};
 
 /**
  *
  * Returns a normalized error message
  *
  */
-function getAPIInnerErrors(error, { getTrad }) {
+export function getAPIInnerErrors(
+  error: FetchError,
+  { getTrad }: { getTrad: (key: string) => string }
+) {
   const normalizedError = normalizeAPIError(error, getTrad);
 
   if (normalizedError && 'errors' in normalizedError) {
-    return normalizedError.errors.reduce((acc, error) => {
+    return normalizedError.errors.reduce<GetAPIInnerErrorsReturn>((acc, error) => {
       if ('path' in error.values) {
         acc[error.values.path] = {
           id: error.id,
@@ -23,5 +34,3 @@ function getAPIInnerErrors(error, { getTrad }) {
 
   return normalizedError?.defaultMessage;
 }
-
-export default getAPIInnerErrors;

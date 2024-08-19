@@ -12,4 +12,4 @@ export { getTrad } from './getTrad';
 export { toSingularTypes } from './toSingularTypes';
 export { getFileExtension } from './getFileExtension';
 export { prefixFileUrlWithBackendUrl } from './prefixFileUrlWithBackendUrl';
-export { default as getAPIInnerErrors } from './getAPIInnerErrors';
+export { getAPIInnerErrors } from './getAPIInnerErrors';
