@@ -2,6 +2,11 @@ import type { Data } from '@strapi/types';
 import { getTrad } from './getTrad';
 import type { FolderStructure } from '../../../shared/contracts/folders';
 
+interface FolderStructureParent extends FolderStructure {
+  parent?: FolderStructureParent;
+  path?: string;
+}
+
 type GetBreadcrumbDataCMReturn = (
   | {
       id?: Data.ID | null;
@@ -11,7 +16,9 @@ type GetBreadcrumbDataCMReturn = (
   | never[]
 )[];
 
-export const getBreadcrumbDataCM = (folder: FolderStructure | null): GetBreadcrumbDataCMReturn => {
+export const getBreadcrumbDataCM = (
+  folder: FolderStructureParent | null
+): GetBreadcrumbDataCMReturn => {
   let data: GetBreadcrumbDataCMReturn = [
     {
       id: null,

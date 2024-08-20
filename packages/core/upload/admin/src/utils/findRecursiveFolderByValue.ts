@@ -1,9 +1,14 @@
 import type { FolderStructure } from '../../../shared/contracts/folders';
 
-export function findRecursiveFolderByValue(data: FolderStructure[], value: number | null) {
+interface FolderStructureValue extends Omit<FolderStructure, 'children'> {
+  value: number | null;
+  children?: FolderStructureValue[];
+}
+
+export function findRecursiveFolderByValue(data: FolderStructureValue[], value: number | null) {
   let result;
 
-  function iter(a: FolderStructure) {
+  function iter(a: FolderStructureValue) {
     if (a.value === value) {
       result = a;
 

@@ -6,13 +6,9 @@ export type SortOrder = 'ASC' | 'DESC';
 export type SortKey = 'createdAt' | 'name';
 
 export interface FolderStructure {
-  value?: number | null;
   id?: Data.ID;
   name?: string;
-  label?: string;
-  children?: [] | FolderStructure | FolderStructure[];
-  parent?: FolderStructure;
-  path?: string;
+  children?: [] | FolderStructure[];
 }
 
 /**

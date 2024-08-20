@@ -4,6 +4,11 @@ import { getTrad } from './getTrad';
 import type { Query } from '../types';
 import type { FolderStructure } from '../../../shared/contracts/folders';
 
+interface FolderStructureParent extends FolderStructure {
+  parent?: FolderStructureParent;
+  path?: string;
+}
+
 type BreadcrumbItem = {
   id: Data.ID | null;
   label: string | { id: string; defaultMessage: string };
@@ -11,7 +16,7 @@ type BreadcrumbItem = {
 };
 
 type GetBreadcrumbDataMLProps = {
-  folder: FolderStructure | null;
+  folder: FolderStructureParent | null;
   options: {
     pathname: string;
     query?: Query;

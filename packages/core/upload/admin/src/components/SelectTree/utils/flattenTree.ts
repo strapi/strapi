@@ -7,6 +7,7 @@ type FlattenedNode<T> = {
   value: T;
   parent?: T;
   depth: number;
+  label?: string;
   children?: TreeNode<T>[];
 };
 

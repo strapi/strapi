@@ -6,7 +6,7 @@ export { formatBytes } from './formatBytes';
 export * from './formatDuration';
 export { getBreadcrumbDataCM } from './getBreadcrumbDataCM';
 export { getBreadcrumbDataML } from './getBreadcrumbDataML';
-export { default as getFolderParents } from './getFolderParents';
+export { getFolderParents } from './getFolderParents';
 export { getFolderURL } from './getFolderURL';
 export { getTrad } from './getTrad';
 export { toSingularTypes } from './toSingularTypes';
