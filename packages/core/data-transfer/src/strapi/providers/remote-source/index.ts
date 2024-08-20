@@ -134,10 +134,13 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     stream
       .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
-        const payloadIndex = payloadIndexer++;
+        const payloadIndex = payloadIndexer;
+        payloadIndexer += 1;
 
         while (currentPayloadIndex < payloadIndex) {
-          await new Promise(function (resolve) { setTimeout(resolve, 100) });
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
         }
 
         for (const item of payload) {
