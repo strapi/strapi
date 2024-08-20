@@ -1,6 +1,6 @@
 type Primitive = string | number | boolean | null | undefined;
 
-type DeepRecord<T> = {
+export type DeepRecord<T> = {
   [K in keyof T]: T[K] extends Primitive ? T[K] : DeepRecord<T[K]>;
 };
 

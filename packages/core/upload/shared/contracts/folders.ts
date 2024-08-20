@@ -16,13 +16,16 @@ export interface FolderStructure {
  *
  * Return the structure of a folder.
  */
-export declare namespace FolderStructure {
+export declare namespace FolderStructureNamespace {
   export interface Request {
     query?: {};
   }
 
   export interface Response {
-    data: FolderStructure[];
+    data: {
+      data: FolderStructure[];
+    };
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
 

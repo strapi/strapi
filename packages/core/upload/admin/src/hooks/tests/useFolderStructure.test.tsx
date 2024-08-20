@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -45,7 +43,7 @@ const client = new QueryClient({
 });
 
 // eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }) {
+function ComponentFixture({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
@@ -55,12 +53,11 @@ function ComponentFixture({ children }) {
   );
 }
 
-function setup(...args) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useFolderStructure(...args), { wrapper: ComponentFixture }));
-    });
-  });
+async function setup(...args: Parameters<typeof useFolderStructure>) {
+  const result = await act(async () =>
+    renderHook(() => useFolderStructure(...args), { wrapper: ComponentFixture })
+  );
+  return result;
 }
 
 describe('useFolderStructure', () => {
