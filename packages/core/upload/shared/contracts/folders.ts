@@ -103,8 +103,10 @@ export declare namespace BulkDeleteFolders {
 
   export interface Response {
     data: {
-      files: [];
-      folders: Folder[];
+      data: {
+        files: [];
+        folders: Folder[];
+      };
     };
     error?: errors.ApplicationError | errors.ValidationError;
   }

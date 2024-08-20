@@ -1,29 +1,69 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, screen } from '@tests/utils';
 
-import { useBulkRemove } from '../useBulkRemove';
+import { useBulkRemove, AssetWithType, FolderWithType } from '../useBulkRemove';
 
-const FIXTURE_ASSETS = [
+const FIXTURE_ASSETS: AssetWithType[] = [
   {
     id: 1,
     type: 'asset',
+    size: 100,
+    createdAt: '2023-08-01T00:00:00.000Z',
+    mime: 'image/png',
+    name: 'Asset 1',
+    updatedAt: '2023-08-01T00:00:00.000Z',
+    url: '/assets/1',
+    folder: null,
+    folderPath: '/',
+    documentId: 'document1',
+    hash: 'hash1',
+    locale: null,
+    provider: 'local',
   },
 
   {
     id: 2,
     type: 'asset',
+    size: 200,
+    createdAt: '2023-08-01T00:00:00.000Z',
+    mime: 'image/png',
+    name: 'Asset 2',
+    updatedAt: '2023-08-01T00:00:00.000Z',
+    url: '/assets/2',
+    folder: null,
+    folderPath: '/',
+    documentId: 'document2',
+    hash: 'hash2',
+    locale: null,
+    provider: 'local',
   },
 ];
 
-const FIXTURE_FOLDERS = [
+const FIXTURE_FOLDERS: FolderWithType[] = [
   {
     id: 11,
     type: 'folder',
+    name: 'Folder 1',
+    path: '/11',
+    createdAt: '2023-08-01T00:00:00.000Z',
+    updatedAt: '2023-08-01T00:00:00.000Z',
+    documentId: 'document11',
+    pathId: '/11',
+    publishedAt: '2023-08-01T00:00:00.000Z',
+    locale: null,
   },
 
   {
     id: 12,
     type: 'folder',
+    name: 'Folder 2',
+    path: '/12',
+    createdAt: '2023-08-01T00:00:00.000Z',
+    updatedAt: '2023-08-01T00:00:00.000Z',
+    documentId: 'document12',
+    pathId: '/12',
+    publishedAt: '2023-08-01T00:00:00.000Z',
+    locale: null,
   },
 ];
 
@@ -31,7 +71,14 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     post: jest.fn((url, payload) => {
-      const res = { data: { data: {} } };
+      const res: {
+        data: {
+          data: {
+            files?: AssetWithType[];
+            folders?: FolderWithType[];
+          };
+        };
+      } = { data: { data: {} } };
 
       if (payload?.fileIds) {
         res.data.data.files = FIXTURE_ASSETS;
@@ -46,7 +93,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   }),
 }));
 
-function setup(...args) {
+function setup(...args: Parameters<typeof useBulkRemove>) {
   return renderHook(() => useBulkRemove(...args));
 }
 
