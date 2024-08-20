@@ -145,14 +145,15 @@ interface BulkLocaleActionModalProps {
   }[];
   localesMetadata: Locale[];
   validationErrors?: FormErrors;
+  isPublish?: boolean;
 }
 
 const BulkLocaleActionModal = ({
   headers,
   rows,
   localesMetadata,
-
   validationErrors = {},
+  isPublish = true,
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
 
@@ -168,11 +169,11 @@ const BulkLocaleActionModal = ({
     }, {});
     const localesWithErrors = Object.keys(validationErrors);
 
-    const alreadyPublishedCount = selectedRows.filter(
+    const publishedCount = selectedRows.filter(
       ({ locale }) => currentStatusByLocale[locale] === 'published'
     ).length;
 
-    const readyToPublishCount = selectedRows.filter(
+    const draftCount = selectedRows.filter(
       ({ locale }) =>
         (currentStatusByLocale[locale] === 'draft' ||
           currentStatusByLocale[locale] === 'modified') &&
@@ -180,17 +181,23 @@ const BulkLocaleActionModal = ({
     ).length;
 
     const withErrorsCount = localesWithErrors.length;
+    const messageId = isPublish
+      ? 'content-manager.containers.list.selectedEntriesModal.selectedCount.publish'
+      : 'content-manager.containers.list.selectedEntriesModal.selectedCount.unpublish';
+
+    const defaultMessage = isPublish
+      ? '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.'
+      : '<b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} already draft. <b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} ready to unpublish.';
 
     return formatMessage(
       {
-        id: 'content-manager.containers.list.selectedEntriesModal.selectedCount',
-        defaultMessage:
-          '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
+        id: messageId,
+        defaultMessage,
       },
       {
         withErrorsCount,
-        readyToPublishCount,
-        alreadyPublishedCount,
+        draftCount,
+        publishedCount,
         b: BoldChunk,
       }
     );
