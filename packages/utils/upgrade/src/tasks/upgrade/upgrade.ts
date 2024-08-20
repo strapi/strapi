@@ -19,12 +19,16 @@ export const upgrade = async (options: UpgradeOptions) => {
 
   const project = projectFactory(cwd);
 
+  logger.debug(f.projectDetails(project));
+
   if (!isApplicationProject(project)) {
     throw new Error(
       `The "${options.target}" upgrade can only be run on a Strapi project; for plugins, please use "codemods".`
     );
   }
+
   const npmPackage = npmPackageFactory(upgraderConstants.STRAPI_PACKAGE_NAME);
+
   // Load all versions from the registry
   await npmPackage.refresh();
 
@@ -46,11 +50,11 @@ export const upgrade = async (options: UpgradeOptions) => {
       .addRequirement(requirements.major.REQUIRE_LATEST_FOR_CURRENT_MAJOR);
   }
 
-  // Make sure the git repository is in an optimal state before running the upgrade
+  // Make sure the git repository is in an optional state before running the upgrade
   // Mainly used to ease rollbacks in case the upgrade is corrupted
   upgrader.addRequirement(requirements.common.REQUIRE_GIT.asOptional());
 
-  // Actually run the upgrade process once configured
+  // Actually run the upgrade process once configured,
   // The response contains information about the final status (success/error)
   const upgradeReport = await upgrader.upgrade();
 
