@@ -171,8 +171,10 @@ export declare namespace BulkMoveFiles {
 
   export interface Response {
     data: {
-      files: Asset[];
-      folders: [];
+      data: {
+        files: Asset[];
+        folders: [];
+      };
     };
     error?: errors.ApplicationError | errors.ValidationError;
   }
