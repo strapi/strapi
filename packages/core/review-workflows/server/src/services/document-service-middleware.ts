@@ -94,6 +94,7 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
     strapi.eventHub.emit(WORKFLOW_UPDATE_STAGE, {
       model: model.modelName,
       uid: model.uid,
+      // TODO v6: Rename to "entry", which is what is used for regular CRUD updates
       entity: {
         // @ts-expect-error
         id: result?.id,
