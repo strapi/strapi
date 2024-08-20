@@ -9,7 +9,7 @@ import { styled } from 'styled-components';
 
 // TODO: replace it with the import from the costants file when it will be migrated to typescript
 import { AssetSource } from '../../../newConstants';
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 
 import type { UploadAsset } from './AddAssetStep';

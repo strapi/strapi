@@ -4,8 +4,7 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 import { Button, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-// TODO: replace with the import from the index file when it will be migrated to TypeScript
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 interface ReplaceMediaButtonProps {
   onSelectMedia: (file: File) => void;

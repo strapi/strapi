@@ -4,7 +4,7 @@ import { Link as LinkIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useClipboard } from '../../hooks/useClipboard';
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 export const CopyLinkButton = ({ url }: { url: string }) => {
   const { toggleNotification } = useNotification();

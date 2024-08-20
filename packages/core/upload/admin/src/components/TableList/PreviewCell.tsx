@@ -4,12 +4,7 @@ import { styled } from 'styled-components';
 
 // TODO: replace this import with the one from constants when the file is migrated to typescript
 import { AssetType } from '../../newConstants';
-// TODO: replace this import with the one from utils when the index file is migrated to typescript
-import { createAssetUrl } from '../../utils/createAssetUrl';
-// TODO: replace this import with the one from utils when the index file is migrated to typescript
-import { getFileExtension } from '../../utils/getFileExtension';
-// TODO: replace this import with the one from utils when the index file is migrated to typescript
-import { prefixFileUrlWithBackendUrl } from '../../utils/prefixFileUrlWithBackendUrl';
+import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
 import type { AssetEnriched } from '../../../../shared/contracts/files';
 

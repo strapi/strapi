@@ -5,7 +5,7 @@ import { Check, Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 
 import { CroppingActionRow } from './components';
 

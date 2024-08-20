@@ -1,7 +1,6 @@
 import { CardAsset } from '@strapi/design-system';
 
-// TODO: Replace it with the import from the utils package when the index  migration is done
-import { appendSearchParamsToUrl } from '../../utils/appendSearchParamsToUrl';
+import { appendSearchParamsToUrl } from '../../utils';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 

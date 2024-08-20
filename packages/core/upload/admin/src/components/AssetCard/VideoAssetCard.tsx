@@ -3,8 +3,7 @@ import * as React from 'react';
 import { Box, CardAsset, CardTimer } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-// TODO: Replace it with the import from utils when all the utils are migrated to typescript
-import { formatDuration } from '../../utils/formatDuration';
+import { formatDuration } from '../../utils';
 
 import { AssetCardBase } from './AssetCardBase';
 import { VideoPreview } from './VideoPreview';

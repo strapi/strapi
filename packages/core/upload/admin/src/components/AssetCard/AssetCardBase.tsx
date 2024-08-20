@@ -19,8 +19,7 @@ import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-// TODO: use the `getTrad` function from the `utils` package when the migration to TS is over
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;

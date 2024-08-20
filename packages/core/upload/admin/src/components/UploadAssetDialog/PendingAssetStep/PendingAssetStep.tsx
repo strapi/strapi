@@ -4,7 +4,7 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import type { Data } from '@strapi/types';
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import type { Asset, AssetEnriched } from '../../../../../shared/contracts/files';

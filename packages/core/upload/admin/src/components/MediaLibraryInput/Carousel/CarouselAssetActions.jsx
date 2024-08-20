@@ -6,9 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { AssetDefinition } from '../../../constants';
-// TODO: replace this import with the one from utils when the index file is migrated to typescript
-import { getTrad } from '../../../utils/getTrad';
-import { prefixFileUrlWithBackendUrl } from '../../../utils/prefixFileUrlWithBackendUrl';
+import { getTrad, prefixFileUrlWithBackendUrl } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton';
 
 export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditAsset }) => {

@@ -2,10 +2,7 @@ import { Typography } from '@strapi/design-system';
 import parseISO from 'date-fns/parseISO';
 import { useIntl } from 'react-intl';
 
-// TODO: replace this import with the one from utils when the index file is migrated to typescript
-import { formatBytes } from '../../utils/formatBytes';
-// TODO: replace this import with the one from utils when the index file is migrated to typescript
-import { getFileExtension } from '../../utils/getFileExtension';
+import { formatBytes, getFileExtension } from '../../utils';
 
 import { PreviewCell } from './PreviewCell';
 

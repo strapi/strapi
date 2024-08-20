@@ -5,8 +5,7 @@ import { Link } from 'react-router-dom';
 
 // TODO: replace with the import from the constants file when it will be migrated to TypeScript
 import { tableHeaders as cells } from '../../newConstants';
-// TODO: replace with the import from the constants index util file when it will be migrated to TypeScript
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 import type { AssetEnriched, Asset } from '../../../../shared/contracts/files';
 import type { Folder, FolderEnriched } from '../../../../shared/contracts/folders';
 

@@ -1,5 +1,4 @@
-// TODO: to replace with the import from the index file in the utils when it will be migrated to TypeScript
-import { getTrad } from './utils/getTrad';
+import { getTrad } from './utils';
 
 // TODO: replace with the constants file when it will be migrated to TS
 export enum AssetType {

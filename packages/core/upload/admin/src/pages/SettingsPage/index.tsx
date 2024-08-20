@@ -9,8 +9,7 @@ import { useMutation, useQuery } from 'react-query';
 
 // TODO: to replace with the import from constants when the file is migrated to TypeScript
 import { PERMISSIONS } from '../../newConstants';
-// TODO: to replace with the import from utils when the index is migrated to TypeScript
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 import type { GetSettings, UpdateSettings } from '../../../../shared/contracts/settings';
 
 import init from './init';

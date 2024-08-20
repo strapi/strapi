@@ -3,8 +3,7 @@ import { useIntl } from 'react-intl';
 
 // TODO: replace with the import from the constants file when the file is migrated to TypeScript
 import { sortOptions } from '../../newConstants';
-// TODO: replace with the import from the utils file when the file is migrated to TypeScript
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 interface SortPickerProps {
   onChangeSort: (value: string) => void;

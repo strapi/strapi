@@ -1,7 +1,7 @@
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { AssetGridList } from '../../AssetGridList/AssetGridList';
 import type { AssetEnriched } from '../../../../../shared/contracts/files';
 

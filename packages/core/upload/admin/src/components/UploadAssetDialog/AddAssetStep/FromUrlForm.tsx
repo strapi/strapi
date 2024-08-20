@@ -5,8 +5,7 @@ import { Box, Button, Field, Modal, Textarea } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
-// TODO: to replace with the import from utils when the index is migrated to TypeScript
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { urlsToAssets } from '../../../utils/urlsToAssets';
 import { urlSchema } from '../../../utils/urlYupSchema';
 

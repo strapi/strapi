@@ -7,7 +7,7 @@ import { styled } from 'styled-components';
 
 // TODO: replace it with the correct import to the constants.js file when it will be migrated to TypeScript
 import { AssetSource } from '../../../newConstants';
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 import type { RawFile } from '../../../../../shared/contracts/files';
 

@@ -1,8 +1,7 @@
 import { Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-// TODO: replace with the import from the index file when it will be migrated to TypeScript
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 
 export const EditFolderModalHeader = ({ isEditing = false }: { isEditing?: boolean }) => {
   const { formatMessage } = useIntl();

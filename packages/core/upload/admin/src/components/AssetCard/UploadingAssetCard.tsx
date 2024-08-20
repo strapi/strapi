@@ -18,8 +18,7 @@ import { styled } from 'styled-components';
 // TODO: replace tne import below with the one from the constants file when the file is migrated to ts
 import { useUpload } from '../../hooks/useUpload';
 import { AssetType } from '../../newConstants';
-// TODO: replace the import below with the one from the utils file when the file is migrated to ts
-import { getTrad } from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 import { UploadProgress } from '../UploadProgress/UploadProgress';
 import type { Data } from '@strapi/types';
 import type { Asset, AssetEnriched } from '../../../../shared/contracts/files';

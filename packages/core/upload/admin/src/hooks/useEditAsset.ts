@@ -7,8 +7,7 @@ import { UpdateFile } from '../../../shared/contracts/files';
 import type { Asset, RawFile } from '../../../shared/contracts/files';
 
 import pluginId from '../pluginId';
-// TODO: replace it with the import from the index file when it will be migrated to typescript
-import { getTrad } from '../utils/getTrad';
+import { getTrad } from '../utils';
 import { Data } from '@strapi/types';
 
 type FetchResponse<TData = any> = {

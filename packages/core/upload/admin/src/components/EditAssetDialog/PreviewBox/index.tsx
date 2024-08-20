@@ -10,10 +10,9 @@ import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
 // TODO: replace with the import from the constants file when it will be migrated
 import { AssetType } from '../../../newConstants';
-// TODO: replace with the import from the index file when it will be migrated
-import { createAssetUrl } from '../../../utils/createAssetUrl';
+import { createAssetUrl } from '../../../utils';
 import { downloadFile } from '../../../utils/downloadFile';
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress/UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
