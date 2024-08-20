@@ -129,8 +129,17 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     const stream = await this.#createStageReadStream('assets');
     const pass = new PassThrough({ objectMode: true });
 
+    let payloadIndexer = 0;
+    let currentPayloadIndex = 0;
+
     stream
       .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
+        const payloadIndex = payloadIndexer++;
+
+        while (currentPayloadIndex < payloadIndex) {
+          await new Promise(function (resolve) { setTimeout(resolve, 100) });
+        }
+
         for (const item of payload) {
           const { action } = item;
 
@@ -168,6 +177,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
             });
           }
         }
+
+        currentPayloadIndex++;
       })
       .on('close', () => {
         pass.end();
