@@ -22,8 +22,8 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   }),
 }));
 
-function setup(...args) {
-  return renderHook(() => useEditFolder(...args));
+function setup() {
+  return renderHook(() => useEditFolder());
 }
 
 describe('useEditFolder', () => {
@@ -39,10 +39,10 @@ describe('useEditFolder', () => {
     const { editFolder } = current;
 
     await act(async () => {
-      await editFolder(FOLDER_CREATE_FIXTURE);
+      await editFolder(FOLDER_CREATE_FIXTURE, undefined);
     });
 
-    expect(post).toHaveBeenCalledWith('/upload/folders/', expect.any(Object));
+    expect(post).toHaveBeenCalledWith('/upload/folders', expect.any(Object));
   });
 
   test('calls the proper endpoint when creating a folder (put)', async () => {
