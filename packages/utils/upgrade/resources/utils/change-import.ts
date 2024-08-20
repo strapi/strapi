@@ -9,7 +9,7 @@ export const changeImportSpecifier = (
 
   // Flag to check if the method was imported from the old dependency
   let methodImportedFromOldDependency = false;
-  let methodAlias: string | undefined;
+  const methodAliases: string[] = [];
 
   // Remove the method from the old dependency and check if it was imported
   root
@@ -19,28 +19,27 @@ export const changeImportSpecifier = (
       const importDeclaration: ImportDeclaration = path.node;
 
       // Check if the method is imported from the old dependency
-      const methodExistsInOldDependency = importDeclaration.specifiers?.some(
+      const methodSpecifiers = importDeclaration.specifiers?.filter(
         (specifier) =>
           specifier.type === 'ImportSpecifier' && specifier.imported.name === methodName
       );
 
-      if (methodExistsInOldDependency) {
+      if (methodSpecifiers && methodSpecifiers.length > 0) {
         methodImportedFromOldDependency = true;
 
-        // Capture the alias if it exists
-        const aliasSpecifier = importDeclaration.specifiers?.find(
-          (specifier) =>
-            specifier.type === 'ImportSpecifier' &&
-            specifier.imported.name === methodName &&
-            specifier.local?.name !== methodName
-        );
-        if (aliasSpecifier && aliasSpecifier.local) {
-          methodAlias = aliasSpecifier.local.name;
-        }
+        // Collect all aliases for the method
+        methodSpecifiers.forEach((specifier) => {
+          if (specifier.local && specifier.local.name !== methodName) {
+            methodAliases.push(specifier.local.name);
+          } else {
+            methodAliases.push(methodName);
+          }
+        });
 
+        // Remove the method specifiers from the old import
         const updatedSpecifiers = importDeclaration.specifiers?.filter(
           (specifier) =>
-            specifier.type === 'ImportSpecifier' && specifier.imported.name !== methodName
+            specifier.type !== 'ImportSpecifier' || specifier.imported.name !== methodName
         );
 
         if (updatedSpecifiers && updatedSpecifiers.length > 0) {
@@ -59,34 +58,29 @@ export const changeImportSpecifier = (
       .find(j.ImportDeclaration)
       .filter((path) => path.node.source.value === newDependency);
 
-    dependencies.forEach((path) => {
-      const importDeclaration: ImportDeclaration = path.node;
+    if (dependencies.length > 0) {
+      dependencies.forEach((path) => {
+        const importDeclaration: ImportDeclaration = path.node;
 
-      const newSpecifier = j.importSpecifier(
-        j.identifier(methodName),
-        methodAlias ? j.identifier(methodAlias) : null
+        methodAliases.forEach((alias) => {
+          const newSpecifier = j.importSpecifier(j.identifier(methodName), j.identifier(alias));
+          const specifiersArray = importDeclaration.specifiers || [];
+          j(path).replaceWith(
+            j.importDeclaration([...specifiersArray, newSpecifier], j.literal(newDependency))
+          );
+        });
+      });
+    } else {
+      const newSpecifiers = methodAliases.map((alias) =>
+        j.importSpecifier(j.identifier(methodName), j.identifier(alias))
       );
-      const specifiersArray = importDeclaration.specifiers || [];
-      j(path).replaceWith(
-        j.importDeclaration([...specifiersArray, newSpecifier], j.literal(newDependency))
-      );
-    });
 
-    // Add the new import declaration if it doesn't already exist
-    if (dependencies.length === 0) {
-      const newImportDeclaration = j.importDeclaration(
-        [
-          j.importSpecifier(
-            j.identifier(methodName),
-            methodAlias ? j.identifier(methodAlias) : null
-          ),
-        ],
-        j.literal(newDependency)
-      );
+      const newImportDeclaration = j.importDeclaration(newSpecifiers, j.literal(newDependency));
+
       // Find the index of the first non-import declaration
       const body = root.get().node.program.body;
       const lastImportIndex = body.findIndex((node) => node.type !== 'ImportDeclaration');
-      // Check if there are any import declarations
+
       if (lastImportIndex > -1) {
         // Insert the new import declaration just before the first non-import node
         body.splice(lastImportIndex, 0, newImportDeclaration);
