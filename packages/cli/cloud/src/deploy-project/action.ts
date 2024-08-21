@@ -158,14 +158,17 @@ export default async (ctx: CLIContext) => {
   const cloudApiService = await cloudApiFactory(ctx, token);
 
   try {
-    const { data: projectInfo } = await cloudApiService.getProject({ name: project.name });
-    const isProjectSuspended = projectInfo.suspendedAt;
+    const {
+      data: { data: projectData, metadata },
+    } = await cloudApiService.getProject({ name: project.name });
+
+    const isProjectSuspended = projectData.suspendedAt;
 
     if (isProjectSuspended) {
-      ctx.logger.warn(
-        'Oops! This project has been suspended. \n Please reactivate it from the dashboard to continue deploying: '
+      ctx.logger.log(
+        '\n Oops! This project has been suspended. \n\n Please reactivate it from the dashboard to continue deploying: '
       );
-      ctx.logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}`));
+      ctx.logger.log(chalk.underline(`${metadata.dashboardUrls.project}`));
       return;
     }
   } catch (e: Error | unknown) {

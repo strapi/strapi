@@ -38,6 +38,20 @@ export type ListLinkProjectsResponse = {
   };
 };
 
+export type GetProjectResponse = {
+  data: {
+    updatedAt: string;
+    suspendedAt?: string;
+    isTrial: boolean;
+  };
+  metadata: {
+    dashboardUrls: {
+      project: string;
+      deployments: string;
+    };
+  };
+};
+
 export interface CloudApiService {
   deploy(
     deployInput: {
@@ -64,7 +78,7 @@ export interface CloudApiService {
 
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
 
-  getProject(project: { name: string }): Promise<AxiosResponse>;
+  getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
@@ -183,7 +197,7 @@ export async function cloudApiFactory(
       }
     },
 
-    async getProject({ name }): Promise<AxiosResponse<unknown>> {
+    async getProject({ name }): Promise<AxiosResponse<GetProjectResponse>> {
       try {
         const response = await axiosCloudAPI.get(`/projects/${name}`);
 
