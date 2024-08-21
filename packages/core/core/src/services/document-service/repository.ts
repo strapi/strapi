@@ -40,10 +40,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const schema = contentType;
 
   const validateParams = async (params: any) => {
-    validators.validateFilters({ schema, getModel }, params.filters, filtersValidations);
-    validators.validateSort({ schema, getModel }, params.sort, sortValidations);
-    validators.validateFields({ schema, getModel }, params.fields, fieldValidations);
-    validators.validatePopulate({ schema, getModel }, params.fields, populateValidations);
+    await validators.validateFilters({ schema, getModel }, params.filters, filtersValidations);
+    await validators.validateSort({ schema, getModel }, params.sort, sortValidations);
+    await validators.validateFields({ schema, getModel }, params.fields, fieldValidations);
+    await validators.validatePopulate({ schema, getModel }, params.fields, populateValidations);
 
     return params;
   };

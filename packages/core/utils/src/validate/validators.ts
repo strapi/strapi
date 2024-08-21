@@ -31,6 +31,19 @@ export const throwPasswords = (ctx: Context) => async (entity: Data) => {
 
 type AnyFunc = (...args: any[]) => any;
 
+// TODO: move this to a utility
+// lodash/fp curry does not detect async methods, so we'll use our own that is typed correctly
+function asyncCurry<A extends unknown[], R>(
+  fn: (...args: A) => Promise<R>
+): (...args: Partial<A>) => any {
+  return function curried(...args: unknown[]): unknown {
+    if (args.length >= fn.length) {
+      return fn(...(args as A));
+    }
+    return (...moreArgs: unknown[]) => curried(...args, ...moreArgs);
+  };
+}
+
 export const FILTER_TRAVERSALS = [
   'nonAttributesOperators',
   'dynamicZones',
@@ -39,8 +52,8 @@ export const FILTER_TRAVERSALS = [
   'private',
 ];
 
-export const validateFilters = curry(
-  (ctx: Context, filters: unknown, include: (typeof FILTER_TRAVERSALS)[number][]) => {
+export const validateFilters = asyncCurry(
+  async (ctx: Context, filters: unknown, include: (typeof FILTER_TRAVERSALS)[number][]) => {
     // TODO: schema checks should check that it is a valid schema with yup
     if (!ctx.schema) {
       throw new Error('Missing schema in defaultValidateFilters');
@@ -77,7 +90,8 @@ export const validateFilters = curry(
     return pipeAsync(...functionsToApply)(filters);
   }
 );
-export const defaultValidateFilters = curry((ctx: Context, filters: unknown) => {
+
+export const defaultValidateFilters = asyncCurry(async (ctx: Context, filters: unknown) => {
   return validateFilters(ctx, filters, FILTER_TRAVERSALS);
 });
 
@@ -90,8 +104,8 @@ export const SORT_TRAVERSALS = [
   'nonScalarEmptyKeys',
 ];
 
-export const validateSort = curry(
-  (ctx: Context, sort: unknown, include: (typeof SORT_TRAVERSALS)[number][]) => {
+export const validateSort = asyncCurry(
+  async (ctx: Context, sort: unknown, include: (typeof SORT_TRAVERSALS)[number][]) => {
     if (!ctx.schema) {
       throw new Error('Missing schema in defaultValidateSort');
     }
@@ -148,14 +162,14 @@ export const validateSort = curry(
   }
 );
 
-export const defaultValidateSort = curry((ctx: Context, sort: unknown) => {
+export const defaultValidateSort = asyncCurry(async (ctx: Context, sort: unknown) => {
   return validateSort(ctx, sort, SORT_TRAVERSALS);
 });
 
 export const FIELDS_TRAVERSALS = ['scalarAttributes', 'privateFields', 'passwordFields'];
 
-export const validateFields = curry(
-  (ctx: Context, fields: unknown, include: (typeof FIELDS_TRAVERSALS)[number][]) => {
+export const validateFields = asyncCurry(
+  async (ctx: Context, fields: unknown, include: (typeof FIELDS_TRAVERSALS)[number][]) => {
     if (!ctx.schema) {
       throw new Error('Missing schema in defaultValidateFields');
     }
@@ -192,12 +206,12 @@ export const validateFields = curry(
   }
 );
 
-export const defaultValidateFields = curry((ctx: Context, fields: unknown) => {
+export const defaultValidateFields = asyncCurry(async (ctx: Context, fields: unknown) => {
   return validateFields(ctx, fields, FIELDS_TRAVERSALS);
 });
 
-export const validatePopulate = curry(
-  (
+export const validatePopulate = asyncCurry(
+  async (
     ctx: Context,
     populate: unknown,
     includes: {
@@ -282,7 +296,7 @@ export const validatePopulate = curry(
   }
 );
 
-export const defaultValidatePopulate = curry((ctx: Context, populate: unknown) => {
+export const defaultValidatePopulate = asyncCurry(async (ctx: Context, populate: unknown) => {
   if (!ctx.schema) {
     throw new Error('Missing schema in defaultValidatePopulate');
   }
