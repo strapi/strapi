@@ -146,8 +146,8 @@ const forbiddenContentTypeNameValidator = () => {
       if (typeof value !== 'string') {
         return true;
       }
-      // compare snake case to check the actual column names that will be used in the database
-      return reservedNames.every((reservedName) => snakeCase(reservedName) !== snakeCase(value));
+
+      return !getService('builder').isReservedModelName(value);
     },
   };
 };
