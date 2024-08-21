@@ -36,8 +36,6 @@ export const DEFAULT_TYPES = [
 
 export const VALID_UID_TARGETS = ['string', 'text'] as const;
 
-export const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'] as const;
-
 export const coreUids = {
   STRAPI_USER: 'admin::user',
   PREFIX: 'strapi::',
