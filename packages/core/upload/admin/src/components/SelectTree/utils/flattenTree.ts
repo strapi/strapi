@@ -4,7 +4,7 @@ type TreeNode<T> = {
   label?: string;
 };
 
-type FlattenedNode<T> = {
+export type FlattenedNode<T> = {
   value: T;
   parent?: T;
   depth: number;
