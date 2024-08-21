@@ -1,6 +1,7 @@
 type TreeNode<T> = {
   value: T;
   children?: TreeNode<T>[];
+  label?: string;
 };
 
 type FlattenedNode<T> = {
