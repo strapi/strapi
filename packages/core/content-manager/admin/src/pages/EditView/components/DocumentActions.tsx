@@ -674,8 +674,8 @@ const PublishAction: DocumentActionComponent = ({
 
   // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
   // see RFC "Count draft relations" in Notion
-  const draftRelationsCountEnabled = false;
-  const hasDraftRelations = draftRelationsCountEnabled && totalDraftRelations > 0;
+  const enableDraftRelationsCount = false;
+  const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
 
   return {
     /**
