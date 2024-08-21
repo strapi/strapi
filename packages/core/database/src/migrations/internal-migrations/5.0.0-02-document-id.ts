@@ -106,7 +106,7 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
       joinColumn,
       inverseJoinColumn,
       tableName: meta.tableName,
-      joinTableName: identifiers.getJoinTableName(meta.tableName, `localizations`),
+      joinTableName: identifiers.getJoinTableName(meta.tableName, `localizations_links`),
     });
 
     if (ids.length > 0) {
