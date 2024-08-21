@@ -239,11 +239,8 @@ test.describe('Edit view', () => {
     }
   );
 
-  test('As a user I want to publish multiple locales of my document', async ({
-    page,
-    browserName,
-  }) => {
-    if (browserName === 'webkit') {
+  test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {
+    if (browser.browserType().name() === 'webkit') {
       // See DX-1550
       return test.fixme();
     }
