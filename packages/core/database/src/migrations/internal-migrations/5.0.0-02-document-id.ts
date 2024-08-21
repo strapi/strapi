@@ -138,7 +138,7 @@ const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
 };
 
 const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
-  const joinTableName = identifiers.getJoinTableName(tableName, 'localizations');
+  const joinTableName = identifiers.getJoinTableName(tableName, 'localizations_links');
   return knex.schema.hasTable(joinTableName);
 };
 
