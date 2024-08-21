@@ -3,7 +3,7 @@ import { errors } from '@strapi/utils';
 
 export type SortOrder = 'ASC' | 'DESC';
 
-export type SortKey = 'createdAt' | 'name';
+export type SortKey = 'createdAt' | 'name' | 'updatedAt';
 
 export interface FolderStructure {
   id?: Data.ID;

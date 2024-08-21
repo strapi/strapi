@@ -18,7 +18,14 @@ interface CustomQuery extends Query {
   };
   filters?: {
     $and?: {
-      parent: { id: Data.ID | { $null: true } };
+      parent: {
+        id:
+          | {
+              id: Data.ID;
+            }
+          | Data.ID
+          | { $null: true };
+      };
     }[];
   };
 }

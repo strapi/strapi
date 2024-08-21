@@ -31,6 +31,7 @@ export declare namespace GetConfiguration {
     data: {
       data: Configuration;
     };
+    error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
 
