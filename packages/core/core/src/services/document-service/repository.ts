@@ -22,12 +22,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
   // Define the validations that should be performed
-  const sortValidations = [
-    'nonAttributesOperators',
-    'dynamicZones',
-    'morphRelations',
-    'nonScalarEmptyKeys',
-  ];
+  const sortValidations = ['dynamicZones', 'morphRelations'];
   const fieldValidations = ['scalarAttributes'];
   const filtersValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
 
