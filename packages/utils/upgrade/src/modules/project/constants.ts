@@ -1,6 +1,6 @@
 export const PROJECT_PACKAGE_JSON = 'package.json';
 
-export const PROJECT_DEFAULT_ALLOWED_ROOT_PATHS = ['src', 'config', 'public'];
+export const PROJECT_DEFAULT_ALLOWED_ROOT_PATHS = ['src', 'config', 'public', 'admin', 'server'];
 
 export const PROJECT_DEFAULT_CODE_EXTENSIONS = [
   // Source files
