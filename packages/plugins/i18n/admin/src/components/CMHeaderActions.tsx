@@ -106,8 +106,14 @@ const LocalePickerAction = ({
 }: LocalePickerActionProps) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams<I18nBaseQuery>();
+  const currentDesiredLocale = query.plugins?.i18n?.locale;
   const { hasI18n, canCreate, canRead } = useI18n();
-  const { schema } = useDocument({ model, collectionType, documentId });
+  const { schema } = useDocument({
+    model,
+    collectionType,
+    documentId,
+    params: { locale: currentDesiredLocale },
+  });
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -131,7 +137,6 @@ const LocalePickerAction = ({
      * Handle the case where the current locale query param doesn't exist
      * in the list of available locales, so we redirect to the default locale.
      */
-    const currentDesiredLocale = query.plugins?.i18n?.locale;
     const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
     const defaultLocale = locales.find((locale) => locale.isDefault);
     if (!doesLocaleExist && defaultLocale?.code) {
@@ -245,10 +250,17 @@ const FillFromAnotherLocaleAction = ({
 }: FillFromAnotherLocaleActionProps) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState<boolean>(false);
   const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const currentDesiredLocale = query.plugins?.i18n?.locale;
   const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
   const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
   const { getDocument } = useDocumentActions();
-  const { schema } = useDocument({ model, documentId, collectionType });
+  const { schema } = useDocument({
+    model,
+    documentId,
+    collectionType,
+    params: { locale: currentDesiredLocale },
+  });
 
   const availableLocales = locales.filter((locale) =>
     meta?.availableLocales.some((l) => l.locale === locale.code)
@@ -503,7 +515,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       },
     },
     {
-      skip: !hasI18n,
+      skip: !hasI18n || !baseLocale,
     }
   );
 
@@ -701,7 +713,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       defaultMessage: 'Publish Multiple Locales',
     }),
     icon: <ListPlus />,
-    disabled: isPublishedTab || canPublish.length === 0,
+    disabled: isPublishedTab || canPublish.length === 0 || !baseLocale,
     position: ['panel'],
     variant: 'secondary',
     dialog: {

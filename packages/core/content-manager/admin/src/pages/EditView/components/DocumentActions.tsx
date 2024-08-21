@@ -587,27 +587,29 @@ const PublishAction: DocumentActionComponent = ({
   }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
   React.useEffect(() => {
-    if (documentId) {
-      const fetchDraftRelationsCount = async () => {
-        const { data, error } = await countDraftRelations({
-          collectionType,
-          model,
-          documentId,
-          params,
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setServerCountOfDraftRelations(data.data);
-        }
-      };
-
-      fetchDraftRelationsCount();
+    if (!document || !document.documentId) {
+      return;
     }
-  }, [documentId, countDraftRelations, collectionType, model, params]);
+
+    const fetchDraftRelationsCount = async () => {
+      const { data, error } = await countDraftRelations({
+        collectionType,
+        model,
+        documentId,
+        params,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setServerCountOfDraftRelations(data.data);
+      }
+    };
+
+    fetchDraftRelationsCount();
+  }, [document, documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
