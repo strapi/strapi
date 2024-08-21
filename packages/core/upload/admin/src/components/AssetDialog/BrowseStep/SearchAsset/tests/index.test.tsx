@@ -1,11 +1,3 @@
-/**
- *
- * Tests for SearchAsset
- *
- */
-
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -14,7 +6,7 @@ import SearchAsset from '../index';
 
 const handleChange = jest.fn();
 
-const makeApp = (queryValue) => (
+const makeApp = (queryValue: string | null) => (
   <DesignSystemProvider>
     <IntlProvider locale="en">
       <SearchAsset onChangeSearch={handleChange} queryValue={queryValue} />
@@ -137,7 +129,7 @@ describe('SearchAsset', () => {
     const queryValue = 'michka';
     const { container } = render(makeApp(queryValue));
 
-    const input = container.querySelector('input[name="search"]');
+    const input = container.querySelector('input[name="search"]') as HTMLInputElement;
 
     expect(input).toBeInTheDocument();
     expect(input.value).toEqual(queryValue);
@@ -146,8 +138,10 @@ describe('SearchAsset', () => {
   it('should call handleChange when submitting search input', () => {
     const { container } = render(makeApp(null));
 
-    fireEvent.click(container.querySelector('button'));
-    const input = container.querySelector('input[name="search"]');
+    const button = container.querySelector('button')!;
+    fireEvent.click(button);
+
+    const input = container.querySelector('input[name="search"]') as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: 'michka' } });
     fireEvent.submit(input);
