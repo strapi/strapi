@@ -1,11 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { components } from 'react-select';
+import { components, OptionProps as ReactSelectOptionProps } from 'react-select';
 import { styled } from 'styled-components';
+import type { FolderStructure } from '../../../../shared/contracts/folders';
 
 const ToggleButton = styled(Flex)`
   align-self: flex-end;
@@ -18,7 +18,24 @@ const ToggleButton = styled(Flex)`
   }
 `;
 
-const Option = ({ children, data, selectProps, ...props }) => {
+interface FolderStructureParent extends FolderStructure {
+  parent?: FolderStructureParent;
+  path?: string;
+  depth: number;
+  value: string;
+}
+
+interface SelectProps {
+  maxDisplayDepth: number;
+  openValues: string[];
+  onOptionToggle: (value: string) => void;
+}
+
+interface OptionProps extends ReactSelectOptionProps<FolderStructureParent, false> {
+  selectProps: SelectProps & ReactSelectOptionProps<FolderStructureParent, false>['selectProps'];
+}
+
+const Option = ({ children, data, selectProps, innerRef, innerProps, ...rest }: OptionProps) => {
   const { formatMessage } = useIntl();
   const { depth, value, children: options } = data;
   const { maxDisplayDepth, openValues, onOptionToggle } = selectProps;
@@ -27,7 +44,13 @@ const Option = ({ children, data, selectProps, ...props }) => {
   const Icon = isOpen ? ChevronUp : ChevronDown;
 
   return (
-    <components.Option {...props}>
+    <components.Option
+      data={data}
+      selectProps={selectProps}
+      innerRef={innerRef}
+      innerProps={innerProps}
+      {...rest}
+    >
       <Flex alignItems="start">
         <Typography textColor="neutral800" ellipsis>
           <span style={{ paddingLeft: `${Math.min(depth, maxDisplayDepth) * 14}px` }}>
@@ -35,7 +58,7 @@ const Option = ({ children, data, selectProps, ...props }) => {
           </span>
         </Typography>
 
-        {options?.length > 0 && (
+        {options && options?.length > 0 && (
           <ToggleButton
             aria-label={formatMessage({
               id: 'app.utils.toggle',
@@ -46,7 +69,7 @@ const Option = ({ children, data, selectProps, ...props }) => {
             hasRadius
             justifyContent="center"
             marginLeft="auto"
-            onClick={(event) => {
+            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
               event.preventDefault();
               event.stopPropagation();
 
@@ -59,17 +82,6 @@ const Option = ({ children, data, selectProps, ...props }) => {
       </Flex>
     </components.Option>
   );
-};
-
-Option.propTypes = {
-  children: PropTypes.node.isRequired,
-  data: PropTypes.object.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  selectProps: PropTypes.shape({
-    maxDisplayDepth: PropTypes.number,
-    openValues: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
-    onOptionToggle: PropTypes.func,
-  }).isRequired,
 };
 
 export default Option;
