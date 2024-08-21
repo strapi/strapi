@@ -342,6 +342,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
 
       return { locale, status };
     });
+
     rowsFromMeta.unshift({
       locale: document.locale,
       status: document.status,
@@ -365,12 +366,14 @@ const BulkLocaleAction: DocumentActionComponent = ({
     return [rowsFromMeta, errors];
   }, [document, documentMeta?.availableLocales, validate]);
 
-  const localesForAction = selectedRows.reduce((acc, selectedRow) => {
-    const isValidLocale = !Object.keys(validationErrors).includes(selectedRow.locale);
+  const localesForAction = selectedRows.reduce((acc: string[], selectedRow: LocaleStatus) => {
+    const isValidLocale =
+      // Validation errors are irrelevant if we are trying to unpublish
+      !isPublish || !Object.keys(validationErrors).includes(selectedRow.locale);
 
     const shouldAddLocale = isPublish
       ? selectedRow.status !== 'published' && isValidLocale
-      : selectedRow.status === 'published' && isValidLocale;
+      : selectedRow.status !== 'draft' && isValidLocale;
 
     if (shouldAddLocale) {
       acc.push(selectedRow.locale);
@@ -535,6 +538,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
               headers={headers}
               rows={rows}
               localesMetadata={localesMetadata as Locale[]}
+              isPublish={isPublish}
             />
           </Table.Root>
         );
