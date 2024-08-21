@@ -211,6 +211,17 @@ describe('Sort', () => {
     ]);
   });
 
+  test('Sort on invalid key returns ValidationError', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+      qs: { sort: 'fakekey' },
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.name).toBe('ValidationError');
+    expect(res.body.error.details.key).toBe('fakekey');
+    expect(res.body.error.details.path).toBe(null);
+  });
+
   test('Deep Sort (1st level)', async () => {
     const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
       qs: { sort: 'categories.name', populate: 'categories' },
