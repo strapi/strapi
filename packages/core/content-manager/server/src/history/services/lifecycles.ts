@@ -1,4 +1,5 @@
 import type { Core, Modules, UID } from '@strapi/types';
+import { contentTypes } from '@strapi/utils';
 
 import { omit, castArray } from 'lodash/fp';
 
@@ -139,11 +140,9 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         const localeEntries = await strapi.db.query(uid).findMany({
           where: {
             documentId,
-            ...(isLocalizedContentType
-              ? {
-                  locale: { $in: locales },
-                  publishedAt: null,
-                }
+            ...(isLocalizedContentType ? { locale: { $in: locales } } : {}),
+            ...(contentTypes.hasDraftAndPublish(strapi.contentTypes[uid])
+              ? { publishedAt: null }
               : {}),
           },
           populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
