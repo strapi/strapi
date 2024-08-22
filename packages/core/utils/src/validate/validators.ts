@@ -210,6 +210,8 @@ export const defaultValidateFields = asyncCurry(async (ctx: Context, fields: unk
   return validateFields(ctx, fields, FIELDS_TRAVERSALS);
 });
 
+export const POPULATE_TRAVERSALS = ['private'];
+
 export const validatePopulate = asyncCurry(
   async (
     ctx: Context,
@@ -218,13 +220,14 @@ export const validatePopulate = asyncCurry(
       fields?: (typeof FIELDS_TRAVERSALS)[number][];
       sort?: (typeof SORT_TRAVERSALS)[number][];
       filters?: (typeof FILTER_TRAVERSALS)[number][];
+      populate?: (typeof POPULATE_TRAVERSALS)[number][];
     }
   ) => {
     if (!ctx.schema) {
       throw new Error('Missing schema in defaultValidatePopulate');
     }
 
-    return pipeAsync(
+    const functionsToApply: Array<AnyFunc> = [
       traverseQueryPopulate(async ({ key, value, schema, attribute, getModel }, { set }) => {
         if (attribute) {
           return;
@@ -290,9 +293,16 @@ export const validatePopulate = asyncCurry(
           );
         }
       }, ctx),
-      // Remove private fields after populating
-      traverseQueryPopulate(throwPrivate, ctx)
-    )(populate);
+      // Conditionally traverse for private fields only if 'private' is included
+      includes?.populate?.includes('private') && traverseQueryPopulate(throwPrivate, ctx),
+    ].filter((fn): fn is AnyFunc => typeof fn === 'function'); // Ensure only functions are passed
+
+    // Return directly if no validation functions are provided
+    if (functionsToApply.length === 0) {
+      return populate;
+    }
+
+    return pipeAsync(...functionsToApply)(populate);
   }
 );
 

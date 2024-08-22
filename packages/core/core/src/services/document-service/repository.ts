@@ -26,11 +26,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const sortValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
   const fieldValidations = ['scalarAttributes'];
   const filtersValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
-
   const populateValidations = {
     sort: sortValidations,
     field: fieldValidations,
     filters: filtersValidations,
+    populate: [], // intentionally empty to avoid throwing on private
   };
 
   // we have to typecast to reconcile the differences between validator and database getModel
@@ -41,7 +41,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     await validators.validateFilters({ schema, getModel }, params.filters, filtersValidations);
     await validators.validateSort({ schema, getModel }, params.sort, sortValidations);
     await validators.validateFields({ schema, getModel }, params.fields, fieldValidations);
-    await validators.validatePopulate({ schema, getModel }, params.fields, populateValidations);
+    await validators.validatePopulate({ schema, getModel }, params.populate, populateValidations);
 
     return params;
   };
