@@ -2,12 +2,14 @@
  * NOTE: This migration avoids using the `identifiers` utility.
  * As the `5.0.0-01-convert-identifiers-long-than-max-length`
  * migration does not convert the `localizations` join tables, as they are not
- * tables that exist anymore in v5.
+ * tables that exist anymore in v5 and are not in the db metadata.
  *
- * Hence the `identifiers` utility would return the wrong join table name.
+ * This migration therefore relies on the fact that those tables still exist, and
+ * references them directly.
  *
  * Database join table name: `categories_localizations_links`
  * Actual `identifiers` returned join table name: `categories_localizations_lnk`
+ * 
  */
 import { createId } from '@paralleldrive/cuid2';
 import { snakeCase } from 'lodash/fp';
