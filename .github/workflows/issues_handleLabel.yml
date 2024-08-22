@@ -37,17 +37,6 @@ jobs:
 
             Thank you!
 
-      # Support team auto assign
-      - name: 'Assign: add random solution engineer to reproduction issues'
-        if: "${{ github.event.label.name == 'status: pending reproduction' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'add-assignees'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          assignees: 'derrickmehaffy, kasonde, bolg55, Eventyret, dennism501, n-alonso'
-          random-to: 1
-
       # v3 Legacy Issues
       - name: 'Comment: unsupported v3 issues'
         if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
@@ -170,18 +159,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'complete'
-
-      # Critical issue alerting
-      # - name: alert team to critical issue
-      #   if: "${{ github.event.label.name == 'severity: critical' }}"
-      #   uses: rtCamp/action-slack-notify@v2
-      #   env:
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      #     SLACK_CHANNEL: crisis
-      #     SLACK_COLOR: bad
-      #     SLACK_TITLE: Issue marked as Critical!
-      #     SLACK_USERNAME: Strapi-Alerts
-      #     SLACK_FOOTER: Triggered by GitHub Actions
 
       - name: assign issues to DevExp squad project
         uses: actions/add-to-project@v0.4.1

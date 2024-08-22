@@ -1,20 +1,24 @@
 import { Command } from 'commander';
 import crypto from 'crypto';
 import deployProject from './deploy-project';
+import link from './link';
 import login from './login';
 import logout from './logout';
 import createProject from './create-project';
+import listProjects from './list-projects';
 import { CLIContext } from './types';
 import { getLocalConfig, saveLocalConfig } from './config/local';
 
 export const cli = {
   deployProject,
+  link,
   login,
   logout,
   createProject,
+  listProjects,
 };
 
-const cloudCommands = [deployProject, login, logout];
+const cloudCommands = [deployProject, link, login, logout, listProjects];
 
 async function initCloudCLIConfig() {
   const localConfig = await getLocalConfig();

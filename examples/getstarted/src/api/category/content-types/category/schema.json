@@ -59,6 +59,12 @@
       "relation": "manyToMany",
       "target": "api::relation-locale.relation-locale",
       "mappedBy": "categories"
+    },
+    "relation": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-locale.relation-locale",
+      "mappedBy": "category"
     }
   }
 }

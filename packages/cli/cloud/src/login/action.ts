@@ -1,24 +1,34 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import chalk from 'chalk';
+import inquirer from 'inquirer';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';
 import { apiConfig } from '../config/api';
+import { trackEvent } from '../utils/analytics';
 
 const openModule = import('open');
 
-export default async (ctx: CLIContext): Promise<boolean> => {
+export async function promptLogin(ctx: CLIContext) {
+  const response = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'login',
+      message: 'Would you like to login?',
+    },
+  ]);
+
+  if (response.login) {
+    const loginSuccessful = await loginAction(ctx);
+    return loginSuccessful;
+  }
+  return false;
+}
+
+export default async function loginAction(ctx: CLIContext): Promise<boolean> {
   const { logger } = ctx;
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
-  const cloudApiService = await cloudApiFactory(existingToken || undefined);
-
-  const trackFailedLogin = async () => {
-    try {
-      await cloudApiService.track('didNotLogin', { loginMethod: 'cli' });
-    } catch (e) {
-      logger.debug('Failed to track failed login', e);
-    }
-  };
+  const cloudApiService = await cloudApiFactory(ctx, existingToken || undefined);
 
   if (existingToken) {
     const isTokenValid = await tokenService.isTokenValid(existingToken);
@@ -38,7 +48,6 @@ export default async (ctx: CLIContext): Promise<boolean> => {
         return true;
       } catch (e) {
         logger.debug('Failed to fetch user info', e);
-        // If the token is invalid and request failed, we should proceed with the login process
       }
     }
   }
@@ -53,12 +62,7 @@ export default async (ctx: CLIContext): Promise<boolean> => {
     logger.debug(e);
     return false;
   }
-
-  try {
-    await cloudApiService.track('willLoginAttempt', {});
-  } catch (e) {
-    logger.debug('Failed to track login attempt', e);
-  }
+  await trackEvent(ctx, cloudApiService, 'willLoginAttempt', {});
 
   logger.debug('🔐 Creating device authentication request...', {
     client_id: cliConfig.clientId,
@@ -126,7 +130,7 @@ export default async (ctx: CLIContext): Promise<boolean> => {
           }
 
           logger.debug('🔍 Fetching user information...');
-          const cloudApiServiceWithToken = await cloudApiFactory(authTokenData.access_token);
+          const cloudApiServiceWithToken = await cloudApiFactory(ctx, authTokenData.access_token);
           // Call to get user info to create the user in DB if not exists
           await cloudApiServiceWithToken.getUserInfo();
           logger.debug('🔍 User information fetched successfully!');
@@ -151,7 +155,7 @@ export default async (ctx: CLIContext): Promise<boolean> => {
             'There seems to be a problem with your login information. Please try logging in again.'
           );
           spinnerFail();
-          await trackFailedLogin();
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
           return false;
         }
         if (
@@ -160,7 +164,7 @@ export default async (ctx: CLIContext): Promise<boolean> => {
         ) {
           logger.debug(e);
           spinnerFail();
-          await trackFailedLogin();
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
           return false;
         }
         // Await interval before retrying
@@ -175,13 +179,9 @@ export default async (ctx: CLIContext): Promise<boolean> => {
       'To access your dashboard, please copy and paste the following URL into your web browser:'
     );
     logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
-    try {
-      await cloudApiService.track('didLogin', { loginMethod: 'cli' });
-    } catch (e) {
-      logger.debug('Failed to track login', e);
-    }
+    await trackEvent(ctx, cloudApiService, 'didLogin', { loginMethod: 'cli' });
   };
 
   await authenticate();
   return isAuthenticated;
-};
+}

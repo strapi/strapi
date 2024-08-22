@@ -62,6 +62,7 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
           if (retries > MAX_RETRIES) {
             spinner.fail('We were unable to connect to the server to get build logs at this time.');
             es.close();
+            clearExistingTimeout(); // Important to clear the event loop from remaining timeout - avoid to wait for nothing while the timeout is running
             reject(new Error('Max retries reached'));
           }
         };

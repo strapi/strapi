@@ -2,20 +2,21 @@ import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
 import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
-import { tokenServiceFactory, cloudApiFactory, local } from '../services';
+import { cloudApiFactory, local, tokenServiceFactory } from '../services';
+import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
+import { promptLogin } from '../login/action';
+import {
+  getDefaultsFromQuestions,
+  getProjectNodeVersionDefault,
+  questionDefaultValuesMapper,
+} from './utils/project-questions.utils';
 
 async function handleError(ctx: CLIContext, error: Error) {
-  const tokenService = await tokenServiceFactory(ctx);
   const { logger } = ctx;
-
   logger.debug(error);
   if (error instanceof AxiosError) {
     const errorMessage = typeof error.response?.data === 'string' ? error.response.data : null;
     switch (error.response?.status) {
-      case 401:
-        logger.error('Your session has expired. Please log in again.');
-        await tokenService.eraseToken();
-        return;
       case 403:
         logger.error(
           errorMessage ||
@@ -43,23 +44,8 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-export default async (ctx: CLIContext) => {
+async function createProject(ctx: CLIContext, cloudApi: any, projectInput: ProjectInput) {
   const { logger } = ctx;
-  const { getValidToken } = await tokenServiceFactory(ctx);
-
-  const token = await getValidToken();
-  if (!token) {
-    return;
-  }
-  const cloudApi = await cloudApiFactory(token);
-  const { data: config } = await cloudApi.config();
-  const { questions, defaults: defaultValues } = config.projectCreation;
-
-  const projectAnswersDefaulted = defaults(defaultValues);
-  const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
-
-  const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
-
   const spinner = logger.spinner('Setting up your project...').start();
   try {
     const { data } = await cloudApi.createProject(projectInput);
@@ -67,7 +53,50 @@ export default async (ctx: CLIContext) => {
     spinner.succeed('Project created successfully!');
     return data;
   } catch (e: Error | unknown) {
-    spinner.fail('Failed to create project on Strapi Cloud.');
-    await handleError(ctx, e as Error);
+    spinner.fail('An error occurred while creating the project on Strapi Cloud.');
+    throw e;
+  }
+}
+
+export default async (ctx: CLIContext) => {
+  const { logger } = ctx;
+  const { getValidToken, eraseToken } = await tokenServiceFactory(ctx);
+
+  const token = await getValidToken(ctx, promptLogin);
+  if (!token) {
+    return;
+  }
+
+  const cloudApi = await cloudApiFactory(ctx, token);
+  const { data: config } = await cloudApi.config();
+  const projectName = await getProjectNameFromPackageJson(ctx);
+
+  const defaultAnswersMapper = questionDefaultValuesMapper({
+    name: projectName,
+    nodeVersion: getProjectNodeVersionDefault,
+  });
+  const questions = defaultAnswersMapper(config.projectCreation.questions);
+  const defaultValues = {
+    ...config.projectCreation.defaults,
+    ...getDefaultsFromQuestions(questions),
+  };
+
+  const projectAnswersDefaulted = defaults(defaultValues);
+  const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
+
+  const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
+
+  try {
+    return await createProject(ctx, cloudApi, projectInput);
+  } catch (e: Error | unknown) {
+    if (e instanceof AxiosError && e.response?.status === 401) {
+      logger.warn('Oops! Your session has expired. Please log in again to retry.');
+      await eraseToken();
+      if (await promptLogin(ctx)) {
+        return await createProject(ctx, cloudApi, projectInput);
+      }
+    } else {
+      await handleError(ctx, e as Error);
+    }
   }
 };
