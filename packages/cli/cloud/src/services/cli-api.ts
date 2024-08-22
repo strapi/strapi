@@ -182,7 +182,7 @@ export async function cloudApiFactory(
 
     async listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse, unknown>> {
       try {
-        const response = await axiosCloudAPI.get('/projects/linkable');
+        const response = await axiosCloudAPI.get('/projects-linkable');
 
         if (response.status !== 200) {
           throw new Error('Error fetching cloud projects from the server.');
