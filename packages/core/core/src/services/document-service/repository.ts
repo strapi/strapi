@@ -2,6 +2,7 @@ import { omit, assoc, merge, curry } from 'lodash/fp';
 
 import { async, contentTypes as contentTypesUtils, validate } from '@strapi/utils';
 
+import { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
@@ -22,7 +23,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
   // Define the validations that should be performed
-  const sortValidations = ['dynamicZones', 'morphRelations'];
+  const sortValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
   const fieldValidations = ['scalarAttributes'];
   const filtersValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
 
@@ -31,7 +32,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     field: fieldValidations,
     filters: filtersValidations,
   };
-  const getModel = () => contentType;
+
+  // we have to typecast to reconcile the differences between validator and database getModel
+  const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
   const schema = contentType;
 
   const validateParams = async (params: any) => {
