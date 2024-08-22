@@ -93,6 +93,7 @@ const ReleaseListCell = ({ documentId, model }: ReleaseListCellProps) => {
         <Button
           variant="ghost"
           onClick={(e: React.MouseEvent<HTMLElement>) => e.stopPropagation()}
+          // TODO: find a way in the DS to define the widht and height of the icon
           endIcon={releases.length > 0 ? <CaretDown width="1.2rem" height="1.2rem" /> : null}
         >
           <Typography

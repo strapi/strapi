@@ -68,11 +68,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
   return (
     <Menu.Root onOpenChange={(isOpen) => setIsOpen(isOpen)}>
       <Menu.Trigger onClick={(e) => e.stopPropagation()}>
-        <Typography
-          style={{ maxWidth: '252px', cursor: 'pointer' }}
-          textColor="neutral800"
-          fontWeight="regular"
-        >
+        <Typography style={{ cursor: 'pointer' }} textColor="neutral800" fontWeight="regular">
           {content.count > 0
             ? formatMessage(
                 {
