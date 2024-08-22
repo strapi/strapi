@@ -80,11 +80,15 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Supported operating systems**:
 
-- Ubuntu LTS/Debian 9.x
-- CentOS/RHEL 8
-- macOS Mojave
-- Windows 10
-- Docker
+| OS              | Recommended | Minimum    |
+|-----------------|-------------|------------|
+| Ubuntu          | 24.04       | LTS        |
+| Debian          | 11          | LTS        |
+| RHEL            | 9           | LTS        |
+| macOS           | 14          | 12         |
+| Windows Desktop | 11          | 10         |
+| Windows Server  | No Support  | No Support |
+| Docker          | N/A         | N/A        |
 
 (Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
 
@@ -93,7 +97,7 @@ Complete installation requirements can be found in the documentation under <a hr
 Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
 
 | Strapi Version  | Recommended | Minimum |
-| --------------- | ----------- | ------- |
+|-----------------|-------------|---------|
 | 5.0.0 and up    | 20.x        | 18.x    |
 | 4.14.5 and up   | 20.x        | 18.x    |
 | 4.11.0 and up   | 18.x        | 16.x    |
@@ -103,10 +107,10 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 **Database:**
 
 | Database   | Recommended | Minimum |
-| ---------- | ----------- | ------- |
+|------------|-------------|---------|
 | MySQL      | 8.0         | 8.0     |
-| MariaDB    | 10.6        | 10.3    |
-| PostgreSQL | 14.0        | 11.0    |
+| MariaDB    | 11.2        | 10.3    |
+| PostgreSQL | 16.0        | 14.0    |
 | SQLite     | 3           | 3       |
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.
@@ -153,6 +157,7 @@ See our dedicated [repository](https://github.com/strapi/documentation) for the 
 
 - [Developer docs](https://docs.strapi.io/developer-docs/latest/getting-started/introduction.html)
 - [User guide](https://docs.strapi.io/user-docs/latest/getting-started/introduction.html)
+- [Cloud guide](https://docs.strapi.io/cloud/intro)
 
 ## Try live demo
 
