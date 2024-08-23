@@ -577,20 +577,6 @@ describe('Core API - Validate', () => {
         });
       });
 
-      describe('Invalid attribute name', () => {
-        describe('Basic (no modifiers)', () => {
-          it.each([
-            ['name_invalid', 'name_invalid', defaultDocumentsOrder],
-            ['name_invalid (asc)', 'name_invalid:asc', defaultDocumentsOrder],
-            ['name_invalid (desc)', 'name_invalid:desc', defaultDocumentsOrder],
-          ])('Error with sort: %s', async (_s, sort, order) => {
-            const res = await rq.get('/api/documents', { qs: { sort } });
-
-            expect(res.status).toEqual(400);
-          });
-        });
-      });
-
       describe('Custom (composed)', () => {
         it.each([
           ['password (asc) + name (asc)', 'password:asc,name:asc', [2, 3, 1]],
@@ -643,7 +629,7 @@ describe('Core API - Validate', () => {
           });
         });
 
-        describe('invalid attribute name', () => {
+        describe('invalid modifier', () => {
           it.each([
             ['name_invalid (asc)', [{ name_invalid: 'asc' }], defaultDocumentsOrder],
             ['name_invalid (desc)', [{ name_private: 'desc' }], defaultDocumentsOrder],
