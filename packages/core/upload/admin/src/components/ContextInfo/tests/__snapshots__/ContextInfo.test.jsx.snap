@@ -2,25 +2,25 @@
 
 exports[`ContextInfo renders 1`] = `
 .c0 {
-  background: #f6f6f9;
   padding-block-start: 16px;
-  padding-inline-end: 24px;
   padding-block-end: 16px;
   padding-inline-start: 24px;
+  padding-inline-end: 24px;
+  background: #f6f6f9;
   border-radius: 4px;
 }
 
 .c2 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c4 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c5 {
@@ -55,19 +55,25 @@ exports[`ContextInfo renders 1`] = `
 }
 
 .c3 {
-  grid-column: span 6;
+  grid-column: span 12;
   max-width: 100%;
 }
 
-@media (max-width: 1100px) {
+@media (min-width: 520px) {
   .c3 {
-    grid-column: span;
+    grid-column: span 12;
   }
 }
 
-@media (max-width: 550px) {
+@media (min-width: 768px) {
   .c3 {
     grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .c3 {
+    grid-column: span 6;
   }
 }
 

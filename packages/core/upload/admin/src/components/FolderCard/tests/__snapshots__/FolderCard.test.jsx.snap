@@ -6,9 +6,11 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c2 {
+  padding-block-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-end: 12px;
+  padding-inline-start: 12px;
   background: #ffffff;
-  padding-block: 12px;
-  padding-inline: 12px;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
@@ -18,29 +20,31 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c4 {
-  position: relative;
   z-index: 2;
+  position: relative;
 }
 
 .c6 {
-  background: #eaf5ff;
-  color: #66b7f1;
   padding-block-start: 8px;
-  padding-inline-end: 12px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  color: #66b7f1;
+  background: #eaf5ff;
   border-radius: 4px;
 }
 
 .c8 {
+  max-width: 100%;
   position: relative;
   overflow: hidden;
-  max-width: 100%;
 }
 
 .c11 {
-  padding-block: 4px;
-  padding-inline: 4px;
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 4px;
   max-width: 100%;
 }
 
@@ -49,23 +53,23 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c3 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c9 {
   align-items: flex-start;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c13 {
   font-size: 1.4rem;
   line-height: 1.43;
-  font-weight: 500;
   color: currentcolor;
+  font-weight: 500;
 }
 
 .c17 {
@@ -149,12 +153,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 .c12:focus {
   outline: 2px solid #4945ff;
   outline-offset: -2px;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c5 {
-    transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
 }
 
 <div>
@@ -261,9 +259,11 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 }
 
 .c2 {
+  padding-block-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-end: 12px;
+  padding-inline-start: 12px;
   background: #ffffff;
-  padding-block: 12px;
-  padding-inline: 12px;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
@@ -273,24 +273,26 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 }
 
 .c4 {
-  background: #eaf5ff;
-  color: #66b7f1;
   padding-block-start: 8px;
-  padding-inline-end: 12px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  color: #66b7f1;
+  background: #eaf5ff;
   border-radius: 4px;
 }
 
 .c6 {
+  max-width: 100%;
   position: relative;
   overflow: hidden;
-  max-width: 100%;
 }
 
 .c9 {
-  padding-block: 4px;
-  padding-inline: 4px;
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 4px;
   max-width: 100%;
 }
 
@@ -299,23 +301,23 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 }
 
 .c3 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c7 {
   align-items: flex-start;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c11 {
   font-size: 1.4rem;
   line-height: 1.43;
-  font-weight: 500;
   color: currentcolor;
+  font-weight: 500;
 }
 
 .c15 {
