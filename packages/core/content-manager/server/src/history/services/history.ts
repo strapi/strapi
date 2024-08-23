@@ -34,7 +34,15 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       results: HistoryVersions.HistoryVersionDataResponse[];
       pagination: HistoryVersions.Pagination;
     }> {
-      const locale = params.query.locale || (await serviceUtils.getDefaultLocale());
+      const model = strapi.getModel(params.query.contentType);
+      const isLocalizedContentType = serviceUtils.isLocalizedContentType(model);
+      const defaultLocale = await serviceUtils.getDefaultLocale();
+
+      let locale = null;
+      if (isLocalizedContentType) {
+        locale = params.query.locale || defaultLocale;
+      }
+
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params.query,

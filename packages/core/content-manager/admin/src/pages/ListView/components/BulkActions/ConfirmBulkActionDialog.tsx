@@ -99,6 +99,10 @@ const ConfirmDialogPublishAll = ({
     };
   }>();
 
+  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
+  // see RFC "Count draft relations" in Notion
+  const enableDraftRelationsCount = false;
+
   const {
     data: countDraftRelations = 0,
     isLoading,
@@ -110,7 +114,7 @@ const ConfirmDialogPublishAll = ({
       locale: query?.plugins?.i18n?.locale,
     },
     {
-      skip: selectedEntries.length === 0,
+      skip: !enableDraftRelationsCount || selectedEntries.length === 0,
     }
   );
 

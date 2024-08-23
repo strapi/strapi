@@ -28,7 +28,7 @@ import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
-import { CLONE_PATH } from '../../../router';
+import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
@@ -509,6 +509,7 @@ const PublishAction: DocumentActionComponent = ({
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
+  const isListView = useMatch(LIST_PATH) !== null;
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
@@ -581,7 +582,9 @@ const PublishAction: DocumentActionComponent = ({
   }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
   React.useEffect(() => {
-    if (documentId) {
+    if (documentId && !isListView) {
+      // We don't want to call count draft relations if in the list view. There is no
+      // use for the response.
       const fetchDraftRelationsCount = async () => {
         const { data, error } = await countDraftRelations({
           collectionType,
@@ -601,7 +604,7 @@ const PublishAction: DocumentActionComponent = ({
 
       fetchDraftRelationsCount();
     }
-  }, [documentId, countDraftRelations, collectionType, model, params]);
+  }, [isListView, documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -662,7 +665,11 @@ const PublishAction: DocumentActionComponent = ({
   };
 
   const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
-  const hasDraftRelations = totalDraftRelations > 0;
+
+  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
+  // see RFC "Count draft relations" in Notion
+  const enableDraftRelationsCount = false;
+  const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
 
   return {
     /**

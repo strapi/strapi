@@ -122,7 +122,12 @@ export default {
     const workflow = await workflowService.assertContentTypeBelongsToWorkflow(modelUID);
     workflowService.assertStageBelongsToWorkflow(stageId, workflow);
 
-    const updatedEntity = await stagesService.updateEntity({ id: entity.id, modelUID }, stageId);
+    const updatedEntity = await stagesService.updateEntity(
+      entity.documentId,
+      entity.locale,
+      modelUID,
+      stageId
+    );
 
     ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },
