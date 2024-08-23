@@ -199,7 +199,8 @@ describe('Document Service Validations', () => {
         });
       });
 
-      it.todo('should throw ValidationError on invalid dz component', async () => {
+      // TODO: functionality is not yet implemented
+      it.skip('should throw ValidationError on invalid dz component', async () => {
         await expect(
           strapi.documents(ARTICLE_UID)[methodName]({
             populate: {
