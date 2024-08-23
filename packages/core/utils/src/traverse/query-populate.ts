@@ -132,6 +132,8 @@ const populate = traverseFactory()
     },
   }))
   .ignore(({ key, attribute }) => {
+    // we don't want to recurse using traversePopulate and instead let
+    // the visitors recurse with the appropriate traversal (sort, filters, etc...)
     return ['sort', 'filters', 'fields'].includes(key) && !attribute;
   })
   .on(

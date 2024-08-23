@@ -149,13 +149,7 @@ describe('Document Service Validations', () => {
 
       it('should not throw on private attribute', async () => {
         await strapi.documents(ARTICLE_UID)[methodName]({
-          populate: ['private'],
-        });
-      });
-
-      it('should not throw on password attribute', async () => {
-        await strapi.documents(ARTICLE_UID)[methodName]({
-          populate: ['password'],
+          populate: ['categories_private'],
         });
       });
 
@@ -199,8 +193,22 @@ describe('Document Service Validations', () => {
         });
       });
 
+      it('should not throw on nested wildcard populate', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: {
+            identifiersDz: {
+              on: {
+                'article.compo-unique-all': {
+                  populate: '*',
+                },
+              },
+            },
+          },
+        });
+      });
+
       // TODO: functionality is not yet implemented
-      it.skip('should throw ValidationError on invalid dz component', async () => {
+      it('should throw ValidationError on invalid dz component', async () => {
         await expect(
           strapi.documents(ARTICLE_UID)[methodName]({
             populate: {
@@ -210,6 +218,14 @@ describe('Document Service Validations', () => {
                 },
               },
             },
+          })
+        ).rejects.toThrow(errors.ValidationError);
+      });
+
+      it('should throw ValidationError on non-populatable attribute', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({
+            populate: ['title'],
           })
         ).rejects.toThrow(errors.ValidationError);
       });

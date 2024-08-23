@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from 'lodash/fp';
+import { isEmpty, isNil, isObject } from 'lodash/fp';
 
 import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
@@ -13,6 +13,7 @@ import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations }
 import { isOperator } from '../operators';
 import { throwInvalidKey } from './utils';
 import type { Model, Data } from '../types';
+import parseType from '../parse-type';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
@@ -229,14 +230,55 @@ export const validatePopulate = asyncCurry(
 
     const functionsToApply: Array<AnyFunc> = [
       traverseQueryPopulate(async ({ key, path, value, schema, attribute, getModel }, { set }) => {
-        // TODO: clean this up, especially the wildcard and dz populate
-        if (
-          attribute ||
-          path?.attribute || // dz and components
-          !key || // empty keys
-          ['*', 'on', 'true', 'false'].includes(key) // wildcard and dz populates
-        ) {
+        if (attribute) {
+          const isPopulatableAttribute = ['relation', 'dynamiczone', 'component', 'media'].includes(
+            attribute.type
+          );
+
+          // throw on non-populate attributes
+          if (!isPopulatableAttribute) {
+            throwInvalidKey({ key, path: path.raw });
+          }
+
+          // valid populatable attribute, so return
           return;
+        }
+
+        // if we're looking at a populate fragment
+        // make sure its target are valid (they're not validated otherwise)
+        if (key === 'on') {
+          // populate fragment should always be an object
+          if (!isObject(value)) {
+            return throwInvalidKey({ key, path: path.raw });
+          }
+
+          const targets = Object.keys(value);
+
+          for (const target of targets) {
+            const model = getModel(target);
+
+            // if a target is invalid (no matching model), then raise an error
+            if (!model) {
+              throwInvalidKey({ key: target, path: `${path.raw}.${target}` });
+            }
+          }
+
+          // if the fragment's target is fine, then let it pass
+          return;
+        }
+
+        // Ignore plain wildcards
+        if (key === '' && value === '*') {
+          return;
+        }
+
+        // Allowed boolean-like keywords should be ignored
+        try {
+          parseType({ type: 'boolean', value: key });
+          // key is an allowed boolean-like keyword, skipping validation...
+          return;
+        } catch {
+          // continue, because it's not a boolean-like
         }
 
         // Handle nested `sort` validation with custom or default traversals
