@@ -9,7 +9,7 @@
  *
  * Database join table name: `categories_localizations_links`
  * Actual `identifiers` returned join table name: `categories_localizations_lnk`
- * 
+ *
  */
 import { createId } from '@paralleldrive/cuid2';
 import { snakeCase } from 'lodash/fp';
