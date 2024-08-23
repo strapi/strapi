@@ -8,6 +8,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
 const { createTestBuilder } = require('api-tests/builder');
+const { kebabCase } = require('lodash/fp');
 
 let strapi;
 let rq;
@@ -48,6 +49,7 @@ describe('Content Type Builder - Content types', () => {
     await restart();
   });
 
+  // TODO FIXME: this depends on all tests to run or else it throws an error
   afterAll(async () => {
     const modelsUIDs = [
       'api::test-collection-type.test-collection-type',
@@ -199,6 +201,58 @@ describe('Content Type Builder - Content types', () => {
         },
       });
     });
+
+    test.each(['strapi', '_strapi', '__strapi'])(
+      'Cannot use %s prefix for content type name',
+      async (prefix) => {
+        const res = await rq({
+          method: 'POST',
+          url: '/content-type-builder/content-types',
+          body: {
+            contentType: {
+              displayName: 'unique string',
+              singularName: `${kebabCase(prefix)}-singular`,
+              pluralName: `${kebabCase(prefix)}-plural`,
+              attributes: {
+                [prefix]: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({
+          error: {
+            details: {
+              errors: [
+                {
+                  message:
+                    'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, status, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*',
+                  name: 'ValidationError',
+                  path: ['contentType', 'attributes', prefix],
+                },
+                {
+                  message:
+                    'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
+                  name: 'ValidationError',
+                  path: ['contentType', 'singularName'],
+                },
+                {
+                  message:
+                    'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
+                  name: 'ValidationError',
+                  path: ['contentType', 'pluralName'],
+                },
+              ],
+            },
+            message: '3 errors occurred',
+            name: 'ValidationError',
+          },
+        });
+      }
+    );
 
     test('Cannot use same string for singularName and pluralName', async () => {
       const res = await rq({
