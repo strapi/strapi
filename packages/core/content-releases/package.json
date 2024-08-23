@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.0.0-rc.10",
+  "version": "5.0.0-rc.11",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
