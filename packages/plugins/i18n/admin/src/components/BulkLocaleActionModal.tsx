@@ -23,7 +23,7 @@ type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 interface EntryValidationTextProps {
   status: Status;
   validationErrors: FormErrors[string] | null;
-  isPublish?: boolean;
+  action: 'bulk-publish' | 'bulk-unpublish';
 }
 
 interface TranslationMessage extends MessageDescriptor {
@@ -39,7 +39,7 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
 const EntryValidationText = ({
   status = 'draft',
   validationErrors,
-  isPublish = true,
+  action,
 }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
@@ -92,7 +92,7 @@ const EntryValidationText = ({
   }
 
   const getStatusMessage = () => {
-    if (isPublish) {
+    if (action === 'bulk-publish') {
       if (status === 'published') {
         return {
           icon: <CheckCircle fill="success600" />,
@@ -175,7 +175,7 @@ interface BulkLocaleActionModalProps {
   }[];
   localesMetadata: Locale[];
   validationErrors?: FormErrors;
-  isPublish?: boolean;
+  action: 'bulk-publish' | 'bulk-unpublish';
 }
 
 const BulkLocaleActionModal = ({
@@ -183,7 +183,7 @@ const BulkLocaleActionModal = ({
   rows,
   localesMetadata,
   validationErrors = {},
-  isPublish = true,
+  action,
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
 
@@ -211,13 +211,15 @@ const BulkLocaleActionModal = ({
     ).length;
 
     const withErrorsCount = localesWithErrors.length;
-    const messageId = isPublish
-      ? 'content-manager.containers.list.selectedEntriesModal.selectedCount.publish'
-      : 'content-manager.containers.list.selectedEntriesModal.selectedCount.unpublish';
+    const messageId =
+      action === 'bulk-publish'
+        ? 'content-manager.containers.list.selectedEntriesModal.selectedCount.publish'
+        : 'content-manager.containers.list.selectedEntriesModal.selectedCount.unpublish';
 
-    const defaultMessage = isPublish
-      ? '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.'
-      : '<b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} already unpublished. <b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} ready to unpublish.';
+    const defaultMessage =
+      action === 'bulk-publish'
+        ? '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.'
+        : '<b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} already unpublished. <b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} ready to unpublish.';
 
     return formatMessage(
       {
@@ -280,11 +282,7 @@ const BulkLocaleActionModal = ({
                     </Box>
                   </Table.Cell>
                   <Table.Cell>
-                    <EntryValidationText
-                      validationErrors={error}
-                      status={status}
-                      isPublish={isPublish}
-                    />
+                    <EntryValidationText validationErrors={error} status={status} action={action} />
                   </Table.Cell>
                   <Table.Cell>
                     <IconButton
