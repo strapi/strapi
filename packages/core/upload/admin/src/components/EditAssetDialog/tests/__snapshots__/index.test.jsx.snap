@@ -3,19 +3,19 @@
 exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c0 {
   margin-inline-start: -250px;
-  position: fixed;
-  left: 50%;
   top: 4.6rem;
-  z-index: 700;
+  left: 50%;
   width: 50rem;
+  z-index: 700;
+  position: fixed;
 }
 
 .c5 {
-  background: #f6f6f9;
-  padding-block: 16px;
-  padding-inline: 16px;
+  padding-block-start: 16px;
   padding-inline-end: 20px;
+  padding-block-end: 16px;
   padding-inline-start: 20px;
+  background: #f6f6f9;
 }
 
 .c9 {
@@ -27,31 +27,28 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c18 {
   background: #eaeaef;
   border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
   border-color: #dcdce4;
-  border: 1px solid #dcdce4;
 }
 
 .c20 {
-  padding-inline-end: 12px;
   padding-inline-start: 12px;
+  padding-inline-end: 12px;
 }
 
 .c25 {
-  padding-inline-end: 8px;
   padding-inline-start: 8px;
+  padding-inline-end: 8px;
 }
 
 .c27 {
-  background: #f6f6f9;
   padding-block-start: 16px;
-  padding-inline-end: 24px;
   padding-block-end: 16px;
   padding-inline-start: 24px;
+  padding-inline-end: 24px;
+  background: #f6f6f9;
   border-radius: 4px;
-}
-
-.c31 {
-  display: flex;
 }
 
 .c37 {
@@ -59,95 +56,95 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c41 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .c1 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c6 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c10 {
   align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   justify-content: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c16 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c21 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: flex-end;
+  flex-direction: row;
+  display: flex;
 }
 
 .c23 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 4px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c26 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 12px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c28 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c33 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c42 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c45 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c8 {
   font-size: 1.4rem;
   line-height: 1.43;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c29 {
@@ -164,11 +161,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #4a4a6a;
 }
 
-.c32 {
+.c31 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c36 {
@@ -180,8 +181,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c44 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c2 {
@@ -268,6 +269,36 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   cursor: default;
 }
 
+.c11 {
+  text-decoration: none;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+  color: #8e8ea9;
+}
+
+.c11:hover {
+  background-color: #f6f6f9;
+  color: #666687;
+}
+
+.c11:active {
+  background-color: #eaeaef;
+}
+
+.c11[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c32 {
+  display: flex;
+}
+
 .c35 {
   border: none;
   border-radius: 4px;
@@ -278,6 +309,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   display: block;
   width: 100%;
   background: inherit;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
   padding-block: 8px;
 }
 
@@ -299,53 +332,17 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
+  padding-inline-start: 0;
+  position: relative;
   outline: none;
   box-shadow: none;
   transition-property: border-color,box-shadow,fill;
   transition-duration: 0.2s;
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
 }
 
 .c34:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
-}
-
-.c15 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c17 {
-  grid-column: span 6;
-  max-width: 100%;
-}
-
-.c11 {
-  text-decoration: none;
-  padding-block: 0.9rem;
-  padding-inline: 0.9rem;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-  color: #32324d;
-  color: #666687;
-}
-
-.c11:hover {
-  background-color: #f6f6f9;
-}
-
-.c11:active {
-  background-color: #eaeaef;
-}
-
-.c11[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-  cursor: default;
 }
 
 .c12 {
@@ -369,8 +366,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c4 {
   max-width: 83rem;
-  max-height: 80vh;
-  height: min-content;
+  max-height: 90vh;
+  height: auto;
   width: 60%;
   overflow: hidden;
   margin: 0 auto;
@@ -405,6 +402,17 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c40 {
   border-top: solid 1px #eaeaef;
   flex: 1;
+}
+
+.c15 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c17 {
+  grid-column: span 12;
+  max-width: 100%;
 }
 
 .c38 {
@@ -479,18 +487,6 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   }
 }
 
-@media (max-width: 1100px) {
-  .c17 {
-    grid-column: span;
-  }
-}
-
-@media (max-width: 550px) {
-  .c17 {
-    grid-column: span 12;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .c11 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -514,6 +510,24 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
     animation-duration: 120ms;
     animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     animation-name: jgufbq;
+  }
+}
+
+@media (min-width: 520px) {
+  .c17 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 768px) {
+  .c17 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .c17 {
+    grid-column: span 6;
   }
 }
 

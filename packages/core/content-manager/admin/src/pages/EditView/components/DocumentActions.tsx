@@ -265,7 +265,7 @@ const DocumentActionsMenu = ({
 
   return (
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
-      <StyledMoreButton
+      <Menu.Trigger
         disabled={isDisabled}
         size="S"
         endIcon={null}
@@ -282,7 +282,7 @@ const DocumentActionsMenu = ({
               defaultMessage: 'More document actions',
             })}
         </VisuallyHidden>
-      </StyledMoreButton>
+      </Menu.Trigger>
       <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -388,12 +388,6 @@ const convertActionVariantToIconColor = (
       return 'primary600';
   }
 };
-
-const StyledMoreButton = styled(Menu.Trigger)`
-  & > span {
-    display: flex;
-  }
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionConfirmDialog
@@ -671,7 +665,11 @@ const PublishAction: DocumentActionComponent = ({
   };
 
   const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
-  const hasDraftRelations = totalDraftRelations > 0;
+
+  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
+  // see RFC "Count draft relations" in Notion
+  const enableDraftRelationsCount = false;
+  const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
 
   return {
     /**

@@ -62,9 +62,9 @@ describe('<UploadProgress />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
-        background: #eaeaef;
         width: 100%;
         height: 100%;
+        background: #eaeaef;
       }
 
       .c3 {
@@ -73,22 +73,22 @@ describe('<UploadProgress />', () => {
 
       .c1 {
         align-items: center;
-        display: flex;
         flex-direction: row;
+        display: flex;
       }
 
       .c4 {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
         gap: 8px;
+        align-items: center;
+        flex-direction: column;
+        display: flex;
       }
 
       .c9 {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
         gap: 8px;
+        align-items: center;
+        flex-direction: row;
+        display: flex;
       }
 
       .c7 {
@@ -215,15 +215,15 @@ describe('<UploadProgress />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
-        background: #fcecea;
         width: 100%;
         height: 100%;
+        background: #fcecea;
       }
 
       .c1 {
         align-items: center;
-        display: flex;
         flex-direction: row;
+        display: flex;
       }
 
       .c2 {

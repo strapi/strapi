@@ -12,7 +12,6 @@ import {
 } from '@strapi/design-system';
 import { Cross, Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import type { Categories, Collections, FilterTypes } from '../hooks/useMarketplaceData';
 import type { NpmPackageType, MarketplacePageQuery } from '../MarketplacePage';
@@ -46,65 +45,64 @@ const NpmPackagesFilters = ({
 
   return (
     <Popover.Root>
-      <Box paddingTop={1} paddingBottom={1}>
-        <Popover.Trigger>
-          <ButtonToggle variant="tertiary" startIcon={<Filter />} size="S">
-            {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-          </ButtonToggle>
-        </Popover.Trigger>
-        <Popover.Content sideOffset={4}>
-          <Flex padding={3} direction="column" alignItems="stretch" gap={1}>
+      <Popover.Trigger>
+        <Button variant="tertiary" startIcon={<Filter />}>
+          {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content sideOffset={4}>
+        <Flex padding={3} direction="column" alignItems="stretch" gap={1}>
+          <FilterSelect
+            message={formatMessage({
+              id: 'admin.pages.MarketPlacePage.filters.collections',
+              defaultMessage: 'Collections',
+            })}
+            value={query?.collections || []}
+            onChange={(newCollections) => {
+              const update = { collections: newCollections };
+              handleSelectChange(update);
+            }}
+            onClear={() => handleSelectClear('collections')}
+            possibleFilters={possibleCollections}
+            customizeContent={(values) =>
+              formatMessage(
+                {
+                  id: 'admin.pages.MarketPlacePage.filters.collectionsSelected',
+                  defaultMessage:
+                    '{count, plural, =0 {No collections} one {# collection} other {# collections}} selected',
+                },
+                { count: values?.length ?? 0 }
+              )
+            }
+          />
+          {npmPackageType === 'plugin' && (
             <FilterSelect
               message={formatMessage({
-                id: 'admin.pages.MarketPlacePage.filters.collections',
-                defaultMessage: 'Collections',
+                id: 'admin.pages.MarketPlacePage.filters.categories',
+                defaultMessage: 'Categories',
               })}
-              value={query?.collections || []}
-              onChange={(newCollections) => {
-                const update = { collections: newCollections };
+              value={query?.categories || []}
+              onChange={(newCategories) => {
+                const update = { categories: newCategories };
                 handleSelectChange(update);
               }}
-              onClear={() => handleSelectClear('collections')}
-              possibleFilters={possibleCollections}
+              onClear={() => handleSelectClear('categories')}
+              possibleFilters={possibleCategories}
               customizeContent={(values) =>
                 formatMessage(
                   {
-                    id: 'admin.pages.MarketPlacePage.filters.collectionsSelected',
+                    id: 'admin.pages.MarketPlacePage.filters.categoriesSelected',
                     defaultMessage:
-                      '{count, plural, =0 {No collections} one {# collection} other {# collections}} selected',
+                      '{count, plural, =0 {No categories} one {# category} other {# categories}} selected',
                   },
                   { count: values?.length ?? 0 }
                 )
               }
             />
-            {npmPackageType === 'plugin' && (
-              <FilterSelect
-                message={formatMessage({
-                  id: 'admin.pages.MarketPlacePage.filters.categories',
-                  defaultMessage: 'Categories',
-                })}
-                value={query?.categories || []}
-                onChange={(newCategories) => {
-                  const update = { categories: newCategories };
-                  handleSelectChange(update);
-                }}
-                onClear={() => handleSelectClear('categories')}
-                possibleFilters={possibleCategories}
-                customizeContent={(values) =>
-                  formatMessage(
-                    {
-                      id: 'admin.pages.MarketPlacePage.filters.categoriesSelected',
-                      defaultMessage:
-                        '{count, plural, =0 {No categories} one {# category} other {# categories}} selected',
-                    },
-                    { count: values?.length ?? 0 }
-                  )
-                }
-              />
-            )}
-          </Flex>
-        </Popover.Content>
-      </Box>
+          )}
+        </Flex>
+      </Popover.Content>
+
       {query.collections?.map((collection) => (
         <Box key={collection} padding={1}>
           <Tag icon={<Cross />} onClick={() => handleTagRemove(collection, 'collections')}>
@@ -123,11 +121,6 @@ const NpmPackagesFilters = ({
     </Popover.Root>
   );
 };
-
-const ButtonToggle = styled(Button)`
-  height: unset;
-  padding-block: 1.1rem;
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * FilterSelect

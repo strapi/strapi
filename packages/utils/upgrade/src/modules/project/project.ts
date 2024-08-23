@@ -12,7 +12,13 @@ import * as constants from './constants';
 import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
-import type { FileExtension, MinimalPackageJSON, ProjectType, RunCodemodsOptions } from './types';
+import type {
+  FileExtension,
+  MinimalPackageJSON,
+  ProjectConfig,
+  ProjectType,
+  RunCodemodsOptions,
+} from './types';
 
 export class Project {
   public cwd: string;
@@ -25,12 +31,15 @@ export class Project {
 
   public packageJSON!: MinimalPackageJSON;
 
-  constructor(cwd: string) {
+  public readonly paths: string[];
+
+  constructor(cwd: string, config: ProjectConfig) {
     if (!fse.pathExistsSync(cwd)) {
       throw new Error(`ENOENT: no such file or directory, access '${cwd}'`);
     }
 
     this.cwd = cwd;
+    this.paths = config.paths;
 
     this.refresh();
   }
@@ -67,12 +76,8 @@ export class Project {
   }
 
   private createProjectCodemodsRunners(dry: boolean = false) {
-    const jsonExtensions = constants.PROJECT_DEFAULT_JSON_EXTENSIONS.map<FileExtension>(
-      (ext) => `.${ext}`
-    );
-    const codeExtensions = constants.PROJECT_DEFAULT_CODE_EXTENSIONS.map<FileExtension>(
-      (ext) => `.${ext}`
-    );
+    const jsonExtensions = constants.PROJECT_JSON_EXTENSIONS.map<FileExtension>((ext) => `.${ext}`);
+    const codeExtensions = constants.PROJECT_CODE_EXTENSIONS.map<FileExtension>((ext) => `.${ext}`);
 
     const jsonFiles = this.getFilesByExtensions(jsonExtensions);
     const codeFiles = this.getFilesByExtensions(codeExtensions);
@@ -82,7 +87,7 @@ export class Project {
       parser: 'ts',
       runInBand: true,
       babel: true,
-      extensions: constants.PROJECT_DEFAULT_CODE_EXTENSIONS.join(','),
+      extensions: constants.PROJECT_CODE_EXTENSIONS.join(','),
       // Don't output any log coming from the runner
       print: false,
       silent: true,
@@ -109,20 +114,9 @@ export class Project {
   }
 
   private refreshProjectFiles(): void {
-    const allowedRootPaths = formatGlobCollectionPattern(
-      constants.PROJECT_DEFAULT_ALLOWED_ROOT_PATHS
-    );
-
-    const allowedExtensions = formatGlobCollectionPattern(
-      constants.PROJECT_DEFAULT_ALLOWED_EXTENSIONS
-    );
-
-    const projectFilesPattern = `./${allowedRootPaths}/**/*.${allowedExtensions}`;
-
-    const patterns = [projectFilesPattern, ...constants.PROJECT_DEFAULT_PATTERNS];
     const scanner = fileScannerFactory(this.cwd);
 
-    this.files = scanner.scan(patterns);
+    this.files = scanner.scan(this.paths);
   }
 }
 
@@ -131,8 +125,25 @@ export class AppProject extends Project {
 
   readonly type = 'application' as const satisfies ProjectType;
 
+  /**
+   * Returns an array of allowed file paths for a Strapi application
+   *
+   * The resulting paths include app default files and the root package.json file.
+   */
+  private static get paths() {
+    const allowedRootPaths = formatGlobCollectionPattern(constants.PROJECT_APP_ALLOWED_ROOT_PATHS);
+    const allowedExtensions = formatGlobCollectionPattern(constants.PROJECT_ALLOWED_EXTENSIONS);
+
+    return [
+      // App default files
+      `./${allowedRootPaths}/**/*.${allowedExtensions}`,
+      // Root package.json file
+      constants.PROJECT_PACKAGE_JSON,
+    ];
+  }
+
   constructor(cwd: string) {
-    super(cwd);
+    super(cwd, { paths: AppProject.paths });
     this.refreshStrapiVersion();
   }
 
@@ -206,6 +217,31 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
 
 export class PluginProject extends Project {
   readonly type = 'plugin' as const satisfies ProjectType;
+
+  /**
+   * Returns an array of allowed file paths for a Strapi plugin
+   *
+   * The resulting paths include plugin default files, the root package.json file, and plugin-specific files.
+   */
+  private static get paths() {
+    const allowedRootPaths = formatGlobCollectionPattern(
+      constants.PROJECT_PLUGIN_ALLOWED_ROOT_PATHS
+    );
+    const allowedExtensions = formatGlobCollectionPattern(constants.PROJECT_ALLOWED_EXTENSIONS);
+
+    return [
+      // Plugin default files
+      `./${allowedRootPaths}/**/*.${allowedExtensions}`,
+      // Root package.json file
+      constants.PROJECT_PACKAGE_JSON,
+      // Plugin root files
+      ...constants.PROJECT_PLUGIN_ROOT_FILES,
+    ];
+  }
+
+  constructor(cwd: string) {
+    super(cwd, { paths: PluginProject.paths });
+  }
 }
 
 const isPlugin = (cwd: string) => {
@@ -228,9 +264,5 @@ const isPlugin = (cwd: string) => {
 export const projectFactory = (cwd: string) => {
   fse.accessSync(cwd);
 
-  if (isPlugin(cwd)) {
-    return new PluginProject(cwd);
-  }
-
-  return new AppProject(cwd);
+  return isPlugin(cwd) ? new PluginProject(cwd) : new AppProject(cwd);
 };

@@ -118,8 +118,12 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const localesService = strapi.plugin('i18n')?.service('locales');
+  const i18nContentTypeService = strapi.plugin('i18n')?.service('content-types');
 
   const getDefaultLocale = async () => (localesService ? localesService.getDefaultLocale() : null);
+
+  const isLocalizedContentType = (model: Schema.ContentType) =>
+    i18nContentTypeService ? i18nContentTypeService.isLocalizedContentType(model) : false;
 
   /**
    *
@@ -328,6 +332,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getRelationRestoreValue,
     getMediaRestoreValue,
     getDefaultLocale,
+    isLocalizedContentType,
     getLocaleDictionary,
     getRetentionDays,
     getVersionStatus,

@@ -2,25 +2,21 @@
 
 exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
 .c0 {
-  background: #ffffff;
   padding-block-start: 24px;
-  padding-inline-end: 32px;
   padding-block-end: 24px;
   padding-inline-start: 32px;
+  padding-inline-end: 32px;
+  background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-}
-
-.c5 {
-  display: flex;
 }
 
 .c7 {
   background: #ffffff;
   border-radius: 4px;
+  cursor: default;
   position: relative;
   overflow: hidden;
-  cursor: default;
 }
 
 .c10 {
@@ -29,37 +25,41 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c2 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c4 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c8 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 16px;
+  align-items: center;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c11 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 12px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
-.c6 {
+.c5 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c12 {
@@ -89,6 +89,10 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   width: 1px;
 }
 
+.c6 {
+  display: flex;
+}
+
 .c9 {
   border: 1px solid #dcdce4;
   padding-block: 8px;
@@ -101,7 +105,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 .c9[aria-disabled='true'] {
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c9:focus-visible {
@@ -113,8 +117,12 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c15 {
+  display: flex;
+}
+
 .c15>svg {
-  fill: #666687;
+  fill: #8e8ea9;
 }
 
 .c13 {
@@ -136,7 +144,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 .c3 {
-  grid-column: span 6;
+  grid-column: span 12;
   max-width: 100%;
 }
 
@@ -144,15 +152,21 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 }
 
-@media (max-width: 1100px) {
+@media (min-width: 520px) {
   .c3 {
     grid-column: span 12;
   }
 }
 
-@media (max-width: 550px) {
+@media (min-width: 768px) {
   .c3 {
-    grid-column: span;
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .c3 {
+    grid-column: span 6;
   }
 }
 

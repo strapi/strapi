@@ -6,11 +6,11 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c4 {
-  background: #f6f6f9;
   padding-block-start: 24px;
-  padding-inline-end: 56px;
   padding-block-end: 40px;
   padding-inline-start: 56px;
+  padding-inline-end: 56px;
+  background: #f6f6f9;
 }
 
 .c5 {
@@ -26,8 +26,8 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c14 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -37,30 +37,26 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c20 {
-  padding-inline-end: 56px;
   padding-inline-start: 56px;
+  padding-inline-end: 56px;
 }
 
 .c21 {
-  background: #ffffff;
   padding-block-start: 24px;
-  padding-inline-end: 32px;
   padding-block-end: 24px;
   padding-inline-start: 32px;
+  padding-inline-end: 32px;
+  background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-}
-
-.c26 {
-  display: flex;
 }
 
 .c28 {
   background: #ffffff;
   border-radius: 4px;
+  cursor: default;
   position: relative;
   overflow: hidden;
-  cursor: default;
 }
 
 .c31 {
@@ -69,51 +65,51 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c10 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c12 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c15 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c23 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c25 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c29 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 16px;
+  align-items: center;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c32 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 12px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c9 {
@@ -132,8 +128,8 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 .c18 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c19 {
@@ -142,11 +138,15 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   color: #666687;
 }
 
-.c27 {
+.c26 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c33 {
@@ -226,7 +226,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   fill: #4945ff;
 }
 
-.c8:hover span {
+.c8:hover>span {
   color: #7b79ff;
 }
 
@@ -262,6 +262,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   border: 2px solid #4945ff;
 }
 
+.c27 {
+  display: flex;
+}
+
 .c30 {
   border: 1px solid #dcdce4;
   padding-block: 8px;
@@ -274,7 +278,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c30[aria-disabled='true'] {
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c30:focus-visible {
@@ -286,8 +290,12 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
+.c36 {
+  display: flex;
+}
+
 .c36>svg {
-  fill: #666687;
+  fill: #8e8ea9;
 }
 
 .c34 {
@@ -302,6 +310,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   flex-wrap: wrap;
 }
 
+.c3:focus-visible {
+  outline: none;
+}
+
 .c22 {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -309,12 +321,8 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c24 {
-  grid-column: span 6;
+  grid-column: span 12;
   max-width: 100%;
-}
-
-.c3:focus-visible {
-  outline: none;
 }
 
 .c0 {
@@ -336,15 +344,21 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 }
 
-@media (max-width: 1100px) {
+@media (min-width: 520px) {
   .c24 {
     grid-column: span 12;
   }
 }
 
-@media (max-width: 550px) {
+@media (min-width: 768px) {
   .c24 {
-    grid-column: span;
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .c24 {
+    grid-column: span 6;
   }
 }
 

@@ -1,50 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
-.c1 {
-  display: flex;
-}
-
 .c3 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .c0 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c4 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c8 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
-.c2 {
+.c1 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c7 {
   font-size: 1.4rem;
   line-height: 1.43;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c10 {
@@ -85,6 +85,10 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
   color: #666687;
   cursor: default;
+}
+
+.c2 {
+  display: flex;
 }
 
 .c9 {
