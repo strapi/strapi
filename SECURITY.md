@@ -22,7 +22,7 @@ Submit your vulnerability via [this link](https://github.com/strapi/strapi/secur
 
 **Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities.**
 
-At most during our public disclosure we can give credit to the reporter and link to any social accounts you wish to have us add including linking to your own blog post detailing the vulnerability if you wish.
+During our public disclosure, we can give credit to the reporter and link to any social accounts you wish to have us add, including linking to your own blog post detailing the vulnerability.
 
 Please note the following requirements (all are required):
 
