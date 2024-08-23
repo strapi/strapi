@@ -19,7 +19,7 @@ export const codemodUID = (uid: string) => {
 };
 
 export const projectDetails = (project: AppProject | PluginProject) => {
-  return `Project: TYPE=${projectType(project.type)}, CWD=${path(project.cwd)}, PATHS=${project.paths.map(path)}`;
+  return `Project: TYPE=${projectType(project.type)}; CWD=${path(project.cwd)}; PATHS=${project.paths.map(path)}`;
 };
 
 export const projectType = (type: ProjectType) => chalk.cyan(type);
