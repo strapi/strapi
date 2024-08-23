@@ -453,7 +453,7 @@ const ReleaseDetailsLayout = ({
                   justifyContent="center"
                   alignItems="flex-start"
                   gap={1}
-                  padding={5}
+                  padding={4}
                 >
                   <Typography variant="pi" fontWeight="bold">
                     {formatMessage({

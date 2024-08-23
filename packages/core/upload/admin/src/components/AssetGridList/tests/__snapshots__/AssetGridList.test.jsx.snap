@@ -6,13 +6,13 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 }
 
 .c4 {
+  height: 100%;
   background: #ffffff;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
   border-color: #eaeaef;
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-  height: 100%;
 }
 
 .c6 {
@@ -21,9 +21,9 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 
 .c14 {
   padding-block-start: 8px;
-  padding-inline-end: 12px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
+  padding-inline-end: 12px;
 }
 
 .c17 {
@@ -36,21 +36,23 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 }
 
 .c24 {
-  background: #eaeaef;
-  padding-inline-end: 8px;
   padding-inline-start: 8px;
+  padding-inline-end: 8px;
   min-width: 20px;
+  background: #eaeaef;
 }
 
 .c31 {
-  background: #32324d;
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 4px;
+  bottom: 4px;
+  right: 4px;
   color: #ffffff;
-  padding-block: 4px;
-  padding-inline: 4px;
+  background: #32324d;
   border-radius: 4px;
   position: absolute;
-  right: 4px;
-  bottom: 4px;
 }
 
 .c33 {
@@ -60,48 +62,48 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 
 .c2 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c7 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c9 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c15 {
   align-items: flex-start;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c22 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c25 {
   align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c18 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c19 {
@@ -115,8 +117,8 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   font-size: 1.1rem;
   line-height: 1.45;
   text-transform: uppercase;
-  line-height: 1rem;
   color: #666687;
+  line-height: 1rem;
 }
 
 .c32 {
@@ -225,7 +227,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 }
 
 .c3 {
-  grid-column: span 3;
+  grid-column: span 12;
   max-width: 100%;
 }
 
@@ -254,21 +256,21 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   max-height: 16.4rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .c11 {
-    transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+@media (min-width: 520px) {
+  .c3 {
+    grid-column: span 12;
   }
 }
 
-@media (max-width: 1100px) {
+@media (min-width: 768px) {
   .c3 {
-    grid-column: span;
+    grid-column: span 12;
   }
 }
 
-@media (max-width: 550px) {
+@media (min-width: 1280px) {
   .c3 {
-    grid-column: span;
+    grid-column: span 3;
   }
 }
 

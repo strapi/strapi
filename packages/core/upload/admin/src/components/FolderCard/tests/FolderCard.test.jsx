@@ -70,7 +70,7 @@ describe('FolderCard', () => {
     ).toBeInTheDocument();
   });
 
-  test.only('renders as a link with to prop', () => {
+  test('renders as a link with to prop', () => {
     const { container } = setup({
       to: '/michka-page',
     });

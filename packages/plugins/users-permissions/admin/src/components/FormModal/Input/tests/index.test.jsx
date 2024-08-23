@@ -36,30 +36,34 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        display: flex;
-      }
-
       .c0 {
-        align-items: stretch;
-        display: flex;
-        flex-direction: column;
         gap: 4px;
+        align-items: stretch;
+        flex-direction: column;
+        display: flex;
       }
 
       .c3 {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
         gap: 8px;
+        align-items: center;
         justify-content: space-between;
+        flex-direction: row;
+        display: flex;
+      }
+
+      .c1 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #32324d;
+        font-weight: 600;
       }
 
       .c2 {
-        font-size: 1.2rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
+        display: flex;
       }
 
       .c5 {
@@ -72,6 +76,8 @@ describe('<Input />', () => {
         display: block;
         width: 100%;
         background: inherit;
+        padding-inline-start: 16px;
+        padding-inline-end: 16px;
         padding-block: 8px;
       }
 
@@ -93,12 +99,12 @@ describe('<Input />', () => {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
+        padding-inline-start: 0;
+        position: relative;
         outline: none;
         box-shadow: none;
         transition-property: border-color,box-shadow,fill;
         transition-duration: 0.2s;
-        padding-inline-start: 16px;
-        padding-inline-end: 16px;
       }
 
       .c4:focus-within {
