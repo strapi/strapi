@@ -1,9 +1,15 @@
-/**
- * Depending on the selected field find the possible filters to apply
- * @param {Object} fieldSchema.type the type of the filter
- * @returns {Object[]}
- */
-const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
+interface GetFilterListProps {
+  fieldSchema: {
+    type: string;
+    mainField?: {
+      schema: {
+        type: string;
+      };
+    };
+  };
+}
+
+const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }: GetFilterListProps) => {
   const type = mainField?.schema.type ? mainField.schema.type : fieldType;
 
   switch (type) {
