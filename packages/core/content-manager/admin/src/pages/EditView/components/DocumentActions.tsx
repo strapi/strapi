@@ -588,29 +588,29 @@ const PublishAction: DocumentActionComponent = ({
   }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
   React.useEffect(() => {
-    if (documentId && !isListView) {
-      // We don't want to call count draft relations if in the list view. There is no
-      // use for the response.
-      const fetchDraftRelationsCount = async () => {
-        const { data, error } = await countDraftRelations({
-          collectionType,
-          model,
-          documentId,
-          params,
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setServerCountOfDraftRelations(data.data);
-        }
-      };
-
-      fetchDraftRelationsCount();
+    if (!document || !document.documentId || isListView) {
+      return;
     }
-  }, [isListView, documentId, countDraftRelations, collectionType, model, params]);
+
+    const fetchDraftRelationsCount = async () => {
+      const { data, error } = await countDraftRelations({
+        collectionType,
+        model,
+        documentId,
+        params,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setServerCountOfDraftRelations(data.data);
+      }
+    };
+
+    fetchDraftRelationsCount();
+  }, [isListView, document, documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
