@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   Button,
   Flex,
+  IconButton,
   IconButtonGroup,
   SingleSelectOption,
   Popover,
@@ -25,13 +26,7 @@ import {
 import { EditorFromTextArea } from 'codemirror5';
 import { useIntl } from 'react-intl';
 
-import {
-  CustomIconButton,
-  CustomLinkIconButton,
-  IconButtonGroupMargin,
-  MainButtons,
-  MoreButton,
-} from './WysiwygStyles';
+import { IconButtonGroupMargin, MainButtons, MoreButton } from './WysiwygStyles';
 
 interface WysiwygNavProps {
   disabled?: boolean;
@@ -97,15 +92,15 @@ const WysiwygNav = ({
           </Field.Root>
 
           <MainButtons>
-            <CustomIconButton disabled label="Bold" name="Bold">
+            <IconButton disabled label="Bold" name="Bold">
               <Bold />
-            </CustomIconButton>
-            <CustomIconButton disabled label="Italic" name="Italic">
+            </IconButton>
+            <IconButton disabled label="Italic" name="Italic">
               <Italic />
-            </CustomIconButton>
-            <CustomIconButton disabled label="Underline" name="Underline">
+            </IconButton>
+            <IconButton disabled label="Underline" name="Underline">
               <Underline />
-            </CustomIconButton>
+            </IconButton>
           </MainButtons>
 
           <MoreButton disabled label="More">
@@ -151,27 +146,23 @@ const WysiwygNav = ({
         </Field.Root>
 
         <MainButtons>
-          <CustomIconButton
-            onClick={() => onActionClick('Bold', editorRef)}
-            label="Bold"
-            name="Bold"
-          >
+          <IconButton onClick={() => onActionClick('Bold', editorRef)} label="Bold" name="Bold">
             <Bold />
-          </CustomIconButton>
-          <CustomIconButton
+          </IconButton>
+          <IconButton
             onClick={() => onActionClick('Italic', editorRef)}
             label="Italic"
             name="Italic"
           >
             <Italic />
-          </CustomIconButton>
-          <CustomIconButton
+          </IconButton>
+          <IconButton
             onClick={() => onActionClick('Underline', editorRef)}
             label="Underline"
             name="Underline"
           >
             <Underline />
-          </CustomIconButton>
+          </IconButton>
         </MainButtons>
         <Popover.Root>
           <Popover.Trigger>
@@ -182,37 +173,37 @@ const WysiwygNav = ({
           <Popover.Content sideOffset={12}>
             <Flex padding={2}>
               <IconButtonGroupMargin>
-                <CustomIconButton
+                <IconButton
                   onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
                   label="Strikethrough"
                   name="Strikethrough"
                 >
                   <StrikeThrough />
-                </CustomIconButton>
-                <CustomIconButton
+                </IconButton>
+                <IconButton
                   onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
                   label="BulletList"
                   name="BulletList"
                 >
                   <BulletList />
-                </CustomIconButton>
-                <CustomIconButton
+                </IconButton>
+                <IconButton
                   onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
                   label="NumberList"
                   name="NumberList"
                 >
                   <NumberList />
-                </CustomIconButton>
+                </IconButton>
               </IconButtonGroupMargin>
               <IconButtonGroup>
-                <CustomIconButton
+                <IconButton
                   onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
                   label="Code"
                   name="Code"
                 >
                   <Code />
-                </CustomIconButton>
-                <CustomIconButton
+                </IconButton>
+                <IconButton
                   onClick={() => {
                     handleTogglePopover();
                     onToggleMediaLib();
@@ -221,21 +212,21 @@ const WysiwygNav = ({
                   name="Image"
                 >
                   <Image />
-                </CustomIconButton>
-                <CustomLinkIconButton
+                </IconButton>
+                <IconButton
                   onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
                   label="Link"
                   name="Link"
                 >
                   <Link />
-                </CustomLinkIconButton>
-                <CustomIconButton
+                </IconButton>
+                <IconButton
                   onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
                   label="Quote"
                   name="Quote"
                 >
                   <Quotes />
-                </CustomIconButton>
+                </IconButton>
               </IconButtonGroup>
             </Flex>
           </Popover.Content>

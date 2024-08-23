@@ -17,7 +17,7 @@ export const runCodemods = async (options: RunCodemodsOptions) => {
   const project = projectFactory(cwd);
   const range = findRangeFromTarget(project, options.target);
 
-  logger.debug(`Project: ${f.projectType(project.type)} found in ${f.path(cwd)}`);
+  logger.debug(f.projectDetails(project));
   logger.debug(`Range: set to ${f.versionRange(range)}`);
 
   const codemodRunner = codemodRunnerFactory(project, range)

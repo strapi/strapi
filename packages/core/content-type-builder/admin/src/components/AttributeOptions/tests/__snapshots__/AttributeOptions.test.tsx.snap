@@ -2,13 +2,15 @@
 
 exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 .c11 {
-  background: #eaeaef;
   margin-block-end: 24px;
+  background: #eaeaef;
 }
 
 .c17 {
-  padding-block: 16px;
-  padding-inline: 16px;
+  padding-block-start: 16px;
+  padding-inline-end: 16px;
+  padding-block-end: 16px;
+  padding-inline-start: 16px;
   border-radius: 4px;
 }
 
@@ -24,28 +26,28 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 
 .c4 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c13 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 40px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c15 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c19 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c5 {
@@ -60,15 +62,15 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   font-size: 1.1rem;
   line-height: 1.45;
   text-transform: uppercase;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c23 {
   font-size: 1.4rem;
   line-height: 1.43;
-  font-weight: 600;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c24 {
@@ -92,17 +94,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   height: 1px;
   border: none;
   flex-shrink: 0;
-}
-
-.c14 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 12px;
-}
-
-.c16 {
-  grid-column: span 6;
-  max-width: 100%;
 }
 
 .c0 {
@@ -178,6 +169,17 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   color: #a5a5ba;
 }
 
+.c14 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+}
+
+.c16 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
 .c21 svg {
   height: 100%;
   width: 100%;
@@ -196,27 +198,21 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   border: 1px solid #d9d8ff;
 }
 
-@media (max-width: 1100px) {
+@media (min-width: 520px) {
   .c16 {
-    grid-column: span;
+    grid-column: span 12;
   }
 }
 
-@media (max-width: 550px) {
+@media (min-width: 768px) {
   .c16 {
-    grid-column: span;
+    grid-column: span 12;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .c10 {
-    transition: opacity 200ms cubic-bezier(.4,0,.2,1);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c7 {
-    transition: color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),box-shadow 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+@media (min-width: 1280px) {
+  .c16 {
+    grid-column: span 6;
   }
 }
 

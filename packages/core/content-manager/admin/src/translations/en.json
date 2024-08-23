@@ -101,7 +101,7 @@
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Home.pluginHeaderTitle": "Content Manager",
   "containers.list.displayedFields": "Displayed Fields",
-  "containers.list.items": "{number, plural, =0 {items} one {item} other {items}}",
+  "containers.list.items": "{number} {number, plural, =0 {items} one {item} other {items}}",
   "containers.list.table.row-actions": "Row actions",
   "containers.list.selectedEntriesModal.title": "Publish entries",
   "containers.list.selectedEntriesModal.selectedCount": "<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.",

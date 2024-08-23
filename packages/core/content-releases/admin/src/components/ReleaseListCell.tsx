@@ -2,20 +2,12 @@ import * as React from 'react';
 
 import { useTable, useQueryParams } from '@strapi/admin/strapi-admin';
 import { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
-import { Box, Flex, Popover, Typography, Button } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Popover, Typography, Button, Link } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { Modules, UID } from '@strapi/types';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { useGetMappedEntriesInReleasesQuery } from '../services/release';
-
-const StyledButton = styled(Button)`
-  span {
-    font-weight: 400;
-  }
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * useReleasesList
@@ -98,12 +90,17 @@ const ReleaseListCell = ({ documentId, model }: ReleaseListCellProps) => {
   return (
     <Popover.Root>
       <Popover.Trigger>
-        <StyledButton
+        <Button
           variant="ghost"
           onClick={(e: React.MouseEvent<HTMLElement>) => e.stopPropagation()}
-          endIcon={<CaretDown />}
+          // TODO: find a way in the DS to define the widht and height of the icon
+          endIcon={releases.length > 0 ? <CaretDown width="1.2rem" height="1.2rem" /> : null}
         >
-          <Typography style={{ maxWidth: '252px', cursor: 'pointer' }} textColor="neutral800">
+          <Typography
+            style={{ maxWidth: '252px', cursor: 'pointer' }}
+            textColor="neutral800"
+            fontWeight="regular"
+          >
             {releases.length > 0
               ? formatMessage(
                   {
@@ -116,7 +113,7 @@ const ReleaseListCell = ({ documentId, model }: ReleaseListCellProps) => {
                 )
               : '-'}
           </Typography>
-        </StyledButton>
+        </Button>
       </Popover.Trigger>
       <Popover.Content>
         <ul>
