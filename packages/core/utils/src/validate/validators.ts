@@ -210,7 +210,7 @@ export const defaultValidateFields = asyncCurry(async (ctx: Context, fields: unk
   return validateFields(ctx, fields, FIELDS_TRAVERSALS);
 });
 
-export const POPULATE_TRAVERSALS = ['private'];
+export const POPULATE_TRAVERSALS = ['nonAttributesOperators', 'private'];
 
 export const validatePopulate = asyncCurry(
   async (
@@ -228,8 +228,14 @@ export const validatePopulate = asyncCurry(
     }
 
     const functionsToApply: Array<AnyFunc> = [
-      traverseQueryPopulate(async ({ key, value, schema, attribute, getModel }, { set }) => {
-        if (attribute) {
+      traverseQueryPopulate(async ({ key, path, value, schema, attribute, getModel }, { set }) => {
+        // TODO: clean this up, especially the wildcard and dz populate
+        if (
+          attribute ||
+          path?.attribute || // dz and components
+          !key || // empty keys
+          ['*', 'on', 'true', 'false'].includes(key) // wildcard and dz populates
+        ) {
           return;
         }
 
@@ -246,6 +252,7 @@ export const validatePopulate = asyncCurry(
               includes?.sort || SORT_TRAVERSALS
             )
           );
+          return;
         }
 
         // Handle nested `filters` validation with custom or default traversals
@@ -261,6 +268,7 @@ export const validatePopulate = asyncCurry(
               includes?.filters || FILTER_TRAVERSALS
             )
           );
+          return;
         }
 
         // Handle nested `fields` validation with custom or default traversals
@@ -276,6 +284,7 @@ export const validatePopulate = asyncCurry(
               includes?.fields || FIELDS_TRAVERSALS
             )
           );
+          return;
         }
 
         // Handle recursive nested `populate` validation with the same include object
@@ -291,6 +300,11 @@ export const validatePopulate = asyncCurry(
               includes // pass down the same includes object
             )
           );
+          return;
+        }
+
+        if (includes?.populate?.includes('nonAttributesOperators')) {
+          throwInvalidKey({ key, path: path.attribute });
         }
       }, ctx),
       // Conditionally traverse for private fields only if 'private' is included
@@ -316,5 +330,6 @@ export const defaultValidatePopulate = asyncCurry(async (ctx: Context, populate:
     filters: FILTER_TRAVERSALS,
     sort: SORT_TRAVERSALS,
     fields: FIELDS_TRAVERSALS,
+    populate: POPULATE_TRAVERSALS,
   });
 });

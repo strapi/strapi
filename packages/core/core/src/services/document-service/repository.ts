@@ -30,7 +30,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     sort: sortValidations,
     field: fieldValidations,
     filters: filtersValidations,
-    populate: [], // intentionally empty to avoid throwing on private
+    populate: ['nonAttributesOperators'],
   };
 
   // we have to typecast to reconcile the differences between validator and database getModel

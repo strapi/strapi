@@ -141,7 +141,7 @@ describe('Document Service Validations', () => {
     });
 
     describe('populate', () => {
-      it('should not throw', async () => {
+      it('should not throw on populatable attribute', async () => {
         await strapi.documents(ARTICLE_UID)[methodName]({
           populate: ['categories'],
         });
@@ -165,6 +165,26 @@ describe('Document Service Validations', () => {
         });
       });
 
+      it('should not throw on dz (boolean)', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: {
+            identifiersDz: true,
+          },
+        });
+      });
+
+      it('should not throw on dz - comp (boolean)', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: {
+            identifiersDz: {
+              on: {
+                'article.compo-unique-all': true,
+              },
+            },
+          },
+        });
+      });
+
       it('should not throw on dz', async () => {
         await strapi.documents(ARTICLE_UID)[methodName]({
           populate: {
@@ -177,6 +197,20 @@ describe('Document Service Validations', () => {
             },
           },
         });
+      });
+
+      it.todo('should throw ValidationError on invalid dz component', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({
+            populate: {
+              identifiersDz: {
+                on: {
+                  invalidkey: true,
+                },
+              },
+            },
+          })
+        ).rejects.toThrow(errors.ValidationError);
       });
 
       it('should throw ValidationError on invalid key', async () => {
