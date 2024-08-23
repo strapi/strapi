@@ -36,7 +36,7 @@ export const DisplayedType = ({
   }
 
   return (
-    <Typography>
+    <Typography textColor="neutral800">
       {formatMessage({
         id: getTrad(`attribute.${readableType}`),
         defaultMessage: type,

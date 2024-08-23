@@ -8,7 +8,12 @@ jest.mock('fs', () => fs);
 
 const srcFilename = (cwd: string, filename: string) => path.join(cwd, 'src', filename);
 const srcFilenames = (cwd: string) => {
-  return Object.keys(srcFiles).map((filename) => srcFilename(cwd, filename));
+  return Object.keys(defaultFiles).map((filename) => srcFilename(cwd, filename));
+};
+
+const pluginServerFilename = (cwd: string, filename: string) => path.join(cwd, 'server', filename);
+const pluginServerFilenames = (cwd: string) => {
+  return Object.keys(defaultFiles).map((filename) => pluginServerFilename(cwd, filename));
 };
 
 const currentStrapiVersion = '1.2.3';
@@ -29,7 +34,7 @@ const pluginPackageJSONFile = `{
   }
 }`;
 
-const srcFiles = {
+const defaultFiles = {
   'a.ts': 'console.log("a.ts")',
   'b.ts': 'console.log("b.ts")',
   'c.js': 'console.log("c.js")',
@@ -40,12 +45,12 @@ const srcFiles = {
 
 const appVolume = {
   'package.json': appPackageJSONFile,
-  src: srcFiles,
+  src: defaultFiles,
 };
 
 const pluginVolume = {
   'package.json': pluginPackageJSONFile,
-  src: srcFiles,
+  server: defaultFiles,
 };
 
 describe('Project', () => {
@@ -70,7 +75,7 @@ describe('Project', () => {
     });
 
     test('Fails on project without package.json file', async () => {
-      vol.fromNestedJSON({ src: srcFiles }, defaultCWD);
+      vol.fromNestedJSON({ src: defaultFiles }, defaultCWD);
 
       expect(() => projectFactory(defaultCWD)).toThrow(
         `Could not find a package.json file in ${defaultCWD}`
@@ -79,7 +84,7 @@ describe('Project', () => {
 
     test('Fails when not a plugin and no @strapi/strapi dependency found', async () => {
       vol.fromNestedJSON(
-        { 'package.json': `{ "name": "test", "version": "1.2.3" }`, src: srcFiles },
+        { 'package.json': `{ "name": "test", "version": "1.2.3" }`, src: defaultFiles },
         defaultCWD
       );
 
@@ -92,7 +97,7 @@ describe('Project', () => {
       vol.fromNestedJSON(
         {
           'package.json': `{ "name": "test", "version": "1.2.3", "dependencies": { "@strapi/strapi": "^4.0.0" } }`,
-          src: srcFiles,
+          src: defaultFiles,
         },
         defaultCWD
       );
@@ -133,7 +138,10 @@ describe('Project', () => {
 
       expect(project.files.length).toBe(7);
       expect(project.files).toStrictEqual(
-        expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
+        expect.arrayContaining([
+          path.join(defaultCWD, 'package.json'),
+          ...pluginServerFilenames(defaultCWD),
+        ])
       );
 
       expect(project.cwd).toBe(defaultCWD);
@@ -172,7 +180,10 @@ describe('Project', () => {
 
       expect(project.files.length).toBe(7);
       expect(project.files).toStrictEqual(
-        expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
+        expect.arrayContaining([
+          path.join(defaultCWD, 'package.json'),
+          ...pluginServerFilenames(defaultCWD),
+        ])
       );
 
       expect(project.cwd).toBe(defaultCWD);

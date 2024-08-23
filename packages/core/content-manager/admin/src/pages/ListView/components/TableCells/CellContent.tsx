@@ -16,7 +16,15 @@ interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
 
 const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
   if (!hasContent(content, mainField, attribute)) {
-    return <Typography textColor="neutral800">-</Typography>;
+    return (
+      <Typography
+        textColor="neutral800"
+        paddingLeft={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
+        paddingRight={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
+      >
+        -
+      </Typography>
+    );
   }
 
   switch (attribute.type) {
