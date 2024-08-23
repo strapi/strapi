@@ -30,165 +30,162 @@ describe('Document Service Validations', () => {
     'update',
   ];
 
-  describe('sort', () => {
-    test.each(methods)('%s should not throw on existing attribute name', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'title' });
-    });
+  describe.each(methods)('%s method', (methodName) => {
+    describe('sort', () => {
+      it('should not throw on existing attribute name', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'title' });
+      });
 
-    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'private' });
-    });
+      it('should not throw on private attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'private' });
+      });
 
-    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'password' });
-    });
+      it('should not throw on password attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'password' });
+      });
 
-    test.each(methods)(
-      '%s should not throw on existing nested (object) key',
-      async (methodName) => {
-        await strapi
-          .documents(ARTICLE_UID)
-          [methodName]({ populate: { categories: { sort: { name: 'asc' } } } });
-      }
-    );
+      it('should not throw on existing nested (object) key', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: { categories: { sort: { name: 'asc' } } },
+        });
+      });
 
-    test.each(methods)(
-      '%s should not throw on existing nested (dot separated) key',
-      async (methodName) => {
-        await strapi
-          .documents(ARTICLE_UID)
-          [methodName]({ sort: 'categories.name', populate: 'categories' });
-      }
-    );
+      it('should not throw on existing nested (dot separated) key', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          sort: 'categories.name',
+          populate: 'categories',
+        });
+      });
 
-    test.each(methods)('%s should throw ValidationError on invalid key', async (methodName) => {
-      await expect(strapi.documents(ARTICLE_UID)[methodName]({ sort: 'fakekey' })).rejects.toThrow(
-        errors.ValidationError
-      );
-    });
-  });
-
-  describe('filters', () => {
-    test.each(methods)('%s should not throw on existing attribute equality', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        filters: {
-          title: 'Hello World',
-        },
+      it('should throw ValidationError on invalid key', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({ sort: 'fakekey' })
+        ).rejects.toThrow(errors.ValidationError);
       });
     });
 
-    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        filters: {
-          private: 'Hello World',
-        },
-      });
-    });
-
-    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        filters: {
-          password: 'Hello World',
-        },
-      });
-    });
-
-    test.each(methods)('%s should not throw on existing nested conditions', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        filters: {
-          title: {
-            $not: {
-              $contains: 'Hello World',
-            },
-          },
-        },
-      });
-    });
-
-    test.each(methods)('%s should throw ValidationError on invalid key', async (methodName) => {
-      await expect(
-        strapi.documents(ARTICLE_UID)[methodName]({
+    describe('filters', () => {
+      it('should not throw on existing attribute equality', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
           filters: {
-            fakekey: 'Hello World',
+            title: 'Hello World',
           },
-        })
-      ).rejects.toThrow(errors.ValidationError);
-    });
-  });
-
-  describe('fields', () => {
-    test.each(methods)('%s should not throw on existing attribute equality', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        fields: ['title'],
+        });
       });
-    });
 
-    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        fields: ['private'],
+      it('should not throw on private attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          filters: {
+            private: 'Hello World',
+          },
+        });
       });
-    });
 
-    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        fields: ['password'],
+      it('should not throw on password attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          filters: {
+            password: 'Hello World',
+          },
+        });
       });
-    });
 
-    test.each(methods)('%s should throw ValidationError on invalid key', async (methodName) => {
-      await expect(
-        strapi.documents(ARTICLE_UID)[methodName]({
-          fields: ['title', 'fakekey'],
-        })
-      ).rejects.toThrow(errors.ValidationError);
-    });
-  });
-
-  describe('populate', () => {
-    test.each(methods)('%s should not throw', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        populate: ['categories'],
-      });
-    });
-
-    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        populate: ['private'],
-      });
-    });
-
-    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        populate: ['password'],
-      });
-    });
-
-    test.each(methods)('%s should not throw on wildcard *', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        populate: '*',
-      });
-    });
-
-    test.each(methods)('%s should not throw on dz', async (methodName) => {
-      await strapi.documents(ARTICLE_UID)[methodName]({
-        populate: {
-          identifiersDz: {
-            on: {
-              'article.compo-unique-all': {
-                fields: ['ComponentTextShort'],
+      it('should not throw on existing nested conditions', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          filters: {
+            title: {
+              $not: {
+                $contains: 'Hello World',
               },
             },
           },
-        },
+        });
+      });
+
+      it('should throw ValidationError on invalid key', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({
+            filters: {
+              fakekey: 'Hello World',
+            },
+          })
+        ).rejects.toThrow(errors.ValidationError);
       });
     });
 
-    test.each(methods)('%s should throw ValidationError on invalid key', async (methodName) => {
-      await expect(
-        strapi.documents(ARTICLE_UID)[methodName]({
-          populate: ['categories', 'fakekey'],
-        })
-      ).rejects.toThrow(errors.ValidationError);
+    describe('fields', () => {
+      it('should not throw on existing attribute equality', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          fields: ['title'],
+        });
+      });
+
+      it('should not throw on private attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          fields: ['private'],
+        });
+      });
+
+      it('should not throw on password attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          fields: ['password'],
+        });
+      });
+
+      it('should throw ValidationError on invalid key', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({
+            fields: ['title', 'fakekey'],
+          })
+        ).rejects.toThrow(errors.ValidationError);
+      });
+    });
+
+    describe('populate', () => {
+      it('should not throw', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: ['categories'],
+        });
+      });
+
+      it('should not throw on private attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: ['private'],
+        });
+      });
+
+      it('should not throw on password attribute', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: ['password'],
+        });
+      });
+
+      it('should not throw on wildcard *', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: '*',
+        });
+      });
+
+      it('should not throw on dz', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({
+          populate: {
+            identifiersDz: {
+              on: {
+                'article.compo-unique-all': {
+                  fields: ['ComponentTextShort'],
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('should throw ValidationError on invalid key', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({
+            populate: ['categories', 'fakekey'],
+          })
+        ).rejects.toThrow(errors.ValidationError);
+      });
     });
   });
 });
