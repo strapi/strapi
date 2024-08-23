@@ -31,10 +31,16 @@ describe('Document Service Validations', () => {
   ];
 
   describe('sort', () => {
-    test.todo('should not throw on private fields');
-
     test.each(methods)('%s should not throw on existing attribute name', async (methodName) => {
       await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'title' });
+    });
+
+    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'private' });
+    });
+
+    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({ sort: 'password' });
     });
 
     test.each(methods)(
@@ -71,6 +77,22 @@ describe('Document Service Validations', () => {
       });
     });
 
+    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({
+        filters: {
+          private: 'Hello World',
+        },
+      });
+    });
+
+    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({
+        filters: {
+          password: 'Hello World',
+        },
+      });
+    });
+
     test.each(methods)('%s should not throw on existing nested conditions', async (methodName) => {
       await strapi.documents(ARTICLE_UID)[methodName]({
         filters: {
@@ -95,11 +117,21 @@ describe('Document Service Validations', () => {
   });
 
   describe('fields', () => {
-    test.todo('should not throw on private fields');
-
     test.each(methods)('%s should not throw on existing attribute equality', async (methodName) => {
       await strapi.documents(ARTICLE_UID)[methodName]({
         fields: ['title'],
+      });
+    });
+
+    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({
+        fields: ['private'],
+      });
+    });
+
+    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({
+        fields: ['password'],
       });
     });
 
@@ -113,11 +145,21 @@ describe('Document Service Validations', () => {
   });
 
   describe('populate', () => {
-    test.todo('should not throw on private fields');
-
     test.each(methods)('%s should not throw', async (methodName) => {
       await strapi.documents(ARTICLE_UID)[methodName]({
         populate: ['categories'],
+      });
+    });
+
+    test.each(methods)('%s should not throw on private attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({
+        populate: ['private'],
+      });
+    });
+
+    test.each(methods)('%s should not throw on password attribute', async (methodName) => {
+      await strapi.documents(ARTICLE_UID)[methodName]({
+        populate: ['password'],
       });
     });
 
