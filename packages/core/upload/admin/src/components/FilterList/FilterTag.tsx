@@ -1,11 +1,41 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Tag } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const FilterTag = ({ attribute, filter, onClick, operator, value }) => {
+type FilterTagAttribute = {
+  fieldSchema: {
+    type: string; // "date" | "enumeration"
+    options?: {
+      label: string; // "audio" | "video" | "image" | "file"
+      value: string; // "audio" | "video" | "image" | "file"
+    }[];
+  };
+  metadatas: {
+    label: string; // "createdAt" | "updatedAt" | "type"
+  };
+  name: string; // "createdAt" | "updatedAt" | "mime"
+};
+
+type FilterKey = 'createdAt' | 'updatedAt' | 'mime';
+type Operator = '$eq' | '$ne' | '$gt' | '$gte' | '$contains' | '$notContains';
+
+type FilterTagFilter = {
+  [key in FilterKey]?: {
+    [key in Operator]?: string | string[];
+  };
+};
+
+interface FilterTagProps {
+  attribute: FilterTagAttribute;
+  filter: FilterTagFilter;
+  onClick: (filter: FilterTagFilter) => void;
+  operator: Operator;
+  value: string;
+}
+
+const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagProps) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
 
   const handleClick = () => {
@@ -29,12 +59,12 @@ const FilterTag = ({ attribute, filter, onClick, operator, value }) => {
   if (type === 'time') {
     const [hour, minute] = value.split(':');
     const date = new Date();
-    date.setHours(hour);
-    date.setMinutes(minute);
+    date.setHours(Number(hour));
+    date.setMinutes(Number(minute));
 
     formattedValue = formatTime(date, {
-      numeric: 'auto',
-      style: 'short',
+      hour: 'numeric',
+      minute: 'numeric',
     });
   }
 
@@ -48,18 +78,6 @@ const FilterTag = ({ attribute, filter, onClick, operator, value }) => {
       {content}
     </Tag>
   );
-};
-
-FilterTag.propTypes = {
-  attribute: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    fieldSchema: PropTypes.object.isRequired,
-    metadatas: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
-  }).isRequired,
-  filter: PropTypes.object.isRequired,
-  onClick: PropTypes.func.isRequired,
-  operator: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
 };
 
 export default FilterTag;
