@@ -6,11 +6,15 @@ interface GetFilterListProps {
         type: string;
       };
     };
+    options?: {
+      label: string;
+      value: string;
+    }[];
   };
 }
 
 const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }: GetFilterListProps) => {
-  const type = mainField?.schema.type ? mainField.schema.type : fieldType;
+  const type = mainField?.schema.type ? mainField?.schema?.type : fieldType;
 
   switch (type) {
     case 'enumeration': {

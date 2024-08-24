@@ -7,7 +7,7 @@ interface FilterValueInputProps {
   label?: string;
   options?: { label: string; value: string }[];
   onChange: (value: string) => void;
-  type: string;
+  type?: string;
   value?: string;
 }
 
