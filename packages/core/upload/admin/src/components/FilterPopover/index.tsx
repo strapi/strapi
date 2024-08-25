@@ -33,13 +33,27 @@ type DisplayedFilter = {
   name: string; // "createdAt" | "updatedAt" | "mime"
 };
 
+type NumberKeyedObject = {
+  [key: number]: string;
+};
+
+type MimeFilter = {
+  $contains?: string | NumberKeyedObject;
+  $notContains?: string | NumberKeyedObject;
+  $not?: {
+    $contains?: string | NumberKeyedObject;
+  };
+};
+
 type FilterKey = 'createdAt' | 'updatedAt' | 'mime';
-type Operator = '$eq' | '$ne' | '$gt' | '$gte' | '$contains' | '$notContains';
+type Operator = '$eq' | '$ne' | '$gt' | '$gte';
 
 type FilterType = {
-  [key in FilterKey]?: {
-    [key in Operator]?: string | string[];
-  };
+  [key in FilterKey]?: key extends 'mime'
+    ? MimeFilter
+    : {
+        [key in Operator]?: string;
+      };
 };
 
 interface FilterPopoverProps {
@@ -112,21 +126,21 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }: Filter
           let filterToAdd: FilterType = {};
 
           if (modifiedData.filter === '$contains') {
-            hasCurrentFilter =
-              alreadyAppliedFilters.find((filter) => {
-                return filter.mime?.$notContains !== undefined;
-              }) !== undefined;
+            hasCurrentFilter = alreadyAppliedFilters.some((filter) => {
+              return filter.mime?.$not?.$contains !== undefined;
+            });
 
             filterToAdd = {
               mime: {
-                $notContains: ['image', 'video'],
+                $not: {
+                  $contains: ['image', 'video'],
+                },
               },
             };
           } else {
-            hasCurrentFilter =
-              alreadyAppliedFilters.find((filter) => {
-                return Array.isArray(filter.mime?.$contains);
-              }) !== undefined;
+            hasCurrentFilter = alreadyAppliedFilters.some((filter) => {
+              return Array.isArray(filter.mime?.$contains);
+            });
 
             filterToAdd = {
               mime: {
@@ -150,8 +164,9 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }: Filter
         }
 
         const hasFilter = alreadyAppliedFilters.some((filter) => {
-          return filter.mime
-            ? filter.mime[modifiedData.filter as Operator] === modifiedData.value
+          const mimeFilter = filter.mime as MimeFilter;
+          return mimeFilter
+            ? mimeFilter[modifiedData.filter as keyof MimeFilter] === modifiedData.value
             : false;
         });
 
@@ -170,7 +185,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }: Filter
             return true;
           }
 
-          if (filter.mime?.$notContains !== undefined) {
+          if (filter.mime?.$not?.$contains !== undefined) {
             return false;
           }
 
@@ -184,7 +199,8 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }: Filter
         const oppositeFilter = modifiedData.filter === '$contains' ? '$notContains' : '$contains';
 
         const oppositeFilterIndex = filtersWithoutFile.findIndex((filter) => {
-          return filter.mime?.[oppositeFilter] === modifiedData.value;
+          const mimeFilter = filter.mime as MimeFilter;
+          return mimeFilter?.[oppositeFilter as keyof MimeFilter] === modifiedData.value;
         });
         const hasOppositeFilter = oppositeFilterIndex !== -1;
 
@@ -211,14 +227,22 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }: Filter
         return;
       }
 
-      const hasFilter =
-        filters.find((filter) => {
+      const hasFilter = filters.some((filter) => {
+        const currentFilter = filter[modifiedData.name as FilterKey];
+
+        if (modifiedData.name === 'mime') {
+          const mimeFilter = currentFilter as MimeFilter;
+          // Ensure `mimeFilter` is defined and contains the operator
           return (
-            filter[modifiedData.name as FilterKey] &&
-            filter[modifiedData.name as FilterKey]?.[modifiedData.filter as Operator] ===
-              modifiedData.value
+            mimeFilter && mimeFilter[modifiedData.filter as keyof MimeFilter] === modifiedData.value
           );
-        }) !== undefined;
+        } else {
+          const generalFilter = currentFilter as { [key in Operator]?: string | string[] };
+          return (
+            generalFilter && generalFilter[modifiedData.filter as Operator] === modifiedData.value
+          );
+        }
+      });
 
       if (!hasFilter) {
         let filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } };

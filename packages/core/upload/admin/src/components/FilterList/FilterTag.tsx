@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Tag } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -18,21 +16,37 @@ type FilterTagAttribute = {
   name: string; // "createdAt" | "updatedAt" | "mime"
 };
 
+type NumberKeyedObject = {
+  [key: number]: string;
+};
+
+type MimeFilter = {
+  $contains?: string | NumberKeyedObject;
+  $notContains?: string | NumberKeyedObject;
+  $not?: {
+    $contains?: string | NumberKeyedObject;
+  };
+};
+
 type FilterKey = 'createdAt' | 'updatedAt' | 'mime';
-type Operator = '$eq' | '$ne' | '$gt' | '$gte' | '$contains' | '$notContains';
+type Operator = '$eq' | '$ne' | '$gt' | '$gte';
+
+type MimeFilterOperator = keyof MimeFilter;
 
 type FilterTagFilter = {
-  [key in FilterKey]?: {
-    [key in Operator]?: string | string[];
-  };
+  [key in FilterKey]?: key extends 'mime'
+    ? MimeFilter
+    : {
+        [key in Operator]?: string;
+      };
 };
 
 interface FilterTagProps {
   attribute: FilterTagAttribute;
   filter: FilterTagFilter;
   onClick: (filter: FilterTagFilter) => void;
-  operator: Operator;
-  value: string;
+  operator: Operator | MimeFilterOperator;
+  value?: string | NumberKeyedObject | { $contains?: string | NumberKeyedObject };
 }
 
 const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagProps) => {
@@ -49,15 +63,15 @@ const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagPro
   let formattedValue = value;
 
   if (type === 'date') {
-    formattedValue = formatDate(value, { dateStyle: 'full' });
+    formattedValue = formatDate(value as string, { dateStyle: 'full' });
   }
 
   if (type === 'datetime') {
-    formattedValue = formatDate(value, { dateStyle: 'full', timeStyle: 'short' });
+    formattedValue = formatDate(value as string, { dateStyle: 'full', timeStyle: 'short' });
   }
 
   if (type === 'time') {
-    const [hour, minute] = value.split(':');
+    const [hour, minute] = (value as string).split(':');
     const date = new Date();
     date.setHours(Number(hour));
     date.setMinutes(Number(minute));
