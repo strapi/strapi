@@ -55,9 +55,10 @@ const getInitialProviders = ({ purest }) => ({
       .request()
       .then(({ body }) => {
         // Combine username and discriminator (if discriminator exists and not equal to 0)
-        const username = body.discriminator && body.discriminator !== '0'
-        ? `${body.username}#${body.discriminator}`
-        : body.username;
+        const username =
+          body.discriminator && body.discriminator !== '0'
+            ? `${body.username}#${body.discriminator}`
+            : body.username;
         return {
           username,
           email: body.email,
