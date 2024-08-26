@@ -32,13 +32,13 @@ describe('DocAssetCard', () => {
 
     expect(container).toMatchInlineSnapshot(`
       .c0 {
+        height: 100%;
         background: #ffffff;
         border-radius: 4px;
         border-style: solid;
         border-width: 1px;
         border-color: #eaeaef;
         box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-        height: 100%;
       }
 
       .c2 {
@@ -51,75 +51,75 @@ describe('DocAssetCard', () => {
         cursor: pointer;
       }
 
-      .c15 {
+      .c14 {
         width: 100%;
         height: 8.8rem;
       }
 
-      .c18 {
+      .c17 {
         padding-block-start: 8px;
-        padding-inline-end: 12px;
         padding-block-end: 8px;
         padding-inline-start: 12px;
+        padding-inline-end: 12px;
       }
 
-      .c21 {
+      .c20 {
         padding-block-start: 4px;
       }
 
-      .c25 {
+      .c24 {
         padding-block-start: 4px;
         flex-grow: 1;
       }
 
-      .c28 {
-        background: #eaeaef;
-        padding-inline-end: 8px;
+      .c27 {
         padding-inline-start: 8px;
+        padding-inline-end: 8px;
         min-width: 20px;
+        background: #eaeaef;
       }
 
       .c3 {
         align-items: center;
-        display: flex;
-        flex-direction: row;
         justify-content: center;
+        flex-direction: row;
+        display: flex;
       }
 
       .c5 {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
         gap: 8px;
-      }
-
-      .c12 {
         align-items: center;
-        display: inline-flex;
         flex-direction: row;
-        justify-content: center;
+        display: flex;
       }
 
-      .c19 {
+      .c18 {
         align-items: flex-start;
-        display: flex;
         flex-direction: row;
+        display: flex;
       }
 
-      .c26 {
+      .c25 {
         align-items: center;
-        display: flex;
         flex-direction: row;
+        display: flex;
+      }
+
+      .c28 {
+        align-items: center;
+        justify-content: center;
+        flex-direction: row;
+        display: inline-flex;
+      }
+
+      .c21 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        color: #32324d;
+        font-weight: 600;
       }
 
       .c22 {
-        font-size: 1.2rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c23 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: #666687;
@@ -130,11 +130,11 @@ describe('DocAssetCard', () => {
         font-size: 1.1rem;
         line-height: 1.45;
         text-transform: uppercase;
-        line-height: 1rem;
         color: #666687;
+        line-height: 1rem;
       }
 
-      .c14 {
+      .c13 {
         border: 0;
         clip: rect(0 0 0 0);
         height: 1px;
@@ -150,6 +150,32 @@ describe('DocAssetCard', () => {
         padding-block: 0.7rem;
       }
 
+      .c12 {
+        text-decoration: none;
+        padding-block: 0.7rem;
+        padding-inline: 0.7rem;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+        color: #32324d;
+        color: #8e8ea9;
+      }
+
+      .c12:hover {
+        background-color: #f6f6f9;
+        color: #666687;
+      }
+
+      .c12:active {
+        background-color: #eaeaef;
+      }
+
+      .c12[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+        color: #666687;
+        cursor: default;
+      }
+
       .c6 {
         position: absolute;
         top: 12px;
@@ -162,7 +188,7 @@ describe('DocAssetCard', () => {
         right: 12px;
       }
 
-      .c27 {
+      .c26 {
         margin-left: auto;
         flex-shrink: 0;
       }
@@ -207,7 +233,7 @@ describe('DocAssetCard', () => {
         min-height: 44px;
       }
 
-      .c20 {
+      .c19 {
         word-break: break-all;
       }
 
@@ -215,32 +241,7 @@ describe('DocAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c13 {
-        text-decoration: none;
-        padding-block: 0.9rem;
-        padding-inline: 0.9rem;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-        color: #32324d;
-        color: #666687;
-      }
-
-      .c13:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c13:active {
-        background-color: #eaeaef;
-      }
-
-      .c13[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-        color: #666687;
-        cursor: default;
-      }
-
-      .c24 {
+      .c23 {
         text-transform: uppercase;
       }
 
@@ -260,23 +261,17 @@ describe('DocAssetCard', () => {
         opacity: 1;
       }
 
-      .c17 svg {
+      .c16 svg {
         font-size: 4.8rem;
       }
 
-      .c16 {
+      .c15 {
         border-radius: 4px 4px 0 0;
         background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
       }
 
       @media (prefers-reduced-motion: no-preference) {
-        .c7 {
-          transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-      }
-
-      @media (prefers-reduced-motion: no-preference) {
-        .c13 {
+        .c12 {
           transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
       }
@@ -311,7 +306,7 @@ describe('DocAssetCard', () => {
             >
               <button
                 aria-disabled="false"
-                class="c11 c12 c13"
+                class="c11 c3 c12"
                 data-state="closed"
               >
                 <svg
@@ -328,17 +323,17 @@ describe('DocAssetCard', () => {
                   />
                 </svg>
                 <span
-                  class="c14"
+                  class="c13"
                 >
                   Edit
                 </span>
               </button>
             </div>
             <div
-              class="c15 c3 c16"
+              class="c14 c3 c15"
             >
               <span
-                class="c17"
+                class="c16"
               >
                 <svg
                   aria-label="hello.png"
@@ -356,42 +351,42 @@ describe('DocAssetCard', () => {
             </div>
           </div>
           <div
-            class="c18"
+            class="c17"
           >
             <div
-              class="c19"
+              class="c18"
             >
               <div
-                class="c20"
+                class="c19"
               >
                 <div
-                  class="c21"
+                  class="c20"
                 >
                   <h2
-                    class="c22"
+                    class="c21"
                     id=":r0:-title"
                   >
                     hello.png
                   </h2>
                 </div>
                 <div
-                  class="c23"
+                  class="c22"
                 >
                   <span
-                    class="c24"
+                    class="c23"
                   >
                     png
                   </span>
                 </div>
               </div>
               <div
-                class="c25 c26"
+                class="c24 c25"
               >
                 <div
-                  class="c27"
+                  class="c26"
                 >
                   <div
-                    class="c28 c12 c29 c30"
+                    class="c27 c28 c29 c30"
                   >
                     <span
                       class="c31"
@@ -405,7 +400,7 @@ describe('DocAssetCard', () => {
           </div>
         </article>
         <span
-          class="c14"
+          class="c13"
         >
           <p
             aria-live="polite"

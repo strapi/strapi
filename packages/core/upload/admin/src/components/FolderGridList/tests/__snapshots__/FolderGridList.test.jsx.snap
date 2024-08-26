@@ -9,8 +9,8 @@ exports[`FolderGridList renders and match snapshots 1`] = `
   font-weight: 500;
   font-size: 1.6rem;
   line-height: 1.25;
-  font-weight: 500;
   color: currentcolor;
+  font-weight: 500;
 }
 
 .c3 {

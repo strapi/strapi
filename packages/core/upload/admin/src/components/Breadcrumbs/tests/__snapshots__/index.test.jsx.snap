@@ -6,44 +6,42 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c6 {
-  padding-inline-end: 4px;
   padding-inline-start: 4px;
+  padding-inline-end: 4px;
 }
 
 .c8 {
-  padding-block-start: 4px;
-  padding-inline-end: 12px;
-  padding-block-end: 4px;
-  padding-inline-start: 12px;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .c13 {
   padding-block-start: 4px;
-  padding-inline-end: 8px;
   padding-block-end: 4px;
   padding-inline-start: 8px;
+  padding-inline-end: 8px;
 }
 
 .c0 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c2 {
   align-items: center;
-  display: inline-flex;
   flex-direction: row;
+  display: inline-flex;
 }
 
 .c9 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c7 {
@@ -55,15 +53,15 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 .c12 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c14 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c15 {
@@ -121,7 +119,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c10:active {
-  border: 1px solid;
+  background-color: #eaeaef;
 }
 
 .c10[aria-disabled='true'] {
@@ -188,7 +186,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
           class="c8 c9 c10 c11"
           data-state="closed"
           id="radix-:r1:"
-          label="..."
           type="button"
         >
           <span

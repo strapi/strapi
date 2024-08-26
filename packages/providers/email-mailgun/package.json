@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-mailgun",
-  "version": "5.0.0-rc.10",
+  "version": "5.0.0-rc.11",
   "description": "Mailgun provider for strapi email plugin",
   "keywords": [
     "email",

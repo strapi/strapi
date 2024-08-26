@@ -390,6 +390,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
             </Typography>
             <Flex>
               <IconButton
+                type="button"
                 variant="ghost"
                 background="transparent"
                 onClick={(e) => {
@@ -408,6 +409,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 <Pencil />
               </IconButton>
               <IconButton
+                type="button"
                 variant="ghost"
                 onClick={handleRemoveField}
                 background="transparent"

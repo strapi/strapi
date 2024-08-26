@@ -240,30 +240,33 @@ const SelectedEntriesTableContent = ({
               )}
             </Table.Cell>
             <Table.Cell>
-              <IconButton
-                tag={Link}
-                to={{
-                  pathname: `${pathname}/${row.documentId}`,
-                  search: row.locale && `?plugins[i18n][locale]=${row.locale}`,
-                }}
-                state={{ from: pathname }}
-                label={formatMessage(
-                  { id: 'app.component.HelperPluginTable.edit', defaultMessage: 'Edit {target}' },
-                  {
-                    target: formatMessage(
-                      {
-                        id: 'content-manager.components.ListViewHelperPluginTable.row-line',
-                        defaultMessage: 'item line {number}',
-                      },
-                      { number: index + 1 }
-                    ),
-                  }
-                )}
-                target="_blank"
-                marginLeft="auto"
-              >
-                <Pencil />
-              </IconButton>
+              <Flex>
+                <IconButton
+                  tag={Link}
+                  to={{
+                    pathname: `${pathname}/${row.documentId}`,
+                    search: row.locale && `?plugins[i18n][locale]=${row.locale}`,
+                  }}
+                  state={{ from: pathname }}
+                  label={formatMessage(
+                    { id: 'app.component.HelperPluginTable.edit', defaultMessage: 'Edit {target}' },
+                    {
+                      target: formatMessage(
+                        {
+                          id: 'content-manager.components.ListViewHelperPluginTable.row-line',
+                          defaultMessage: 'item line {number}',
+                        },
+                        { number: index + 1 }
+                      ),
+                    }
+                  )}
+                  target="_blank"
+                  marginLeft="auto"
+                  variant="ghost"
+                >
+                  <Pencil width={'1.6rem'} height={'1.6rem'} />
+                </IconButton>
+              </Flex>
             </Table.Cell>
           </Table.Row>
         ))}

@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { Typography, Badge, Flex, Loader, useNotifyAT, Menu } from '@strapi/design-system';
+import { Typography, Loader, useNotifyAT, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import { useDoc } from '../../../../hooks/useDocument';
 import { useGetRelationsQuery } from '../../../../services/relations';
@@ -68,18 +67,19 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
 
   return (
     <Menu.Root onOpenChange={(isOpen) => setIsOpen(isOpen)}>
-      <MenuTrigger onClick={(e) => e.stopPropagation()}>
-        <Flex gap={1} wrap="nowrap">
-          <Badge>{content.count}</Badge>
-          {formatMessage(
-            {
-              id: 'content-manager.containers.list.items',
-              defaultMessage: '{number, plural, =0 {items} one {item} other {items}}',
-            },
-            { number: content.count }
-          )}
-        </Flex>
-      </MenuTrigger>
+      <Menu.Trigger onClick={(e) => e.stopPropagation()}>
+        <Typography style={{ cursor: 'pointer' }} textColor="neutral800" fontWeight="regular">
+          {content.count > 0
+            ? formatMessage(
+                {
+                  id: 'content-manager.containers.list.items',
+                  defaultMessage: '{number} {number, plural, =0 {items} one {item} other {items}}',
+                },
+                { number: content.count }
+              )
+            : '-'}
+        </Typography>
+      </Menu.Trigger>
       <Menu.Content>
         {isLoading && (
           <Menu.Item disabled>
@@ -118,16 +118,6 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
     </Menu.Root>
   );
 };
-
-/**
- * TODO: this needs to be solved in the Design-System
- */
-const MenuTrigger = styled(Menu.Trigger)`
-  svg {
-    width: 0.6rem;
-    height: 0.4rem;
-  }
-`;
 
 export { RelationSingle, RelationMultiple };
 export type { RelationSingleProps, RelationMultipleProps };
