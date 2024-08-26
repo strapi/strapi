@@ -470,7 +470,7 @@ const AttributeTag = ({
     formattedValue = selectedOption
       ? typeof selectedOption === 'string'
         ? selectedOption
-        : selectedOption.label ?? selectedOption.value
+        : (selectedOption.label ?? selectedOption.value)
       : value;
   }
 

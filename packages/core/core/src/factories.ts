@@ -27,7 +27,7 @@ const createCoreController = <
   }): TController & Core.CoreAPI.Controller.ContentType<TUID> => {
     const baseController = createController({ contentType: strapi.contentType(uid) });
 
-    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
+    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
     for (const methodName of Object.keys(baseController) as Array<keyof typeof baseController>) {
       if (userCtrl[methodName] === undefined) {
@@ -64,7 +64,7 @@ function createCoreService<
   }): TService & Core.CoreAPI.Service.ContentType<TUID> => {
     const baseService = createService({ contentType: strapi.contentType(uid) });
 
-    const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
+    const userService = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
     for (const methodName of Object.keys(baseService) as Array<keyof typeof baseService>) {
       if (userService[methodName] === undefined) {
