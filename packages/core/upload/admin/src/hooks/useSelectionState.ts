@@ -30,7 +30,11 @@ export const useSelectionState = <TValues extends object>(
   };
 
   const selectOnly = (nextSelection: TValues) => {
-    if (selections.indexOf(nextSelection) > -1) {
+    const index = selections.findIndex((currentSelection) =>
+      keys.every((key) => currentSelection[key] === nextSelection[key])
+    );
+
+    if (index > -1) {
       setSelections([]);
     } else {
       setSelections([nextSelection]);
