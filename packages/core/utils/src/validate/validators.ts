@@ -272,6 +272,16 @@ export const validatePopulate = asyncCurry(
           return;
         }
 
+        // Ensure count is a boolean
+        if (key === 'count') {
+          try {
+            parseType({ type: 'boolean', value });
+            return;
+          } catch {
+            throwInvalidKey({ key, path: path.attribute });
+          }
+        }
+
         // Allowed boolean-like keywords should be ignored
         try {
           parseType({ type: 'boolean', value: key });

@@ -43,6 +43,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     await validators.validateFields({ schema, getModel }, params.fields, fieldValidations);
     await validators.validatePopulate({ schema, getModel }, params.populate, populateValidations);
 
+    // TODO: add validate status, locale, pagination
+
     return params;
   };
 
