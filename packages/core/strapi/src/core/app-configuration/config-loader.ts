@@ -10,11 +10,14 @@ export default (dir: string) => {
   return fs
     .readdirSync(dir, { withFileTypes: true })
     .filter((file) => file.isFile() && VALID_EXTENSIONS.includes(path.extname(file.name)))
-    .reduce((acc, file) => {
-      const key = path.basename(file.name, path.extname(file.name));
+    .reduce(
+      (acc, file) => {
+        const key = path.basename(file.name, path.extname(file.name));
 
-      acc[key] = loadFile(path.resolve(dir, file.name));
+        acc[key] = loadFile(path.resolve(dir, file.name));
 
-      return acc;
-    }, {} as Record<string, unknown>);
+        return acc;
+      },
+      {} as Record<string, unknown>
+    );
 };

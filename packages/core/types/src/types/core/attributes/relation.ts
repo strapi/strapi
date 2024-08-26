@@ -10,7 +10,7 @@ export type Relation<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _TOrigin extends Common.UID.Schema = Common.UID.Schema,
   TRelationKind extends RelationKind.Any = RelationKind.Any,
-  TTarget extends Common.UID.ContentType = Common.UID.ContentType
+  TTarget extends Common.UID.ContentType = Common.UID.ContentType,
 > = Attribute.OfType<'relation'> &
   // Properties
   Utils.Guard.Never<RelationProperties<TRelationKind, TTarget>, AllRelationProperties<TTarget>> &
@@ -23,25 +23,25 @@ export type Relation<
 
 export type RelationProperties<
   TRelationKind extends RelationKind.Any,
-  TTarget extends Common.UID.ContentType
+  TTarget extends Common.UID.ContentType,
 > = Utils.Expression.MatchFirst<
   [
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.BiDirectional>,
-      BiDirectionalProperties<Utils.Cast<TRelationKind, RelationKind.BiDirectional>, TTarget>
+      BiDirectionalProperties<Utils.Cast<TRelationKind, RelationKind.BiDirectional>, TTarget>,
     ],
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.XWay>,
-      XWayProperties<Utils.Cast<TRelationKind, RelationKind.XWay>, TTarget>
+      XWayProperties<Utils.Cast<TRelationKind, RelationKind.XWay>, TTarget>,
     ],
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.MorphReference>,
-      MorphReferenceProperties<Utils.Cast<TRelationKind, RelationKind.MorphReference>, TTarget>
+      MorphReferenceProperties<Utils.Cast<TRelationKind, RelationKind.MorphReference>, TTarget>,
     ],
     [
       Utils.Expression.Extends<TRelationKind, RelationKind.MorphOwner>,
-      MorphOwnerProperties<Utils.Cast<TRelationKind, RelationKind.MorphOwner>>
-    ]
+      MorphOwnerProperties<Utils.Cast<TRelationKind, RelationKind.MorphOwner>>,
+    ],
   ]
 >;
 
@@ -54,7 +54,7 @@ export type AllRelationProperties<TTarget extends Common.UID.Schema> =
 
 type BiDirectionalProperties<
   TRelationKind extends RelationKind.BiDirectional,
-  TTarget extends Common.UID.Schema
+  TTarget extends Common.UID.Schema,
 > = {
   relation: TRelationKind;
   target: TTarget;
@@ -67,7 +67,7 @@ type XWayProperties<TRelationKind extends RelationKind.XWay, TTarget extends Com
 
 type MorphReferenceProperties<
   TRelationKind extends RelationKind.MorphReference,
-  TTarget extends Common.UID.Schema
+  TTarget extends Common.UID.Schema,
 > = {
   relation: TRelationKind;
   target: TTarget;
@@ -83,17 +83,17 @@ type MorphOwnerProperties<TRelationKind extends RelationKind.MorphOwner> = {
 
 export type RelationsKeysFromTo<
   TTarget extends Common.UID.Schema,
-  TOrigin extends Common.UID.Schema
+  TOrigin extends Common.UID.Schema,
 > = Utils.Guard.Never<keyof PickRelationsFromTo<TTarget, TOrigin>, string>;
 
 export type PickRelationsFromTo<
   TTarget extends Common.UID.Schema,
-  TOrigin extends Common.UID.Schema
+  TOrigin extends Common.UID.Schema,
 > = Attribute.GetByType<TTarget, 'relation', { target: TOrigin }>;
 
 export type RelationPluralityModifier<
   TRelationKind extends RelationKind.Any,
-  TValue
+  TValue,
 > = Utils.Expression.If<IsManyRelation<TRelationKind>, TValue[], TValue>;
 
 export type IsManyRelation<TRelationKind extends RelationKind.Any> = Utils.Expression.Extends<
@@ -103,27 +103,29 @@ export type IsManyRelation<TRelationKind extends RelationKind.Any> = Utils.Expre
 
 export type RelationValue<
   TRelationKind extends RelationKind.Any,
-  TTarget extends Common.UID.Schema
+  TTarget extends Common.UID.Schema,
 > = RelationPluralityModifier<TRelationKind, Attribute.GetValues<TTarget>>;
 
-export type GetRelationValue<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TOrigin,
-  infer TRelationKind,
-  infer TTarget
->
-  ? RelationValue<TRelationKind, TTarget>
-  : never;
+export type GetRelationValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Relation<
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    infer _TOrigin,
+    infer TRelationKind,
+    infer TTarget
+  >
+    ? RelationValue<TRelationKind, TTarget>
+    : never;
 
-export type GetRelationTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TOrigin,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TRelationKind,
-  infer TTarget
->
-  ? TTarget
-  : never;
+export type GetRelationTarget<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Relation<
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    infer _TOrigin,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    infer _TRelationKind,
+    infer TTarget
+  >
+    ? TTarget
+    : never;
 
 export namespace RelationKind {
   type GetOppositePlurality<TPlurality extends RelationKind.Left | RelationKind.Right> = {

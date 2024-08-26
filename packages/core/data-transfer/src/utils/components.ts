@@ -46,7 +46,7 @@ function omitComponentData(
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async <
   TUID extends Common.UID.Schema,
-  TData extends EntityService.Params.Data.Input<TUID>
+  TData extends EntityService.Params.Data.Input<TUID>,
 >(
   uid: TUID,
   data: TData
@@ -166,7 +166,7 @@ const getComponents = async <TUID extends Common.UID.Schema>(
 */
 const updateComponents = async <
   TUID extends Common.UID.Schema,
-  TData extends Partial<EntityService.Params.Data.Input<TUID>>
+  TData extends Partial<EntityService.Params.Data.Input<TUID>>,
 >(
   uid: TUID,
   entityToUpdate: { id: EntityService.Params.Attribute.ID },
@@ -360,7 +360,7 @@ const deleteOldDZComponents = async <TUID extends Common.UID.Schema>(
 
 const deleteComponents = async <
   TUID extends Common.UID.Schema,
-  TEntity extends Attribute.GetValues<TUID>
+  TEntity extends Attribute.GetValues<TUID>,
 >(
   uid: TUID,
   entityToDelete: TEntity,

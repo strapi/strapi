@@ -279,7 +279,7 @@ type ReturnLayout<TLayout> = TLayout extends FormattedContentTypeLayout
   : SettingsViewComponentLayout;
 
 const formatLayoutForSettingsView = <
-  TLayout extends FormattedContentTypeLayout | FormattedComponentLayout
+  TLayout extends FormattedContentTypeLayout | FormattedComponentLayout,
 >({
   layouts,
   metadatas,

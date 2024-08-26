@@ -118,7 +118,7 @@ describe('Entity service', () => {
     });
 
     afterAll(() => {
-      jest.mocked(global.strapi.getModel).mockImplementation(() => ({} as any));
+      jest.mocked(global.strapi.getModel).mockImplementation(() => ({}) as any);
     });
 
     describe('assign default values', () => {
@@ -215,7 +215,7 @@ describe('Entity service', () => {
             count: jest.fn(({ where }) => {
               return where.id.$in.filter((id: string) => Boolean(fakeEntities[uid][id])).length;
             }),
-          } as any);
+          }) as any;
 
         const fakeDB = {
           transaction: (cb: Utils.Function.Any) => cb(),

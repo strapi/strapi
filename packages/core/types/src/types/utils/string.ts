@@ -20,12 +20,12 @@ export type NonEmpty<T extends string> = T extends '' ? never : T;
  */
 export type Split<
   TValue extends string,
-  TSeparator extends Literal
+  TSeparator extends Literal,
 > = TValue extends `${infer TLeft}${TSeparator}${infer TRight}`
   ? [TLeft, ...Split<TRight, TSeparator>]
   : TValue extends ''
-  ? []
-  : [TValue];
+    ? []
+    : [TValue];
 
 /**
  * Add a literal suffix (`TSuffix`) at the end of the given string

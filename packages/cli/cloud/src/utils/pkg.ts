@@ -20,27 +20,30 @@ const packageJsonSchema = yup.object({
     yup
       .object(
         typeof value === 'object'
-          ? Object.entries(value).reduce((acc, [key, value]) => {
-              if (typeof value === 'object') {
-                acc[key] = yup
-                  .object({
-                    types: yup.string().optional(),
-                    source: yup.string().required(),
-                    module: yup.string().optional(),
-                    import: yup.string().required(),
-                    require: yup.string().required(),
-                    default: yup.string().required(),
-                  })
-                  .noUnknown(true);
-              } else {
-                acc[key] = yup
-                  .string()
-                  .matches(/^\.\/.*\.json$/)
-                  .required();
-              }
+          ? Object.entries(value).reduce(
+              (acc, [key, value]) => {
+                if (typeof value === 'object') {
+                  acc[key] = yup
+                    .object({
+                      types: yup.string().optional(),
+                      source: yup.string().required(),
+                      module: yup.string().optional(),
+                      import: yup.string().required(),
+                      require: yup.string().required(),
+                      default: yup.string().required(),
+                    })
+                    .noUnknown(true);
+                } else {
+                  acc[key] = yup
+                    .string()
+                    .matches(/^\.\/.*\.json$/)
+                    .required();
+                }
 
-              return acc;
-            }, {} as Record<string, yup.SchemaOf<string> | yup.SchemaOf<Export>>)
+                return acc;
+              },
+              {} as Record<string, yup.SchemaOf<string> | yup.SchemaOf<Export>>
+            )
           : undefined
       )
       .optional()

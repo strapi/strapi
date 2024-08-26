@@ -15,7 +15,7 @@ export const getStrapiFactory =
   <
     T extends {
       [key in keyof Partial<LoadedStrapi>]: unknown;
-    }
+    },
   >(
     properties?: T
   ) =>

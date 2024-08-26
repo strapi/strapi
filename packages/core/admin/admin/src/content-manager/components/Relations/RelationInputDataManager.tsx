@@ -198,8 +198,8 @@ const RelationInputDataManager = ({
             isCreatingEntry || isCloningEntry
               ? undefined
               : isComponentRelation
-              ? componentId
-              : entityId,
+                ? componentId
+                : entityId,
           pageSize: SEARCH_RESULTS_TO_DISPLAY,
         },
       },

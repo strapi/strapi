@@ -17,7 +17,9 @@ interface Schemas<TSchema extends Schema.ContentType> {
 
 const cleanData = <
   TSchema extends Schema.ContentType,
-  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
+  TData extends {
+    [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]>;
+  },
 >(
   data: TData,
   { contentType, components }: Schemas<TSchema>,
@@ -46,7 +48,9 @@ const cleanData = <
 
 const removePasswordAndRelationsFieldFromData = <
   TSchema extends Schema.ContentType,
-  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
+  TData extends {
+    [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]>;
+  },
 >(
   data: TData,
   contentTypeSchema: TSchema,
@@ -56,7 +60,7 @@ const removePasswordAndRelationsFieldFromData = <
     TSchemum extends Schema.Schema,
     TDatum extends {
       [P in keyof TSchemum['attributes']]: Attribute.GetValue<TSchemum['attributes'][P]>;
-    }
+    },
   >(
     datum: TDatum,
     schemum: TSchemum

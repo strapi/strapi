@@ -28,7 +28,7 @@ import { EmptyBodyTable, EmptyBodyTableProps } from './EmptyBodyTable';
 
 interface TableProps<
   TRows extends { id: Entity.ID } = { id: Entity.ID },
-  THeader extends TableHeader = TableHeader
+  THeader extends TableHeader = TableHeader,
 > extends Pick<EmptyBodyTableProps, 'action'>,
     Pick<DSTableProps, 'footer'> {
   children?: React.ReactNode;
@@ -52,7 +52,7 @@ interface TableProps<
 
 interface TableRowProps<
   TRows extends { id: Entity.ID } = { id: Entity.ID },
-  THeader extends TableHeader = TableHeader
+  THeader extends TableHeader = TableHeader,
 > extends Pick<
       TableProps<TRows, THeader>,
       'withBulkActions' | 'withMainAction' | 'rows' | 'headers'

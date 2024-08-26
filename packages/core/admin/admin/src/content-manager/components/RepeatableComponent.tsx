@@ -160,7 +160,7 @@ const RepeatableComponent = ({
   };
 
   const mainField =
-    'settings' in componentLayoutData ? componentLayoutData.settings.mainField ?? 'id' : 'id';
+    'settings' in componentLayoutData ? (componentLayoutData.settings.mainField ?? 'id') : 'id';
 
   const handleToggle = (key: number) => () => {
     if (collapseToOpen === key) {

@@ -4,7 +4,7 @@ import type { Attribute, Common } from '@strapi/types';
 type ReplacementFn<
   TData extends Record<string, any>,
   TKey extends keyof TData,
-  TReplacementValue
+  TReplacementValue,
 > = (data: TData[TKey], args: { path: string[]; parent: TData }) => TReplacementValue;
 
 /**
@@ -21,7 +21,7 @@ type ReplacementFn<
  */
 const findAllAndReplaceSetup = <
   TReplacementValue,
-  TData extends Record<string, any> = Record<string, any>
+  TData extends Record<string, any> = Record<string, any>,
 >(
   components: Record<string, FormattedComponentLayout>,
   predicate: (

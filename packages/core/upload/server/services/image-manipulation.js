@@ -104,9 +104,8 @@ const generateThumbnail = async (file) => {
  *
  */
 const optimize = async (file) => {
-  const { sizeOptimization = false, autoOrientation = false } = await getService(
-    'upload'
-  ).getSettings();
+  const { sizeOptimization = false, autoOrientation = false } =
+    await getService('upload').getSettings();
 
   const { format, size } = await getMetadata(file);
 

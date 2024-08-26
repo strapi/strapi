@@ -215,7 +215,7 @@ const Notification = ({
               id: typeof link.label === 'object' ? link.label.id : link.label,
               defaultMessage:
                 typeof link.label === 'object'
-                  ? link.label.defaultMessage ?? link.label.id
+                  ? (link.label.defaultMessage ?? link.label.id)
                   : link.label,
             })}
           </Link>

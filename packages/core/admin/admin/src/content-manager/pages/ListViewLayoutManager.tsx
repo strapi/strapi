@@ -88,7 +88,7 @@ interface GetDataAction {
   type: typeof GET_DATA;
 }
 
-const getData = () => ({ type: GET_DATA } satisfies GetDataAction);
+const getData = () => ({ type: GET_DATA }) satisfies GetDataAction;
 
 interface GetDataSucceededAction extends Pick<ListViewLayoutManagerState, 'data' | 'pagination'> {
   type: typeof GET_DATA_SUCCEEDED;
@@ -102,14 +102,14 @@ const getDataSucceeded = (
     type: GET_DATA_SUCCEEDED,
     pagination,
     data,
-  } satisfies GetDataSucceededAction);
+  }) satisfies GetDataSucceededAction;
 
 interface onResetListHeadersAction {
   type: typeof ON_RESET_LIST_HEADERS;
 }
 
 const onResetListHeaders = () =>
-  ({ type: ON_RESET_LIST_HEADERS } satisfies onResetListHeadersAction);
+  ({ type: ON_RESET_LIST_HEADERS }) satisfies onResetListHeadersAction;
 
 interface ResetPropsAction {
   type: typeof RESET_PROPS;
@@ -134,7 +134,7 @@ const setLayout = ({
     components,
     displayedHeaders: contentType.layouts.list,
     type: SET_LIST_LAYOUT,
-  } satisfies SetLayoutAction);
+  }) satisfies SetLayoutAction;
 
 interface OnChangeListHeadersAction {
   type: typeof ON_CHANGE_LIST_HEADERS;
@@ -145,7 +145,7 @@ interface OnChangeListHeadersAction {
 }
 
 const onChangeListHeaders = (target: OnChangeListHeadersAction['target']) =>
-  ({ type: ON_CHANGE_LIST_HEADERS, target } satisfies OnChangeListHeadersAction);
+  ({ type: ON_CHANGE_LIST_HEADERS, target }) satisfies OnChangeListHeadersAction;
 
 type Action =
   | GetDataAction

@@ -1416,10 +1416,13 @@ export const createEntityManager = (db: Database): EntityManager => {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: fieldsArr.reduce((acc, field) => {
-          acc[field] = populate || true;
-          return acc;
-        }, {} as Record<string, unknown>),
+        populate: fieldsArr.reduce(
+          (acc, field) => {
+            acc[field] = populate || true;
+            return acc;
+          },
+          {} as Record<string, unknown>
+        ),
       });
 
       if (!entry) {

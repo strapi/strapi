@@ -20,7 +20,7 @@ export interface EntityService {
   wrapParams<
     TResult extends object = object,
     TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
-    TParams extends object = object
+    TParams extends object = object,
   >(
     params?: TParams,
     options?: { uid: TContentTypeUID; action: WrapAction }
@@ -28,7 +28,7 @@ export interface EntityService {
 
   wrapResult<
     TResult = any,
-    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
+    TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType,
   >(
     result: unknown,
     options?: { uid: TContentTypeUID; action: WrapAction; [key: string]: unknown }
@@ -52,7 +52,7 @@ export interface EntityService {
       | 'populate'
       | 'publicationState'
       | 'plugin'
-    >
+    >,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -60,7 +60,7 @@ export interface EntityService {
     Utils.Expression.MatchFirst<
       [
         [Common.UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
-        [Common.UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
+        [Common.UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null],
       ],
       (Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]
     >
@@ -68,7 +68,7 @@ export interface EntityService {
 
   findOne<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
@@ -77,7 +77,7 @@ export interface EntityService {
 
   delete<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
@@ -86,7 +86,7 @@ export interface EntityService {
 
   create<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -94,7 +94,7 @@ export interface EntityService {
 
   update<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'files' | 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
@@ -113,7 +113,7 @@ export interface EntityService {
       | '_q'
       | 'publicationState'
       | 'plugin'
-    >
+    >,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -121,7 +121,7 @@ export interface EntityService {
 
   clone<
     TContentTypeUID extends Common.UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data' | 'files' | 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     cloneId: Params.Attribute.ID,
@@ -152,7 +152,7 @@ export interface EntityService {
       | 'populate'
       | 'publicationState'
       | 'plugin'
-    >
+    >,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -173,7 +173,7 @@ export interface EntityService {
       | 'populate'
       | 'publicationState'
       | 'plugin'
-    >
+    >,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -190,7 +190,7 @@ export interface EntityService {
    */
   load<
     TContentTypeUID extends Common.UID.ContentType,
-    TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
+    TField extends Attribute.GetPopulatableKeys<TContentTypeUID>,
   >(
     uid: TContentTypeUID,
     entity: PartialEntity<TContentTypeUID>,
@@ -204,7 +204,7 @@ export interface EntityService {
    */
   loadPages<
     TContentTypeUID extends Common.UID.ContentType,
-    TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
+    TField extends Attribute.GetPopulatableKeys<TContentTypeUID>,
   >(
     uid: TContentTypeUID,
     entity: PartialEntity<TContentTypeUID>,
@@ -216,20 +216,20 @@ export interface EntityService {
 
 type GetPopulatableFieldParams<
   TContentTypeUID extends Common.UID.ContentType,
-  TField extends Attribute.GetPopulatableKeys<TContentTypeUID>
+  TField extends Attribute.GetPopulatableKeys<TContentTypeUID>,
 > = Utils.Expression.MatchFirst<
   [
     [
       Attribute.HasTarget<TContentTypeUID, TField>,
-      Params.Populate.NestedParams<Attribute.GetTarget<TContentTypeUID, TField>>
+      Params.Populate.NestedParams<Attribute.GetTarget<TContentTypeUID, TField>>,
     ],
     [
       Attribute.HasMorphTargets<TContentTypeUID, TField>,
       (
         | Params.Populate.Fragment<Attribute.GetMorphTargets<TContentTypeUID, TField>>
         | Params.Populate.NestedParams<Common.UID.Schema>
-      )
-    ]
+      ),
+    ],
   ],
   Params.Populate.Fragment<Common.UID.Schema> | Params.Populate.NestedParams<Common.UID.Schema>
 >;

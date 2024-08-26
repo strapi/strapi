@@ -43,17 +43,20 @@ const getAdminDependencyAliases = (monorepo?: StrapiMonorepo) =>
     .filter(
       (moduleName) => !monorepo?.path || (monorepo.path && moduleName !== '@strapi/helper-plugin')
     )
-    .reduce((acc, moduleName) => {
-      /**
-       * We use `findRoot` instead of `resolveFrom` here because we don't want to
-       * choose a particular file e.g. the CJS version over the ESM because the
-       * bundler should decide this, so insted find-root is more appropriate.
-       *
-       * When we remove these aliases in V5 we can also remove the `find-root` package.
-       */
-      acc[`${moduleName}$`] = findRoot(require.resolve(moduleName));
-      return acc;
-    }, {} as Record<string, string>);
+    .reduce(
+      (acc, moduleName) => {
+        /**
+         * We use `findRoot` instead of `resolveFrom` here because we don't want to
+         * choose a particular file e.g. the CJS version over the ESM because the
+         * bundler should decide this, so insted find-root is more appropriate.
+         *
+         * When we remove these aliases in V5 we can also remove the `find-root` package.
+         */
+        acc[`${moduleName}$`] = findRoot(require.resolve(moduleName));
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 
 const getAliases = (cwd: string, monorepo?: StrapiMonorepo) => {
   const adminAliases = getAdminDependencyAliases(monorepo);

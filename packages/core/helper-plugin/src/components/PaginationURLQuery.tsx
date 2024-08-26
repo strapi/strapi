@@ -91,8 +91,8 @@ export const PaginationURLQuery = ({
     ...(siblingsStart > boundaryCount + 2
       ? ['start-ellipsis']
       : boundaryCount + 1 < pageCount - boundaryCount
-      ? [boundaryCount + 1]
-      : []),
+        ? [boundaryCount + 1]
+        : []),
 
     // Sibling pages
     ...range(siblingsStart, siblingsEnd),
@@ -102,8 +102,8 @@ export const PaginationURLQuery = ({
     ...(siblingsEnd < pageCount - boundaryCount - 1
       ? ['end-ellipsis']
       : pageCount - boundaryCount > boundaryCount
-      ? [pageCount - boundaryCount]
-      : []),
+        ? [pageCount - boundaryCount]
+        : []),
 
     ...endPages,
   ];

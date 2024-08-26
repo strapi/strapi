@@ -8270,7 +8270,7 @@ __metadata:
     p-map: "npm:4.0.0"
     passport-local: "npm:1.0.0"
     pluralize: "npm:8.0.0"
-    prettier: "npm:2.8.4"
+    prettier: "npm:3.3.3"
     prop-types: "npm:^15.8.1"
     punycode: "npm:2.3.1"
     qs: "npm:6.11.1"
@@ -9318,7 +9318,7 @@ __metadata:
     cli-table3: "npm:0.6.5"
     fs-extra: "npm:10.0.0"
     lodash: "npm:4.17.21"
-    prettier: "npm:2.8.4"
+    prettier: "npm:3.3.3"
     typescript: "npm:5.2.2"
   languageName: unknown
   linkType: soft
@@ -26461,6 +26461,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prettier@npm:3.3.3":
+  version: 3.3.3
+  resolution: "prettier@npm:3.3.3"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: 10c0/b85828b08e7505716324e4245549b9205c0cacb25342a030ba8885aba2039a115dbcf75a0b7ca3b37bc9d101ee61fab8113fc69ca3359f2a226f1ecc07ad2e26
+  languageName: node
+  linkType: hard
+
 "prettier@npm:^2.8.0":
   version: 2.8.8
   resolution: "prettier@npm:2.8.8"
@@ -29399,7 +29408,7 @@ __metadata:
     lodash: "npm:4.17.21"
     nx: "npm:16.8.1"
     plop: "npm:2.7.6"
-    prettier: "npm:2.8.4"
+    prettier: "npm:3.3.3"
     qs: "npm:6.11.1"
     rimraf: "npm:3.0.2"
     supertest: "npm:6.3.3"

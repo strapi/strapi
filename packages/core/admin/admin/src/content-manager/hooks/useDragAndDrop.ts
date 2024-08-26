@@ -29,7 +29,7 @@ const DROP_SENSITIVITY = {
 
 interface UseDragAndDropOptions<
   TIndex extends number | Array<number> = number,
-  TItem extends { index: TIndex } = { index: TIndex }
+  TItem extends { index: TIndex } = { index: TIndex },
 > extends UseKeyboardDragAndDropCallbacks<TIndex> {
   type?: string;
   index: TIndex;
@@ -52,7 +52,7 @@ type UseDragAndDropReturn = [
   objectRef: React.RefObject<HTMLElement>,
   dropRef: ConnectDropTarget,
   dragRef: ConnectDragSource,
-  dragPreviewRef: ConnectDragPreview
+  dragPreviewRef: ConnectDragPreview,
 ];
 
 type DropCollectedProps = {
@@ -66,7 +66,7 @@ type DropCollectedProps = {
  */
 const useDragAndDrop = <
   TIndex extends number | Array<number>,
-  TItem extends { index: TIndex; id?: Entity.ID; [key: string]: unknown }
+  TItem extends { index: TIndex; id?: Entity.ID; [key: string]: unknown },
 >(
   active: boolean,
   {

@@ -134,7 +134,7 @@ type GenericIsMinSuperiorThanMax<T extends (string | null) | number> = yup.TestC
 >;
 
 const isMinSuperiorThanMax = <
-  T extends (string | null) | number
+  T extends (string | null) | number,
 >(): GenericIsMinSuperiorThanMax<T> => ({
   name: 'isMinSuperiorThanMax',
   message: getTrad('error.validation.minSupMax'),

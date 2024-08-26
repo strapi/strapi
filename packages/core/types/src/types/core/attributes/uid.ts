@@ -10,7 +10,7 @@ export interface UIDOptions {
 
 export interface UIDProperties<
   TTargetAttribute extends string = string,
-  TOptions extends UIDOptions = UIDOptions
+  TOptions extends UIDOptions = UIDOptions,
 > {
   targetField?: TTargetAttribute;
   options?: UIDOptions & TOptions;
@@ -23,7 +23,7 @@ export type UID<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _TOrigin extends Common.UID.Schema = never,
   TTargetAttribute extends string = string,
-  TOptions extends UIDOptions = UIDOptions
+  TOptions extends UIDOptions = UIDOptions,
 > = Attribute.OfType<'uid'> &
   // Properties
   UIDProperties<TTargetAttribute, TOptions> &

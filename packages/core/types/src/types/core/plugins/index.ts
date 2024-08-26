@@ -5,7 +5,7 @@ import type { Strapi } from '../../..';
 
 export type IsEnabled<
   TName extends keyof any,
-  TSchemaUID extends Common.UID.Schema
+  TSchemaUID extends Common.UID.Schema,
 > = TName extends keyof Shared.PluginActivation
   ? Shared.PluginActivation[TName] extends infer TRule
     ? Utils.Expression.Or<

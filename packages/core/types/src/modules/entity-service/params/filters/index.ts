@@ -80,24 +80,25 @@ type IDFiltering = { id?: AttributeCondition<never, IDKey> };
  */
 type AttributeCondition<
   TSchemaUID extends Common.UID.Schema,
-  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>
-> = GetScalarAttributeValue<TSchemaUID, TAttributeName> extends infer TAttributeValue
-  ?
-      | TAttributeValue // Implicit $eq operator
-      | ({
-          [TIter in Operator.BooleanValue]?: boolean;
-        } & {
-          [TIter in Operator.DynamicValue]?: TAttributeValue;
-        } & {
-          [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
-        } & {
-          [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
-        } & {
-          [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
-        } & {
-          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
-        })
-  : never;
+  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>,
+> =
+  GetScalarAttributeValue<TSchemaUID, TAttributeName> extends infer TAttributeValue
+    ?
+        | TAttributeValue // Implicit $eq operator
+        | ({
+            [TIter in Operator.BooleanValue]?: boolean;
+          } & {
+            [TIter in Operator.DynamicValue]?: TAttributeValue;
+          } & {
+            [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
+          } & {
+            [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
+          } & {
+            [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
+          } & {
+            [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
+          })
+    : never;
 
 /**
  * Utility type that retrieves the value of a scalar attribute in a schema.
@@ -106,7 +107,7 @@ type AttributeCondition<
  */
 type GetScalarAttributeValue<
   TSchemaUID extends Common.UID.Schema,
-  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>
+  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>,
 > = Utils.Expression.MatchFirst<
   [
     // Checks and captures for manually added ID attributes
@@ -121,8 +122,8 @@ type GetScalarAttributeValue<
           // Cast attribute name to a scalar key if possible
           Utils.Cast<TAttributeName, AttributeUtils.GetScalarKeys<TSchemaUID>>
         >
-      >
-    ]
+      >,
+    ],
   ],
   // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
   AttributeUtils.ScalarValues
@@ -135,7 +136,7 @@ type GetScalarAttributeValue<
  */
 type NestedAttributeCondition<
   TSchemaUID extends Common.UID.Schema,
-  TAttributeName extends Attribute.GetKeys<TSchemaUID>
+  TAttributeName extends Attribute.GetKeys<TSchemaUID>,
 > = ObjectNotation<
   // Ensure the resolved target isn't `never`, else, fallback to Common.UID.Schema
   Utils.Guard.Never<Attribute.GetTarget<TSchemaUID, TAttributeName>, Common.UID.Schema>

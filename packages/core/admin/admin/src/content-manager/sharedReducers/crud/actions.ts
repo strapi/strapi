@@ -29,7 +29,7 @@ const getDataSucceeded = (data: GetDataSucceededAction['data']) =>
   ({
     type: GET_DATA_SUCCEEDED,
     data,
-  } satisfies GetDataSucceededAction);
+  }) satisfies GetDataSucceededAction;
 
 interface InitFormAction extends Partial<Pick<CrudState, 'data'>> {
   type: typeof INIT_FORM;
@@ -42,13 +42,13 @@ const initForm = (rawQuery?: InitFormAction['rawQuery'], isSingleType = false) =
     type: INIT_FORM,
     rawQuery,
     isSingleType,
-  } satisfies InitFormAction);
+  }) satisfies InitFormAction;
 
 interface ResetPropsAction {
   type: typeof RESET_PROPS;
 }
 
-const resetProps = () => ({ type: RESET_PROPS } satisfies ResetPropsAction);
+const resetProps = () => ({ type: RESET_PROPS }) satisfies ResetPropsAction;
 
 interface SetDataStructuresAction
   extends Pick<CrudState, 'componentsDataStructure' | 'contentTypeDataStructure'> {
@@ -63,7 +63,7 @@ const setDataStructures = (
     type: SET_DATA_STRUCTURES,
     componentsDataStructure,
     contentTypeDataStructure,
-  } satisfies SetDataStructuresAction);
+  }) satisfies SetDataStructuresAction;
 
 interface SetStatusAction extends Pick<CrudState, 'status'> {
   type: typeof SET_STATUS;
@@ -73,7 +73,7 @@ const setStatus = (status: SetStatusAction['status']) =>
   ({
     type: SET_STATUS,
     status,
-  } satisfies SetStatusAction);
+  }) satisfies SetStatusAction;
 
 interface SubmitSucceededAction extends Pick<CrudState, 'data'> {
   type: typeof SUBMIT_SUCCEEDED;
@@ -83,7 +83,7 @@ const submitSucceeded = (data: SubmitSucceededAction['data']) =>
   ({
     type: SUBMIT_SUCCEEDED,
     data,
-  } satisfies SubmitSucceededAction);
+  }) satisfies SubmitSucceededAction;
 
 interface ClearSetModifiedDataOnlyAction {
   type: typeof CLEAR_SET_MODIFIED_DATA_ONLY;
@@ -92,7 +92,7 @@ interface ClearSetModifiedDataOnlyAction {
 const clearSetModifiedDataOnly = () =>
   ({
     type: CLEAR_SET_MODIFIED_DATA_ONLY,
-  } satisfies ClearSetModifiedDataOnlyAction);
+  }) satisfies ClearSetModifiedDataOnlyAction;
 
 export {
   getData,

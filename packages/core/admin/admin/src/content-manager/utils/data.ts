@@ -48,7 +48,9 @@ const createDefaultDataStructure = (
 
 const removePasswordFieldsFromData = <
   TSchema extends FormattedContentTypeLayout,
-  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
+  TData extends {
+    [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]>;
+  },
 >(
   data: TData,
   contentTypeSchema: TSchema,
@@ -58,7 +60,7 @@ const removePasswordFieldsFromData = <
     TSchemum extends FormattedContentTypeLayout | FormattedComponentLayout,
     TDatum extends {
       [P in keyof TSchemum['attributes']]: Attribute.GetValue<TSchemum['attributes'][P]>;
-    }
+    },
   >(
     datum: TDatum,
     schema: TSchemum

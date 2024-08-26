@@ -230,7 +230,7 @@ const createDefaultImplementation = ({
 
   async create<
     TUID extends Common.UID.ContentType,
-    TParams extends EntityService.Params.Pick<TUID, 'data' | 'files' | 'fields' | 'populate'>
+    TParams extends EntityService.Params.Pick<TUID, 'data' | 'files' | 'fields' | 'populate'>,
   >(uid: TUID, params?: TParams) {
     const wrappedParams = await this.wrapParams<TParams>(params, { uid, action: 'create' });
     const { data, files } = wrappedParams;

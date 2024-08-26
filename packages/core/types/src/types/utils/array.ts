@@ -3,9 +3,8 @@ import type { Utils } from '..';
 /**
  * Extract the array values into a union type
  */
-export type Values<TCollection extends Array<unknown>> = TCollection extends Array<infer TValues>
-  ? TValues
-  : never;
+export type Values<TCollection extends Array<unknown>> =
+  TCollection extends Array<infer TValues> ? TValues : never;
 
 /**
  * Checks if the size of the given collection equals 0

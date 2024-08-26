@@ -7,7 +7,7 @@ type AnyEntity = { id: Params.Attribute.ID } & { [key: string]: any };
 
 export type Result<
   TSchemaUID extends Common.UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = Utils.Expression.If<
   Common.AreSchemaRegistriesExtended,
   GetValues<
@@ -23,7 +23,7 @@ export type Result<
 
 export type Entity<
   TSchemaUID extends Common.UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = Utils.Expression.If<
   Common.AreSchemaRegistriesExtended,
   GetValues<
@@ -42,12 +42,12 @@ export type Entity<
 
 export type PartialEntity<
   TSchemaUID extends Common.UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = Partial<Entity<TSchemaUID, TParams>>;
 
 export type PaginatedResult<
   TSchemaUID extends Common.UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = {
   results: Entity<TSchemaUID, TParams>[];
   pagination: Pagination;
@@ -61,13 +61,11 @@ export type PaginatedResult<
 export type GetValues<
   TSchemaUID extends Common.UID.Schema,
   TFields extends Attribute.GetKeys<TSchemaUID> = Attribute.GetNonPopulatableKeys<TSchemaUID>,
-  TPopulate extends Attribute.GetKeys<TSchemaUID> = Attribute.GetPopulatableKeys<TSchemaUID>
+  TPopulate extends Attribute.GetKeys<TSchemaUID> = Attribute.GetPopulatableKeys<TSchemaUID>,
 > = Utils.Expression.If<
   Common.AreSchemaRegistriesExtended,
-  Utils.Guard.Never<
-    TFields | TPopulate,
+  Utils.Guard.Never<TFields | TPopulate, Attribute.GetKeys<TSchemaUID>> extends infer TKeys extends
     Attribute.GetKeys<TSchemaUID>
-  > extends infer TKeys extends Attribute.GetKeys<TSchemaUID>
     ? Attribute.GetValues<TSchemaUID, TKeys>
     : never,
   AnyEntity
@@ -75,7 +73,7 @@ export type GetValues<
 
 type ExtractFields<
   TSchemaUID extends Common.UID.Schema,
-  TFields extends Params.Fields.Any<TSchemaUID> | undefined
+  TFields extends Params.Fields.Any<TSchemaUID> | undefined,
 > = Utils.Expression.MatchFirst<
   [
     // No fields provided
@@ -87,12 +85,12 @@ type ExtractFields<
           Utils.Expression.StrictEqual<TFields, undefined>
         >
       >,
-      never
+      never,
     ],
     // string
     [
       Utils.Expression.Extends<TFields, Params.Fields.StringNotation<TSchemaUID>>,
-      ParseStringFields<TSchemaUID, Utils.Cast<TFields, Params.Fields.StringNotation<TSchemaUID>>>
+      ParseStringFields<TSchemaUID, Utils.Cast<TFields, Params.Fields.StringNotation<TSchemaUID>>>,
     ],
     // string array
     [
@@ -103,31 +101,31 @@ type ExtractFields<
           Utils.Array.Values<Utils.Cast<TFields, Params.Fields.ArrayNotation<TSchemaUID>>>,
           Params.Fields.StringNotation<TSchemaUID>
         >
-      >
-    ]
+      >,
+    ],
   ]
 >;
 
 type ParseStringFields<
   TSchemaUID extends Common.UID.Schema,
-  TFields extends Params.Fields.StringNotation<TSchemaUID>
+  TFields extends Params.Fields.StringNotation<TSchemaUID>,
 > = Utils.Expression.MatchFirst<
   [
     [
       Utils.Expression.StrictEqual<TFields, Params.Fields.WildcardNotation>,
-      Attribute.GetNonPopulatableKeys<TSchemaUID>
+      Attribute.GetNonPopulatableKeys<TSchemaUID>,
     ],
     [Utils.Expression.Extends<TFields, Params.Fields.SingleAttribute<TSchemaUID>>, TFields],
     [
       Utils.Expression.Extends<TFields, `${string},${string}`>,
-      Utils.Array.Values<Utils.String.Split<Utils.Cast<TFields, string>, ','>>
-    ]
+      Utils.Array.Values<Utils.String.Split<Utils.Cast<TFields, string>, ','>>,
+    ],
   ]
 >;
 
 type ExtractPopulate<
   TSchemaUID extends Common.UID.Schema,
-  TPopulate extends Params.Populate.Any<TSchemaUID> | undefined
+  TPopulate extends Params.Populate.Any<TSchemaUID> | undefined,
 > = Utils.Expression.MatchFirst<
   [
     // No populate provided
@@ -136,7 +134,7 @@ type ExtractPopulate<
         Utils.Expression.StrictEqual<TPopulate, Params.Populate.Any<TSchemaUID>>,
         Utils.Expression.IsNever<TPopulate>
       >,
-      never
+      never,
     ],
     // string notation
     [
@@ -144,7 +142,7 @@ type ExtractPopulate<
       ParseStringPopulate<
         TSchemaUID,
         Utils.Cast<TPopulate, Params.Populate.StringNotation<TSchemaUID>>
-      >
+      >,
     ],
     // Array notation
     [
@@ -155,7 +153,7 @@ type ExtractPopulate<
           Utils.Array.Values<Utils.Cast<TPopulate, Params.Populate.ArrayNotation<TSchemaUID>>>,
           Params.Populate.StringNotation<TSchemaUID>
         >
-      >
+      >,
     ],
     // object notation
     [
@@ -164,14 +162,14 @@ type ExtractPopulate<
         TSchemaUID,
         // TODO: Handle relations set to false in object notation
         Utils.Cast<keyof TPopulate, Params.Populate.StringNotation<TSchemaUID>>
-      >
-    ]
+      >,
+    ],
   ]
 >;
 
 type ParsePopulateDotNotation<
   TSchemaUID extends Common.UID.Schema,
-  TPopulate extends Params.Populate.StringNotation<TSchemaUID>
+  TPopulate extends Params.Populate.StringNotation<TSchemaUID>,
 > = Utils.Cast<
   Utils.String.Split<Utils.Cast<TPopulate, string>, '.'>[0],
   Attribute.GetPopulatableKeys<TSchemaUID>
@@ -179,12 +177,12 @@ type ParsePopulateDotNotation<
 
 type ParseStringPopulate<
   TSchemaUID extends Common.UID.Schema,
-  TPopulate extends Params.Populate.StringNotation<TSchemaUID>
+  TPopulate extends Params.Populate.StringNotation<TSchemaUID>,
 > = Utils.Expression.MatchFirst<
   [
     [
       Utils.Expression.StrictEqual<Params.Populate.WildcardNotation, TPopulate>,
-      Attribute.GetPopulatableKeys<TSchemaUID>
+      Attribute.GetPopulatableKeys<TSchemaUID>,
     ],
     [
       Utils.Expression.Extends<TPopulate, `${string},${string}`>,
@@ -194,12 +192,12 @@ type ParseStringPopulate<
           Utils.Array.Values<Utils.String.Split<Utils.Cast<TPopulate, string>, ','>>,
           Params.Populate.StringNotation<TSchemaUID>
         >
-      >
+      >,
     ],
     [
       Utils.Expression.Extends<TPopulate, `${string}.${string}`>,
-      ParsePopulateDotNotation<TSchemaUID, TPopulate>
-    ]
+      ParsePopulateDotNotation<TSchemaUID, TPopulate>,
+    ],
   ],
   TPopulate
 >;

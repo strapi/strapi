@@ -25,9 +25,8 @@ export type SingleType = Utils.Guard.Never<
 >;
 
 export type Component = Registry.Keys<Shared.Components, UID.Component>;
-export type ComponentCategory = Component extends UID.Component<infer TCategory>
-  ? TCategory
-  : never;
+export type ComponentCategory =
+  Component extends UID.Component<infer TCategory> ? TCategory : never;
 
 export type Schema = Registry.Keys<
   Common.Schemas,

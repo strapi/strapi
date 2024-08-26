@@ -9,7 +9,9 @@ import type { Attribute, Schema } from '@strapi/types';
 
 const formatContentTypeData = <
   TSchema extends Schema.ContentType,
-  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
+  TData extends {
+    [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]>;
+  },
 >(
   data: TData,
   ct: TSchema,
@@ -19,7 +21,7 @@ const formatContentTypeData = <
     TSchemum extends Schema.Schema,
     TDatum extends {
       [P in keyof TSchemum['attributes']]: Attribute.GetValue<TSchemum['attributes'][P]>;
-    }
+    },
   >(
     data: TDatum,
     schema: TSchemum

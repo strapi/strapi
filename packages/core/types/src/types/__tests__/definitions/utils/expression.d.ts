@@ -147,20 +147,20 @@ type MatchFirstReturnsNeverWithNeverDefault = Utils.Expression.MatchFirst<
 type MatchAllIntersectWithOneTrueCondition = Utils.Expression.MatchAllIntersect<
   [
     [Utils.Expression.IsTrue<Utils.Expression.True>, { test: 1 }],
-    [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 2 }]
+    [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 2 }],
   ]
 >;
 type MatchAllIntersectWithAllFalseConditions = Utils.Expression.MatchAllIntersect<
   [
     [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 1 }],
-    [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 2 }]
+    [Utils.Expression.IsTrue<Utils.Expression.False>, { test: 2 }],
   ]
 >;
 
 type MatchAllIntersectWithIntersection = Utils.Expression.MatchAllIntersect<
   [
     [Utils.Expression.Extends<'test', string>, 'test'],
-    [Utils.Expression.Extends<'test', string>, 'test']
+    [Utils.Expression.Extends<'test', string>, 'test'],
   ]
 >;
 

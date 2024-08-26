@@ -14,7 +14,7 @@ export const CustomFieldsList = () => {
   // TODO change this once useCustomFields is typed (helper-plugin types are solved)
   const registeredCustomFields = Object.entries(customFields.getAll()) as [
     CustomFieldUID,
-    CustomFieldOption
+    CustomFieldOption,
   ][];
 
   if (!registeredCustomFields.length) {

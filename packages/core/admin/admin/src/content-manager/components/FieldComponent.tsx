@@ -132,8 +132,8 @@ const FieldComponent = ({
   const isReadOnly = isCreatingEntry
     ? false
     : hasChildrenAllowedFields
-    ? false
-    : hasChildrenReadableFields;
+      ? false
+      : hasChildrenReadableFields;
 
   const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;

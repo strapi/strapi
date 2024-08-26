@@ -79,9 +79,9 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
     ? // First level sort (scalar attributes, id, ...)
       OrderKind.Any
     : TKey extends Attribute.GetKeysWithTarget<TSchemaUID>
-    ? // Deep sort (relations with a target, components, media, ...)
-      ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>>
-    : never;
+      ? // Deep sort (relations with a target, components, media, ...)
+        ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>>
+      : never;
 };
 
 /**

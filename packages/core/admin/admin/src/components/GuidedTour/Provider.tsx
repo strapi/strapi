@@ -183,7 +183,7 @@ const reducer: React.Reducer<State, Action> = (state: State = initialState, acti
       case 'SET_STEP_STATE': {
         const [section, step] = action.currentStep.split('.') as [
           GuidedTourSectionKey,
-          GuidedTourStepKey
+          GuidedTourStepKey,
         ];
         draftState.guidedTourState[section][step] = action.value;
         break;
@@ -219,7 +219,7 @@ const initialiseState = (initialState: State) => {
   if (currentStepLocaleStorage) {
     const [sectionName, stepName] = currentStepLocaleStorage.split('.') as [
       GuidedTourSectionKey,
-      GuidedTourStepKey
+      GuidedTourStepKey,
     ];
     set(copyInitialState, ['guidedTourState', sectionName, stepName], true);
 

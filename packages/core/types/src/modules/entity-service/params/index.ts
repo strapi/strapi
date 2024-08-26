@@ -15,7 +15,7 @@ import type * as Attribute from './attributes';
 
 export type Pick<
   TSchemaUID extends Common.UID.Schema,
-  TKind extends Kind
+  TKind extends Kind,
 > = Utils.Expression.MatchAllIntersect<
   [
     // Sort
@@ -48,7 +48,7 @@ export type Pick<
     // Files
     [HasMember<TKind, 'files'>, { files?: Record<string, unknown> }], // TODO
     // Search
-    [HasMember<TKind, '_q'>, { _q?: Search.Q }]
+    [HasMember<TKind, '_q'>, { _q?: Search.Q }],
   ]
 >;
 

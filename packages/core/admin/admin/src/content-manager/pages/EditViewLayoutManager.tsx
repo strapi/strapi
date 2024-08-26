@@ -61,7 +61,7 @@ interface ResetPropsAction {
   type: typeof RESET_PROPS;
 }
 
-const resetProps = () => ({ type: RESET_PROPS } satisfies ResetPropsAction);
+const resetProps = () => ({ type: RESET_PROPS }) satisfies ResetPropsAction;
 
 const SET_LAYOUT = 'ContentManager/EditViewLayoutManager/SET_LAYOUT';
 
@@ -76,7 +76,7 @@ const setLayout = (layout: SetLayoutAction['layout'], query: SetLayoutAction['qu
     type: SET_LAYOUT,
     layout,
     query,
-  } satisfies SetLayoutAction);
+  }) satisfies SetLayoutAction;
 
 interface EditViewLayoutManagerState {
   currentLayout: {

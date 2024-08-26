@@ -8,8 +8,8 @@ type ComponentLayoutData = Contracts.Components.FindComponentConfiguration.Respo
 type LayoutData<TKey> = TKey extends 'component'
   ? ComponentLayoutData
   : TKey extends 'contentType'
-  ? ContentTypeLayoutData
-  : never;
+    ? ContentTypeLayoutData
+    : never;
 
 type Models = Array<Contracts.Components.Component | Contracts.ContentTypes.ContentType>;
 
@@ -18,13 +18,13 @@ type ModifiedLayoutData<TKey> = TKey extends 'component'
       [K in TKey]: Contracts.Components.ComponentConfiguration & Contracts.Components.Component;
     }
   : TKey extends 'contentType'
-  ? Omit<ComponentsWithSchemas<ContentTypeLayoutData>, TKey> & {
-      [K in TKey]: Contracts.ContentTypes.Configuration & Contracts.ContentTypes.ContentType;
-    }
-  : never;
+    ? Omit<ComponentsWithSchemas<ContentTypeLayoutData>, TKey> & {
+        [K in TKey]: Contracts.ContentTypes.Configuration & Contracts.ContentTypes.ContentType;
+      }
+    : never;
 
 type ComponentsWithSchemas<
-  TData extends { components: Record<string, Contracts.Components.ComponentConfiguration> }
+  TData extends { components: Record<string, Contracts.Components.ComponentConfiguration> },
 > = Omit<TData, 'components'> & {
   components: Record<
     string,

@@ -370,10 +370,10 @@ export default (db: Database) => {
     };
 
     const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
-      ? (await strapi.store.get({
+      ? ((await strapi.store.get({
           type: 'core',
           key: 'persisted_tables',
-        })) ?? []
+        })) ?? [])
       : [];
 
     const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];

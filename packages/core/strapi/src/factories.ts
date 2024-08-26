@@ -25,7 +25,7 @@ const getContentTypeProxy = (strapi: Strapi, uid: Common.UID.ContentType) => {
 
 const createCoreController = <
   TUID extends Common.UID.ContentType,
-  TController extends CoreApi.Controller.Extendable<TUID>
+  TController extends CoreApi.Controller.Extendable<TUID>,
 >(
   uid: TUID,
   cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Controller.Extendable<TUID> & TController>>
@@ -33,7 +33,7 @@ const createCoreController = <
   return ({ strapi }: { strapi: Strapi }): TController & CoreApi.Controller.ContentType<TUID> => {
     const baseController = createController({ contentType: getContentTypeProxy(strapi, uid) });
 
-    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
+    const userCtrl = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
     for (const methodName of Object.keys(baseController) as Array<keyof typeof baseController>) {
       if (userCtrl[methodName] === undefined) {
@@ -58,7 +58,7 @@ const createCoreController = <
 
 function createCoreService<
   TUID extends Common.UID.ContentType,
-  TService extends CoreApi.Service.Extendable<TUID>
+  TService extends CoreApi.Service.Extendable<TUID>,
 >(
   uid: TUID,
   cfg?: WithStrapiCallback<Utils.PartialWithThis<CoreApi.Service.Extendable<TUID> & TService>>
@@ -66,7 +66,7 @@ function createCoreService<
   return ({ strapi }: { strapi: Strapi }): TService & CoreApi.Service.ContentType<TUID> => {
     const baseService = createService({ contentType: getContentTypeProxy(strapi, uid) });
 
-    const userService = typeof cfg === 'function' ? cfg({ strapi }) : cfg ?? ({} as any);
+    const userService = typeof cfg === 'function' ? cfg({ strapi }) : (cfg ?? ({} as any));
 
     for (const methodName of Object.keys(baseService) as Array<keyof typeof baseService>) {
       if (userService[methodName] === undefined) {

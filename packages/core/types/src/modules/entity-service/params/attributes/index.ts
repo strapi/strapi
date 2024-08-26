@@ -55,7 +55,7 @@ export type GetValues<TSchemaUID extends Common.UID.Schema> = {
  */
 export type GetValue<
   TAttribute extends Attribute.Attribute,
-  TGuard = unknown
+  TGuard = unknown,
 > = Utils.Expression.If<
   Utils.Expression.IsNotNever<TAttribute>,
   Utils.Expression.MatchFirst<
@@ -69,7 +69,7 @@ export type GetValue<
               Utils.Expression.IsNotNever<TTarget>,
               RelationInputValue<TRelationKind>
             >
-          : never
+          : never,
       ],
       // DynamicZone
       [
@@ -83,7 +83,7 @@ export type GetValue<
                   : never
                 : never
             >
-          : never
+          : never,
       ],
       // Component
       [
@@ -94,7 +94,7 @@ export type GetValue<
               ? Utils.Expression.If<TRepeatable, TValues[], TValues>
               : never
             : never
-          : never
+          : never,
       ],
       // Boolean
       [Utils.Expression.Extends<TAttribute, Attribute.Boolean>, Literals.BooleanValue],
@@ -104,18 +104,18 @@ export type GetValue<
           TAttribute,
           Attribute.Integer | Attribute.BigInteger | Attribute.Float | Attribute.Decimal
         >,
-        Literals.NumberValue
+        Literals.NumberValue,
       ],
       // Date / Time
       [Utils.Expression.Extends<TAttribute, Attribute.Time>, Literals.TimeValue],
       [Utils.Expression.Extends<TAttribute, Attribute.Date>, Literals.DateValue],
       [
         Utils.Expression.Extends<TAttribute, Attribute.Timestamp | Attribute.DateTime>,
-        Literals.DateTimeValue
+        Literals.DateTimeValue,
       ],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)
-      [Utils.Expression.True, Attribute.GetValue<TAttribute, TGuard>]
+      [Utils.Expression.True, Attribute.GetValue<TAttribute, TGuard>],
     ],
     unknown
   >,

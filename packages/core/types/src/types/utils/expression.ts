@@ -23,14 +23,14 @@ export type DoesNotExtends<TLeft, TRight> = Not<Extends<TLeft, TRight>>;
 export type Not<TExpression extends BooleanValue> = If<TExpression, False, True>;
 
 export type If<TExpression extends BooleanValue, TOnTrue, TOnFalse = never> = [
-  TExpression
+  TExpression,
 ] extends [True]
   ? TOnTrue
   : TOnFalse;
 
 export type MatchFirst<TTests extends Test[], TDefault = never> = TTests extends [
   infer THead extends Test,
-  ...infer TTail extends Test[]
+  ...infer TTail extends Test[],
 ]
   ? THead extends Test<infer TExpression, infer TValue>
     ? If<
@@ -43,7 +43,7 @@ export type MatchFirst<TTests extends Test[], TDefault = never> = TTests extends
 
 export type MatchAllUnion<TTests extends Test[], TDefault = never> = TTests extends [
   infer THead extends Test,
-  ...infer TTail extends Test[]
+  ...infer TTail extends Test[],
 ]
   ? THead extends Test<infer TExpression, infer TValue>
     ? Utils.Guard.Never<
@@ -55,7 +55,7 @@ export type MatchAllUnion<TTests extends Test[], TDefault = never> = TTests exte
 
 export type MatchAllIntersect<TTests extends Test[], TDefault = unknown> = TTests extends [
   infer THead extends Test,
-  ...infer TTail extends Test[]
+  ...infer TTail extends Test[],
 ]
   ? THead extends Test<infer TExpression, infer TValue>
     ? // Actual test case evaluation
@@ -67,19 +67,19 @@ export type MatchAllIntersect<TTests extends Test[], TDefault = unknown> = TTest
 
 export type Test<TExpression extends BooleanValue = BooleanValue, TValue = unknown> = [
   TExpression,
-  TValue
+  TValue,
 ];
 
 export type Some<TExpressions extends BooleanValue[]> = TExpressions extends [
   infer THead extends BooleanValue,
-  ...infer TTail extends BooleanValue[]
+  ...infer TTail extends BooleanValue[],
 ]
   ? If<Utils.Array.IsNotEmpty<TTail>, Or<THead, Some<TTail>>, Or<THead, false>>
   : never;
 
 export type Every<TExpressions extends BooleanValue[]> = TExpressions extends [
   infer THead extends BooleanValue,
-  ...infer TTail extends BooleanValue[]
+  ...infer TTail extends BooleanValue[],
 ]
   ? If<Utils.Array.IsNotEmpty<TTail>, And<THead, Every<TTail>>, And<THead, True>>
   : never;

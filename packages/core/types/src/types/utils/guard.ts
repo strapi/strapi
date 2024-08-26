@@ -17,7 +17,7 @@ export type Never<TValue, TFallback = unknown> = OfTypes<[never], TValue, TFallb
 
 export type OfTypes<TTypes extends unknown[], TValue, TFallback = unknown> = TTypes extends [
   infer THead extends unknown,
-  ...infer TTail extends unknown[]
+  ...infer TTail extends unknown[],
 ]
   ? Utils.Expression.If<
       Utils.Expression.StrictEqual<TValue, THead>,

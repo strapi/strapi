@@ -13,7 +13,7 @@ export const useInjectionZone = (area: InjectionZoneArea) => {
   const [moduleName, page, position] = area.split('.') as [
     InjectionZoneModule,
     InjectionZoneContainer,
-    InjectionZoneBlock
+    InjectionZoneBlock,
   ];
 
   return getAdminInjectedComponents(moduleName, page, position);
