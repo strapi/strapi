@@ -5,7 +5,7 @@
 As of April 2024 (and until this document is updated), only the v4.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
 
 | Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes                |
-|---------|-------------|----------------|----------------|------------------------|----------------------|
+| ------- | ----------- | -------------- | -------------- | ---------------------- | -------------------- |
 | 5.x.x   | GA          | October 2024   | Further Notice | Further Notice         | LTS (Future)         |
 | 5.x.x   | RC          | N/A            | October 2024   | N/A                    | Non-Production Usage |
 | 5.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported        |
