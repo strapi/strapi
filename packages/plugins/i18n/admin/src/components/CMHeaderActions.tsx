@@ -10,7 +10,6 @@ import {
   useForm,
 } from '@strapi/admin/strapi-admin';
 import {
-  type HeaderActionComponent,
   type DocumentActionComponent,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
@@ -26,7 +25,6 @@ import {
   Field,
   SingleSelect,
   SingleSelectOption,
-  IconButton,
   Dialog,
 } from '@strapi/design-system';
 import { WarningCircle, ListPlus, Trash, Download } from '@strapi/icons';
@@ -47,54 +45,8 @@ import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
 
 /* -------------------------------------------------------------------------------------------------
- * i18nHeaderAction
- * -----------------------------------------------------------------------------------------------*/
-
-const HeaderStyledComponent = styled(Flex)`
-  & {
-    border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
-    border-radius: ${({ theme }) => theme.borderRadius};
-    overflow: hidden;
-  }
-
-  & > * {
-    border: none;
-    border-radius: 0;
-  }
-
-  & button {
-    border-left: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
-  }
-`;
-
-const IntlHeaderAction: HeaderActionComponent = (props: HeaderActionProps) => {
-  const { hasI18n } = useI18n();
-  const { data: locales = [] } = useGetLocalesQuery();
-
-  if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
-    return null;
-  }
-
-  return {
-    type: 'custom',
-    render: () => {
-      return (
-        <HeaderStyledComponent>
-          <LocalePickerAction {...props} locales={locales} />
-          <FillFromAnotherLocaleAction {...props} locales={locales} />
-        </HeaderStyledComponent>
-      );
-    },
-  };
-};
-
-/* -------------------------------------------------------------------------------------------------
  * LocalePickerAction
  * -----------------------------------------------------------------------------------------------*/
-
-interface LocalePickerActionProps extends HeaderActionProps {
-  locales: Locale[];
-}
 
 const LocalePickerAction = ({
   document,
@@ -102,12 +54,12 @@ const LocalePickerAction = ({
   model,
   collectionType,
   documentId,
-  locales,
-}: LocalePickerActionProps) => {
+}: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams<I18nBaseQuery>();
-  const currentDesiredLocale = query.plugins?.i18n?.locale;
   const { hasI18n, canCreate, canRead } = useI18n();
+  const { data: locales = [] } = useGetLocalesQuery();
+  const currentDesiredLocale = query.plugins?.i18n?.locale;
   const { schema } = useDocument({
     model,
     collectionType,
@@ -142,69 +94,62 @@ const LocalePickerAction = ({
     if (!doesLocaleExist && defaultLocale?.code) {
       handleSelect(defaultLocale.code);
     }
-  }, [handleSelect, hasI18n, locales, query.plugins?.i18n?.locale]);
+  }, [handleSelect, hasI18n, locales, currentDesiredLocale]);
 
-  const currentLocale = query.plugins?.i18n?.locale || locales.find((loc) => loc.isDefault)?.code;
+  const currentLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.code === currentDesiredLocale)?.code
+    : undefined;
 
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale },
     ...(meta?.availableLocales ?? []),
   ];
 
-  const label = formatMessage({
-    id: getTranslation('Settings.locales.modal.locales.label'),
-    defaultMessage: 'Locales',
-  });
+  if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
+    return null;
+  }
 
-  return (
-    <SingleSelect
-      size="S"
-      aria-label={label}
-      // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
-      onChange={handleSelect}
-      value={currentLocale}
-    >
-      {locales.map((locale) => {
-        const currentLocaleDoc = allCurrentLocales.find((doc) =>
-          'locale' in doc ? doc.locale === locale.code : false
-        );
-        const status = currentLocaleDoc?.status ?? 'draft';
+  return {
+    label: formatMessage({
+      id: getTranslation('Settings.locales.modal.locales.label'),
+      defaultMessage: 'Locales',
+    }),
+    options: locales.map((locale) => {
+      const currentLocaleDoc = allCurrentLocales.find((doc) =>
+        'locale' in doc ? doc.locale === locale.code : false
+      );
+      const status = currentLocaleDoc?.status ?? 'draft';
 
-        const permissionsToCheck = currentLocaleDoc ? canCreate : canRead;
+      const permissionsToCheck = currentLocaleDoc ? canCreate : canRead;
 
-        const statusVariant =
-          status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
+      const statusVariant =
+        status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
 
-        return (
-          <SingleSelectOption
-            key={locale.code}
-            disabled={!permissionsToCheck.includes(locale.code)}
-            value={locale.code}
-            startIcon={
-              schema?.options?.draftAndPublish ? (
-                <Status
-                  display="flex"
-                  paddingLeft="6px"
-                  paddingRight="6px"
-                  paddingTop="2px"
-                  paddingBottom="2px"
-                  showBullet={false}
-                  size={'S'}
-                  variant={statusVariant}
-                >
-                  <Typography tag="span" variant="pi" fontWeight="bold">
-                    {capitalize(status)}
-                  </Typography>
-                </Status>
-              ) : null
-            }
+      return {
+        disabled: !permissionsToCheck.includes(locale.code),
+        value: locale.code,
+        label: locale.name,
+        startIcon: schema?.options?.draftAndPublish ? (
+          <Status
+            display="flex"
+            paddingLeft="6px"
+            paddingRight="6px"
+            paddingTop="2px"
+            paddingBottom="2px"
+            showBullet={false}
+            size={'S'}
+            variant={statusVariant}
           >
-            {locale.name}
-          </SingleSelectOption>
-        );
-      })}
-    </SingleSelect>
-  );
+            <Typography tag="span" variant="pi" fontWeight="bold">
+              {capitalize(status)}
+            </Typography>
+          </Status>
+        ) : null,
+      };
+    }),
+    onSelect: handleSelect,
+    value: currentLocale,
+  };
 };
 
 type UseDocument = typeof useDocument;
@@ -237,23 +182,19 @@ const getDocumentStatus = (
  * FillFromAnotherLocaleAction
  * -----------------------------------------------------------------------------------------------*/
 
-interface FillFromAnotherLocaleActionProps extends HeaderActionProps {
-  locales: Locale[];
-}
-
 const FillFromAnotherLocaleAction = ({
   documentId,
   meta,
   model,
   collectionType,
-  locales,
-}: FillFromAnotherLocaleActionProps) => {
-  const [isDialogOpen, setIsDialogOpen] = React.useState<boolean>(false);
+}: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<I18nBaseQuery>();
   const currentDesiredLocale = query.plugins?.i18n?.locale;
   const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
   const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
+  const test = useForm('FillFromAnotherLocale', (state) => state);
+  console.log({ test });
   const { getDocument } = useDocumentActions();
   const { schema } = useDocument({
     model,
@@ -261,12 +202,13 @@ const FillFromAnotherLocaleAction = ({
     collectionType,
     params: { locale: currentDesiredLocale },
   });
+  const { data: locales = [] } = useGetLocalesQuery();
 
-  const availableLocales = locales.filter((locale) =>
-    meta?.availableLocales.some((l) => l.locale === locale.code)
-  );
+  const availableLocales = Array.isArray(locales)
+    ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
+    : [];
 
-  const fillFromLocale = async () => {
+  const fillFromLocale = (onClose: () => void) => async () => {
     const response = await getDocument({
       collectionType,
       model,
@@ -293,6 +235,14 @@ const FillFromAnotherLocaleAction = ({
 
     const copiedValues = validValues.reduce(
       (acc, key) => {
+        if (Array.isArray(data[key])) {
+          acc[key] = data[key].map((item: any, index: number) => ({
+            ...item,
+            __temp_key__: index + 1,
+          }));
+          return acc;
+        }
+
         acc[key] = data[key];
         return acc;
       },
@@ -301,37 +251,24 @@ const FillFromAnotherLocaleAction = ({
 
     setValues(copiedValues);
 
-    handleCloseDialog();
+    onClose();
   };
 
-  const handleOpenDialog = () => {
-    setIsDialogOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-  };
-
-  return (
-    <>
-      <IconButton
-        label={formatMessage({
-          id: getTranslation('CMEditViewCopyLocale.copy-text'),
-          defaultMessage: 'Fill in from another locale',
-        })}
-        size="S"
-        onClick={handleOpenDialog}
-      >
-        <Download />
-      </IconButton>
-      <Dialog.Root open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <Dialog.Content>
-          <Dialog.Header>
-            {formatMessage({
-              id: getTranslation('CMEditViewCopyLocale.dialog.title'),
-              defaultMessage: 'Confirmation',
-            })}
-          </Dialog.Header>
+  return {
+    type: 'icon',
+    icon: <Download />,
+    label: formatMessage({
+      id: getTranslation('CMEditViewCopyLocale.copy-text'),
+      defaultMessage: 'Fill in from another locale',
+    }),
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: getTranslation('CMEditViewCopyLocale.dialog.title'),
+        defaultMessage: 'Confirmation',
+      }),
+      content: ({ onClose }: { onClose: () => void }) => (
+        <>
           <Dialog.Body>
             <Flex direction="column" gap={3}>
               <WarningCircle width="24px" height="24px" fill="danger600" />
@@ -369,13 +306,13 @@ const FillFromAnotherLocaleAction = ({
           </Dialog.Body>
           <Dialog.Footer>
             <Flex gap={2} width="100%">
-              <Button flex="auto" variant="tertiary" onClick={handleCloseDialog}>
+              <Button flex="auto" variant="tertiary" onClick={onClose}>
                 {formatMessage({
                   id: getTranslation('CMEditViewCopyLocale.cancel-text'),
                   defaultMessage: 'No, cancel',
                 })}
               </Button>
-              <Button flex="auto" variant="success" onClick={fillFromLocale}>
+              <Button flex="auto" variant="success" onClick={fillFromLocale(onClose)}>
                 {formatMessage({
                   id: getTranslation('CMEditViewCopyLocale.submit-text'),
                   defaultMessage: 'Yes, fill in',
@@ -383,10 +320,10 @@ const FillFromAnotherLocaleAction = ({
               </Button>
             </Flex>
           </Dialog.Footer>
-        </Dialog.Content>
-      </Dialog.Root>
-    </>
-  );
+        </>
+      ),
+    },
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -771,4 +708,9 @@ const StyledTrash = styled(Trash)`
   }
 `;
 
-export { BulkLocalePublishAction, DeleteLocaleAction, IntlHeaderAction };
+export {
+  BulkLocalePublishAction,
+  DeleteLocaleAction,
+  LocalePickerAction,
+  FillFromAnotherLocaleAction,
+};
