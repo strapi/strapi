@@ -18,6 +18,9 @@ import { createEventManager } from './events';
 
 const { validators } = validate;
 
+// we have to typecast to reconcile the differences between validator and database getModel
+const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
+
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
@@ -33,15 +36,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     populate: ['nonAttributesOperators'],
   };
 
-  // we have to typecast to reconcile the differences between validator and database getModel
-  const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
-  const schema = contentType;
-
   const validateParams = async (params: any) => {
-    await validators.validateFilters({ schema, getModel }, params.filters, filtersValidations);
-    await validators.validateSort({ schema, getModel }, params.sort, sortValidations);
-    await validators.validateFields({ schema, getModel }, params.fields, fieldValidations);
-    await validators.validatePopulate({ schema, getModel }, params.populate, populateValidations);
+    const ctx = { schema: contentType, getModel };
+    await validators.validateFilters(ctx, params.filters, filtersValidations);
+    await validators.validateSort(ctx, params.sort, sortValidations);
+    await validators.validateFields(ctx, params.fields, fieldValidations);
+    await validators.validatePopulate(ctx, params.populate, populateValidations);
 
     // TODO: add validate status, locale, pagination
 
