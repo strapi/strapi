@@ -46,8 +46,8 @@ const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) =
 
   return (
     <Menu.Root>
-      <MenuTrigger onClick={(e) => e.stopPropagation()}>
-        <Badge>{content.length}</Badge>{' '}
+      <Menu.Trigger onClick={(e) => e.stopPropagation()}>
+        <Badge>{content.length}</Badge>
         {formatMessage(
           {
             id: 'content-manager.containers.list.items',
@@ -55,7 +55,7 @@ const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) =
           },
           { number: content.length }
         )}
-      </MenuTrigger>
+      </Menu.Trigger>
       <Menu.Content>
         {content.map((item) => (
           <Menu.Item key={item.id} disabled>
@@ -68,16 +68,6 @@ const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) =
     </Menu.Root>
   );
 };
-
-/**
- * TODO: this needs to be solved in the Design-System
- */
-const MenuTrigger = styled(Menu.Trigger)`
-  svg {
-    width: 0.6rem;
-    height: 0.4rem;
-  }
-`;
 
 export { SingleComponent, RepeatableComponent };
 export type { SingleComponentProps, RepeatableComponentProps };

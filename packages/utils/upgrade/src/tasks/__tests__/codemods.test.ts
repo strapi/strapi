@@ -43,6 +43,7 @@ describe('codemods task', () => {
   });
 
   (projectFactory as jest.Mock).mockReturnValue({
+    paths: [],
     dry: jest.fn().mockReturnThis(),
     onSelectCodemods: jest.fn().mockReturnThis(),
     setLogger: jest.fn().mockReturnThis(),

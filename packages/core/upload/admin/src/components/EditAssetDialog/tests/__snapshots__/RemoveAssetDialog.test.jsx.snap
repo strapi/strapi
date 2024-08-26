@@ -3,74 +3,78 @@
 exports[`RemoveAssetDialog snapshots the component 1`] = `
 .c0 {
   margin-inline-start: -250px;
-  position: fixed;
-  left: 50%;
   top: 4.6rem;
-  z-index: 700;
+  left: 50%;
   width: 50rem;
+  z-index: 700;
+  position: fixed;
 }
 
 .c5 {
-  padding-block: 24px;
-  padding-inline: 24px;
+  padding-block-start: 24px;
+  padding-inline-end: 24px;
+  padding-block-end: 24px;
+  padding-inline-start: 24px;
 }
 
 .c8 {
   padding-block-start: 40px;
-  padding-inline-end: 24px;
   padding-block-end: 40px;
   padding-inline-start: 24px;
+  padding-inline-end: 24px;
 }
 
 .c12 {
-  padding-block: 16px;
-  padding-inline: 16px;
+  padding-block-start: 16px;
+  padding-inline-end: 16px;
+  padding-block-end: 16px;
+  padding-inline-start: 16px;
 }
 
 .c15 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
-  border-radius: 4px;
+  padding-inline-end: 16px;
   width: 100%;
+  border-radius: 4px;
   cursor: pointer;
 }
 
 .c1 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c9 {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  align-items: center;
+  flex-direction: column;
+  display: flex;
 }
 
 .c13 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c16 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c6 {
   font-weight: 600;
   font-size: 1.8rem;
   line-height: 1.22;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c11 {
@@ -82,8 +86,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 .c18 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c2 {

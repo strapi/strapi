@@ -30,7 +30,7 @@ const createColumn = (name: string, attribute: Attribute): Column => {
     notNullable: false,
     unsigned: false,
     ...opts,
-    ...('column' in attribute ? attribute.column ?? {} : {}),
+    ...('column' in attribute ? (attribute.column ?? {}) : {}),
   };
 };
 

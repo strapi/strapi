@@ -3,19 +3,19 @@
 exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 .c0 {
   margin-inline-start: -250px;
-  position: fixed;
-  left: 50%;
   top: 4.6rem;
-  z-index: 700;
+  left: 50%;
   width: 50rem;
+  z-index: 700;
+  position: fixed;
 }
 
 .c5 {
-  background: #f6f6f9;
-  padding-block: 16px;
-  padding-inline: 16px;
+  padding-block-start: 16px;
   padding-inline-end: 20px;
+  padding-block-end: 16px;
   padding-inline-start: 20px;
+  background: #f6f6f9;
 }
 
 .c9 {
@@ -24,82 +24,82 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c19 {
-  display: flex;
-}
-
 .c21 {
   padding-inline-end: 12px;
 }
 
 .c25 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .c1 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c6 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c10 {
   align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   justify-content: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c16 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c18 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c26 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c8 {
   font-size: 1.4rem;
   line-height: 1.43;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
-.c20 {
+.c19 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c28 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c2 {
@@ -161,29 +161,19 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   cursor: default;
 }
 
-.c15 {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 16px;
-}
-
-.c17 {
-  grid-column: span 12;
-  max-width: 100%;
-}
-
 .c11 {
   text-decoration: none;
-  padding-block: 0.9rem;
-  padding-inline: 0.9rem;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c11:hover {
   background-color: #f6f6f9;
+  color: #666687;
 }
 
 .c11:active {
@@ -195,6 +185,10 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   background: #eaeaef;
   color: #666687;
   cursor: default;
+}
+
+.c20 {
+  display: flex;
 }
 
 .c12 {
@@ -218,8 +212,8 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 
 .c4 {
   max-width: 83rem;
-  max-height: 80vh;
-  height: min-content;
+  max-height: 90vh;
+  height: auto;
   width: 60%;
   overflow: hidden;
   margin: 0 auto;
@@ -254,6 +248,17 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 .c24 {
   border-top: solid 1px #eaeaef;
   flex: 1;
+}
+
+.c15 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c17 {
+  grid-column: span 12;
+  max-width: 100%;
 }
 
 .c22 {
@@ -294,18 +299,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   }
 }
 
-@media (max-width: 1100px) {
-  .c17 {
-    grid-column: span;
-  }
-}
-
-@media (max-width: 550px) {
-  .c17 {
-    grid-column: span 12;
-  }
-}
-
 @media (prefers-reduced-motion: no-preference) {
   .c11 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -329,6 +322,24 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
     animation-duration: 120ms;
     animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     animation-name: jgufbq;
+  }
+}
+
+@media (min-width: 520px) {
+  .c17 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 768px) {
+  .c17 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .c17 {
+    grid-column: span 12;
   }
 }
 

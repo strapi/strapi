@@ -13,7 +13,7 @@ export const listCodemods = async (options: ListCodemodsOptions) => {
   const project = projectFactory(cwd);
   const range = findRangeFromTarget(project, target);
 
-  logger.debug(`Project: ${f.projectType(project.type)} found in ${f.path(cwd)}`);
+  logger.debug(f.projectDetails(project));
   logger.debug(`Range: set to ${f.versionRange(range)}`);
 
   // Create a codemod repository targeting the default location of the codemods

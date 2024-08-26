@@ -180,7 +180,9 @@ const Register = ({ hasAdmin }: RegisterProps) => {
 
   React.useEffect(() => {
     if (error) {
-      const message: string = isBaseQueryError(error) ? formatAPIError(error) : error.message ?? '';
+      const message: string = isBaseQueryError(error)
+        ? formatAPIError(error)
+        : (error.message ?? '');
 
       toggleNotification({
         type: 'danger',

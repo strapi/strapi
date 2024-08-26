@@ -22,3 +22,7 @@ export type MinimalPackageJSON = {
   version: string;
   dependencies?: Record<string, string>;
 } & Utils.JSONObject;
+
+export interface ProjectConfig {
+  paths: string[];
+}
