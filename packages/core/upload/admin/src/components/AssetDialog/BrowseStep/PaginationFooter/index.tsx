@@ -11,15 +11,24 @@
  * 1, ...., 7, `8`, 9, 10
  * 1, ... 6, `7`, 8, 9, 10
  */
-import React from 'react';
-
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { Dots, NextLink, PageLink, PreviousLink } from './components';
 import { Pagination } from './Pagination';
 
-const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } }) => {
+interface PaginationFooterProps {
+  activePage: number;
+  onChangePage: (page: number) => void;
+  pagination: {
+    pageCount: number;
+  };
+}
+
+const PaginationFooter = ({
+  activePage,
+  onChangePage,
+  pagination: { pageCount },
+}: PaginationFooterProps) => {
   const { formatMessage } = useIntl();
 
   const previousActivePage = activePage - 1;
@@ -73,10 +82,10 @@ const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } 
     );
   }
 
-  let firstLinksToCreate = [];
-  let lastLinks = [];
-  let lastLinksToCreate = [];
-  const middleLinks = [];
+  let firstLinksToCreate: number[] = [];
+  let lastLinks: JSX.Element[] = [];
+  let lastLinksToCreate: number[] = [];
+  const middleLinks: JSX.Element[] = [];
 
   if (pageCount > 1) {
     lastLinks.push(
@@ -213,12 +222,6 @@ const PaginationFooter = ({ activePage, onChangePage, pagination: { pageCount } 
       </NextLink>
     </Pagination>
   );
-};
-
-PaginationFooter.propTypes = {
-  activePage: PropTypes.number.isRequired,
-  onChangePage: PropTypes.func.isRequired,
-  pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
 };
 
 export default PaginationFooter;
