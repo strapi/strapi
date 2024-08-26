@@ -1,12 +1,11 @@
 import * as React from 'react';
 
-import { Cog, PuzzlePiece, ShoppingCart, House } from '@strapi/icons';
+import { Cog, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
-import { useSelector } from 'react-redux';
 
+import { useTypedSelector } from '../core/store/hooks';
 import { useAuth, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
-import { selectAdminPermissions } from '../selectors';
 
 /* -------------------------------------------------------------------------------------------------
  * useMenu
@@ -23,7 +22,7 @@ export interface Menu {
 const useMenu = (shouldUpdateStrapi: boolean) => {
   const checkUserHasPermissions = useAuth('useMenu', (state) => state.checkUserHasPermissions);
   const menu = useStrapiApp('useMenu', (state) => state.menu);
-  const permissions = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
       {
@@ -37,16 +36,6 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         position: 0,
       },
       {
-        icon: PuzzlePiece,
-        intlLabel: {
-          id: 'global.plugins',
-          defaultMessage: 'Plugins',
-        },
-        to: '/list-plugins',
-        permissions: permissions.marketplace?.main ?? [],
-        position: 7,
-      },
-      {
         icon: ShoppingCart,
         intlLabel: {
           id: 'global.marketplace',
@@ -54,7 +43,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         },
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
-        position: 8,
+        position: 7,
       },
       {
         icon: Cog,
@@ -67,7 +56,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         // using the settings menu
         permissions: [],
         notificationsCount: 0,
-        position: 10,
+        position: 9,
       },
     ],
     pluginsSectionLinks: [],

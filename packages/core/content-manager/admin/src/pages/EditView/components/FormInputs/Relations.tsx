@@ -81,7 +81,7 @@ interface RelationsFieldProps
   extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
-interface RelationsFormValue {
+export interface RelationsFormValue {
   connect?: Relation[];
   disconnect?: Pick<Relation, 'id'>[];
 }
@@ -942,7 +942,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                   id: getTranslation('components.RelationInput.icon-button-aria-label'),
                   defaultMessage: 'Drag',
                 })}
-                borderWidth={0}
+                variant="ghost"
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
               >

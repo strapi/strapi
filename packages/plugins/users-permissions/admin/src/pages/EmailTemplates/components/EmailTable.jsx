@@ -10,6 +10,7 @@ import {
   Tr,
   Typography,
   VisuallyHidden,
+  Box,
 } from '@strapi/design-system';
 import { Check, Pencil, ArrowClockwise as Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
@@ -53,12 +54,14 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
       <Tbody>
         <Tr onClick={() => onEditClick('reset_password')}>
           <Td>
-            <Refresh
-              aria-label={formatMessage({
-                id: 'global.reset-password',
-                defaultMessage: 'Reset password',
-              })}
-            />
+            <Box width="3.2rem" height="3.2rem" padding="0.8rem">
+              <Refresh
+                aria-label={formatMessage({
+                  id: 'global.reset-password',
+                  defaultMessage: 'Reset password',
+                })}
+              />
+            </Box>
           </Td>
           <Td>
             <Typography>
@@ -75,7 +78,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 id: getTrad('Email.template.form.edit.label'),
                 defaultMessage: 'Edit a template',
               })}
-              borderWidth={0}
+              variant="ghost"
               disabled={!canUpdate}
             >
               <Pencil />
@@ -84,12 +87,14 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
         </Tr>
         <Tr onClick={() => onEditClick('email_confirmation')}>
           <Td>
-            <Check
-              aria-label={formatMessage({
-                id: getTrad('Email.template.email_confirmation'),
-                defaultMessage: 'Email address confirmation',
-              })}
-            />
+            <Box width="3.2rem" height="3.2rem" padding="0.8rem">
+              <Check
+                aria-label={formatMessage({
+                  id: getTrad('Email.template.email_confirmation'),
+                  defaultMessage: 'Email address confirmation',
+                })}
+              />
+            </Box>
           </Td>
           <Td>
             <Typography>
@@ -106,7 +111,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 id: getTrad('Email.template.form.edit.label'),
                 defaultMessage: 'Edit a template',
               })}
-              borderWidth={0}
+              variant="ghost"
               disabled={!canUpdate}
             >
               <Pencil />

@@ -170,12 +170,12 @@ export const List = ({
             <thead>
               <tr>
                 <th>
-                  <Typography variant="sigma" textColor="neutral600">
+                  <Typography variant="sigma" textColor="neutral800">
                     {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
                   </Typography>
                 </th>
                 <th colSpan={2}>
-                  <Typography variant="sigma" textColor="neutral600">
+                  <Typography variant="sigma" textColor="neutral800">
                     {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
                   </Typography>
                 </th>

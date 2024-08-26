@@ -8,11 +8,10 @@ import {
   useStrapiApp,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
+import { Box, Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
 import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
 
 import { RelativeTime } from '../../../components/RelativeTime';
 import {
@@ -57,21 +56,19 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
     : documentTitle;
 
   return (
-    <Flex direction="column" alignItems="flex-start" paddingTop={8} paddingBottom={4} gap={3}>
+    <Flex direction="column" alignItems="flex-start" paddingTop={6} paddingBottom={4} gap={2}>
       <BackButton />
-      <Flex
-        width="100%"
-        justifyContent="space-between"
-        paddingTop={1}
-        gap="80px"
-        alignItems="flex-start"
-      >
+      <Flex width="100%" justifyContent="space-between" gap="80px" alignItems="flex-start">
         <Typography variant="alpha" tag="h1">
           {title}
         </Typography>
         <HeaderToolbar />
       </Flex>
-      {status ? <DocumentStatus status={isCloning ? 'draft' : status} /> : null}
+      {status ? (
+        <Box marginTop={1}>
+          <DocumentStatus status={isCloning ? 'draft' : status} />
+        </Box>
+      ) : null}
     </Flex>
   );
 };

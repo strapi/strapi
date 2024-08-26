@@ -19,7 +19,7 @@ import {
   Field,
   Modal,
 } from '@strapi/design-system';
-import { Cursor } from '@strapi/icons';
+import { PaperPlane } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useFormik } from 'formik';
 import { useIntl } from 'react-intl';
@@ -256,7 +256,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
       id: 'content-releases.content-manager-edit-view.add-to-release',
       defaultMessage: 'Add to release',
     }),
-    icon: <Cursor />,
+    icon: <PaperPlane />,
     position: ['panel', 'table-row'],
     dialog: {
       type: 'modal',

@@ -72,15 +72,13 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
 
   const handleSubmit = async (values: FormValues) => {
     const locale = query.plugins?.i18n?.locale;
-    // @ts-expect-error – this may not work because id needs to be an entity number not a document id (string)
+
     const releaseActionEntries: CreateManyReleaseActions.Request['body'] = documentIds.map(
-      (id) => ({
+      (entryDocumentId) => ({
         type: values.type,
-        entry: {
-          contentType: model as UID.ContentType,
-          id,
-          locale,
-        },
+        contentType: model as UID.ContentType,
+        entryDocumentId,
+        locale,
       })
     );
 

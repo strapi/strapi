@@ -74,9 +74,24 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
     async syncSchema() {
       debug('Synchronizing database schema');
 
-      const DBSchema = await db.dialect.schemaInspector.getSchema();
+      const databaseSchema = await db.dialect.schemaInspector.getSchema();
+      const storedSchema = await this.schemaStorage.read();
 
-      const { status, diff } = await this.schemaDiff.diff(DBSchema, this.schema);
+      /*
+        3way diff - DB schema / previous metadataSchema / new metadataSchema
+
+        - When something doesn't exist in the previous metadataSchema -> It's not tracked by us and should be ignored
+        - If no previous metadataSchema => use new metadataSchema so we start tracking them and ignore everything else
+        - Apply this logic to Tables / Columns / Indexes / FKs ...
+        - Handle errors (indexes or fks on incompatible stuff ...)
+
+      */
+
+      const { status, diff } = await this.schemaDiff.diff({
+        previousSchema: storedSchema?.schema,
+        databaseSchema,
+        userSchema: this.schema,
+      });
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);

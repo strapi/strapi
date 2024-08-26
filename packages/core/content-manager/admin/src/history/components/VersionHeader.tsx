@@ -50,13 +50,13 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
 
     if (collectionType === COLLECTION_TYPES) {
       return {
-        pathname: `/content-manager/${collectionType}/${version.contentType}/${version.relatedDocumentId}`,
+        pathname: '..',
         search: pluginsQueryParams,
       };
     }
 
     return {
-      pathname: `/content-manager/${collectionType}/${version.contentType}`,
+      pathname: '..',
       search: pluginsQueryParams,
     };
   };
@@ -74,7 +74,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
       });
 
       if ('data' in response) {
-        navigate(getNextNavigation());
+        navigate(getNextNavigation(), { relative: 'path' });
 
         toggleNotification({
           type: 'success',
@@ -134,7 +134,13 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           </Typography>
         }
         navigationAction={
-          <Link startIcon={<ArrowLeft />} tag={NavLink} to={getNextNavigation()} isExternal={false}>
+          <Link
+            startIcon={<ArrowLeft />}
+            tag={NavLink}
+            to={getNextNavigation()}
+            relative="path"
+            isExternal={false}
+          >
             {formatMessage({
               id: 'global.back',
               defaultMessage: 'Back',

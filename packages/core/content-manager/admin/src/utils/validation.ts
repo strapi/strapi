@@ -20,12 +20,17 @@ type AnySchema =
  * createYupSchema
  * -----------------------------------------------------------------------------------------------*/
 
+interface ValidationOptions {
+  status: 'draft' | 'published' | null;
+}
+
 /**
  * TODO: should we create a Map to store these based on the hash of the schema?
  */
 const createYupSchema = (
   attributes: Schema['attributes'] = {},
-  components: ComponentsDictionary = {}
+  components: ComponentsDictionary = {},
+  options: ValidationOptions = { status: null }
 ): yup.ObjectSchema<any> => {
   const createModelSchema = (attributes: Schema['attributes']): yup.ObjectSchema<any> =>
     yup
@@ -48,7 +53,7 @@ const createYupSchema = (
             addMinValidation,
             addMaxValidation,
             addRegexValidation,
-          ].map((fn) => fn(attribute));
+          ].map((fn) => fn(attribute, options));
 
           const transformSchema = pipe(...validations);
 
@@ -181,6 +186,16 @@ const createAttributeSchema = (
           return true;
         }
 
+        // If the value was created via content API and wasn't changed, then it's still an object
+        if (typeof value === 'object') {
+          try {
+            JSON.stringify(value);
+            return true;
+          } catch (err) {
+            return false;
+          }
+        }
+
         try {
           JSON.parse(value);
 
@@ -204,25 +219,8 @@ const createAttributeSchema = (
   }
 };
 
-/* -------------------------------------------------------------------------------------------------
- * Validators
- * -----------------------------------------------------------------------------------------------*/
-/**
- * Our validator functions can be preped with the
- * attribute and then have the schema piped through them.
- */
-type ValidationFn = (
-  attribute: Schema['attributes'][string]
-) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
-
-const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
-  if (attribute.required) {
-    return schema.required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'This field is required.',
-    });
-  }
-
+// Helper function to return schema.nullable() if it exists, otherwise return schema
+const nullableSchema = <TSchema extends AnySchema>(schema: TSchema) => {
   return schema?.nullable
     ? schema.nullable()
     : // In some cases '.nullable' will not be available on the schema.
@@ -231,9 +229,47 @@ const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
       schema;
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Validators
+ * -----------------------------------------------------------------------------------------------*/
+/**
+ * Our validator functions can be preped with the
+ * attribute and then have the schema piped through them.
+ */
+type ValidationFn = (
+  attribute: Schema['attributes'][string],
+  options: ValidationOptions
+) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
+
+const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
+  if (options.status === 'draft') {
+    return nullableSchema(schema);
+  }
+
+  if (
+    ((attribute.type === 'component' && attribute.repeatable) ||
+      attribute.type === 'dynamiczone') &&
+    attribute.required &&
+    'min' in schema
+  ) {
+    return schema.min(1, translatedErrors.required);
+  }
+
+  if (attribute.required && attribute.type !== 'relation') {
+    return schema.required(translatedErrors.required);
+  }
+
+  return nullableSchema(schema);
+};
+
 const addMinLengthValidation: ValidationFn =
-  (attribute) =>
+  (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    // Skip minLength validation for draft
+    if (options.status === 'draft') {
+      return schema;
+    }
+
     if (
       'minLength' in attribute &&
       attribute.minLength &&
@@ -272,10 +308,39 @@ const addMaxLengthValidation: ValidationFn =
   };
 
 const addMinValidation: ValidationFn =
-  (attribute) =>
+  (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
     if ('min' in attribute) {
       const min = toInteger(attribute.min);
+
+      if (
+        (attribute.type === 'component' && attribute.repeatable) ||
+        attribute.type === 'dynamiczone'
+      ) {
+        if (options.status !== 'draft' && !attribute.required && 'test' in schema && min) {
+          // @ts-expect-error - We know the schema is an array here but ts doesn't know.
+          return schema.test(
+            'custom-min',
+            {
+              ...translatedErrors.min,
+              values: {
+                min: attribute.min,
+              },
+            },
+            (value: Array<unknown>) => {
+              if (!value) {
+                return true;
+              }
+
+              if (Array.isArray(value) && value.length === 0) {
+                return true;
+              }
+
+              return value.length >= min;
+            }
+          );
+        }
+      }
 
       if ('min' in schema && min) {
         return schema.min(min, {

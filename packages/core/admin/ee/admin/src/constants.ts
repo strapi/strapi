@@ -21,9 +21,23 @@ export const ADMIN_PERMISSIONS_EE = {
       read: [{ action: 'admin::provider-login.read', subject: null }],
       update: [{ action: 'admin::provider-login.update', subject: null }],
     },
+    releases: {
+      read: [
+        {
+          action: 'plugin::content-releases.settings.read',
+          subject: null,
+        },
+      ],
+      update: [
+        {
+          action: 'plugin::content-releases.settings.update',
+          subject: null,
+        },
+      ],
+    },
   },
 } satisfies {
-  settings: Pick<PermissionMap['settings'], 'auditLogs' | 'review-workflows' | 'sso'>;
+  settings: Pick<PermissionMap['settings'], 'auditLogs' | 'review-workflows' | 'sso' | 'releases'>;
 };
 
 /**

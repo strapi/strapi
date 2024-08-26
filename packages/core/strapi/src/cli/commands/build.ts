@@ -14,17 +14,6 @@ const action = async (options: BuildCLIOptions) => {
       );
     }
 
-    /**
-     * ENFORCE NODE_ENV to production when building
-     */
-    process.env.NODE_ENV = process.env.NODE_ENV ?? 'production';
-
-    if (process.env.NODE_ENV !== 'production') {
-      options.logger.warn(
-        '[@strapi/strapi]: The NODE_ENV is not set to production. This may result in unexpected behavior.'
-      );
-    }
-
     await nodeBuild(options);
   } catch (err) {
     handleUnexpectedError(err);

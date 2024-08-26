@@ -36,7 +36,6 @@ interface InputProps {
         | 'media'
         | 'blocks'
         | 'richtext'
-        | 'uid'
         | 'dynamiczone'
         | 'component'
         | 'relation'

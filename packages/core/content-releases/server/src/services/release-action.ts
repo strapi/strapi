@@ -108,7 +108,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       // If the action is an unpublish, skip the validation
       const actionStatus =
         action.type === 'publish'
-          ? getDraftEntryValidStatus(
+          ? await getDraftEntryValidStatus(
               {
                 contentType: action.contentType,
                 documentId: action.entryDocumentId,

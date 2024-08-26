@@ -56,7 +56,7 @@ export const TableList = ({
                 defaultMessage: 'Select all folders & assets',
               })}
               disabled={shouldDisableBulkSelect}
-              onCheckedValue={(checked) => onSelectAll(checked, rows)}
+              onCheckedChange={(checked) => onSelectAll(checked, rows)}
               checked={
                 indeterminate && !shouldDisableBulkSelect
                   ? 'indeterminate'
@@ -81,7 +81,7 @@ export const TableList = ({
                     <IconButton
                       label={sortLabel}
                       onClick={() => handleClickSort(isSorted, name)}
-                      borderWidth={0}
+                      variant="ghost"
                     >
                       {isUp ? <CaretUp /> : <CaretDown />}
                     </IconButton>

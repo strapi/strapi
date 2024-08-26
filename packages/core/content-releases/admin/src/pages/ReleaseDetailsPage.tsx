@@ -29,8 +29,9 @@ import {
   Tooltip,
   EmptyStateLayout,
   LinkButton,
-  Menu,
   Dialog,
+  SimpleMenu,
+  MenuItem,
 } from '@strapi/design-system';
 import {
   CheckCircle,
@@ -56,6 +57,7 @@ import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
   useGetReleaseQuery,
+  useGetReleaseSettingsQuery,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
@@ -85,7 +87,7 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledMenuItem = styled(Menu.Item)<{
+const StyledMenuItem = styled(MenuItem)<{
   disabled?: boolean;
   $variant?: 'neutral' | 'danger';
 }>`
@@ -408,89 +410,70 @@ const ReleaseDetailsLayout = ({
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
-              <Menu.Root>
-                {/*
-                  TODO Fix in the DS
-                  - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
-                  - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
-                */}
-                <Menu.Trigger
-                  paddingLeft={2}
-                  paddingRight={2}
-                  aria-label={formatMessage({
-                    id: 'content-releases.header.actions.open-release-actions',
-                    defaultMessage: 'Release edit and delete menu',
-                  })}
-                  variant="tertiary"
-                >
-                  <More />
-                </Menu.Trigger>
-                {/*
-                  TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
-                  Refactor this once fixed in the DS
-                */}
-                <Menu.Content top={1} popoverPlacement="bottom-end" maxHeight={undefined}>
-                  <Flex
-                    alignItems="center"
-                    justifyContent="center"
-                    direction="column"
-                    padding={1}
-                    width="100%"
-                  >
-                    <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
-                      <Flex alignItems="center" gap={2} hasRadius width="100%">
-                        <PencilIcon />
-                        <Typography ellipsis>
-                          {formatMessage({
-                            id: 'content-releases.header.actions.edit',
-                            defaultMessage: 'Edit',
-                          })}
-                        </Typography>
-                      </Flex>
-                    </StyledMenuItem>
-                    <StyledMenuItem
-                      disabled={!canDelete}
-                      onSelect={toggleWarningSubmit}
-                      $variant="danger"
-                    >
-                      <Flex alignItems="center" gap={2} hasRadius width="100%">
-                        <TrashIcon />
-                        <Typography ellipsis textColor="danger600">
-                          {formatMessage({
-                            id: 'content-releases.header.actions.delete',
-                            defaultMessage: 'Delete',
-                          })}
-                        </Typography>
-                      </Flex>
-                    </StyledMenuItem>
-                  </Flex>
-                  <ReleaseInfoWrapper
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="flex-start"
-                    gap={1}
-                    padding={5}
-                  >
-                    <Typography variant="pi" fontWeight="bold">
+              <SimpleMenuButton
+                label={<More />}
+                variant="tertiary"
+                endIcon={null}
+                paddingLeft="7px"
+                paddingRight="7px"
+                aria-label={formatMessage({
+                  id: 'content-releases.header.actions.open-release-actions',
+                  defaultMessage: 'Release edit and delete menu',
+                })}
+                popoverPlacement="bottom-end"
+              >
+                <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
+                  <Flex alignItems="center" gap={2} hasRadius width="100%">
+                    <PencilIcon />
+                    <Typography ellipsis>
                       {formatMessage({
-                        id: 'content-releases.header.actions.created',
-                        defaultMessage: 'Created',
+                        id: 'content-releases.header.actions.edit',
+                        defaultMessage: 'Edit',
                       })}
                     </Typography>
-                    <Typography variant="pi" color="neutral300">
-                      <RelativeTime timestamp={new Date(release.createdAt)} />
-                      {formatMessage(
-                        {
-                          id: 'content-releases.header.actions.created.description',
-                          defaultMessage:
-                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
-                        },
-                        { createdBy: getCreatedByUser(), hasCreatedByUser }
-                      )}
+                  </Flex>
+                </StyledMenuItem>
+                <StyledMenuItem
+                  disabled={!canDelete}
+                  onSelect={toggleWarningSubmit}
+                  $variant="danger"
+                >
+                  <Flex alignItems="center" gap={2} hasRadius width="100%">
+                    <TrashIcon />
+                    <Typography ellipsis textColor="danger600">
+                      {formatMessage({
+                        id: 'content-releases.header.actions.delete',
+                        defaultMessage: 'Delete',
+                      })}
                     </Typography>
-                  </ReleaseInfoWrapper>
-                </Menu.Content>
-              </Menu.Root>
+                  </Flex>
+                </StyledMenuItem>
+                <ReleaseInfoWrapper
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="flex-start"
+                  gap={1}
+                  padding={4}
+                >
+                  <Typography variant="pi" fontWeight="bold">
+                    {formatMessage({
+                      id: 'content-releases.header.actions.created',
+                      defaultMessage: 'Created',
+                    })}
+                  </Typography>
+                  <Typography variant="pi" color="neutral300">
+                    <RelativeTime timestamp={new Date(release.createdAt)} />
+                    {formatMessage(
+                      {
+                        id: 'content-releases.header.actions.created.description',
+                        defaultMessage:
+                          '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
+                      },
+                      { createdBy: getCreatedByUser(), hasCreatedByUser }
+                    )}
+                  </Typography>
+                </ReleaseInfoWrapper>
+              </SimpleMenuButton>
               <Button size="S" variant="tertiary" onClick={handleRefresh}>
                 {formatMessage({
                   id: 'content-releases.header.actions.refresh',
@@ -519,6 +502,12 @@ const ReleaseDetailsLayout = ({
     </Main>
   );
 };
+
+const SimpleMenuButton = styled(SimpleMenu)`
+  & > span {
+    display: flex;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody
@@ -892,6 +881,7 @@ const ReleaseDetailsPage = () => {
       skip: !releaseId,
     }
   );
+  const { data: dataTimezone, isLoading: isLoadingTimezone } = useGetReleaseSettingsQuery();
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
   const [deleteRelease] = useDeleteReleaseMutation();
 
@@ -899,9 +889,20 @@ const ReleaseDetailsPage = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
+  const getTimezoneValue = () => {
+    if (releaseData?.timezone) {
+      return releaseData.timezone;
+    } else {
+      if (dataTimezone?.data.defaultTimezone) {
+        return dataTimezone.data.defaultTimezone;
+      }
+      return null;
+    }
+  };
+
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  if (isLoadingDetails) {
+  if (isLoadingDetails || isLoadingTimezone) {
     return (
       <ReleaseDetailsLayout
         toggleEditReleaseModal={toggleEditReleaseModal}
@@ -919,7 +920,7 @@ const ReleaseDetailsPage = () => {
   const releaseData = (isSuccessDetails && data?.data) || null;
 
   const title = releaseData?.name || '';
-  const timezone = releaseData?.timezone ?? null;
+  const timezone = getTimezoneValue();
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time

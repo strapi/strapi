@@ -10,7 +10,7 @@ import {
   type RenderOptions,
 } from '@strapi/admin/strapi-admin/test';
 
-import { PERMISSIONS } from '../src/constants';
+import { PERMISSIONS, PERMISSIONS_SETTINGS } from '../src/constants';
 
 const render = (
   ui: React.ReactElement,
@@ -18,7 +18,9 @@ const render = (
 ): ReturnType<typeof renderAdmin> =>
   renderAdmin(ui, {
     ...options,
-    providerOptions: { permissions: Object.values(PERMISSIONS).flat() },
+    providerOptions: {
+      permissions: Object.values({ ...PERMISSIONS, ...PERMISSIONS_SETTINGS }).flat(),
+    },
   });
 
 export { render, waitFor, act, screen, server };

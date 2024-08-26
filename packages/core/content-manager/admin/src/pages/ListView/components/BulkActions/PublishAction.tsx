@@ -69,7 +69,14 @@ const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessag
           )
         );
       } else {
-        messages.push(...formatErrorMessages(value, currentKey, formatMessage));
+        messages.push(
+          ...formatErrorMessages(
+            // @ts-expect-error TODO: check why value is not compatible with FormErrors
+            value,
+            currentKey,
+            formatMessage
+          )
+        );
       }
     } else {
       messages.push(
@@ -233,30 +240,33 @@ const SelectedEntriesTableContent = ({
               )}
             </Table.Cell>
             <Table.Cell>
-              <IconButton
-                tag={Link}
-                to={{
-                  pathname: `${pathname}/${row.documentId}`,
-                  search: row.locale && `?plugins[i18n][locale]=${row.locale}`,
-                }}
-                state={{ from: pathname }}
-                label={formatMessage(
-                  { id: 'app.component.HelperPluginTable.edit', defaultMessage: 'Edit {target}' },
-                  {
-                    target: formatMessage(
-                      {
-                        id: 'content-manager.components.ListViewHelperPluginTable.row-line',
-                        defaultMessage: 'item line {number}',
-                      },
-                      { number: index + 1 }
-                    ),
-                  }
-                )}
-                target="_blank"
-                marginLeft="auto"
-              >
-                <Pencil />
-              </IconButton>
+              <Flex>
+                <IconButton
+                  tag={Link}
+                  to={{
+                    pathname: `${pathname}/${row.documentId}`,
+                    search: row.locale && `?plugins[i18n][locale]=${row.locale}`,
+                  }}
+                  state={{ from: pathname }}
+                  label={formatMessage(
+                    { id: 'app.component.HelperPluginTable.edit', defaultMessage: 'Edit {target}' },
+                    {
+                      target: formatMessage(
+                        {
+                          id: 'content-manager.components.ListViewHelperPluginTable.row-line',
+                          defaultMessage: 'item line {number}',
+                        },
+                        { number: index + 1 }
+                      ),
+                    }
+                  )}
+                  target="_blank"
+                  marginLeft="auto"
+                  variant="ghost"
+                >
+                  <Pencil width={'1.6rem'} height={'1.6rem'} />
+                </IconButton>
+              </Flex>
             </Table.Cell>
           </Table.Row>
         ))}
@@ -322,7 +332,13 @@ const SelectedEntriesModalContent = ({
   // Validate the entries based on the schema to show errors if any
   const { rows, validationErrors } = React.useMemo(() => {
     if (data.length > 0 && schema) {
-      const validate = createYupSchema(schema.attributes, components);
+      const validate = createYupSchema(
+        schema.attributes,
+        components,
+        // Since this is the "Publish" action, the validation
+        // schema must enforce the rules for published entities
+        { status: 'published' }
+      );
       const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
       const rows = data.map((entry: Document) => {
         try {

@@ -1,3 +1,4 @@
+import type { UID } from '@strapi/types';
 import { getService } from '../utils';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 
@@ -12,7 +13,7 @@ export default {
     const { contentTypeUID, field, data } = await validateGenerateUIDInput(ctx.request.body);
 
     const { query = {} } = ctx.request;
-    const { locale } = await getDocumentLocaleAndStatus(query);
+    const { locale } = await getDocumentLocaleAndStatus(query, contentTypeUID as UID.Schema);
 
     await validateUIDField(contentTypeUID, field);
 
@@ -29,7 +30,7 @@ export default {
     );
 
     const { query = {} } = ctx.request;
-    const { locale } = await getDocumentLocaleAndStatus(query);
+    const { locale } = await getDocumentLocaleAndStatus(query, contentTypeUID as UID.Schema);
 
     await validateUIDField(contentTypeUID, field);
 

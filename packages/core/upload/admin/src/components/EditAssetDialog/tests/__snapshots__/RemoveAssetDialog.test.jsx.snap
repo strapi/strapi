@@ -3,80 +3,81 @@
 exports[`RemoveAssetDialog snapshots the component 1`] = `
 .c0 {
   margin-inline-start: -250px;
-  position: fixed;
-  left: 50%;
   top: 4.6rem;
-  z-index: 700;
+  left: 50%;
   width: 50rem;
+  z-index: 700;
+  position: fixed;
 }
 
 .c5 {
-  padding-block: 24px;
-  padding-inline: 24px;
+  padding-block-start: 24px;
+  padding-inline-end: 24px;
+  padding-block-end: 24px;
+  padding-inline-start: 24px;
 }
 
 .c8 {
   padding-block-start: 40px;
-  padding-inline-end: 24px;
   padding-block-end: 40px;
   padding-inline-start: 24px;
+  padding-inline-end: 24px;
 }
 
-.c11 {
-  padding-block: 16px;
-  padding-inline: 16px;
-}
-
-.c14 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
+.c12 {
+  padding-block-start: 16px;
   padding-inline-end: 16px;
+  padding-block-end: 16px;
   padding-inline-start: 16px;
-  border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
+}
+
+.c15 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
   width: 100%;
+  border-radius: 4px;
   cursor: pointer;
 }
 
 .c1 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c9 {
+  gap: 8px;
   align-items: center;
-  display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.c12 {
-  align-items: center;
   display: flex;
-  flex-direction: row;
-  gap: 8px;
-  justify-content: space-between;
 }
 
-.c15 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
+.c13 {
   gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c16 {
+  gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c6 {
-  font-size: 1.4rem;
   font-weight: 600;
+  font-size: 1.8rem;
+  line-height: 1.22;
   color: currentcolor;
+  font-weight: 600;
 }
 
-.c10 {
+.c11 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
@@ -85,8 +86,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 .c18 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c2 {
@@ -100,64 +101,12 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c16 {
-  position: relative;
-  outline: none;
-}
-
-.c16[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c16:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c16:focus-visible {
-  outline: none;
-}
-
-.c16:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
 .c17 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
-}
-
-.c17 svg {
-  height: 1.2rem;
-}
-
-.c17[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c17[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
 }
 
 .c17:hover {
@@ -168,27 +117,19 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   background-color: #eaeaef;
 }
 
+.c17[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
 .c19 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #f5c0b8;
   background: #fcecea;
   color: #b72b1a;
-}
-
-.c19 svg {
-  height: 1.2rem;
-}
-
-.c19[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c19[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
 }
 
 .c19:hover {
@@ -199,6 +140,13 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   background-color: #ffffff;
   border: 1px solid #d02b20;
   color: #d02b20;
+}
+
+.c19[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
 .c3 {
@@ -233,9 +181,18 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border-bottom: solid 1px #eaeaef;
 }
 
-.c13 {
+.c14 {
   border-top: solid 1px #eaeaef;
   flex: 1;
+}
+
+.c10 {
+  width: 24px;
+  height: 24px;
+}
+
+.c10 path {
+  fill: #d02b20;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -330,7 +287,6 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
     <h2
       class="c5 c6 c7"
       id="radix-:r1:"
-      justifycontent="center"
     >
       Confirmation
     </h2>
@@ -338,7 +294,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       class="c8 c9"
     >
       <svg
-        fill="#d02b20"
+        class="c10"
+        fill="currentColor"
         height="24"
         viewBox="0 0 32 32"
         width="24"
@@ -349,18 +306,18 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
         />
       </svg>
       <p
-        class="c10"
+        class="c11"
         id="radix-:r2:"
       >
         Are you sure?
       </p>
     </div>
     <footer
-      class="c11 c12 c13"
+      class="c12 c13 c14"
     >
       <button
         aria-disabled="false"
-        class="c14 c15 c16 c17"
+        class="c15 c16 c17"
         type="button"
       >
         <span
@@ -371,7 +328,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       </button>
       <button
         aria-disabled="false"
-        class="c14 c15 c16 c19"
+        class="c15 c16 c19"
         type="button"
       >
         <span

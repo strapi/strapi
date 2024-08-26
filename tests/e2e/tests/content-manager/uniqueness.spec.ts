@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { findAndClose } from '../../utils/shared';
@@ -6,8 +6,10 @@ import { findAndClose } from '../../utils/shared';
 type Field = {
   name: string;
   value: string;
-  newValue?: string;
-  role?: string;
+  role?: 'combobox' | 'textbox';
+  component?: {
+    isSingle: boolean;
+  };
 };
 
 test.describe('Uniqueness', () => {
@@ -22,92 +24,216 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
-    { name: 'uniqueString', value: 'unique', newValue: 'unique-1' },
-    { name: 'uniqueNumber', value: '10', newValue: '20' },
-    { name: 'uniqueEmail', value: 'test@testing.com', newValue: 'editor@testing.com' },
-    { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
-    { name: 'UID', value: 'unique', newValue: 'unique-1' },
-  ] as const satisfies Array<Field>;
+  const SCALAR_FIELDS: Field[] = [
+    { name: 'uniqueString', value: 'unique' },
+    { name: 'uniqueNumber', value: '10' },
+    { name: 'uniqueEmail', value: 'test@strapi.io' },
+    { name: 'uniqueDate', value: '01/01/2024', role: 'combobox' },
+    { name: 'UID', value: 'unique' },
+  ];
 
-  const clickSave = async (page) => {
-    await page.getByRole('button', { name: 'Save' }).isEnabled();
-    await page.getByRole('tab', { name: 'Draft' }).click();
-    await page.getByRole('button', { name: 'Save' }).click();
-  };
+  const SINGLE_COMPONENT_FIELDS: Field[] = [
+    {
+      name: 'ComponentTextShort',
+      value: 'unique',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentTextLong',
+      value: 'unique',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentNumberInteger',
+      value: '10',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentNumberFloat',
+      value: '3.14',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentEmail',
+      value: 'test@strapi.io',
+      component: { isSingle: true },
+    },
+  ];
+
+  const REPEATABLE_COMPONENT_FIELDS: Field[] = [
+    {
+      name: 'ComponentTextShort',
+      value: 'unique',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentTextLong',
+      value: 'unique',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentNumberInteger',
+      value: '10',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentNumberFloat',
+      value: '3.14',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentEmail',
+      value: 'test@strapi.io',
+      component: { isSingle: false },
+    },
+  ];
+
+  const FIELDS_TO_TEST = [
+    ...SCALAR_FIELDS,
+    ...SINGLE_COMPONENT_FIELDS,
+    ...REPEATABLE_COMPONENT_FIELDS,
+  ] as const satisfies Array<Field>;
 
   const CREATE_URL =
     /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
   const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
   const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
+  const clickSave = async (page: Page) => {
+    await page.getByRole('button', { name: 'Save' }).isEnabled();
+    await page.getByRole('tab', { name: 'Draft' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText('Saved document')).toBeVisible();
+  };
+
+  const extraComponentNavigation = async (field: Field, page: Page) => {
+    if ('component' in field) {
+      const isSingle = field.component.isSingle;
+
+      // This opens up the component UI so we can access the field we are
+      // testing against
+
+      if (isSingle) {
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+      } else {
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).nth(1).click();
+        await page
+          .getByLabel('', { exact: true })
+          .getByRole('button', { name: 'No entry yet. Click on the' })
+          .click();
+      }
+    }
+  };
+
+  const createNewEntry = async (page: Page, url: RegExp) => {
+    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await page.waitForURL(url);
+  };
+
+  const fillField = async (page: Page, field: Field, fieldRole: 'combobox' | 'textbox') => {
+    await extraComponentNavigation(field, page);
+    await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+  };
+
+  const publishDocument = async (page: Page) => {
+    await page.getByRole('button', { name: 'Publish' }).click();
+    await expect(page.getByText('Published document')).toBeVisible();
+  };
+
+  const navigateToListView = async (page: Page) => {
+    await page.getByRole('link', { name: 'Unique' }).click();
+    if (await page.getByText('Confirmation').isVisible()) {
+      await page.getByRole('button', { name: 'Confirm' }).click();
+    }
+
+    await page.waitForURL(LIST_URL);
+  };
+
+  const changeLocale = async (page: Page, locale: string) => {
+    await page.getByRole('combobox', { name: 'Select a locale' }).click();
+    await page.getByText(locale).click();
+  };
+
   /**
    * @note the unique content type is set up with every type of document level unique field.
    * We are testing that uniqueness is enforced for these fields across all entries of a content type in the same locale.
    */
   FIELDS_TO_TEST.forEach((field) => {
-    test(`A user should not be able to duplicate the ${field.name} document field value in the same content type and locale. Validation should not happen across locales`, async ({
+    const isComponent = 'component' in field;
+    const isSingleComponentField = isComponent && field.component.isSingle;
+    const isRepeatableComponentField = isComponent && !field.component.isSingle;
+
+    let fieldDescription = 'scalar field';
+    if (isComponent) {
+      fieldDescription = isSingleComponentField
+        ? 'single component field'
+        : 'repeatable component field';
+    }
+
+    test(`A user should not be able to duplicate the ${field.name} ${fieldDescription} value in the same content type and dimensions (locale + publication state).`, async ({
       page,
     }) => {
-      await page.getByRole('link', { name: 'Create new entry' }).first().click();
+      await createNewEntry(page, CREATE_URL);
 
-      await page.waitForURL(CREATE_URL);
-
-      /**
-       * Now we're in the edit view. The content within each entry will be valid from the previous test run.
-       */
       const fieldRole = 'role' in field ? field.role : 'textbox';
-      await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+      await fillField(page, field, fieldRole);
+
+      if (isRepeatableComponentField) {
+        // If the field is a repeatable component field, we add an entry and fill
+        // it with the same value to test uniqueness within the same entity.
+        await page.getByRole('button', { name: 'Add an entry' }).click();
+        await page
+          .getByRole('region')
+          .getByRole('button', { name: 'No entry yet. Click on the' })
+          .click();
+        await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+
+        await clickSave(page);
+        await findAndClose(page, 'Saved document');
+
+        await page.getByRole('button', { name: 'Publish' }).click();
+        await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
+
+        await page.getByRole('button', { name: 'Delete' }).nth(1).click();
+      }
 
       await clickSave(page);
       await findAndClose(page, 'Saved document');
 
-      await page.getByRole('link', { name: 'Unique' }).click();
-      await page.waitForURL(LIST_URL);
+      await navigateToListView(page);
 
-      /**
-       * Try to create another entry with the same value, the validation should fail
-       */
-      await page.getByRole('link', { name: 'Create new entry' }).first().click();
-
-      await page.waitForURL(CREATE_URL);
-
-      await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+      await createNewEntry(page, CREATE_URL);
+      await fillField(page, field, fieldRole);
 
       await clickSave(page);
-      await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
-      /**
-       * Modify the value and try again, this should save successfully
-       * Either take the new value provided in the field object or generate a random new one
-       */
-      await page
-        .getByRole(fieldRole, {
-          name: field.name,
-        })
-        .fill(field.newValue);
+      await findAndClose(page, 'Saved document');
+
+      await publishDocument(page);
+      await findAndClose(page, 'Published document');
+
+      await navigateToListView(page);
+
+      await createNewEntry(page, CREATE_URL);
+      await fillField(page, field, fieldRole);
 
       await clickSave(page);
-      await expect(page.getByText('Saved document')).toBeVisible();
+      await findAndClose(page, 'Saved document');
 
-      await page.getByRole('link', { name: 'Unique' }).click();
-      await page.waitForURL(LIST_URL);
-
-      /**
-       * Change locale and try to create an entry with the same value as our first entry, this should save successfully
-       */
-      await page.getByRole('combobox', { name: 'Select a locale' }).click();
-
-      await page.getByText('French (fr)').click();
-
-      await page.getByRole('link', { name: 'Create new entry' }).first().click();
-
-      await page.waitForURL(EDIT_URL);
-
-      await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
-
-      await clickSave(page);
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Published document')).toBeVisible();
+      await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
+
+      await navigateToListView(page);
+      await changeLocale(page, 'French (fr)');
+
+      await createNewEntry(page, EDIT_URL);
+      await fillField(page, field, fieldRole);
+
+      await clickSave(page);
+      await findAndClose(page, 'Saved document');
+
+      await publishDocument(page);
+      await findAndClose(page, 'Published document');
     });
   });
 });

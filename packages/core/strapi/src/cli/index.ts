@@ -41,9 +41,9 @@ const createCLI = async (argv: string[], command = new Command()) => {
   } satisfies CLIContext;
 
   // Load all commands
-  strapiCommands.forEach((commandFactory) => {
+  for (const commandFactory of strapiCommands) {
     try {
-      const subCommand = commandFactory({ command, argv, ctx });
+      const subCommand = await commandFactory({ command, argv, ctx });
 
       // Add this command to the Commander command object
       if (subCommand) {
@@ -52,7 +52,7 @@ const createCLI = async (argv: string[], command = new Command()) => {
     } catch (e) {
       console.error(`Failed to load command`, e);
     }
-  });
+  }
 
   // TODO v6: remove these deprecation notices
   const deprecatedCommands = [

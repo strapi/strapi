@@ -108,12 +108,14 @@ export const ListRow = memo(
           {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
           <Flex paddingLeft={2} gap={4}>
             <AttributeIcon type={src} customField={customField} />
-            <Typography fontWeight="bold">{name}</Typography>
+            <Typography textColor="neutral800" fontWeight="bold">
+              {name}
+            </Typography>
           </Flex>
         </td>
         <td>
           {target ? (
-            <Typography>
+            <Typography textColor="neutral800">
               {formatMessage({
                 id: getTrad(
                   `modelPage.attribute.${isMorph ? 'relation-polymorphic' : 'relationWith'}`
@@ -147,7 +149,7 @@ export const ListRow = memo(
                         id: 'app.utils.edit',
                         defaultMessage: 'Edit',
                       })} ${name}`}
-                      borderWidth={0}
+                      variant="ghost"
                     >
                       <Pencil />
                     </IconButton>
@@ -165,7 +167,7 @@ export const ListRow = memo(
                       id: 'global.delete',
                       defaultMessage: 'Delete',
                     })} ${name}`}
-                    borderWidth={0}
+                    variant="ghost"
                   >
                     <Trash />
                   </IconButton>

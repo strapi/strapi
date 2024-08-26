@@ -1,10 +1,23 @@
+/**
+ * NOTE: This migration avoids using the `identifiers` utility.
+ * As the `5.0.0-01-convert-identifiers-long-than-max-length`
+ * migration does not convert the `localizations` join tables, as they are not
+ * tables that exist anymore in v5 and are not in the db metadata.
+ *
+ * This migration therefore relies on the fact that those tables still exist, and
+ * references them directly.
+ *
+ * Database join table name: `categories_localizations_links`
+ * Actual `identifiers` returned join table name: `categories_localizations_lnk`
+ *
+ */
 import { createId } from '@paralleldrive/cuid2';
+import { snakeCase } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
 import type { Database } from '../..';
 import type { Meta } from '../../metadata';
-import { identifiers } from '../../utils/identifiers';
 
 interface Params {
   joinColumn: string;
@@ -96,9 +109,8 @@ const getNextIdsToCreateDocumentId = async (
 // Migrate document ids for tables that have localizations
 const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, meta: Meta) => {
   const singularName = meta.singularName.toLowerCase();
-  const joinColumn = identifiers.getJoinColumnAttributeIdName(singularName);
-  const inverseJoinColumn = identifiers.getInverseJoinColumnAttributeIdName(singularName);
-
+  const joinColumn = snakeCase(`${singularName}_id`);
+  const inverseJoinColumn = snakeCase(`inv_${singularName}_id`);
   let ids: number[];
 
   do {
@@ -106,7 +118,7 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
       joinColumn,
       inverseJoinColumn,
       tableName: meta.tableName,
-      joinTableName: identifiers.getJoinTableName(meta.tableName, `localizations`),
+      joinTableName: snakeCase(`${meta.tableName}_localizations_links`),
     });
 
     if (ids.length > 0) {
@@ -138,7 +150,7 @@ const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
 };
 
 const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
-  const joinTableName = identifiers.getJoinTableName(tableName, 'localizations');
+  const joinTableName = snakeCase(`${tableName}_localizations_links`);
   return knex.schema.hasTable(joinTableName);
 };
 

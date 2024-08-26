@@ -36,13 +36,13 @@ describe('ImageAssetCard', () => {
 
     expect(container).toMatchInlineSnapshot(`
       .c0 {
+        height: 100%;
         background: #ffffff;
         border-radius: 4px;
         border-style: solid;
         border-width: 1px;
         border-color: #eaeaef;
         box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-        height: 100%;
       }
 
       .c2 {
@@ -50,94 +50,90 @@ describe('ImageAssetCard', () => {
       }
 
       .c11 {
-        background: #ffffff;
-        padding-block: 8px;
-        padding-inline: 8px;
         border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
+        display: inline-flex;
         cursor: pointer;
       }
 
-      .c17 {
+      .c16 {
         padding-block-start: 8px;
-        padding-inline-end: 12px;
         padding-block-end: 8px;
         padding-inline-start: 12px;
+        padding-inline-end: 12px;
       }
 
-      .c20 {
+      .c19 {
         padding-block-start: 4px;
       }
 
-      .c24 {
+      .c23 {
         padding-block-start: 4px;
         flex-grow: 1;
       }
 
-      .c27 {
-        background: #eaeaef;
-        padding-inline-end: 8px;
+      .c26 {
         padding-inline-start: 8px;
+        padding-inline-end: 8px;
         min-width: 20px;
+        background: #eaeaef;
       }
 
       .c3 {
         align-items: center;
-        display: flex;
-        flex-direction: row;
         justify-content: center;
+        flex-direction: row;
+        display: flex;
       }
 
       .c5 {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
         gap: 8px;
+        align-items: center;
+        flex-direction: row;
+        display: flex;
       }
 
-      .c18 {
+      .c17 {
         align-items: flex-start;
-        display: flex;
         flex-direction: row;
+        display: flex;
       }
 
-      .c25 {
+      .c24 {
         align-items: center;
-        display: flex;
         flex-direction: row;
+        display: flex;
       }
 
-      .c28 {
+      .c27 {
         align-items: center;
-        display: inline-flex;
-        flex-direction: row;
         justify-content: center;
+        flex-direction: row;
+        display: inline-flex;
+      }
+
+      .c20 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        color: #32324d;
+        font-weight: 600;
       }
 
       .c21 {
         font-size: 1.2rem;
         line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-size: 1.2rem;
-        line-height: 1.33;
         color: #666687;
       }
 
-      .c31 {
+      .c30 {
         font-weight: 600;
         font-size: 1.1rem;
         line-height: 1.45;
         text-transform: uppercase;
-        line-height: 1rem;
         color: #666687;
+        line-height: 1rem;
       }
 
-      .c14 {
+      .c13 {
         border: 0;
         clip: rect(0 0 0 0);
         height: 1px;
@@ -148,46 +144,35 @@ describe('ImageAssetCard', () => {
         width: 1px;
       }
 
-      .c29 {
+      .c28 {
         border-radius: 4px;
         padding-block: 0.7rem;
       }
 
       .c12 {
-        position: relative;
-        outline: none;
+        text-decoration: none;
+        padding-block: 0.7rem;
+        padding-inline: 0.7rem;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+        color: #32324d;
+        color: #8e8ea9;
+      }
+
+      .c12:hover {
+        background-color: #f6f6f9;
+        color: #666687;
+      }
+
+      .c12:active {
+        background-color: #eaeaef;
       }
 
       .c12[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c12:after {
-        transition-property: all;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c12:focus-visible {
-        outline: none;
-      }
-
-      .c12:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+        color: #666687;
+        cursor: default;
       }
 
       .c6 {
@@ -202,7 +187,7 @@ describe('ImageAssetCard', () => {
         right: 12px;
       }
 
-      .c16 {
+      .c15 {
         margin: 0;
         padding: 0;
         max-height: 100%;
@@ -210,7 +195,7 @@ describe('ImageAssetCard', () => {
         object-fit: contain;
       }
 
-      .c15 {
+      .c14 {
         display: flex;
         justify-content: center;
         height: 16.4rem;
@@ -220,12 +205,12 @@ describe('ImageAssetCard', () => {
         border-top-right-radius: 4px;
       }
 
-      .c26 {
+      .c25 {
         margin-left: auto;
         flex-shrink: 0;
       }
 
-      .c30 {
+      .c29 {
         margin-left: 4px;
       }
 
@@ -265,7 +250,7 @@ describe('ImageAssetCard', () => {
         min-height: 44px;
       }
 
-      .c19 {
+      .c18 {
         word-break: break-all;
       }
 
@@ -273,23 +258,7 @@ describe('ImageAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c13 {
-        border-color: #dcdce4;
-        height: 3.2rem;
-        width: 3.2rem;
-        color: #8e8ea9;
-      }
-
-      .c13:hover,
-      .c13:focus {
-        color: #666687;
-      }
-
-      .c13[aria-disabled='true'] {
-        color: #666687;
-      }
-
-      .c23 {
+      .c22 {
         text-transform: uppercase;
       }
 
@@ -310,8 +279,8 @@ describe('ImageAssetCard', () => {
       }
 
       @media (prefers-reduced-motion: no-preference) {
-        .c7 {
-          transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        .c12 {
+          transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
       }
 
@@ -345,9 +314,8 @@ describe('ImageAssetCard', () => {
             >
               <button
                 aria-disabled="false"
-                class="c11 c3 c12 c13"
+                class="c11 c3 c12"
                 data-state="closed"
-                type="button"
               >
                 <svg
                   aria-hidden="true"
@@ -363,47 +331,47 @@ describe('ImageAssetCard', () => {
                   />
                 </svg>
                 <span
-                  class="c14"
+                  class="c13"
                 >
                   Edit
                 </span>
               </button>
             </div>
             <div
-              class="c15"
+              class="c14"
             >
               <img
                 alt=""
                 aria-hidden="true"
-                class="c16"
+                class="c15"
                 src="http://somewhere.com/hello.png"
               />
             </div>
           </div>
           <div
-            class="c17"
+            class="c16"
           >
             <div
-              class="c18"
+              class="c17"
             >
               <div
-                class="c19"
+                class="c18"
               >
                 <div
-                  class="c20"
+                  class="c19"
                 >
                   <h2
-                    class="c21"
+                    class="c20"
                     id=":r0:-title"
                   >
                     hello.png
                   </h2>
                 </div>
                 <div
-                  class="c22"
+                  class="c21"
                 >
                   <span
-                    class="c23"
+                    class="c22"
                   >
                     png
                   </span>
@@ -411,16 +379,16 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c24 c25"
+                class="c23 c24"
               >
                 <div
-                  class="c26"
+                  class="c25"
                 >
                   <div
-                    class="c27 c28 c29 c30"
+                    class="c26 c27 c28 c29"
                   >
                     <span
-                      class="c31"
+                      class="c30"
                     >
                       Image
                     </span>
@@ -431,7 +399,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <span
-          class="c14"
+          class="c13"
         >
           <p
             aria-live="polite"

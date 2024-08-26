@@ -131,6 +131,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   onSubmit?: (values: TFormValues, helpers: FormHelpers<TFormValues>) => Promise<void> | void;
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
+  initialErrors?: FormErrors<TFormValues>;
 }
 
 /**
@@ -140,11 +141,11 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  * use the generic useForm hook or the useField hook when providing the name of your field.
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>(
-  ({ disabled = false, method, onSubmit, ...props }, ref) => {
+  ({ disabled = false, method, onSubmit, initialErrors, ...props }, ref) => {
     const formRef = React.useRef<HTMLFormElement>(null!);
     const initialValues = React.useRef(props.initialValues ?? {});
     const [state, dispatch] = React.useReducer(reducer, {
-      errors: {},
+      errors: initialErrors ?? {},
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
@@ -409,7 +410,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         <FormProvider
           disabled={disabled}
           onChange={handleChange}
-          initialValues={initialValues}
+          initialValues={initialValues.current}
           modified={modified}
           addFieldRow={addFieldRow}
           moveFieldRow={moveFieldRow}
@@ -487,7 +488,7 @@ type FormErrors<TFormValues extends FormValues = FormValues> = {
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
     : TFormValues[Key] extends object // is it a regular component?
       ? FormErrors<TFormValues[Key]> // handles nested components
-      : string; // otherwise its just a field.
+      : string | TranslationMessage; // otherwise its just a field or a translation message.
 };
 
 interface FormState<TFormValues extends FormValues = FormValues> {
@@ -618,7 +619,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.values = setIn(
           state.values,
           action.payload.field,
-          newValue.length > 0 ? newValue : undefined
+          newValue.length > 0 ? newValue : []
         );
 
         break;
@@ -669,12 +670,21 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   const handleChange = useForm('useField', (state) => state.onChange);
 
-  const error = useForm('useField', (state) => getIn(state.errors, path));
+  const error = useForm('useField', (state) => {
+    const error = getIn(state.errors, path);
+
+    if (isErrorMessageDescriptor(error)) {
+      const { values, ...message } = error;
+      return formatMessage(message, values);
+    }
+
+    return error;
+  });
 
   return {
     initialValue,
     /**
-     * Errors can be a string, or a MesaageDescriptor, so we need to handle both cases.
+     * Errors can be a string, or a MessageDescriptor, so we need to handle both cases.
      * If it's anything else, we don't return it.
      */
     error: isErrorMessageDescriptor(error)
@@ -693,9 +703,13 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
   };
 };
 
-const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
+const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
   return (
-    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+    typeof object === 'object' &&
+    object !== null &&
+    !Array.isArray(object) &&
+    'id' in object &&
+    'defaultMessage' in object
   );
 };
 

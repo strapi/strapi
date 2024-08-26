@@ -71,12 +71,11 @@ export const RelationTargetPicker = ({
   );
 };
 
-/**
- * TODO: this needs to be solved in the Design-System
- */
 const MenuTrigger = styled(Menu.Trigger)`
-  svg {
-    width: 0.6rem;
-    height: 0.4rem;
+  max-width: 16.8rem;
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;

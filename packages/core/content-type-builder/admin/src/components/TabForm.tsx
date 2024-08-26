@@ -42,6 +42,7 @@ export const TabForm = ({
             <Grid.Root gap={4}>
               {section.items.map((input: any, i: number) => {
                 const key = `${sectionIndex}.${i}`;
+
                 /**
                  * Use undefined as the default value because not every input wants a string e.g. Date pickers
                  */
@@ -77,14 +78,24 @@ export const TabForm = ({
 
                 if (input.type === 'pushRight') {
                   return (
-                    <Grid.Item col={input.size || 6} key={input.name || key}>
+                    <Grid.Item
+                      col={input.size || 6}
+                      key={input.name || key}
+                      direction="column"
+                      alignItems="stretch"
+                    >
                       <div />
                     </Grid.Item>
                   );
                 }
 
                 return (
-                  <Grid.Item col={input.size || 6} key={input.name || key}>
+                  <Grid.Item
+                    col={input.size || 6}
+                    key={input.name || key}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <GenericInput
                       {...input}
                       {...genericInputProps}

@@ -5,6 +5,7 @@ export interface Options {
   quickstart?: boolean;
   run?: boolean;
   dbclient?: DBClient;
+  skipCloud?: boolean;
   dbhost?: string;
   dbport?: string;
   dbname?: string;
@@ -12,7 +13,7 @@ export interface Options {
   dbpassword?: string;
   dbssl?: string;
   dbfile?: string;
-  template?: string;
+  // template?: string;
   typescript?: boolean;
   javascript?: boolean;
 }

@@ -24,19 +24,23 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 }
 
-@media (max-width: 1100px) {
-
-}
-
-@media (max-width: 550px) {
-
-}
-
 @media (prefers-reduced-motion: no-preference) {
 
 }
 
 @media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (min-width: 520px) {
+
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (min-width: 1280px) {
 
 }
 

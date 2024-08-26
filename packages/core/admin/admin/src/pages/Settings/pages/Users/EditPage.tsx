@@ -96,7 +96,7 @@ const EditPage = () => {
 
   React.useEffect(() => {
     if (error) {
-      // Redirect the use to the homepage if is not allowed to read
+      // Redirect the user to the homepage if is not allowed to read
       if (error.name === 'UnauthorizedError') {
         toggleNotification({
           type: 'info',
@@ -235,7 +235,12 @@ const EditPage = () => {
                         {LAYOUT.map((row) =>
                           row.map(({ size, label, ...field }) => {
                             return (
-                              <Grid.Item key={field.name} col={size}>
+                              <Grid.Item
+                                key={field.name}
+                                col={size}
+                                direction="column"
+                                alignItems="stretch"
+                              >
                                 <InputRenderer
                                   {...field}
                                   disabled={!canUpdate}
@@ -270,7 +275,7 @@ const EditPage = () => {
                         })}
                       </Typography>
                       <Grid.Root gap={5}>
-                        <Grid.Item col={6} xs={12}>
+                        <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                           <SelectRoles disabled={!canUpdate} />
                         </Grid.Item>
                       </Grid.Root>

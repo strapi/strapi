@@ -527,7 +527,7 @@ export const FormModal = () => {
           if (canEditContentType(allDataSchema, modifiedData)) {
             onCloseModal();
 
-            submitData(modifiedData);
+            await submitData(modifiedData);
           } else {
             toggleNotification({
               type: 'danger',
@@ -616,7 +616,7 @@ export const FormModal = () => {
               type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
             });
 
-            setActiveTab('base');
+            setActiveTab('basic');
             onNavigateToAddCompoToDZModal({ dynamicZoneTarget: modifiedData.name });
           } else {
             onCloseModal();

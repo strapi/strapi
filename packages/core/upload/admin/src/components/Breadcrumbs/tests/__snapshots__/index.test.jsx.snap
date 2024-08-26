@@ -5,52 +5,46 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   cursor: pointer;
 }
 
-.c5 {
-  padding-inline-end: 4px;
+.c6 {
   padding-inline-start: 4px;
+  padding-inline-end: 4px;
 }
 
-.c7 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
-  padding-block-start: 4px;
-  padding-inline-end: 12px;
-  padding-block-end: 4px;
-  padding-inline-start: 12px;
+.c8 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
   cursor: pointer;
 }
 
 .c13 {
   padding-block-start: 4px;
-  padding-inline-end: 8px;
   padding-block-end: 4px;
   padding-inline-start: 8px;
+  padding-inline-end: 8px;
 }
 
 .c0 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c2 {
   align-items: center;
+  flex-direction: row;
   display: inline-flex;
-  flex-direction: row;
 }
 
-.c8 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
+.c9 {
   gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
-.c6 {
+.c7 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #8e8ea9;
@@ -59,15 +53,15 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 .c12 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c14 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c15 {
@@ -81,48 +75,19 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   width: 1px;
 }
 
-.c9 {
-  position: relative;
-  outline: none;
+.c4 {
+  text-decoration: none;
 }
 
-.c9[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c9:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c9:focus-visible {
-  outline: none;
-}
-
-.c9:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
+.c4:visited {
+  color: inherit;
 }
 
 .c1>*:first-child {
   margin-left: calc(-1*8px);
 }
 
-.c4 {
+.c5 {
   border-radius: 4px;
   color: #666687;
   font-size: 1.2rem;
@@ -131,33 +96,22 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   text-decoration: none;
 }
 
-.c4 :hover,
-.c4 :focus {
+.c5 :hover,
+.c5 :focus {
   background-color: #dcdce4;
   color: #4a4a6a;
 }
 
 .c10 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid transparent;
   background: transparent;
   color: #32324d;
 }
 
 .c10 svg {
-  height: 1.2rem;
-}
-
-.c10[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c10[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
+  fill: #8e8ea9;
 }
 
 .c10:hover {
@@ -165,11 +119,14 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c10:active {
-  border: 1px solid;
+  background-color: #eaeaef;
 }
 
-.c10 svg {
-  fill: #8e8ea9;
+.c10[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
 .c11 {
@@ -202,18 +159,17 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
         <a
           aria-current="page"
           aria-disabled="false"
-          class="c3 c4 active"
+          class="c3 c4 c5 active"
           href="/"
-          target="_self"
         >
           Media Library
         </a>
         <div
           aria-hidden="true"
-          class="c5"
+          class="c6"
         >
           <span
-            class="c6"
+            class="c7"
           >
             /
           </span>
@@ -227,10 +183,9 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Get more ascendants folders"
-          class="c7 c8 c9 c10 c11"
+          class="c8 c9 c10 c11"
           data-state="closed"
           id="radix-:r1:"
-          label="..."
           type="button"
         >
           <span
@@ -241,10 +196,10 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
         </button>
         <div
           aria-hidden="true"
-          class="c5"
+          class="c6"
         >
           <span
-            class="c6"
+            class="c7"
           >
             /
           </span>
@@ -256,18 +211,17 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
         <a
           aria-current="page"
           aria-disabled="false"
-          class="c3 c4 active"
+          class="c3 c4 c5 active"
           href="/"
-          target="_self"
         >
           parent folder
         </a>
         <div
           aria-hidden="true"
-          class="c5"
+          class="c6"
         >
           <span
-            class="c6"
+            class="c7"
           >
             /
           </span>

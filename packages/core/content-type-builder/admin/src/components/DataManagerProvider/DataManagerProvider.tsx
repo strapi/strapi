@@ -22,7 +22,6 @@ import { DataManagerContext } from '../../contexts/DataManagerContext';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
-import { makeUnique } from '../../utils/makeUnique';
 import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
 import { FormModal } from '../FormModal/FormModal';
 
@@ -420,14 +419,13 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
     const composWithCompos = retrieveComponentsThatHaveComponents(allCompos);
 
-    return makeUnique(composWithCompos);
+    return composWithCompos;
   };
 
   const getAllNestedComponents = () => {
     const appNestedCompo = retrieveNestedComponents(components);
-    const editingDataNestedCompos = retrieveNestedComponents(modifiedData.components || {});
 
-    return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
+    return appNestedCompo;
   };
 
   const removeComponentFromDynamicZone = (dzName: string, componentToRemoveIndex: number) => {

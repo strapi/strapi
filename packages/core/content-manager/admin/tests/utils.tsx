@@ -16,15 +16,17 @@ import {
 
 import { reducer } from '../src/modules/reducers';
 
-const storeConfig: ConfigureStoreOptions = {
-  preloadedState: defaultTestStoreConfig.preloadedState,
-  reducer: {
-    ...defaultTestStoreConfig.reducer,
-    'content-manager': reducer,
-  },
-  middleware: (getDefaultMiddleware) => [
-    ...defaultTestStoreConfig.middleware(getDefaultMiddleware),
-  ],
+const storeConfig = (): ConfigureStoreOptions => {
+  const testStoreConfig = defaultTestStoreConfig();
+
+  return {
+    preloadedState: testStoreConfig.preloadedState,
+    reducer: {
+      ...testStoreConfig.reducer,
+      'content-manager': reducer,
+    },
+    middleware: (getDefaultMiddleware) => [...testStoreConfig.middleware(getDefaultMiddleware)],
+  };
 };
 
 const render = (
@@ -33,13 +35,13 @@ const render = (
 ): ReturnType<typeof renderAdmin> =>
   renderAdmin(ui, {
     ...options,
-    providerOptions: { storeConfig },
+    providerOptions: { storeConfig: storeConfig() },
   });
 
 const renderHook: typeof renderHookAdmin = (hook, options) =>
   renderHookAdmin(hook, {
     ...options,
-    providerOptions: { storeConfig },
+    providerOptions: { storeConfig: storeConfig() },
   });
 
 export { fireEvent, render, waitFor, act, screen, server, renderHook };

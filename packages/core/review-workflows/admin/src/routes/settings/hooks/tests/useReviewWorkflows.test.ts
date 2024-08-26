@@ -24,27 +24,6 @@ describe('useReviewWorkflows', () => {
     `);
   });
 
-  it('fetches one workflow', async () => {
-    const { result } = renderHook(() => useReviewWorkflows({ id: 1 }));
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-    expect(result.current.workflows).toMatchInlineSnapshot(`
-      [
-        {
-          "id": 1,
-          "stages": [
-            {
-              "color": "#FFFFFF",
-              "id": 1,
-              "name": "To Review",
-            },
-          ],
-        },
-      ]
-    `);
-  });
-
   it.todo('creates a workflow');
 
   it.todo('updates a workflow');

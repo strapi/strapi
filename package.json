@@ -50,7 +50,8 @@
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
-    "test:clean": "rimraf ./coverage",
+    "test:api:clean": "rimraf ./coverage",
+    "test:clean": "yarn test:api:clean ; yarn test:e2e:clean ; yarn test:cli:clean",
     "test:cli": "node tests/scripts/run-cli-tests.js",
     "test:cli:clean": "node tests/scripts/run-cli-tests.js clean",
     "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
@@ -138,7 +139,7 @@
     "lodash": "4.17.21",
     "nx": "18.2.2",
     "plop": "2.7.6",
-    "prettier": "3.2.5",
+    "prettier": "3.3.3",
     "prettier-2": "npm:prettier@^2",
     "qs": "6.11.1",
     "rimraf": "5.0.5",
@@ -152,7 +153,7 @@
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.0.1",
+  "packageManager": "yarn@4.3.1",
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"

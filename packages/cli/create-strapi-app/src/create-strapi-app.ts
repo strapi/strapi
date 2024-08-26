@@ -1,12 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import commander from 'commander';
+
 import { generateNewApp, type Options as GenerateNewAppOptions } from '@strapi/generate-new';
 
 import * as prompts from './prompts';
 import type { Options } from './types';
 import { detectPackageManager } from './package-manager';
 import * as database from './database';
+import { handleCloudLogin } from './cloud';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
@@ -28,6 +30,9 @@ command
   .option('--use-yarn', 'Use yarn as the project package manager')
   .option('--use-pnpm', 'Use pnpm as the project package manager')
 
+  // Cloud options
+  .option('--skip-cloud', 'Skip cloud login and project creation')
+
   // Database options
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
@@ -39,7 +44,7 @@ command
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
 
   // templates
-  .option('--template <templateurl>', 'Specify a Strapi template')
+  // .option('--template <templateurl>', 'Specify a Strapi template')
   .description('create a new application')
   .action((directory, options) => {
     createStrapiApp(directory, options);
@@ -56,11 +61,15 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
 
   const appDirectory = directory || (await prompts.directory());
 
+  if (!options.skipCloud) {
+    await handleCloudLogin();
+  }
+
   const appOptions = {
     directory: appDirectory,
     useTypescript: true,
     packageManager: 'npm',
-    template: options.template,
+    // template: options.template,
     isQuickstart: options.quickstart,
   } as GenerateNewAppOptions;
 
@@ -101,16 +110,16 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
 }
 
 async function validateOptions(options: Options) {
-  const programFlags = command
-    .createHelp()
-    .visibleOptions(command)
-    .reduce<Array<string | undefined>>((acc, { short, long }) => [...acc, short, long], [])
-    .filter(Boolean);
+  // const programFlags = command
+  //   .createHelp()
+  //   .visibleOptions(command)
+  //   .reduce<Array<string | undefined>>((acc, { short, long }) => [...acc, short, long], [])
+  //   .filter(Boolean);
 
-  if (options.template && programFlags.includes(options.template)) {
-    console.error(`${options.template} is not a valid template`);
-    process.exit(1);
-  }
+  // if (options.template && programFlags.includes(options.template)) {
+  //   console.error(`${options.template} is not a valid template`);
+  //   process.exit(1);
+  // }
 
   if (options.javascript === true && options.typescript === true) {
     console.error('You cannot use both --typescript (--ts) and --javascript (--js) flags together');

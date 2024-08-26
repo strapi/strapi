@@ -2,22 +2,28 @@
 
 exports[`ContextInfo renders 1`] = `
 .c0 {
-  background: #f6f6f9;
   padding-block-start: 16px;
-  padding-inline-end: 24px;
   padding-block-end: 16px;
   padding-inline-start: 24px;
+  padding-inline-end: 24px;
+  background: #f6f6f9;
   border-radius: 4px;
 }
 
-.c3 {
+.c2 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
-  gap: 4px;
+  display: flex;
 }
 
 .c4 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c5 {
   font-weight: 600;
   font-size: 1.1rem;
   line-height: 1.45;
@@ -25,13 +31,13 @@ exports[`ContextInfo renders 1`] = `
   color: #666687;
 }
 
-.c5 {
+.c6 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #4a4a6a;
 }
 
-.c6 {
+.c7 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -48,20 +54,26 @@ exports[`ContextInfo renders 1`] = `
   gap: 16px;
 }
 
-.c2 {
-  grid-column: span 6;
+.c3 {
+  grid-column: span 12;
   max-width: 100%;
 }
 
-@media (max-width: 1100px) {
-  .c2 {
-    grid-column: span;
+@media (min-width: 520px) {
+  .c3 {
+    grid-column: span 12;
   }
 }
 
-@media (max-width: 550px) {
-  .c2 {
+@media (min-width: 768px) {
+  .c3 {
     grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .c3 {
+    grid-column: span 6;
   }
 }
 
@@ -73,54 +85,54 @@ exports[`ContextInfo renders 1`] = `
       class="c1"
     >
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class="c3"
+          class="c4"
         >
           <span
-            class="c4"
+            class="c5"
           >
             Label 1
           </span>
           <span
-            class="c5"
+            class="c6"
           >
             value1
           </span>
         </div>
       </div>
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class="c3"
+          class="c4"
         >
           <span
-            class="c4"
+            class="c5"
           >
             Label 2
           </span>
           <span
-            class="c5"
+            class="c6"
           >
             value2
           </span>
         </div>
       </div>
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class="c3"
+          class="c4"
         >
           <span
-            class="c4"
+            class="c5"
           >
             Label 3
           </span>
           <span
-            class="c5"
+            class="c6"
           >
             value3
           </span>
@@ -129,7 +141,7 @@ exports[`ContextInfo renders 1`] = `
     </div>
   </div>
   <span
-    class="c6"
+    class="c7"
   >
     <p
       aria-live="polite"

@@ -51,7 +51,7 @@ const EditLocale = (props: EditLocaleProps) => {
             name: props.name,
           }
         )}
-        borderWidth={0}
+        variant="ghost"
       >
         <Pencil />
       </IconButton>

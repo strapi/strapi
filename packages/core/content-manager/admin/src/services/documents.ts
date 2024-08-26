@@ -34,7 +34,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params: query,
         },
       }),
-      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_result, error, { model }) => {
+        if (error) {
+          return [];
+        }
+
+        return [{ type: 'Document', id: `${model}_LIST` }];
+      },
     }),
     cloneDocument: builder.mutation<
       Clone.Response,
@@ -51,7 +57,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_result, _error, { model }) => [
+        { type: 'Document', id: `${model}_LIST` },
+        { type: 'UidAvailability', id: model },
+      ],
     }),
     /**
      * Creates a new collection-type document. This should ONLY be used for collection-types.
@@ -75,6 +84,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (result, _error, { model }) => [
         { type: 'Document', id: `${model}_LIST` },
         'Relations',
+        { type: 'UidAvailability', id: model },
       ],
     }),
     deleteDocument: builder.mutation<
@@ -139,6 +149,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
+          { type: 'UidAvailability', id: model },
         ];
       },
     }),
@@ -163,6 +174,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       }),
       providesTags: (result, _error, arg) => {
         return [
+          { type: 'Document', id: `ALL_LIST` },
           { type: 'Document', id: `${arg.model}_LIST` },
           ...(result?.results.map(({ documentId }) => ({
             type: 'Document' as const,
@@ -236,6 +248,11 @@ const documentApi = contentManagerApi.injectEndpoints({
               collectionType !== SINGLE_TYPES
                 ? `${model}_${result && 'documentId' in result ? result.documentId : documentId}`
                 : model,
+          },
+          // Make it easy to invalidate all individual documents queries for a model
+          {
+            type: 'Document',
+            id: `${model}_ALL_ITEMS`,
           },
         ];
       },
@@ -327,7 +344,22 @@ const documentApi = contentManagerApi.injectEndpoints({
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           'Relations',
+          { type: 'UidAvailability', id: model },
         ];
+      },
+      async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
+        // Optimistically update the cache with the new data
+        const patchResult = dispatch(
+          documentApi.util.updateQueryData('getDocument', patch, (draft) => {
+            Object.assign(draft.data, data);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          // Rollback the optimistic update if there's an error
+          patchResult.undo();
+        }
       },
     }),
     unpublishDocument: builder.mutation<

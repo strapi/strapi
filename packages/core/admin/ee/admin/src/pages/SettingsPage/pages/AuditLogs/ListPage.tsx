@@ -72,14 +72,6 @@ const ListPage = () => {
       // In this case, the passed parameter cannot and shouldn't be something else than User
       cellFormatter: ({ user }) => (user ? user.displayName : ''),
     },
-    {
-      name: 'actions',
-      label: formatMessage({
-        id: 'Settings.permissions.auditLogs.actions',
-        defaultMessage: 'Actions',
-      }),
-      sortable: false,
-    },
   ];
 
   if (hasError) {
@@ -170,8 +162,6 @@ const ListPage = () => {
                             </Typography>
                           </Table.Cell>
                         );
-                      case 'actions':
-                        return null;
                       default:
                         return (
                           <Table.Cell key={name}>
@@ -191,7 +181,7 @@ const ListPage = () => {
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
                           { target: `${log.action} action` }
                         )}
-                        borderWidth={0}
+                        variant="ghost"
                       >
                         <Eye />
                       </IconButton>
@@ -202,8 +192,9 @@ const ListPage = () => {
             </Table.Body>
           </Table.Content>
         </Table.Root>
-        <Pagination.Root {...auditLogs?.pagination} defaultPageSize={24}>
-          <Pagination.PageSize options={['12', '24', '50', '100']} />
+
+        <Pagination.Root {...auditLogs?.pagination}>
+          <Pagination.PageSize />
           <Pagination.Links />
         </Pagination.Root>
       </Layouts.Content>

@@ -7,7 +7,7 @@ import { errors } from '@strapi/utils';
 import { Utils } from '@strapi/types';
 
 export interface Settings {
-  defaultTimezone: string | null;
+  defaultTimezone: string | null | undefined;
 }
 
 /**

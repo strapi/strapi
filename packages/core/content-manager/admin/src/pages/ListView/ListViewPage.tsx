@@ -53,6 +53,9 @@ const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 /* -------------------------------------------------------------------------------------------------
  * ListViewPage
  * -----------------------------------------------------------------------------------------------*/
+const LayoutsHeaderCustom = styled(Layouts.Header)`
+  overflow-wrap: anywhere;
+`;
 
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
@@ -97,7 +100,7 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const { data, error, isLoading } = useGetAllDocumentsQuery({
+  const { data, error, isFetching } = useGetAllDocumentsQuery({
     model,
     params,
   });
@@ -170,7 +173,7 @@ const ListViewPage = () => {
     return formattedHeaders;
   }, [displayedHeaders, formatMessage, list, runHookWaterfall, schema?.options?.draftAndPublish]);
 
-  if (isLoading) {
+  if (isFetching) {
     return <Page.Loading />;
   }
 
@@ -191,7 +194,7 @@ const ListViewPage = () => {
   return (
     <Page.Main>
       <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-      <Layouts.Header
+      <LayoutsHeaderCustom
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(
           {
@@ -239,7 +242,7 @@ const ListViewPage = () => {
       />
       <Layouts.Content>
         <Flex gap={4} direction="column" alignItems="stretch">
-          <Table.Root rows={results} headers={tableHeaders} isLoading={isLoading}>
+          <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
             <TableActionsBar />
             <Table.Content>
               <Table.Head>
@@ -377,6 +380,8 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
         pathname: 'create',
         search: stringify({ plugins: query.plugins }),
       }}
+      minWidth="max-content"
+      marginLeft={2}
     >
       {formatMessage({
         id: getTranslation('HeaderLayout.button.label-add-entry'),

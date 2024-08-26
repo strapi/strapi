@@ -13,12 +13,25 @@ import {
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { useContentTypeSchema } from '../hooks/useContentTypeSchema';
 import { useTypedSelector } from '../modules/hooks';
 import { getTranslation } from '../utils/translations';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
+
+const SubNavLinkCustom = styled(SubNavLink)`
+  div {
+    width: inherit;
+    span:nth-child(2) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: inherit;
+    }
+  }
+`;
 
 const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
@@ -28,6 +41,7 @@ const LeftMenu = () => {
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
   );
+
   const singleTypeLinks = useTypedSelector((state) => state['content-manager'].app.singleTypeLinks);
   const { schemas } = useContentTypeSchema();
 
@@ -94,7 +108,7 @@ const LeftMenu = () => {
 
   const label = formatMessage({
     id: getTranslation('header.name'),
-    defaultMessage: 'Content',
+    defaultMessage: 'Content Manager',
   });
 
   const getPluginsParamsForLink = (link: ContentManagerLink) => {
@@ -141,7 +155,7 @@ const LeftMenu = () => {
             >
               {section.links.map((link) => {
                 return (
-                  <SubNavLink
+                  <SubNavLinkCustom
                     tag={NavLink}
                     key={link.uid}
                     to={{
@@ -151,9 +165,10 @@ const LeftMenu = () => {
                         plugins: getPluginsParamsForLink(link),
                       }),
                     }}
+                    width="100%"
                   >
                     {link.title}
-                  </SubNavLink>
+                  </SubNavLinkCustom>
                 );
               })}
             </SubNavSection>

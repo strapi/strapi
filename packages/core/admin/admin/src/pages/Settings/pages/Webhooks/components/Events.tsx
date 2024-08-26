@@ -286,13 +286,15 @@ const EventsRow = ({
       {events.map((event) => {
         return (
           <Td key={event} textAlign="center">
-            <Checkbox
-              disabled={disabledEvents.includes(event)}
-              aria-label={event}
-              name={event}
-              checked={inputValue.includes(event)}
-              onCheckedChange={(value) => handleSelect(event, !!value)}
-            />
+            <Flex width="100%" justifyContent="center">
+              <Checkbox
+                disabled={disabledEvents.includes(event)}
+                aria-label={event}
+                name={event}
+                checked={inputValue.includes(event)}
+                onCheckedChange={(value) => handleSelect(event, !!value)}
+              />
+            </Flex>
           </Td>
         );
       })}

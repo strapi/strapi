@@ -16,7 +16,6 @@ import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
@@ -113,7 +112,6 @@ const EditPage = () => {
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
-  const dispatch = useDispatch();
   const {
     isLoading: isLoadingWorkflow,
     meta,
@@ -121,13 +119,14 @@ const EditPage = () => {
     error,
     update,
     create,
-  } = useReviewWorkflows({ id: isCreatingWorkflow ? undefined : id });
+  } = useReviewWorkflows();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions['settings']?.['review-workflows']
   );
   const {
     allowedActions: { canDelete, canUpdate, canCreate },
   } = useRBAC(permissions);
+
   const [savePrompts, setSavePrompts] = React.useState<{
     hasDeletedServerStages?: boolean;
     hasReassignedContentTypes?: boolean;
@@ -182,19 +181,6 @@ const EditPage = () => {
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
-        } else if ('data' in res) {
-          for (const uid of res.data.contentTypes) {
-            // Invalidates the content-manager's API cache for the document layout so we can see RW enabled.
-            dispatch({
-              type: 'contentManagerApi/invalidateTags',
-              payload: [
-                {
-                  type: 'ContentTypesConfiguration',
-                  id: uid,
-                },
-              ],
-            });
-          }
         }
       } else {
         const res = await create(data);
@@ -202,20 +188,7 @@ const EditPage = () => {
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else if ('data' in res) {
-          for (const uid of res.data.contentTypes) {
-            // Invalidates the content-manager's API cache for the document layout so we can see RW enabled.
-            dispatch({
-              type: 'contentManagerApi/invalidateTags',
-              payload: [
-                {
-                  type: 'ContentTypesConfiguration',
-                  id: uid,
-                },
-              ],
-            });
-          }
-
-          navigate(`../${res.data.id}`);
+          navigate(`../${res.data.id}`, { replace: true });
         }
       }
     } catch (error) {
@@ -389,10 +362,10 @@ const EditPage = () => {
             />
             <Layout.Root>
               <Flex alignItems="stretch" direction="column" gap={7}>
-                <WorkflowAttributes canUpdate={canUpdate} />
+                <WorkflowAttributes canUpdate={canUpdate || canCreate} />
                 <Stages
                   canDelete={canDelete}
-                  canUpdate={canUpdate}
+                  canUpdate={canUpdate || canCreate}
                   isCreating={isCreatingWorkflow}
                 />
               </Flex>
@@ -424,7 +397,7 @@ const EditPage = () => {
                         {
                           count:
                             contentTypesFromOtherWorkflows?.filter((contentType) =>
-                              currentWorkflow?.contentTypes?.includes(contentType)
+                              values.contentTypes.includes(contentType)
                             ).length ?? 0,
                         }
                       )}

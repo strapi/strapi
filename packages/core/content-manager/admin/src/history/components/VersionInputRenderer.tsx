@@ -71,12 +71,12 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
    * Ideally the server would return the correct shape, however, for admin user relations
    * it sanitizes everything out when it finds an object for the relation value.
    */
-  const formattedFieldValue = Array.isArray(field.value)
-    ? {
-        results: field.value,
-        meta: { missingCount: 0 },
-      }
-    : field.value;
+  let formattedFieldValue;
+  if (field) {
+    formattedFieldValue = Array.isArray(field.value)
+      ? { results: field.value, meta: { missingCount: 0 } }
+      : field.value;
+  }
 
   if (
     !formattedFieldValue ||
@@ -168,9 +168,9 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const CustomMediaInput = (props: VersionInputRendererProps) => {
-  const {
-    value: { results, meta },
-  } = useField(props.name);
+  const { value } = useField(props.name);
+  const results = value ? value.results : [];
+  const meta = value ? value.meta : { missingCount: 0 };
   const { formatMessage } = useIntl();
 
   const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);

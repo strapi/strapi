@@ -273,7 +273,12 @@ export const BrowseStep = ({
             >
               {folders.map((folder) => {
                 return (
-                  <Grid.Item col={3} key={`folder-${folder.id}`}>
+                  <Grid.Item
+                    col={3}
+                    key={`folder-${folder.id}`}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}
@@ -298,7 +303,11 @@ export const BrowseStep = ({
                           onClick={() => handleClickFolderCard(folder.id, folder.path)}
                         >
                           <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
-                            <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                            <TypographyMaxWidth
+                              fontWeight="semiBold"
+                              ellipsis
+                              textColor="neutral800"
+                            >
                               {folder.name}
                               {/* VisuallyHidden dash here allows to separate folder title and count informations
                               for voice reading structure purpose */}

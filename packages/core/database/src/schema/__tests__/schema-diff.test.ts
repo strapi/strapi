@@ -31,15 +31,17 @@ describe('diffSchemas', () => {
       foreignKeys: [],
     };
 
-    const srcSchema: Schema = {
+    const databaseSchema: Schema = {
       tables: [],
     };
 
-    const destSchema: Schema = {
+    const userSchema: Schema = {
       tables: [testTable],
     };
 
-    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
+    expect(
+      await diffSchemas({ databaseSchema, userSchema, previousSchema: userSchema })
+    ).toStrictEqual({
       status: 'CHANGED',
       diff: {
         tables: {
@@ -60,15 +62,19 @@ describe('diffSchemas', () => {
       foreignKeys: [],
     };
 
-    const srcSchema = {
+    const databaseSchema = {
       tables: [testTable],
     };
 
-    const destSchema = {
+    const userSchema = {
       tables: [],
     };
 
-    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
+    const previousSchema = {
+      tables: [testTable],
+    };
+
+    expect(await diffSchemas({ databaseSchema, userSchema, previousSchema })).toStrictEqual({
       status: 'CHANGED',
       diff: {
         tables: {
@@ -89,15 +95,17 @@ describe('diffSchemas', () => {
       foreignKeys: [],
     };
 
-    const srcSchema = {
+    const databaseSchema = {
       tables: [testTable],
     };
 
-    const destSchema = {
+    const userSchema = {
       tables: [testTable],
     };
 
-    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
+    expect(
+      await diffSchemas({ databaseSchema, userSchema, previousSchema: userSchema })
+    ).toStrictEqual({
       status: 'UNCHANGED',
       diff: {
         tables: {
@@ -110,9 +118,42 @@ describe('diffSchemas', () => {
     });
   });
 
+  test('UnTracked Table', async () => {
+    const testTable = {
+      name: 'my_table',
+      columns: [],
+      indexes: [],
+      foreignKeys: [],
+    };
+
+    const databaseSchema = {
+      tables: [testTable],
+    };
+
+    const userSchema = {
+      tables: [],
+    };
+
+    const previousSchema = {
+      tables: [],
+    };
+
+    expect(await diffSchemas({ databaseSchema, userSchema, previousSchema })).toStrictEqual({
+      status: 'UNCHANGED',
+      diff: {
+        tables: {
+          added: [],
+          updated: [],
+          unchanged: [],
+          removed: [],
+        },
+      },
+    });
+  });
+
   describe('Changed table', () => {
     test('added column', async () => {
-      const srcSchema: Schema = {
+      const databaseSchema: Schema = {
         tables: [
           {
             name: 'my_table',
@@ -123,7 +164,7 @@ describe('diffSchemas', () => {
         ],
       };
 
-      const destSchema: Schema = {
+      const userSchema: Schema = {
         tables: [
           {
             name: 'my_table',
@@ -140,7 +181,9 @@ describe('diffSchemas', () => {
         ],
       };
 
-      expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
+      expect(
+        await diffSchemas({ databaseSchema, userSchema, previousSchema: userSchema })
+      ).toStrictEqual({
         status: 'CHANGED',
         diff: {
           tables: {
@@ -225,15 +268,19 @@ describe('diffSchemas', () => {
       },
     } as any;
 
-    const srcSchema: Schema = {
+    const databaseSchema: Schema = {
       tables: [...testTables, coreStoreTable],
     };
 
-    const destSchema = {
+    const userSchema = {
       tables: [coreStoreTable],
     };
 
-    expect(await diffSchemas(srcSchema, destSchema)).toStrictEqual({
+    const previousSchema = {
+      tables: [coreStoreTable, testTables[1]],
+    };
+
+    expect(await diffSchemas({ databaseSchema, userSchema, previousSchema })).toStrictEqual({
       status: 'CHANGED',
       diff: {
         tables: {

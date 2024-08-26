@@ -3,7 +3,7 @@ import chalk from 'chalk';
 
 import { constants as timerConstants } from '../timer';
 
-import type { ProjectType } from '../project';
+import type { AppProject, PluginProject, ProjectType } from '../project';
 import type { Codemod } from '../codemod';
 import type { Version } from '../version';
 import type { Report } from '../report';
@@ -16,6 +16,10 @@ export const version = (version: Version.LiteralVersion | Version.SemVer) => {
 
 export const codemodUID = (uid: string) => {
   return chalk.bold.cyan(uid);
+};
+
+export const projectDetails = (project: AppProject | PluginProject) => {
+  return `Project: TYPE=${projectType(project.type)}; CWD=${path(project.cwd)}; PATHS=${project.paths.map(path)}`;
 };
 
 export const projectType = (type: ProjectType) => chalk.cyan(type);

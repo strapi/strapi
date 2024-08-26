@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { Box, Checkbox, Flex, Typography, Grid, VisuallyHidden } from '@strapi/design-system';
-import { Cog as CogIcon } from '@strapi/icons';
+import { Cog } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -78,7 +78,7 @@ const SubCategory = ({ subCategory }) => {
             const name = `${action.name}.enabled`;
 
             return (
-              <Grid.Item col={6} key={action.name}>
+              <Grid.Item col={6} key={action.name} direction="column" alignItems="stretch">
                 <CheckboxWrapper isActive={isActionSelected(action.name)} padding={2} hasRadius>
                   <Checkbox
                     checked={get(modifiedData, name, false)}
@@ -103,7 +103,7 @@ const SubCategory = ({ subCategory }) => {
                         }
                       )}
                     </VisuallyHidden>
-                    <CogIcon />
+                    <Cog id="cog" />
                   </button>
                 </CheckboxWrapper>
               </Grid.Item>

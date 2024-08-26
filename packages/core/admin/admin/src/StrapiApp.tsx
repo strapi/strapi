@@ -19,7 +19,12 @@ import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/rout
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
-import { THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY, ThemeName } from './reducer';
+import {
+  THEME_LOCAL_STORAGE_KEY,
+  LANGUAGE_LOCAL_STORAGE_KEY,
+  ThemeName,
+  getStoredToken,
+} from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 
@@ -439,6 +444,7 @@ class StrapiApp {
             locale: localeNames[locale] ? locale : 'en',
             localeNames,
           },
+          token: getStoredToken(),
         },
       },
       this.middlewares,

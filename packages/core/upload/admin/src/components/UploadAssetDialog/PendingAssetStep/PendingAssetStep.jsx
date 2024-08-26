@@ -77,7 +77,7 @@ export const PendingAssetStep = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <>
       <Modal.Header>
         <Modal.Title>
           {formatMessage({
@@ -122,7 +122,7 @@ export const PendingAssetStep = ({
 
                 if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
                   return (
-                    <Grid.Item col={4} key={assetKey}>
+                    <Grid.Item col={4} key={assetKey} direction="column" alignItems="stretch">
                       <UploadingAssetCard
                         // Props used to store the newly uploaded files
                         addUploadedFiles={addUploadedFiles}
@@ -138,7 +138,7 @@ export const PendingAssetStep = ({
                 }
 
                 return (
-                  <Grid.Item col={4} key={assetKey}>
+                  <Grid.Item col={4} key={assetKey} direction="column" alignItems="stretch">
                     <AssetCard
                       asset={asset}
                       size="S"
@@ -159,7 +159,7 @@ export const PendingAssetStep = ({
         <Button onClick={onClose} variant="tertiary">
           {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
         </Button>
-        <Button type="submit" loading={uploadStatus === Status.Uploading}>
+        <Button onClick={handleSubmit} loading={uploadStatus === Status.Uploading}>
           {formatMessage(
             {
               id: getTrad('modal.upload-list.footer.button'),
@@ -170,7 +170,7 @@ export const PendingAssetStep = ({
           )}
         </Button>
       </Modal.Footer>
-    </form>
+    </>
   );
 };
 

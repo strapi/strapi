@@ -377,7 +377,12 @@ export const MediaLibrary = () => {
                     });
 
                     return (
-                      <Grid.Item col={3} key={`folder-${folder.id}`}>
+                      <Grid.Item
+                        col={3}
+                        key={`folder-${folder.id}`}
+                        direction="column"
+                        alignItems="stretch"
+                      >
                         <FolderCard
                           ref={
                             folderToEdit && folder.id === folderToEdit.id
@@ -486,35 +491,41 @@ export const MediaLibrary = () => {
           </Pagination.Root>
         </Layouts.Content>
       </Page.Main>
-      <UploadAssetDialog
-        open={showUploadAssetDialog}
-        onClose={toggleUploadAssetDialog}
-        trackedLocation="upload"
-        folderId={query?.folder}
-      />
-      <EditFolderDialog
-        open={showEditFolderDialog}
-        onClose={handleEditFolderClose}
-        folder={folderToEdit}
-        parentFolderId={query?.folder}
-        location="upload"
-      />
-      <EditAssetDialog
-        onClose={(editedAsset) => {
-          // The asset has been deleted
-          if (editedAsset === null) {
-            handleAssetDeleted(1);
-          }
+      {showUploadAssetDialog && (
+        <UploadAssetDialog
+          open={showUploadAssetDialog}
+          onClose={toggleUploadAssetDialog}
+          trackedLocation="upload"
+          folderId={query?.folder}
+        />
+      )}
+      {showEditFolderDialog && (
+        <EditFolderDialog
+          open={showEditFolderDialog}
+          onClose={handleEditFolderClose}
+          folder={folderToEdit}
+          parentFolderId={query?.folder}
+          location="upload"
+        />
+      )}
+      {assetToEdit && (
+        <EditAssetDialog
+          onClose={(editedAsset) => {
+            // The asset has been deleted
+            if (editedAsset === null) {
+              handleAssetDeleted(1);
+            }
 
-          setAssetToEdit(undefined);
-        }}
-        open={!!assetToEdit}
-        asset={assetToEdit}
-        canUpdate={canUpdate}
-        canCopyLink={canCopyLink}
-        canDownload={canDownload}
-        trackedLocation="upload"
-      />
+            setAssetToEdit(undefined);
+          }}
+          open={!!assetToEdit}
+          asset={assetToEdit}
+          canUpdate={canUpdate}
+          canCopyLink={canCopyLink}
+          canDownload={canDownload}
+          trackedLocation="upload"
+        />
+      )}
     </Layouts.Root>
   );
 };

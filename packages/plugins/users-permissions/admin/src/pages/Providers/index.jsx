@@ -63,7 +63,7 @@ export const ProvidersPage = () => {
 
   const submitMutation = useMutation((body) => put('/users-permissions/providers', body), {
     async onSuccess() {
-      await queryClient.invalidateQueries(['users-permissions', 'providers']);
+      await queryClient.invalidateQueries(['users-permissions', 'get-providers']);
 
       toggleNotification({
         type: 'success',
@@ -220,7 +220,7 @@ export const ProvidersPage = () => {
                     {canUpdate && (
                       <IconButton
                         onClick={() => handleClickEdit(provider)}
-                        borderWidth={0}
+                        variant="ghost"
                         label="Edit"
                       >
                         <Pencil />

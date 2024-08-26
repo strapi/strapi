@@ -15,7 +15,7 @@ import { styled } from 'styled-components';
  * -----------------------------------------------------------------------------------------------*/
 const MainNavLinkWrapper = styled(RouterLink)`
   text-decoration: none;
-  display: block;
+  display: flex;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral500};
@@ -55,7 +55,7 @@ const LinkImpl = ({ children, ...props }: LinkProps) => {
  * -----------------------------------------------------------------------------------------------*/
 const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipProps) => {
   return (
-    <Tooltip side={position} label={label}>
+    <Tooltip side={position} label={label} delayDuration={0}>
       <span>{children}</span>
     </Tooltip>
   );

@@ -23,6 +23,7 @@ describe('admin_app reducer', () => {
           "availableThemes": [],
           "currentTheme": "system",
         },
+        "token": null,
       }
     `);
   });
@@ -42,6 +43,7 @@ describe('admin_app reducer', () => {
             "availableThemes": [],
             "currentTheme": "dark",
           },
+          "token": null,
         }
       `);
     });
@@ -63,6 +65,7 @@ describe('admin_app reducer', () => {
             ],
             "currentTheme": "system",
           },
+          "token": null,
         }
       `);
     });
@@ -83,6 +86,7 @@ describe('admin_app reducer', () => {
             "availableThemes": [],
             "currentTheme": "system",
           },
+          "token": null,
         }
       `);
     });

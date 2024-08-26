@@ -1,169 +1,134 @@
-// import * as React from 'react';
+import * as React from 'react';
 
-// import { Box, Flex, Popover, Typography } from '@strapi/design-system';
-// import { Link } from '@strapi/design-system';
-// import { Modules, UID } from '@strapi/types';
-// import { useIntl } from 'react-intl';
-// import { styled } from 'styled-components';
+import { useTable, useQueryParams } from '@strapi/admin/strapi-admin';
+import { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
+import { Box, Popover, Typography, Button, Link } from '@strapi/design-system';
+import { CaretDown } from '@strapi/icons';
+import { Modules, UID } from '@strapi/types';
+import { useIntl } from 'react-intl';
 
-// import { useGetMappedEntriesInReleasesQuery } from '../services/release';
-// import { useTypedSelector } from '../store/hooks';
+import { useGetMappedEntriesInReleasesQuery } from '../services/release';
 
-// // TODO: Migrate to v5
-// // import type { CMAdminConfiguration, ListLayoutRow } from '@strapi/admin/strapi-admin';
+/* -------------------------------------------------------------------------------------------------
+ * useReleasesList
+ * -----------------------------------------------------------------------------------------------*/
+interface QueryParams {
+  plugins?: {
+    i18n?: {
+      locale: string;
+    };
+  };
+}
 
-// type Entity = Modules.EntityService.Result<UID.Schema>;
+const useReleasesList = (contentTypeUid: UID.ContentType, documentId: Modules.Documents.ID) => {
+  const listViewData = useTable('ListView', (state) => state.rows);
+  const documentIds = listViewData.map((entry) => entry.documentId);
+  const [{ query }] = useQueryParams();
+  const locale = (query as QueryParams)?.plugins?.i18n?.locale || undefined;
 
-// const Button = styled.button`
-//   svg {
-//     > g,
-//     path {
-//       fill: ${({ theme }) => theme.colors.neutral500};
-//     }
-//   }
-//   &:hover {
-//     svg {
-//       > g,
-//       path {
-//         fill: ${({ theme }) => theme.colors.neutral600};
-//       }
-//     }
-//   }
-//   &:active {
-//     svg {
-//       > g,
-//       path {
-//         fill: ${({ theme }) => theme.colors.neutral400};
-//       }
-//     }
-//   }
-// `;
+  const response = useGetMappedEntriesInReleasesQuery(
+    { contentTypeUid, documentIds, locale },
+    { skip: !documentIds || !contentTypeUid || documentIds.length === 0 }
+  );
 
-// const ActionWrapper = styled(Flex)`
-//   svg {
-//     height: 0.4rem;
-//   }
-// `;
+  const mappedEntriesInReleases = response.data || {};
 
-// /* -------------------------------------------------------------------------------------------------
-//  * useReleasesList
-//  * -----------------------------------------------------------------------------------------------*/
+  return mappedEntriesInReleases?.[documentId] || [];
+};
 
-// const useReleasesList = (entryId: string | number) => {
-//   TODO: fix Property 'uid' does not exist on type 'FormattedContentTypeLayout | null'
-//   const { uid: contentTypeUid } = useTypedSelector(
-//     (state) => state['content-manager_listView'].contentType
-//   );
-//   const listViewData = useTypedSelector((state) => state['content-manager_listView'].data);
-//   // @ts-expect-error Fix when migrating to v5
-//   const entriesIds = listViewData.map((entry) => entry.id);
+/* -------------------------------------------------------------------------------------------------
+ * addColumnToTableHook
+ * -----------------------------------------------------------------------------------------------*/
 
-//   const response = useGetMappedEntriesInReleasesQuery(
-//     { contentTypeUid, entriesIds },
-//     { skip: !entriesIds || !contentTypeUid || entriesIds.length === 0 }
-//   );
+interface AddColumnToTableHookArgs {
+  layout: ListLayout;
+  displayedHeaders: ListFieldLayout[];
+}
 
-//   const mappedEntriesInReleases = response.data || {};
+const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
+  const { options } = layout;
 
-//   // @ts-expect-error Fix when migrating releases
-//   return mappedEntriesInReleases?.[entryId] || [];
-// };
+  if (!options?.draftAndPublish) {
+    return { displayedHeaders, layout };
+  }
 
-// /* -------------------------------------------------------------------------------------------------
-//  * addColumnToTableHook
-//  * -----------------------------------------------------------------------------------------------*/
+  return {
+    displayedHeaders: [
+      ...displayedHeaders,
+      {
+        searchable: false,
+        sortable: false,
+        name: 'releases',
+        label: {
+          id: 'content-releases.content-manager.list-view.releases.header',
+          defaultMessage: 'To be released in',
+        },
+        cellFormatter: (
+          props: Modules.Documents.AnyDocument,
+          _: any,
+          { model }: { model: UID.ContentType }
+        ) => <ReleaseListCell {...props} model={model} />,
+      },
+    ],
+    layout,
+  };
+};
 
-// // TODO: Migrate to v5
-// // interface AddColumnToTableHookArgs {
-// //   layout: {
-// //     components: Record<string, CMAdminConfiguration>;
-// //     contentType: CMAdminConfiguration;
-// //   };
-// //   displayedHeaders: ListLayoutRow[];
-// // }
+/* -------------------------------------------------------------------------------------------------
+ * ReleaseListCell
+ * -----------------------------------------------------------------------------------------------*/
 
-// const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
-//   const { contentType } = layout;
+interface ReleaseListCellProps extends Modules.Documents.AnyDocument {
+  documentId: Modules.Documents.ID;
+  model: UID.ContentType;
+}
 
-//   if (!contentType.options?.draftAndPublish) {
-//     return { displayedHeaders, layout };
-//   }
+const ReleaseListCell = ({ documentId, model }: ReleaseListCellProps) => {
+  const releases = useReleasesList(model, documentId);
+  const { formatMessage } = useIntl();
 
-//   return {
-//     displayedHeaders: [
-//       ...displayedHeaders,
-//       {
-//         key: '__release_key__',
-//         fieldSchema: { type: 'string' },
-//         metadatas: { label: 'To be released in', searchable: true, sortable: false },
-//         name: 'releasedAt',
-//         cellFormatter: (props: Entity) => <ReleaseListCell {...props} />,
-//       },
-//     ],
-//     layout,
-//   };
-// };
+  return (
+    <Popover.Root>
+      <Popover.Trigger>
+        <Button
+          variant="ghost"
+          onClick={(e: React.MouseEvent<HTMLElement>) => e.stopPropagation()}
+          // TODO: find a way in the DS to define the widht and height of the icon
+          endIcon={releases.length > 0 ? <CaretDown width="1.2rem" height="1.2rem" /> : null}
+        >
+          <Typography
+            style={{ maxWidth: '252px', cursor: 'pointer' }}
+            textColor="neutral800"
+            fontWeight="regular"
+          >
+            {releases.length > 0
+              ? formatMessage(
+                  {
+                    id: 'content-releases.content-manager.list-view.releases-number',
+                    defaultMessage: '{number} {number, plural, one {release} other {releases}}',
+                  },
+                  {
+                    number: releases.length,
+                  }
+                )
+              : '-'}
+          </Typography>
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content>
+        <ul>
+          {releases.map(({ id, name }) => (
+            <Box key={id} padding={3} tag="li">
+              <Link href={`/admin/plugins/content-releases/${id}`} isExternal={false}>
+                {name}
+              </Link>
+            </Box>
+          ))}
+        </ul>
+      </Popover.Content>
+    </Popover.Root>
+  );
+};
 
-// /* -------------------------------------------------------------------------------------------------
-//  * ReleaseListCell
-//  * -----------------------------------------------------------------------------------------------*/
-
-// interface ReleaseListCellProps {
-//   id: Entity['id'];
-// }
-
-// const ReleaseListCell = ({ id }: ReleaseListCellProps) => {
-//   const releases = useReleasesList(id);
-//   const [visible, setVisible] = React.useState(false);
-//   const buttonRef = React.useRef<HTMLButtonElement>(null);
-//   const { formatMessage } = useIntl();
-
-//   const handleTogglePopover = () => setVisible((prev) => !prev);
-
-//   return (
-//     <Flex onClick={(e) => e.stopPropagation()}>
-//       <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
-//         <ActionWrapper height="3.2rem" width="3.2rem">
-//           <Typography style={{ maxWidth: '252px', cursor: 'pointer' }} textColor="neutral800">
-//             {releases.length > 0
-//               ? formatMessage(
-//                   {
-//                     id: 'content-releases.content-manager.list-view.releases-number',
-//                     defaultMessage: '{number} {number, plural, one {release} other {releases}}',
-//                   },
-//                   {
-//                     number: releases.length,
-//                   }
-//                 )
-//               : '-'}
-//           </Typography>
-//           <Flex>
-//             {/* {releases.length > 0 && <SortIcon />} */}
-//             {visible && (
-//               <Popover
-//                 onDismiss={handleTogglePopover}
-//                 source={buttonRef as React.MutableRefObject<HTMLElement>}
-//                 spacing={16}
-//               >
-//                 <ul>
-//                   {releases.map(
-//                     // @ts-expect-error fix when migrating to v5
-//                     ({ id, name }) => (
-//                     <Box key={id} padding={3} tag="li">
-//                       <Link href={`/admin/plugins/content-releases/${id}`} isExternal={false}>
-//                         {name}
-//                       </Link>
-//                     </Box>
-//                   ))}
-//                 </ul>
-//               </Popover>
-//             )}
-//           </Flex>
-//         </ActionWrapper>
-//       </Button>
-//     </Flex>
-//   );
-// };
-
-// export { ReleaseListCell, addColumnToTableHook };
-// export type { ReleaseListCellProps };
+export { ReleaseListCell, addColumnToTableHook };
+export type { ReleaseListCellProps };

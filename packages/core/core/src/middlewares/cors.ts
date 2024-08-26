@@ -54,6 +54,11 @@ export const cors: Core.MiddlewareFactory<Config> = (config) => {
         return originList.includes(ctx.get('Origin')) ? ctx.get('Origin') : '';
       }
 
+      const parsedOrigin = originList.split(',').map((origin) => origin.trim());
+      if (parsedOrigin.length > 1) {
+        return parsedOrigin.includes(ctx.get('Origin')) ? ctx.get('Origin') : '';
+      }
+
       return originList;
     },
     exposeHeaders: expose,

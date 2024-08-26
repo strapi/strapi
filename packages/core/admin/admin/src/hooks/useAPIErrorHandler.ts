@@ -5,6 +5,7 @@ import { IntlFormatters, useIntl } from 'react-intl';
 import { FetchError } from '../utils/getFetchClient';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
+import { setIn } from '../utils/objects';
 
 import type { errors } from '@strapi/utils';
 
@@ -97,7 +98,7 @@ that has been thrown.
  *   const { get } = useFetchClient();
  *   const { formatAPIError } = useAPIErrorHandler(getTrad);
  *   const { toggleNotification } = useNotification();
- * 
+ *
  *   const handleDeleteItem = async () => {
  *     try {
  *       return await get('/admin');
@@ -156,10 +157,7 @@ export function useAPIErrorHandler(
             return validationErrors.reduce((acc, err) => {
               const { path, message } = err;
 
-              return {
-                ...acc,
-                [path.join('.')]: message,
-              };
+              return setIn(acc, path.join('.'), message);
             }, {});
           } else {
             const details = error.details as Record<string, string[]>;

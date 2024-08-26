@@ -118,8 +118,12 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const localesService = strapi.plugin('i18n')?.service('locales');
+  const i18nContentTypeService = strapi.plugin('i18n')?.service('content-types');
 
   const getDefaultLocale = async () => (localesService ? localesService.getDefaultLocale() : null);
+
+  const isLocalizedContentType = (model: Schema.ContentType) =>
+    i18nContentTypeService ? i18nContentTypeService.isLocalizedContentType(model) : false;
 
   /**
    *
@@ -179,23 +183,33 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    * @description
    * Creates a populate object that looks for all the relations that need
    * to be saved in history, and populates only the fields needed to later retrieve the content.
+   *
+   * @param uid - The content type UID
+   * @param useDatabaseSyntax - Whether to use the database syntax for populate, defaults to false
    */
-  const getDeepPopulate = (uid: UID.Schema) => {
+  const getDeepPopulate = (uid: UID.Schema, useDatabaseSyntax = false) => {
     const model = strapi.getModel(uid);
     const attributes = Object.entries(model.attributes);
+    const fieldSelector = useDatabaseSyntax ? 'select' : 'fields';
 
     return attributes.reduce((acc: any, [attributeName, attribute]) => {
       switch (attribute.type) {
         case 'relation': {
+          // TODO: Support polymorphic relations
+          const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
+          if (isMorphRelation) {
+            break;
+          }
+
           const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
           if (isVisible) {
-            acc[attributeName] = { fields: ['documentId', 'locale', 'publishedAt'] };
+            acc[attributeName] = { [fieldSelector]: ['documentId', 'locale', 'publishedAt'] };
           }
           break;
         }
 
         case 'media': {
-          acc[attributeName] = { fields: ['id'] };
+          acc[attributeName] = { [fieldSelector]: ['id'] };
           break;
         }
 
@@ -318,6 +332,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getRelationRestoreValue,
     getMediaRestoreValue,
     getDefaultLocale,
+    isLocalizedContentType,
     getLocaleDictionary,
     getRetentionDays,
     getVersionStatus,

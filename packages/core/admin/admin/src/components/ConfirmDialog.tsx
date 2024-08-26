@@ -3,12 +3,13 @@ import * as React from 'react';
 import { Button, ButtonProps, Dialog } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * ConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
 interface ConfirmDialogProps extends Pick<ButtonProps, 'variant'>, Pick<Dialog.BodyProps, 'icon'> {
-  onConfirm?: () => Promise<void> | void;
+  onConfirm?: (e?: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void;
   children?: React.ReactNode;
   endAction?: React.ReactNode;
   startAction?: React.ReactNode;
@@ -49,7 +50,7 @@ interface ConfirmDialogProps extends Pick<ButtonProps, 'variant'>, Pick<Dialog.B
  */
 const ConfirmDialog = ({
   children,
-  icon = <WarningCircle width="24px" height="24px" fill="danger600" />,
+  icon = <StyledWarning />,
   onConfirm,
   variant = 'danger-light',
   startAction,
@@ -66,14 +67,14 @@ const ConfirmDialog = ({
       defaultMessage: 'Are you sure?',
     });
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!onConfirm) {
       return;
     }
 
     try {
       setIsConfirming(true);
-      await onConfirm();
+      await onConfirm(e);
     } finally {
       setIsConfirming(false);
     }
@@ -92,7 +93,13 @@ const ConfirmDialog = ({
       <Dialog.Footer>
         {startAction || (
           <Dialog.Cancel>
-            <Button fullWidth variant="tertiary">
+            <Button
+              fullWidth
+              variant="tertiary"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
@@ -114,6 +121,15 @@ const ConfirmDialog = ({
     </Dialog.Content>
   );
 };
+
+const StyledWarning = styled(WarningCircle)`
+  width: 24px;
+  height: 24px;
+
+  path {
+    fill: ${({ theme }) => theme.colors.danger600};
+  }
+`;
 
 export { ConfirmDialog };
 export type { ConfirmDialogProps };

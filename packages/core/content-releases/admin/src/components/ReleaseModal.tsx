@@ -17,12 +17,12 @@ import {
 import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form, useFormikContext } from 'formik';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
-import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
 import { pluginId } from '../pluginId';
-import { getTimezoneOffset } from '../utils/time';
+import { getTimezones } from '../utils/time';
+import { RELEASE_SCHEMA } from '../validation/schemas';
 
 export interface FormValues {
   name: string;
@@ -111,7 +111,14 @@ export const ReleaseModal = ({
               <Form>
                 <Modal.Body>
                   <Flex direction="column" alignItems="stretch" gap={6}>
-                    <Field.Root name="name" error={errors.name} required>
+                    <Field.Root
+                      name="name"
+                      error={
+                        errors.name &&
+                        formatMessage({ id: errors.name, defaultMessage: errors.name })
+                      }
+                      required
+                    >
                       <Field.Label>
                         {formatMessage({
                           id: 'content-releases.modal.form.input.label.release-name',
@@ -158,7 +165,14 @@ export const ReleaseModal = ({
                       <>
                         <Flex gap={4} alignItems="start">
                           <Box width="100%">
-                            <Field.Root name="date" error={errors.date} required>
+                            <Field.Root
+                              name="date"
+                              error={
+                                errors.date &&
+                                formatMessage({ id: errors.date, defaultMessage: errors.date })
+                              }
+                              required
+                            >
                               <Field.Label>
                                 {formatMessage({
                                   id: 'content-releases.modal.form.input.label.date',
@@ -186,7 +200,14 @@ export const ReleaseModal = ({
                             </Field.Root>
                           </Box>
                           <Box width="100%">
-                            <Field.Root name="time" error={errors.time} required>
+                            <Field.Root
+                              name="time"
+                              error={
+                                errors.time &&
+                                formatMessage({ id: errors.time, defaultMessage: errors.time })
+                              }
+                              required
+                            >
                               <Field.Label>
                                 {formatMessage({
                                   id: 'content-releases.modal.form.input.label.time',
@@ -248,23 +269,6 @@ interface ITimezoneOption {
   value: string;
 }
 
-const getTimezones = (selectedDate: Date) => {
-  const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
-    // Timezone will be in the format GMT${OFFSET} where offset could be nothing,
-    // a four digit string e.g. +05:00 or -08:00
-    const utcOffset = getTimezoneOffset(timezone, selectedDate);
-
-    // Offset and timezone are concatenated with '&', so to split and save the required timezone in DB
-    return { offset: utcOffset, value: `${utcOffset}&${timezone}` } satisfies ITimezoneOption;
-  });
-
-  const systemTimezone = timezoneList.find(
-    (timezone) => timezone.value.split('&')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
-
-  return { timezoneList, systemTimezone };
-};
-
 const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOption[] }) => {
   const { values, errors, setFieldValue } = useFormikContext<FormValues>();
   const { formatMessage } = useIntl();
@@ -286,7 +290,13 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <Field.Root name="timezone" error={errors.timezone} required>
+    <Field.Root
+      name="timezone"
+      error={
+        errors.timezone && formatMessage({ id: errors.timezone, defaultMessage: errors.timezone })
+      }
+      required
+    >
       <Field.Label>
         {formatMessage({
           id: 'content-releases.modal.form.input.label.timezone',

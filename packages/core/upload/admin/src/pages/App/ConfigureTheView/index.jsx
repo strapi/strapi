@@ -44,7 +44,7 @@ const ConfigureTheView = ({ config }) => {
   const handleConfirm = async () => {
     trackUsage('willEditMediaLibraryConfig');
     await mutateConfig.mutateAsync(modifiedData);
-    toggleWarningSubmit();
+    setWarningSubmit(false);
     dispatch(setLoaded());
     toggleNotification({
       type: 'success',
@@ -104,7 +104,7 @@ const ConfigureTheView = ({ config }) => {
           </Layouts.Content>
 
           <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
-            <ConfirmDialog onConfirm={handleConfirm} variant="success-light">
+            <ConfirmDialog onConfirm={handleConfirm} variant="default">
               {formatMessage({
                 id: getTrad('config.popUpWarning.warning.updateAllSettings'),
                 defaultMessage: 'This will modify all your settings',

@@ -672,6 +672,8 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
       'api::article.article'
     >;
     locale: Schema.Attribute.String;
+    identifiers: Schema.Attribute.Component;
+    repeatableIdentifiers: Schema.Attribute.Component;
   };
 }
 

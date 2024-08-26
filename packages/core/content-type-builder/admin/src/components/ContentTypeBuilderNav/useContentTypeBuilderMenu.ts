@@ -175,6 +175,8 @@ export const useContentTypeBuilderMenu = () => {
     const hasChild = section.links.some((l) => Array.isArray(l.links));
 
     if (hasChild) {
+      let filteredLinksCount = 0;
+
       return {
         ...section,
         links: section.links
@@ -185,20 +187,26 @@ export const useContentTypeBuilderMenu = () => {
               return null;
             }
 
+            filteredLinksCount += filteredLinks.length;
+
             return {
               ...link,
               links: filteredLinks.sort((a: any, b: any) => formatter.compare(a.title, b.title)),
             };
           })
           .filter(Boolean),
+        linksCount: filteredLinksCount,
       };
     }
 
+    const filteredLinks = section.links
+      .filter((link) => startsWith(link.title, search))
+      .sort((a, b) => formatter.compare(a.title, b.title));
+
     return {
       ...section,
-      links: section.links
-        .filter((link) => startsWith(link.title, search))
-        .sort((a, b) => formatter.compare(a.title, b.title)),
+      links: filteredLinks,
+      linksCount: filteredLinks.length,
     };
   });
 

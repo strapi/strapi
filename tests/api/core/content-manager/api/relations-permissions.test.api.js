@@ -55,16 +55,16 @@ const createEntry = async (model, data, populate) => {
     body: data,
     qs: { populate },
   });
+
   return body;
 };
 
-const getRelations = async (rq, uid, field, id) => {
-  const res = await rq({
+const getRelations = async (rq, uid, field, id, params = {}) => {
+  return rq({
     method: 'GET',
     url: `/content-manager/relations/${uid}/${id}/${field}`,
+    qs: params,
   });
-
-  return res;
 };
 
 const createUserAndReq = async (userName, permissions) => {
@@ -83,13 +83,10 @@ const createUserAndReq = async (userName, permissions) => {
     roles: [role.id],
   });
 
-  const rq = await createAuthRequest({ strapi, userInfo: user });
-
-  return rq;
+  return createAuthRequest({ strapi, userInfo: user });
 };
 
-// TODO: Fix relations
-describe.skip('Relations', () => {
+describe('Relation permissions', () => {
   const builder = createTestBuilder();
 
   const createFixtures = async () => {
@@ -102,6 +99,9 @@ describe.skip('Relations', () => {
       {
         action: 'plugin::content-manager.explorer.read',
         subject: 'plugin::users-permissions.user',
+      },
+      {
+        action: 'plugin::users-permissions.roles.read',
       },
     ]);
     rqPermissive = await createUserAndReq('permissive', [
@@ -118,6 +118,9 @@ describe.skip('Relations', () => {
         action: 'plugin::content-manager.explorer.read',
         subject: 'plugin::users-permissions.user',
       },
+      {
+        action: 'plugin::users-permissions.roles.read',
+      },
     ]);
   };
 
@@ -130,12 +133,16 @@ describe.skip('Relations', () => {
     rq = await createAuthRequest({ strapi });
     await createFixtures();
 
-    product = await createEntry('api::product.product', { name: 'Skate' });
-    shop = await createEntry(
+    const productEntry = await createEntry('api::product.product', { name: 'Skate' });
+    product = productEntry.data;
+
+    const shopEntry = await createEntry(
       'api::shop.shop',
       { name: 'Shop', products: [product.id] },
       populateShop
     );
+    shop = shopEntry.data;
+
     user = await createEntry('plugin::users-permissions.user', {
       username: 'Alice',
       email: 'test-relations@strapi.io',
@@ -154,13 +161,53 @@ describe.skip('Relations', () => {
       rqPermissive,
       'api::shop.shop',
       'products',
-      shop.id
+      shop.documentId
     );
 
-    // Main field should be in here
+    // The main field should be in here
     expect(products.results).toHaveLength(1);
-    // Main field should be visible
+    // The main field should be visible
     expect(products.results[0].name).toBe(product.name);
+  });
+
+  /**
+   * Prevent relations being loaded without the main field if user has appropriate permissions.
+   * Ref: https://github.com/strapi/strapi/issues/19625
+   */
+  test('Permissive user can read multiple pages of shop products', async () => {
+    // Add more products
+    const products = [];
+
+    for (let i = 0; i < 10; i += 1) {
+      const productEntry = await createEntry('api::product.product', { name: `Product ${i}` });
+      products.push(productEntry.data.id);
+    }
+
+    const shop = await createEntry('api::shop.shop', { name: 'Shop', products }, populateShop);
+
+    const { body: firstPage } = await getRelations(
+      rqPermissive,
+      'api::shop.shop',
+      'products',
+      shop.data.documentId,
+      { page: 1, pageSize: 5 }
+    );
+
+    expect(firstPage.results).toHaveLength(5);
+    // Expect results to have the name field (main field)
+    expect(firstPage.results[0].name).toBeDefined();
+
+    const { body: secondPage } = await getRelations(
+      rqPermissive,
+      'api::shop.shop',
+      'products',
+      shop.data.documentId,
+      { page: 2, pageSize: 5 }
+    );
+
+    expect(secondPage.results).toHaveLength(5);
+    // Expect results to have the name field (main field)
+    expect(secondPage.results[0].name).toBeDefined();
   });
 
   test('Restricted user cannot read shop products mainField', async () => {
@@ -168,11 +215,11 @@ describe.skip('Relations', () => {
       rqRestricted,
       'api::shop.shop',
       'products',
-      shop.id
+      shop.documentId
     );
 
     expect(products.results).toHaveLength(1);
-    // Main field should not be visible
+    // The main field should not be visible
     expect(products.results[0].name).toBeUndefined();
     expect(products.results[0].id).toBe(product.id);
   });
@@ -186,10 +233,10 @@ describe.skip('Relations', () => {
       rqRestricted,
       'plugin::users-permissions.user',
       'role',
-      user.id
+      user.documentId
     );
 
-    // Main field should be visible
-    expect(role.data?.name).toBe('Authenticated');
+    // The main field should be visible
+    expect(role.results?.[0].name).toBe('Authenticated');
   });
 });

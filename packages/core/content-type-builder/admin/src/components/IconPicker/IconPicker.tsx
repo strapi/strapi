@@ -44,24 +44,26 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
 
   return (
     <Field.Root name={name} required={false}>
-      <Field.Label>{ariaLabel}</Field.Label>
-      <VisuallyHidden>
-        <Field.Input
-          type="radio"
-          checked={isSelected}
-          onChange={onChange}
-          value={iconKey}
-          aria-checked={isSelected}
-        />
-      </VisuallyHidden>
-      <Flex
-        padding={2}
-        cursor="pointer"
-        hasRadius
-        background={isSelected ? 'primary200' : undefined}
-      >
-        <Icon fill={isSelected ? 'primary600' : 'neutral300'} />
-      </Flex>
+      <Field.Label>
+        <VisuallyHidden>
+          {ariaLabel}
+          <Field.Input
+            type="radio"
+            checked={isSelected}
+            onChange={onChange}
+            value={iconKey}
+            aria-checked={isSelected}
+          />
+        </VisuallyHidden>
+        <Flex
+          padding={2}
+          cursor="pointer"
+          hasRadius
+          background={isSelected ? 'primary200' : undefined}
+        >
+          <Icon fill={isSelected ? 'primary600' : 'neutral300'} />
+        </Flex>
+      </Field.Label>
     </Field.Root>
   );
 };
@@ -149,7 +151,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
                 id: getTrad('IconPicker.search.button.label'),
                 defaultMessage: 'Search icon button',
               })}
-              borderWidth={0}
+              variant="ghost"
             >
               <Search />
             </IconButton>
@@ -168,7 +170,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
                   id: getTrad('IconPicker.remove.button'),
                   defaultMessage: 'Remove the selected icon',
                 })}
-                borderWidth={0}
+                variant="ghost"
               >
                 <Trash />
               </IconButton>
