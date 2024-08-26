@@ -48,6 +48,7 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
       'styled-components': '^6.0.0',
     },
     template: template ? path.resolve(template) : template,
+    gitInit: false,
   };
 
   await createStrapi(scope);
