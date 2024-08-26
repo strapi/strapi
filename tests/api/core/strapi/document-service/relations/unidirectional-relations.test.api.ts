@@ -28,6 +28,11 @@ const productModel = {
       relation: 'oneToOne',
       target: TAG_UID,
     },
+    tags: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: TAG_UID,
+    },
   },
   draftAndPublish: true,
   displayName: 'Product',
@@ -51,8 +56,6 @@ const tagModel = {
   collectionName: '',
 };
 
-// TODO: Add tests for components
-// TODO: Test discard draft
 describe('Document Service unidirectional relations', () => {
   beforeAll(async () => {
     await builder.addContentTypes([tagModel, productModel]).build();
@@ -74,6 +77,7 @@ describe('Document Service unidirectional relations', () => {
       data: {
         name: 'Product1',
         tag: { documentId: 'Tag1' },
+        tags: [{ documentId: 'Tag1' }, { documentId: 'Tag2' }],
       },
     });
   });
@@ -83,19 +87,38 @@ describe('Document Service unidirectional relations', () => {
     await builder.cleanup();
   });
 
-  testInTransaction('X to One', async () => {
-    // Publish tag1. Product1 relation should target the new published tag1 id
+  testInTransaction('Sync unidirectional relations on publish', async () => {
+    // Publish tag. Product1 relations should target the new published tags id
     const tag1 = await strapi.documents(TAG_UID).publish({ documentId: 'Tag1' });
+    const tag2 = await strapi.documents(TAG_UID).publish({ documentId: 'Tag2' });
 
     const product1 = await strapi
       .documents(PRODUCT_UID)
-      .findFirst({ filters: { name: 'Product1' }, populate: ['tag'] });
+      .findFirst({ filters: { name: 'Product1' }, populate: ['tag', 'tags'], status: 'published' });
 
     expect(product1).toMatchObject({
       name: 'Product1',
       tag: { id: tag1.id },
+      tags: [{ id: tag1.id }, { id: tag2.id }],
     });
   });
 
-  testInTransaction.todo('X to Many', async () => {});
+  testInTransaction('Sync unidirectional relations on discard', async () => {
+    // Discard tag. Product1 relations should target the new draft tags id
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag1' });
+    const tag1 = await strapi.documents(TAG_UID).discardDraft({ documentId: 'Tag1' });
+
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag2' });
+    const tag2 = await strapi.documents(TAG_UID).discardDraft({ documentId: 'Tag2' });
+
+    const product1 = await strapi
+      .documents(PRODUCT_UID)
+      .findFirst({ filters: { name: 'Product1' }, populate: ['tag', 'tags'], status: 'draft' });
+
+    expect(product1).toMatchObject({
+      name: 'Product1',
+      tag: { id: tag1.id },
+      tags: [{ id: tag1.id }, { id: tag2.id }],
+    });
+  });
 });
