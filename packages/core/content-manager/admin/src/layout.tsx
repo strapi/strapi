@@ -75,6 +75,7 @@ const Layout = () => {
           pathname: authorisedModels[0].to,
           search: authorisedModels[0].search ?? '',
         }}
+        replace
       />
     );
   }
