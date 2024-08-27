@@ -68,7 +68,7 @@ jobs:
 
   cli:
     name: 'CLI Tests'
-    needs: [changes, build, typescript]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     steps:
       - run: echo "Skipped"
