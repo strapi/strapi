@@ -157,8 +157,16 @@ const loadUserPluginsFile = async (root: string): Promise<UserPluginConfigFile> 
   return {};
 };
 
-const getMapOfPluginsWithAdmin = (plugins: Record<string, PluginMeta>) =>
-  Object.values(plugins)
+const getMapOfPluginsWithAdmin = (plugins: Record<string, PluginMeta>) => {
+  /**
+   * This variable stores the import paths for plugins.
+   * The keys are the module paths of the plugins, and the values are the paths
+   * to the admin part of the plugins, which is either loaded from the
+   * package.json exports or from the legacy strapi-admin.js file.
+   */
+  const pluginImportPaths: Record<string, string> = {};
+
+  return Object.values(plugins)
     .filter((plugin) => {
       if (!plugin) {
         return false;
@@ -176,16 +184,38 @@ const getMapOfPluginsWithAdmin = (plugins: Record<string, PluginMeta>) =>
        * then it doesn't have an admin part to the package.
        */
       try {
-        const isLocalPluginWithLegacyAdminFile =
-          plugin.path && fs.existsSync(path.join(plugin.path, 'strapi-admin.js'));
-
-        if (!isLocalPluginWithLegacyAdminFile) {
-          const isModuleWithFE = require.resolve(`${plugin.modulePath}/strapi-admin`);
-
-          return isModuleWithFE;
+        const pluginPath = plugin.path;
+        if (!pluginPath) {
+          return false;
         }
 
-        return isLocalPluginWithLegacyAdminFile;
+        const packageJsonPath = path.join(pluginPath, 'package.json');
+        let localAdminPath: string | undefined;
+
+        if (fs.existsSync(packageJsonPath)) {
+          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+          localAdminPath = packageJson?.exports?.['./strapi-admin']?.import;
+        }
+
+        // Check if legacy admin file exists
+        const localWithLegacyAdminFile =
+          pluginPath && fs.existsSync(path.join(pluginPath, 'strapi-admin.js'));
+
+        if (localAdminPath) {
+          pluginImportPaths[plugin.modulePath] = localAdminPath;
+        } else if (localWithLegacyAdminFile) {
+          pluginImportPaths[plugin.modulePath] = 'strapi-admin';
+        } else {
+          const isModuleWithFE = require.resolve(`${plugin.modulePath}/strapi-admin`);
+
+          if (isModuleWithFE) {
+            pluginImportPaths[plugin.modulePath] = 'strapi-admin';
+          } else {
+            return false;
+          }
+        }
+
+        return true;
       } catch (err) {
         if (
           isError(err) &&
@@ -204,8 +234,9 @@ const getMapOfPluginsWithAdmin = (plugins: Record<string, PluginMeta>) =>
     })
     .map((plugin) => ({
       ...plugin,
-      modulePath: `${plugin.modulePath}/strapi-admin`,
+      modulePath: `${plugin.modulePath}/${pluginImportPaths[plugin.modulePath]}`,
     }));
+};
 
 export { getEnabledPlugins, getMapOfPluginsWithAdmin };
 export type { PluginMeta, LocalPluginMeta, ModulePluginMeta };
