@@ -4,6 +4,7 @@ import set from 'lodash/set';
 
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
 import { init, initialState } from './init';
+import type { Configuration } from '../../../../../../shared/contracts/configuration';
 
 interface OnChangeAction {
   keys: string;
@@ -29,8 +30,12 @@ const reducer = (state = initialState, action: Action) =>
         break;
       }
       case SET_LOADED: {
+        const getData = get(draftState, ['modifiedData'], {
+          pageSize: 10,
+          sort: 'createdAt:DESC',
+        }) as Configuration;
         // This action re-initialises the state using the current modifiedData.
-        const reInitialise = init(get(draftState, ['modifiedData'], {}));
+        const reInitialise = init(getData);
         draftState.initialData = reInitialise.initialData;
         draftState.modifiedData = reInitialise.modifiedData;
         break;

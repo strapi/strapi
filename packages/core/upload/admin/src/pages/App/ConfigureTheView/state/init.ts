@@ -1,6 +1,8 @@
+import type { Configuration } from '../../../../../../shared/contracts/configuration';
+
 export type InitialStateType = {
-  initialData: Partial<ConfigData>;
-  modifiedData: Partial<ConfigData>;
+  initialData: Partial<Configuration>;
+  modifiedData: Partial<Configuration>;
 };
 
 const initialState: InitialStateType = {
@@ -8,12 +10,7 @@ const initialState: InitialStateType = {
   modifiedData: {},
 };
 
-interface ConfigData {
-  sort?: string;
-  pageSize?: number;
-}
-
-const init = (configData: ConfigData) => {
+const init = (configData: Configuration) => {
   return {
     ...initialState,
     initialData: configData,
