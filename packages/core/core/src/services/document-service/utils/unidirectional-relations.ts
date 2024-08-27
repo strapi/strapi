@@ -1,6 +1,6 @@
 /* eslint-disable no-continue */
-import { UID } from '@strapi/types';
-import { async } from '@strapi/utils';
+import { UID, Schema } from '@strapi/types';
+import { async, traverseEntity } from '@strapi/utils';
 
 interface RelationToSync {
   uid: string;
@@ -17,15 +17,17 @@ interface RelationToSync {
  * @param newEntries - The new entries that unidirectional relations should target.
  */
 const syncUnidirectionalRelations = async (
-  uid: UID.ContentType | UID.Component,
+  uid: UID.ContentType,
   oldEntries: { id: string; locale: string }[],
   newEntries: { id: string; locale: string }[]
 ) => {
   const relationsToSync: RelationToSync[] = [];
 
   // Iterate all components and content types
-  // TODO: Do the same for components
-  for (const contentType of Object.values(strapi.contentTypes)) {
+  const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
+  const components = Object.values(strapi.components) as Schema.Component[];
+
+  for (const contentType of [...contentTypes, ...components]) {
     // If the content type has a relation to the current content type
     for (const [name, attribute] of Object.entries(contentType.attributes) as any) {
       if (attribute.type !== 'relation') continue;
