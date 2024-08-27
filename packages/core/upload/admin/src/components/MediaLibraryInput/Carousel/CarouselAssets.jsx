@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import * as React from 'react';
 
 import { CarouselInput, CarouselSlide } from '@strapi/design-system';
 import PropTypes from 'prop-types';
@@ -12,7 +12,7 @@ import { CarouselAsset } from './CarouselAsset';
 import { CarouselAssetActions } from './CarouselAssetActions';
 import { EmptyStateAsset } from './EmptyStateAsset';
 
-export const CarouselAssets = forwardRef(
+export const CarouselAssets = React.forwardRef(
   (
     {
       assets,
@@ -35,7 +35,7 @@ export const CarouselAssets = forwardRef(
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
-    const [isEditingAsset, setIsEditingAsset] = useState(false);
+    const [isEditingAsset, setIsEditingAsset] = React.useState(false);
 
     const currentAsset = assets[selectedAssetIndex];
 

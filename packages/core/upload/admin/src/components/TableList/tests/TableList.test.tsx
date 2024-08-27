@@ -1,11 +1,9 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { TableList } from '..';
+import { TableList, TableListProps } from '../index';
 
 const PROPS_FIXTURE = {
   canUpdate: true,
@@ -18,15 +16,31 @@ const PROPS_FIXTURE = {
       formats: {
         thumbnail: {
           url: '/uploads/thumbnail_3874873_b5818bb250.jpg',
+          name: 'thumbnail_3874873.jpg',
+          hash: 'thumbnail_3874873_b5818bb250',
+          ext: '.jpg',
+          mime: 'image/jpeg',
+          width: 156,
+          height: 156,
+          size: 3.97,
+          sizeInBytes: 397,
+          path: null,
         },
       },
       id: 1,
       mime: 'image/jpeg',
       name: 'michka',
       size: 11.79,
+      sizeInBytes: 1179,
       updatedAt: '2021-10-18T08:04:56.326Z',
       url: '/uploads/michka.jpg',
       type: 'asset',
+      folder: null,
+      folderPath: '/1',
+      documentId: 'docId',
+      hash: 'hash',
+      locale: 'en',
+      provider: 'local',
     },
   ],
   onEditAsset: jest.fn(),
@@ -34,10 +48,11 @@ const PROPS_FIXTURE = {
   onSelectOne: jest.fn(),
   onSelectAll: jest.fn(),
   selected: [],
+  sortQuery: 'updatedAt:ASC',
 };
 
-const ComponentFixture = (props) => {
-  const customProps = {
+const ComponentFixture = (props: Partial<TableListProps> = {}) => {
+  const customProps: TableListProps = {
     ...PROPS_FIXTURE,
     ...props,
   };
@@ -53,7 +68,7 @@ const ComponentFixture = (props) => {
   );
 };
 
-const setup = (props) => render(<ComponentFixture {...props} />);
+const setup = (props: Partial<TableListProps> = {}) => render(<ComponentFixture {...props} />);
 
 describe('TableList', () => {
   it('should render a visually hidden edit table headers label', () => {
@@ -120,10 +135,23 @@ describe('TableList', () => {
       rows: [
         {
           createdAt: '2022-11-17T10:40:06.022Z',
+          documentId: 'folderId',
+          folderURL: '/folder/1',
+          isSelectable: true,
+          locale: 'en',
           id: 2,
           name: 'folder 1',
+          path: '/1',
+          pathId: 1,
           type: 'folder',
           updatedAt: '2022-11-17T10:40:06.022Z',
+          publishedAt: '2022-11-17T10:40:06.022Z',
+          children: {
+            count: 0,
+          },
+          files: {
+            count: 0,
+          },
         },
       ],
     });
