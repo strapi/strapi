@@ -5,13 +5,27 @@ import set from 'lodash/set';
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
 import { init, initialState } from './init';
 
+interface OnChangeAction {
+  keys: string;
+  type: typeof ON_CHANGE;
+  value: string;
+}
+
+interface SetLoadedAction {
+  type: typeof SET_LOADED;
+}
+
+type Action = OnChangeAction | SetLoadedAction;
+
 // eslint-disable-next-line default-param-last
-const reducer = (state = initialState, action) =>
+const reducer = (state = initialState, action: Action) =>
   // eslint-disable-next-line consistent-return
   produce(state, (draftState) => {
     switch (action.type) {
       case ON_CHANGE: {
-        set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
+        if ('value' in action) {
+          set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
+        }
         break;
       }
       case SET_LOADED: {

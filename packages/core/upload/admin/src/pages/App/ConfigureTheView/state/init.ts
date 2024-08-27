@@ -1,14 +1,16 @@
-const initialState: {
+export type InitialStateType = {
   initialData: Partial<ConfigData>;
   modifiedData: Partial<ConfigData>;
-} = {
+};
+
+const initialState: InitialStateType = {
   initialData: {},
   modifiedData: {},
 };
 
 interface ConfigData {
-  sort: string;
-  pageSize: number;
+  sort?: string;
+  pageSize?: number;
 }
 
 const init = (configData: ConfigData) => {
