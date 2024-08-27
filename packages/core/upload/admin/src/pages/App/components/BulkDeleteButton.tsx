@@ -1,15 +1,26 @@
-import * as React from 'react';
-
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Button, Dialog } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition, FolderDefinition } from '../../../constants';
+import { Asset } from '../../../../../shared/contracts/files';
+import { Folder } from '../../../../../shared/contracts/folders';
 import { useBulkRemove } from '../../../hooks/useBulkRemove';
 
-export const BulkDeleteButton = ({ selected, onSuccess }) => {
+interface FolderWithType extends Folder {
+  type: string;
+}
+
+export interface AssetWithType extends Asset {
+  type: string;
+}
+
+export interface BulkDeleteButtonProps {
+  selected: (AssetWithType | FolderWithType)[];
+  onSuccess: () => void;
+}
+
+export const BulkDeleteButton = ({ selected, onSuccess }: BulkDeleteButtonProps) => {
   const { formatMessage } = useIntl();
   const { remove } = useBulkRemove();
 
@@ -28,9 +39,4 @@ export const BulkDeleteButton = ({ selected, onSuccess }) => {
       <ConfirmDialog onConfirm={handleConfirmRemove} />
     </Dialog.Root>
   );
-};
-
-BulkDeleteButton.propTypes = {
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
-  onSuccess: PropTypes.func.isRequired,
 };
