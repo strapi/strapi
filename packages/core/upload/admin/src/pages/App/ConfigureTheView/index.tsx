@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import * as React from 'react';
 
 import {
   ConfirmDialog,
@@ -10,7 +10,6 @@ import {
 import { Button, Dialog, Link } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -23,27 +22,31 @@ import { onChange, setLoaded } from './state/actions';
 import { init, initialState } from './state/init';
 import reducer from './state/reducer';
 
-const ConfigureTheView = ({ config }) => {
+import type { Configuration } from '../../../../../shared/contracts/configuration';
+
+const ConfigureTheView = ({ config }: {
+  config: Configuration;
+}) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { mutateConfig } = useConfig();
   const { isLoading: isSubmittingForm } = mutateConfig;
 
-  const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const [showWarningSubmit, setWarningSubmit] = React.useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () => init(config));
+  const [reducerState, dispatch] = React.useReducer(reducer, initialState, () => init(config));
   const { initialData, modifiedData } = reducerState;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     toggleWarningSubmit();
   };
 
   const handleConfirm = async () => {
     trackUsage('willEditMediaLibraryConfig');
-    await mutateConfig.mutateAsync(modifiedData);
+    await mutateConfig.mutateAsync(modifiedData as Configuration);
     setWarningSubmit(false);
     dispatch(setLoaded());
     toggleNotification({
@@ -55,8 +58,13 @@ const ConfigureTheView = ({ config }) => {
     });
   };
 
-  const handleChange = ({ target: { name, value } }) => {
-    dispatch(onChange({ name, value }));
+  const handleChange = ({ target: { name, value } }: {
+    target: {
+      name: string;
+      value: number | string;
+    };
+  }) => {
+    dispatch(onChange({ name, value: Number(value) }));
   };
 
   return (
@@ -97,7 +105,7 @@ const ConfigureTheView = ({ config }) => {
           <Layouts.Content>
             <Settings
               data-testid="settings"
-              pageSize={modifiedData.pageSize || ''}
+              pageSize={modifiedData.pageSize || 10}
               sort={modifiedData.sort || ''}
               onChange={handleChange}
             />
@@ -115,13 +123,6 @@ const ConfigureTheView = ({ config }) => {
       </Page.Main>
     </Layouts.Root>
   );
-};
-
-ConfigureTheView.propTypes = {
-  config: PropTypes.shape({
-    pageSize: PropTypes.number,
-    sort: PropTypes.string,
-  }).isRequired,
 };
 
 export default ConfigureTheView;
