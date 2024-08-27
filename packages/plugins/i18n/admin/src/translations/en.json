@@ -8,6 +8,7 @@
   "CMEditViewCopyLocale.copy-text": "Fill in from another locale",
   "CMEditViewCopyLocale.submit-text": "Yes, fill in",
   "CMEditViewBulkLocale.publish-title": "Publish Multiple Locales",
+  "CMEditViewBulkLocale.unpublish-title": "Unpublish Multiple Locales",
   "CMEditViewBulkLocale.status": "Status",
   "CMEditViewBulkLocale.publication-status": "Publication Status",
   "CMEditViewBulkLocale.draft-relation-warning": "Some locales are related to draft entries. Publishing them could leave broken links in your app.",

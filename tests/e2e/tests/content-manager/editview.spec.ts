@@ -137,7 +137,9 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'More document actions' })).not.toBeDisabled();
 
       await page.getByRole('button', { name: 'More document actions' }).click();
-      await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
+      await expect(
+        page.getByRole('menuitem', { name: 'Unpublish', exact: true })
+      ).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
@@ -330,8 +332,10 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('tab', { name: 'Published' })).not.toBeDisabled();
 
       await page.getByRole('button', { name: 'More document actions' }).click();
-      await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
-      await page.getByRole('menuitem', { name: 'Unpublish' }).click();
+      await expect(
+        page.getByRole('menuitem', { name: 'Unpublish', exact: true })
+      ).not.toBeDisabled();
+      await page.getByRole('menuitem', { name: 'Unpublish', exact: true }).click();
 
       await findAndClose(page, 'Unpublished Document');
 
@@ -483,7 +487,9 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'More document actions' })).not.toBeDisabled();
 
       await page.getByRole('button', { name: 'More document actions' }).click();
-      await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
+      await expect(
+        page.getByRole('menuitem', { name: 'Unpublish', exact: true })
+      ).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
@@ -656,8 +662,10 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('tab', { name: 'Published' })).not.toBeDisabled();
 
       await page.getByRole('button', { name: 'More document actions' }).click();
-      await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
-      await page.getByRole('menuitem', { name: 'Unpublish' }).click();
+      await expect(
+        page.getByRole('menuitem', { name: 'Unpublish', exact: true })
+      ).not.toBeDisabled();
+      await page.getByRole('menuitem', { name: 'Unpublish', exact: true }).click();
 
       await findAndClose(page, 'Unpublished Document');
 
