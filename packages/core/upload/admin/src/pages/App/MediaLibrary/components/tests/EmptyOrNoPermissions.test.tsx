@@ -4,9 +4,9 @@ import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { EmptyOrNoPermissions } from '../EmptyOrNoPermissions';
+import { EmptyOrNoPermissions, EmptyOrNoPermissionsProps } from '../EmptyOrNoPermissions';
 
-const setup = (props) =>
+const setup = (props: Partial<EmptyOrNoPermissionsProps>) =>
   render(
     <DesignSystemProvider>
       <IntlProvider locale="en" messages={{}}>
