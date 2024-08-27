@@ -118,3 +118,5 @@ export const tableHeaders = [
     type: 'date',
   },
 ];
+
+export const pageSizes = [10, 20, 50, 100];

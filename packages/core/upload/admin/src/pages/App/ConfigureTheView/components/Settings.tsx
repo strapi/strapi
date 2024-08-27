@@ -1,13 +1,17 @@
-import React from 'react';
-
 import { Box, Grid, SingleSelectOption, SingleSelect, Field } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { pageSizes, sortOptions } from '../../../../constants';
+// TODO: import from constants file when it will be migrated to TypeScript
+import { pageSizes, sortOptions } from '../../../../newConstants';
 import { getTrad } from '../../../../utils';
 
-const Settings = ({ sort = '', pageSize = 10, onChange }) => {
+interface SettingsProps {
+  sort: string;
+  pageSize: number;
+  onChange: (event: { target: { name: string; value: string | number } }) => void;
+}
+
+export const Settings = ({ sort = '', pageSize = 10, onChange }: SettingsProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -36,7 +40,9 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
               })}
             </Field.Label>
             <SingleSelect
-              onChange={(value) => onChange({ target: { name: 'pageSize', value } })}
+              onChange={(value: number | string) =>
+                onChange({ target: { name: 'pageSize', value } })
+              }
               value={pageSize}
             >
               {pageSizes.map((pageSize) => (
@@ -85,11 +91,3 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
     </Box>
   );
 };
-
-Settings.propTypes = {
-  sort: PropTypes.string.isRequired,
-  pageSize: PropTypes.number.isRequired,
-  onChange: PropTypes.func.isRequired,
-};
-
-export { Settings };
