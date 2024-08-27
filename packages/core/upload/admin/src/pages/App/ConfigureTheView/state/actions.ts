@@ -1,6 +1,11 @@
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
 
-export const onChange = ({ name, value }) => ({
+interface OnChangeProps {
+  name: string;
+  value: number;
+}
+
+export const onChange = ({ name, value }: OnChangeProps) => ({
   type: ON_CHANGE,
   keys: name,
   value,
