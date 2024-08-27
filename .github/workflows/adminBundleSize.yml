@@ -5,7 +5,6 @@ on:
     paths:
       - '**/admin/src/**.js'
       - '**/ee/admin/**.js'
-      - '**/helper-plugin/src/**.js'
       - '**/translations/**.json'
 
       # Might be too broad, but it runs the action even if a
