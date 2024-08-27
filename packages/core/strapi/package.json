@@ -184,6 +184,7 @@
     "@types/webpack-bundle-analyzer": "4.7.0",
     "@types/webpack-hot-middleware": "2.25.9",
     "eslint-config-custom": "workspace:*",
+    "jest": "29.6.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "tsconfig": "workspace:*"

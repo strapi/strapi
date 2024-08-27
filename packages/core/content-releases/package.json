@@ -74,6 +74,7 @@
     "@strapi/admin-test-utils": "workspace:*",
     "@strapi/content-manager": "workspace:*",
     "@strapi/pack-up": "5.0.0",
+    "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "@types/koa": "2.13.4",
