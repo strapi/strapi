@@ -74,13 +74,15 @@ export const LinkToCMSettingsView = memo(
     if (!isInContentTypeView) {
       permissionsToApply = componentsConfigurations;
     }
-    const {
-      allowedActions: { canViewConfig },
-    } = useRBAC({
+    const { isLoading, allowedActions } = useRBAC({
       viewConfig: permissionsToApply,
     });
 
-    if (!canViewConfig) {
+    if (isLoading) {
+      return null;
+    }
+
+    if (!allowedActions.canConfigureView) {
       return null;
     }
 
