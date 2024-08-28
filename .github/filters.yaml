@@ -15,5 +15,4 @@ frontend:
   - 'packages/**/admin/src/**'
   - 'packages/**/admin/ee/admin/**'
   - 'packages/**/strapi-admin.js'
-  - 'packages/core/helper-plugin/**'
   - 'packages/admin-test-utils/**'

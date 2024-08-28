@@ -36,6 +36,13 @@ jobs:
     steps:
       - run: echo "Skipped"
 
+  typescript:
+    runs-on: ubuntu-latest
+    needs: [build]
+    name: 'typescript'
+    steps:
+      - run: echo "Skipped"
+
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [lint]
@@ -70,6 +77,26 @@ jobs:
     name: 'CLI Tests'
     needs: [changes, build]
     runs-on: ubuntu-latest
+    steps:
+      - run: echo "Skipped"
+
+  e2e_ce:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] e2e (browser: ${{ matrix.project }})'
+    strategy:
+      matrix:
+        node: [18, 20]
+    steps:
+      - run: echo "Skipped"
+
+  e2e_ee:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    strategy:
+      matrix:
+        node: [18, 20]
     steps:
       - run: echo "Skipped"
 
