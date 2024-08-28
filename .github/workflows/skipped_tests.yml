@@ -95,7 +95,7 @@ jobs:
     name: '[CE] e2e (browser: ${{ matrix.project }})'
     strategy:
       matrix:
-        node: [18, 20]
+        project: ['chromium', 'webkit', 'firefox']
     steps:
       - run: echo "Skipped"
 
@@ -105,7 +105,7 @@ jobs:
     name: '[EE] e2e (browser: ${{ matrix.project }})'
     strategy:
       matrix:
-        node: [18, 20]
+        project: ['chromium', 'webkit', 'firefox']
     steps:
       - run: echo "Skipped"
 
