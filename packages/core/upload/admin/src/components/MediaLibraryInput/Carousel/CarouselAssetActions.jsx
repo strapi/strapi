@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 
 import { AssetDefinition } from '../../../constants';
 import { prefixFileUrlWithBackendUrl } from '../../../utils';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
 
 export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditAsset }) => {

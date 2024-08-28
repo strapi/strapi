@@ -12,7 +12,7 @@ import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
 import { createAssetUrl } from '../../../utils';
 import { downloadFile } from '../../../utils/downloadFile';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';

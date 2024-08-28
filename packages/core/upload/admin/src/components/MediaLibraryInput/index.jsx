@@ -4,8 +4,8 @@ import { useField, useNotification } from '@strapi/admin/strapi-admin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import getAllowedFiles from '../../utils/getAllowedFiles';
-import getTrad from '../../utils/getTrad';
+import { getAllowedFiles } from '../../utils/getAllowedFiles';
+import { getTrad } from '../../utils/getTrad';
 import { AssetDialog } from '../AssetDialog';
 import { EditFolderDialog } from '../EditFolderDialog';
 import { UploadAssetDialog } from '../UploadAssetDialog/UploadAssetDialog';
