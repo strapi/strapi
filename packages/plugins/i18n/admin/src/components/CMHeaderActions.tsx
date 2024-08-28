@@ -36,6 +36,7 @@ import { styled } from 'styled-components';
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
+import { cleanData } from '../utils/clean';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
@@ -193,10 +194,9 @@ const FillFromAnotherLocaleAction = ({
   const currentDesiredLocale = query.plugins?.i18n?.locale;
   const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
   const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
-  const test = useForm('FillFromAnotherLocale', (state) => state);
-  console.log({ test });
+
   const { getDocument } = useDocumentActions();
-  const { schema } = useDocument({
+  const { schema, components } = useDocument({
     model,
     documentId,
     collectionType,
@@ -220,36 +220,10 @@ const FillFromAnotherLocaleAction = ({
     }
 
     const { data } = response;
-    const { attributes } = schema;
-    const validValues = Object.keys(attributes).filter((key) => {
-      if (['relation', 'password'].includes(attributes[key].type)) {
-        return false;
-      }
 
-      if (['createdAt', 'createdBy', 'updatedAt', 'updatedBy', 'id'].includes(key)) {
-        return false;
-      }
+    const cleanedData = cleanData(data, schema, components);
 
-      return true;
-    });
-
-    const copiedValues = validValues.reduce(
-      (acc, key) => {
-        if (Array.isArray(data[key])) {
-          acc[key] = data[key].map((item: any, index: number) => ({
-            ...item,
-            __temp_key__: index + 1,
-          }));
-          return acc;
-        }
-
-        acc[key] = data[key];
-        return acc;
-      },
-      {} as Record<string, any>
-    );
-
-    setValues(copiedValues);
+    setValues(cleanedData);
 
     onClose();
   };
