@@ -186,7 +186,10 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
       if (layout[rowIndex].children.length === 1) {
         removeFieldRow(`layout`, rowIndex);
       } else {
-        onChange(`layout.${rowIndex}.children.${fieldIndex}`, undefined);
+        onChange(`layout.${rowIndex}.children`, [
+          ...layout[rowIndex].children.slice(0, fieldIndex),
+          ...layout[rowIndex].children.slice(fieldIndex + 1),
+        ]);
       }
     };
 
@@ -340,8 +343,15 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
   const composedRefs = useComposedRefs<HTMLSpanElement>(dragRef, objectRef);
 
   const handleRemoveField: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     onRemoveField(e);
+  };
+
+  const onEditFieldMeta: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsModalOpen(true);
   };
 
   const tempRefs = useComposedRefs<HTMLSpanElement>(dropRef, objectRef);
@@ -393,10 +403,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 type="button"
                 variant="ghost"
                 background="transparent"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsModalOpen(true);
-                }}
+                onClick={onEditFieldMeta}
                 withTooltip={false}
                 label={formatMessage(
                   {
