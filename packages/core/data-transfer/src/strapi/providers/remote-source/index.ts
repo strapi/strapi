@@ -134,6 +134,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     stream
       .on('data', async (payload: Protocol.Client.TransferAssetFlow[]) => {
+        // TODO: fix the race condition causing multiple streams to open at once so that this check can be removed
+        // Keep track of streams and wait to prevent bugs with parallel processing
         const payloadIndex = payloadIndexer;
         payloadIndexer += 1;
 
