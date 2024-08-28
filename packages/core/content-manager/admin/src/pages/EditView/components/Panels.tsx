@@ -82,7 +82,7 @@ const ActionsPanel: PanelComponent = () => {
   return {
     title: formatMessage({
       id: 'content-manager.containers.edit.panels.default.title',
-      defaultMessage: 'Document',
+      defaultMessage: 'Entry',
     }),
     content: <ActionsPanelContent />,
   };
