@@ -27,6 +27,15 @@ jobs:
         with:
           filters: .github/filters.yaml
 
+  pretty:
+    name: 'pretty (node: 20)'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20]
+    steps:
+      - run: echo "Skipped"
+
   lint:
     name: 'lint (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
