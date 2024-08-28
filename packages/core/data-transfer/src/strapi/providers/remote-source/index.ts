@@ -181,7 +181,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           }
         }
 
-        currentPayloadIndex++;
+        currentPayloadIndex = currentPayloadIndex + 1;
       })
       .on('close', () => {
         pass.end();
