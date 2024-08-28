@@ -1,6 +1,6 @@
 /* eslint-disable no-continue */
 import { UID, Schema } from '@strapi/types';
-import { async, traverseEntity } from '@strapi/utils';
+import { async } from '@strapi/utils';
 
 interface RelationToSync {
   uid: string;
@@ -27,19 +27,19 @@ const syncUnidirectionalRelations = async (
   const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
   const components = Object.values(strapi.components) as Schema.Component[];
 
-  for (const contentType of [...contentTypes, ...components]) {
+  for (const model of [...contentTypes, ...components]) {
     // If the content type has a relation to the current content type
-    for (const [name, attribute] of Object.entries(contentType.attributes) as any) {
+    for (const [name, attribute] of Object.entries(model.attributes) as any) {
       if (attribute.type !== 'relation') continue;
       if (attribute.target !== uid) continue;
       // If its inversed by or mapped by, ignore
       if (attribute.inversedBy || attribute.mappedBy) continue;
 
-      relationsToSync.push({ uid: contentType.uid, attribute: name });
+      relationsToSync.push({ uid: model.uid, attribute: name });
     }
   }
 
-  await strapi.db.transaction(async ({ trx }) =>
+  await strapi.db.transaction(({ trx }) =>
     async.map(newEntries, async (newEntry: { id: string; locale: string }) => {
       // Entries should match by locale
       const oldEntry = oldEntries.find((entry) => entry.locale === newEntry.locale);

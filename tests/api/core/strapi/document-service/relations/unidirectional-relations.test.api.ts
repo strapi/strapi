@@ -18,6 +18,27 @@ let rq;
 const PRODUCT_UID = 'api::product.product';
 const TAG_UID = 'api::tag.tag';
 
+const populate = {
+  tag: true,
+  tags: true,
+  compo: {
+    populate: {
+      tag: true,
+    },
+  },
+};
+
+const componentModel = {
+  attributes: {
+    tag: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: TAG_UID,
+    },
+  },
+  displayName: 'compo',
+};
+
 const productModel = {
   attributes: {
     name: {
@@ -32,6 +53,10 @@ const productModel = {
       type: 'relation',
       relation: 'oneToMany',
       target: TAG_UID,
+    },
+    compo: {
+      type: 'component',
+      component: 'default.compo',
     },
   },
   draftAndPublish: true,
@@ -58,7 +83,11 @@ const tagModel = {
 
 describe('Document Service unidirectional relations', () => {
   beforeAll(async () => {
-    await builder.addContentTypes([tagModel, productModel]).build();
+    await builder
+      .addContentTypes([tagModel])
+      .addComponent(componentModel)
+      .addContentTypes([productModel])
+      .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -73,13 +102,21 @@ describe('Document Service unidirectional relations', () => {
     });
 
     // PRODUCTS
-    await strapi.documents(PRODUCT_UID).create({
+    const product = await strapi.documents(PRODUCT_UID).create({
       data: {
         name: 'Product1',
         tag: { documentId: 'Tag1' },
         tags: [{ documentId: 'Tag1' }, { documentId: 'Tag2' }],
+        compo: { tag: { documentId: 'Tag1' } },
       },
     });
+
+    // Publish tag1
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag1' });
+    await strapi.documents(TAG_UID).publish({ documentId: 'Tag2' });
+
+    // Publish product
+    await strapi.documents(PRODUCT_UID).publish({ documentId: product.documentId });
   });
 
   afterAll(async () => {
@@ -90,16 +127,19 @@ describe('Document Service unidirectional relations', () => {
   testInTransaction('Sync unidirectional relations on publish', async () => {
     // Publish tag. Product1 relations should target the new published tags id
     const tag1 = await strapi.documents(TAG_UID).publish({ documentId: 'Tag1' });
+    const tag1Id = tag1.entries[0].id;
     const tag2 = await strapi.documents(TAG_UID).publish({ documentId: 'Tag2' });
+    const tag2Id = tag2.entries[0].id;
 
     const product1 = await strapi
       .documents(PRODUCT_UID)
-      .findFirst({ filters: { name: 'Product1' }, populate: ['tag', 'tags'], status: 'published' });
+      .findFirst({ filters: { name: 'Product1' }, populate, status: 'published' });
 
     expect(product1).toMatchObject({
       name: 'Product1',
-      tag: { id: tag1.id },
-      tags: [{ id: tag1.id }, { id: tag2.id }],
+      tag: { id: tag1Id },
+      tags: [{ id: tag1Id }, { id: tag2Id }],
+      compo: { tag: { id: tag1Id } },
     });
   });
 
@@ -107,18 +147,21 @@ describe('Document Service unidirectional relations', () => {
     // Discard tag. Product1 relations should target the new draft tags id
     await strapi.documents(TAG_UID).publish({ documentId: 'Tag1' });
     const tag1 = await strapi.documents(TAG_UID).discardDraft({ documentId: 'Tag1' });
+    const tag1Id = tag1.entries[0].id;
 
     await strapi.documents(TAG_UID).publish({ documentId: 'Tag2' });
     const tag2 = await strapi.documents(TAG_UID).discardDraft({ documentId: 'Tag2' });
+    const tag2Id = tag2.entries[0].id;
 
     const product1 = await strapi
       .documents(PRODUCT_UID)
-      .findFirst({ filters: { name: 'Product1' }, populate: ['tag', 'tags'], status: 'draft' });
+      .findFirst({ filters: { name: 'Product1' }, populate, status: 'draft' });
 
     expect(product1).toMatchObject({
       name: 'Product1',
-      tag: { id: tag1.id },
-      tags: [{ id: tag1.id }, { id: tag2.id }],
+      tag: { id: tag1Id },
+      tags: [{ id: tag1Id }, { id: tag2Id }],
+      compo: { tag: { id: tag1Id } },
     });
   });
 });

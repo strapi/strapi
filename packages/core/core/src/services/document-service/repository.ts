@@ -247,7 +247,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           documentId,
           publishedAt: { $ne: null },
         },
-        select: ['id'],
+        select: ['id', 'locale'],
       }),
     ]);
 
@@ -313,7 +313,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     ]);
 
     // Transform published entry data and create draft versions
-    const draftEntries = await async.map(versionsToDraft, async (entry: any) =>
+    const draftEntries = await async.map(versionsToDraft, (entry: any) =>
       entries.discardDraft(entry, queryParams)
     );
 
