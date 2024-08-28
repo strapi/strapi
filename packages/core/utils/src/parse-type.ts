@@ -1,15 +1,19 @@
 import * as _ from 'lodash';
-import * as dates from 'date-fns';
+import _isDate from 'date-fns/isDate';
+import format from 'date-fns/format';
+import isValid from 'date-fns/isValid';
+import parseISO from 'date-fns/parseISO';
+import parse from 'date-fns/parse';
 
 const timeRegex = /^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$/;
 
 const isDate = (v: unknown): v is Date => {
-  return dates.isDate(v);
+  return _isDate(v);
 };
 
 const parseTime = (value: unknown): string => {
   if (isDate(value)) {
-    return dates.format(value, 'HH:mm:ss.SSS');
+    return format(value, 'HH:mm:ss.SSS');
   }
 
   if (typeof value !== 'string') {
@@ -29,7 +33,7 @@ const parseTime = (value: unknown): string => {
 
 const parseDate = (value: unknown) => {
   if (isDate(value)) {
-    return dates.format(value, 'yyyy-MM-dd');
+    return format(value, 'yyyy-MM-dd');
   }
 
   if (typeof value !== 'string') {
@@ -37,9 +41,9 @@ const parseDate = (value: unknown) => {
   }
 
   try {
-    const date = dates.parseISO(value);
+    const date = parseISO(value);
 
-    if (dates.isValid(date)) return dates.format(date, 'yyyy-MM-dd');
+    if (isValid(date)) return format(date, 'yyyy-MM-dd');
 
     throw new Error(`Invalid format, expected an ISO compatible date`);
   } catch (error) {
@@ -57,11 +61,11 @@ const parseDateTimeOrTimestamp = (value: unknown) => {
   }
 
   try {
-    const date = dates.parseISO(value);
-    if (dates.isValid(date)) return date;
+    const date = parseISO(value);
+    if (isValid(date)) return date;
 
-    const milliUnixDate = dates.parse(value, 'T', new Date());
-    if (dates.isValid(milliUnixDate)) return milliUnixDate;
+    const milliUnixDate = parse(value, 'T', new Date());
+    if (isValid(milliUnixDate)) return milliUnixDate;
 
     throw new Error(`Invalid format, expected a timestamp or an ISO date`);
   } catch (error) {

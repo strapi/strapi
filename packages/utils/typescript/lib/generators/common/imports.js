@@ -1,6 +1,5 @@
 'use strict';
 
-const { factory } = require('typescript');
 
 const imports = [];
 
@@ -18,6 +17,8 @@ module.exports = {
   },
 
   generateImportDefinition() {
+    const { factory } = require('typescript');
+
     const formattedImports = imports.map((key) =>
       factory.createImportSpecifier(false, undefined, factory.createIdentifier(key))
     );

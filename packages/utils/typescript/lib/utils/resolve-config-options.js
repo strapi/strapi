@@ -1,10 +1,11 @@
 'use strict';
 
-const ts = require('typescript');
 
 const logDiagnostics = require('./report-diagnostics');
 
 module.exports = (configPath) => {
+  const ts = require('typescript');
+
   // Parse the tsconfig.json file and resolve every file name & compiler options
   const { errors, ...configOptions } = ts.getParsedCommandLineOfConfigFile(
     configPath,

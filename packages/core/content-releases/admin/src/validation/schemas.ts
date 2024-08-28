@@ -1,5 +1,5 @@
 import { translatedErrors } from '@strapi/admin/strapi-admin';
-import { zonedTimeToUtc } from 'date-fns-tz';
+import zonedTimeToUtc from 'date-fns-tz/zonedTimeToUtc';
 import * as yup from 'yup';
 
 /**

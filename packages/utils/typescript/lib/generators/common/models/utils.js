@@ -1,7 +1,5 @@
 'use strict';
 
-const ts = require('typescript');
-const { factory } = require('typescript');
 const {
   pipe,
   replace,
@@ -70,6 +68,7 @@ const getSchemaExtendsTypeName = (schema) => {
  * @returns
  */
 const getTypeNode = (typeName, params = []) => {
+  const { factory } = require('typescript');
   return factory.createTypeReferenceNode(factory.createIdentifier(typeName), params);
 };
 
@@ -79,6 +78,8 @@ const getTypeNode = (typeName, params = []) => {
  * @returns {ts.TypeNode}
  */
 const toTypeLiteral = (data) => {
+  const ts = require('typescript');
+  const { factory } = require('typescript');
   if (isUndefined(data)) {
     return factory.createLiteralTypeNode(ts.SyntaxKind.UndefinedKeyword);
   }

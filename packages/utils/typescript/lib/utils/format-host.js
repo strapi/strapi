@@ -1,15 +1,15 @@
 'use strict';
 
-const ts = require('typescript');
 const { identity } = require('lodash/fp');
+const os = require('os');
 
 /**
  * @type {ts.FormatDiagnosticsHost}
  */
 const formatHost = {
   getCanonicalFileName: identity,
-  getCurrentDirectory: ts.sys.getCurrentDirectory,
-  getNewLine: () => ts.sys.newLine,
+  getCurrentDirectory: () => process.cwd,
+  getNewLine: () => os.EOL,
 };
 
 module.exports = formatHost;

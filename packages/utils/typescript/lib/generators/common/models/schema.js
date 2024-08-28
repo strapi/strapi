@@ -1,7 +1,5 @@
 'use strict';
 
-const ts = require('typescript');
-const { factory } = require('typescript');
 const { isEmpty } = require('lodash/fp');
 
 const {
@@ -21,6 +19,7 @@ const { addImport } = require('../imports');
  */
 const generateAttributePropertySignature = (schema) => {
   const { attributes } = schema;
+  const { factory } = require('typescript');
 
   const properties = Object.entries(attributes).map(([attributeName, attribute]) => {
     return attributeToPropertySignature(schema, attributeName, attribute);
@@ -35,6 +34,7 @@ const generateAttributePropertySignature = (schema) => {
 };
 
 const generatePropertyLiteralDefinitionFactory = (schema) => (key) => {
+  const { factory } = require('typescript');
   return factory.createPropertySignature(
     undefined,
     factory.createIdentifier(key),
@@ -51,6 +51,8 @@ const generatePropertyLiteralDefinitionFactory = (schema) => (key) => {
  */
 const generateSchemaDefinition = (schema) => {
   const { uid } = schema;
+  const ts = require('typescript');
+  const { factory } = require('typescript');
 
   // Resolve the different interface names needed to declare the schema's interface
   const interfaceName = getSchemaInterfaceName(uid);

@@ -1,5 +1,4 @@
 import path from 'path';
-import packageJson from 'package-json';
 import Configstore from 'configstore';
 import semver from 'semver';
 import boxen from 'boxen';
@@ -54,7 +53,8 @@ export const createUpdateNotifier = (strapi: Core.Strapi) => {
     }
 
     try {
-      const res = await packageJson(pkg.name);
+      const res = await (await strapi.fetch(`https://registry.npmjs.org/${pkg.name}/latest`)).json();
+
       if (res.version) {
         config.set('latest', res.version);
         config.set('lastUpdateCheck', now);

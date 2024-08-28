@@ -1,6 +1,5 @@
 'use strict';
 
-const ts = require('typescript');
 const { merge } = require('lodash');
 
 const reportDiagnostics = require('../utils/report-diagnostics');
@@ -16,6 +15,7 @@ module.exports = {
    * @param {boolean} configOptions.ignoreDiagnostics
    */
   run(tsConfigPath, configOptions = {}) {
+    const ts = require('typescript');
     const { ignoreDiagnostics = false } = configOptions;
     // Parse the tsconfig.json file & resolve the configuration options
     const { fileNames, options, projectReferences } = resolveConfigOptions(tsConfigPath);

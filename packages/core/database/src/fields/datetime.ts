@@ -1,4 +1,4 @@
-import * as dateFns from 'date-fns';
+import isValid from 'date-fns/isValid';
 
 import { parseDateTimeOrTimestamp } from './shared/parsers';
 import Field from './field';
@@ -10,6 +10,6 @@ export default class DatetimeField extends Field {
 
   fromDB(value: unknown) {
     const cast = new Date(value as any);
-    return dateFns.isValid(cast) ? cast.toISOString() : null;
+    return isValid(cast) ? cast.toISOString() : null;
   }
 }

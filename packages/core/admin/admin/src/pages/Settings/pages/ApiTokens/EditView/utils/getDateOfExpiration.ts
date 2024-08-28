@@ -1,4 +1,5 @@
-import { addDays, format } from 'date-fns';
+import addDays from 'date-fns/addDays';
+import format from 'date-fns/format';
 import * as locales from 'date-fns/locale';
 
 import { getDateFnsLocaleName } from '../../../../../../utils/locales';

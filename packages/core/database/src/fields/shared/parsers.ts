@@ -1,10 +1,15 @@
 import { padCharsEnd, isString, toString } from 'lodash/fp';
-import * as dateFns from 'date-fns';
+
+import datefnsIsDate from 'date-fns/isDate';
+import parse from 'date-fns/parse';
+import isValid from 'date-fns/isValid';
+import parseISO from 'date-fns/parseISO';
+import format from 'date-fns/format';
 
 import { InvalidDateTimeError, InvalidDateError, InvalidTimeError } from '../../errors';
 
 const isDate = (value: unknown): value is Date => {
-  return dateFns.isDate(value);
+  return datefnsIsDate(value);
 };
 
 const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
@@ -17,13 +22,13 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
   }
 
   try {
-    const date = dateFns.parseISO(toString(value));
-    if (dateFns.isValid(date)) {
+    const date = parseISO(toString(value));
+    if (isValid(date)) {
       return date;
     }
 
-    const milliUnixDate = dateFns.parse(toString(value), 'T', new Date());
-    if (dateFns.isValid(milliUnixDate)) {
+    const milliUnixDate = parse(toString(value), 'T', new Date());
+    if (isValid(milliUnixDate)) {
       return milliUnixDate;
     }
 
@@ -35,7 +40,7 @@ export const parseDateTimeOrTimestamp = (value: unknown): Date => {
 
 export const parseDate = (value: unknown) => {
   if (isDate(value)) {
-    return dateFns.format(value, 'yyyy-MM-dd');
+    return format(value, 'yyyy-MM-dd');
   }
 
   const found = isString(value) ? value.match(PARTIAL_DATE_REGEX) || [] : [];
@@ -53,8 +58,8 @@ export const parseDate = (value: unknown) => {
     throw new InvalidDateError(`Invalid format, expected yyyy-MM-dd`);
   }
 
-  const date = dateFns.parseISO(extractedValue);
-  if (!dateFns.isValid(date)) {
+  const date = parseISO(extractedValue);
+  if (!isValid(date)) {
     throw new InvalidDateError(`Invalid date`);
   }
 
@@ -63,7 +68,7 @@ export const parseDate = (value: unknown) => {
 
 export const parseTime = (value: unknown) => {
   if (isDate(value)) {
-    return dateFns.format(value, 'HH:mm:ss.SSS');
+    return format(value, 'HH:mm:ss.SSS');
   }
 
   if (typeof value !== 'string') {

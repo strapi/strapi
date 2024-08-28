@@ -1,11 +1,10 @@
 'use strict';
 
-const ts = require('typescript');
+
 const _ = require('lodash/fp');
 
 const { toTypeLiteral, withAttributeNamespace } = require('./utils');
 
-const { factory } = ts;
 
 module.exports = {
   string() {
@@ -48,6 +47,9 @@ module.exports = {
     return [withAttributeNamespace('Decimal')];
   },
   uid({ attribute }) {
+
+    const ts = require('typescript');
+    const { factory } = require('typescript');
     const { targetField, options } = attribute;
 
     // If there are no params to compute, then return the attribute type alone
@@ -88,6 +90,8 @@ module.exports = {
     return [withAttributeNamespace('Blocks')];
   },
   media({ attribute }) {
+    const ts = require('typescript');
+    const { factory } = ts;
     const { allowedTypes, multiple } = attribute;
 
     const params = [];
@@ -109,6 +113,8 @@ module.exports = {
     return [withAttributeNamespace('Media'), params];
   },
   relation({ attribute }) {
+    const { factory } = require('typescript');
+
     const { relation, target } = attribute;
 
     const isMorphRelation = relation.toLowerCase().includes('morph');
@@ -123,6 +129,7 @@ module.exports = {
     ];
   },
   component({ attribute }) {
+    const { factory } = require('typescript');
     const target = attribute.component;
     const params = [factory.createStringLiteral(target, true)];
 
@@ -135,6 +142,7 @@ module.exports = {
     return [withAttributeNamespace('Component'), params];
   },
   dynamiczone({ attribute }) {
+    const { factory } = require('typescript');
     const componentsParam = factory.createTupleTypeNode(
       attribute.components.map((component) => factory.createStringLiteral(component))
     );

@@ -1,13 +1,11 @@
 'use strict';
 
-const ts = require('typescript');
 const _ = require('lodash/fp');
 
 const { addImport } = require('../imports');
 const { getTypeNode, toTypeLiteral, withAttributeNamespace, NAMESPACES } = require('./utils');
 const mappers = require('./mappers');
 
-const { factory } = ts;
 
 /**
  * Create the base type node for a given attribute
@@ -41,6 +39,9 @@ const getAttributeType = (attributeName, attribute, uid) => {
  * @returns {object[]}
  */
 const getAttributeModifiers = (attribute) => {
+  const ts = require('typescript');
+  const { factory } = ts;
+
   const modifiers = [];
 
   // Required
@@ -175,6 +176,7 @@ const getAttributeModifiers = (attribute) => {
  * @returns {object}
  */
 const attributeToPropertySignature = (schema, attributeName, attribute) => {
+  const { factory } = require('typescript');
   const baseType = getAttributeType(attributeName, attribute, schema.uid);
 
   if (baseType === null) {

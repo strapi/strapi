@@ -1,4 +1,5 @@
-import * as dateFns from 'date-fns';
+import isValid from 'date-fns/isValid';
+import format from 'date-fns/format';
 
 import { parseDateTimeOrTimestamp } from './shared/parsers';
 import Field from './field';
@@ -10,6 +11,6 @@ export default class TimestampField extends Field {
 
   fromDB(value: unknown) {
     const cast = new Date(value as any);
-    return dateFns.isValid(cast) ? dateFns.format(cast, 'T') : null;
+    return isValid(cast) ? format(cast, 'T') : null;
   }
 }

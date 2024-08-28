@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const ts = require('typescript');
 
 const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
 
@@ -17,13 +16,8 @@ const DEFAULT_TS_CONFIG_FILENAME = 'tsconfig.json';
  */
 module.exports = (dir, { filename = DEFAULT_TS_CONFIG_FILENAME, ancestorsLookup = false } = {}) => {
   const dirAbsolutePath = path.resolve(dir);
-  let configFilePath = ts.findConfigFile(dirAbsolutePath, ts.sys.fileExists, filename);
 
-  if (configFilePath) configFilePath = path.resolve(configFilePath);
-
-  if (!configFilePath || ancestorsLookup) {
-    return configFilePath;
-  }
+  const configFilePath = path.resolve(path.join(dirAbsolutePath, filename));
 
   return configFilePath.startsWith(dirAbsolutePath) ? configFilePath : undefined;
 };

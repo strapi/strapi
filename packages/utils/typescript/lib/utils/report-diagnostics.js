@@ -1,6 +1,5 @@
 'use strict';
 
-const ts = require('typescript');
 
 const formatHost = require('./format-host');
 
@@ -9,6 +8,8 @@ const formatHost = require('./format-host');
  * @param {ts.Diagnostic[] | ts.Diagnostic} diagnostics
  */
 module.exports = (diagnostics) => {
+  const ts = require('typescript');
+
   const formattedDiagnostics = ts.formatDiagnosticsWithColorAndContext(
     Array.isArray(diagnostics) ? diagnostics : [diagnostics],
     formatHost

@@ -2,11 +2,9 @@
 
 const path = require('path');
 const assert = require('assert');
-const ts = require('typescript');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 
-const { factory } = ts;
 
 const MODULE_DECLARATION = '@strapi/strapi';
 const PUBLIC_NAMESPACE = 'Public';
@@ -18,6 +16,9 @@ const PUBLIC_NAMESPACE = 'Public';
  * @return {string}
  */
 const emitDefinitions = (definitions) => {
+  const ts = require('typescript');
+  const { factory } = ts;
+
   const nodeArray = factory.createNodeArray(definitions);
 
   const sourceFile = ts.createSourceFile(
@@ -86,6 +87,9 @@ const format = async (content) => {
  * @returns {ts.ModuleDeclaration}
  */
 const generateSharedExtensionDefinition = (registry, definitions) => {
+  const ts = require('typescript');
+  const { factory } = ts;
+
   const properties = definitions.map(({ uid, definition }) =>
     factory.createPropertySignature(
       undefined,

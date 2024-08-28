@@ -1,5 +1,5 @@
 import { defaultTo } from 'lodash/fp';
-import { add } from 'date-fns';
+import add from 'date-fns/add';
 
 import type { Core } from '@strapi/types';
 

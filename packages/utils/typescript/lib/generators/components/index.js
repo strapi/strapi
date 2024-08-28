@@ -1,7 +1,5 @@
 'use strict';
 
-const { factory } = require('typescript');
-
 const { models } = require('../common');
 const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
 
@@ -19,6 +17,8 @@ const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
  * @param {string} options.pwd
  */
 const generateComponentsDefinitions = async (options = {}) => {
+  const { factory } = require('typescript');
+
   const { strapi } = options;
 
   const { components } = strapi;
