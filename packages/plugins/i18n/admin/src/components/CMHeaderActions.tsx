@@ -11,12 +11,13 @@ import {
 import {
   type HeaderActionComponent,
   type DocumentActionComponent,
+  type DocumentActionProps,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
   buildValidParams,
 } from '@strapi/content-manager/strapi-admin';
 import { Flex, Status, Typography, Button, Modal } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Cross } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -239,27 +240,34 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   };
 };
 
-/* -------------------------------------------------------------------------------------------------
- * BulkPublishAction
- * -----------------------------------------------------------------------------------------------*/
-
 export type LocaleStatus = {
   locale: string;
   status: Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 };
 
-const BulkLocalePublishAction: DocumentActionComponent = ({
+interface ExtendedDocumentActionProps extends DocumentActionProps {
+  action?: 'bulk-publish' | 'bulk-unpublish';
+}
+
+/* -------------------------------------------------------------------------------------------------
+ * BulkLocaleAction
+ *
+ * This component is used to handle bulk publish and unpublish actions on locales.
+ * -----------------------------------------------------------------------------------------------*/
+
+const BulkLocaleAction: DocumentActionComponent = ({
   document: baseDocument,
   documentId,
   model,
   collectionType,
-}) => {
+  action,
+}: ExtendedDocumentActionProps) => {
   const baseLocale = baseDocument?.locale ?? null;
 
   const [{ query }] = useQueryParams<{ status: 'draft' | 'published' }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const isPublishedTab = query.status === 'published';
+  const isOnPublishedTab = query.status === 'published';
 
   const { formatMessage } = useIntl();
   const { hasI18n, canPublish } = useI18n();
@@ -270,7 +278,9 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   const [isDraftRelationConfirmationOpen, setIsDraftRelationConfirmationOpen] =
     React.useState<boolean>(false);
 
-  const { publishMany: publishManyAction } = useDocumentActions();
+  const { publishMany: publishManyAction, unpublishMany: unpublishManyAction } =
+    useDocumentActions();
+
   const {
     document,
     meta: documentMeta,
@@ -332,6 +342,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
 
       return { locale, status };
     });
+
     rowsFromMeta.unshift({
       locale: document.locale,
       status: document.status,
@@ -355,16 +366,26 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     return [rowsFromMeta, errors];
   }, [document, documentMeta?.availableLocales, validate]);
 
-  const localesToPublish = selectedRows.reduce((acc, selectedRow) => {
-    if (
-      selectedRow.status !== 'published' &&
-      !Object.keys(validationErrors).includes(selectedRow.locale)
-    ) {
+  const isBulkPublish = action === 'bulk-publish';
+  const localesForAction = selectedRows.reduce((acc: string[], selectedRow: LocaleStatus) => {
+    const isValidLocale =
+      // Validation errors are irrelevant if we are trying to unpublish
+      !isBulkPublish || !Object.keys(validationErrors).includes(selectedRow.locale);
+
+    const shouldAddLocale = isBulkPublish
+      ? selectedRow.status !== 'published' && isValidLocale
+      : selectedRow.status !== 'draft' && isValidLocale;
+
+    if (shouldAddLocale) {
       acc.push(selectedRow.locale);
     }
+
     return acc;
   }, []);
 
+  // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
+  // see https://www.notion.so/strapi/Count-draft-relations-56901b492efb45ab90d42fe975b32bd8?pvs=4
+  const enableDraftRelationsCount = false;
   const {
     data: draftRelationsCount = 0,
     isLoading: isDraftRelationsLoading,
@@ -373,10 +394,10 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     {
       model,
       documentIds: [documentId!],
-      locale: localesToPublish,
+      locale: localesForAction,
     },
     {
-      skip: !documentId || localesToPublish.length === 0,
+      skip: !enableDraftRelationsCount || !documentId || localesForAction.length === 0,
     }
   );
 
@@ -410,7 +431,20 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       documentIds: [documentId],
       params: {
         ...params,
-        locale: localesToPublish,
+        locale: localesForAction,
+      },
+    });
+
+    setSelectedRows([]);
+  };
+
+  const unpublish = async () => {
+    await unpublishManyAction({
+      model,
+      documentIds: [documentId],
+      params: {
+        ...params,
+        locale: localesForAction,
       },
     });
 
@@ -420,16 +454,12 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   const handleAction = async () => {
     if (draftRelationsCount > 0) {
       setIsDraftRelationConfirmationOpen(true);
-    } else {
+    } else if (isBulkPublish) {
       await publish();
+    } else {
+      await unpublish();
     }
   };
-
-  const isUnpublish = document?.status === 'published';
-  if (isUnpublish) {
-    // TODO: For now we still proceed so we have the bulk locale publish action in all cases
-    console.warn(['I18N'], 'Bulk locale unpublish modal not implemented');
-  }
 
   if (isDraftRelationConfirmationOpen) {
     return {
@@ -480,18 +510,18 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
 
   return {
     label: formatMessage({
-      id: getTranslation('CMEditViewBulkLocale.publish-title'),
-      defaultMessage: 'Publish Multiple Locales',
+      id: getTranslation(`CMEditViewBulkLocale.${isBulkPublish ? 'publish' : 'unpublish'}-title`),
+      defaultMessage: `${isBulkPublish ? 'Publish' : 'Unpublish'} Multiple Locales`,
     }),
-    icon: <ListPlus />,
-    disabled: isPublishedTab || canPublish.length === 0,
+    variant: isBulkPublish ? 'secondary' : 'danger',
+    icon: isBulkPublish ? <ListPlus /> : <Cross />,
+    disabled: isOnPublishedTab || canPublish.length === 0,
     position: ['panel'],
-    variant: 'secondary',
     dialog: {
       type: 'modal',
       title: formatMessage({
-        id: getTranslation('CMEditViewBulkLocale.publish-title'),
-        defaultMessage: 'Publish Multiple Locales',
+        id: getTranslation(`CMEditViewBulkLocale.${isBulkPublish ? 'publish' : 'unpublish'}-title`),
+        defaultMessage: `${isBulkPublish ? 'Publish' : 'Unpublish'} Multiple Locales`,
       }),
       content: () => {
         return (
@@ -509,6 +539,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
               headers={headers}
               rows={rows}
               localesMetadata={localesMetadata as Locale[]}
+              action={action ?? 'bulk-publish'}
             />
           </Table.Root>
         );
@@ -517,19 +548,33 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         <Modal.Footer justifyContent="flex-end">
           <Button
             loading={isDraftRelationsLoading}
-            disabled={!hasPermission || localesToPublish.length === 0}
+            disabled={!hasPermission || localesForAction.length === 0}
             variant="default"
             onClick={handleAction}
           >
             {formatMessage({
-              id: 'app.utils.publish',
-              defaultMessage: 'Publish',
+              id: isBulkPublish ? 'app.utils.publish' : 'app.utils.unpublish',
+              defaultMessage: isBulkPublish ? 'Publish' : 'Unpublish',
             })}
           </Button>
         </Modal.Footer>
       ),
     },
   };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * BulkLocalePublishAction
+ * -----------------------------------------------------------------------------------------------*/
+const BulkLocalePublishAction: DocumentActionComponent = (props: ExtendedDocumentActionProps) => {
+  return BulkLocaleAction({ action: 'bulk-publish', ...props });
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * BulkLocaleUnpublishAction
+ * -----------------------------------------------------------------------------------------------*/
+const BulkLocaleUnpublishAction: DocumentActionComponent = (props: ExtendedDocumentActionProps) => {
+  return BulkLocaleAction({ action: 'bulk-unpublish', ...props });
 };
 
 /**
@@ -542,4 +587,9 @@ const StyledTrash = styled(Trash)`
   }
 `;
 
-export { BulkLocalePublishAction, DeleteLocaleAction, LocalePickerAction };
+export {
+  BulkLocalePublishAction,
+  BulkLocaleUnpublishAction,
+  DeleteLocaleAction,
+  LocalePickerAction,
+};

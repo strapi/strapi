@@ -553,6 +553,7 @@
   "app.utils.published": "Published",
   "app.utils.ready-to-publish": "Ready to publish",
   "app.utils.ready-to-publish-changes": "Ready to publish changes",
+  "app.utils.ready-to-unpublish-changes": "Ready to unpublish",
   "app.confirm.body": "Are you sure?",
   "clearLabel": "Clear",
   "coming.soon": "This content is currently under construction and will be back in a few weeks!",

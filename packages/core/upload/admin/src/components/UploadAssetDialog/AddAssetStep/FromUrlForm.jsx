@@ -62,7 +62,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
               <Field.Label>
                 {formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL' })}
               </Field.Label>
-              <Textarea onChange={handleChange} value={values.urls} />
+              <Textarea name="urls" onChange={handleChange} value={values.urls} />
               <Field.Hint />
               <Field.Error />
             </Field.Root>
