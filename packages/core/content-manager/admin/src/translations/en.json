@@ -84,7 +84,7 @@
   "containers.edit.tabs.label": "Document status",
   "containers.edit.tabs.draft": "draft",
   "containers.edit.tabs.published": "published",
-  "containers.edit.panels.default.title": "Document",
+  "containers.edit.panels.default.title": "Entry",
   "containers.edit.panels.default.more-actions": "More document actions",
   "containers.Edit.delete": "Delete",
   "containers.edit.title.new": "Create an entry",
