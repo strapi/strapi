@@ -23,6 +23,7 @@ type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 interface EntryValidationTextProps {
   status: Status;
   validationErrors: FormErrors[string] | null;
+  action: 'bulk-publish' | 'bulk-unpublish';
 }
 
 interface TranslationMessage extends MessageDescriptor {
@@ -35,7 +36,11 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
   );
 };
 
-const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValidationTextProps) => {
+const EntryValidationText = ({
+  status = 'draft',
+  validationErrors,
+  action,
+}: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
   /**
@@ -86,42 +91,67 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
     );
   }
 
-  if (status === 'published') {
-    return (
-      <Flex gap={2}>
-        <CheckCircle fill="success600" />
-        <Typography textColor="success600" fontWeight="bold">
-          {formatMessage({
+  const getStatusMessage = () => {
+    if (action === 'bulk-publish') {
+      if (status === 'published') {
+        return {
+          icon: <CheckCircle fill="success600" />,
+          text: formatMessage({
             id: 'content-manager.bulk-publish.already-published',
             defaultMessage: 'Already Published',
-          })}
-        </Typography>
-      </Flex>
-    );
-  }
-
-  if (status === 'modified') {
-    return (
-      <Flex gap={2}>
-        <ArrowsCounterClockwise fill="alternative600" />
-        <Typography>
-          {formatMessage({
+          }),
+          textColor: 'success600',
+          fontWeight: 'bold',
+        };
+      } else if (status === 'modified') {
+        return {
+          icon: <ArrowsCounterClockwise fill="alternative600" />,
+          text: formatMessage({
             id: 'app.utils.ready-to-publish-changes',
             defaultMessage: 'Ready to publish changes',
-          })}
-        </Typography>
-      </Flex>
-    );
-  }
+          }),
+        };
+      } else {
+        return {
+          icon: <CheckCircle fill="success600" />,
+          text: formatMessage({
+            id: 'app.utils.ready-to-publish',
+            defaultMessage: 'Ready to publish',
+          }),
+        };
+      }
+    } else {
+      if (status === 'draft') {
+        return {
+          icon: <CheckCircle fill="success600" />,
+          text: formatMessage({
+            id: 'content-manager.bulk-unpublish.already-unpublished',
+            defaultMessage: 'Already Unpublished',
+          }),
+          textColor: 'success600',
+          fontWeight: 'bold',
+        };
+      } else {
+        return {
+          icon: <CheckCircle fill="success600" />,
+          text: formatMessage({
+            id: 'app.utils.ready-to-unpublish-changes',
+            defaultMessage: 'Ready to unpublish',
+          }),
+          textColor: 'success600',
+          fontWeight: 'bold',
+        };
+      }
+    }
+  };
+
+  const { icon, text, textColor = 'success600', fontWeight = 'normal' } = getStatusMessage();
 
   return (
     <Flex gap={2}>
-      <CheckCircle fill="success600" />
-      <Typography>
-        {formatMessage({
-          id: 'app.utils.ready-to-publish',
-          defaultMessage: 'Ready to publish',
-        })}
+      {icon}
+      <Typography textColor={textColor} fontWeight={fontWeight}>
+        {text}
       </Typography>
     </Flex>
   );
@@ -145,14 +175,15 @@ interface BulkLocaleActionModalProps {
   }[];
   localesMetadata: Locale[];
   validationErrors?: FormErrors;
+  action: 'bulk-publish' | 'bulk-unpublish';
 }
 
 const BulkLocaleActionModal = ({
   headers,
   rows,
   localesMetadata,
-
   validationErrors = {},
+  action,
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
 
@@ -168,11 +199,11 @@ const BulkLocaleActionModal = ({
     }, {});
     const localesWithErrors = Object.keys(validationErrors);
 
-    const alreadyPublishedCount = selectedRows.filter(
+    const publishedCount = selectedRows.filter(
       ({ locale }) => currentStatusByLocale[locale] === 'published'
     ).length;
 
-    const readyToPublishCount = selectedRows.filter(
+    const draftCount = selectedRows.filter(
       ({ locale }) =>
         (currentStatusByLocale[locale] === 'draft' ||
           currentStatusByLocale[locale] === 'modified') &&
@@ -180,17 +211,25 @@ const BulkLocaleActionModal = ({
     ).length;
 
     const withErrorsCount = localesWithErrors.length;
+    const messageId =
+      action === 'bulk-publish'
+        ? 'content-manager.containers.list.selectedEntriesModal.selectedCount.publish'
+        : 'content-manager.containers.list.selectedEntriesModal.selectedCount.unpublish';
+
+    const defaultMessage =
+      action === 'bulk-publish'
+        ? '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.'
+        : '<b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} already unpublished. <b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} ready to unpublish.';
 
     return formatMessage(
       {
-        id: 'content-manager.containers.list.selectedEntriesModal.selectedCount',
-        defaultMessage:
-          '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
+        id: messageId,
+        defaultMessage,
       },
       {
         withErrorsCount,
-        readyToPublishCount,
-        alreadyPublishedCount,
+        draftCount,
+        publishedCount,
         b: BoldChunk,
       }
     );
@@ -243,7 +282,7 @@ const BulkLocaleActionModal = ({
                     </Box>
                   </Table.Cell>
                   <Table.Cell>
-                    <EntryValidationText validationErrors={error} status={status} />
+                    <EntryValidationText validationErrors={error} status={status} action={action} />
                   </Table.Cell>
                   <Table.Cell>
                     <IconButton

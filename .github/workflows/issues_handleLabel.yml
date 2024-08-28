@@ -195,5 +195,5 @@ jobs:
         with:
           project-url: https://github.com/orgs/strapi/projects/23
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:email, source: core:helper-plugin, source: core:permissions, source: core:review-workflows, source: core:upload, source: plugin:cloud, source: plugin:color-picker, source:  plugin:documentation, source: , plugin:i18n, source: plugin:sentry, source: providers'
+          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:email, source: core:permissions, source: core:review-workflows, source: core:upload, source: plugin:cloud, source: plugin:color-picker, source:  plugin:documentation, source: , plugin:i18n, source: plugin:sentry, source: providers'
           label-operator: OR

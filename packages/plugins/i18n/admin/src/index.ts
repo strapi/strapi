@@ -4,6 +4,7 @@ import * as yup from 'yup';
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
 import {
   BulkLocalePublishAction,
+  BulkLocaleUnpublishAction,
   DeleteLocaleAction,
   LocalePickerAction,
   FillFromAnotherLocaleAction,
@@ -80,6 +81,7 @@ export default {
       // When enabled the bulk locale publish action should be the first action
       // in 'More Document Actions' and therefore the third action in the array
       actions.splice(2, 0, BulkLocalePublishAction);
+      actions.splice(5, 0, BulkLocaleUnpublishAction);
       return actions;
     });
 

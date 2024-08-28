@@ -510,7 +510,9 @@ export default {
       return ctx.forbidden();
     }
 
-    const { locale } = await getDocumentLocaleAndStatus(body, model);
+    const { locale } = await getDocumentLocaleAndStatus(body, model, {
+      allowMultipleLocales: true,
+    });
 
     const entityPromises = documentIds.map((documentId: any) =>
       documentManager.findLocales(documentId, model, { locale, isPublished: true })
