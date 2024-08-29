@@ -86,8 +86,10 @@ export const FormModal = () => {
     step,
     targetUid,
     showBackLink,
+    activeTab,
+    setActiveTab,
   } = useFormModalNavigation();
-  const [activeTab, setActiveTab] = React.useState('basic');
+
   const getPlugin = useStrapiApp('FormModal', (state) => state.getPlugin);
   const getCustomField = useStrapiApp('FormModal', (state) => state.customFields.get);
   const customField = getCustomField(customFieldUid);
