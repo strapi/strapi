@@ -87,10 +87,11 @@ export const security: Core.MiddlewareFactory<Config> =
      * It only applies in development, and only on GET requests
      * that are part of the admin route.
      */
+
     if (
       ['development', 'test'].includes(process.env.NODE_ENV ?? '') &&
       ctx.method === 'GET' &&
-      ['/admin'].some((str) => ctx.path.startsWith(str))
+      ctx.path.startsWith(strapi.config.get('admin.path'))
     ) {
       helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {

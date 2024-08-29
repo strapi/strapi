@@ -12,6 +12,7 @@ const INITIAL_STATE_DATA = {
   step: null,
   targetUid: null,
   customFieldUid: null,
+  activeTab: 'basic',
 };
 
 export { INITIAL_STATE_DATA };
