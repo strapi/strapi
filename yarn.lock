@@ -8206,12 +8206,14 @@ __metadata:
     eslint-config-custom: "workspace:*"
     jest-environment-jsdom: "npm:29.6.1"
     jest-styled-components: "npm:7.1.1"
+    styled-components: "npm:6.1.8"
     tsconfig: "workspace:*"
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
     "@testing-library/jest-dom": ^5.16.5
     jest-environment-jsdom: ^29.0.0
+    styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
 
@@ -8428,6 +8430,7 @@ __metadata:
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/types": "workspace:*"
     "@strapi/utils": "workspace:*"
+    "@testing-library/dom": "npm:10.1.0"
     "@testing-library/react": "npm:15.0.7"
     "@testing-library/user-event": "npm:14.5.2"
     "@types/koa": "npm:2.13.4"
@@ -8470,6 +8473,7 @@ __metadata:
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/types": "workspace:*"
     "@strapi/utils": "workspace:*"
+    "@testing-library/dom": "npm:10.1.0"
     "@testing-library/react": "npm:15.0.7"
     "@testing-library/user-event": "npm:14.5.2"
     "@types/fs-extra": "npm:11.0.4"
@@ -9388,6 +9392,7 @@ __metadata:
     git-url-parse: "npm:14.0.0"
     html-webpack-plugin: "npm:5.6.0"
     inquirer: "npm:8.2.5"
+    jest: "npm:29.6.0"
     lodash: "npm:4.17.21"
     mini-css-extract-plugin: "npm:2.7.7"
     nodemon: "npm:3.0.2"

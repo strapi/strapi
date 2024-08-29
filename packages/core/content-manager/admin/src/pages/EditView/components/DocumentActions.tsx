@@ -18,7 +18,7 @@ import {
   Menu,
   ButtonProps,
 } from '@strapi/design-system';
-import { CrossCircle, More, WarningCircle } from '@strapi/icons';
+import { Cross, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import { styled, DefaultTheme } from 'styled-components';
@@ -582,29 +582,29 @@ const PublishAction: DocumentActionComponent = ({
   }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
   React.useEffect(() => {
-    if (documentId && !isListView) {
-      // We don't want to call count draft relations if in the list view. There is no
-      // use for the response.
-      const fetchDraftRelationsCount = async () => {
-        const { data, error } = await countDraftRelations({
-          collectionType,
-          model,
-          documentId,
-          params,
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setServerCountOfDraftRelations(data.data);
-        }
-      };
-
-      fetchDraftRelationsCount();
+    if (!document || !document.documentId || isListView) {
+      return;
     }
-  }, [isListView, documentId, countDraftRelations, collectionType, model, params]);
+
+    const fetchDraftRelationsCount = async () => {
+      const { data, error } = await countDraftRelations({
+        collectionType,
+        model,
+        documentId,
+        params,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        setServerCountOfDraftRelations(data.data);
+      }
+    };
+
+    fetchDraftRelationsCount();
+  }, [isListView, document, documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -909,7 +909,7 @@ const UnpublishAction: DocumentActionComponent = ({
       id: 'app.utils.unpublish',
       defaultMessage: 'Unpublish',
     }),
-    icon: <StyledCrossCircle />,
+    icon: <Cross />,
     onClick: async () => {
       /**
        * return if there's no id & we're in a collection type, or the status modified
@@ -1043,7 +1043,7 @@ const DiscardAction: DocumentActionComponent = ({
       id: 'content-manager.actions.discard.label',
       defaultMessage: 'Discard changes',
     }),
-    icon: <StyledCrossCircle />,
+    icon: <Cross />,
     position: ['panel', 'table-row'],
     variant: 'danger',
     dialog: {
@@ -1076,16 +1076,6 @@ const DiscardAction: DocumentActionComponent = ({
 };
 
 DiscardAction.type = 'discard';
-
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
-const StyledCrossCircle = styled(CrossCircle)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
