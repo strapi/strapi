@@ -14,18 +14,6 @@ export interface ActionAlias {
   subjects?: string[];
 }
 
-export interface ActionAlias {
-  /**
-   * The action ID to alias
-   */
-  actionId: string;
-
-  /**
-   * An optional array of subject to restrict the alias usage
-   */
-  subjects?: string[];
-}
-
 export type Action = {
   /**
    * The unique identifier of the action
