@@ -106,7 +106,7 @@ const LocalePickerAction: HeaderActionComponent = ({
       const permissionsToCheck = currentLocaleDoc ? canCreate : canRead;
 
       const statusVariant =
-        status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
+        status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
 
       return {
         disabled: !permissionsToCheck.includes(locale.code),

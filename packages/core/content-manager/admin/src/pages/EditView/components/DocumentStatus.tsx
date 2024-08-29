@@ -18,7 +18,7 @@ interface DocumentStatusProps
  */
 const DocumentStatus = ({ status = 'draft', ...restProps }: DocumentStatusProps) => {
   const statusVariant =
-    status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
+    status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
 
   return (
     <Status {...restProps} showBullet={false} size={'S'} variant={statusVariant}>
