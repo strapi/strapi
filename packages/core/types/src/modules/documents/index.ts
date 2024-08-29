@@ -19,7 +19,7 @@ type ServiceUtils = {
 export type Service = {
   <TContentTypeUID extends UID.ContentType>(
     uid: TContentTypeUID
-  ): ServiceInstance<TContentTypeUID> & ComponentExtension;
+  ): ServiceInstance<TContentTypeUID> & ComponentExtension<TContentTypeUID>;
   utils: ServiceUtils;
   /** Add a middleware for all uid's and a specific action
    *  @example - Add a default locale
