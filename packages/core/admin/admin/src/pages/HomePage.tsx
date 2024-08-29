@@ -219,8 +219,7 @@ const ContentBlocks = () => {
             <Typography textColor="neutral600">
               {formatMessage({
                 id: 'app.components.BlockLink.cloud.content',
-                defaultMessage:
-                  'A fully composable, and collaborative platform to boost your team velocity.',
+                defaultMessage: 'Fully-managed cloud hosting for your Strapi project.',
               })}
             </Typography>
             <Box src={cloudFlagsImage} position="absolute" top={0} right={0} tag="img" />

@@ -371,7 +371,6 @@ describe('Action Provider', () => {
         );
       });
     });
-
     describe('Aliases', () => {
       test('Return an empty array when there is no alias pointing to the given action', async () => {
         const provider = createActionProvider();

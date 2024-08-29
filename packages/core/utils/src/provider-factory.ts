@@ -40,7 +40,7 @@ export interface Provider<T = unknown> {
   keys(): string[];
   has(key: string): boolean;
   size(): number;
-  clear(): Promise<Provider>;
+  clear(): Promise<Provider<T>>;
 }
 
 export type ProviderFactory<T> = (options?: Options) => Provider<T>;

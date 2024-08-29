@@ -1,5 +1,6 @@
 import type { CLIContext } from '../types';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
+import { trackEvent } from '../utils/analytics';
 
 const openModule = import('open');
 
@@ -40,9 +41,5 @@ export default async (ctx: CLIContext) => {
     logger.error('🥲 Oops! Something went wrong while logging you out. Please try again.');
     logger.debug(e);
   }
-  try {
-    await cloudApiService.track('didLogout', { loginMethod: 'cli' });
-  } catch (e) {
-    logger.debug('Failed to track logout event', e);
-  }
+  await trackEvent(ctx, cloudApiService, 'didLogout', { loginMethod: 'cli' });
 };

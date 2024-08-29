@@ -390,7 +390,7 @@
   "app.components.BlockLink.blog": "Blog",
   "app.components.BlockLink.blog.content": "Read the latest news about Strapi and the ecosystem.",
   "app.components.BlockLink.cloud": "Strapi Cloud",
-  "app.components.BlockLink.cloud.content": "A fully composable, and collaborative platform to boost your team velocity.",
+  "app.components.BlockLink.cloud.content": "Fully-managed cloud hosting for your Strapi project.",
   "app.components.BlockLink.code": "Code examples",
   "app.components.BlockLink.code.content": "Learn by testing real projects developed the community.",
   "app.components.BlockLink.documentation.content": "Discover the essential concepts, guides and instructions.",

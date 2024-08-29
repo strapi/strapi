@@ -41,11 +41,12 @@
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
+    "test:unit": "run -T jest",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@strapi/utils": "workspace:*",
-    "axios": "1.6.8",
+    "axios": "1.7.4",
     "chalk": "4.1.2",
     "cli-progress": "3.12.0",
     "commander": "8.3.0",

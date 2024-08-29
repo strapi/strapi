@@ -1,4 +1,3 @@
-import { omit } from 'lodash';
 import type { Webhook, LoadedStrapi } from '@strapi/types';
 
 import { createStrapiInstance } from 'api-tests/strapi';

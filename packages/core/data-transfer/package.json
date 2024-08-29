@@ -44,7 +44,7 @@
     "@strapi/types": "workspace:*",
     "@strapi/utils": "workspace:*",
     "chalk": "4.1.2",
-    "cli-table3": "0.6.2",
+    "cli-table3": "0.6.5",
     "commander": "8.3.0",
     "fs-extra": "11.2.0",
     "inquirer": "8.2.5",

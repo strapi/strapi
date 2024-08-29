@@ -5,7 +5,7 @@ import type { ProjectInfos } from './cli-api';
 export const LOCAL_SAVE_FILENAME = '.strapi-cloud.json';
 
 export type LocalSave = {
-  project?: ProjectInfos;
+  project?: Omit<ProjectInfos, 'id'>;
 };
 
 export async function save(data: LocalSave, { directoryPath }: { directoryPath?: string } = {}) {
