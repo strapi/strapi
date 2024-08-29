@@ -140,7 +140,7 @@
     "lodash": "4.17.21",
     "nx": "18.2.2",
     "plop": "2.7.6",
-    "prettier": "3.2.5",
+    "prettier": "3.3.3",
     "prettier-2": "npm:prettier@^2",
     "qs": "6.11.1",
     "rimraf": "5.0.5",

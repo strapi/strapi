@@ -315,7 +315,6 @@ export declare namespace BulkPublish {
     };
     query: {
       // If not provided, the default locale will be used
-      // Otherwise specify the locales to publish of the documents
       locale?: string | string[] | null;
     };
   }
@@ -340,7 +339,10 @@ export declare namespace BulkUnpublish {
     body: {
       documentIds: Modules.Documents.ID[];
     };
-    query: {};
+    query: {
+      // If not provided, the default locale will be used
+      locale?: string | string[] | null;
+    };
   }
 
   export interface Params {

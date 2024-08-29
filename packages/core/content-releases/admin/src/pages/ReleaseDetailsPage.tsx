@@ -14,6 +14,7 @@ import {
   isFetchError,
   useStrapiApp,
   Layouts,
+  FormErrors,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
@@ -145,6 +146,42 @@ const EntryValidationText = ({ action, schema, entry, status }: EntryValidationT
     }
   );
 
+  const errorsToString = (errors: FormErrors, prefix: string = ''): string => {
+    if (Object.keys(errors).length === 0) {
+      return '';
+    }
+
+    return Object.entries(errors)
+      .map(([key, value]) => {
+        if (value === undefined || value === null) {
+          return '';
+        }
+
+        if (typeof value === 'string') {
+          return formatMessage(
+            { id: value, defaultMessage: value },
+            { field: prefix ? `${prefix}.${key}` : key }
+          );
+        }
+
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          'id' in value &&
+          'defaultMessage' in value
+        ) {
+          return formatMessage(
+            // @ts-expect-error – TODO: default message will be a string
+            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+            { field: prefix ? `${prefix}.${key}` : key }
+          );
+        }
+
+        return errorsToString(value as FormErrors, key);
+      })
+      .join(' ');
+  };
+
   if (isLoading) {
     return null;
   }
@@ -153,15 +190,7 @@ const EntryValidationText = ({ action, schema, entry, status }: EntryValidationT
 
   if (action === 'publish') {
     if (Object.keys(errors).length > 0) {
-      const validationErrorsMessages = Object.entries(errors)
-        .map(([key, value]) =>
-          formatMessage(
-            // @ts-expect-error – TODO: fix this will better checks
-            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-            { field: key }
-          )
-        )
-        .join(' ');
+      const validationErrorsMessages = errorsToString(errors);
 
       return (
         <Flex gap={2}>

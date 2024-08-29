@@ -13,6 +13,7 @@ import { useIntl } from 'react-intl';
 
 import { CREATOR_FIELDS } from '../../../constants/attributes';
 import { useContentTypeSchema } from '../../../hooks/useContentTypeSchema';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { Schema } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { getMainField } from '../../../utils/attributes';
@@ -224,20 +225,26 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
-  const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [search, setSearch] = React.useState('');
   const { formatMessage } = useIntl();
+
+  const debouncedSearch = useDebounce(search, 300);
+
   const { data, isLoading } = useAdminUsers({
-    page,
+    pageSize,
+    _q: debouncedSearch,
   });
   const field = useField(name);
 
   const handleOpenChange = (isOpen?: boolean) => {
     if (!isOpen) {
-      setPage(1);
+      setPageSize(10);
     }
   };
 
-  const users = data?.users || [];
+  const { users = [], pagination } = data ?? {};
+  const { pageCount = 1, page = 1 } = pagination ?? {};
 
   return (
     <Combobox
@@ -249,7 +256,11 @@ const AdminUsersFilter = ({ name }: Filters.ValueInputProps) => {
       onOpenChange={handleOpenChange}
       onChange={(value) => field.onChange(name, value)}
       loading={isLoading}
-      onLoadMore={() => setPage((prev) => prev + 1)}
+      onLoadMore={() => setPageSize(pageSize + 10)}
+      hasMoreItems={page < pageCount}
+      onInputChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.currentTarget.value);
+      }}
     >
       {users.map((user) => {
         return (

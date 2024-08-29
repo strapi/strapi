@@ -264,7 +264,8 @@ const formatEditLayout = (
         layout: convertEditLayoutToFieldLayouts(
           configuration.layouts.edit,
           components[uid].attributes,
-          configuration.metadatas
+          configuration.metadatas,
+          { configurations: data.components, schemas: components }
         ),
         settings: {
           ...configuration.settings,
