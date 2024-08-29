@@ -80,6 +80,7 @@ const DragItem = styled<FlexComponent>(Flex)<{ $dragVisibility: CSSProperties['v
 const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)<{
   $dragHandleTopMargin?: CSSProperties['marginTop'];
 }>`
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -234,6 +235,7 @@ const DragAndDropElement = ({
         >
           <DragIconButton
             tag="div"
+            contentEditable={false}
             role="button"
             tabIndex={0}
             withTooltip={false}
