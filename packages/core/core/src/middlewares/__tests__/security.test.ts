@@ -27,6 +27,13 @@ describe('Security middleware', () => {
       {
         strapi: {
           plugin: () => null,
+          config: {
+            get(key: string) {
+              if (key === 'admin.path') {
+                return '/admin';
+              }
+            },
+          },
         } as any,
       }
     )!;
