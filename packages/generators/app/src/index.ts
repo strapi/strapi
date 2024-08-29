@@ -17,8 +17,6 @@ export type { Options };
 export { default as checkInstallPath } from './utils/check-install-path';
 export { default as checkRequirements } from './utils/check-requirements';
 
-export type { NewOptions } from './types';
-
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 export const generateNewApp = async (options: Options) => {
