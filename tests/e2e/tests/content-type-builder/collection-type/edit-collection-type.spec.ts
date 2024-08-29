@@ -79,4 +79,46 @@ describeOnCondition(!process.env.CI)('Edit collection type', () => {
 
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
+
+  test('Can configure advanced settings for multiple fields sequentially', async ({ page }) => {
+    const fieldsToAdd = [
+      {
+        name: 'testfield',
+        defaultValue: 'mydefault',
+      },
+      {
+        name: 'testfield2',
+        defaultValue: 'mydefault2',
+      },
+    ];
+
+    for (const field of fieldsToAdd) {
+      await page.getByRole('button', { name: 'Add another field', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Text Small or long text like title or description' })
+        .click();
+      await page.getByLabel('Name', { exact: true }).fill(field.name);
+
+      // This ensures that the modal state management correctly resets the active
+      // tab when adding/editing multiple fields sequentially
+      await expect(page.getByRole('tab', { name: 'Basic settings' })).toHaveAttribute(
+        'data-state',
+        'active'
+      );
+      await expect(page.getByRole('tab', { name: 'Advanced settings' })).toHaveAttribute(
+        'data-state',
+        'inactive'
+      );
+
+      await page.getByRole('tab', { name: 'Advanced settings' }).click();
+      await page.getByRole('textbox', { name: 'Default value' }).fill(field.defaultValue);
+      await page.getByRole('button', { name: 'Finish' }).click();
+    }
+
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await waitForRestart(page);
+
+    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+  });
 });
