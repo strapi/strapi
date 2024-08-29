@@ -215,3 +215,13 @@ export const connectToWebsocket = (address: Address, options?: Options): Promise
 export const trimTrailingSlash = (input: string): string => {
   return input.replace(/\/$/, '');
 };
+
+export const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+export const waitUntil = async (test: () => boolean, interval: number): Promise<void> => {
+  while (!test()) {
+    await wait(interval);
+  }
+
+  return Promise.resolve();
+};
