@@ -60,8 +60,8 @@ describe('useConfig', () => {
 
       act(() => {
         result.current.mutateConfig.mutateAsync({
-          pageSize: 100,
-          sort: 'name:DESC',
+          pageSize: 10,
+          sort: 'name:ASC',
         });
       });
 

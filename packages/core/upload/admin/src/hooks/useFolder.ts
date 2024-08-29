@@ -1,16 +1,28 @@
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
 import { getTrad } from '../utils';
+import { GetFolder } from '../../../shared/contracts/folders';
 
-export const useFolder = (id, { enabled = true } = {}) => {
+export const useFolder = (
+  id: Data.ID,
+  {
+    enabled = true,
+  }: {
+    enabled?: boolean;
+  } = {}
+) => {
   const { toggleNotification } = useNotification();
   const { get } = useFetchClient();
   const { formatMessage } = useIntl();
 
-  const { data, error, isLoading } = useQuery(
+  const { data, error, isLoading } = useQuery<
+    GetFolder.Response['data'],
+    GetFolder.Response['error']
+  >(
     [pluginId, 'folder', id],
     async () => {
       const {

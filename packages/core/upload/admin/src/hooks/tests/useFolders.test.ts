@@ -36,7 +36,19 @@ describe('useFolders', () => {
   test('does not use parent filter in params if _q', async () => {
     const { result } = renderHook(() =>
       useFolders({
-        query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
+        query: {
+          folder: 5,
+          _q: 'something',
+          filters: {
+            $and: [
+              {
+                parent: {
+                  id: 5,
+                },
+              },
+            ],
+          },
+        },
       })
     );
 
@@ -61,7 +73,7 @@ describe('useFolders', () => {
       ]
     `);
 
-    expect(result.current.data[0].name).toBe('something');
+    expect(result.current.data?.[0].name).toBe('something');
   });
 
   test('fetches data from the right URL if a query param was set', async () => {
@@ -102,7 +114,7 @@ describe('useFolders', () => {
       ]
     `);
 
-    result.current.data.forEach((folder) => {
+    result.current.data?.forEach((folder) => {
       /**
        * We're passing a "current folder" in the query, which means
        * any folders returned should include the current folder's ID

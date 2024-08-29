@@ -8,14 +8,41 @@ import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
 
-export const useFolders = ({ enabled = true, query = {} } = {}) => {
+import { GetFolders } from '../../../shared/contracts/folders';
+import type { Query } from '../types';
+import { Data } from '@strapi/types';
+
+interface CustomQuery extends Query {
+  pagination?: {
+    pageSize: number;
+  };
+  filters?: {
+    $and?: {
+      parent: {
+        id:
+          | {
+              id: Data.ID;
+            }
+          | Data.ID
+          | { $null: true };
+      };
+    }[];
+  };
+}
+
+interface UseFoldersOptions {
+  enabled?: boolean;
+  query?: CustomQuery;
+}
+
+export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {}) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
   const { get } = useFetchClient();
 
-  let params;
+  let params: CustomQuery;
 
   if (_q) {
     params = {
@@ -46,7 +73,10 @@ export const useFolders = ({ enabled = true, query = {} } = {}) => {
     };
   }
 
-  const { data, error, isLoading } = useQuery(
+  const { data, error, isLoading } = useQuery<
+    GetFolders.Response['data'],
+    GetFolders.Response['error']
+  >(
     [pluginId, 'folders', stringify(params)],
     async () => {
       const {
