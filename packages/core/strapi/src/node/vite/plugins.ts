@@ -32,7 +32,7 @@ const buildFilesPlugin = (ctx: BuildContext): Plugin => {
       }
 
       const entryFileName = entryFile.fileName;
-      const entryPath = ['/admin'.replace(/\/+$/, ''), entryFileName].join('/');
+      const entryPath = [ctx.basePath.replace(/\/+$/, ''), entryFileName].join('/');
 
       this.emitFile({
         type: 'asset',
