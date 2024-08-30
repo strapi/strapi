@@ -328,8 +328,9 @@ export default {
       }
 
       // Add the status and locale filters if they are provided
-      if (status) {
-        where[`${alias}.published_at`] = getPublishedAtClause(status, targetUid);
+      const publishedAt = getPublishedAtClause(status, targetUid);
+      if (publishedAt) {
+        where[`${alias}.published_at`] = publishedAt;
       }
       if (filterByLocale) {
         where[`${alias}.locale`] = locale;
