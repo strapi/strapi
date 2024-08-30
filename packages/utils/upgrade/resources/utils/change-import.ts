@@ -3,9 +3,15 @@ import type { ImportDeclaration, JSCodeshift, Collection } from 'jscodeshift';
 export const changeImportSpecifier = (
   root: Collection,
   j: JSCodeshift,
-  options: { methodName: string; oldDependency: string; newDependency: string }
+  options: {
+    oldDependency: string;
+    newDependency: string;
+    oldMethodName: string;
+    newMethodName?: string;
+  }
 ): void => {
-  const { methodName, oldDependency, newDependency } = options;
+  const { oldMethodName, newMethodName, oldDependency, newDependency } = options;
+  const methodNameToReplace = newMethodName ?? oldMethodName;
 
   // Flag to check if the method was imported from the old dependency
   let methodImportedFromOldDependency = false;
@@ -21,7 +27,7 @@ export const changeImportSpecifier = (
       // Check if the method is imported from the old dependency
       const methodSpecifiers = importDeclaration.specifiers?.filter(
         (specifier) =>
-          specifier.type === 'ImportSpecifier' && specifier.imported.name === methodName
+          specifier.type === 'ImportSpecifier' && specifier.imported.name === oldMethodName
       );
 
       if (methodSpecifiers && methodSpecifiers.length > 0) {
@@ -29,17 +35,17 @@ export const changeImportSpecifier = (
 
         // Collect all aliases for the method
         methodSpecifiers.forEach((specifier) => {
-          if (specifier.local && specifier.local.name !== methodName) {
+          if (specifier.local && specifier.local.name !== oldMethodName) {
             methodAliases.push(specifier.local.name);
           } else {
-            methodAliases.push(methodName);
+            methodAliases.push(methodNameToReplace);
           }
         });
 
         // Remove the method specifiers from the old import
         const updatedSpecifiers = importDeclaration.specifiers?.filter(
           (specifier) =>
-            specifier.type !== 'ImportSpecifier' || specifier.imported.name !== methodName
+            specifier.type !== 'ImportSpecifier' || specifier.imported.name !== oldMethodName
         );
 
         if (updatedSpecifiers && updatedSpecifiers.length > 0) {
@@ -63,7 +69,10 @@ export const changeImportSpecifier = (
         const importDeclaration: ImportDeclaration = path.node;
 
         methodAliases.forEach((alias) => {
-          const newSpecifier = j.importSpecifier(j.identifier(methodName), j.identifier(alias));
+          const newSpecifier = j.importSpecifier(
+            j.identifier(methodNameToReplace),
+            j.identifier(alias)
+          );
           const specifiersArray = importDeclaration.specifiers || [];
           j(path).replaceWith(
             j.importDeclaration([...specifiersArray, newSpecifier], j.literal(newDependency))
@@ -72,7 +81,7 @@ export const changeImportSpecifier = (
       });
     } else {
       const newSpecifiers = methodAliases.map((alias) =>
-        j.importSpecifier(j.identifier(methodName), j.identifier(alias))
+        j.importSpecifier(j.identifier(methodNameToReplace), j.identifier(alias))
       );
 
       const newImportDeclaration = j.importDeclaration(newSpecifiers, j.literal(newDependency));
