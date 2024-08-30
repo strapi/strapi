@@ -1,5 +1,5 @@
 import type { UID, Schema, Utils } from '../..';
-import type * as EntityService from '../entity-service';
+import type { Input, PartialInput } from './params/data';
 import type * as AttributeUtils from './params/attributes';
 
 /**
@@ -73,10 +73,8 @@ export type ComponentExtension<TSchemaUID extends UID.Schema> = {
    *
    * @internal
    */
-  updateComponents<const TData extends EntityService.Params.Data.Input<TSchemaUID>>(
-    entityToUpdate: {
-      id: EntityService.Params.Attribute.ID;
-    },
+  updateComponents<const TData extends Input<TSchemaUID>>(
+    entityToUpdate: { id: AttributeUtils.ID },
     data: TData
   ): Promise<ComponentBody<TSchemaUID, Extract<keyof TData, string>>>;
 
@@ -87,7 +85,5 @@ export type ComponentExtension<TSchemaUID extends UID.Schema> = {
    *
    * @internal
    */
-  omitComponentData<const TData extends EntityService.Params.Data.PartialInput<TSchemaUID>>(
-    data: TData
-  ): TData;
+  omitComponentData<const TData extends PartialInput<TSchemaUID>>(data: TData): TData;
 };

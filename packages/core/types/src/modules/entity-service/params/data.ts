@@ -1,5 +1,4 @@
 import type * as UID from '../../../uid';
-import type * as Utils from '../../../utils';
 import type * as AttributeUtils from './attributes';
 
 /**
@@ -51,22 +50,3 @@ import type * as AttributeUtils from './attributes';
  * ```
  */
 export type Input<TSchemaUID extends UID.Schema> = AttributeUtils.GetValues<TSchemaUID>;
-
-/**
- * Conditionally applies partial types to schema input data based on the extension status of schema registries.
- *
- * This type evaluates whether the schema registries have been extended.
- *
- * If so, it returns a partial version of `Input<TSchemaUID>`, otherwise it returns the default `Input` type.
- *
- * @template TSchemaUID - Represents a unique identifier for a schema, either content-type or component, extending {@link UID.Schema}.
- *
- * @remark
- * This type is particularly useful for ensuring backward compatibility within input data structures,
- * enabling flexibility during schema transitions or extensions without breaking existing data contracts.
- */
-export type PartialInput<TSchemaUID extends UID.Schema> = Utils.If<
-  Utils.Constants.AreSchemaRegistriesExtended,
-  Partial<Input<TSchemaUID>>,
-  Input<TSchemaUID>
->;
