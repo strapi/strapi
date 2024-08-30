@@ -7,17 +7,28 @@ import {
   Table,
   useAPIErrorHandler,
   FormErrors,
+  useForm,
 } from '@strapi/admin/strapi-admin';
 import {
-  type HeaderActionComponent,
   type DocumentActionComponent,
   type DocumentActionProps,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
   buildValidParams,
+  HeaderActionProps,
 } from '@strapi/content-manager/strapi-admin';
-import { Flex, Status, Typography, Button, Modal } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Cross } from '@strapi/icons';
+import {
+  Flex,
+  Status,
+  Typography,
+  Button,
+  Modal,
+  Field,
+  SingleSelect,
+  SingleSelectOption,
+  Dialog,
+} from '@strapi/design-system';
+import { WarningCircle, ListPlus, Trash, Download, Cross } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +37,7 @@ import { styled } from 'styled-components';
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
 import { useGetManyDraftRelationCountQuery } from '../services/relations';
+import { cleanData } from '../utils/clean';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
@@ -38,18 +50,24 @@ import type { I18nBaseQuery } from '../types';
  * LocalePickerAction
  * -----------------------------------------------------------------------------------------------*/
 
-const LocalePickerAction: HeaderActionComponent = ({
+const LocalePickerAction = ({
   document,
   meta,
   model,
   collectionType,
   documentId,
-}) => {
+}: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams<I18nBaseQuery>();
   const { hasI18n, canCreate, canRead } = useI18n();
   const { data: locales = [] } = useGetLocalesQuery();
-  const { schema } = useDocument({ model, collectionType, documentId });
+  const currentDesiredLocale = query.plugins?.i18n?.locale;
+  const { schema } = useDocument({
+    model,
+    collectionType,
+    documentId,
+    params: { locale: currentDesiredLocale },
+  });
 
   const handleSelect = React.useCallback(
     (value: string) => {
@@ -73,24 +91,25 @@ const LocalePickerAction: HeaderActionComponent = ({
      * Handle the case where the current locale query param doesn't exist
      * in the list of available locales, so we redirect to the default locale.
      */
-    const currentDesiredLocale = query.plugins?.i18n?.locale;
     const doesLocaleExist = locales.find((loc) => loc.code === currentDesiredLocale);
     const defaultLocale = locales.find((locale) => locale.isDefault);
     if (!doesLocaleExist && defaultLocale?.code) {
       handleSelect(defaultLocale.code);
     }
-  }, [handleSelect, hasI18n, locales, query.plugins?.i18n?.locale]);
+  }, [handleSelect, hasI18n, locales, currentDesiredLocale]);
 
-  if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
-    return null;
-  }
-
-  const currentLocale = query.plugins?.i18n?.locale || locales.find((loc) => loc.isDefault)?.code;
+  const currentLocale = Array.isArray(locales)
+    ? locales.find((locale) => locale.code === currentDesiredLocale)?.code
+    : undefined;
 
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale },
     ...(meta?.availableLocales ?? []),
   ];
+
+  if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
+    return null;
+  }
 
   return {
     label: formatMessage({
@@ -159,6 +178,128 @@ const getDocumentStatus = (
   }
 
   return docStatus;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * FillFromAnotherLocaleAction
+ * -----------------------------------------------------------------------------------------------*/
+
+const FillFromAnotherLocaleAction = ({
+  documentId,
+  meta,
+  model,
+  collectionType,
+}: HeaderActionProps) => {
+  const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const currentDesiredLocale = query.plugins?.i18n?.locale;
+  const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
+  const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
+
+  const { getDocument } = useDocumentActions();
+  const { schema, components } = useDocument({
+    model,
+    documentId,
+    collectionType,
+    params: { locale: currentDesiredLocale },
+  });
+  const { data: locales = [] } = useGetLocalesQuery();
+
+  const availableLocales = Array.isArray(locales)
+    ? locales.filter((locale) => meta?.availableLocales.some((l) => l.locale === locale.code))
+    : [];
+
+  const fillFromLocale = (onClose: () => void) => async () => {
+    const response = await getDocument({
+      collectionType,
+      model,
+      documentId,
+      params: { locale: localeSelected },
+    });
+    if (!response || !schema) {
+      return;
+    }
+
+    const { data } = response;
+
+    const cleanedData = cleanData(data, schema, components);
+
+    setValues(cleanedData);
+
+    onClose();
+  };
+
+  return {
+    type: 'icon',
+    icon: <Download />,
+    disabled: availableLocales.length === 0,
+    label: formatMessage({
+      id: getTranslation('CMEditViewCopyLocale.copy-text'),
+      defaultMessage: 'Fill in from another locale',
+    }),
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: getTranslation('CMEditViewCopyLocale.dialog.title'),
+        defaultMessage: 'Confirmation',
+      }),
+      content: ({ onClose }: { onClose: () => void }) => (
+        <>
+          <Dialog.Body>
+            <Flex direction="column" gap={3}>
+              <WarningCircle width="24px" height="24px" fill="danger600" />
+              <Typography textAlign="center">
+                {formatMessage({
+                  id: getTranslation('CMEditViewCopyLocale.dialog.body'),
+                  defaultMessage:
+                    'Your current content will be erased and filled by the content of the selected locale:',
+                })}
+              </Typography>
+              <Field.Root width="100%">
+                <Field.Label>
+                  {formatMessage({
+                    id: getTranslation('CMEditViewCopyLocale.dialog.field.label'),
+                    defaultMessage: 'Locale',
+                  })}
+                </Field.Label>
+                <SingleSelect
+                  value={localeSelected}
+                  placeholder={formatMessage({
+                    id: getTranslation('CMEditViewCopyLocale.dialog.field.placeholder'),
+                    defaultMessage: 'Select one locale...',
+                  })}
+                  // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
+                  onChange={(value) => setLocaleSelected(value)}
+                >
+                  {availableLocales.map((locale) => (
+                    <SingleSelectOption key={locale.code} value={locale.code}>
+                      {locale.name}
+                    </SingleSelectOption>
+                  ))}
+                </SingleSelect>
+              </Field.Root>
+            </Flex>
+          </Dialog.Body>
+          <Dialog.Footer>
+            <Flex gap={2} width="100%">
+              <Button flex="auto" variant="tertiary" onClick={onClose}>
+                {formatMessage({
+                  id: getTranslation('CMEditViewCopyLocale.cancel-text'),
+                  defaultMessage: 'No, cancel',
+                })}
+              </Button>
+              <Button flex="auto" variant="success" onClick={fillFromLocale(onClose)}>
+                {formatMessage({
+                  id: getTranslation('CMEditViewCopyLocale.submit-text'),
+                  defaultMessage: 'Yes, fill in',
+                })}
+              </Button>
+            </Flex>
+          </Dialog.Footer>
+        </>
+      ),
+    },
+  };
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -296,7 +437,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
       },
     },
     {
-      skip: !hasI18n,
+      skip: !hasI18n || !baseLocale,
     }
   );
 
@@ -592,4 +733,5 @@ export {
   BulkLocaleUnpublishAction,
   DeleteLocaleAction,
   LocalePickerAction,
+  FillFromAnotherLocaleAction,
 };

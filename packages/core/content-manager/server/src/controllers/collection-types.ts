@@ -209,7 +209,7 @@ export default {
         permissionChecker,
         model,
         // @ts-expect-error TODO: fix
-        { id, locale, publishedAt: null },
+        { documentId: id, locale, publishedAt: null },
         { availableLocales: true, availableStatus: false }
       );
 

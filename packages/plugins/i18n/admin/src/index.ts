@@ -7,6 +7,7 @@ import {
   BulkLocaleUnpublishAction,
   DeleteLocaleAction,
   LocalePickerAction,
+  FillFromAnotherLocaleAction,
 } from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
@@ -69,7 +70,7 @@ export default {
 
     const contentManager = app.getPlugin('content-manager');
 
-    contentManager.apis.addDocumentHeaderAction([LocalePickerAction]);
+    contentManager.apis.addDocumentHeaderAction([LocalePickerAction, FillFromAnotherLocaleAction]);
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
