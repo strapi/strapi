@@ -432,14 +432,14 @@ const DocumentActionConfirmDialog = ({
         <Dialog.Body>{content}</Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
-            <Button variant="tertiary">
+            <Button variant="tertiary" fullWidth>
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
               })}
             </Button>
           </Dialog.Cancel>
-          <Button onClick={handleConfirm} variant={variant}>
+          <Button onClick={handleConfirm} variant={variant} fullWidth>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',
