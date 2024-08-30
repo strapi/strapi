@@ -28,6 +28,8 @@ describe('Document Service Validations', () => {
     'unpublish',
     'clone',
     'update',
+    'discardDraft',
+    'count',
   ];
 
   describe.each(methods)('%s method', (methodName) => {
