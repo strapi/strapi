@@ -1,4 +1,3 @@
-import * as globalAgent from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -410,7 +409,7 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async bootstrap() {
-    this.configureGlobalProxy();
+    await this.configureGlobalProxy();
 
     const models = [
       ...utils.transformContentTypesToModels(
@@ -470,7 +469,7 @@ class Strapi extends Container implements Core.Strapi {
     return this;
   }
 
-  configureGlobalProxy() {
+  async configureGlobalProxy() {
     const globalProxy = this.config.get('server.proxy.global');
     const httpProxy = this.config.get('server.proxy.http') || globalProxy;
     const httpsProxy = this.config.get('server.proxy.https') || globalProxy;
@@ -478,6 +477,7 @@ class Strapi extends Container implements Core.Strapi {
     if (!httpProxy && !httpsProxy) {
       return;
     }
+    const globalAgent = await import('global-agent');
 
     globalAgent.bootstrap();
 
