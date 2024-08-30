@@ -1,0 +1,32 @@
+{
+  "collectionName": "components_slices_testimonials_groups",
+  "info": {
+    "name": "TestimonialsGroup",
+    "displayName": "Testimonials group",
+    "icon": "user-friends"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "link": {
+      "type": "component",
+      "repeatable": false,
+      "component": "links.link"
+    },
+    "logos": {
+      "type": "component",
+      "repeatable": true,
+      "component": "elements.logos"
+    },
+    "testimonials": {
+      "type": "component",
+      "repeatable": true,
+      "component": "elements.testimonial"
+    }
+  }
+}

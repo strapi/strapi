@@ -1,0 +1,22 @@
+{
+  "name": "website",
+  "private": true,
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi",
+    "deploy": "strapi deploy"
+  },
+  "dependencies": {
+    "@strapi/plugin-cloud": "^5.0.0-rc",
+    "@strapi/plugin-graphql": "^5.0.0-rc",
+    "@strapi/plugin-users-permissions": "^5.0.0-rc",
+    "@strapi/strapi": "^5.0.0-rc",
+    "lodash.set": "^4.3.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  }
+}

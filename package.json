@@ -104,6 +104,7 @@
     "chokidar": "3.5.3",
     "coffee": "5.5.1",
     "core-js": "3.36.0",
+    "create-strapi-app": "workspace:*",
     "cross-env": "7.0.3",
     "dotenv": "16.4.5",
     "eslint": "8.50.0",
