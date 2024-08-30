@@ -381,7 +381,12 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
           if (action.type === 'icon') {
             return (
               <React.Fragment key={action.id}>
-                <IconButton label={action.label} size="S" onClick={handleClick(action)}>
+                <IconButton
+                  disabled={action.disabled}
+                  label={action.label}
+                  size="S"
+                  onClick={handleClick(action)}
+                >
                   {action.icon}
                 </IconButton>
                 {action.dialog ? (

@@ -232,6 +232,7 @@ const FillFromAnotherLocaleAction = ({
   return {
     type: 'icon',
     icon: <Download />,
+    disabled: availableLocales.length === 0,
     label: formatMessage({
       id: getTranslation('CMEditViewCopyLocale.copy-text'),
       defaultMessage: 'Fill in from another locale',
