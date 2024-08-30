@@ -154,16 +154,15 @@ const NpmPackageCard = ({
             defaultMessage: 'More',
           })}
         </LinkButton>
-        {isCompatible && (
-          <InstallPluginButton
-            isInstalled={isInstalled}
-            isInDevelopmentMode={isInDevelopmentMode}
-            commandToCopy={commandToCopy}
-            strapiAppVersion={strapiAppVersion}
-            strapiPeerDepVersion={attributes.strapiVersion}
-            pluginName={attributes.name}
-          />
-        )}
+        <InstallPluginButton
+          isInstalled={isInstalled}
+          isInDevelopmentMode={isInDevelopmentMode}
+          isCompatible={isCompatible}
+          commandToCopy={commandToCopy}
+          strapiAppVersion={strapiAppVersion}
+          strapiPeerDepVersion={attributes.strapiVersion}
+          pluginName={attributes.name}
+        />
       </Flex>
     </Flex>
   );
@@ -178,11 +177,13 @@ interface InstallPluginButtonProps
   commandToCopy: string;
   pluginName: string;
   strapiPeerDepVersion?: string;
+  isCompatible?: boolean;
 }
 
 const InstallPluginButton = ({
   isInstalled,
   isInDevelopmentMode,
+  isCompatible,
   commandToCopy,
   strapiAppVersion,
   strapiPeerDepVersion,
@@ -221,7 +222,7 @@ const InstallPluginButton = ({
   }
 
   // In development, show install button
-  if (isInDevelopmentMode) {
+  if (isInDevelopmentMode && isCompatible !== false) {
     return (
       <CardButton
         strapiAppVersion={strapiAppVersion}
