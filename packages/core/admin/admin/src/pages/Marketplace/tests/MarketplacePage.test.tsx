@@ -52,9 +52,9 @@ describe('Marketplace page - layout', () => {
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Transformer')
     )!;
-  
+
     const button = within(alreadyInstalledCard).queryByText(/copy install command/i);
-  
+
     expect(button).not.toBeInTheDocument();
   });
 
