@@ -41,6 +41,8 @@ export interface FormModalNavigationContextValue {
   kind: string;
   step: string;
   targetUid: Internal.UID.Schema;
+  activeTab: string;
+  setActiveTab: (value: React.SetStateAction<string>) => void;
 }
 
 // @ts-expect-error need to pass initial value to params
