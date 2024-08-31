@@ -34,6 +34,9 @@ const secretLabel = {
   defaultMessage: 'Client Secret',
 };
 
+const CALLBACK_REGEX = /^(?:.+:\/\/.*)(d*)\/?(.*)$/;
+const SUBDOMAIN_REGEX = /^(([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+)(:\d+)?(\/\S*)?$/;
+
 const forms = {
   email: {
     form: [
@@ -130,7 +133,10 @@ const forms = {
       }),
       callback: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup
+          .string()
+          .matches(CALLBACK_REGEX, translatedErrors.regex)
+          .required(translatedErrors.required),
         otherwise: yup.string(),
       }),
     }),
@@ -244,12 +250,18 @@ const forms = {
       }),
       subdomain: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup
+          .string()
+          .matches(SUBDOMAIN_REGEX, translatedErrors.regex)
+          .required(translatedErrors.required),
         otherwise: yup.string(),
       }),
       callback: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup
+          .string()
+          .matches(CALLBACK_REGEX, translatedErrors.regex)
+          .required(translatedErrors.required),
         otherwise: yup.string(),
       }),
     }),
