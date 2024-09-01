@@ -71,7 +71,17 @@ describe('schema with subdomain', () => {
         key: 'example-key',
         secret: 'example-secret',
         subdomain: 'http://example.com',
-        callback: 'example.com/callback',
+        callback: 'http://example.com/callback',
+      })
+    ).toThrow();
+
+    expect(() =>
+      providersWithSubdomain.schema.validateSync({
+        enabled: true,
+        key: 'example-key',
+        secret: 'example-secret',
+        subdomain: 'https://example.com',
+        callback: 'http://example.com/callback',
       })
     ).toThrow();
   });
@@ -93,7 +103,7 @@ describe('schema with subdomain', () => {
         key: 'example-key',
         secret: 'example-secret',
         subdomain: 'example.com/example',
-        callback: 'http://example.com/example-callback',
+        callback: 'http://example.com/callback',
       })
     ).not.toThrow();
 
@@ -103,7 +113,7 @@ describe('schema with subdomain', () => {
         key: 'example-key',
         secret: 'example-secret',
         subdomain: 'example.com',
-        callback: 'http://example.com/example-callback',
+        callback: 'https://example.com/callback',
       })
     ).not.toThrow();
   });
