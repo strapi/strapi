@@ -23,7 +23,7 @@ describe('schema without subdomain', () => {
     ).toThrow();
   });
 
-  it('should success to validate', () => {
+  it('should successfully validate', () => {
     expect(() =>
       providers.schema.validateSync({
         enabled: false,
@@ -76,7 +76,7 @@ describe('schema with subdomain', () => {
     ).toThrow();
   });
 
-  it('should success to validate', () => {
+  it('should successfully validate', () => {
     expect(() =>
       providersWithSubdomain.schema.validateSync({
         enabled: false,

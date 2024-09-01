@@ -7,7 +7,10 @@ const URL_REGEX = new RegExp('(^$)|((.+:\\/\\/.*)(d*)\\/?(.*))');
 const schema = yup.object().shape({
   email_confirmation_redirection: yup.mixed().when('email_confirmation', {
     is: true,
-    then: yup.string().matches(URL_REGEX).required(),
+    then: yup
+      .string()
+      .matches(URL_REGEX, translatedErrors.regex)
+      .required(translatedErrors.required),
     otherwise: yup.string().nullable(),
   }),
   email_reset_password: yup
