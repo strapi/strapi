@@ -23,7 +23,7 @@ const testCT = {
       type: 'relation',
       relation: 'manyToMany',
       target: 'api::test.test',
-      inversedBy: 'children', // intentionnaly wrong to validate retro compatibility
+      inversedBy: 'children', // intentionally wrong to validate retro compatibility
     },
   },
 };
