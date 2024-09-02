@@ -45,7 +45,9 @@ const releaseActionController = {
       const releaseActions = await Promise.all(
         releaseActionsArgs.map(async (releaseActionArgs) => {
           try {
-            const action = await releaseService.createAction(releaseId, releaseActionArgs);
+            const action = await releaseService.createAction(releaseId, releaseActionArgs, {
+              disableUpdateReleaseStatus: true,
+            });
 
             return action;
           } catch (error) {
@@ -63,6 +65,10 @@ const releaseActionController = {
     });
 
     const newReleaseActions = releaseActions.filter((action) => action !== null);
+
+    if (newReleaseActions.length > 0) {
+      releaseService.updateReleaseStatus(releaseId);
+    }
 
     ctx.body = {
       data: newReleaseActions,
