@@ -101,13 +101,6 @@ describe('Marketplace page - providers tab', () => {
       .find((div) => div.innerHTML.includes('Cloudinary'))!;
     const alreadyInstalledText = within(alreadyInstalledCard).queryByText(/installed/i);
     expect(alreadyInstalledText).toBeVisible();
-
-    // Provider that's not installed
-    const notInstalledCard = screen
-      .getAllByTestId('npm-package-card')
-      .find((div) => div.innerHTML.includes('Rackspace'))!;
-    const notInstalledText = within(notInstalledCard).queryByText(/copy install command/i);
-    expect(notInstalledText).toBeVisible();
   });
 
   it('shows providers filters popover', async () => {

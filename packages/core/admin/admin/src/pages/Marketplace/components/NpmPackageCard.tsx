@@ -65,6 +65,9 @@ const NpmPackageCard = ({
     attributes.slug
   }`;
 
+  const versionRange = semver.validRange(attributes.strapiVersion);
+  const isCompatible = semver.satisfies(strapiAppVersion ?? '', versionRange ?? '');
+
   return (
     <Flex
       direction="column"
@@ -158,6 +161,7 @@ const NpmPackageCard = ({
         <InstallPluginButton
           isInstalled={isInstalled}
           isInDevelopmentMode={isInDevelopmentMode}
+          isCompatible={isCompatible}
           commandToCopy={commandToCopy}
           strapiAppVersion={strapiAppVersion}
           strapiPeerDepVersion={attributes.strapiVersion}
@@ -177,11 +181,13 @@ interface InstallPluginButtonProps
   commandToCopy: string;
   pluginName: string;
   strapiPeerDepVersion?: string;
+  isCompatible?: boolean;
 }
 
 const InstallPluginButton = ({
   isInstalled,
   isInDevelopmentMode,
+  isCompatible,
   commandToCopy,
   strapiAppVersion,
   strapiPeerDepVersion,
@@ -220,7 +226,7 @@ const InstallPluginButton = ({
   }
 
   // In development, show install button
-  if (isInDevelopmentMode) {
+  if (isInDevelopmentMode && isCompatible !== false) {
     return (
       <CardButton
         strapiAppVersion={strapiAppVersion}
