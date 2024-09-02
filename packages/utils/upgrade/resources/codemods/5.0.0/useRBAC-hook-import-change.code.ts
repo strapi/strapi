@@ -10,7 +10,7 @@ const transform: Transform = (file, api) => {
   const root = j.withParser('tsx')(file.source);
 
   changeImportSpecifier(root, j, {
-    methodName: 'useRBAC',
+    oldMethodName: 'useRBAC',
     oldDependency: '@strapi/helper-plugin',
     newDependency: '@strapi/strapi/admin',
   });
