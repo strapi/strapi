@@ -34,7 +34,7 @@ const secretLabel = {
   defaultMessage: 'Client Secret',
 };
 
-const CALLBACK_REGEX = /^(?:.+:\/\/.*)(d*)\/?(.*)$/;
+const CALLBACK_REGEX = /(^$)|((.+:\/\/.*)(d*)\/?(.*))/;
 const SUBDOMAIN_REGEX = /^(([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+)(:\d+)?(\/\S*)?$/;
 
 const forms = {
