@@ -11,7 +11,7 @@ import {
 } from '../traverse';
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
-import { throwInvalidKey } from './utils';
+import { asyncCurry, throwInvalidKey } from './utils';
 import type { Model, Data } from '../types';
 import parseType from '../parse-type';
 
@@ -32,19 +32,6 @@ export const throwPasswords = (ctx: Context) => async (entity: Data) => {
 
 type AnyFunc = (...args: any[]) => any;
 
-// TODO: move this to a utility
-// lodash/fp curry does not detect async methods, so we'll use our own that is typed correctly
-function asyncCurry<A extends unknown[], R>(
-  fn: (...args: A) => Promise<R>
-): (...args: Partial<A>) => any {
-  return function curried(...args: unknown[]): unknown {
-    if (args.length >= fn.length) {
-      return fn(...(args as A));
-    }
-    return (...moreArgs: unknown[]) => curried(...args, ...moreArgs);
-  };
-}
-
 export const FILTER_TRAVERSALS = [
   'nonAttributesOperators',
   'dynamicZones',
@@ -61,9 +48,11 @@ export const validateFilters = asyncCurry(
     }
 
     // Build the list of functions conditionally
-    const functionsToApply = [
-      // keys that are not attributes or valid operators
-      include.includes('nonAttributesOperators') &&
+    const functionsToApply: Array<AnyFunc> = [];
+
+    // keys that are not attributes or valid operators
+    if (include.includes('nonAttributesOperators')) {
+      functionsToApply.push(
         traverseQueryFilters(({ key, attribute, path }) => {
           // ID is not an attribute per se, so we need to make
           // an extra check to ensure we're not removing it
@@ -76,12 +65,25 @@ export const validateFilters = asyncCurry(
           if (!isAttribute && !isOperator(key)) {
             throwInvalidKey({ key, path: path.attribute });
           }
-        }, ctx),
-      include.includes('dynamicZones') && traverseQueryFilters(throwDynamicZones, ctx),
-      include.includes('morphRelations') && traverseQueryFilters(throwMorphToRelations, ctx),
-      include.includes('passwords') && traverseQueryFilters(throwPassword, ctx),
-      include.includes('private') && traverseQueryFilters(throwPrivate, ctx),
-    ].filter((fn): fn is AnyFunc => typeof fn === 'function'); // Remove `false` values
+        }, ctx)
+      );
+    }
+
+    if (include.includes('dynamicZones')) {
+      functionsToApply.push(traverseQueryFilters(throwDynamicZones, ctx));
+    }
+
+    if (include.includes('morphRelations')) {
+      functionsToApply.push(traverseQueryFilters(throwMorphToRelations, ctx));
+    }
+
+    if (include.includes('passwords')) {
+      functionsToApply.push(traverseQueryFilters(throwPassword, ctx));
+    }
+
+    if (include.includes('private')) {
+      functionsToApply.push(traverseQueryFilters(throwPrivate, ctx));
+    }
 
     // Return directly if no validation functions are provided
     if (functionsToApply.length === 0) {
@@ -112,9 +114,11 @@ export const validateSort = asyncCurry(
     }
 
     // Build the list of functions conditionally based on the include array
-    const functionsToApply: Array<AnyFunc> = [
-      // Validate non attribute keys
-      include.includes('nonAttributesOperators') &&
+    const functionsToApply: Array<AnyFunc> = [];
+
+    // Validate non attribute keys
+    if (include.includes('nonAttributesOperators')) {
+      functionsToApply.push(
         traverseQuerySort(({ key, attribute, path }) => {
           // ID is not an attribute per se, so we need to make
           // an extra check to ensure we're not removing it
@@ -125,22 +129,33 @@ export const validateSort = asyncCurry(
           if (!attribute) {
             throwInvalidKey({ key, path: path.attribute });
           }
-        }, ctx),
+        }, ctx)
+      );
+    }
 
-      // Validate dynamic zones from sort
-      include.includes('dynamicZones') && traverseQuerySort(throwDynamicZones, ctx),
+    // Validate dynamic zones from sort
+    if (include.includes('dynamicZones')) {
+      functionsToApply.push(traverseQuerySort(throwDynamicZones, ctx));
+    }
 
-      // Validate morphTo relations from sort
-      include.includes('morphRelations') && traverseQuerySort(throwMorphToRelations, ctx),
+    // Validate morphTo relations from sort
+    if (include.includes('morphRelations')) {
+      functionsToApply.push(traverseQuerySort(throwMorphToRelations, ctx));
+    }
 
-      // Validate passwords from sort
-      include.includes('passwords') && traverseQuerySort(throwPassword, ctx),
+    // Validate passwords from sort
+    if (include.includes('passwords')) {
+      functionsToApply.push(traverseQuerySort(throwPassword, ctx));
+    }
 
-      // Validate private from sort
-      include.includes('private') && traverseQuerySort(throwPrivate, ctx),
+    // Validate private from sort
+    if (include.includes('private')) {
+      functionsToApply.push(traverseQuerySort(throwPrivate, ctx));
+    }
 
-      // Validate non-scalar empty keys
-      include.includes('nonScalarEmptyKeys') &&
+    // Validate non-scalar empty keys
+    if (include.includes('nonScalarEmptyKeys')) {
+      functionsToApply.push(
         traverseQuerySort(({ key, attribute, value, path }) => {
           // ID is not an attribute per se, so we need to make
           // an extra check to ensure we're not removing it
@@ -151,8 +166,9 @@ export const validateSort = asyncCurry(
           if (!isScalarAttribute(attribute) && isEmpty(value)) {
             throwInvalidKey({ key, path: path.attribute });
           }
-        }, ctx),
-    ].filter((fn): fn is AnyFunc => typeof fn === 'function'); // Ensure only functions are passed
+        }, ctx)
+      );
+    }
 
     // Return directly if no validation functions are provided
     if (functionsToApply.length === 0) {
@@ -174,11 +190,12 @@ export const validateFields = asyncCurry(
     if (!ctx.schema) {
       throw new Error('Missing schema in defaultValidateFields');
     }
-
     // Build the list of functions conditionally based on the include array
-    const functionsToApply: Array<AnyFunc> = [
-      // Only allow scalar attributes
-      include.includes('scalarAttributes') &&
+    const functionsToApply: Array<AnyFunc> = [];
+
+    // Only allow scalar attributes
+    if (include.includes('scalarAttributes')) {
+      functionsToApply.push(
         traverseQueryFields(({ key, attribute, path }) => {
           // ID is not an attribute per se, so we need to make
           // an extra check to ensure we're not throwing because of it
@@ -189,14 +206,19 @@ export const validateFields = asyncCurry(
           if (isNil(attribute) || !isScalarAttribute(attribute)) {
             throwInvalidKey({ key, path: path.attribute });
           }
-        }, ctx),
+        }, ctx)
+      );
+    }
 
-      // Private fields
-      include.includes('privateFields') && traverseQueryFields(throwPrivate, ctx),
+    // Private fields
+    if (include.includes('privateFields')) {
+      functionsToApply.push(traverseQueryFields(throwPrivate, ctx));
+    }
 
-      // Password fields
-      include.includes('passwordFields') && traverseQueryFields(throwPassword, ctx),
-    ].filter((fn): fn is AnyFunc => typeof fn === 'function'); // Ensure only functions are passed
+    // Password fields
+    if (include.includes('passwordFields')) {
+      functionsToApply.push(traverseQueryFields(throwPassword, ctx));
+    }
 
     // Return directly if no validation functions are provided
     if (functionsToApply.length === 0) {
@@ -227,27 +249,29 @@ export const validatePopulate = asyncCurry(
     if (!ctx.schema) {
       throw new Error('Missing schema in defaultValidatePopulate');
     }
+    // Build the list of functions conditionally based on the include array
+    const functionsToApply: Array<AnyFunc> = [];
 
-    const functionsToApply: Array<AnyFunc> = [
+    // Always include the main traversal function
+    functionsToApply.push(
       traverseQueryPopulate(async ({ key, path, value, schema, attribute, getModel }, { set }) => {
         if (attribute) {
           const isPopulatableAttribute = ['relation', 'dynamiczone', 'component', 'media'].includes(
             attribute.type
           );
 
-          // throw on non-populate attributes
+          // Throw on non-populate attributes
           if (!isPopulatableAttribute) {
             throwInvalidKey({ key, path: path.raw });
           }
 
-          // valid populatable attribute, so return
+          // Valid populatable attribute, so return
           return;
         }
 
-        // if we're looking at a populate fragment
-        // make sure its target are valid (they're not validated otherwise)
+        // If we're looking at a populate fragment, ensure its target is valid
         if (key === 'on') {
-          // populate fragment should always be an object
+          // Populate fragment should always be an object
           if (!isObject(value)) {
             return throwInvalidKey({ key, path: path.raw });
           }
@@ -257,13 +281,13 @@ export const validatePopulate = asyncCurry(
           for (const target of targets) {
             const model = getModel(target);
 
-            // if a target is invalid (no matching model), then raise an error
+            // If a target is invalid (no matching model), then raise an error
             if (!model) {
               throwInvalidKey({ key: target, path: `${path.raw}.${target}` });
             }
           }
 
-          // if the fragment's target is fine, then let it pass
+          // If the fragment's target is fine, then let it pass
           return;
         }
 
@@ -285,10 +309,10 @@ export const validatePopulate = asyncCurry(
         // Allowed boolean-like keywords should be ignored
         try {
           parseType({ type: 'boolean', value: key });
-          // key is an allowed boolean-like keyword, skipping validation...
+          // Key is an allowed boolean-like keyword, skipping validation...
           return;
         } catch {
-          // continue, because it's not a boolean-like
+          // Continue, because it's not a boolean-like
         }
 
         // Handle nested `sort` validation with custom or default traversals
@@ -355,13 +379,17 @@ export const validatePopulate = asyncCurry(
           return;
         }
 
+        // Throw an error if non-attribute operators are included in the populate array
         if (includes?.populate?.includes('nonAttributesOperators')) {
           throwInvalidKey({ key, path: path.attribute });
         }
-      }, ctx),
-      // Conditionally traverse for private fields only if 'private' is included
-      includes?.populate?.includes('private') && traverseQueryPopulate(throwPrivate, ctx),
-    ].filter((fn): fn is AnyFunc => typeof fn === 'function'); // Ensure only functions are passed
+      }, ctx)
+    );
+
+    // Conditionally traverse for private fields only if 'private' is included
+    if (includes?.populate?.includes('private')) {
+      functionsToApply.push(traverseQueryPopulate(throwPrivate, ctx));
+    }
 
     // Return directly if no validation functions are provided
     if (functionsToApply.length === 0) {
