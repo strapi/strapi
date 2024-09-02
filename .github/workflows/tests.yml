@@ -155,13 +155,14 @@ jobs:
 
   e2e_ce:
     timeout-minutes: 60
-    needs: [changes, build, typescript, unit_front]
+    needs: [changes, build]
     name: '[CE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -184,7 +185,7 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: false
-          jestOptions: --project=${{ matrix.project }}
+          jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -195,7 +196,7 @@ jobs:
 
   e2e_ee:
     timeout-minutes: 60
-    needs: [changes, build, typescript, unit_front]
+    needs: [changes, build]
     name: '[EE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     env:
@@ -204,6 +205,7 @@ jobs:
       fail-fast: false
       matrix:
         project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -227,7 +229,7 @@ jobs:
         with:
           runEE: true
           enableFutureFeatures: true
-          jestOptions: --project=${{ matrix.project }}
+          jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -262,7 +264,7 @@ jobs:
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -366,7 +368,7 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:

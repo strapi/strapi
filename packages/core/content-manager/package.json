@@ -81,7 +81,7 @@
     "markdown-it-mark": "^3.0.1",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
-    "node-schedule": "2.1.0",
+    "node-schedule": "2.1.1",
     "qs": "6.11.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",

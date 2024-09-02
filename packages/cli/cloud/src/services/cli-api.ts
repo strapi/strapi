@@ -2,7 +2,7 @@ import axios, { type AxiosResponse } from 'axios';
 import fse from 'fs-extra';
 import os from 'os';
 import { apiConfig } from '../config/api';
-import type { CLIContext, CloudCliConfig } from '../types';
+import type { CLIContext, CloudCliConfig, TrackPayload } from '../types';
 import { getLocalConfig } from '../config/local';
 
 import packageJson from '../../package.json';
@@ -10,12 +10,15 @@ import packageJson from '../../package.json';
 export const VERSION = 'v1';
 
 export type ProjectInfos = {
+  id: string;
   name: string;
-  nodeVersion: string;
-  region: string;
+  displayName?: string;
+  nodeVersion?: string;
+  region?: string;
   plan?: string;
   url?: string;
 };
+
 export type ProjectInput = Omit<ProjectInfos, 'id'>;
 
 export type DeployResponse = {
@@ -23,7 +26,31 @@ export type DeployResponse = {
   image: string;
 };
 
-export type TrackPayload = Record<string, unknown>;
+export type ListProjectsResponse = {
+  data: {
+    data: string;
+  };
+};
+
+export type ListLinkProjectsResponse = {
+  data: {
+    data: ProjectInfos[] | Record<string, never>;
+  };
+};
+
+export type GetProjectResponse = {
+  data: {
+    updatedAt: string;
+    suspendedAt?: string;
+    isTrial: boolean;
+  };
+  metadata: {
+    dashboardUrls: {
+      project: string;
+      deployments: string;
+    };
+  };
+};
 
 export interface CloudApiService {
   deploy(
@@ -38,8 +65,8 @@ export interface CloudApiService {
     }
   ): Promise<AxiosResponse<DeployResponse>>;
 
-  createProject(projectInput: ProjectInput): Promise<{
-    data: ProjectInfos;
+  createProject(createProjectInput: ProjectInput): Promise<{
+    data: ProjectInput;
     status: number;
   }>;
 
@@ -47,7 +74,11 @@ export interface CloudApiService {
 
   config(): Promise<AxiosResponse<CloudCliConfig>>;
 
-  listProjects(): Promise<AxiosResponse<ProjectInfos[]>>;
+  listProjects(): Promise<AxiosResponse<ListProjectsResponse>>;
+
+  listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
+
+  getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
@@ -132,8 +163,55 @@ export async function cloudApiFactory(
       }
     },
 
-    listProjects() {
-      return axiosCloudAPI.get<ProjectInfos[]>('/projects');
+    async listProjects(): Promise<AxiosResponse<ListProjectsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get('/projects');
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud projects from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse, unknown>> {
+      try {
+        const response = await axiosCloudAPI.get('/projects-linkable');
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud projects from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async getProject({ name }): Promise<AxiosResponse<GetProjectResponse>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}`);
+
+        if (response.status !== 200) {
+          throw new Error("Error fetching project's details.");
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! There was a problem retrieving your project's details. Please try again."
+        );
+        throw error;
+      }
     },
 
     track(event, payload = {}) {

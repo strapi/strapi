@@ -51,6 +51,9 @@ describe.skip('Relations', () => {
           services: {
             'permission-checker': {
               create: jest.fn().mockReturnValue({
+                can: {
+                  read: jest.fn().mockReturnValue(true),
+                },
                 cannot: {
                   read: jest.fn().mockReturnValue(false),
                 },
@@ -136,6 +139,20 @@ describe.skip('Relations', () => {
     });
 
     test('Replace mainField by id when mainField is not listable', async () => {
+      global.strapi.plugins['content-manager'].services[
+        'permission-checker'
+      ].create.mockReturnValue({
+        can: {
+          read: jest.fn().mockReturnValue(true),
+        },
+        cannot: {
+          read: jest.fn().mockReturnValue(false),
+        },
+        sanitizedQuery: {
+          read: jest.fn((queryParams) => queryParams),
+        },
+      });
+
       const ctx = createContext(
         {
           params: {
@@ -182,6 +199,9 @@ describe.skip('Relations', () => {
       global.strapi.plugins['content-manager'].services[
         'permission-checker'
       ].create.mockReturnValue({
+        can: {
+          read: jest.fn().mockReturnValue(true),
+        },
         cannot: {
           read: jest.fn().mockReturnValue(false),
         },
@@ -324,5 +344,56 @@ describe.skip('Relations', () => {
         })
       );
     });
+  });
+
+  test('Replace mainField by id when mainField is not accessible with RBAC', async () => {
+    global.strapi.plugins['content-manager'].services['permission-checker'].create
+      .mockReturnValueOnce({
+        can: {
+          read: jest.fn().mockReturnValue(true),
+        },
+        cannot: {
+          read: jest.fn().mockReturnValue(false),
+        },
+        sanitizedQuery: {
+          read: jest.fn().mockReturnValue({}),
+        },
+      })
+      .mockReturnValueOnce({
+        can: {
+          read: jest.fn().mockReturnValue(false),
+        },
+        cannot: {
+          read: jest.fn().mockReturnValue(true),
+        },
+      });
+
+    const ctx = createContext(
+      {
+        params: {
+          model: 'main',
+          targetField: 'relationWithHidden',
+          id: 1,
+        },
+      },
+      {
+        state: {
+          userAbility: {
+            can: jest.fn().mockReturnValue(true),
+          },
+        },
+      }
+    );
+
+    await relations.findExisting(ctx);
+
+    expect(strapi.entityService.load).toHaveBeenCalledWith(
+      'main',
+      { id: 1 },
+      'relationWithHidden',
+      expect.objectContaining({
+        fields: ['id'],
+      })
+    );
   });
 });
