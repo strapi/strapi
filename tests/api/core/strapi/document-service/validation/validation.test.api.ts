@@ -140,6 +140,16 @@ describe('Document Service Validations', () => {
           })
         ).rejects.toThrow(errors.ValidationError);
       });
+
+      it('should not throw on valid comma separated keys', async () => {
+        await strapi.documents(ARTICLE_UID)[methodName]({ fields: 'title,password,private' });
+      });
+
+      it('should throw on invalid comma separated keys', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({ fields: 'title,invalid' })
+        ).rejects.toThrow(errors.ValidationError);
+      });
     });
 
     describe('populate', () => {
