@@ -79,6 +79,11 @@ export interface BaseJoinTable {
     referencedColumn: string;
     referencedTable?: string;
   };
+  /**
+   * Use to flag joinTable we created internally vs user defined
+   * @internal
+   */
+  __internal__?: boolean;
 }
 
 export interface JoinTable extends BaseJoinTable {
@@ -194,6 +199,12 @@ export interface MorphJoinTable {
   on?: Record<string, unknown>;
   pivotColumns: string[];
   morphColumn: MorphColumn;
+
+  /**
+   * Use to flag joinTable we created internally vs user defined
+   * @internal
+   */
+  __internal__?: boolean;
 }
 
 export interface BaseRelationalAttribute {

@@ -237,7 +237,7 @@ const createMorphToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  if ('joinTable' in attribute && attribute.joinTable) {
+  if ('joinTable' in attribute && attribute.joinTable && !attribute.joinTable.__internal__) {
     return;
   }
 
@@ -311,6 +311,7 @@ const createMorphToMany = (
   });
 
   const joinTable: MorphJoinTable = {
+    __internal__: true,
     name: joinTableName,
     joinColumn: {
       name: joinColumnName,
@@ -423,7 +424,7 @@ const createJoinTable = (
   }
 
   // TODO: implement overwrite logic instead
-  if ('joinTable' in attribute && attribute.joinTable) {
+  if ('joinTable' in attribute && attribute.joinTable && !attribute.joinTable.__internal__) {
     return;
   }
 
@@ -519,6 +520,7 @@ const createJoinTable = (
   };
 
   const joinTable = {
+    __internal__: true,
     name: joinTableName,
     joinColumn: {
       name: joinColumnName,
@@ -592,6 +594,7 @@ const createJoinTable = (
     }
 
     inverseAttribute.joinTable = {
+      __internal__: true,
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,
