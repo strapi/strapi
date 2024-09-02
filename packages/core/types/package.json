@@ -52,6 +52,7 @@
     "@strapi/utils": "workspace:*",
     "commander": "8.3.0",
     "koa": "2.15.2",
+    "koa-body": "4.2.0",
     "node-schedule": "2.1.1",
     "typedoc": "0.25.10",
     "typedoc-github-wiki-theme": "1.1.0",
