@@ -83,9 +83,9 @@ export const attributes = {
       },
       complex: {
         type: 'relation',
-        relation: 'manyToOne',
+        relation: 'oneToOne',
         target: 'api::complex.complex',
-        inversedBy: 'complexbelongstomanycomplexes',
+        mappedBy: 'complexhasandbelongstoonecomplex',
       },
     },
     manyToMany: {

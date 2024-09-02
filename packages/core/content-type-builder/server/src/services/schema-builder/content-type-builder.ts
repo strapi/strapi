@@ -120,7 +120,18 @@ export default function createComponentBuilder() {
 
         if (isRelation(attribute)) {
           if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
-            attribute.dominant = true;
+            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
+              // self referencing relation
+              const targetAttribute = infos.attributes[attribute.targetAttribute];
+
+              if (targetAttribute.dominant === undefined) {
+                attribute.dominant = true;
+              } else {
+                attribute.dominant = false;
+              }
+            } else {
+              attribute.dominant = true;
+            }
           }
 
           this.setRelation({
@@ -214,7 +225,18 @@ export default function createComponentBuilder() {
 
         if (isRelation(attribute)) {
           if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
-            attribute.dominant = true;
+            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
+              // self referencing relation
+              const targetAttribute = newAttributes[attribute.targetAttribute];
+
+              if (targetAttribute.dominant === undefined) {
+                attribute.dominant = true;
+              } else {
+                attribute.dominant = false;
+              }
+            } else {
+              attribute.dominant = true;
+            }
           }
 
           this.setRelation({
