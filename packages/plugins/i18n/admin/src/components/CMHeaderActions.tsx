@@ -551,7 +551,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     }
   }, [isDraftRelationsError, toggleNotification, formatAPIError]);
 
-  if (!schema?.options?.draftAndPublish ?? false) {
+  if (!schema?.options?.draftAndPublish) {
     return null;
   }
 

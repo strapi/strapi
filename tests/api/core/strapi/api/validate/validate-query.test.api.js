@@ -428,6 +428,17 @@ describe('Core API - Validate', () => {
             expect(res.status).toEqual(400);
           });
         });
+
+        describe('invalid modifier', () => {
+          it.each([
+            ['name_fake (asc)', { name_fake: 'asc' }, defaultDocumentsOrder],
+            ['name_fake (desc)', { name_fake: 'desc' }, defaultDocumentsOrder],
+          ])('Error with sort: %s', async (_s, sort, order) => {
+            const res = await rq.get('/api/documents', { qs: { sort } });
+
+            expect(res.status).toEqual(400);
+          });
+        });
       });
 
       describe('Password', () => {
@@ -444,12 +455,12 @@ describe('Core API - Validate', () => {
       });
 
       // TODO: Nested sort returns duplicate results. Add back those tests when the issue will be fixed
-      describe.skip('Relation', () => {
+      describe('Relation', () => {
         describe('Scalar', () => {
-          describe('Basic (no modifiers)', () => {
+          describe.skip('Basic (no modifiers)', () => {
             it.each([
               ['relations.name (asc)', { relations: { name: 'asc' } }, [1, 3, 2]],
-              ['relations.sname (desc)', { relations: { name: 'desc' } }, [2, 1, 3]],
+              ['relations.name (desc)', { relations: { name: 'desc' } }, [2, 1, 3]],
             ])('Successfully sort: %s', async (_s, sort, order) => {
               const res = await rq.get('/api/documents', { qs: { sort } });
 
@@ -538,6 +549,18 @@ describe('Core API - Validate', () => {
             expect(res.status).toEqual(400);
           });
         });
+
+        describe('invalid modifier', () => {
+          it.each([
+            ['name_invalid', 'name_invalid', defaultDocumentsOrder],
+            ['name_invalid (asc)', 'name_invalid:asc', defaultDocumentsOrder],
+            ['name_invalid (desc)', 'name_invalid:desc', defaultDocumentsOrder],
+          ])('Error with sort: %s', async (_s, sort, order) => {
+            const res = await rq.get('/api/documents', { qs: { sort } });
+
+            expect(res.status).toEqual(400);
+          });
+        });
       });
 
       describe('Password', () => {
@@ -599,6 +622,17 @@ describe('Core API - Validate', () => {
           it.each([
             ['name_private (asc)', [{ name_private: 'asc' }], defaultDocumentsOrder],
             ['name_private (desc)', [{ name_private: 'desc' }], defaultDocumentsOrder],
+          ])('Error on sort: %s', async (_s, sort, order) => {
+            const res = await rq.get('/api/documents', { qs: { sort } });
+
+            expect(res.status).toEqual(400);
+          });
+        });
+
+        describe('invalid modifier', () => {
+          it.each([
+            ['name_invalid (asc)', [{ name_invalid: 'asc' }], defaultDocumentsOrder],
+            ['name_invalid (desc)', [{ name_private: 'desc' }], defaultDocumentsOrder],
           ])('Error on sort: %s', async (_s, sort, order) => {
             const res = await rq.get('/api/documents', { qs: { sort } });
 

@@ -79,7 +79,7 @@ interface CommonHandler<AttributeType = Attribute> {
 
 export interface TransformUtils {
   remove(key: string): void;
-  set(key: string, valeu: unknown): void;
+  set(key: string, value: unknown): void;
   recurse: Traverse;
 }
 

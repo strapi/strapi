@@ -37,7 +37,8 @@ const registerModelsHooks = () => {
     // Use the id and populate built from non localized fields to get the full
     // result
     let resultID;
-    if (Array.isArray(result?.entries)) {
+    // TODO: fix bug where an empty array can be returned
+    if (Array.isArray(result?.entries) && result.entries[0]?.id) {
       resultID = result.entries[0].id;
     } else if (result?.id) {
       resultID = result.id;

@@ -1,7 +1,8 @@
 import { omit, assoc, merge, curry } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils } from '@strapi/utils';
+import { async, contentTypes as contentTypesUtils, validate } from '@strapi/utils';
 
+import { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
@@ -15,9 +16,37 @@ import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 
+const { validators } = validate;
+
+// we have to typecast to reconcile the differences between validator and database getModel
+const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
+
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
+
+  // Define the validations that should be performed
+  const sortValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
+  const fieldValidations = ['scalarAttributes'];
+  const filtersValidations = ['nonAttributesOperators', 'dynamicZones', 'morphRelations'];
+  const populateValidations = {
+    sort: sortValidations,
+    field: fieldValidations,
+    filters: filtersValidations,
+    populate: ['nonAttributesOperators'],
+  };
+
+  const validateParams = async (params: any) => {
+    const ctx = { schema: contentType, getModel };
+    await validators.validateFilters(ctx, params.filters, filtersValidations);
+    await validators.validateSort(ctx, params.sort, sortValidations);
+    await validators.validateFields(ctx, params.fields, fieldValidations);
+    await validators.validatePopulate(ctx, params.populate, populateValidations);
+
+    // TODO: add validate status, locale, pagination
+
+    return params;
+  };
 
   const entries = createEntriesService(uid);
 
@@ -26,6 +55,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function findMany(params = {} as any) {
     const query = await async.pipe(
+      validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -39,6 +69,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function findFirst(params = {} as any) {
     const query = await async.pipe(
+      validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -55,6 +86,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const query = await async.pipe(
+      validateParams,
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -71,6 +103,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const query = await async.pipe(
+      validateParams,
       omit('status'),
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
@@ -98,6 +131,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
+      validateParams,
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
       DP.statusToData(contentType),
@@ -123,6 +157,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
+      validateParams,
       DP.filterDataPublishedAt,
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
@@ -143,6 +178,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const clonedEntries = await async.map(
       entriesToClone,
       async.pipe(
+        validateParams,
         omit('id'),
         // assign new documentId
         assoc('documentId', createDocumentId()),
@@ -161,6 +197,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
+      validateParams,
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
       DP.statusToLookup(contentType),
@@ -212,6 +249,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
   async function count(params = {} as any) {
     const query = await async.pipe(
+      validateParams,
       DP.defaultStatus(contentType),
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
@@ -226,6 +264,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
+      validateParams,
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
@@ -266,6 +305,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const query = await async.pipe(
+      validateParams,
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid),
@@ -284,6 +324,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const { documentId, ...params } = opts;
 
     const queryParams = await async.pipe(
+      validateParams,
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
