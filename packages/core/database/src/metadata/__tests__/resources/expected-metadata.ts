@@ -79,6 +79,7 @@ export const expectedMetadataResults = {
               relation: 'oneToOne',
               target: 'api::complex.complex',
               joinTable: {
+                __internal__: true,
                 name: 'complexes_complexhasonecomplex_links',
                 joinColumn: {
                   name: 'complex_id',
@@ -226,6 +227,7 @@ export const expectedMetadataResults = {
               target: 'api::complex.complex',
               inversedBy: 'complexes',
               joinTable: {
+                __internal__: true,
                 name: 'complexes_complexhasmanycomplexes_links',
                 joinColumn: {
                   name: 'complex_id',
@@ -247,6 +249,7 @@ export const expectedMetadataResults = {
               target: 'api::complex.complex',
               mappedBy: 'complexeshasandbelongstomanycomplexes',
               joinTable: {
+                __internal__: true,
                 name: 'complexes_complexhasmanycomplexes_links',
                 joinColumn: {
                   name: 'inv_complex_id',
@@ -378,6 +381,7 @@ export const expectedMetadataResults = {
               target: 'api::complex.complex',
               inversedBy: 'complex',
               joinTable: {
+                __internal__: true,
                 name: 'complexes_complexhasandbelongstoonecomplex_links',
                 joinColumn: {
                   name: 'complex_id',
@@ -394,10 +398,11 @@ export const expectedMetadataResults = {
             },
             complex: {
               type: 'relation',
-              relation: 'manyToOne',
+              relation: 'oneToOne',
               target: 'api::complex.complex',
-              inversedBy: 'complexbelongstomanycomplexes',
+              mappedBy: 'complexhasandbelongstoonecomplex',
               joinTable: {
+                __internal__: true,
                 name: 'complexes_complexhasandbelongstoonecomplex_links',
                 joinColumn: {
                   name: 'inv_complex_id',
@@ -512,6 +517,7 @@ export const expectedMetadataResults = {
               target: 'api::complex.complex',
               inversedBy: 'complexes',
               joinTable: {
+                __internal__: true,
                 name: 'complexes_complexeshasandbelongstomanycomplexes_links',
                 joinColumn: {
                   name: 'complex_id',
@@ -537,6 +543,7 @@ export const expectedMetadataResults = {
               target: 'api::complex.complex',
               mappedBy: 'complexeshasandbelongstomanycomplexes',
               joinTable: {
+                __internal__: true,
                 name: 'complexes_complexeshasandbelongstomanycomplexes_links',
                 joinColumn: {
                   name: 'inv_complex_id',
@@ -681,6 +688,7 @@ export const expectedMetadataResults = {
               relation: 'oneToOne',
               target: 'api::complex.complex',
               joinTable: {
+                __internal__: true,
                 name: 'components_default_long_component_names_complex_links',
                 joinColumn: {
                   name: 'long_component_name_id',
@@ -700,6 +708,7 @@ export const expectedMetadataResults = {
               relation: 'oneToMany',
               target: 'api::complex.complex',
               joinTable: {
+                __internal__: true,
                 name: 'components_default_long_component_names_complexes_links',
                 joinColumn: {
                   name: 'long_component_name_id',
@@ -946,6 +955,7 @@ export const expectedMetadataResults = {
               relation: 'oneToOne',
               target: 'api::complex.complex',
               joinTable: {
+                __internal__: true,
                 name: 'components_default_long_component_names_complex_links',
                 joinColumn: {
                   name: 'long_component_name_id',
@@ -965,6 +975,7 @@ export const expectedMetadataResults = {
               relation: 'oneToMany',
               target: 'api::complex.complex',
               joinTable: {
+                __internal__: true,
                 name: 'components_default_long_component_names_complexes_links',
                 joinColumn: {
                   name: 'long_component_name_id',
@@ -1210,6 +1221,7 @@ export const expectedMetadataResults = {
               relation: 'oneToOne',
               target: 'api::complex.complex',
               joinTable: {
+                __internal__: true,
                 name: 'components_default_long_component_names_complex_links',
                 joinColumn: {
                   name: 'long_component_name_id',
@@ -1229,6 +1241,7 @@ export const expectedMetadataResults = {
               relation: 'oneToMany',
               target: 'api::complex.complex',
               joinTable: {
+                __internal__: true,
                 name: 'components_default_long_component_names_complexes_links',
                 joinColumn: {
                   name: 'long_component_name_id',
@@ -1475,6 +1488,7 @@ export const expectedMetadataResults = {
             relation: 'oneToOne',
             target: 'api::complex.complex',
             joinTable: {
+              __internal__: true,
               name: 'components_default_long_component_names_complex_links',
               joinColumn: {
                 name: 'long_component_name_id',
@@ -1494,6 +1508,7 @@ export const expectedMetadataResults = {
             relation: 'oneToMany',
             target: 'api::complex.complex',
             joinTable: {
+              __internal__: true,
               name: 'components_default_long_component_names_complexes_links',
               joinColumn: {
                 name: 'long_component_name_id',
