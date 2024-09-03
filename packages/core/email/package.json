@@ -52,8 +52,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.9",
-    "@strapi/icons": "2.0.0-rc.9",
+    "@strapi/design-system": "2.0.0-rc.10",
+    "@strapi/icons": "2.0.0-rc.10",
     "@strapi/provider-email-sendmail": "workspace:*",
     "@strapi/utils": "workspace:*",
     "lodash": "4.17.21",
