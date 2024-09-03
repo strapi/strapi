@@ -95,6 +95,10 @@ const hasContent = (
       return !isEmpty(content);
     }
 
+    if (Array.isArray(content)) {
+      return content.length > 0;
+    }
+
     return content?.count > 0;
   }
 
