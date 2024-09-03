@@ -1,70 +1,106 @@
 /* eslint-disable no-continue */
-import { UID, Schema } from '@strapi/types';
-import { async } from '@strapi/utils';
+import { keyBy } from 'lodash/fp';
 
-interface RelationToSync {
-  uid: string;
-  attribute: string;
-}
+import { UID, Schema } from '@strapi/types';
+
+/**
+ * Loads lingering relations that need to be updated when overriding a published or draft entry.
+ * This is necessary because the relations are uni-directional and the target entry is not aware of the source entry.
+ * This is not the case for bi-directional relations, where the target entry is also linked to the source entry.
+ *
+ * @param uid The content type uid
+ * @param oldEntries The old entries that are being overridden
+ * @returns An array of relations that need to be updated with the join table reference.
+ */
+const load = async (uid: UID.ContentType, oldEntries: { id: string; locale: string }[]) => {
+  const updates = [] as any;
+
+  // Iterate all components and content types to find relations that need to be updated
+  await strapi.db.transaction(async ({ trx }) => {
+    const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
+    const components = Object.values(strapi.components) as Schema.Component[];
+
+    for (const model of [...contentTypes, ...components]) {
+      const dbModel = strapi.db.metadata.get(model.uid);
+
+      for (const attribute of Object.values(dbModel.attributes) as any) {
+        /**
+         * Only consider unidirectional relations
+         */
+        if (attribute.type !== 'relation') continue;
+        if (attribute.target !== uid) continue;
+        if (attribute.inversedBy || attribute.mappedBy) continue;
+        const joinTable = attribute.joinTable;
+        // TODO: joinColumn relations
+        if (!joinTable) continue;
+
+        const { name } = joinTable.inverseJoinColumn;
+
+        /**
+         * Load all relations that need to be updated
+         */
+        const oldEntriesIds = oldEntries.map((entry) => entry.id);
+        const relations = await strapi.db
+          .getConnection()
+          .select('*')
+          .from(joinTable.name)
+          .whereIn(name, oldEntriesIds)
+          .transacting(trx);
+
+        if (relations.length === 0) continue;
+
+        updates.push({ joinTable, relations });
+      }
+    }
+  });
+
+  return updates;
+};
 
 /**
  * Updates uni directional relations to target the right entries when overriding published or draft entries.
  *
- * 1. Finds all content types that target the content type that's about to be published/discarded
- * 2. For each relation, update them to target the new entry
- *
- * @param oldEntries - The old entries that will be removed.
- * @param newEntries - The new entries that unidirectional relations should target.
+ * @param oldEntries The old entries that are being overridden
+ * @param newEntries The new entries that are overriding the old ones
+ * @param oldRelations The relations that were previously loaded with `load` @see load
  */
-const syncUnidirectionalRelations = async (
-  uid: UID.ContentType,
+const sync = async (
   oldEntries: { id: string; locale: string }[],
-  newEntries: { id: string; locale: string }[]
+  newEntries: { id: string; locale: string }[],
+  oldRelations: { joinTable: any; relations: any[] }[]
 ) => {
-  const relationsToSync: RelationToSync[] = [];
-
-  // Iterate all components and content types
-  const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
-  const components = Object.values(strapi.components) as Schema.Component[];
-
-  for (const model of [...contentTypes, ...components]) {
-    // If the content type has a relation to the current content type
-    for (const [name, attribute] of Object.entries(model.attributes) as any) {
-      if (attribute.type !== 'relation') continue;
-      if (attribute.target !== uid) continue;
-      // If its inversed by or mapped by, ignore
-      if (attribute.inversedBy || attribute.mappedBy) continue;
-
-      relationsToSync.push({ uid: model.uid, attribute: name });
-    }
-  }
-
-  await strapi.db.transaction(({ trx }) =>
-    async.map(newEntries, async (newEntry: { id: string; locale: string }) => {
-      // Entries should match by locale
-      const oldEntry = oldEntries.find((entry) => entry.locale === newEntry.locale);
-      if (!oldEntry) return;
-
-      // Update all relations to the new entry
-      for (const { uid, attribute: name } of relationsToSync) {
-        const model = strapi.db.metadata.get(uid);
-        const attribute = model.attributes[name];
-        if (attribute?.type === 'relation') {
-          // @ts-expect-error - FIX
-          const joinTable = attribute.joinTable;
-          if (!joinTable) continue;
-          const { name } = joinTable.inverseJoinColumn;
-
-          await strapi.db
-            .getConnection()
-            .from(joinTable.name)
-            .where(name, oldEntry.id)
-            .update(name, newEntry.id)
-            .transacting(trx);
-        }
-      }
-    })
+  /**
+   * Create a map of old entry ids to new entry ids
+   *
+   * Will be used to update the relation target ids
+   */
+  const newEntryByLocale = keyBy('locale', newEntries);
+  const oldEntriesMap = oldEntries.reduce(
+    (acc, entry) => {
+      const newEntry = newEntryByLocale[entry.locale];
+      if (!newEntry) return acc;
+      acc[entry.id] = newEntry.id;
+      return acc;
+    },
+    {} as Record<string, string>
   );
+
+  await strapi.db.transaction(async ({ trx }) => {
+    const con = strapi.db.getConnection();
+
+    // Iterate old relations that are deleted and insert the new ones
+    for (const { joinTable, relations } of oldRelations) {
+      // Update old ids with the new ones
+      const newRelations = relations.map((relation) => {
+        const column = joinTable.inverseJoinColumn.name;
+        const newId = oldEntriesMap[relation[column]];
+        return { ...relation, [column]: newId };
+      });
+
+      // Insert those relations into the join table
+      await con.batchInsert(joinTable.name, newRelations).transacting(trx);
+    }
+  });
 };
 
-export { syncUnidirectionalRelations };
+export { load, sync };

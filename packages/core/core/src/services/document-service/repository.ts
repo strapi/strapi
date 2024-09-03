@@ -14,7 +14,7 @@ import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
-import { syncUnidirectionalRelations } from './utils/unidirectional-relations';
+import * as unidirectionalRelations from './utils/unidirectional-relations';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
@@ -251,15 +251,19 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       }),
     ]);
 
+    // Load any unidirectional relation targetting the old published entries
+    const relationsToSync = await unidirectionalRelations.load(uid, oldPublishedVersions);
+
+    // Delete old published versions
+    await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
+
     // Transform draft entry data and create published versions
     const publishedEntries = await async.map(draftsToPublish, (draft: any) =>
       entries.publish(draft, queryParams)
     );
 
-    await syncUnidirectionalRelations(uid, oldPublishedVersions, publishedEntries);
-
-    // Delete old published versions
-    await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
+    // Sync unidirectional relations with the new published entries
+    await unidirectionalRelations.sync(oldPublishedVersions, publishedEntries, relationsToSync);
 
     publishedEntries.forEach(emitEvent('entry.publish'));
 
@@ -312,15 +316,19 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       }),
     ]);
 
+    // Load any unidirectional relation targeting the old drafts
+    const relationsToSync = await unidirectionalRelations.load(uid, oldDrafts);
+
+    // Delete old drafts
+    await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
+
     // Transform published entry data and create draft versions
     const draftEntries = await async.map(versionsToDraft, (entry: any) =>
       entries.discardDraft(entry, queryParams)
     );
 
-    await syncUnidirectionalRelations(uid, oldDrafts, draftEntries);
-
-    // Delete old drafts
-    await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
+    // Sync unidirectional relations with the new draft entries
+    await unidirectionalRelations.sync(oldDrafts, draftEntries, relationsToSync);
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };
