@@ -20,6 +20,26 @@ type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
 
 /**
+ * Check if the model has draft and publish enabled.
+ */
+const hasDraftAndPublish = async (trx: Knex, meta: any) => {
+  const hasTable = await trx.schema.hasTable(meta.tableName);
+
+  if (!hasTable) {
+    return false;
+  }
+
+  const uid = meta.uid as UID.ContentType;
+  const model = strapi.getModel(uid);
+  const hasDP = contentTypes.hasDraftAndPublish(model);
+  if (!hasDP) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
  * Copy all the published entries to draft entries, without it's components, dynamic zones or relations.
  * This ensures all necessary draft's exist before copying it's relations.
  */
@@ -118,57 +138,47 @@ export async function* getBatchToDiscard({
   }
 }
 
+/**
+ * 2 pass migration to create the draft entries for all the published entries.
+ * And then discard the drafts to copy the relations.
+ */
 const migrateUp = async (trx: Knex, db: Database) => {
+  const dpModels = [];
   for (const meta of db.metadata.values()) {
-    const hasTable = await trx.schema.hasTable(meta.tableName);
-
-    if (!hasTable) {
-      continue;
+    const hasDP = await hasDraftAndPublish(trx, meta);
+    if (hasDP) {
+      dpModels.push(meta);
     }
+  }
 
-    const uid = meta.uid as UID.ContentType;
-    const model = strapi.getModel(uid);
-    const hasDP = contentTypes.hasDraftAndPublish(model);
-    if (!hasDP) {
-      continue;
-    }
+  /**
+   * Create plain draft entries for all the entries that were published.
+   */
+  for (const model of dpModels) {
+    await copyPublishedEntriesToDraft({ db, trx, uid: model.uid });
+  }
 
-    /**
-     * Create plain draft entries for all the entries that were published.
-     */
-    await copyPublishedEntriesToDraft({ db, trx, uid: meta.uid });
-
+  /**
+   * Discard the drafts will copy the relations from the published entries to the newly created drafts.
+   *
+   * Load a batch of entries (batched to prevent loading millions of rows at once ),
+   * and discard them using the document service.
+   */
+  for (const model of dpModels) {
     const discardDraft = async (entry: DocumentVersion) =>
       strapi
-        .documents(uid)
-        // Discard draft by referencing the documentId and locale
+        .documents(model.uid as UID.ContentType)
         .discardDraft({ documentId: entry.documentId, locale: entry.locale });
 
-    /**
-     * Discard the drafts will copy the relations from the published entries to the newly created drafts.
-     *
-     * Load a batch of entries (batched to prevent loading millions of rows at once ),
-     * and discard them using the document service.
-     */
-    for await (const batch of getBatchToDiscard({ db, trx, uid: meta.uid })) {
+    for await (const batch of getBatchToDiscard({ db, trx, uid: model.uid })) {
       await async.map(batch, discardDraft, { concurrency: 10 });
     }
   }
 };
 
-/**
- * On V4 there was no concept of document, and an entry could be in a draft or published state.
- * But not both at the same time.
- *
- * On V5 we introduced the concept of document, and an entry can be in a draft or published state,
- * with the requirement that a document must always have a draft.
- *
- * This migration creates the document draft counterpart for all the entries that were in a published state.
- */
 export const discardDocumentDrafts: Migration = {
   name: 'core::5.0.0-discard-drafts',
   async up(trx, db) {
-    // TODO: Log to inform the user that the migration is running in the background
     await migrateUp(trx, db);
   },
   async down() {
