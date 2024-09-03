@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendgrid",
-  "version": "5.0.0-rc.11",
+  "version": "5.0.0-rc.12",
   "description": "Sendgrid provider for strapi email",
   "keywords": [
     "email",

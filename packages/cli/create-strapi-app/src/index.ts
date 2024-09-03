@@ -3,10 +3,10 @@ import os from 'node:os';
 import chalk from 'chalk';
 import commander from 'commander';
 import crypto from 'crypto';
+import fse from 'fs-extra';
 
 import * as prompts from './prompts';
 import { handleCloudLogin } from './cloud';
-import { version } from '../package.json';
 import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
@@ -16,6 +16,8 @@ import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
 import type { Options, Scope } from './types';
 import { logger } from './utils/logger';
+
+const { version } = fse.readJSONSync(join(__dirname, '..', 'package.json'));
 
 const command = new commander.Command('create-strapi-app')
   .version(version)
