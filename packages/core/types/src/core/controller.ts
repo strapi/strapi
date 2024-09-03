@@ -1,4 +1,4 @@
-import type {} from 'koa-body';
+import 'koa-body';
 import type { Context, Next } from 'koa';
 
 export type Controller = Record<string, ControllerHandler>;
