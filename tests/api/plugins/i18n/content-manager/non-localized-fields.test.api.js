@@ -286,7 +286,7 @@ describe('i18n', () => {
 
       test('Modify a scalar non localized field - Unpublish + Discard', async () => {
         // Publish the default locale entry
-        let res = await publish('api::category.category', documentId, { [attribute]: 'publish' });
+        let res = await publish('api::category.category', documentId, { [attribute]: 'unpublish' });
         expect(res.statusCode).toBe(200);
 
         // Update the default locale draft entry with random data
@@ -310,7 +310,7 @@ describe('i18n', () => {
           });
 
           // The locale should now have the same value as the default locale.
-          expect(localeRes[attribute]).toEqual('unpbulish');
+          expect(localeRes[attribute]).toEqual('unpublish');
         }
       });
 
