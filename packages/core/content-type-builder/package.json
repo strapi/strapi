@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.0.0-rc.11",
+  "version": "5.0.0-rc.12",
   "description": "Create and manage content types",
   "repository": {
     "type": "git",
