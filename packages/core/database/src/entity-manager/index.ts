@@ -834,16 +834,63 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({
-                [idColumn.name]: id,
-                [typeColumn.name]: uid,
-                ...(joinTable.on || {}),
-                field: attributeName,
-              })
-              .transacting(trx)
-              .execute();
+            // for connect/disconnect, only modify those relations
+            if (!isEmpty(cleanRelationData.disconnect) || !isEmpty(cleanRelationData.connect)) {
+              // delete disonnects, and connects (to prevent duplicates when we add them later)
+              const idsToDelete = [
+                ...(cleanRelationData.disconnect || []),
+                ...(cleanRelationData.connect || []),
+              ];
+
+              if (!isEmpty(idsToDelete)) {
+                const where = {
+                  $or: idsToDelete.map((item: any) => {
+                    return {
+                      [idColumn.name]: id,
+                      [typeColumn.name]: uid,
+                      [joinColumn.name]: item.id,
+                      ...(joinTable.on || {}),
+                      field: attributeName,
+                    };
+                  }),
+                };
+
+                await this.createQueryBuilder(joinTable.name)
+                  .delete()
+                  .where(where)
+                  .transacting(trx)
+                  .execute();
+              }
+              if (!isEmpty(cleanRelationData.connect)) {
+                const rows = cleanRelationData.connect?.map((data, idx) => ({
+                  [joinColumn.name]: data.id,
+                  [idColumn.name]: id,
+                  [typeColumn.name]: uid,
+                  ...(joinTable.on || {}),
+                  ...(data.__pivot || {}),
+                  order: idx + 1,
+                  field: attributeName,
+                })) as Record<string, any>;
+
+                await this.createQueryBuilder(joinTable.name)
+                  .insert(rows)
+                  .transacting(trx)
+                  .execute();
+              }
+            }
+            // without connect/disconnect, delete all relations
+            else {
+              await this.createQueryBuilder(joinTable.name)
+                .delete()
+                .where({
+                  [idColumn.name]: id,
+                  [typeColumn.name]: uid,
+                  ...(joinTable.on || {}),
+                  field: attributeName,
+                })
+                .transacting(trx)
+                .execute();
+            }
 
             if (isEmpty(cleanRelationData.set)) {
               continue;

@@ -23,6 +23,10 @@ const dogModel = {
     profilePicture: {
       type: 'media',
     },
+    relatedMedia: {
+      type: 'media',
+      multiple: true,
+    },
   },
 };
 
@@ -254,6 +258,7 @@ describe('Upload plugin', () => {
       });
       data.dogs.push(res.body);
     });
+
     test('File should have related field', async () => {
       const fileId = get(data, 'dogs[0].data.attributes.profilePicture.data.id');
 
@@ -570,6 +575,111 @@ describe('Upload plugin', () => {
       });
 
       expect(res.body.data.length).toBe(0);
+    });
+  });
+
+  describe('Media relations', () => {
+    // TODO: add this test to relations testing instead of media testing
+    test('disconnect works', async () => {
+      // upload images
+      const images = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          ],
+        },
+      });
+
+      const imageIds = images.body.map((item) => item.id);
+
+      // create entity with those images
+      const res = await rq({
+        method: 'POST',
+        url: `/dogs/?populate=*`,
+        body: {
+          data: {
+            relatedMedia: imageIds,
+          },
+        },
+      });
+
+      const entityId = res.body.data.id;
+
+      const disconnectRes = await rq({
+        method: 'PUT',
+        url: `/dogs/${entityId}?populate=*`,
+        body: JSON.stringify({
+          data: {
+            relatedMedia: {
+              disconnect: [imageIds[0]],
+            },
+          },
+        }),
+      });
+
+      expect(disconnectRes.body.data.attributes.relatedMedia.data).toHaveLength(1);
+      expect(disconnectRes.body.data.attributes.relatedMedia.data[0]).toEqual(
+        expect.objectContaining({
+          id: images.body[1].id,
+        })
+      );
+    });
+
+    test('connect works', async () => {
+      // upload images
+      const images = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: [
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+            fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          ],
+        },
+      });
+
+      const imageIds = images.body.map((item) => item.id);
+
+      // create entity with just the first image
+      const res = await rq({
+        method: 'POST',
+        url: `/dogs/?populate=*`,
+        body: {
+          data: {
+            relatedMedia: [imageIds[0]],
+          },
+        },
+      });
+
+      const entityId = res.body.data.id;
+
+      // connect the second image
+      const connectRes = await rq({
+        method: 'PUT',
+        url: `/dogs/${entityId}?populate=*`,
+        body: JSON.stringify({
+          data: {
+            relatedMedia: {
+              connect: [imageIds[1]],
+            },
+          },
+        }),
+      });
+
+      expect(connectRes.body.data.attributes.relatedMedia.data).toHaveLength(2);
+      expect(connectRes.body.data.attributes.relatedMedia.data[0]).toEqual(
+        expect.objectContaining({
+          id: images.body[0].id,
+        })
+      );
+      expect(connectRes.body.data.attributes.relatedMedia.data[1]).toEqual(
+        expect.objectContaining({
+          id: images.body[1].id,
+        })
+      );
     });
   });
 });
