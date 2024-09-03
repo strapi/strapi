@@ -183,6 +183,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
               // Ignore asset chunks for assets with a closed/errored status
               case 'closed':
               case 'errored':
+              default:
                 break;
             }
           }
@@ -213,6 +214,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
                 break;
               // Ignore commands for assets being currently closed
               case 'closed':
+              default:
                 break;
             }
           }
@@ -238,6 +240,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         );
       }
 
+      const nextItemInQueue = () => assets[id].queue.shift();
+
       try {
         // Lock the asset
         assets[id].status = 'busy';
@@ -246,10 +250,11 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         await unsafe_writeAssetChunk(id, data);
 
         // Empty the queue if needed
+        let item = nextItemInQueue();
 
-        let item;
-        while ((item = assets[id].queue.shift())) {
+        while (item) {
           await unsafe_writeAssetChunk(id, item.data);
+          item = nextItemInQueue();
         }
 
         // Unlock the asset
