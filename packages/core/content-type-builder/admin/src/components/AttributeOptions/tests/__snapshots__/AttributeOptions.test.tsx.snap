@@ -210,7 +210,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1080px) {
   .c16 {
     grid-column: span 6;
   }

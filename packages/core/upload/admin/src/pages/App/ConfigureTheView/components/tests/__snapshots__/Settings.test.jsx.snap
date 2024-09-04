@@ -164,7 +164,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1080px) {
   .c3 {
     grid-column: span 6;
   }

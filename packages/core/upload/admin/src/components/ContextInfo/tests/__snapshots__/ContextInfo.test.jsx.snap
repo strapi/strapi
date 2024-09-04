@@ -71,7 +71,7 @@ exports[`ContextInfo renders 1`] = `
   }
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1080px) {
   .c3 {
     grid-column: span 6;
   }
