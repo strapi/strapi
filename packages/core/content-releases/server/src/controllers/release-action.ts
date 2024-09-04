@@ -41,11 +41,15 @@ const releaseActionController = {
     );
 
     const releaseActionService = getService('release-action', { strapi });
+    const releaseService = getService('release', { strapi });
+
     const releaseActions = await strapi.db.transaction(async () => {
       const releaseActions = await Promise.all(
         releaseActionsArgs.map(async (releaseActionArgs) => {
           try {
-            const action = await releaseActionService.create(releaseId, releaseActionArgs);
+            const action = await releaseActionService.create(releaseId, releaseActionArgs, {
+              disableUpdateReleaseStatus: true,
+            });
             return action;
           } catch (error) {
             // If the entry is already in the release, we don't want to throw an error, so we catch and ignore it
@@ -60,6 +64,10 @@ const releaseActionController = {
     });
 
     const newReleaseActions = releaseActions.filter((action) => action !== null);
+
+    if (newReleaseActions.length > 0) {
+      releaseService.updateReleaseStatus(releaseId);
+    }
 
     ctx.created({
       data: newReleaseActions,
