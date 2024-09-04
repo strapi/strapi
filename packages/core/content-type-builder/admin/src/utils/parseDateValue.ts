@@ -1,8 +1,4 @@
-import { Schema } from '@strapi/types';
-
-export const parseDateValue = <TAttribute extends Schema.Attribute.AnyAttribute>(
-  value: Schema.Attribute.Value<TAttribute>
-) => {
+export const parseDateValue = (value: unknown): Date | undefined => {
   if (value instanceof Date && isValidDate(value)) {
     return value;
   }
