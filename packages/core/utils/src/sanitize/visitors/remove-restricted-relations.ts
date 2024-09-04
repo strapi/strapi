@@ -1,4 +1,5 @@
 import * as contentTypeUtils from '../../content-types';
+import { ValidationError } from '../../errors';
 import type { Visitor } from '../../traverse/factory';
 
 const ACTIONS_TO_VERIFY = ['find'];
@@ -20,6 +21,14 @@ export default (auth: unknown): Visitor =>
 
     const handleMorphRelation = async () => {
       const newMorphValue: Record<string, unknown>[] = [];
+
+      const elements = (data as Record<string, MorphArray>)[key];
+
+      // Check if data[key] is iterable
+      if (elements == null || typeof elements[Symbol.iterator] !== 'function') {
+        remove(key);
+        return;
+      }
 
       for (const element of (data as Record<string, MorphArray>)[key]) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
