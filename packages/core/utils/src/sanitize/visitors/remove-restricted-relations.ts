@@ -24,13 +24,13 @@ export default (auth: unknown): Visitor =>
 
       const elements = (data as Record<string, MorphArray>)[key];
 
-      // Check if data[key] is iterable
+      // Check if elements is iterable
       if (elements == null || typeof elements[Symbol.iterator] !== 'function') {
         remove(key);
         return;
       }
 
-      for (const element of (data as Record<string, MorphArray>)[key]) {
+      for (const element of elements) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
