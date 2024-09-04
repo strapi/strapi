@@ -25,6 +25,8 @@ import formatISO from 'date-fns/formatISO';
 import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 
+import { parseDateValue } from '../utils/parseDateValue';
+
 import type { Schema } from '@strapi/types';
 
 interface TranslationMessage extends MessageDescriptor {
@@ -143,7 +145,6 @@ const GenericInput = ({
   // the API always returns null, which throws an error in React,
   // therefore we cast this case to undefined
   const value = defaultValue ?? undefined;
-
   /*
    TODO: ideally we should pass in `defaultValue` and `value` for
    inputs, in order to make them controlled components. This variable
@@ -266,6 +267,7 @@ const GenericInput = ({
         );
       }
       case 'datetime': {
+        const dateValue = parseDateValue(value);
         return (
           <DateTimePicker
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -278,11 +280,12 @@ const GenericInput = ({
             }}
             onClear={() => onChange({ target: { name, value: null, type } })}
             placeholder={formattedPlaceholder}
-            value={value}
+            value={dateValue}
           />
         );
       }
       case 'date': {
+        const dateValue = parseDateValue(value);
         return (
           <DatePicker
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -298,7 +301,7 @@ const GenericInput = ({
             }}
             onClear={() => onChange({ target: { name, value: null, type } })}
             placeholder={formattedPlaceholder}
-            value={value}
+            value={dateValue}
           />
         );
       }
