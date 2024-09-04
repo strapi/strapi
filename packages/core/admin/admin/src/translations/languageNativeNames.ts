@@ -16,6 +16,7 @@ export const languageNativeNames = {
   ja: '日本語',
   ko: '한국어',
   ml: 'Malayalam',
+  mn: 'Монгол',
   ms: 'Melayu',
   nl: 'Nederlands',
   no: 'Norwegian',
