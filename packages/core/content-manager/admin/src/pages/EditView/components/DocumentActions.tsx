@@ -283,7 +283,7 @@ const DocumentActionsMenu = ({
             })}
         </VisuallyHidden>
       </Menu.Trigger>
-      <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
+      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
             <Menu.Item
