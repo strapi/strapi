@@ -52,8 +52,8 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
 }
 
 .c5>svg {
-  height: 0.8rem;
-  width: 0.8rem;
+  height: 1.2rem;
+  width: 1.2rem;
 }
 
 .c5>svg path {
