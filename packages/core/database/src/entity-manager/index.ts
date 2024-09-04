@@ -95,7 +95,7 @@ const toIdArray = (
 
       // if it is an object check it has at least a valid id
       if (!isValidObjectId(datum)) {
-        throw new Error(`Invalid id, expected a string or integer, got ${datum}`);
+        throw new Error(`Invalid id expected a string or integer, got ${JSON.stringify(datum)}`);
       }
 
       return datum;
@@ -868,13 +868,29 @@ export const createEntityManager = (db: Database): EntityManager => {
 
               // connect relations
               if (hasConnect) {
+                // Query database to find the order of the last relation
+                const start = await this.createQueryBuilder(joinTable.name)
+                  .where({
+                    [idColumn.name]: id,
+                    [typeColumn.name]: uid,
+                    ...(joinTable.on || {}),
+                    ...(data.__pivot || {}),
+                    field: attributeName,
+                  })
+                  .max('order')
+                  .first()
+                  .transacting(trx)
+                  .execute();
+
+                const startOrder = (start as any)?.order || 0;
+
                 const rows = cleanRelationData.connect?.map((data, idx) => ({
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
                   ...(joinTable.on || {}),
                   ...(data.__pivot || {}),
-                  order: idx + 1,
+                  order: startOrder + idx + 1,
                   field: attributeName,
                 })) as Record<string, any>;
 
