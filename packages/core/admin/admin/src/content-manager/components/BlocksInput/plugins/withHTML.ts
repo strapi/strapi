@@ -74,9 +74,10 @@ const deserialize = (
   } else if (el.nodeType !== 1) {
     return null;
   } else if (el.nodeName === 'BR') {
+    if (parentNodeName) return el.textContent;
     return jsx('element', { type: 'paragraph' }, [{ text: '' }]);
   }
-
+  const isGoogleDoc = checkIfGoogleDoc(el as HTMLElement);
   const { nodeName } = el;
   let parent = el;
 
@@ -84,7 +85,9 @@ const deserialize = (
     parent = el.childNodes[0];
   }
   let children = Array.from(parent.childNodes)
-    .map((childNode) => deserialize(childNode, el.nodeName as TElementTag))
+    .map((childNode) =>
+      deserialize(childNode, !isGoogleDoc ? (el.nodeName as TElementTag) : undefined)
+    )
     .flat();
 
   if (children.length === 0) {
@@ -95,20 +98,21 @@ const deserialize = (
     return jsx('fragment', {}, children);
   }
 
-  // Google Docs adds a <p> tag in a <li> tag, that must be omitted
-  if (nodeName === 'P' && parentNodeName && ELEMENT_TAGS[parentNodeName as TElementTag]) {
+  // Google Docs wraps the content in a <b> tag with an id starting with 'docs-internal-guid-'
+  if (isGoogleDoc) {
     return jsx('fragment', {}, children);
   }
 
-  // Google Docs wraps the content in a <b> tag with an id starting with 'docs-internal-guid-'
-  if (checkIfGoogleDoc(el as HTMLElement)) {
+  // Google Docs adds a <p> tag in a <li> tag, that must be omitted
+  if (nodeName === 'P' && parentNodeName && ELEMENT_TAGS[parentNodeName as TElementTag]) {
     return jsx('fragment', {}, children);
   }
 
   // Google Docs expresses bold/italic/underlined text with a <span> tag
   if (nodeName === 'SPAN') {
     const attrs = getSpan(el as HTMLElement);
-    if (attrs) {
+
+    if (attrs && Object.keys(attrs).length > 0) {
       return children.map((child) => jsx('text', attrs, child));
     }
   }
@@ -137,7 +141,6 @@ export function withHtml(editor: Editor) {
 
   editor.insertData = (data) => {
     const html = data.getData('text/html');
-
     if (html) {
       const parsed = new DOMParser().parseFromString(html, 'text/html');
       const fragment = deserialize(parsed.body);
