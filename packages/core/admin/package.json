@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.0.0-rc.12",
+  "version": "5.0.0-rc.13",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
