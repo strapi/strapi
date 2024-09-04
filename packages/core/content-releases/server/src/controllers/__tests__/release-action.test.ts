@@ -173,21 +173,18 @@ describe('Release Action controller', () => {
         params: {
           releaseId: 1,
         },
+        created: jest.fn(),
         request: {
           body: [
             {
-              entry: {
-                id: 1,
-                contentType: 'api::contentTypeA.contentTypeA',
-              },
+              entryDocumentId: 'abcd1',
+              contentType: 'api::contentTypeA.contentTypeA',
               type: 'publish',
             },
             {
-              entry: {
-                id: 2,
-                contentType: 'api::contentTypeB.contentTypeB',
-              },
-              type: 'unpublish',
+              entryDocumentId: 'abcd2',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
             },
           ],
         },
