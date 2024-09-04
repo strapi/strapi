@@ -15,6 +15,7 @@ import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
+import * as unidirectionalRelations from './utils/unidirectional-relations';
 
 const { validators } = validate;
 
@@ -269,7 +270,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [draftsToPublish, publishedToDelete] = await Promise.all([
+    const [draftsToPublish, oldPublishedVersions] = await Promise.all([
       strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
@@ -285,19 +286,26 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           documentId,
           publishedAt: { $ne: null },
         },
-        select: ['id'],
+        select: ['id', 'locale'],
       }),
     ]);
 
-    // Delete all published versions
-    await async.map(publishedToDelete, (entry: any) => entries.delete(entry.id));
+    // Load any unidirectional relation targetting the old published entries
+    const relationsToSync = await unidirectionalRelations.load(uid, oldPublishedVersions);
+
+    // Delete old published versions
+    await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
     // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(draftsToPublish, (draft: unknown) =>
+    const publishedEntries = await async.map(draftsToPublish, (draft: any) =>
       entries.publish(draft, queryParams)
     );
 
+    // Sync unidirectional relations with the new published entries
+    await unidirectionalRelations.sync(oldPublishedVersions, publishedEntries, relationsToSync);
+
     publishedEntries.forEach(emitEvent('entry.publish'));
+
     return { documentId, entries: publishedEntries };
   }
 
@@ -329,7 +337,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const [versionsToDraft, versionsToDelete] = await Promise.all([
+    const [versionsToDraft, oldDrafts] = await Promise.all([
       strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
@@ -345,17 +353,23 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           documentId,
           publishedAt: null,
         },
-        select: ['id'],
+        select: ['id', 'locale'],
       }),
     ]);
 
-    // Delete all drafts
-    await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
+    // Load any unidirectional relation targeting the old drafts
+    const relationsToSync = await unidirectionalRelations.load(uid, oldDrafts);
+
+    // Delete old drafts
+    await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
 
     // Transform published entry data and create draft versions
     const draftEntries = await async.map(versionsToDraft, (entry: any) =>
       entries.discardDraft(entry, queryParams)
     );
+
+    // Sync unidirectional relations with the new draft entries
+    await unidirectionalRelations.sync(oldDrafts, draftEntries, relationsToSync);
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };

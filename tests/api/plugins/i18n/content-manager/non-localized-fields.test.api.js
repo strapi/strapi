@@ -155,6 +155,38 @@ const transformConnectToDisconnect = (data) => {
   return data;
 };
 
+const create = async (uid, payload) => {
+  return rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/${uid}`,
+    body: payload,
+  });
+};
+
+const update = async (uid, documentId, payload) => {
+  return rq({
+    method: 'PUT',
+    url: `/content-manager/collection-types/${uid}/${documentId}`,
+    body: payload,
+  });
+};
+
+const publish = async (uid, documentId, payload) => {
+  return rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/${uid}/${documentId}/actions/publish`,
+    body: payload,
+  });
+};
+
+const unpublish = async (uid, documentId, payload) => {
+  return rq({
+    method: 'POST',
+    url: `/content-manager/collection-types/${uid}/${documentId}/actions/unpublish`,
+    body: payload,
+  });
+};
+
 describe('i18n', () => {
   const builder = createTestBuilder();
 
@@ -190,42 +222,20 @@ describe('i18n', () => {
     beforeAll(async () => {
       // Create a document with an entry in every locale with the localized
       // field filled in. This field can be different across locales
-      const res = await rq({
-        method: 'POST',
-        url: `/content-manager/collection-types/api::category.category`,
-        body: {
-          name: `Test`,
-        },
-      });
+      const res = await create('api::category.category', { name: `Test` });
       documentId = res.body.data.documentId;
 
       for (const locale of allLocaleCodes) {
-        await rq({
-          method: 'PUT',
-          url: `/content-manager/collection-types/api::category.category/${documentId}`,
-          body: {
-            locale,
-            name: `Test ${locale}`,
-          },
+        await update('api::category.category', documentId, {
+          locale,
+          name: `Test ${locale}`,
         });
       }
 
       // Create 2 tags in the default locale
       const [tag1, tag2] = await Promise.all([
-        rq({
-          method: 'POST',
-          url: `/content-manager/collection-types/api::tag.tag`,
-          body: {
-            name: `Test tag`,
-          },
-        }),
-        rq({
-          method: 'POST',
-          url: `/content-manager/collection-types/api::tag.tag`,
-          body: {
-            name: `Test tag 2`,
-          },
-        }),
+        create('api::tag.tag', { name: `Test tag` }),
+        create('api::tag.tag', { name: `Test tag 2` }),
       ]);
       data.tags.push(tag1.body.data);
       data.tags.push(tag2.body.data);
@@ -233,21 +243,13 @@ describe('i18n', () => {
       for (const locale of tagsAvailableIn) {
         // Create 2 tags for every other locale that supports tags
         const [localeTag1, localeTag2] = await Promise.all([
-          rq({
-            method: 'PUT',
-            url: `/content-manager/collection-types/api::tag.tag/${tag1.body.data.documentId}`,
-            body: {
-              locale,
-              name: `Test tag ${locale}`,
-            },
+          update('api::tag.tag', tag1.body.data.documentId, {
+            locale,
+            name: `Test tag ${locale}`,
           }),
-          rq({
-            method: 'PUT',
-            url: `/content-manager/collection-types/api::tag.tag/${tag2.body.data.documentId}`,
-            body: {
-              locale,
-              name: `Test tag ${locale} 2`,
-            },
+          update('api::tag.tag', tag2.body.data.documentId, {
+            locale,
+            name: `Test tag ${locale} 2`,
           }),
         ]);
 
@@ -260,76 +262,80 @@ describe('i18n', () => {
     const actionsToTest = [['publish'], ['unpublish + discard'], ['update']];
 
     describe('Scalar non localized fields', () => {
-      describe.each(actionsToTest)('', (method) => {
-        test(`Modify a scalar non localized field - Method ${method}`, async () => {
-          const isPublish = method === 'publish';
-          const isUnpublish = method.includes('unpublish');
+      const attribute = 'nonLocalized';
 
-          const key = 'nonLocalized';
-          // Update the non localized field
-          const updatedValue = `${key}::Update Test::${method}`;
+      test('Modify a scalar non localized field - Publish', async () => {
+        const res = await publish('api::category.category', documentId, { [attribute]: 'publish' });
 
-          let res;
-          if (isPublish) {
-            // Publish the default locale entry
-            res = await rq({
-              method: 'POST',
-              url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
-              body: {
-                [key]: updatedValue,
-              },
-            });
-          } else if (isUnpublish) {
-            // Publish the default locale entry
-            await rq({
-              method: 'POST',
-              url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
-              body: {
-                [key]: updatedValue,
-              },
-            });
+        expect(res.statusCode).toBe(200);
 
-            // Update the default locale draft entry with random data
-            const randomData = 'random';
-            await rq({
-              method: 'PUT',
-              url: `/content-manager/collection-types/api::category.category/${documentId}`,
-              body: {
-                [key]: randomData,
-              },
-            });
+        // Expect all locales to be updates, both draft and published versions
+        for (const locale of allLocaleCodes) {
+          const localeRes = await strapi.db.query('api::category.category').findOne({
+            where: {
+              documentId,
+              publishedAt: null,
+              locale: { $eq: locale },
+            },
+          });
 
-            // Unpublish the default locale entry
-            res = await rq({
-              method: 'POST',
-              url: `/content-manager/collection-types/api::category.category/${documentId}/actions/unpublish`,
-              body: {
-                discardDraft: true,
-              },
-            });
-          } else {
-            res = await rq({
-              method: 'PUT',
-              url: `/content-manager/collection-types/api::category.category/${documentId}`,
-              body: {
-                [key]: updatedValue,
-              },
-            });
-          }
+          // The locale should now have the same value as the default locale.
+          expect(localeRes[attribute]).toEqual('publish');
+        }
+      });
 
-          for (const locale of allLocaleCodes) {
-            const localeRes = await strapi.db.query('api::category.category').findOne({
-              where: {
-                documentId,
-                publishedAt: null,
-                locale: { $eq: locale },
-              },
-            });
+      test('Modify a scalar non localized field - Unpublish + Discard', async () => {
+        // Publish the default locale entry
+        let res = await publish('api::category.category', documentId, { [attribute]: 'unpublish' });
+        expect(res.statusCode).toBe(200);
 
-            // The locale should now have the same value as the default locale.
-            expect(localeRes[key]).toEqual(updatedValue);
-          }
+        // Update the default locale draft entry with random data
+        const randomData = 'random';
+        res = await update('api::category.category', documentId, { [attribute]: randomData });
+        expect(res.statusCode).toBe(200);
+
+        // Unpublish the default locale entry
+        res = await unpublish('api::category.category', documentId, { discardDraft: true });
+
+        expect(res.statusCode).toBe(200);
+
+        // Expect all locales to be updates, both draft and published versions
+        for (const locale of allLocaleCodes) {
+          const localeRes = await strapi.db.query('api::category.category').findOne({
+            where: {
+              documentId,
+              publishedAt: null,
+              locale: { $eq: locale },
+            },
+          });
+
+          // The locale should now have the same value as the default locale.
+          expect(localeRes[attribute]).toEqual('unpublish');
+        }
+      });
+
+      test('Modify a scalar non localized field - Update', async () => {
+        const updatedValue = 'update';
+
+        const res = await update('api::category.category', documentId, {
+          [attribute]: updatedValue,
         });
+
+        expect(res.statusCode).toBe(200);
+
+        // Expect all locales to be updates, both draft and published versions
+        for (const locale of allLocaleCodes) {
+          const localeRes = await strapi.db.query('api::category.category').findOne({
+            where: {
+              documentId,
+              publishedAt: null,
+              locale: { $eq: locale },
+            },
+          });
+
+          // The locale should now have the same value as the default locale.
+          expect(localeRes[attribute]).toEqual(updatedValue);
+        }
       });
     });
 
