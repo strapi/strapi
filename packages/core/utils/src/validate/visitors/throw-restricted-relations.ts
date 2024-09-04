@@ -20,13 +20,18 @@ export default (auth: unknown): Visitor =>
     }
 
     const handleMorphRelation = async () => {
-      const elements = (data as Record<string, MorphArray>)[key];
+      const elements: any = (data as Record<string, MorphArray>)[key];
 
-      // Check if elements is iterable
-      if (elements == null || typeof elements[Symbol.iterator] !== 'function') {
-        throwInvalidParam({ key });
+      if ('connect' in elements || 'set' in elements || 'disconnect' in elements) {
+        await handleMorphElements(elements.connect || []);
+        await handleMorphElements(elements.set || []);
+        await handleMorphElements(elements.disconnect || []);
+      } else {
+        await handleMorphElements(elements);
       }
+    };
 
+    const handleMorphElements = async (elements: any[]) => {
       for (const element of elements) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
