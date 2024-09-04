@@ -602,24 +602,38 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            if (isEmpty(cleanRelationData.set)) {
-              continue;
+            if (!isEmpty(cleanRelationData.set)) {
+              const rows =
+                cleanRelationData.set?.map((data, idx) => {
+                  return {
+                    [joinColumn.name]: data.id,
+                    [idColumn.name]: id,
+                    [typeColumn.name]: uid,
+                    ...(('on' in joinTable && joinTable.on) || {}),
+                    ...(data.__pivot || {}),
+                    order: idx + 1,
+                    field: attributeName,
+                  };
+                }) ?? [];
+
+              await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            } else if (!isEmpty(cleanRelationData.connect)) {
+              const rows =
+                cleanRelationData.connect?.map((data, idx) => {
+                  return {
+                    [joinColumn.name]: data.id,
+                    [idColumn.name]: id,
+                    [typeColumn.name]: uid,
+                    ...(('on' in joinTable && joinTable.on) || {}),
+                    ...(data.__pivot || {}),
+                    order: idx + 1,
+                    field: attributeName,
+                  };
+                }) ?? [];
+
+              await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
             }
-
-            const rows =
-              cleanRelationData.set?.map((data, idx) => {
-                return {
-                  [joinColumn.name]: data.id,
-                  [idColumn.name]: id,
-                  [typeColumn.name]: uid,
-                  ...(('on' in joinTable && joinTable.on) || {}),
-                  ...(data.__pivot || {}),
-                  order: idx + 1,
-                  field: attributeName,
-                };
-              }) ?? [];
-
-            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            continue;
           }
 
           continue;
