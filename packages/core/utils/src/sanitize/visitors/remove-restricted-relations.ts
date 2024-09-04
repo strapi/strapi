@@ -1,5 +1,4 @@
 import * as contentTypeUtils from '../../content-types';
-import { ValidationError } from '../../errors';
 import type { Visitor } from '../../traverse/factory';
 
 const ACTIONS_TO_VERIFY = ['find'];
