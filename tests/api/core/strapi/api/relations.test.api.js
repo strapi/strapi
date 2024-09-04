@@ -15,16 +15,22 @@ let id1;
 let id2;
 let id3;
 
-const populateShop = [
-  'products_ow',
-  'products_oo',
-  'products_mo',
-  'products_om',
-  'products_mm',
-  'products_mw',
-  'myCompo.compo_products_ow',
-  'myCompo.compo_products_mw',
-];
+const populateShop = {
+  products_ow: true,
+  products_oo: true,
+  products_mo: true,
+  products_om: true,
+  products_mm: true,
+  products_mw: true,
+  products_morphtomany: {
+    on: {
+      'api::product.product': true,
+    },
+  },
+  myCompo: {
+    populate: ['compo_products_ow', 'compo_products_mw'],
+  },
+};
 
 const compo = (withRelations = false) => ({
   displayName: 'compo',
@@ -102,6 +108,10 @@ const shopModel = {
       relation: 'oneToMany',
       target: 'api::product.product',
     },
+    products_morphtomany: {
+      type: 'relation',
+      relation: 'morphToMany',
+    },
     myCompo: {
       type: 'component',
       repeatable: false,
@@ -114,28 +124,31 @@ const shopModel = {
 };
 
 const createEntry = async (pluralName, data, populate) => {
-  const { body } = await rq({
+  const res = await rq({
     method: 'POST',
     url: `/${pluralName}`,
     body: { data },
     qs: { populate },
   });
-  return body;
+
+  return res.body;
 };
 
 const updateEntry = async (pluralName, id, data, populate) => {
-  const { body } = await rq({
+  const res = await rq({
     method: 'PUT',
     url: `/${pluralName}/${id}`,
     body: { data },
     qs: { populate },
   });
-  return body;
+
+  return res.body;
 };
 
 const createShop = async ({
   anyToOneRel = [{ id: id1 }],
   anyToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
+  morphToManyRel = [{ id: id1 }, { id: id2 }, { id: id3 }],
   data = {},
   populate,
   strict,
@@ -152,6 +165,7 @@ const createShop = async ({
       products_om: { options, connect: anyToManyRel },
       products_mm: { options, connect: anyToManyRel },
       products_mw: { options, connect: anyToManyRel },
+      products_morphtomany: { options, connect: morphToManyRel },
       myCompo: {
         compo_products_ow: { connect: anyToOneRel },
         compo_products_mw: { options, connect: anyToManyRel },
@@ -246,7 +260,7 @@ describe('Relations', () => {
     await builder.cleanup();
   });
 
-  describe.each([['connect'], ['set']])(
+  describe.each([['connect', 'set']])(
     'Create an entity with relations using %s',
     (connectOrSet) => {
       describe.each([
@@ -267,6 +281,11 @@ describe('Relations', () => {
               products_om: { [connectOrSet]: manyRelations },
               products_mm: { [connectOrSet]: manyRelations },
               products_mw: { [connectOrSet]: manyRelations },
+              products_morphtomany: {
+                [connectOrSet]: manyRelations.map((rel) => {
+                  return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+                }),
+              },
               myCompo: {
                 compo_products_ow: { [connectOrSet]: oneRelation },
                 compo_products_mw: { [connectOrSet]: manyRelations },
@@ -284,6 +303,7 @@ describe('Relations', () => {
               products_mm: { data: [{ id: id1 }, { id: id2 }] },
               products_mo: { data: { id: id1 } },
               products_mw: { data: [{ id: id1 }, { id: id2 }] },
+              products_morphtomany: [{ id: id1 }, { id: id2 }],
               products_om: { data: [{ id: id1 }, { id: id2 }] },
               products_oo: { data: { id: id1 } },
               products_ow: { data: { id: id1 } },
