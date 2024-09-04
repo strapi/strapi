@@ -8,10 +8,6 @@ exports[`BulkDeleteButton renders 1`] = `
   cursor: pointer;
 }
 
-.c3 {
-  flex: 1 0 1.2rem;
-}
-
 .c1 {
   gap: 8px;
   align-items: center;
@@ -20,20 +16,20 @@ exports[`BulkDeleteButton renders 1`] = `
   display: inline-flex;
 }
 
-.c4 {
+.c3 {
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
-.c5 {
+.c4 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c6 {
+.c5 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -87,7 +83,7 @@ exports[`BulkDeleteButton renders 1`] = `
   >
     <span
       aria-hidden="true"
-      class="c3 c4"
+      class="c3"
     >
       <svg
         fill="currentColor"
@@ -102,13 +98,13 @@ exports[`BulkDeleteButton renders 1`] = `
       </svg>
     </span>
     <span
-      class="c5"
+      class="c4"
     >
       Delete
     </span>
   </button>
   <span
-    class="c6"
+    class="c5"
   >
     <p
       aria-live="polite"
