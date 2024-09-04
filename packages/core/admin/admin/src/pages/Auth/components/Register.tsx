@@ -223,8 +223,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         setNpsSurveySettings((s) => ({ ...s, enabled: true }));
 
         navigate({
-          pathname: '/auth/register-admin',
-          search: `?redirectTo=${encodeURIComponent('/usecase')}&hasAdmin=${true}`,
+          pathname: '/usecase',
+          search: `?hasAdmin=${true}`,
         });
       } else {
         navigate('/');
@@ -257,8 +257,8 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         setNpsSurveySettings((s) => ({ ...s, enabled: true }));
 
         navigate({
-          pathname: '/auth/register',
-          search: `?redirectTo=${encodeURIComponent('/usecase')}&hasAdmin=${hasAdmin}`,
+          pathname: '/usecase',
+          search: `?hasAdmin=${hasAdmin}`,
         });
       } else {
         navigate('/');

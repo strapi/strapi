@@ -37,24 +37,17 @@ const AuthPage = () => {
 
   const { token } = useAuth('AuthPage', (auth) => auth);
 
-  const searchParams = new URLSearchParams(search);
-  const redirectTo = searchParams.get('redirectTo');
-
   if (!authType || !forms) {
     return <Navigate to="/" />;
   }
 
   const Component = forms[authType as keyof FormDictionary];
 
-  if (token && redirectTo) {
-    return <Navigate to={redirectTo} />;
-  }
-
   // Redirect the user to the login page if
   // the endpoint does not exist or
   // there is already an admin user oo
   // the user is already logged in
-  if (!Component || (hasAdmin && authType === 'register-admin') || (token && !redirectTo)) {
+  if (!Component || (hasAdmin && authType === 'register-admin' && token)) {
     return <Navigate to="/" />;
   }
 
