@@ -1,4 +1,11 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Check for .only in test-related functions (test.only, it.only, describe.only)
+if grep -rE '^\s*(test|it|describe)\.only' './**/*.test.*'; then
+  echo "Error: .only found in test files. Please remove it before committing."
+  exit 1
+fi
+
+# Run lint-staged if no .only is found
 yarn lint-staged
