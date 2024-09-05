@@ -1,4 +1,4 @@
-import type { Schema, Core } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
