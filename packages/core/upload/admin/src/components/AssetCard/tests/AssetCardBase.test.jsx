@@ -20,7 +20,7 @@ const render = (props) => ({
 
 describe('AssetCardBase', () => {
   describe('Interaction', () => {
-    it.only('should call onSelect when the checkbox is clicked', async () => {
+    it('should call onSelect when the checkbox is clicked', async () => {
       const onSelect = jest.fn();
       const { getByRole, user } = render({
         onSelect,
