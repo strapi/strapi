@@ -1,6 +1,6 @@
 {
   "name": "@strapi/email",
-  "version": "5.0.0-rc.13",
+  "version": "5.0.0-rc.14",
   "description": "Easily configure your Strapi application to send emails.",
   "repository": {
     "type": "git",
