@@ -30,7 +30,7 @@ async function createApp(scope: Scope) {
   const {
     rootPath,
     useTypescript,
-    useExampleApp,
+    useExample,
     installDependencies,
     isQuickstart,
     template,
@@ -50,7 +50,7 @@ async function createApp(scope: Scope) {
   }
 
   if (!template) {
-    let templateName = useExampleApp ? 'example' : 'vanilla';
+    let templateName = useExample ? 'example' : 'vanilla';
 
     if (!useTypescript) {
       templateName = `${templateName}-js`;
