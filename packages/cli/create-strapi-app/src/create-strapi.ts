@@ -166,10 +166,10 @@ async function createApp(scope: Scope) {
   ]);
 
   if (installDependencies) {
-    logger.log(['To get start run', '', `${chalk.cyan('cd')} ${rootPath}`, `${cmd} develop`]);
+    logger.log(['To get started run', '', `${chalk.cyan('cd')} ${rootPath}`, `${cmd} develop`]);
   } else {
     logger.log([
-      'To get start run',
+      'To get started run',
       '',
       `${chalk.cyan('cd')} ${rootPath}`,
       `${chalk.cyan(packageManager)} install`,
@@ -178,12 +178,12 @@ async function createApp(scope: Scope) {
   }
 
   if (runApp && installDependencies) {
-    logger.title('Starting', 'Running your Strapi application');
+    logger.title('Run', 'Running your Strapi application');
 
     try {
       await trackUsage({ event: 'willStartServer', scope });
 
-      await execa('npm', ['run', 'develop'], {
+      await execa(packageManager, ['run', 'develop'], {
         stdio: 'inherit',
         cwd: rootPath,
         env: {
