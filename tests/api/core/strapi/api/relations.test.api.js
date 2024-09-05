@@ -260,7 +260,7 @@ describe('Relations', () => {
     await builder.cleanup();
   });
 
-  describe.each([['connect', 'set']])(
+  describe.each([['set', 'connect']])(
     'Create an entity with relations using %s',
     (connectOrSet) => {
       describe.each([
@@ -326,6 +326,11 @@ describe('Relations', () => {
               products_om: { [connectOrSet]: manyRelations },
               products_mm: { [connectOrSet]: manyRelations },
               products_mw: { [connectOrSet]: manyRelations },
+              products_morphtomany: {
+                [connectOrSet]: manyRelations.map((rel) => {
+                  return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+                }),
+              },
               myCompo: {
                 compo_products_ow: { [connectOrSet]: oneRelation },
                 compo_products_mw: { [connectOrSet]: manyRelations },
@@ -343,6 +348,7 @@ describe('Relations', () => {
               products_mm: { data: [{ id: id2 }, { id: id1 }] },
               products_mo: { data: { id: id1 } },
               products_mw: { data: [{ id: id2 }, { id: id1 }] },
+              products_morphtomany: [{ id: id2 }, { id: id1 }],
               products_om: { data: [{ id: id2 }, { id: id1 }] },
               products_oo: { data: { id: id1 } },
               products_ow: { data: { id: id1 } },
@@ -359,23 +365,47 @@ describe('Relations', () => {
       ['an object in the array ([{ id: 3 }])', 'array'],
     ])('ids being %s', (name, mode) => {
       test('Adding id3', async () => {
+        const oneRelation = [id1];
+        const manyRelations = [id1, id2];
+
         const createdShop = await createEntry(
           'shops',
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: [id1] },
-            products_oo: { connect: [id1] },
-            products_mo: { connect: [id1] },
-            products_om: { connect: [id1, id2] },
-            products_mm: { connect: [id1, id2] },
-            products_mw: { connect: [id1, id2] },
+            products_ow: { connect: oneRelation },
+            products_oo: { connect: oneRelation },
+            products_mo: { connect: oneRelation },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            products_morphtomany: {
+              connect: manyRelations.map((rel) => {
+                return { id: rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
-              compo_products_ow: { connect: [id1] },
-              compo_products_mw: { connect: [id1, id2] },
+              compo_products_ow: { connect: oneRelation },
+              compo_products_mw: { connect: manyRelations },
             },
           },
-          ['myCompo']
+          populateShop
         );
+
+        expect(createdShop.data).toMatchObject({
+          attributes: {
+            myCompo: {
+              compo_products_mw: { data: [{ id: id1 }, { id: id2 }] },
+              compo_products_ow: { data: { id: id1 } },
+            },
+            products_mm: { data: [{ id: id1 }, { id: id2 }] },
+            products_mo: { data: { id: id1 } },
+            products_mw: { data: [{ id: id1 }, { id: id2 }] },
+            products_morphtomany: [{ id: id1 }, { id: id2 }],
+            products_om: { data: [{ id: id1 }, { id: id2 }] },
+            products_oo: { data: { id: id1 } },
+            products_ow: { data: { id: id1 } },
+          },
+        });
 
         const relationToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
 
@@ -390,6 +420,7 @@ describe('Relations', () => {
             products_om: { connect: relationToAdd },
             products_mm: { connect: relationToAdd },
             products_mw: { connect: relationToAdd },
+            products_morphtomany: { connect: [{ id: id3, __type: 'api::product.product' }] },
             myCompo: {
               id: createdShop.data.attributes.myCompo.id,
               compo_products_ow: { connect: relationToAdd },
@@ -408,6 +439,7 @@ describe('Relations', () => {
             products_mm: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
             products_mo: { data: { id: id3 } },
             products_mw: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
+            products_morphtomany: [{ id: id1 }, { id: id2 }, { id: id3 }],
             products_om: { data: [{ id: id1 }, { id: id2 }, { id: id3 }] },
             products_oo: { data: { id: id3 } },
             products_ow: { data: { id: id3 } },

@@ -145,6 +145,7 @@ const toAssocs = (data: Assocs) => {
     },
     connect: toIdArray(data?.connect).map((elm) => ({
       id: elm.id,
+      __type: elm.__type,
       position: elm.position ? elm.position : { end: true },
       __pivot: elm.__pivot ?? {},
     })),
@@ -632,7 +633,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          if (isEmpty(cleanRelationData.set)) {
+          if (isEmpty(cleanRelationData.set) && isEmpty(cleanRelationData.connect)) {
             continue;
           }
 
@@ -644,16 +645,17 @@ export const createEntityManager = (db: Database): EntityManager => {
               ...(('on' in joinTable && joinTable.on) || {}),
               ...(data.__pivot || {}),
               order: idx + 1,
-            })) ?? [];
-
-          // delete previous relations
-          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows as any, {
-            uid,
-            attributeName,
-            joinTable,
-            db,
-            transaction: trx,
-          });
+            })) ??
+            cleanRelationData.connect?.map((data, idx) => ({
+              [joinColumn.name]: id,
+              [idColumn.name]: data.id,
+              // @ts-expect-error ignore
+              [typeColumn.name]: data[typeField],
+              ...(('on' in joinTable && joinTable.on) || {}),
+              ...(data.__pivot || {}),
+              order: idx + 1,
+            })) ??
+            [];
 
           await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
 
@@ -953,29 +955,97 @@ export const createEntityManager = (db: Database): EntityManager => {
             .transacting(trx)
             .execute();
 
-          if (isEmpty(cleanRelationData.set)) {
+          const hasSet = !isEmpty(cleanRelationData.set);
+          const hasConnect = !isEmpty(cleanRelationData.connect);
+          const hasDisconnect = !isEmpty(cleanRelationData.disconnect);
+
+          // for connect/disconnect without a set, only modify those relations
+          if (!hasSet && (hasConnect || hasDisconnect)) {
+            // delete disconnects and connects (to prevent duplicates when we add them later)
+            const idsToDelete = [
+              ...(cleanRelationData.disconnect || []),
+              ...(cleanRelationData.connect || []),
+            ];
+
+            if (!isEmpty(idsToDelete)) {
+              const where = {
+                $or: idsToDelete.map((item: any) => {
+                  return {
+                    [idColumn.name]: item.id,
+                    [typeColumn.name]: item[typeField],
+                    [joinColumn.name]: id,
+                    ...(joinTable.on || {}),
+                    field: attributeName,
+                  };
+                }),
+              };
+
+              await this.createQueryBuilder(joinTable.name)
+                .delete()
+                .where(where)
+                .transacting(trx)
+                .execute();
+            }
+
+            // connect relations
+            if (hasConnect) {
+              // Query database to find the order of the last relation
+              const start = await this.createQueryBuilder(joinTable.name)
+                .where({
+                  [joinColumn.name]: id,
+                  ...(joinTable.on || {}),
+                  ...(data.__pivot || {}),
+                  field: attributeName,
+                })
+                .max('order')
+                .first()
+                .transacting(trx)
+                .execute();
+
+              const startOrder = (start as any)?.order || 0;
+
+              const rows = cleanRelationData.connect?.map((data, idx) => ({
+                [joinColumn.name]: id,
+                [idColumn.name]: data.id,
+                // @ts-expect-error TODO: types
+                [typeColumn.name]: data[typeField],
+                ...(joinTable.on || {}),
+                ...(data.__pivot || {}),
+                order: startOrder + idx + 1,
+                field: attributeName,
+              })) as Record<string, any>;
+
+              await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            }
+
             continue;
           }
 
-          const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
-            [joinColumn.name]: id,
-            [idColumn.name]: data.id,
-            [typeColumn.name]: data[typeField],
-            ...(joinTable.on || {}),
-            ...(data.__pivot || {}),
-            order: idx + 1,
-          })) as Record<string, any>[];
+          // delete all relations
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({
+              [idColumn.name]: id,
+              [typeColumn.name]: uid,
+              ...(joinTable.on || {}),
+              field: attributeName,
+            })
+            .transacting(trx)
+            .execute();
 
-          // delete previous relations
-          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
-            uid,
-            attributeName,
-            joinTable,
-            db,
-            transaction: trx,
-          });
+          if (hasSet) {
+            const rows = cleanRelationData.set?.map((data, idx) => ({
+              [joinColumn.name]: id,
+              [idColumn.name]: data.id,
+              [typeColumn.name]: data[typeField],
+              ...(joinTable.on || {}),
+              ...(data.__pivot || {}),
+              order: idx + 1,
+              field: attributeName,
+            })) as Record<string, any>;
 
-          await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+            await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
+          }
 
           continue;
         }
