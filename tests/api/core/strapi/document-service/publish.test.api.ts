@@ -29,15 +29,18 @@ describe('Document Service', () => {
 
       await publishArticle({ documentId: articleDb.documentId });
 
-      const publishedArticle = await findArticleDb({
-        documentId: articleDb.documentId,
-        locale: 'en',
-        publishedAt: { $notNull: true },
-      });
+      const publishedArticle = await findArticleDb(
+        {
+          documentId: articleDb.documentId,
+          locale: 'en',
+          publishedAt: { $notNull: true },
+        },
+        ['createdBy', 'updatedBy'] // populate creator fields
+      );
 
       expect(publishedArticle).not.toBeNull();
-      expect(publishedArticle.createdBy).not.toBeNull();
-      expect(publishedArticle.updatedBy).not.toBeNull();
+      expect(publishedArticle.createdBy).toBeDefined();
+      expect(publishedArticle.updatedBy).toBeDefined();
     });
 
     testInTransaction('Can publish all locales of a document', async () => {
