@@ -40,7 +40,7 @@
   "utton.model.create": "Шинэ бүрдлийн төрөл үүсгэх",
   "button.single-types.create": "Шинэ дан төрөл үүсгэх",
   "component.repeatable": "(давтагддаг)",
-  "components.SelectComponents.displayed-value": "{number, plural, =0 {# компонент} one {# компонент} other {# компонент}} сонгогдсон",
+  "components.SelectComponents.displayed-value": "{number, plural, =0 {# components} one {# component} other {# components}} сонгогдсон",
   "components.componentSelect.no-component-available": "Та бүх компонентуудыг нэмсэн байна",
   "components.componentSelect.no-component-available.with-search": "Таны хайлтын үр дүнд тохирох компонент олдсонгүй",
   "components.componentSelect.value-component": "{number} компонент сонгогдсон байна (компонент хайх)",
