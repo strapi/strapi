@@ -192,7 +192,7 @@ const processData = (
           : data[joinColumnName];
 
         if (!isUndefined(attrValue)) {
-          obj[joinColumnName] = attrValue;
+          obj[joinColumnName] = toId(attrValue);
         }
 
         continue;

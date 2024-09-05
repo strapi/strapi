@@ -22,12 +22,7 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
           break;
         }
 
-        // TODO: Should this just be a plain list?
-        // Ignore createdBy, updatedBy, ...
-        const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
-        if (isVisible) {
-          acc[attributeName] = { select: opts.relationalFields };
-        }
+        acc[attributeName] = { select: opts.relationalFields };
         break;
       }
 
