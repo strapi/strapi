@@ -13,6 +13,7 @@ import { isStderrError } from './types';
 
 import type { Scope } from './types';
 import { logger } from './utils/logger';
+import { gitIgnore } from './utils/gitignore';
 
 async function createStrapi(scope: Scope) {
   const { rootPath } = scope;
@@ -138,7 +139,13 @@ async function createApp(scope: Scope) {
   // Init git
   if (gitInit) {
     logger.title('git', 'Initializing git repository.');
+
+    if (!(await fse.exists(join(rootPath, '.gitignore')))) {
+      await fse.writeFile(join(rootPath, '.gitignore'), gitIgnore);
+    }
+
     await tryGitInit(rootPath);
+
     logger.success('Initialized a git repository.');
   }
 
