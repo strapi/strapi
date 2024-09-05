@@ -5,6 +5,7 @@ const mockSanitizedQueryRead = jest.fn().mockResolvedValue({});
 const mockFindActions = jest.fn().mockResolvedValue({ results: [], pagination: {} });
 const mockSanitizeOutput = jest.fn((entry: { id: number; name: string }) => ({ id: entry.id }));
 const mockCreateAction = jest.fn();
+const mockUpdateReleaseStatus = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
@@ -20,6 +21,7 @@ jest.mock('../../utils', () => ({
         displayName: 'contentTypeB',
       },
     })),
+    updateReleaseStatus: mockUpdateReleaseStatus,
   })),
   getPermissionsChecker: jest.fn(() => ({
     sanitizedQuery: {
@@ -161,6 +163,36 @@ describe('Release Action controller', () => {
         data: [],
         meta: { totalEntries: 1, entriesAlreadyInRelease: 1 },
       });
+    });
+
+    it('should call updateReleaseStatus only once', async () => {
+      mockCreateAction.mockResolvedValue({ id: 1 });
+      mockUpdateReleaseStatus.mockResolvedValue({ id: 1 });
+
+      const ctx: any = {
+        params: {
+          releaseId: 1,
+        },
+        created: jest.fn(),
+        request: {
+          body: [
+            {
+              entryDocumentId: 'abcd1',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+            {
+              entryDocumentId: 'abcd2',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      expect(mockUpdateReleaseStatus).toHaveBeenCalledTimes(1);
     });
   });
 
