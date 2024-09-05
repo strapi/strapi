@@ -8161,11 +8161,13 @@ __metadata:
     "@testing-library/jest-dom": "npm:5.16.5"
     eslint-config-custom: "npm:4.25.10"
     jest-styled-components: "npm:7.1.1"
+    styled-components: "npm:5.3.3"
     tsconfig: "npm:4.25.10"
     whatwg-fetch: "npm:3.6.2"
   peerDependencies:
     "@reduxjs/toolkit": ^1.9.7
     "@testing-library/jest-dom": ^5.16.5
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -8364,6 +8366,7 @@ __metadata:
     "@strapi/strapi": "npm:4.25.10"
     "@strapi/types": "workspace:*"
     "@strapi/utils": "npm:4.25.10"
+    "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
     "@types/koa": "npm:2.13.4"
@@ -8759,6 +8762,7 @@ __metadata:
     "@strapi/strapi": "npm:4.25.10"
     "@strapi/types": "npm:4.25.10"
     "@strapi/utils": "npm:4.25.10"
+    "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/react-hooks": "npm:8.0.1"
     "@testing-library/user-event": "npm:14.4.3"
