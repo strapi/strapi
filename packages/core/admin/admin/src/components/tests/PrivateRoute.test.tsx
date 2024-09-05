@@ -20,9 +20,29 @@ const LoginPage = () => {
 };
 
 describe('PrivateRoute', () => {
-  // TODO: fix this, it doesn't actually clear the login between tests
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+
+  it('Authenticated users should be able to access protected routes', async () => {
+    // Login
+    window.localStorage.setItem('jwtToken', JSON.stringify('access-token'));
+
+    render(
+      <>
+        <Route path="/auth/login" component={LoginPage} />
+        <PrivateRoute path="/">
+          <ProtectedPage />
+        </PrivateRoute>
+      </>,
+      {
+        initialEntries: ['/protected'],
+      }
+    );
+
+    // Should see the protected route
+    expect(await screen.findByText('You are authenticated'));
   });
 
   it('Unauthenticated users should not be able to access protected routes and get redirected', async () => {
@@ -65,25 +85,5 @@ describe('PrivateRoute', () => {
     );
 
     expect(screen.getByText('Please login')).toBeInTheDocument();
-  });
-
-  it('Authenticated users should be able to access protected routes', async () => {
-    // Login
-    window.localStorage.setItem('jwtToken', JSON.stringify('access-token'));
-
-    render(
-      <>
-        <Route path="/auth/login" component={LoginPage} />
-        <PrivateRoute path="/">
-          <ProtectedPage />
-        </PrivateRoute>
-      </>,
-      {
-        initialEntries: ['/protected'],
-      }
-    );
-
-    // Should see the protected route
-    expect(await screen.findByText('You are authenticated'));
   });
 });
