@@ -49,9 +49,6 @@ describe('PrivateRoute', () => {
     let testLocation: Location = null!;
     let testHistory: History = null!;
 
-    // Force the component to wait for localStorage to be empty
-    await waitFor(() => expect(window.localStorage.getItem('jwtToken')).toBeNull());
-
     render(
       <>
         <Route path="/auth/login" component={LoginPage} />
