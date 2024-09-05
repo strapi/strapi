@@ -27,14 +27,17 @@ describe('Document Service', () => {
     testInTransaction('Publishing keeps creator fields from the draft', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-      const publishedArticle = await publishArticle({
+      await publishArticle({ documentId: articleDb.documentId });
+
+      const publishedArticle = await findArticleDb({
         documentId: articleDb.documentId,
-        populate: ['createdBy', 'updatedBy'],
+        locale: 'en',
+        publishedAt: { $notNull: true },
       });
 
-      expect(publishedArticle.entries[0]).not.toBeNull();
-      expect(publishedArticle.entries[0].createdBy).not.toBeNull();
-      expect(publishedArticle.entries[0].updatedBy).not.toBeNull();
+      expect(publishedArticle).not.toBeNull();
+      expect(publishedArticle.createdBy).not.toBeNull();
+      expect(publishedArticle.updatedBy).not.toBeNull();
     });
 
     testInTransaction('Can publish all locales of a document', async () => {
