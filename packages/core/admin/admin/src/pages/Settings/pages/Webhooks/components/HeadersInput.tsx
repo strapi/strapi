@@ -84,7 +84,7 @@ const HeadersInput = () => {
                     />
                   </Box>
                   <IconButton
-                    width="3rem"
+                    width="4rem"
                     height="4rem"
                     onClick={() => removeRow(index)}
                     color="primary600"
