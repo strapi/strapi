@@ -877,14 +877,13 @@ export const createEntityManager = (db: Database): EntityManager => {
                     [typeColumn.name]: uid,
                     ...(joinTable.on || {}),
                     ...(data.__pivot || {}),
-                    field: attributeName,
                   })
                   .max('order')
                   .first()
                   .transacting(trx)
                   .execute();
 
-                const startOrder = (start as any)?.order || 0;
+                const startOrder = (start as any)?.max || 0;
 
                 const rows = cleanRelationData.connect?.map((data, idx) => ({
                   [joinColumn.name]: data.id,
@@ -946,15 +945,6 @@ export const createEntityManager = (db: Database): EntityManager => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({
-              [joinColumn.name]: id,
-              ...(joinTable.on || {}),
-            })
-            .transacting(trx)
-            .execute();
-
           const hasSet = !isEmpty(cleanRelationData.set);
           const hasConnect = !isEmpty(cleanRelationData.connect);
           const hasDisconnect = !isEmpty(cleanRelationData.disconnect);
@@ -995,14 +985,13 @@ export const createEntityManager = (db: Database): EntityManager => {
                   [joinColumn.name]: id,
                   ...(joinTable.on || {}),
                   ...(data.__pivot || {}),
-                  field: attributeName,
                 })
                 .max('order')
                 .first()
                 .transacting(trx)
                 .execute();
 
-              const startOrder = (start as any)?.order || 0;
+              const startOrder = (start as any)?.max || 0;
 
               const rows = cleanRelationData.connect?.map((data, idx) => ({
                 [joinColumn.name]: id,
