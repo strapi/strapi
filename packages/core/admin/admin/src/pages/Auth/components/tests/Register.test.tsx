@@ -4,8 +4,6 @@ import { Register } from '../Register';
 
 const FIELD_LABELS = ['Firstname', 'Lastname', 'Email', 'Password', 'Confirm Password'];
 
-jest.mock('../../../../components/GuidedTour/Provider');
-
 describe('Register', () => {
   it('renders correctly', () => {
     const { getByText, getByRole, getByLabelText } = render(<Register />, {
