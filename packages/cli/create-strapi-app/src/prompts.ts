@@ -31,18 +31,18 @@ async function typescript() {
 }
 
 async function example() {
-  const { useExampleApp } = await inquirer.prompt<{
-    useExampleApp: boolean;
+  const { useExample } = await inquirer.prompt<{
+    useExample: boolean;
   }>([
     {
       type: 'confirm',
-      name: 'useExampleApp',
+      name: 'useExample',
       message: 'Start with an example structure & data?',
       default: true,
     },
   ]);
 
-  return useExampleApp;
+  return useExample;
 }
 
 async function gitInit() {

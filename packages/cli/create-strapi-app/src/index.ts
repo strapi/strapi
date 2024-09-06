@@ -133,6 +133,7 @@ async function run(args: string[]): Promise<void> {
     templateBranch: options.templateBranch,
     templatePath: options.templatePath,
     isQuickstart: options.quickstart,
+    useExample: false,
     runApp: options.quickstart === true && options.run !== false,
     strapiVersion: version,
     packageJsonStrapi: {
@@ -157,13 +158,13 @@ async function run(args: string[]): Promise<void> {
   };
 
   if (options.template !== undefined) {
-    scope.useExampleApp = false;
-  } else if (options.example === true || options.quickstart) {
-    scope.useExampleApp = true;
-  } else if (options.example === false) {
-    scope.useExampleApp = false;
+    scope.useExample = false;
+  } else if (options.example === true) {
+    scope.useExample = true;
+  } else if (options.example === false || options.quickstart === true) {
+    scope.useExample = false;
   } else {
-    scope.useExampleApp = await prompts.example();
+    scope.useExample = await prompts.example();
   }
 
   if (options.javascript === true) {
