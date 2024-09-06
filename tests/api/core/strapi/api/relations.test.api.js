@@ -407,24 +407,28 @@ describe('Relations', () => {
           },
         });
 
-        const relationToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
+        const relationsToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
 
         const updatedShop = await updateEntry(
           'shops',
           createdShop.data.id,
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: relationToAdd },
-            products_oo: { connect: relationToAdd },
-            products_mo: { connect: relationToAdd },
-            products_om: { connect: relationToAdd },
-            products_mm: { connect: relationToAdd },
-            products_mw: { connect: relationToAdd },
-            products_morphtomany: { connect: [{ id: id3, __type: 'api::product.product' }] },
+            products_ow: { connect: relationsToAdd },
+            products_oo: { connect: relationsToAdd },
+            products_mo: { connect: relationsToAdd },
+            products_om: { connect: relationsToAdd },
+            products_mm: { connect: relationsToAdd },
+            products_mw: { connect: relationsToAdd },
+            products_morphtomany: {
+              connect: relationsToAdd.map((rel) => {
+                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
               id: createdShop.data.attributes.myCompo.id,
-              compo_products_ow: { connect: relationToAdd },
-              compo_products_mw: { connect: relationToAdd },
+              compo_products_ow: { connect: relationsToAdd },
+              compo_products_mw: { connect: relationsToAdd },
             },
           },
           populateShop
@@ -448,42 +452,58 @@ describe('Relations', () => {
       });
 
       test('Adding id3 & removing id1', async () => {
+        const manyRelations = [id1, id2];
+        const oneRelation = [id1];
+
         const createdShop = await createEntry(
           'shops',
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: [id1] },
-            products_oo: { connect: [id1] },
-            products_mo: { connect: [id1] },
-            products_om: { connect: [id1, id2] },
-            products_mm: { connect: [id1, id2] },
-            products_mw: { connect: [id1, id2] },
+            products_ow: { connect: oneRelation },
+            products_oo: { connect: oneRelation },
+            products_mo: { connect: oneRelation },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            products_morphtomany: {
+              connect: manyRelations.map((rel) => {
+                return { id: rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
-              compo_products_ow: { connect: [id1] },
-              compo_products_mw: { connect: [id1, id2] },
+              compo_products_ow: { connect: oneRelation },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
-        const relationToRemove = mode === 'object' ? [{ id: id1 }] : [id1];
+        const relationsToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
+        const relationsToRemove = mode === 'object' ? [{ id: id1 }] : [id1];
 
         const updatedShop = await updateEntry(
           'shops',
           createdShop.data.id,
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: relationToAdd, disconnect: relationToRemove },
-            products_oo: { connect: relationToAdd, disconnect: relationToRemove },
-            products_mo: { connect: relationToAdd, disconnect: relationToRemove },
-            products_om: { connect: relationToAdd, disconnect: relationToRemove },
-            products_mm: { connect: relationToAdd, disconnect: relationToRemove },
-            products_mw: { connect: relationToAdd, disconnect: relationToRemove },
+            products_ow: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_oo: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_mo: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_om: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_mm: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_mw: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_morphtomany: {
+              connect: relationsToAdd.map((rel) => {
+                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+              }),
+              disconnect: relationsToRemove.map((rel) => {
+                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
               id: createdShop.data.attributes.myCompo.id,
-              compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
-              compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
+              compo_products_ow: { connect: relationsToAdd, disconnect: relationsToRemove },
+              compo_products_mw: { connect: relationsToAdd, disconnect: relationsToRemove },
             },
           },
           populateShop
@@ -498,6 +518,7 @@ describe('Relations', () => {
             products_mm: { data: [{ id: id2 }, { id: id3 }] },
             products_mo: { data: { id: id3 } },
             products_mw: { data: [{ id: id2 }, { id: id3 }] },
+            products_morphtomany: [{ id: id2 }, { id: id3 }],
             products_om: { data: [{ id: id2 }, { id: id3 }] },
             products_oo: { data: { id: id3 } },
             products_ow: { data: { id: id3 } },
@@ -506,42 +527,58 @@ describe('Relations', () => {
       });
 
       test('Adding id3 & removing id1, id3 (should still add id3)', async () => {
+        const manyRelations = [id1, id2];
+        const oneRelation = [id1];
+
         const createdShop = await createEntry(
           'shops',
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: [id1] },
-            products_oo: { connect: [id1] },
-            products_mo: { connect: [id1] },
-            products_om: { connect: [id1, id2] },
-            products_mm: { connect: [id1, id2] },
-            products_mw: { connect: [id1, id2] },
+            products_ow: { connect: oneRelation },
+            products_oo: { connect: oneRelation },
+            products_mo: { connect: oneRelation },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            products_morphtomany: {
+              connect: manyRelations.map((rel) => {
+                return { id: rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
-              compo_products_ow: { connect: [id1] },
-              compo_products_mw: { connect: [id1, id2] },
+              compo_products_ow: { connect: oneRelation },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
-        const relationToRemove = mode === 'object' ? [{ id: id1 }, { id: id3 }] : [id1, id3];
+        const relationsToAdd = mode === 'object' ? [{ id: id3 }] : [id3];
+        const relationsToRemove = mode === 'object' ? [{ id: id1 }, { id: id3 }] : [id1, id3];
 
         const updatedShop = await updateEntry(
           'shops',
           createdShop.data.id,
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: relationToAdd, disconnect: relationToRemove },
-            products_oo: { connect: relationToAdd, disconnect: relationToRemove },
-            products_mo: { connect: relationToAdd, disconnect: relationToRemove },
-            products_om: { connect: relationToAdd, disconnect: relationToRemove },
-            products_mm: { connect: relationToAdd, disconnect: relationToRemove },
-            products_mw: { connect: relationToAdd, disconnect: relationToRemove },
+            products_ow: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_oo: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_mo: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_om: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_mm: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_mw: { connect: relationsToAdd, disconnect: relationsToRemove },
+            products_morphtomany: {
+              connect: relationsToAdd.map((rel) => {
+                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+              }),
+              disconnect: relationsToRemove.map((rel) => {
+                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
               id: createdShop.data.attributes.myCompo.id,
-              compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
-              compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
+              compo_products_ow: { connect: relationsToAdd, disconnect: relationsToRemove },
+              compo_products_mw: { connect: relationsToAdd, disconnect: relationsToRemove },
             },
           },
           populateShop
@@ -556,6 +593,7 @@ describe('Relations', () => {
             products_mm: { data: [{ id: id2 }, { id: id3 }] },
             products_mo: { data: { id: id3 } },
             products_mw: { data: [{ id: id2 }, { id: id3 }] },
+            products_morphtomany: [{ id: id2 }, { id: id3 }],
             products_om: { data: [{ id: id2 }, { id: id3 }] },
             products_oo: { data: { id: id3 } },
             products_ow: { data: { id: id3 } },
@@ -564,21 +602,27 @@ describe('Relations', () => {
       });
 
       test('Change relation order from id1, id2, id3 to id3, id2, id1', async () => {
+        const manyRelations = [id1, id2, id3];
         const createdShop = await createEntry(
           'shops',
           {
             name: 'Cazotte Shop',
-            products_om: { connect: [id1, id2, id3] },
-            products_mm: { connect: [id1, id2, id3] },
-            products_mw: { connect: [id1, id2, id3] },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            products_morphtomany: {
+              connect: manyRelations.map((rel) => {
+                return { id: rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
-              compo_products_mw: { connect: [id1, id2, id3] },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToChange =
+        const relationsToChange =
           mode === 'object' ? [{ id: id3 }, { id: id2 }, { id: id1 }] : [id3, id2, id1];
 
         const updatedShop = await updateEntry(
@@ -586,12 +630,17 @@ describe('Relations', () => {
           createdShop.data.id,
           {
             name: 'Cazotte Shop',
-            products_om: { connect: relationToChange },
-            products_mm: { connect: relationToChange },
-            products_mw: { connect: relationToChange },
+            products_om: { connect: relationsToChange },
+            products_mm: { connect: relationsToChange },
+            products_mw: { connect: relationsToChange },
+            products_morphtomany: {
+              connect: relationsToChange.map((rel) => {
+                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
               id: createdShop.data.attributes.myCompo.id,
-              compo_products_mw: { connect: relationToChange },
+              compo_products_mw: { connect: relationsToChange },
             },
           },
           populateShop
@@ -604,39 +653,52 @@ describe('Relations', () => {
             },
             products_mm: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
             products_mw: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
+            products_morphtomany: [{ id: id3 }, { id: id2 }, { id: id1 }],
             products_om: { data: [{ id: id3 }, { id: id2 }, { id: id1 }] },
           },
         });
       });
 
       test('Change relation order by putting id2 at the end', async () => {
+        const manyRelations = [id1, id2, id3];
+
         const createdShop = await createEntry(
           'shops',
           {
             name: 'Cazotte Shop',
-            products_om: { connect: [id1, id2, id3] },
-            products_mm: { connect: [id1, id2, id3] },
-            products_mw: { connect: [id1, id2, id3] },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            products_morphtomany: {
+              connect: manyRelations.map((rel) => {
+                return { id: rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
-              compo_products_mw: { connect: [id1, id2, id3] },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToChange = mode === 'object' ? [{ id: id2 }] : [id2];
+        const relationsToChange = mode === 'object' ? [{ id: id2 }] : [id2];
 
         const updatedShop = await updateEntry(
           'shops',
           createdShop.data.id,
           {
             name: 'Cazotte Shop',
-            products_om: { connect: relationToChange },
-            products_mm: { connect: relationToChange },
-            products_mw: { connect: relationToChange },
+            products_om: { connect: relationsToChange },
+            products_mm: { connect: relationsToChange },
+            products_mw: { connect: relationsToChange },
+            products_morphtomany: {
+              connect: relationsToChange.map((rel) => {
+                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+              }),
+            },
             myCompo: {
               id: createdShop.data.attributes.myCompo.id,
-              compo_products_mw: { connect: relationToChange },
+              compo_products_mw: { connect: relationsToChange },
             },
           },
           populateShop

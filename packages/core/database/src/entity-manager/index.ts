@@ -965,7 +965,6 @@ export const createEntityManager = (db: Database): EntityManager => {
                     [typeColumn.name]: item[typeField],
                     [joinColumn.name]: id,
                     ...(joinTable.on || {}),
-                    field: attributeName,
                   };
                 }),
               };
