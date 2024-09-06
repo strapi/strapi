@@ -169,7 +169,6 @@ const EditView = () => {
             replace: true,
             state: { transferToken: res.data },
           });
-          setCurrentStep('transferTokens.success');
         } else {
           const res = await updateToken({
             id: id!,

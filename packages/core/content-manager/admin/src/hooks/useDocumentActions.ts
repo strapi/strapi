@@ -6,6 +6,7 @@ import {
   useTracking,
   type TrackingEvent,
   useAPIErrorHandler,
+  useGuidedTour,
 } from '@strapi/admin/strapi-admin';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -193,6 +194,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
+  const setCurrentStep = useGuidedTour('useDocumentActions', (state) => state.setCurrentStep);
 
   const [deleteDocument] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
@@ -576,6 +578,8 @@ const useDocumentActions: UseDocumentActions = () => {
             defaultMessage: 'Saved document',
           }),
         });
+
+        setCurrentStep('contentManager.success');
 
         return res.data;
       } catch (err) {

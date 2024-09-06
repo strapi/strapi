@@ -83,7 +83,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   } = useSelector(makeSelectDataManagerProvider());
   const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
-  const setCurrentStep = useGuidedTour('DataManagerProvider', (state) => state.setCurrentStep);
+  const { setCurrentStep, setStepState } = useGuidedTour('DataManagerProvider', (state) => state);
 
   const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
 
@@ -548,18 +548,14 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         await put(requestURL, body);
       }
 
-      // Make sure the server has restarted
-      await serverRestartWatcher(true);
-
-      // Unlock the app
-      unlockAppWithAutoreload?.();
-
       if (
         isCreating &&
         (initialData.contentType?.schema.kind === 'collectionType' ||
           initialData.contentType?.schema.kind === 'singleType')
       ) {
-        setCurrentStep('contentTypeBuilder.success');
+        setStepState('contentTypeBuilder.success', true);
+        trackUsage('didCreateGuidedTourCollectionType');
+        setCurrentStep(null);
       }
 
       // Submit ct tracking success
@@ -575,6 +571,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       } else {
         trackUsage('didSaveComponent');
       }
+
+      // Make sure the server has restarted
+      await serverRestartWatcher(true);
+
+      // Unlock the app
+      unlockAppWithAutoreload?.();
 
       // refetch and update initial state after the data has been saved
       await getDataRef.current();

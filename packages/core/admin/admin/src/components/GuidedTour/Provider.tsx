@@ -38,10 +38,6 @@ interface GuidedTourContextValue {
       create: boolean;
       success: boolean;
     };
-    transferTokens: {
-      create: boolean;
-      success: boolean;
-    };
   };
   isGuidedTourVisible: boolean;
   isSkipped: boolean;
@@ -175,10 +171,6 @@ const initialState = {
       create: false,
       success: false,
     },
-    transferTokens: {
-      create: false,
-      success: false,
-    },
   },
   isGuidedTourVisible: false,
   isSkipped: false,
@@ -246,7 +238,7 @@ const initialiseState = (initialState: State) => {
     window.localStorage.getItem(GUIDED_TOUR_CURRENT_STEP) ?? 'null'
   );
   const skippedLocaleStorage = JSON.parse(
-    window.localStorage.getItem(GUIDED_TOUR_SKIPPED) ?? 'false'
+    window.localStorage.getItem(GUIDED_TOUR_SKIPPED) ?? 'null'
   );
 
   if (Array.isArray(guidedTourLocaleStorage)) {
