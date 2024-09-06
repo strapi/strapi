@@ -637,9 +637,9 @@ export const createEntityManager = (db: Database): EntityManager => {
             continue;
           }
 
-          const data = cleanRelationData.set || cleanRelationData.connect || [];
+          const dataset = cleanRelationData.set || cleanRelationData.connect || [];
 
-          const rows = data.map((data, idx) => ({
+          const rows = dataset.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             // @ts-expect-error TODO
@@ -648,6 +648,21 @@ export const createEntityManager = (db: Database): EntityManager => {
             ...(data.__pivot || {}),
             order: idx + 1,
           })) as Record<string, any>[];
+
+          const orderMap = relationsOrderer(
+            [],
+            morphColumn.idColumn.name, // TODO: Is this right? it doesn't seem to have any effect
+            'order',
+            true // Always make an strict connect when inserting
+          )
+            .connect(dataset as any)
+            .get()
+            // set the order based on the order of the ids
+            .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {} as Record<ID, number>);
+
+          rows.forEach((row: Record<string, unknown>) => {
+            row.order = orderMap[row[morphColumn.idColumn.name] as number];
+          });
 
           await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
 

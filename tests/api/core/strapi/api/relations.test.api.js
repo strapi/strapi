@@ -167,7 +167,11 @@ const createShop = async ({
       products_morphtomany: {
         options,
         connect: anyToManyRel.map((rel) => {
-          return { id: rel.id ? rel.id : rel, __type: 'api::product.product' };
+          return {
+            id: rel.id ? rel.id : rel,
+            __type: 'api::product.product',
+            position: rel?.position || undefined,
+          };
         }),
       },
       // do not set morphtomany by default, it complicates the tests unneccessarily
@@ -206,7 +210,11 @@ const updateShop = async (
       products_morphtomany: {
         options: { strict },
         [relAction]: anyToManyRel.map((rel) => {
-          return { id: rel.id ? rel.id : rel, __type: 'api::product.product' };
+          return {
+            id: rel.id ? rel.id : rel,
+            __type: 'api::product.product',
+            position: rel?.position || undefined,
+          };
         }),
       },
       myCompo: {
@@ -234,7 +242,7 @@ const shopFactory = ({
       products_mm: { data: anyToManyRel },
       products_mo: { data: anyToOneRel },
       products_mw: { data: anyToManyRel },
-      // products_morphtomany: anyToManyRel, // TODO: add support for morphtomany reordering
+      products_morphtomany: anyToManyRel,
       products_om: { data: anyToManyRel },
       products_oo: { data: anyToOneRel },
       products_ow: { data: anyToOneRel },
@@ -943,8 +951,6 @@ describe('Relations', () => {
   });
 
   describe('Reorder entity relations', () => {
-    test.todo('morphtomany reordering');
-
     test('Connect new relation at the start', async () => {
       const createdShop = await createShop({
         anyToManyRel: [
@@ -954,6 +960,7 @@ describe('Relations', () => {
       });
 
       const expectedCreatedShop = shopFactory({ anyToManyRel: [{ id: id2 }, { id: id1 }] });
+
       expect(createdShop.data).toMatchObject(expectedCreatedShop);
     });
 
