@@ -66,6 +66,7 @@ export interface JoinColumn {
   referencedColumn: string;
   referencedTable?: string;
   columnType?: ScalarAttribute['type'];
+  on?: Record<string, unknown> | ((...args: any[]) => Record<string, unknown>);
 }
 
 export interface BaseJoinTable {

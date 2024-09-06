@@ -175,7 +175,11 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
   const fromTargetRow = (rowOrRows: Row | Row[] | undefined) => fromRow(targetMeta, rowOrRows);
 
   if ('joinColumn' in attribute && attribute.joinColumn) {
-    const { name: joinColumnName, referencedColumn: referencedColumnName } = attribute.joinColumn;
+    const {
+      name: joinColumnName,
+      referencedColumn: referencedColumnName,
+      on,
+    } = attribute.joinColumn;
 
     const referencedValues = _.uniq(
       results.map((r) => r[joinColumnName]).filter((value) => !_.isNil(value))
@@ -192,7 +196,10 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
       .createQueryBuilder(targetMeta.uid)
       .init(populateValue)
       .addSelect(`${qb.alias}.${referencedColumnName}`)
-      .where({ [referencedColumnName]: referencedValues })
+      .where({
+        [referencedColumnName]: referencedValues,
+        ...(on && typeof on === 'function' ? on({ populateValue, results }) : {}),
+      })
       .execute<Row[]>({ mapResults: false });
 
     const map = _.groupBy<Row>(referencedColumnName)(rows);
