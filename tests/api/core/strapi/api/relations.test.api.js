@@ -164,6 +164,12 @@ const createShop = async ({
       products_om: { options, connect: anyToManyRel },
       products_mm: { options, connect: anyToManyRel },
       products_mw: { options, connect: anyToManyRel },
+      products_morphtomany: {
+        options,
+        connect: anyToManyRel.map((rel) => {
+          return { id: rel.id ? rel.id : rel, __type: 'api::product.product' };
+        }),
+      },
       // do not set morphtomany by default, it complicates the tests unneccessarily
       myCompo: {
         compo_products_ow: { connect: anyToOneRel },
@@ -197,7 +203,12 @@ const updateShop = async (
       products_om: { options: { strict }, [relAction]: anyToManyRel },
       products_mm: { options: { strict }, [relAction]: anyToManyRel },
       products_mw: { options: { strict }, [relAction]: anyToManyRel },
-      // do not set morphtomany by default, it complicates the tests unneccessarily
+      products_morphtomany: {
+        options: { strict },
+        [relAction]: anyToManyRel.map((rel) => {
+          return { id: rel.id ? rel.id : rel, __type: 'api::product.product' };
+        }),
+      },
       myCompo: {
         id: shop.attributes?.myCompo?.id,
         compo_products_ow: { [relAction]: anyToOneRel },
@@ -223,6 +234,7 @@ const shopFactory = ({
       products_mm: { data: anyToManyRel },
       products_mo: { data: anyToOneRel },
       products_mw: { data: anyToManyRel },
+      // products_morphtomany: anyToManyRel, // TODO: add support for morphtomany reordering
       products_om: { data: anyToManyRel },
       products_oo: { data: anyToOneRel },
       products_ow: { data: anyToOneRel },
