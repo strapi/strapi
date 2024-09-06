@@ -34,7 +34,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           right={0}
           background="neutral0"
           shadow="tableShadow"
-          width={`${width}rem`}
+          width={`${width}px`}
           zIndex={1}
           data-strapi-header-sticky
         >
