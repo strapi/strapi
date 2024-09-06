@@ -136,13 +136,14 @@ async function createApp(scope: Scope) {
 
   await trackUsage({ event: 'didCreateProject', scope });
 
+  // make sure a gitignore file is created regardless of the user using git or not
+  if (!(await fse.exists(join(rootPath, '.gitignore')))) {
+    await fse.writeFile(join(rootPath, '.gitignore'), gitIgnore);
+  }
+
   // Init git
   if (gitInit) {
     logger.title('git', 'Initializing git repository.');
-
-    if (!(await fse.exists(join(rootPath, '.gitignore')))) {
-      await fse.writeFile(join(rootPath, '.gitignore'), gitIgnore);
-    }
 
     await tryGitInit(rootPath);
 
