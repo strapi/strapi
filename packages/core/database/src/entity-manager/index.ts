@@ -637,25 +637,17 @@ export const createEntityManager = (db: Database): EntityManager => {
             continue;
           }
 
-          const rows =
-            cleanRelationData.set?.map((data, idx) => ({
-              [joinColumn.name]: id,
-              [idColumn.name]: data.id,
-              [typeColumn.name]: data[typeField],
-              ...(('on' in joinTable && joinTable.on) || {}),
-              ...(data.__pivot || {}),
-              order: idx + 1,
-            })) ??
-            cleanRelationData.connect?.map((data, idx) => ({
-              [joinColumn.name]: id,
-              [idColumn.name]: data.id,
-              // @ts-expect-error ignore
-              [typeColumn.name]: data[typeField],
-              ...(('on' in joinTable && joinTable.on) || {}),
-              ...(data.__pivot || {}),
-              order: idx + 1,
-            })) ??
-            [];
+          const data = cleanRelationData.set || cleanRelationData.connect || [];
+
+          const rows = data.map((data, idx) => ({
+            [joinColumn.name]: id,
+            [idColumn.name]: data.id,
+            // @ts-expect-error TODO
+            [typeColumn.name]: data[typeField],
+            ...(('on' in joinTable && joinTable.on) || {}),
+            ...(data.__pivot || {}),
+            order: idx + 1,
+          })) as Record<string, any>[];
 
           await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
 
