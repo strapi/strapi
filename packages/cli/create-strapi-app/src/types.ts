@@ -61,7 +61,7 @@ export interface Scope {
   tmpPath?: string;
   packageJsonStrapi?: Record<string, unknown>;
   useTypescript?: boolean;
-  useExampleApp?: boolean;
+  useExample?: boolean;
   gitInit?: boolean;
 }
 

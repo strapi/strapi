@@ -1,4 +1,4 @@
-import { prop, uniq, uniqBy, concat, flow } from 'lodash/fp';
+import { prop, uniq, uniqBy, concat, flow, isEmpty } from 'lodash/fp';
 
 import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
@@ -328,8 +328,9 @@ export default {
       }
 
       // Add the status and locale filters if they are provided
-      if (status) {
-        where[`${alias}.published_at`] = getPublishedAtClause(status, targetUid);
+      const publishedAt = getPublishedAtClause(status, targetUid);
+      if (!isEmpty(publishedAt)) {
+        where[`${alias}.published_at`] = publishedAt;
       }
       if (filterByLocale) {
         where[`${alias}.locale`] = locale;

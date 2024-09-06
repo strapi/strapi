@@ -6,7 +6,9 @@ const MAX_PREFIX_LENGTH = 8;
 const badge = (text: string, bgColor: ChalkFunction, textColor: ChalkFunction = chalk.black) => {
   const wrappedText = ` ${text} `;
 
-  return ' '.repeat(MAX_PREFIX_LENGTH - wrappedText.length) + bgColor(textColor(wrappedText));
+  const repeat = Math.max(0, MAX_PREFIX_LENGTH - wrappedText.length);
+
+  return ' '.repeat(repeat) + bgColor(textColor(wrappedText));
 };
 
 const textIndent = (

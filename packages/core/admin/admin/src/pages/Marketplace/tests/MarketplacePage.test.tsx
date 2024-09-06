@@ -50,19 +50,16 @@ describe('Marketplace page - layout', () => {
     // Shows the filters button
     expect(getByRole('button', { name: 'Filters' })).toBeVisible();
   });
-
-  it('disables the button', async () => {
+  it('does not display the button when incompatible version provided', async () => {
     const { findAllByTestId } = render();
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Transformer')
     )!;
 
-    const button = within(alreadyInstalledCard)
-      .getByText(/copy install command/i)
-      .closest('button');
+    const button = within(alreadyInstalledCard).queryByText(/copy install command/i);
 
-    expect(button).toBeDisabled();
+    expect(button).not.toBeInTheDocument();
   });
 
   it('shows compatibility tooltip message when no version provided', async () => {

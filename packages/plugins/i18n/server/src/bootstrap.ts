@@ -1,4 +1,4 @@
-import type { Schema, Core } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
@@ -58,15 +58,10 @@ const registerModelsHooks = () => {
   });
 };
 
-export default async ({ strapi }: { strapi: Core.Strapi }) => {
+export default async () => {
   const { sendDidInitializeEvent } = getService('metrics');
-  const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');
   const { sectionsBuilder, actions, engine } = getService('permissions');
-
-  // TODO: v5 handled in the document service or via document service middlewares
-  // Entity Service
-  (strapi.entityService as any).decorate(decorator);
 
   // Data
   await initDefaultLocale();

@@ -13,6 +13,7 @@ import { isStderrError } from './types';
 
 import type { Scope } from './types';
 import { logger } from './utils/logger';
+import { gitIgnore } from './utils/gitignore';
 
 async function createStrapi(scope: Scope) {
   const { rootPath } = scope;
@@ -30,7 +31,7 @@ async function createApp(scope: Scope) {
   const {
     rootPath,
     useTypescript,
-    useExampleApp,
+    useExample,
     installDependencies,
     isQuickstart,
     template,
@@ -50,7 +51,7 @@ async function createApp(scope: Scope) {
   }
 
   if (!template) {
-    let templateName = useExampleApp ? 'example' : 'vanilla';
+    let templateName = useExample ? 'example' : 'vanilla';
 
     if (!useTypescript) {
       templateName = `${templateName}-js`;
@@ -138,7 +139,13 @@ async function createApp(scope: Scope) {
   // Init git
   if (gitInit) {
     logger.title('git', 'Initializing git repository.');
+
+    if (!(await fse.exists(join(rootPath, '.gitignore')))) {
+      await fse.writeFile(join(rootPath, '.gitignore'), gitIgnore);
+    }
+
     await tryGitInit(rootPath);
+
     logger.success('Initialized a git repository.');
   }
 
@@ -166,10 +173,10 @@ async function createApp(scope: Scope) {
   ]);
 
   if (installDependencies) {
-    logger.log(['To get start run', '', `${chalk.cyan('cd')} ${rootPath}`, `${cmd} develop`]);
+    logger.log(['To get started run', '', `${chalk.cyan('cd')} ${rootPath}`, `${cmd} develop`]);
   } else {
     logger.log([
-      'To get start run',
+      'To get started run',
       '',
       `${chalk.cyan('cd')} ${rootPath}`,
       `${chalk.cyan(packageManager)} install`,
@@ -178,12 +185,12 @@ async function createApp(scope: Scope) {
   }
 
   if (runApp && installDependencies) {
-    logger.title('Starting', 'Running your Strapi application');
+    logger.title('Run', 'Running your Strapi application');
 
     try {
       await trackUsage({ event: 'willStartServer', scope });
 
-      await execa('npm', ['run', 'develop'], {
+      await execa(packageManager, ['run', 'develop'], {
         stdio: 'inherit',
         cwd: rootPath,
         env: {

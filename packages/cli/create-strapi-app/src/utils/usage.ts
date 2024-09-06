@@ -12,6 +12,8 @@ function addPackageJsonStrapiMetadata(metadata: Record<string, unknown>, scope: 
   return _.defaults(metadata, packageJsonStrapi);
 }
 
+const boolToString = (value: boolean | undefined) => (value === true).toString();
+
 const getProperties = (scope: Scope, error?: TrackError) => {
   const eventProperties = {
     error: typeof error === 'string' ? error : error && error.message,
@@ -30,11 +32,17 @@ const getProperties = (scope: Scope, error?: TrackError) => {
     docker: scope.docker,
     useYarn: scope.packageManager === 'yarn',
     packageManager: scope.packageManager,
-    useTypescriptOnServer: scope.useTypescript,
-    useTypescriptOnAdmin: scope.useTypescript,
+    /** @deprecated */
+    useTypescriptOnServer: boolToString(scope.useTypescript),
+    /** @deprecated */
+    useTypescriptOnAdmin: boolToString(scope.useTypescript),
+    useTypescript: boolToString(scope.useTypescript),
     isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
-    noRun: (scope.runApp !== true).toString(),
+    noRun: boolToString(scope.runApp),
     projectId: scope.uuid,
+    useExample: boolToString(scope.useExample),
+    gitInit: boolToString(scope.gitInit),
+    installDependencies: boolToString(scope.installDependencies),
   };
 
   return {
