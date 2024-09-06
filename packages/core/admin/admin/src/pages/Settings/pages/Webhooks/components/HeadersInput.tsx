@@ -83,28 +83,22 @@ const HeadersInput = () => {
                       type="string"
                     />
                   </Box>
-                  <Flex paddingTop={6} style={{ alignSelf: 'flex-start' }}>
-                    <IconButton
-                      borderRadius="3rem"
-                      width="2rem"
-                      height="2rem"
-                      padding="0.4rem"
-                      alignItems="center"
-                      justifyContent="center"
-                      onClick={() => removeRow(index)}
-                      color="primary600"
-                      label={formatMessage(
-                        {
-                          id: 'Settings.webhooks.headers.remove',
-                          defaultMessage: 'Remove header row {number}',
-                        },
-                        { number: index + 1 }
-                      )}
-                      type="button"
-                    >
-                      <Minus width="0.8rem" />
-                    </IconButton>
-                  </Flex>
+                  <IconButton
+                    width="3rem"
+                    height="4rem"
+                    onClick={() => removeRow(index)}
+                    color="primary600"
+                    label={formatMessage(
+                      {
+                        id: 'Settings.webhooks.headers.remove',
+                        defaultMessage: 'Remove header row {number}',
+                      },
+                      { number: index + 1 }
+                    )}
+                    type="button"
+                  >
+                    <Minus width="0.8rem" />
+                  </IconButton>
                 </Flex>
               </Grid.Item>
             </Grid.Root>
