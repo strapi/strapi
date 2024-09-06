@@ -100,4 +100,19 @@ test.describe('Sign Up', () => {
 
     await expect(page).toHaveTitle(TITLE_HOME);
   });
+
+  test('a user should be redirected to /usecase page if they mark news as true', async ({
+    page,
+  }) => {
+    await page.getByLabel(/Keep me updated/).check();
+    await page.getByRole('button', { name: "Let's start" }).click();
+
+    // Wait for navigation to complete
+    await page.waitForURL('**/usecase**');
+
+    // Assert that we're on the /usecase page
+    expect(page.url()).toContain('/usecase');
+
+    await expect(page.getByText('Tell us a bit more about yourself')).toBeVisible();
+  });
 });
