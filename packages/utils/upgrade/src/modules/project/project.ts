@@ -137,6 +137,8 @@ export class AppProject extends Project {
     return [
       // App default files
       `./${allowedRootPaths}/**/*.${allowedExtensions}`,
+      `!./**/node_modules/**/*`,
+      `!./**/dist/**/*`,
       // Root package.json file
       constants.PROJECT_PACKAGE_JSON,
     ];
@@ -232,6 +234,8 @@ export class PluginProject extends Project {
     return [
       // Plugin default files
       `./${allowedRootPaths}/**/*.${allowedExtensions}`,
+      `!./**/node_modules/**/*`,
+      `!./**/dist/**/*`,
       // Root package.json file
       constants.PROJECT_PACKAGE_JSON,
       // Plugin root files
