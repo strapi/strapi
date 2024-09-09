@@ -37,8 +37,8 @@
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
     },
     "./package.json": "./package.json"
   },

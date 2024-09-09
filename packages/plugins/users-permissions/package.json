@@ -27,9 +27,9 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./strapi-server.js",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "source": "./server/index.js",
+      "require": "./server/index.js",
+      "default": "./server/index.js"
     },
     "./package.json": "./package.json"
   },

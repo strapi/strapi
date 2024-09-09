@@ -17,12 +17,6 @@ const config: Config = defineConfig({
       tsconfig: './server/tsconfig.build.json',
       runtime: 'node',
     },
-    {
-      source: './ee/server/src/index.ts',
-      import: './dist/ee/server/index.mjs',
-      require: './dist/ee/server/index.js',
-      runtime: 'node',
-    },
   ],
   dist: './dist',
   /**
