@@ -23,10 +23,7 @@ const TodoCard = () => {
       <Box
         aria-labelledy="additional-informations"
         background="neutral0"
-        paddingBottom={4}
-        paddingLeft={4}
-        paddingRight={4}
-        paddingTop={3}
+        marginTop={4}
         width={'100%'}
       >
         <Typography variant="sigma" textColor="neutral600" id="additional-informations">
