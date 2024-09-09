@@ -20,6 +20,8 @@ module.exports = (fixtures) => {
       private: 'private',
       locale: 'en',
       categories: [category('Cat1-EN')],
+      createdBy: 1,
+      updatedBy: 1,
     },
     {
       documentId: 'Article2',
@@ -29,6 +31,8 @@ module.exports = (fixtures) => {
       private: 'private',
       locale: 'en',
       categories: [],
+      createdBy: 1,
+      updatedBy: 1,
     },
     {
       documentId: 'Article1',
@@ -38,6 +42,8 @@ module.exports = (fixtures) => {
       private: 'private',
       locale: 'nl',
       categories: [category('Cat1-NL')],
+      createdBy: 1,
+      updatedBy: 1,
     },
     {
       documentId: 'Article1',
@@ -47,6 +53,8 @@ module.exports = (fixtures) => {
       private: 'private',
       locale: 'it',
       categories: [category('Cat1-IT')],
+      createdBy: 1,
+      updatedBy: 1,
     },
     {
       documentId: 'Article2',
@@ -56,6 +64,8 @@ module.exports = (fixtures) => {
       private: 'private',
       locale: 'en',
       categories: [],
+      createdBy: 1,
+      updatedBy: 1,
     },
   ];
 };

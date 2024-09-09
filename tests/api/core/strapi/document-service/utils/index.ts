@@ -12,8 +12,8 @@ export type Category = Data.ContentType<
   Schema.NonPopulatableAttributeNames<typeof CATEGORY_UID>
 >;
 
-export const findArticleDb = async (where: any) => {
-  return strapi.db.query(ARTICLE_UID).findOne({ where }) as Article | undefined;
+export const findArticleDb = async (where: any, populate: any) => {
+  return strapi.db.query(ARTICLE_UID).findOne({ where, populate }) as Article | undefined;
 };
 
 export const findArticlesDb = async (where: any) => {
