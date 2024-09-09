@@ -8,6 +8,8 @@ interface Options {
   relationalFields?: string[];
 }
 
+const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypes.constants;
+
 // We want to build a populate object based on the schema
 export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
   const model = strapi.getModel(uid);
@@ -22,7 +24,14 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
           break;
         }
 
-        acc[attributeName] = { select: opts.relationalFields };
+        // Ignore not visible fields other than createdBy and updatedBy
+        const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
+        const isCreatorField = [CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE].includes(attributeName);
+
+        if (isVisible || isCreatorField) {
+          acc[attributeName] = { select: opts.relationalFields };
+        }
+
         break;
       }
 
