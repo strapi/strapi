@@ -227,7 +227,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Will Kitman' }).click();
       await page.waitForURL(AUTHOR_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /delete document/i }).click();
+      await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the the article's history page
@@ -461,7 +461,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Will Kitman' }).click();
       await page.waitForURL(AUTHOR_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /delete document/i }).click();
+      await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the the article's history page

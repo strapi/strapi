@@ -358,7 +358,7 @@ test.describe('Edit View', () => {
       await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
 
       await page.getByRole('button', { name: 'More actions' }).click();
-      await page.getByRole('menuitem', { name: 'Delete document' }).click();
+      await page.getByRole('menuitem', { name: 'Delete entry (all locales)' }).click();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Deleted Document');
