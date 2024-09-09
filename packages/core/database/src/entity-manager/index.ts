@@ -29,7 +29,7 @@ import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
 import { createRepository } from './entity-repository';
-import { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } from './morph-relations';
+
 import {
   isPolymorphic,
   isBidirectional,
@@ -964,6 +964,34 @@ export const createEntityManager = (db: Database): EntityManager => {
               ...(cleanRelationData.connect || []),
             ];
 
+            const adjacentRelations = await this.createQueryBuilder(joinTable.name)
+              .where({
+                $or: [
+                  {
+                    [joinColumn.name]: id,
+                    [idColumn.name]: {
+                      $in: compact(
+                        cleanRelationData.connect?.map(
+                          (r) => r.position?.after || r.position?.before
+                        )
+                      ),
+                    },
+                  },
+                  {
+                    [joinColumn.name]: id,
+                    order: this.createQueryBuilder(joinTable.name)
+                      .max('order')
+                      .where({ [joinColumn.name]: id })
+                      .where(joinTable.on || {})
+                      .transacting(trx)
+                      .getKnexQuery(),
+                  },
+                ],
+              })
+              .where(joinTable.on || {})
+              .transacting(trx)
+              .execute<Array<Record<string, any>>>();
+
             if (!isEmpty(idsToDelete)) {
               const where = {
                 $or: idsToDelete.map((item: any) => {
@@ -998,8 +1026,9 @@ export const createEntityManager = (db: Database): EntityManager => {
                 .execute();
 
               const startOrder = (start as any)?.max || 0;
+              const dataset = cleanRelationData.connect || [];
 
-              const rows = cleanRelationData.connect?.map((data, idx) => ({
+              const rows = dataset.map((data, idx) => ({
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
                 // @ts-expect-error TODO: types
@@ -1009,6 +1038,19 @@ export const createEntityManager = (db: Database): EntityManager => {
                 order: startOrder + idx + 1,
                 field: attributeName,
               })) as Record<string, any>;
+
+              const orderMap = relationsOrderer(
+                adjacentRelations,
+                idColumn.name,
+                'order',
+                cleanRelationData.options?.strict
+              )
+                .connect(dataset as any)
+                .getOrderMap();
+
+              rows.forEach((row: Record<string, unknown>) => {
+                row.order = orderMap[row[idColumn.name] as number];
+              });
 
               await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
             }

@@ -40,6 +40,11 @@ export default (auth: unknown): Visitor =>
           newValue.disconnect = disconnect;
         }
 
+        if ('options' in elements) {
+          // TODO: sanitize options
+          newValue.options = elements.options;
+        }
+
         set(key, newValue);
       } else {
         const newMorphValue = await handleMorphElements(elements);
