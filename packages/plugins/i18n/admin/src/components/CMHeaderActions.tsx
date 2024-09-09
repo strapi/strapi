@@ -323,7 +323,6 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   const { data: locales = [] } = useGetLocalesQuery();
   const currentDesiredLocale = query.plugins?.i18n?.locale;
   const locale = !('error' in locales) && locales.find((loc) => loc.code === currentDesiredLocale);
-  console.log(locales);
 
   if (!hasI18n) {
     return null;
