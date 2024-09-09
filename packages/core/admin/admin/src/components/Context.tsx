@@ -19,6 +19,7 @@ function createContext<ContextValueType extends object | null>(
     // Only re-memoize when prop values change
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const value = React.useMemo(() => context, Object.values(context)) as ContextValueType;
+
     return <Context.Provider value={value}>{children}</Context.Provider>;
   };
 

@@ -9,8 +9,6 @@ jest.mock('../../features/AppInfo', () => ({
   useAppInfo: jest.fn((name, getter) => getter({ communityEdition: true })),
 }));
 
-jest.mock('../../components/GuidedTour/Provider');
-
 /**
  * TODO: remove this mock.
  */

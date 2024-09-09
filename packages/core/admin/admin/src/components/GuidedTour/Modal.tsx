@@ -28,15 +28,16 @@ import { GuidedTourContextValue, useGuidedTour } from './Provider';
  * -----------------------------------------------------------------------------------------------*/
 
 const GuidedTourModal = () => {
-  const currentStep = useGuidedTour('GuidedTourModal', (state) => state.currentStep);
-  const guidedTourState = useGuidedTour('GuidedTourModal', (state) => state.guidedTourState);
-  const setCurrentStep = useGuidedTour('GuidedTourModal', (state) => state.setCurrentStep);
-  const setStepState = useGuidedTour('GuidedTourModal', (state) => state.setStepState);
-  const isGuidedTourVisible = useGuidedTour(
-    'GuidedTourModal',
-    (state) => state.isGuidedTourVisible
-  );
-  const setSkipped = useGuidedTour('GuidedTourModal', (state) => state.setSkipped);
+  const guidedTour = useGuidedTour('GuidedTourModal', (state) => state);
+
+  const {
+    currentStep,
+    guidedTourState,
+    setCurrentStep,
+    setStepState,
+    isGuidedTourVisible,
+    setSkipped,
+  } = guidedTour;
 
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
