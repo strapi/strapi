@@ -96,16 +96,16 @@ export default async function loadPlugins(strapi: Core.Strapi) {
     const enabledPlugin = enabledPlugins[pluginName];
 
     let serverEntrypointPath;
-    let resolvedExport = './strapi-server';
+    let resolvedExport = './strapi-server.js';
 
     try {
       resolvedExport = (
         resolve.exports(enabledPlugin.packageInfo, 'strapi-server', {
           require: true,
-        }) ?? './strapi-server'
+        }) ?? './strapi-server.js'
       ).toString();
     } catch (e) {
-      // key missing in exports map or no export map -> let's try the legacy way
+      // no export map or missing strapi-server export => fallback to default
     }
 
     try {
