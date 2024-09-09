@@ -24,6 +24,7 @@ import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { Provider } from 'react-redux';
 import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-router-dom';
 
+import { GuidedTourProvider } from '../src/components/GuidedTour/Provider';
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
 import { RBAC } from '../src/core/apis/rbac';
@@ -151,29 +152,31 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                         }}
                       >
                         <NotificationsProvider>
-                          <ConfigurationContextProvider
-                            showReleaseNotification={false}
-                            showTutorials={false}
-                            logos={{
-                              auth: { default: 'default' },
-                              menu: { default: 'default' },
-                            }}
-                            updateProjectSettings={jest.fn()}
-                          >
-                            <AppInfoProvider
-                              autoReload
-                              useYarn
-                              dependencies={{
-                                '@strapi/plugin-documentation': '4.2.0',
-                                '@strapi/provider-upload-cloudinary': '4.2.0',
+                          <GuidedTourProvider>
+                            <ConfigurationContextProvider
+                              showReleaseNotification={false}
+                              showTutorials={false}
+                              logos={{
+                                auth: { default: 'default' },
+                                menu: { default: 'default' },
                               }}
-                              strapiVersion="4.1.0"
-                              communityEdition
-                              shouldUpdateStrapi={false}
+                              updateProjectSettings={jest.fn()}
                             >
-                              {children}
-                            </AppInfoProvider>
-                          </ConfigurationContextProvider>
+                              <AppInfoProvider
+                                autoReload
+                                useYarn
+                                dependencies={{
+                                  '@strapi/plugin-documentation': '4.2.0',
+                                  '@strapi/provider-upload-cloudinary': '4.2.0',
+                                }}
+                                strapiVersion="4.1.0"
+                                communityEdition
+                                shouldUpdateStrapi={false}
+                              >
+                                {children}
+                              </AppInfoProvider>
+                            </ConfigurationContextProvider>
+                          </GuidedTourProvider>
                         </NotificationsProvider>
                       </Theme>
                     </LanguageProvider>

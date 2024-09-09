@@ -491,13 +491,17 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
   const { delete: deleteAction } = useDocumentActions();
   const { toggleNotification } = useNotification();
   const setSubmitting = useForm('DeleteAction', (state) => state.setSubmitting);
+  const isLocalized = document?.locale != null;
 
   return {
     disabled: !canDelete || !document,
-    label: formatMessage({
-      id: 'content-manager.actions.delete.label',
-      defaultMessage: 'Delete document',
-    }),
+    label: formatMessage(
+      {
+        id: 'content-manager.actions.delete.label',
+        defaultMessage: 'Delete entry{isLocalized, select, true { (all locales)} other {}}',
+      },
+      { isLocalized }
+    ),
     icon: <Trash />,
     dialog: {
       type: 'dialog',

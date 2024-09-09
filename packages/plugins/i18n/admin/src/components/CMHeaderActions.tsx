@@ -318,6 +318,12 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   const { delete: deleteAction } = useDocumentActions();
   const { hasI18n, canDelete } = useI18n();
 
+  // Get the current locale object, using the URL instead of document so it works while creating
+  const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const { data: locales = [] } = useGetLocalesQuery();
+  const currentDesiredLocale = query.plugins?.i18n?.locale;
+  const locale = !('error' in locales) && locales.find((loc) => loc.code === currentDesiredLocale);
+
   if (!hasI18n) {
     return null;
   }
@@ -326,10 +332,13 @@ const DeleteLocaleAction: DocumentActionComponent = ({
     disabled:
       (document?.locale && !canDelete.includes(document.locale)) || !document || !document.id,
     position: ['header', 'table-row'],
-    label: formatMessage({
-      id: getTranslation('actions.delete.label'),
-      defaultMessage: 'Delete locale',
-    }),
+    label: formatMessage(
+      {
+        id: getTranslation('actions.delete.label'),
+        defaultMessage: 'Delete entry ({locale})',
+      },
+      { locale: locale && locale.name }
+    ),
     icon: <StyledTrash />,
     variant: 'danger',
     dialog: {

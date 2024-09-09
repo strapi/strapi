@@ -1,5 +1,5 @@
 {
-  "actions.delete.label": "Delete locale",
+  "actions.delete.label": "Delete entry ({locale})",
   "actions.delete.dialog.title": "Confirmation",
   "actions.delete.dialog.body": "Are you sure you want to delete this locale?",
   "actions.delete.error": "An error occurred while trying to delete the document locale.",

@@ -71,7 +71,9 @@ test.describe('Settings', () => {
       await expect(page.getByRole('menuitem', { name: 'Edit the model' })).toBeEnabled();
       await expect(page.getByRole('menuitem', { name: 'Configure the view' })).toBeEnabled();
       await expect(page.getByRole('menuitem', { name: 'Delete locale' })).toBeDisabled();
-      await expect(page.getByRole('menuitem', { name: 'Delete document' })).toBeEnabled();
+      await expect(
+        page.getByRole('menuitem', { name: 'Delete entry (all locales)' })
+      ).toBeEnabled();
       await page.keyboard.press('Escape');
 
       /**

@@ -9,6 +9,8 @@ import { LAYOUT_DATA, States, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 import { GuidedTourContextValue, useGuidedTour } from './Provider';
 
+type SectionName = keyof GuidedTourContextValue['guidedTourState'];
+
 const GuidedTourHomepage = () => {
   const guidedTourState = useGuidedTour('GuidedTourHomepage', (state) => state.guidedTourState);
   const setSkipped = useGuidedTour('GuidedTourHomepage', (state) => state.setSkipped);
@@ -28,9 +30,7 @@ const GuidedTourHomepage = () => {
         {formatMessage(val.home.cta.title)}
       </LinkButton>
     ),
-    isDone: Object.entries(
-      guidedTourState[key as keyof GuidedTourContextValue['guidedTourState']]
-    ).every(([, value]) => value),
+    isDone: Object.values(guidedTourState[key as SectionName]).every((value) => value === true),
   }));
 
   const activeSectionIndex = sections.findIndex((section) => !section.isDone);
@@ -60,6 +60,7 @@ const GuidedTourHomepage = () => {
         <Box>
           {sections.map((section, index) => {
             const state = getState(activeSectionIndex, index);
+
             return (
               <Box key={section.key}>
                 <Flex>
