@@ -69,14 +69,25 @@ export const changeImportSpecifier = (
         const importDeclaration: ImportDeclaration = path.node;
 
         methodAliases.forEach((alias) => {
-          const newSpecifier = j.importSpecifier(
-            j.identifier(methodNameToReplace),
-            j.identifier(alias)
-          );
+          // Check if the methodNameToReplace or its alias is already imported
           const specifiersArray = importDeclaration.specifiers || [];
-          j(path).replaceWith(
-            j.importDeclaration([...specifiersArray, newSpecifier], j.literal(newDependency))
+          const methodAlreadyExists = specifiersArray.some(
+            (specifier) =>
+              specifier.type === 'ImportSpecifier' &&
+              specifier.imported.name === methodNameToReplace && // Check if imported method matches
+              specifier.local?.name === alias // Check if local alias matches
           );
+
+          if (!methodAlreadyExists) {
+            // If method does not exist, add it
+            const newSpecifier = j.importSpecifier(
+              j.identifier(methodNameToReplace),
+              j.identifier(alias)
+            );
+            j(path).replaceWith(
+              j.importDeclaration([...specifiersArray, newSpecifier], j.literal(newDependency))
+            );
+          }
         });
       });
     } else {

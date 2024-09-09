@@ -3,8 +3,8 @@ import { changeImportSpecifier } from '../../utils/change-import';
 import { replaceJSXElement } from '../../utils/replace-jsx';
 
 /**
- * change CheckPagePermissions import from '@strapi/helper-plugin' to Page from '@strapi/strapi/admin'
- * And replace all uses of CheckPagePermissions with Page.Protect
+ * change AnErrorOccurred import from '@strapi/helper-plugin' to Page from '@strapi/strapi/admin'
+ * And replace all uses of AnErrorOccurred with Page.Error
  */
 const transform: Transform = (file, api) => {
   const { j } = api;
@@ -12,13 +12,13 @@ const transform: Transform = (file, api) => {
   const root = j.withParser('tsx')(file.source);
 
   replaceJSXElement(root, j, {
-    oldElementName: 'CheckPagePermissions',
-    newElementName: 'Page.Protect',
+    oldElementName: 'AnErrorOccurred',
+    newElementName: 'Page.Error',
     oldDependency: '@strapi/helper-plugin',
   });
 
   changeImportSpecifier(root, j, {
-    oldMethodName: 'CheckPagePermissions',
+    oldMethodName: 'AnErrorOccurred',
     newMethodName: 'Page',
     oldDependency: '@strapi/helper-plugin',
     newDependency: '@strapi/strapi/admin',
