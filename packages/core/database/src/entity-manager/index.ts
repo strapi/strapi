@@ -116,6 +116,7 @@ type Assocs =
         id: ScalarAssoc;
         position?: { start?: boolean; end?: boolean; before?: ID; after?: ID };
         __pivot?: any;
+        __type?: any;
       }> | null;
       disconnect?: Array<ScalarAssoc> | null;
     };
@@ -642,8 +643,7 @@ export const createEntityManager = (db: Database): EntityManager => {
           const rows = dataset.map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
-            // @ts-expect-error TODO
-            [typeColumn.name]: data[typeField],
+            [typeColumn.name]: data[typeField as '__type'],
             ...(('on' in joinTable && joinTable.on) || {}),
             ...(data.__pivot || {}),
             order: idx + 1,
@@ -1013,29 +1013,14 @@ export const createEntityManager = (db: Database): EntityManager => {
 
             // connect relations
             if (hasConnect) {
-              // Query database to find the order of the last relation
-              const start = await this.createQueryBuilder(joinTable.name)
-                .where({
-                  [joinColumn.name]: id,
-                  ...(joinTable.on || {}),
-                  ...(data.__pivot || {}),
-                })
-                .max('order')
-                .first()
-                .transacting(trx)
-                .execute();
-
-              const startOrder = (start as any)?.max || 0;
               const dataset = cleanRelationData.connect || [];
 
-              const rows = dataset.map((data, idx) => ({
+              const rows = dataset.map((data) => ({
                 [joinColumn.name]: id,
                 [idColumn.name]: data.id,
-                // @ts-expect-error TODO: types
-                [typeColumn.name]: data[typeField],
+                [typeColumn.name]: data[typeField as '__type'],
                 ...(joinTable.on || {}),
                 ...(data.__pivot || {}),
-                order: startOrder + idx + 1,
                 field: attributeName,
               })) as Record<string, any>;
 
