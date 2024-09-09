@@ -108,6 +108,7 @@ interface HeaderActionDescription {
   }>;
   onSelect?: (value: string) => void;
   value?: string;
+  customizeContent?: (value: string) => React.ReactNode;
 }
 
 /**
@@ -369,6 +370,7 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
               onChange={action.onSelect}
               value={action.value}
+              customizeContent={action.customizeContent}
             >
               {action.options.map(({ label, ...option }) => (
                 <SingleSelectOption key={option.value} {...option}>
