@@ -12,6 +12,7 @@ import {
   useQueryParams,
   FormErrors,
   getYupValidationErrors,
+  useForm,
 } from '@strapi/admin/strapi-admin';
 import { Modules } from '@strapi/types';
 import { useParams } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { buildValidParams } from '../utils/api';
 import { createYupSchema } from '../utils/validation';
 
 import { useContentTypeSchema, ComponentsDictionary } from './useContentTypeSchema';
+import { useDocumentLayout } from './useDocumentLayout';
 
 import type { FindOne } from '../../../shared/contracts/collection-types';
 import type { ContentType } from '../../../shared/contracts/content-types';
@@ -56,6 +58,7 @@ type UseDocument = (
    * This is the schema of the content type, it is not the same as the layout.
    */
   schema?: Schema;
+  schemas?: Schema[];
   validate: (document: Document) => null | FormErrors;
 };
 
@@ -104,7 +107,12 @@ const useDocument: UseDocument = (args, opts) => {
     skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
   });
 
-  const { components, schema, isLoading: isLoadingSchema } = useContentTypeSchema(args.model);
+  const {
+    components,
+    schema,
+    schemas,
+    isLoading: isLoadingSchema,
+  } = useContentTypeSchema(args.model);
 
   React.useEffect(() => {
     if (error) {
@@ -153,6 +161,7 @@ const useDocument: UseDocument = (args, opts) => {
     meta: data?.meta,
     isLoading,
     schema,
+    schemas,
     validate,
   } satisfies ReturnType<UseDocument>;
 };
@@ -196,5 +205,61 @@ const useDoc = () => {
   };
 };
 
-export { useDocument, useDoc };
+/**
+ * @public
+ * @experimental
+ * Content manager context hooks for plugin development.
+ * Make sure to use this hook inside the content manager.
+ */
+const useContentManagerContext = () => {
+  const {
+    collectionType,
+    model,
+    id,
+    components,
+    isLoading: isLoadingDoc,
+    schema,
+    schemas,
+  } = useDoc();
+
+  const layout = useDocumentLayout(model);
+
+  const form = useForm('useContentManagerContext', (state) => state);
+
+  const isSingleType = collectionType === SINGLE_TYPES;
+  const slug = model;
+  const isCreatingEntry = id === 'create';
+
+  const {} = useContentTypeSchema();
+
+  const isLoading = isLoadingDoc || layout.isLoading;
+  const error = layout.error;
+
+  return {
+    error,
+    isLoading,
+
+    // Base metadata
+    model,
+    collectionType,
+    id,
+    slug,
+    isCreatingEntry,
+    isSingleType,
+    hasDraftAndPublish: schema?.options?.draftAndPublish ?? false,
+
+    // All schema infos
+    components,
+    contentType: schema,
+    contentTypes: schemas,
+
+    // Form state
+    form,
+
+    // layout infos
+    layout,
+  };
+};
+
+export { useDocument, useDoc, useContentManagerContext };
 export type { UseDocument, UseDocumentArgs, Document, Schema, ComponentsDictionary };
