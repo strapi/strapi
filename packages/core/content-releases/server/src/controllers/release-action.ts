@@ -1,6 +1,6 @@
 import type Koa from 'koa';
 
-import { async } from '@strapi/utils';
+import { errors, async } from '@strapi/utils';
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
@@ -23,6 +23,20 @@ const releaseActionController = {
     const releaseActionArgs = ctx.request.body as CreateReleaseAction.Request['body'];
 
     await validateReleaseAction(releaseActionArgs);
+
+    // If we are adding a singleType, we need to append the documentId of that singleType
+    const model = strapi.getModel(releaseActionArgs.contentType);
+    if (model.kind === 'singleType') {
+      const document = await strapi.db.query(model.uid).findOne({ select: ['documentId'] });
+
+      if (!document) {
+        throw new errors.NotFoundError(
+          `No entry found for contentType ${releaseActionArgs.contentType}`
+        );
+      }
+
+      releaseActionArgs.entryDocumentId = document.documentId;
+    }
 
     const releaseActionService = getService('release-action', { strapi });
     const releaseAction = await releaseActionService.create(releaseId, releaseActionArgs);

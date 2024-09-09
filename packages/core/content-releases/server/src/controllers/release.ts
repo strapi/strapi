@@ -14,6 +14,7 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
+import type { Schema } from '@strapi/types';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
@@ -34,7 +35,19 @@ const releaseController = {
 
     await validatefindByDocumentAttachedParams(query);
 
-    const { contentType, entryDocumentId, hasEntryAttached, locale } = query;
+    // If entry is a singleType, we need to manually add the entryDocumentId to the query
+    const model = strapi.getModel(query.contentType) as Schema.ContentType;
+    if (model.kind && model.kind === 'singleType') {
+      const document = await strapi.db.query(model.uid).findOne({ select: ['documentId'] });
+
+      if (!document) {
+        throw new errors.NotFoundError(`No entry found for contentType ${query.contentType}`);
+      }
+
+      query.entryDocumentId = document.documentId;
+    }
+
+    const { contentType, hasEntryAttached, entryDocumentId, locale } = query;
     const isEntryAttached =
       typeof hasEntryAttached === 'string' ? Boolean(JSON.parse(hasEntryAttached)) : false;
 
