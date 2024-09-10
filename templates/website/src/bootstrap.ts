@@ -125,8 +125,6 @@ async function createEntry(
       }
     }
 
-    console.log(`api::${model}.${model}`);
-
     // Actually create the entry in Strapi
     await strapi.documents(`api::${model}.${model}` as any).create({
       data: entry as any,
