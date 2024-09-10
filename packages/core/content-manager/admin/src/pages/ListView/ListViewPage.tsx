@@ -151,7 +151,7 @@ const ListViewPage = () => {
       return {
         ...header,
         label: typeof header.label === 'string' ? header.label : formatMessage(header.label),
-        name: `${header.name}${header.mainField ? `.${header.mainField}` : ''}`,
+        name: `${header.name}${header.mainField?.name ? `.${header.mainField.name}` : ''}`,
       };
     });
 
