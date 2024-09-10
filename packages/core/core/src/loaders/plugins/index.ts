@@ -1,6 +1,8 @@
 import { join } from 'path';
 import fse from 'fs-extra';
 import { defaultsDeep, defaults, getOr, get } from 'lodash/fp';
+import * as resolve from 'resolve.exports';
+
 import { env } from '@strapi/utils';
 import type { Core, Plugin, Struct } from '@strapi/types';
 import { loadConfigFile } from '../../utils/load-config-file';
@@ -94,9 +96,20 @@ export default async function loadPlugins(strapi: Core.Strapi) {
     const enabledPlugin = enabledPlugins[pluginName];
 
     let serverEntrypointPath;
+    let resolvedExport = './strapi-server.js';
 
     try {
-      serverEntrypointPath = join(enabledPlugin.pathToPlugin, 'strapi-server.js');
+      resolvedExport = (
+        resolve.exports(enabledPlugin.packageInfo, 'strapi-server', {
+          require: true,
+        }) ?? './strapi-server.js'
+      ).toString();
+    } catch (e) {
+      // no export map or missing strapi-server export => fallback to default
+    }
+
+    try {
+      serverEntrypointPath = join(enabledPlugin.pathToPlugin, resolvedExport);
     } catch (e) {
       throw new Error(
         `Error loading the plugin ${pluginName} because ${pluginName} is not installed. Please either install the plugin or remove it's configuration.`
