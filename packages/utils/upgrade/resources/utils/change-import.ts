@@ -84,9 +84,7 @@ export const changeImportSpecifier = (
               j.identifier(methodNameToReplace),
               j.identifier(alias)
             );
-            j(path).replaceWith(
-              j.importDeclaration([...specifiersArray, newSpecifier], j.literal(newDependency))
-            );
+            path.get('specifiers').replace([...specifiersArray, newSpecifier]);
           }
         });
       });
