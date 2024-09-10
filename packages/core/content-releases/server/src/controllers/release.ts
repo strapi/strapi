@@ -1,5 +1,6 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
+import type { Schema } from '@strapi/types';
 import { RELEASE_MODEL_UID } from '../constants';
 import { validateRelease, validatefindByDocumentAttachedParams } from './validation/release';
 import type {
@@ -14,7 +15,6 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
-import type { Schema } from '@strapi/types';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 

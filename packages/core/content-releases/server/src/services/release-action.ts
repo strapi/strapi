@@ -93,6 +93,18 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         validateUniqueEntry(releaseId, action),
       ]);
 
+      // If we are adding a singleType, we need to append the documentId of that singleType
+      const model = strapi.contentType(action.contentType);
+      if (model.kind === 'singleType') {
+        const document = await strapi.db.query(model.uid).findOne({ select: ['documentId'] });
+
+        if (!document) {
+          throw new errors.NotFoundError(`No entry found for contentType ${action.contentType}`);
+        }
+
+        action.entryDocumentId = document.documentId;
+      }
+
       const release = await strapi.db
         .query(RELEASE_MODEL_UID)
         .findOne({ where: { id: releaseId } });
