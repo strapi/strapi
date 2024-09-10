@@ -420,8 +420,8 @@ const GenericInput = ({
           <TimePicker
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
             disabled={disabled}
-            onChange={(time) => handleTimeChangeEvent(time, onChange, name, type)}
-            onClear={() => handleTimeChangeEvent(undefined, onChange, name, type)}
+            onChange={(time) => handleTimeChangeEvent(onChange, name, type, time)}
+            onClear={() => handleTimeChangeEvent(onChange, name, type, undefined)}
             value={formattedValue}
           />
         );

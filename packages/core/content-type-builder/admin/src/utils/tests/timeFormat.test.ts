@@ -36,7 +36,7 @@ describe('Time Logic', () => {
   describe('handleTimeChangeEvent', () => {
     it('should add seconds and milliseconds to time string', () => {
       const onChange = jest.fn();
-      handleTimeChangeEvent('14:30', onChange, 'timeField', 'time');
+      handleTimeChangeEvent(onChange, 'timeField', 'time', '14:30');
       expect(onChange).toHaveBeenCalledWith({
         target: { name: 'timeField', value: '14:30:00.000', type: 'time' },
       });
@@ -44,7 +44,7 @@ describe('Time Logic', () => {
 
     it('should not modify time string with seconds and milliseconds', () => {
       const onChange = jest.fn();
-      handleTimeChangeEvent('14:30:00.000', onChange, 'timeField', 'time');
+      handleTimeChangeEvent(onChange, 'timeField', 'time', '14:30:00.000');
       expect(onChange).toHaveBeenCalledWith({
         target: { name: 'timeField', value: '14:30:00.000', type: 'time' },
       });
@@ -52,7 +52,7 @@ describe('Time Logic', () => {
 
     it('should handle undefined input', () => {
       const onChange = jest.fn();
-      handleTimeChangeEvent(undefined, onChange, 'timeField', 'time');
+      handleTimeChangeEvent(onChange, 'timeField', 'time', undefined);
       expect(onChange).toHaveBeenCalledWith({
         target: { name: 'timeField', value: undefined, type: 'time' },
       });

@@ -3,14 +3,14 @@ type TimeChangeHandler = (params: {
 }) => void;
 
 type TimeChangeParams = {
-  value: string | undefined;
+  value?: string;
   onChange: TimeChangeHandler;
   name: string;
   type: string;
 };
 
-// The backend send a value which has the following format: '00:45:00.000'
-// or the time picker only supports hours & minutes so we need to mutate the value
+// The backend sends a value which has the following format: '00:45:00.000'
+// but the time picker only supports hours & minutes so we need to mutate the value
 const removeSeconds = (time: string): string => {
   const [hours, minutes] = time.split(':');
   return `${hours}:${minutes}`;
@@ -21,12 +21,12 @@ const addSecondsAndMilliseconds = (time: string): string => {
   return time.split(':').length === 2 ? `${time}:00.000` : time;
 };
 
-const formatTimeForInput = (value: string | undefined): string | undefined => {
-  if (!value) return undefined;
+const formatTimeForInput = (value?: string): string | undefined => {
+  if (!value) return;
   return value.split(':').length > 2 ? removeSeconds(value) : value;
 };
 
-const formatTimeForOutput = (value: string | undefined): string | undefined => {
+const formatTimeForOutput = (value?: string): string | undefined => {
   if (!value) return undefined;
   return addSecondsAndMilliseconds(value);
 };
@@ -38,10 +38,10 @@ export const handleTimeChange = ({ value }: TimeChangeParams): string | undefine
 };
 
 export const handleTimeChangeEvent = (
-  time: string | undefined,
   onChange: TimeChangeHandler,
   name: string,
-  type: string
+  type: string,
+  time?: string
 ): void => {
   const formattedOutputTime = formatTimeForOutput(time);
 
