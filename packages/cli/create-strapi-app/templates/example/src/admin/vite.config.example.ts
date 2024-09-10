@@ -1,6 +1,6 @@
-const { mergeConfig } = require('vite');
+import { mergeConfig, type UserConfig } from 'vite';
 
-module.exports = (config) => {
+export default (config: UserConfig) => {
   // Important: always return the modified config
   return mergeConfig(config, {
     resolve: {
