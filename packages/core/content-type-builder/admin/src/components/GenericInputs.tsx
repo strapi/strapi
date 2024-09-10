@@ -26,6 +26,7 @@ import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 
 import { parseDateValue } from '../utils/parseDateValue';
+import { handleTimeChange, handleTimeChangeEvent } from '../utils/timeFormat';
 
 import type { Schema } from '@strapi/types';
 
@@ -413,26 +414,15 @@ const GenericInput = ({
         );
       }
       case 'time': {
-        let time = value;
-
-        // The backend send a value which has the following format: '00:45:00.000'
-        // or the time picker only supports hours & minutes so we need to mutate the value
-        if (typeof value === 'string' && value.split(':').length > 2) {
-          const [hour, minute] = value.split(':');
-          time = `${hour}:${minute}`;
-        }
+        const formattedValue = handleTimeChange({ value, onChange, name, type });
 
         return (
           <TimePicker
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
             disabled={disabled}
-            onChange={(time) => {
-              onChange({ target: { name, value: `${time}`, type } });
-            }}
-            onClear={() => {
-              onChange({ target: { name, value: null, type } });
-            }}
-            value={time}
+            onChange={(time) => handleTimeChangeEvent(onChange, name, type, time)}
+            onClear={() => handleTimeChangeEvent(onChange, name, type, undefined)}
+            value={formattedValue}
           />
         );
       }
