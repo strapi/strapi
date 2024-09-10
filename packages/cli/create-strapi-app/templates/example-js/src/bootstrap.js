@@ -52,13 +52,13 @@ function getFileData(fileName) {
   // Parse the file metadata
   const size = getFileSizeInBytes(filePath);
   const ext = fileName.split('.').pop();
-  const mimeType = mime.lookup(ext);
+  const mimeType = mime.lookup(ext || '') || '';
 
   return {
-    path: filePath,
-    name: fileName,
+    filepath: filePath,
+    originalFileName: fileName,
     size,
-    type: mimeType,
+    mimetype: mimeType,
   };
 }
 
@@ -82,7 +82,7 @@ async function uploadFile(file, name) {
 async function createEntry({ model, entry }) {
   try {
     // Actually create the entry in Strapi
-    await strapi.entityService.create(`api::${model}.${model}`, {
+    await strapi.documents(`api::${model}.${model}`).create({
       data: entry,
     });
   } catch (error) {
