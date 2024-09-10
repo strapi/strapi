@@ -63,4 +63,4 @@ const getAdminEE = () => {
   return eeAdmin;
 };
 
-export default getAdminEE();
+export default getAdminEE;

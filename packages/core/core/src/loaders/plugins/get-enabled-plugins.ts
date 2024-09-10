@@ -11,6 +11,7 @@ interface PluginMeta {
   enabled: boolean;
   pathToPlugin?: string;
   info: Record<string, unknown>;
+  packageInfo?: Record<string, unknown>;
 }
 
 type PluginMetas = Record<string, PluginMeta>;
@@ -102,6 +103,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
     internalPlugins[packageInfo.strapi.name] = {
       ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
       info: packageInfo.strapi,
+      packageInfo,
     };
   }
 
@@ -125,6 +127,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
           ...packageInfo.strapi,
           packageName: packageInfo.name,
         },
+        packageInfo,
       };
     }
   }
@@ -149,6 +152,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
 
       if (isStrapiPlugin(packageInfo)) {
         declaredPlugins[pluginName].info = packageInfo.strapi || {};
+        declaredPlugins[pluginName].packageInfo = packageInfo;
       }
     }
   });
