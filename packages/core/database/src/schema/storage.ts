@@ -52,7 +52,7 @@ export default (db: Database) => {
     },
 
     hashSchema(schema: Schema) {
-      return crypto.createHash('md5').update(JSON.stringify(schema)).digest('hex');
+      return crypto.createHash('sha256').update(JSON.stringify(schema)).digest('hex');
     },
 
     async add(schema: Schema) {
