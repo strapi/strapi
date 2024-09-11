@@ -1,16 +1,6 @@
 import providerFactory from '../provider-factory';
 
-const providerMethods = [
-  'register',
-  'delete',
-  'get',
-  'getWhere',
-  'values',
-  'keys',
-  'has',
-  'size',
-  'clear',
-];
+const providerMethods = ['register', 'delete', 'get', 'values', 'keys', 'has', 'size', 'clear'];
 
 describe('Provider Factory', () => {
   describe('Core', () => {
@@ -201,50 +191,6 @@ describe('Provider Factory', () => {
         const result = provider.get('key');
 
         expect(result).toBeUndefined();
-      });
-    });
-
-    describe('GetWhere', () => {
-      const items = [
-        { key: 'keyA', value: { foo: 'barA', bar: 'foo1' } },
-        { key: 'keyB', value: { foo: 'barB', bar: 'foo2' } },
-        { key: 'keyC', value: { foo: 'barC', bar: 'foo1' } },
-        { key: 'keyD', value: { foo: 'barD', bar: 'foo2' } },
-      ];
-      const provider = providerFactory();
-
-      const sortItems = (a, b) => (a.key < b.key ? -1 : 1);
-      const pickItems = (...indexes) => indexes.map((index) => items[index].value);
-
-      beforeAll(async () => {
-        for (const item of items) {
-          await provider.register(item.key, item.value);
-        }
-      });
-
-      test('Calling getWhere without filters returns every registered items', async () => {
-        const expected = items.map((i) => i.value).sort(sortItems);
-
-        const results = provider.getWhere();
-
-        expect(results).toStrictEqual(expect.any(Array));
-        expect(results).toHaveLength(items.length);
-        expect(results.sort(sortItems)).toEqual(expected);
-      });
-
-      test.each([
-        [{ foo: 'barA' }, pickItems(0)],
-        [{ bar: 'foo1' }, pickItems(0, 2)],
-        [{ bar: 'foo2' }, pickItems(1, 3)],
-        [{ foo: 'barD', bar: 'foo2' }, pickItems(3)],
-        [{ foo: 'barC', bar: 'foo2' }, []],
-        [{ foobar: 'foobar' }, []],
-        [{}, pickItems(0, 1, 2, 3)],
-      ])('Filters %s', (filters, expected) => {
-        const results = provider.getWhere(filters);
-
-        expect(results).toStrictEqual(expect.any(Array));
-        expect(results).toStrictEqual(expected);
       });
     });
 
