@@ -116,6 +116,7 @@ export namespace Relation {
     inversedBy?: string;
     mappedBy?: string;
     joinTable: BidirectionalAttributeJoinTable;
+    virtual?: boolean;
   };
 
   export type OneToOne = BaseBidirectional & {

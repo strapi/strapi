@@ -70,7 +70,7 @@ const extendContentTypes = (strapi: Core.Strapi) => {
       private: false,
       configurable: false,
       visible: false,
-      useJoinTable: false,
+      virtual: true,
       joinColumn: {
         name: 'document_id',
         referencedColumn: 'document_id',

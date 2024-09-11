@@ -395,6 +395,10 @@ const createMorphMany = (
  * Creates a join column info and add them to the attribute meta
  */
 const createJoinColumn = (metadata: Metadata, { attribute, attributeName }: JoinColumnOptions) => {
+  if (attribute.virtual) {
+    return;
+  }
+
   const targetMeta = metadata.get(attribute.target);
 
   if (!targetMeta) {
@@ -433,6 +437,10 @@ const createJoinTable = (
   metadata: Metadata,
   { attributeName, attribute, meta }: JoinTableOptions
 ) => {
+  if (attribute.virtual) {
+    return;
+  }
+
   if (!shouldUseJoinTable(attribute)) {
     throw new Error('Attempted to create join table when useJoinTable is false');
   }
