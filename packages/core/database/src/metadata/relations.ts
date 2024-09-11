@@ -417,13 +417,11 @@ const createJoinTable = (
   metadata: Metadata,
   { attributeName, attribute, meta }: JoinTableOptions
 ) => {
-  const targetMeta = metadata.get(attribute.target);
-
-  // Localizations are a "calculated" relation set in packages/plugins/i18n/server/src/register.ts
-  // we do not create an actual join table for localizations
-  if (attributeName === 'localizations') {
+  if (!shouldUseJoinTable(attribute)) {
     return;
   }
+
+  const targetMeta = metadata.get(attribute.target);
 
   if (!targetMeta) {
     throw new Error(`Unknown target ${attribute.target}`);
