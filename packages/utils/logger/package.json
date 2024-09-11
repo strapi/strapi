@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.0.0-rc.19",
+  "version": "5.0.0-rc.20",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
