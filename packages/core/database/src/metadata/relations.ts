@@ -120,6 +120,10 @@ const createOneToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
+  /**
+   * Setting useJoinTable: false is a way to explicitly declare not to create a join table
+   * it is needed so that we can have self-relations with no db effects like  'localizations'
+   *  */
   if (!shouldUseJoinTable(attribute)) {
     return;
   }
@@ -194,6 +198,10 @@ const createManyToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
+  /**
+   * Setting useJoinTable: false is a way to explicitly declare not to create a join table
+   * it is needed so that we can have self-relations with no db effects like  'localizations'
+   *  */
   if (!shouldUseJoinTable(attribute)) {
     return;
   }
