@@ -120,6 +120,10 @@ const createOneToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
+  if (!shouldUseJoinTable(attribute)) {
+    return;
+  }
+
   if (!isBidirectional(attribute)) {
     createJoinTable(metadata, {
       attribute,
@@ -190,6 +194,10 @@ const createManyToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
+  if (!shouldUseJoinTable(attribute)) {
+    return;
+  }
+
   if (!isBidirectional(attribute) || isOwner(attribute)) {
     createJoinTable(metadata, {
       attribute,
@@ -418,7 +426,7 @@ const createJoinTable = (
   { attributeName, attribute, meta }: JoinTableOptions
 ) => {
   if (!shouldUseJoinTable(attribute)) {
-    return;
+    throw new Error('Attempted to create join table when useJoinTable is false');
   }
 
   const targetMeta = metadata.get(attribute.target);
