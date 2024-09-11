@@ -59,6 +59,9 @@ const isOwner = (
 ): attribute is RelationalAttribute & Relation.Owner =>
   !isBidirectional(attribute) || hasInversedBy(attribute);
 
+const isVirtual = (attribute: RelationalAttribute) =>
+  'virtual' in attribute && attribute.virtual === true;
+
 const shouldUseJoinTable = (attribute: RelationalAttribute) =>
   !('useJoinTable' in attribute) || attribute.useJoinTable !== false;
 
@@ -120,21 +123,13 @@ const createOneToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  /**
-   * Setting useJoinTable: false is a way to explicitly declare not to create a join table
-   * it is needed so that we can have self-relations with no db effects like  'localizations'
-   *  */
-  if (!shouldUseJoinTable(attribute)) {
-    return;
-  }
-
-  if (!isBidirectional(attribute)) {
+  if (shouldUseJoinTable(attribute) && !isBidirectional(attribute)) {
     createJoinTable(metadata, {
       attribute,
       attributeName,
       meta,
     });
-  } else if (isOwner(attribute)) {
+  } else if (isOwner(attribute) && !isVirtual(attribute)) {
     throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
   }
 };
@@ -198,15 +193,7 @@ const createManyToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  /**
-   * Setting useJoinTable: false is a way to explicitly declare not to create a join table
-   * it is needed so that we can have self-relations with no db effects like  'localizations'
-   *  */
-  if (!shouldUseJoinTable(attribute)) {
-    return;
-  }
-
-  if (!isBidirectional(attribute) || isOwner(attribute)) {
+  if (shouldUseJoinTable(attribute) && (!isBidirectional(attribute) || isOwner(attribute))) {
     createJoinTable(metadata, {
       attribute,
       attributeName,
@@ -395,7 +382,7 @@ const createMorphMany = (
  * Creates a join column info and add them to the attribute meta
  */
 const createJoinColumn = (metadata: Metadata, { attribute, attributeName }: JoinColumnOptions) => {
-  if (attribute.virtual) {
+  if (isVirtual(attribute)) {
     return;
   }
 
@@ -437,7 +424,7 @@ const createJoinTable = (
   metadata: Metadata,
   { attributeName, attribute, meta }: JoinTableOptions
 ) => {
-  if (attribute.virtual) {
+  if (isVirtual(attribute)) {
     return;
   }
 
