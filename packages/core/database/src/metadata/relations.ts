@@ -59,9 +59,6 @@ const isOwner = (
 ): attribute is RelationalAttribute & Relation.Owner =>
   !isBidirectional(attribute) || hasInversedBy(attribute);
 
-const isVirtual = (attribute: RelationalAttribute) =>
-  'virtual' in attribute && attribute.virtual === true;
-
 const shouldUseJoinTable = (attribute: RelationalAttribute) =>
   !('useJoinTable' in attribute) || attribute.useJoinTable !== false;
 
@@ -129,7 +126,7 @@ const createOneToMany = (
       attributeName,
       meta,
     });
-  } else if (isOwner(attribute) && !isVirtual(attribute)) {
+  } else if (isOwner(attribute)) {
     throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
   }
 };
@@ -382,10 +379,6 @@ const createMorphMany = (
  * Creates a join column info and add them to the attribute meta
  */
 const createJoinColumn = (metadata: Metadata, { attribute, attributeName }: JoinColumnOptions) => {
-  if (isVirtual(attribute)) {
-    return;
-  }
-
   const targetMeta = metadata.get(attribute.target);
 
   if (!targetMeta) {
@@ -424,10 +417,6 @@ const createJoinTable = (
   metadata: Metadata,
   { attributeName, attribute, meta }: JoinTableOptions
 ) => {
-  if (isVirtual(attribute)) {
-    return;
-  }
-
   if (!shouldUseJoinTable(attribute)) {
     throw new Error('Attempted to create join table when useJoinTable is false');
   }
