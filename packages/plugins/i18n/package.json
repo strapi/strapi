@@ -1,6 +1,6 @@
 {
   "name": "@strapi/i18n",
-  "version": "5.0.0-rc.21",
+  "version": "5.0.0-rc.22",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
