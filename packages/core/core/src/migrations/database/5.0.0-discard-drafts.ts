@@ -77,7 +77,12 @@ async function copyPublishedEntriesToDraft({
    */
   await trx
     // INSERT INTO tableName (columnName1, columnName2, columnName3, ...)
-    .into(trx.raw(`?? (??)`, [meta.tableName, scalarAttributes]))
+    .into(
+      trx.raw(`?? (${scalarAttributes.map(() => `??`).join(', ')})`, [
+        meta.tableName,
+        ...scalarAttributes,
+      ])
+    )
     .insert((subQb: typeof trx) => {
       // SELECT columnName1, columnName2, columnName3, ...
       subQb
