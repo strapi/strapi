@@ -365,12 +365,9 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
             <SingleSelect
               key={action.id}
               size="S"
-              disabled={action.disabled}
-              aria-label={action.label}
               // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
               onChange={action.onSelect}
-              value={action.value}
-              customizeContent={action.customizeContent}
+              {...action}
             >
               {action.options.map(({ label, ...option }) => (
                 <SingleSelectOption key={option.value} {...option}>

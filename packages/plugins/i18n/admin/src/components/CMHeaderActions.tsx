@@ -27,6 +27,7 @@ import {
   SingleSelect,
   SingleSelectOption,
   Dialog,
+  type StatusVariant,
 } from '@strapi/design-system';
 import { WarningCircle, ListPlus, Trash, Download, Cross, Plus } from '@strapi/icons';
 import { Modules } from '@strapi/types';
@@ -56,6 +57,12 @@ interface LocaleOptionProps {
   status: 'draft' | 'published' | 'modified';
   entryExists: boolean;
 }
+
+const statusVariants: Record<LocaleOptionProps['status'], StatusVariant> = {
+  draft: 'secondary',
+  published: 'success',
+  modified: 'alternative',
+};
 
 const LocaleOption = ({
   isDraftAndPublishEnabled,
@@ -89,10 +96,8 @@ const LocaleOption = ({
           paddingTop="2px"
           paddingBottom="2px"
           showBullet={false}
-          size={'S'}
-          variant={
-            status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative'
-          }
+          size="S"
+          variant={statusVariants[status]}
         >
           <Typography tag="span" variant="pi" fontWeight="bold">
             {capitalize(status)}
