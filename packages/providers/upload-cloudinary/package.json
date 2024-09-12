@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
-  "version": "5.0.0-rc.20",
+  "version": "5.0.0-rc.21",
   "description": "Cloudinary provider for strapi upload",
   "keywords": [
     "upload",
