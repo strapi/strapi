@@ -20,6 +20,7 @@ export * from './components/PageHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
+export * from './components/ContentBox';
 
 export { useGuidedTour } from './components/GuidedTour/Provider';
 
