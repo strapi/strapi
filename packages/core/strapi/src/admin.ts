@@ -39,3 +39,5 @@ export {
   unstable_useContentManagerContext,
   useDocumentRBAC,
 } from '@strapi/content-manager/strapi-admin';
+
+export { useAutoReloadOverlayBlocker } from '@strapi/content-type-builder/strapi-admin';
