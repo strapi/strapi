@@ -58,3 +58,5 @@ export default {
     return Promise.resolve(importedTrads);
   },
 };
+
+export * from './exports';
