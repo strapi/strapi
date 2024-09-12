@@ -69,6 +69,10 @@ export class Metadata extends Map<string, Meta> {
     for (const meta of this.values()) {
       for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
         try {
+          if (attribute.unstable_virtual) {
+            continue;
+          }
+
           if (types.isRelationalAttribute(attribute)) {
             createRelation(attributeName, attribute, meta, this);
             continue;

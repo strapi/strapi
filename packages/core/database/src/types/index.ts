@@ -9,7 +9,7 @@ export interface ColumnInfo {
   notNullable?: boolean;
 }
 
-export type Attribute = ScalarAttribute | RelationalAttribute;
+export type Attribute = (ScalarAttribute | RelationalAttribute) & { unstable_virtual?: boolean };
 
 export type CountResult = { count: number };
 
