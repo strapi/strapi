@@ -1,1 +1,4 @@
-export { useAutoReloadOverlayBlocker } from './components/AutoReloadOverlayBlocker';
+export {
+  useAutoReloadOverlayBlocker,
+  AutoReloadOverlayBlockerProvider,
+} from './components/AutoReloadOverlayBlocker';
