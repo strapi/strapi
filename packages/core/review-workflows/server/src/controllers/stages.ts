@@ -174,12 +174,14 @@ export default {
     const entityStageId = entity[ENTITY_STAGE_ATTRIBUTE]?.id;
     const canTransition = stagePermissions.can(STAGE_TRANSITION_UID, entityStageId);
 
-    const [workflowCount, { stages: workflowStages }] = await Promise.all([
+    const [workflowCount, workflowResult] = await Promise.all([
       workflowService.count(),
       workflowService.getAssignedWorkflow(modelUID, {
         populate: 'stages',
       }),
     ]);
+
+    const workflowStages = workflowResult ? workflowResult.stages : [];
 
     const meta = {
       stageCount: workflowStages.length,

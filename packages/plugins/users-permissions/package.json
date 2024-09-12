@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "5.0.0-rc.17",
+  "version": "5.0.0-rc.22",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -27,9 +27,9 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./strapi-server.js",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "source": "./server/index.js",
+      "require": "./server/index.js",
+      "default": "./server/index.js"
     },
     "./package.json": "./package.json"
   },

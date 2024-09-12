@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "5.0.0-rc.17",
+  "version": "5.0.0-rc.22",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -64,8 +64,8 @@
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "esbuild-register": "3.5.0",
+    "fast-glob": "3.3.2",
     "fs-extra": "11.2.0",
-    "glob": "10.3.10",
     "jscodeshift": "0.15.1",
     "lodash": "4.17.21",
     "memfs": "4.6.0",

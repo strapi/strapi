@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-cloud",
-  "version": "5.0.0-rc.17",
+  "version": "5.0.0-rc.22",
   "description": "Instructions to deploy your local project to Strapi Cloud",
   "license": "MIT",
   "author": {

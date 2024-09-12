@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.0.0-rc.17",
+  "version": "5.0.0-rc.22",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -51,8 +51,9 @@
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.js",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
     },
     "./package.json": "./package.json"
   },

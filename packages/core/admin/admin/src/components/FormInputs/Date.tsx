@@ -25,7 +25,7 @@ const DateInput = forwardRef<HTMLInputElement, InputProps>(
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onChange={(date) => {
-            field.onChange(name, date ? convertLocalDateToUTCDate(date) : null);
+            field.onChange(name, date ? convertLocalDateToUTCDate(date).toISOString() : null);
           }}
           onClear={() => field.onChange(name, null)}
           value={value ? convertLocalDateToUTCDate(value) : value}

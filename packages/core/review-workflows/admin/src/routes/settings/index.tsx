@@ -4,19 +4,10 @@ import * as React from 'react';
 
 import { Page, useTracking, ConfirmDialog, useRBAC, Table } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import {
-  Flex,
-  IconButton,
-  TFooter,
-  Typography,
-  Link,
-  LinkButton,
-  Dialog,
-} from '@strapi/design-system';
+import { Flex, IconButton, TFooter, Typography, LinkButton, Dialog } from '@strapi/design-system';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 
 import { LimitsModal } from '../../components/LimitsModal';
 import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
@@ -220,18 +211,20 @@ export const ReviewWorkflowsListView = () => {
                   <Table.Cell>
                     <Flex alignItems="center" justifyContent="end">
                       {canRead || canUpdate ? (
-                        <ActionLink
-                          to={`${workflow.id}`}
-                          aria-label={formatMessage(
+                        <IconButton
+                          tag={Link}
+                          to={workflow.id.toString()}
+                          label={formatMessage(
                             {
                               id: 'Settings.review-workflows.list.page.list.column.actions.edit.label',
                               defaultMessage: 'Edit {name}',
                             },
                             { name: workflow.name }
                           )}
+                          variant="ghost"
                         >
                           <Pencil />
-                        </ActionLink>
+                        </IconButton>
                       ) : null}
                       {workflows.length > 1 && canDelete ? (
                         <IconButton
@@ -289,28 +282,6 @@ export const ReviewWorkflowsListView = () => {
     </>
   );
 };
-
-const ActionLink = styled(Link)`
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  & > span {
-    line-height: 1rem;
-    font-size: 1rem;
-  }
-
-  & svg > path {
-    fill: ${({ theme }) => theme.colors.neutral500};
-  }
-
-  &:hover,
-  &:focus {
-    svg > path {
-      fill: ${({ theme }) => theme.colors.neutral800};
-    }
-  }
-`;
 
 const ProtectedListPage = () => {
   const permissions = useTypedSelector(

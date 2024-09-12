@@ -77,7 +77,12 @@ async function copyPublishedEntriesToDraft({
    */
   await trx
     // INSERT INTO tableName (columnName1, columnName2, columnName3, ...)
-    .into(trx.raw(`${meta.tableName} (${scalarAttributes.join(', ')})`))
+    .into(
+      trx.raw(`?? (${scalarAttributes.map(() => `??`).join(', ')})`, [
+        meta.tableName,
+        ...scalarAttributes,
+      ])
+    )
     .insert((subQb: typeof trx) => {
       // SELECT columnName1, columnName2, columnName3, ...
       subQb
@@ -85,7 +90,7 @@ async function copyPublishedEntriesToDraft({
           ...scalarAttributes.map((att: string) => {
             // Override 'publishedAt' and 'updatedAt' attributes
             if (att === 'published_at') {
-              return trx.raw('NULL as published_at');
+              return trx.raw('NULL as ??', 'published_at');
             }
 
             return att;

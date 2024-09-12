@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.0.0-rc.17",
+  "version": "5.0.0-rc.22",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -37,8 +37,8 @@
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
     },
     "./package.json": "./package.json"
   },

@@ -3,6 +3,7 @@ import loadAdmin from '../loaders/admin';
 
 export default defineProvider({
   init(strapi) {
+    // eslint-disable-next-line node/no-missing-require
     strapi.add('admin', () => require('@strapi/admin/strapi-server'));
   },
 
