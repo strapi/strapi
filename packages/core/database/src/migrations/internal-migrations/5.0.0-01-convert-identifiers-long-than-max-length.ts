@@ -104,10 +104,11 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
         await knex
           .raw('ALTER INDEX ?? RENAME TO ??', [full.indexName, short.indexName])
           .transacting(trx);
-      } else if (client === 'sqlite' || client === 'better') {
+      } else if (['sqlite', 'sqlite3', 'better-sqlite3'].includes(client as any)) {
         // SQLite doesn't support renaming, so rather than trying to drop/recreate we'll let db sync handle it
+        debug(`SQLite does not support index renaming, not renaming index ${full.indexName}`);
       } else {
-        debug('No db client name matches, not creating index');
+        debug(`No db client name matches, not renaming index ${full.indexName}`);
       }
     });
   } catch (err) {
