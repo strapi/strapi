@@ -18,6 +18,7 @@ const cleanData = (
     'strapi_stage',
     'strapi_assignee',
     'locale',
+    'status',
   ]);
 
   const cleanedDataWithoutPasswordAndRelation = recursiveRemoveFieldTypes(

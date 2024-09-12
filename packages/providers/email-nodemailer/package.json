@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "5.0.0-rc.19",
+  "version": "5.0.0-rc.20",
   "description": "Nodemailer provider for Strapi 3",
   "keywords": [
     "strapi",
