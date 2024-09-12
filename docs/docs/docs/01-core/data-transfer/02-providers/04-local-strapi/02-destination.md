@@ -53,4 +53,7 @@ For Strapi data, that is done with a database transaction wrapped around the res
 
 For Strapi assets (ie, the media library files) this is done by attempting to temporarily move the existing assets to a backup directory to `uploads_backup_{timestamp}`, and then deleting it on success, or deleting the failed import files and putting the backup back into place on failure. In some cases of failure, it may be impossible to move the backup files back into place, so you will need to manually restore the backup assets files.
 
-Note: Because of the need for write access, environments without filesystem permissions to move the assets folder (common for virtual environments where /uploads is mounted as a read-only drive) will be unable to include assets in a transfer and the asset stage must be excluded in order to run the transfer.
+> ⚠️ **Note:**
+> Because of the need for write access, environments without filesystem permissions
+> to move the assets folder (common for virtual environments where /uploads is mounted as a read-only drive)
+> will be unable to include assets in a transfer and the asset stage must be  excluded in order to run the transfer.
