@@ -971,17 +971,18 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>
-            <DisconnectButton
-              disabled={disabled}
-              type="button"
+            <IconButton
               onClick={() => handleDisconnect(relations[index])}
-              aria-label={formatMessage({
+              disabled={disabled}
+              label={formatMessage({
                 id: getTranslation('relation.disconnect'),
                 defaultMessage: 'Remove',
               })}
+              variant="ghost"
+              size="S"
             >
-              <Cross width="12px" />
-            </DisconnectButton>
+              <Cross />
+            </IconButton>
           </Box>
         </Flex>
       )}
