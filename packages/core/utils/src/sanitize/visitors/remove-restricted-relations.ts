@@ -1,5 +1,7 @@
 import * as contentTypeUtils from '../../content-types';
 import type { Visitor } from '../../traverse/factory';
+import { RelationOrderingOptions } from '../../types';
+import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
@@ -40,9 +42,27 @@ export default (auth: unknown): Visitor =>
           newValue.disconnect = disconnect;
         }
 
-        if ('options' in elements) {
-          // TODO: sanitize options
-          newValue.options = elements.options;
+        if (
+          'options' in elements &&
+          typeof elements.options === 'object' &&
+          elements.options !== null
+        ) {
+          const filteredOptions: RelationOrderingOptions = {};
+
+          // Iterate through the keys of elements.options
+          Object.keys(elements.options).forEach((key) => {
+            const validator = VALID_RELATION_ORDERING_KEYS[key as keyof RelationOrderingOptions];
+
+            // Ensure the key exists in VALID_RELATION_ORDERING_KEYS and the validator is defined before calling it
+            if (validator && validator(elements.options[key])) {
+              filteredOptions[key as keyof RelationOrderingOptions] = elements.options[key];
+            }
+          });
+
+          // Assign the filtered options back to newValue
+          newValue.options = filteredOptions;
+        } else {
+          newValue.options = {};
         }
 
         set(key, newValue);

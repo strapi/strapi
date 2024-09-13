@@ -1,3 +1,4 @@
+import { isBoolean } from 'lodash/fp';
 import type { Attribute, Model } from './types';
 
 import { isRelationalAttribute } from './content-types';
@@ -21,6 +22,10 @@ const isAnyToMany = (attribute: Attribute) =>
 
 export const constants = {
   MANY_RELATIONS,
+};
+
+export const VALID_RELATION_ORDERING_KEYS: { [key: string]: (value: any) => boolean } = {
+  strict: isBoolean,
 };
 
 export { getRelationalFields, isOneToAny, isManyToAny, isAnyToOne, isAnyToMany };

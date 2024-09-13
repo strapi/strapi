@@ -66,7 +66,7 @@ const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
     ),
     // Remove dynamic zones from filters
     traverseQueryFilters(removeDynamicZones, { schema }),
-    // Remove morpTo relations from filters
+    // Remove morphTo relations from filters
     traverseQueryFilters(removeMorphToRelations, { schema }),
     // Remove passwords from filters
     traverseQueryFilters(removePassword, { schema }),
