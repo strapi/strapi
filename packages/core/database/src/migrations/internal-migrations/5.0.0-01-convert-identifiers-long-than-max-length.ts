@@ -76,15 +76,10 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
     debug(`not renaming index ${full.indexName} because name hasn't changed`);
     return;
   }
-  // link tables are new and do not need to be migrated
+
   // fk indexes can't be easily renamed, and will be recreated by db sync
   // if this misses something due to the loose string matching, it's not critical, it just means index will be rebuilt in db sync
-  if (
-    short.indexName.includes('_lnk_') ||
-    full.indexName.includes('_lnk_') ||
-    short.indexName.endsWith('fk') ||
-    full.indexName.endsWith('fk')
-  ) {
+  if (short.indexName.endsWith('fk') || full.indexName.endsWith('fk')) {
     return;
   }
 
@@ -99,18 +94,21 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
     await knex.transaction(async (trx) => {
       if (client === 'mysql' || client === 'mariadb') {
         await knex
-          .raw(
-            `ALTER TABLE \`${full.tableName}\` RENAME INDEX \`${full.indexName}\` TO \`${short.indexName}\``
-          )
+          .raw('ALTER TABLE ?? RENAME INDEX ?? TO ??', [
+            full.tableName,
+            full.indexName,
+            short.indexName,
+          ])
           .transacting(trx);
       } else if (client === 'pg' || client === 'postgres') {
         await knex
-          .raw(`ALTER INDEX "${full.indexName}" RENAME TO "${short.indexName}"`)
+          .raw('ALTER INDEX ?? RENAME TO ??', [full.indexName, short.indexName])
           .transacting(trx);
-      } else if (client === 'sqlite' || client === 'better') {
+      } else if (['sqlite', 'sqlite3', 'better-sqlite3'].includes(client as any)) {
         // SQLite doesn't support renaming, so rather than trying to drop/recreate we'll let db sync handle it
+        debug(`SQLite does not support index renaming, not renaming index ${full.indexName}`);
       } else {
-        debug('No db client name matches, not creating index');
+        debug(`No db client name matches, not renaming index ${full.indexName}`);
       }
     });
   } catch (err) {

@@ -187,7 +187,10 @@ const releaseApi = adminApi
               method: 'GET',
             };
           },
-          providesTags: (result, error, arg) => [{ type: 'Release' as const, id: arg.id }],
+          providesTags: (result, error, arg) => [
+            { type: 'Release', id: 'LIST' },
+            { type: 'Release' as const, id: arg.id },
+          ],
         }),
         getReleaseActions: build.query<
           GetReleaseActions.Response,
