@@ -42,6 +42,7 @@ export default (auth: unknown): Visitor =>
           newValue.disconnect = disconnect;
         }
 
+        // TODO: this should technically be in its own visitor to check morph options, but for now we'll handle it here
         if (
           'options' in elements &&
           typeof elements.options === 'object' &&
