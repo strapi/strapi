@@ -18,6 +18,7 @@
   "CMEditViewBulkLocale.publication-status": "Publication Status",
   "CMEditViewBulkLocale.draft-relation-warning": "Some locales are related to draft entries. Publishing them could leave broken links in your app.",
   "CMEditViewBulkLocale.continue-confirmation": "Are you sure you want to continue?",
+  "CMEditViewLocalePicker.locale.create": "Create <bold>{locale}</bold> locale",
   "CMListView.popover.display-locales.label": "Display translated locales",
   "CheckboxConfirmation.Modal.body": "Do you want to disable it?",
   "CheckboxConfirmation.Modal.button-confirm": "Yes, disable",
