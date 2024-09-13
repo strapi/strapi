@@ -219,26 +219,37 @@ const DynamicComponent = ({
               <Accordion.Content>
                 <AccordionContentRadius background="neutral0">
                   <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
-                    {components[componentUid]?.layout?.map((row, rowInd) => (
-                      <Grid.Root gap={4} key={rowInd}>
-                        {row.map(({ size, ...field }) => {
-                          const fieldName = `${name}.${index}.${field.name}`;
+                    <Grid.Root gap={4}>
+                      {components[componentUid]?.layout?.map((row, rowInd) => (
+                        <Grid.Item
+                          col={12}
+                          key={rowInd}
+                          s={12}
+                          xs={12}
+                          direction="column"
+                          alignItems="stretch"
+                        >
+                          <Grid.Root gap={4}>
+                            {row.map(({ size, ...field }) => {
+                              const fieldName = `${name}.${index}.${field.name}`;
 
-                          return (
-                            <Grid.Item
-                              col={size}
-                              key={fieldName}
-                              s={12}
-                              xs={12}
-                              direction="column"
-                              alignItems="stretch"
-                            >
-                              <InputRenderer {...field} name={fieldName} />
-                            </Grid.Item>
-                          );
-                        })}
-                      </Grid.Root>
-                    ))}
+                              return (
+                                <Grid.Item
+                                  col={size}
+                                  key={fieldName}
+                                  s={12}
+                                  xs={12}
+                                  direction="column"
+                                  alignItems="stretch"
+                                >
+                                  <InputRenderer {...field} name={fieldName} />
+                                </Grid.Item>
+                              );
+                            })}
+                          </Grid.Root>
+                        </Grid.Item>
+                      ))}
+                    </Grid.Root>
                   </Box>
                 </AccordionContentRadius>
               </Accordion.Content>
