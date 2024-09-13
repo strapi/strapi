@@ -40,4 +40,7 @@ export {
   useDocumentRBAC,
 } from '@strapi/content-manager/strapi-admin';
 
-export { useAutoReloadOverlayBlocker } from '@strapi/content-type-builder/strapi-admin';
+export {
+  private_useAutoReloadOverlayBlocker,
+  private_AutoReloadOverlayBlockerProvider,
+} from '@strapi/content-type-builder/strapi-admin';
