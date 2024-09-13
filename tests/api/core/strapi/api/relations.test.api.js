@@ -223,7 +223,8 @@ const updateShop = async (
       //   id: shop?.myCompo?.id,
       //   compo_products_ow: { [relAction]: anyToOneRel },
       //   compo_products_mw: { options: { strict }, [relAction]: anyToManyRel },
-      // },      ...data,
+      // },
+      ...data,
     },
     populate || populateShop
   );
