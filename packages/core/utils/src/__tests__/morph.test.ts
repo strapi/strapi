@@ -15,7 +15,7 @@ describe('restricted relations', () => {
       target: 'admin::user',
     };
 
-    // we don't care about actual relation permissions here, only that the properties are not removed
+    // we don't care about actual relation permissions here, only that the properties are sanitized and validated correctly
     global.strapi = {
       auth: {
         verify(_config, auth) {
