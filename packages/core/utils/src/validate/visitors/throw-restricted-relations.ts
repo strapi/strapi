@@ -1,3 +1,4 @@
+import { isArray, isObject } from 'lodash/fp';
 import * as contentTypeUtils from '../../content-types';
 import { throwInvalidKey } from '../utils';
 import type { Visitor } from '../../traverse/factory';
@@ -23,7 +24,12 @@ export default (auth: unknown): Visitor =>
     const handleMorphRelation = async () => {
       const elements: any = (data as Record<string, MorphArray>)[key];
 
-      if ('connect' in elements || 'set' in elements || 'disconnect' in elements) {
+      if (
+        'connect' in elements ||
+        'set' in elements ||
+        'disconnect' in elements ||
+        'options' in elements
+      ) {
         await handleMorphElements(elements.connect || []);
         await handleMorphElements(elements.set || []);
         await handleMorphElements(elements.disconnect || []);
@@ -56,7 +62,15 @@ export default (auth: unknown): Visitor =>
     };
 
     const handleMorphElements = async (elements: any[]) => {
+      if (!isArray(elements)) {
+        throwInvalidKey({ key, path: path.attribute });
+      }
+
       for (const element of elements) {
+        if (!isObject(element) || !('__type' in element)) {
+          throwInvalidKey({ key, path: path.attribute });
+        }
+
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 

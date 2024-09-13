@@ -1,3 +1,4 @@
+import { isArray, isObject } from 'lodash/fp';
 import * as contentTypeUtils from '../../content-types';
 import type { Visitor } from '../../traverse/factory';
 import { RelationOrderingOptions } from '../../types';
@@ -80,7 +81,15 @@ export default (auth: unknown): Visitor =>
     const handleMorphElements = async (elements: any[]) => {
       const allowedElements: Record<string, unknown>[] = [];
 
+      if (!isArray(elements)) {
+        return allowedElements;
+      }
+
       for (const element of elements) {
+        if (!isObject(element) || !('__type' in element)) {
+          continue;
+        }
+
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
