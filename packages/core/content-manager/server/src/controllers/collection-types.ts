@@ -417,14 +417,26 @@ export default {
 
       const isUpdate = !isCreate;
       if (isUpdate) {
-        document = await documentManager.findOne(id!, model, { populate, locale });
+        // check if the document exists
+        const documentExists = documentManager.exists(model, id)!;
 
-        if (!document) {
+        if (!documentExists) {
           throw new errors.NotFoundError('Document not found');
         }
 
-        // Only Update if user has update permissions
-        if (permissionChecker.can.update(document)) {
+        // check the document version
+        document = await documentManager.findOne(id!, model, { populate, locale });
+
+        if (!document) {
+          // update and publish the new version
+          if (
+            permissionChecker.cannot.create({ locale }) ||
+            permissionChecker.cannot.publish({ locale })
+          ) {
+            throw new errors.ForbiddenError();
+          }
+          document = await updateDocument(ctx);
+        } else if (permissionChecker.can.update(document)) {
           await updateDocument(ctx);
         }
       }
