@@ -18,9 +18,8 @@ describe('restricted relations', () => {
     // we don't care about actual relations here, only that the properties are not removed
     global.strapi = {
       auth: {
-        verify(one, two, three) {
-          console.log(one, two, three);
-          if (two.scope === 'undefined.find') {
+        verify(_config, auth) {
+          if (auth.scope === 'undefined.find') {
             throw new Error('no permissions');
           }
 
