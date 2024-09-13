@@ -87,6 +87,18 @@ const baseStrapiMock = {
 
     return map[contentType];
   }),
+  contentType: jest.fn((contentType: string) => {
+    const map: Record<string, any> = {
+      'api::contentTypeA.contentTypeA': {
+        kind: 'collectionType',
+      },
+      'api::contentTypeB.contentTypeB': {
+        kind: 'collectionType',
+      },
+    };
+
+    return map[contentType];
+  }),
   documents: jest.fn().mockReturnValue({
     findOne: jest.fn().mockReturnValue({ documentId: 'id', name: 'test' }),
     findFirst: jest.fn().mockReturnValue({ documentId: 'id', name: 'test' }),
@@ -129,7 +141,7 @@ describe('Release Action service', () => {
           query: jest.fn().mockReturnValue({
             create: jest.fn().mockReturnValue({
               type: 'publish',
-              entry: { id: 1, contentType: 'api::contentType.contentType' },
+              entry: { id: 1, contentType: 'api::contentTypeA.contentTypeA' },
             }),
             findOne: jest.fn().mockReturnValue({ id: 1, name: 'test' }),
             count: jest.fn(),
@@ -144,14 +156,14 @@ describe('Release Action service', () => {
       const mockActionArgs = {
         type: 'publish' as const,
         entryDocumentId: '1',
-        contentType: 'api::contentType.contentType' as const,
+        contentType: 'api::contentTypeA.contentTypeA' as const,
       };
 
       const action = await releaseActionService.create(1, mockActionArgs);
 
       expect(action).toEqual({
         type: 'publish',
-        entry: { id: 1, contentType: 'api::contentType.contentType' },
+        entry: { id: 1, contentType: 'api::contentTypeA.contentTypeA' },
       });
     });
 
@@ -170,7 +182,7 @@ describe('Release Action service', () => {
       const mockActionArgs = {
         type: 'publish' as const,
         entryDocumentId: '1',
-        contentType: 'api::contentType.contentType' as const,
+        contentType: 'api::contentTypeA.contentTypeA' as const,
       };
 
       expect(() => releaseActionService.create(1, mockActionArgs)).rejects.toThrow(
@@ -194,7 +206,7 @@ describe('Release Action service', () => {
       const mockActionArgs = {
         type: 'publish' as const,
         entryDocumentId: '1',
-        contentType: 'api::contentType.contentType' as const,
+        contentType: 'api::contentTypeA.contentTypeA' as const,
       };
 
       expect(() => releaseActionService.create(1, mockActionArgs)).rejects.toThrow(

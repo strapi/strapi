@@ -165,6 +165,7 @@ const AddActionToReleaseModal = ({
 
 const ReleaseActionModalForm: DocumentActionComponent = ({
   documentId,
+  document,
   model,
   collectionType,
 }: DocumentActionProps) => {
@@ -257,6 +258,8 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
       defaultMessage: 'Add to release',
     }),
     icon: <PaperPlane />,
+    // Entry is creating so we don't want to allow adding it to a release
+    disabled: !document,
     position: ['panel', 'table-row'],
     dialog: {
       type: 'modal',
