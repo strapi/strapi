@@ -41,6 +41,6 @@ export {
 } from '@strapi/content-manager/strapi-admin';
 
 export {
-  useAutoReloadOverlayBlocker,
-  AutoReloadOverlayBlockerProvider,
+  private_useAutoReloadOverlayBlocker,
+  private_AutoReloadOverlayBlockerProvider,
 } from '@strapi/content-type-builder/strapi-admin';
