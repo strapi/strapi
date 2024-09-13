@@ -15,16 +15,22 @@ let id1;
 let id2;
 let id3;
 
-const populateShop = [
-  'products_ow',
-  'products_oo',
-  'products_mo',
-  'products_om',
-  'products_mm',
-  'products_mw',
-  'myCompo.compo_products_ow',
-  'myCompo.compo_products_mw',
-];
+const populateShop = {
+  products_ow: true,
+  products_oo: true,
+  products_mo: true,
+  products_om: true,
+  products_mm: true,
+  products_mw: true,
+  products_morphtomany: {
+    on: {
+      'api::product.product': true,
+    },
+  },
+  myCompo: {
+    populate: ['compo_products_ow', 'compo_products_mw'],
+  },
+};
 
 const compo = (withRelations = false) => ({
   displayName: 'compo',
@@ -102,6 +108,10 @@ const shopModel = {
       relation: 'oneToMany',
       target: 'api::product.product',
     },
+    products_morphtomany: {
+      type: 'relation',
+      relation: 'morphToMany',
+    },
     myCompo: {
       type: 'component',
       repeatable: false,
@@ -153,6 +163,16 @@ const createShop = async ({
       products_om: { options, connect: anyToManyRel },
       products_mm: { options, connect: anyToManyRel },
       products_mw: { options, connect: anyToManyRel },
+      products_morphtomany: {
+        options,
+        connect: anyToManyRel.map((rel) => {
+          return {
+            id: rel.documentId ? rel.documentId : rel,
+            __type: 'api::product.product',
+            position: rel?.position || undefined,
+          };
+        }),
+      },
       myCompo: {
         compo_products_ow: { connect: anyToOneRel },
         compo_products_mw: { options, connect: anyToManyRel },
@@ -187,6 +207,16 @@ const updateShop = async (
       products_om: { options: { strict }, [relAction]: anyToManyRel },
       products_mm: { options: { strict }, [relAction]: anyToManyRel },
       products_mw: { options: { strict }, [relAction]: anyToManyRel },
+      products_morphtomany: {
+        options: { strict },
+        [relAction]: anyToManyRel.map((rel) => {
+          return {
+            id: rel.documentId ? rel.documentId : rel,
+            __type: 'api::product.product',
+            position: rel?.position || undefined,
+          };
+        }),
+      },
       // TODO V5: Discuss component id update, updating a draft component
       //          with a published component id will fail
       // myCompo: {
@@ -870,6 +900,120 @@ describe('Relations', () => {
       });
 
       expect(updatedShop.error).toMatchObject({ status: 400, name: 'ValidationError' });
+    });
+
+    test('Create relations using invalid key in morphToMany returns error', async () => {
+      const result = await createEntry(
+        'shops',
+        {
+          name: 'Cazotte Shop',
+          products_morphtomany: {
+            options: { strict: true, invalid: true },
+            connect: [
+              {
+                id: id1,
+                __type: 'api::product.product',
+                position: 'end',
+              },
+            ],
+            invalid: 'fake',
+          },
+        },
+        populateShop
+      );
+
+      expect(result.error).toMatchObject({ status: 400, name: 'ValidationError' });
+    });
+
+    test('Create relations using invalid options for morphToMany returns error', async () => {
+      const result = await createEntry(
+        'shops',
+        {
+          name: 'Cazotte Shop',
+          products_morphtomany: {
+            options: { strict: true, invalid: true },
+            connect: [
+              {
+                id: id1,
+                __type: 'api::product.product',
+                position: 'end',
+              },
+            ],
+          },
+        },
+        populateShop
+      );
+
+      expect(result.error).toMatchObject({ status: 400, name: 'ValidationError' });
+    });
+
+    test('Create relations using invalid connect for morphToMany returns error', async () => {
+      const result = await createEntry(
+        'shops',
+        {
+          name: 'Cazotte Shop',
+          products_morphtomany: {
+            options: { strict: true },
+            connect: [
+              {
+                id: id1,
+                __type: 'api::product.product',
+                position: 'end',
+              },
+              'invalid',
+            ],
+          },
+        },
+        populateShop
+      );
+
+      expect(result.error).toMatchObject({ status: 400, name: 'ValidationError' });
+    });
+
+    test('Create relations using invalid disconnect for morphToMany returns error', async () => {
+      const result = await createEntry(
+        'shops',
+        {
+          name: 'Cazotte Shop',
+          products_morphtomany: {
+            options: { strict: true, invalid: true },
+            disconnect: [
+              {
+                id: id1,
+                __type: 'api::product.product',
+                position: 'end',
+              },
+              'invalid',
+            ],
+          },
+        },
+        populateShop
+      );
+
+      expect(result.error).toMatchObject({ status: 400, name: 'ValidationError' });
+    });
+
+    test('Create relations using invalid set for morphToMany returns error', async () => {
+      const result = await createEntry(
+        'shops',
+        {
+          name: 'Cazotte Shop',
+          products_morphtomany: {
+            options: { strict: true, invalid: true },
+            set: [
+              {
+                id: id1,
+                __type: 'api::product.product',
+                position: 'end',
+              },
+              'invalid',
+            ],
+          },
+        },
+        populateShop
+      );
+
+      expect(result.error).toMatchObject({ status: 400, name: 'ValidationError' });
     });
 
     test('Update relations with invalid connect array in strict mode', async () => {

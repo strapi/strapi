@@ -1,6 +1,8 @@
+import { isArray, isObject } from 'lodash/fp';
 import * as contentTypeUtils from '../../content-types';
 import { throwInvalidKey } from '../utils';
 import type { Visitor } from '../../traverse/factory';
+import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
@@ -20,7 +22,55 @@ export default (auth: unknown): Visitor =>
     }
 
     const handleMorphRelation = async () => {
-      for (const element of (data as Record<string, MorphArray>)[key]) {
+      const elements: any = (data as Record<string, MorphArray>)[key];
+
+      if (
+        'connect' in elements ||
+        'set' in elements ||
+        'disconnect' in elements ||
+        'options' in elements
+      ) {
+        await handleMorphElements(elements.connect || []);
+        await handleMorphElements(elements.set || []);
+        await handleMorphElements(elements.disconnect || []);
+
+        // TODO: this should technically be in its own visitor to check morph options, but for now we'll handle it here
+        if ('options' in elements) {
+          if (elements.options === null || elements.options === undefined) {
+            return;
+          }
+
+          if (typeof elements.options !== 'object') {
+            throwInvalidKey({ key, path: path.attribute });
+          }
+
+          const optionKeys = Object.keys(elements.options);
+
+          // Validate each key based on its validator function
+          for (const key of optionKeys) {
+            if (!(key in VALID_RELATION_ORDERING_KEYS)) {
+              throwInvalidKey({ key, path: path.attribute });
+            }
+            if (!VALID_RELATION_ORDERING_KEYS[key](elements.options[key])) {
+              throwInvalidKey({ key, path: path.attribute });
+            }
+          }
+        }
+      } else {
+        await handleMorphElements(elements);
+      }
+    };
+
+    const handleMorphElements = async (elements: any[]) => {
+      if (!isArray(elements)) {
+        throwInvalidKey({ key, path: path.attribute });
+      }
+
+      for (const element of elements) {
+        if (!isObject(element) || !('__type' in element)) {
+          throwInvalidKey({ key, path: path.attribute });
+        }
+
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
