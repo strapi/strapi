@@ -55,6 +55,7 @@ const EditViewPage = () => {
     collectionType,
     id,
     model,
+    hasError,
   } = useDoc();
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
@@ -119,6 +120,9 @@ const EditViewPage = () => {
 
     return transformDocument(schema, components)(form);
   }, [document, isCreatingDocument, isSingleType, schema, components]);
+  if (hasError) {
+    return <Page.Error />;
+  }
 
   if (isLoading && !document?.documentId) {
     return <Page.Loading />;
