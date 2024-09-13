@@ -24,6 +24,8 @@ export const constants = {
   MANY_RELATIONS,
 };
 
+// Valid keys in the `options` property of relations reordering
+// The value for each key must be a function that returns true if it is a valid value
 export const VALID_RELATION_ORDERING_KEYS: { [key: string]: (value: any) => boolean } = {
   strict: isBoolean,
 };
