@@ -367,6 +367,7 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               size="S"
               // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
               onChange={action.onSelect}
+              aria-label={action.label}
               {...action}
             >
               {action.options.map(({ label, ...option }) => (
