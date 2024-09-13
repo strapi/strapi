@@ -502,7 +502,7 @@ const RelationsInput = ({
       <Combobox
         ref={fieldRef}
         name={name}
-        autocomplete="none"
+        autocomplete="list"
         placeholder={
           placeholder ||
           formatMessage({
