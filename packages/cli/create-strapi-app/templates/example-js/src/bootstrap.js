@@ -99,7 +99,7 @@ async function checkFileExistsBeforeUpload(files) {
     // Check if the file already exists in Strapi
     const fileWhereName = await strapi.query('plugin::upload.file').findOne({
       where: {
-        name: fileName,
+        name: fileName.replace(/\..*$/, ''),
       },
     });
 

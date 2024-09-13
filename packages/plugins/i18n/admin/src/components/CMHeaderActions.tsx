@@ -27,8 +27,9 @@ import {
   SingleSelect,
   SingleSelectOption,
   Dialog,
+  type StatusVariant,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Download, Cross } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Download, Cross, Plus } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -49,6 +50,63 @@ import type { I18nBaseQuery } from '../types';
 /* -------------------------------------------------------------------------------------------------
  * LocalePickerAction
  * -----------------------------------------------------------------------------------------------*/
+
+interface LocaleOptionProps {
+  isDraftAndPublishEnabled: boolean;
+  locale: Locale;
+  status: 'draft' | 'published' | 'modified';
+  entryExists: boolean;
+}
+
+const statusVariants: Record<LocaleOptionProps['status'], StatusVariant> = {
+  draft: 'secondary',
+  published: 'success',
+  modified: 'alternative',
+};
+
+const LocaleOption = ({
+  isDraftAndPublishEnabled,
+  locale,
+  status,
+  entryExists,
+}: LocaleOptionProps) => {
+  const { formatMessage } = useIntl();
+
+  if (!entryExists) {
+    return formatMessage(
+      {
+        id: getTranslation('CMEditViewLocalePicker.locale.create'),
+        defaultMessage: 'Create <bold>{locale}</bold> locale',
+      },
+      {
+        bold: (locale: React.ReactNode) => <b>{locale}</b>,
+        locale: locale.name,
+      }
+    );
+  }
+
+  return (
+    <Flex width="100%" gap={1} justifyContent="space-between">
+      <Typography>{locale.name}</Typography>
+      {isDraftAndPublishEnabled ? (
+        <Status
+          display="flex"
+          paddingLeft="6px"
+          paddingRight="6px"
+          paddingTop="2px"
+          paddingBottom="2px"
+          showBullet={false}
+          size="S"
+          variant={statusVariants[status]}
+        >
+          <Typography tag="span" variant="pi" fontWeight="bold">
+            {capitalize(status)}
+          </Typography>
+        </Status>
+      ) : null}
+    </Flex>
+  );
+};
 
 const LocalePickerAction = ({
   document,
@@ -99,11 +157,11 @@ const LocalePickerAction = ({
   }, [handleSelect, hasI18n, locales, currentDesiredLocale]);
 
   const currentLocale = Array.isArray(locales)
-    ? locales.find((locale) => locale.code === currentDesiredLocale)?.code
+    ? locales.find((locale) => locale.code === currentDesiredLocale)
     : undefined;
 
   const allCurrentLocales = [
-    { status: getDocumentStatus(document, meta), locale: currentLocale },
+    { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
     ...(meta?.availableLocales ?? []),
   ];
 
@@ -117,38 +175,29 @@ const LocalePickerAction = ({
       defaultMessage: 'Locales',
     }),
     options: locales.map((locale) => {
+      const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
+
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
         'locale' in doc ? doc.locale === locale.code : false
       );
-      const status = currentLocaleDoc?.status ?? 'draft';
 
       const permissionsToCheck = currentLocaleDoc ? canCreate : canRead;
-
-      const statusVariant =
-        status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
 
       return {
         disabled: !permissionsToCheck.includes(locale.code),
         value: locale.code,
-        label: locale.name,
-        startIcon: schema?.options?.draftAndPublish ? (
-          <Status
-            display="flex"
-            paddingLeft="6px"
-            paddingRight="6px"
-            paddingTop="2px"
-            paddingBottom="2px"
-            showBullet={false}
-            size={'S'}
-            variant={statusVariant}
-          >
-            <Typography tag="span" variant="pi" fontWeight="bold">
-              {capitalize(status)}
-            </Typography>
-          </Status>
-        ) : null,
+        label: (
+          <LocaleOption
+            isDraftAndPublishEnabled={!!schema?.options?.draftAndPublish}
+            locale={locale}
+            status={currentLocaleDoc?.status}
+            entryExists={entryWithLocaleExists}
+          />
+        ),
+        startIcon: !entryWithLocaleExists ? <Plus /> : null,
       };
     }),
+    customizeContent: () => currentLocale?.name,
     onSelect: handleSelect,
     value: currentLocale,
   };

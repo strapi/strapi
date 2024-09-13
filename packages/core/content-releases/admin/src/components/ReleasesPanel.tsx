@@ -11,7 +11,12 @@ import { ReleaseActionMenu } from './ReleaseActionMenu';
 
 import type { PanelComponent, PanelComponentProps } from '@strapi/content-manager/strapi-admin';
 
-const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelComponentProps) => {
+const Panel: PanelComponent = ({
+  model,
+  document,
+  documentId,
+  collectionType,
+}: PanelComponentProps) => {
   const [{ query }] = useQueryParams<{ plugins: { i18n: { locale: string } } }>();
   const locale = query.plugins?.i18n?.locale;
 
@@ -23,12 +28,17 @@ const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelCompo
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canRead, canDeleteAction } = allowedActions;
 
-  const response = useGetReleasesForEntryQuery({
-    contentType: model,
-    entryDocumentId: documentId,
-    locale,
-    hasEntryAttached: true,
-  });
+  const response = useGetReleasesForEntryQuery(
+    {
+      contentType: model,
+      entryDocumentId: documentId,
+      locale,
+      hasEntryAttached: true,
+    },
+    {
+      skip: !document,
+    }
+  );
   const releases = response.data?.data;
 
   const getReleaseColorVariant = (
@@ -51,7 +61,7 @@ const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelCompo
     return null;
   }
 
-  if (releases && releases.length === 0) {
+  if (!releases || releases.length === 0) {
     return null;
   }
 
