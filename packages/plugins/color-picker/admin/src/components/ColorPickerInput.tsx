@@ -10,7 +10,7 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
-import { useField, type InputProps } from '@strapi/strapi/admin';
+import { useField, type InputProps, type FieldValue } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -73,13 +73,16 @@ const ColorPickerPopover = styled(Popover.Content)`
   min-height: 270px;
 `;
 
-type ColorPickerInputProps = InputProps & {
-  labelAction?: React.ReactNode;
-};
+type ColorPickerInputProps = InputProps &
+  FieldValue & {
+    labelAction?: React.ReactNode;
+  };
 
 export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerInputProps>(
-  ({ hint, disabled = false, labelAction, label, name, required = false }, forwardedRef) => {
-    const { onChange, value, error } = useField(name);
+  (
+    { hint, disabled = false, labelAction, label, name, required = false, onChange, value, error },
+    forwardedRef
+  ) => {
     const [showColorPicker, setShowColorPicker] = React.useState(false);
     const colorPickerButtonRef = React.useRef<HTMLButtonElement>(null!);
     const { formatMessage } = useIntl();

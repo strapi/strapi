@@ -114,7 +114,7 @@ const createYupSchema = (
                       // an array of objects with {id} properties, representing the related entities.
                       return yup.array().of(
                         yup.object().shape({
-                          id: yup.string().required(),
+                          id: yup.number().required(),
                         })
                       );
                     } else if (typeof value === 'object') {
