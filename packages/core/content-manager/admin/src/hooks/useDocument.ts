@@ -60,6 +60,7 @@ type UseDocument = (
   schema?: Schema;
   schemas?: Schema[];
   validate: (document: Document) => null | FormErrors;
+  hasError?: boolean;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -154,12 +155,14 @@ const useDocument: UseDocument = (args, opts) => {
   );
 
   const isLoading = isLoadingDocument || isFetchingDocument || isLoadingSchema;
+  const hasError = !!error;
 
   return {
     components,
     document: data?.data,
     meta: data?.meta,
     isLoading,
+    hasError,
     schema,
     schemas,
     validate,
