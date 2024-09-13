@@ -1,4 +1,4 @@
-import { ValidationError } from 'yup';
+import { ValidationError } from '../errors';
 import * as sanitizeVisitors from '../sanitize/visitors';
 import * as validateVisitors from '../validate/visitors';
 
