@@ -12,6 +12,10 @@ export type Data = {
 
 export type Config = Record<string, unknown>;
 
+export interface RelationOrderingOptions {
+  strict?: boolean;
+}
+
 export interface Attribute {
   type: string;
   writable?: boolean;

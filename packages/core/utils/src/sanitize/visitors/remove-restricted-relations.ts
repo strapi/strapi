@@ -1,5 +1,7 @@
 import * as contentTypeUtils from '../../content-types';
 import type { Visitor } from '../../traverse/factory';
+import { RelationOrderingOptions } from '../../types';
+import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
@@ -19,23 +21,76 @@ export default (auth: unknown): Visitor =>
     }
 
     const handleMorphRelation = async () => {
-      const newMorphValue: Record<string, unknown>[] = [];
+      const elements: any = (data as Record<string, MorphArray>)[key];
 
-      for (const element of (data as Record<string, MorphArray>)[key]) {
+      if ('connect' in elements || 'set' in elements || 'disconnect' in elements) {
+        const newValue: Record<string, unknown> = {};
+
+        const connect = await handleMorphElements(elements.connect || []);
+        const relSet = await handleMorphElements(elements.set || []);
+        const disconnect = await handleMorphElements(elements.disconnect || []);
+
+        if (connect.length > 0) {
+          newValue.connect = connect;
+        }
+
+        if (relSet.length > 0) {
+          newValue.set = relSet;
+        }
+
+        if (disconnect.length > 0) {
+          newValue.disconnect = disconnect;
+        }
+
+        if (
+          'options' in elements &&
+          typeof elements.options === 'object' &&
+          elements.options !== null
+        ) {
+          const filteredOptions: RelationOrderingOptions = {};
+
+          // Iterate through the keys of elements.options
+          Object.keys(elements.options).forEach((key) => {
+            const validator = VALID_RELATION_ORDERING_KEYS[key as keyof RelationOrderingOptions];
+
+            // Ensure the key exists in VALID_RELATION_ORDERING_KEYS and the validator is defined before calling it
+            if (validator && validator(elements.options[key])) {
+              filteredOptions[key as keyof RelationOrderingOptions] = elements.options[key];
+            }
+          });
+
+          // Assign the filtered options back to newValue
+          newValue.options = filteredOptions;
+        } else {
+          newValue.options = {};
+        }
+
+        set(key, newValue);
+      } else {
+        const newMorphValue = await handleMorphElements(elements);
+
+        // If the new value is empty, remove the relation completely
+        if (newMorphValue.length === 0) {
+          remove(key);
+        } else {
+          set(key, newMorphValue);
+        }
+      }
+    };
+
+    const handleMorphElements = async (elements: any[]) => {
+      const allowedElements: Record<string, unknown>[] = [];
+
+      for (const element of elements) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
         if (isAllowed) {
-          newMorphValue.push(element);
+          allowedElements.push(element);
         }
       }
 
-      // If the new value is empty, remove the relation completely
-      if (newMorphValue.length === 0) {
-        remove(key);
-      } else {
-        set(key, newMorphValue);
-      }
+      return allowedElements;
     };
 
     const handleRegularRelation = async () => {
