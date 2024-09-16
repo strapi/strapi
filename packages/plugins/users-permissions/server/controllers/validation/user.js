@@ -28,8 +28,6 @@ const createUserBodySchema = yup.object().shape({
 
 const updateUserBodySchema = yup.object().shape({
   email: yup.string().email().min(1),
-
-  // change
   username: yup.string(),
   password: yup.string().min(1),
   role: yup.lazy((value) =>
