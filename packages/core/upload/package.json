@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upload",
-  "version": "5.0.0-rc.24",
+  "version": "5.0.0-rc.25",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
