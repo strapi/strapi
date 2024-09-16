@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "5.0.0-rc.23",
+  "version": "5.0.0-rc.24",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
