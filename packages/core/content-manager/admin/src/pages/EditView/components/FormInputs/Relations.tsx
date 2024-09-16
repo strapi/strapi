@@ -273,11 +273,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
         // Remove any existing relation so they can be replaced with the new one
-        if (field.value?.connect?.length > 0) {
-          field.value.connect.forEach(handleDisconnect);
-        } else if (relations.length > 0) {
-          relations.forEach(handleDisconnect);
-        }
+        field.value?.connect?.forEach(handleDisconnect);
+        relations.forEach(handleDisconnect);
 
         field.onChange(`${props.name}.connect`, [item]);
       } else {
