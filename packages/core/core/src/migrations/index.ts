@@ -1,5 +1,6 @@
-import draftPublishMigrations, { type Input } from './draft-publish';
-import i18nMigrations from './i18n';
+import * as draftPublishMigrations from './draft-publish';
+import * as i18nMigrations from './i18n';
+import type { Input } from './draft-publish';
 
 const enable = async ({ oldContentTypes, contentTypes }: Input) => {
   await i18nMigrations.enable({ oldContentTypes, contentTypes });

@@ -1,4 +1,4 @@
-import i18nMigrations from '../i18n';
+import { enable, disable } from '../i18n';
 
 const createDBQueryMock = () => {
   const obj = {
@@ -39,7 +39,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const previousDefinition = {};
         const definition = {};
 
-        await i18nMigrations.enable({
+        await enable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });
@@ -53,7 +53,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
         const definition = {};
 
-        await i18nMigrations.enable({
+        await enable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });
@@ -67,7 +67,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
-        await i18nMigrations.enable({
+        await enable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });
@@ -83,7 +83,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const previousDefinition = {};
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
-        await i18nMigrations.enable({
+        await enable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });
@@ -102,7 +102,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const previousDefinition = {};
         const definition = {};
 
-        await i18nMigrations.disable({
+        await disable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });
@@ -115,7 +115,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const previousDefinition = {};
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
-        await i18nMigrations.disable({
+        await disable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });
@@ -128,7 +128,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
-        await i18nMigrations.disable({
+        await disable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });
@@ -143,7 +143,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         };
         const definition = {};
 
-        await i18nMigrations.disable({
+        await disable({
           oldContentTypes: { test: previousDefinition as any },
           contentTypes: { test: definition as any },
         });

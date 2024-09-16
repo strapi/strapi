@@ -77,4 +77,4 @@ const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) 
   }
 };
 
-export default { enable: enableDraftAndPublish, disable: disableDraftAndPublish };
+export { enableDraftAndPublish as enable, disableDraftAndPublish as disable };

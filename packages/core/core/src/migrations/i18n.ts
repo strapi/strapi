@@ -63,4 +63,4 @@ const disableI18n = async ({ oldContentTypes, contentTypes }: Input) => {
   }
 };
 
-export default { enable: enableI18n, disable: disableI18n };
+export { enableI18n as enable, disableI18n as disable };
