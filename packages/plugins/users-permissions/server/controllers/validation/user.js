@@ -8,7 +8,7 @@ const deleteRoleSchema = yup.object().shape({
 
 const createUserBodySchema = yup.object().shape({
   email: yup.string().email().required(),
-  username: yup.string().min(1).required(),
+  username: yup.string().required(),
   password: yup.string().min(1).required(),
   role: yup.lazy((value) =>
     typeof value === 'object'
@@ -28,7 +28,9 @@ const createUserBodySchema = yup.object().shape({
 
 const updateUserBodySchema = yup.object().shape({
   email: yup.string().email().min(1),
-  username: yup.string().min(1),
+
+  // change
+  username: yup.string(),
   password: yup.string().min(1),
   role: yup.lazy((value) =>
     typeof value === 'object'

@@ -18,7 +18,7 @@ export const firstname = yup.string().trim().min(1);
 
 export const lastname = yup.string();
 
-export const username = yup.string().min(1);
+export const username = yup.string();
 
 export const password = yup
   .string()
