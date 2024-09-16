@@ -9,7 +9,11 @@ import { StageSelect } from './StageSelect';
 import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 
 const Panel: PanelComponent = () => {
-  const { slug = '', id } = useParams<{
+  const {
+    slug = '',
+    id,
+    collectionType,
+  } = useParams<{
     collectionType: string;
     slug: string;
     id: string;
@@ -20,7 +24,12 @@ const Panel: PanelComponent = () => {
   } = useDocumentLayout(slug);
   const { formatMessage } = useIntl();
 
-  if (!window.strapi.isEE || !options?.reviewWorkflows || !id || id === 'create') {
+  if (
+    !window.strapi.isEE ||
+    !options?.reviewWorkflows ||
+    (collectionType !== 'single-types' && !id) ||
+    id === 'create'
+  ) {
     return null;
   }
 
