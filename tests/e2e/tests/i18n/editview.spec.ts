@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 
+import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 import { findAndClose } from '../../utils/shared';
@@ -118,126 +119,193 @@ test.describe('Edit view', () => {
     await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
   });
 
-  test.fixme(
-    'As a user I want to add a locale entry to an existing document',
-    async ({ browser, page }) => {
-      const LIST_URL = /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/;
-      const EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::product.product\/[^/]+(\?.*)?/;
+  test('As a user I want to add a locale entry to an existing document', async ({
+    browser,
+    page,
+  }) => {
+    const LIST_URL = /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/;
+    const EDIT_URL =
+      /\/admin\/content-manager\/collection-types\/api::product.product\/[^/]+(\?.*)?/;
 
-      /**
-       * Navigate to our products list-view where there will be one document already made in the `en` locale
-       */
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Products' }).click();
-      await page.waitForURL(LIST_URL);
-      await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
+    /**
+     * Navigate to our products list-view where there will be one document already made in the `en` locale
+     */
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Products' }).click();
+    await page.waitForURL(LIST_URL);
+    await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
-      /**
-       * Assert we're on the english locale and our document exists
-       */
-      await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
-        'English (en)'
-      );
-      await expect(
-        page.getByRole('row', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
-      ).toBeVisible();
-      await page.getByRole('row', { name: 'Nike Mens 23/24 Away Stadium Jersey' }).click();
+    /**
+     * Assert we're on the english locale and our document exists
+     */
+    await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
+      'English (en)'
+    );
+    await expect(
+      page.getByRole('row', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
+    ).toBeVisible();
+    await page.getByRole('row', { name: 'Nike Mens 23/24 Away Stadium Jersey' }).click();
 
-      /**
-       * Assert we're on the edit view for the document
-       */
-      await page.waitForURL(EDIT_URL);
-      await expect(
-        page.getByRole('heading', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
-      ).toBeVisible();
-      await page.getByRole('combobox', { name: 'Locales' }).click();
-      await page.getByRole('option', { name: 'Spanish (es)' }).click();
+    /**
+     * Assert we're on the edit view for the document
+     */
+    await page.waitForURL(EDIT_URL);
+    await expect(
+      page.getByRole('heading', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
+    ).toBeVisible();
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'Spanish (es)' }).click();
 
-      /**
-       * Now we should be on a new document in the `es` locale
-       */
-      expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
-      await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+    /**
+     * Now we should be on a new document in the `es` locale
+     */
+    expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
+    await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
 
-      /**
-       * This is here because the `fill` method below doesn't immediately update the value
-       * in webkit.
-       */
-      if (browser.browserType().name() === 'webkit') {
-        await page.getByRole('textbox', { name: 'name' }).press('s');
-        await page.getByRole('textbox', { name: 'name' }).press('Delete');
-      }
-
-      await page
-        .getByRole('textbox', { name: 'name' })
-        .fill('Camiseta de fuera 23/24 de Nike para hombres');
-
-      /**
-       * Verify the UID works as expected due to issues with webkit above,
-       * this has been kept.
-       */
-      await expect
-        .poll(
-          async () => {
-            const requestPromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
-            await page.getByRole('button', { name: 'Regenerate' }).click();
-            const body = (await requestPromise).postDataJSON();
-            return body;
-          },
-          {
-            intervals: [1000, 2000, 4000, 8000],
-          }
-        )
-        .toMatchObject({
-          contentTypeUID: 'api::product.product',
-          data: {
-            id: expect.any(String),
-            name: 'Camiseta de fuera 23/24 de Nike para hombres',
-            slug: 'product',
-          },
-          field: 'slug',
-        });
-
-      await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
-        'camiseta-de-fuera-23-24-de-nike-para-hombres'
-      );
-
-      /**
-       * Publish the document
-       */
-      await page.getByRole('button', { name: 'Publish' }).click();
-      await findAndClose(page, 'Success:Published');
-
-      /**
-       * Now we'll go back to the list view to ensure the content has been updated
-       */
-      await page.getByRole('link', { name: 'Products' }).click();
-      await page.waitForURL(LIST_URL);
-      await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
-      await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
-        'Spanish (es)'
-      );
-      await expect(
-        page.getByRole('row', { name: 'Camiseta de fuera 23/24 de Nike para hombres' })
-      ).toBeVisible();
-
-      /**
-       * Now we'll go back to the edit view to swap back to the en locale to ensure
-       * these updates were made on the same document
-       */
-      await page.getByRole('row', { name: 'Camiseta de fuera 23/24 de Nike para hombres' }).click();
-      await page.waitForURL(EDIT_URL);
-      await expect(
-        page.getByRole('heading', { name: 'Camiseta de fuera 23/24 de Nike para hombres' })
-      ).toBeVisible();
-      await page.getByRole('combobox', { name: 'Locales' }).click();
-      await page.getByRole('option', { name: 'English (en)' }).click();
-      await expect(
-        page.getByRole('heading', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
-      ).toBeVisible();
+    /**
+     * This is here because the `fill` method below doesn't immediately update the value
+     * in webkit.
+     */
+    if (browser.browserType().name() === 'webkit') {
+      await page.getByRole('textbox', { name: 'name' }).press('s');
+      await page.getByRole('textbox', { name: 'name' }).press('Delete');
     }
-  );
+
+    await page
+      .getByRole('textbox', { name: 'name' })
+      .fill('Camiseta de fuera 23/24 de Nike para hombres');
+
+    /**
+     * Verify the UID works as expected due to issues with webkit above,
+     * this has been kept.
+     */
+    await expect
+      .poll(
+        async () => {
+          const requestPromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
+          await page.getByRole('button', { name: 'Regenerate' }).click();
+          const body = (await requestPromise).postDataJSON();
+          return body;
+        },
+        {
+          intervals: [1000, 2000, 4000, 8000],
+        }
+      )
+      .toMatchObject({
+        contentTypeUID: 'api::product.product',
+        data: {
+          id: expect.any(String),
+          name: 'Camiseta de fuera 23/24 de Nike para hombres',
+          slug: 'product',
+        },
+        field: 'slug',
+      });
+
+    await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
+      'camiseta-de-fuera-23-24-de-nike-para-hombres'
+    );
+
+    /**
+     * Publish the document
+     */
+    await page.getByRole('button', { name: 'Publish' }).click();
+    await findAndClose(page, 'Success:Published');
+
+    /**
+     * Now we'll go back to the list view to ensure the content has been updated
+     */
+    await page.getByRole('link', { name: 'Products' }).click();
+    await page.waitForURL(LIST_URL);
+    await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
+      'Spanish (es)'
+    );
+    await expect(
+      page.getByRole('row', { name: 'Camiseta de fuera 23/24 de Nike para hombres' })
+    ).toBeVisible();
+
+    /**
+     * Now we'll go back to the edit view to swap back to the en locale to ensure
+     * these updates were made on the same document
+     */
+    await page.getByRole('row', { name: 'Camiseta de fuera 23/24 de Nike para hombres' }).click();
+    await page.waitForURL(EDIT_URL);
+    await expect(
+      page.getByRole('heading', { name: 'Camiseta de fuera 23/24 de Nike para hombres' })
+    ).toBeVisible();
+    await page.getByRole('combobox', { name: 'Locales' }).click();
+    await page.getByRole('option', { name: 'English (en)' }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
+    ).toBeVisible();
+  });
+
+  test("As a user I should not be able to create a document in a locale I don't have permissions for", async ({
+    page,
+  }) => {
+    const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
+
+    /**
+     * Navigate to settings and roles & modify editor permissions
+     */
+    await page.getByRole('link', { name: 'Settings', exact: true }).click();
+    await page.getByRole('link', { name: 'Roles' }).first().click();
+    await page.getByRole('gridcell', { name: 'Editor', exact: true }).click();
+
+    /**
+     * Set permissions for English (en) locale
+     */
+    await page.getByRole('button', { name: 'Article' }).click();
+    await page.getByLabel('Select all English (en)').check();
+
+    /**
+     * Set permissions for French (fr) locale. Editors can now do everything BUT
+     * create french content
+     */
+    await page.getByLabel('Select all French (fr)').check();
+    await page.getByLabel('Select fr Create permission').uncheck();
+
+    // Scroll to the top of the page before clicking save
+    // TODO: Fix the need to scroll to the top before saving. z-index of layout
+    // header is behind the permissions component.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Success:Saved');
+
+    /**
+     * Logout and login as editor
+     */
+    await page.getByRole('button', { name: 'tt test testing' }).click();
+    await page.getByRole('menuitem', { name: 'Logout' }).click();
+
+    await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
+
+    /**
+     * Verify permissions
+     */
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.waitForURL(LIST_URL);
+    await expect(page.getByText('English (en)', { exact: true })).toBeVisible();
+
+    /**
+     * Verify we can create a new entry in the english locale as expected
+     */
+    await page.getByRole('link', { name: 'Create new entry' }).click();
+    await page.getByLabel('titleThis value is unique for').fill('english content');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Success:Saved');
+
+    /**
+     * Verify we cannot create a new entry in the french locale as editors do
+     * not have the right permissions
+     */
+    await page.getByLabel('Locales').click();
+    await expect(page.getByLabel('Create French (fr) locale')).toBeDisabled();
+  });
+
+  test.skip('As a user I should be able to delete a locale of a single type and collection type', async ({}) => {
+    // TODO
+  });
 
   test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {
     if (browser.browserType().name() === 'webkit') {
