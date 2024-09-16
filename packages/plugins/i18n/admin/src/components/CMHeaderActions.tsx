@@ -181,7 +181,7 @@ const LocalePickerAction = ({
         'locale' in doc ? doc.locale === locale.code : false
       );
 
-      const permissionsToCheck = currentLocaleDoc ? canCreate : canRead;
+      const permissionsToCheck = currentLocaleDoc ? canRead : canCreate;
 
       return {
         disabled: !permissionsToCheck.includes(locale.code),
@@ -408,7 +408,12 @@ const DeleteLocaleAction: DocumentActionComponent = ({
         </Flex>
       ),
       onConfirm: async () => {
-        if (!documentId || !document?.locale) {
+        const unableToDelete =
+          // We are unable to delete a collection type without a document ID
+          // & unable to delete generally if there is no document locale
+          (collectionType !== 'single-types' && !documentId) || !document?.locale;
+
+        if (unableToDelete) {
           console.error(
             "You're trying to delete a document without an id or locale, this is likely a bug with Strapi. Please open an issue."
           );
