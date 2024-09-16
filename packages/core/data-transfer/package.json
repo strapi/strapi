@@ -56,7 +56,7 @@
     "stream-json": "1.8.0",
     "tar": "6.1.13",
     "tar-stream": "2.2.0",
-    "ws": "8.13.0"
+    "ws": "8.17.1"
   },
   "devDependencies": {
     "@strapi/database": "workspace:*",
