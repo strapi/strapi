@@ -241,27 +241,84 @@ async function createApp(scope: Scope) {
 
 const installArguments = ['install'];
 
-const installArgumentsMap = {
+type VersionedArgumentsMap = {
+  [key: number]: string[]; // Maps version numbers to argument arrays
+};
+
+type VersionedEnvMap = {
+  [key: number]: Record<string, string>; // Maps version numbers to environment variables
+};
+
+// set command line options for specific package managers
+const installArgumentsMap: {
+  [key: string]: string[] | VersionedArgumentsMap;
+} = {
   npm: ['--legacy-peer-deps'],
-  yarn: ['--network-timeout 1000000'],
+  yarn: {
+    1: ['--network-timeout', '1000000'],
+    2: ['--network-timeout', '1000000'],
+    3: ['--network-timeout', '1000000'],
+  },
   pnpm: [],
 };
 
-function runInstall({ rootPath, packageManager }: Scope) {
+// set env vars for specific package managers
+const installEnvMap: {
+  [key: string]: Record<string, string> | VersionedEnvMap;
+} = {
+  yarn: {
+    4: { YARN_NETWORK_TIMEOUT: '1000000' },
+  },
+  npm: {},
+  pnpm: {},
+};
+
+async function getPackageManagerVersion(packageManager: string): Promise<number | null> {
+  try {
+    const { stdout } = await execa(packageManager, ['--version']);
+    const version = stdout.trim();
+    const majorVersion = parseInt(version.split('.')[0], 10);
+    return majorVersion;
+  } catch (err) {
+    console.error(`Error detecting ${packageManager} version:`, err);
+    return null;
+  }
+}
+
+async function runInstall({ rootPath, packageManager }: Scope) {
+  const packageManagerVersion = await getPackageManagerVersion(packageManager);
+
+  // Get environment variables
+  let packageEnv: Record<string, string> = {};
+  const envMap = installEnvMap[packageManager];
+
+  if (packageManagerVersion && typeof envMap === 'object' && packageManagerVersion in envMap) {
+    packageEnv = (envMap as VersionedEnvMap)[packageManagerVersion] || {};
+  } else if (typeof envMap === 'object') {
+    packageEnv = envMap as Record<string, string>;
+  }
+
+  // Get install arguments
+  let packageOptions: string[] = [];
+  const argsMap = installArgumentsMap[packageManager];
+  if (packageManagerVersion && typeof argsMap === 'object' && packageManagerVersion in argsMap) {
+    packageOptions = (argsMap as VersionedArgumentsMap)[packageManagerVersion] || [];
+  } else if (Array.isArray(argsMap)) {
+    packageOptions = argsMap;
+  }
+
+  // Set up execa options, including merged environment variables
   const options: execa.Options = {
     cwd: rootPath,
     stdio: 'inherit',
     env: {
       ...process.env,
+      ...packageEnv, // Merge environment variables
       NODE_ENV: 'development',
     },
   };
 
-  if (packageManager in installArgumentsMap) {
-    installArguments.push(...(installArgumentsMap[packageManager] ?? []));
-  }
-
-  const proc = execa(packageManager, installArguments, options);
+  const proc = execa(packageManager, [...installArguments, ...packageOptions], options);
 
   return proc;
 }
