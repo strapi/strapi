@@ -3,7 +3,7 @@ import { Schema } from '@strapi/types';
 
 import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
 
-interface Input {
+export interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;
   contentTypes: Record<string, Schema.ContentType>;
 }
@@ -77,4 +77,4 @@ const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) 
   }
 };
 
-export { enableDraftAndPublish as enable, disableDraftAndPublish as disable };
+export default { enable: enableDraftAndPublish, disable: disableDraftAndPublish };
