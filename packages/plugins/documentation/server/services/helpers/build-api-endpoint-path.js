@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const pathToRegexp = require('path-to-regexp');
+const { pathToRegexp } = require('path-to-regexp');
 
 const pascalCase = require('./utils/pascal-case');
 const queryParams = require('./utils/query-params');
@@ -16,10 +16,12 @@ const { hasFindMethod, isLocalizedPath } = require('./utils/routes');
  * @returns {string}
  */
 const parsePathWithVariables = (routePath) => {
-  return pathToRegexp
-    .parse(routePath)
+  const tokens = [];
+  pathToRegexp(routePath, tokens);
+
+  return tokens
     .map((token) => {
-      if (_.isObject(token)) {
+      if (typeof token === 'object') {
         return `${token.prefix}{${token.name}}`;
       }
 
@@ -36,9 +38,11 @@ const parsePathWithVariables = (routePath) => {
  * @returns {object } Swagger path params object
  */
 const getPathParams = (routePath) => {
-  return pathToRegexp
-    .parse(routePath)
-    .filter((token) => _.isObject(token))
+  const tokens = [];
+  pathToRegexp(routePath, tokens);
+
+  return tokens
+    .filter((token) => typeof token === 'object') // Filter to get only the tokens that are objects (path parameters)
     .map((param) => {
       return {
         name: param.name,
