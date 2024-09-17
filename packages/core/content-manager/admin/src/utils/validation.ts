@@ -241,11 +241,7 @@ type ValidationFn = (
   options: ValidationOptions
 ) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
-const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
-  if (options.status === 'draft') {
-    return nullableSchema(schema);
-  }
-
+const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
   if (
     ((attribute.type === 'component' && attribute.repeatable) ||
       attribute.type === 'dynamiczone') &&
