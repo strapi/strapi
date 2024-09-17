@@ -104,7 +104,9 @@ const updateDocument = async (ctx: any, opts?: Options) => {
   const pickPermittedFields = documentVersion
     ? permissionChecker.sanitizeUpdateInput(documentVersion)
     : permissionChecker.sanitizeCreateInput;
-  const setCreator = setCreatorFields({ user, isEdition: true });
+  const setCreator = documentVersion
+    ? setCreatorFields({ user, isEdition: true })
+    : setCreatorFields({ user });
   const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 

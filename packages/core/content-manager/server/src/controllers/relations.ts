@@ -91,12 +91,8 @@ const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, local
   const isSourceLocalized = isLocalized(sourceModel);
   const isTargetLocalized = isLocalized(targetModel);
 
-  let validatedLocale = locale;
-
-  if (!targetModel || !isTargetLocalized) validatedLocale = undefined;
-
   return {
-    locale: validatedLocale,
+    locale,
     isSourceLocalized,
     isTargetLocalized,
   };
@@ -240,7 +236,7 @@ export default {
       attribute,
       fieldsToSelect,
       mainField,
-      source: { schema: sourceSchema },
+      source: { schema: sourceSchema, isLocalized: isSourceLocalized },
       target: { schema: targetSchema, isLocalized: isTargetLocalized },
       sourceSchema,
       targetSchema,
@@ -266,6 +262,7 @@ export default {
       mainField,
       source: {
         schema: { uid: sourceUid, modelType: sourceModelType },
+        isLocalized: isSourceLocalized,
       },
       target: {
         schema: { uid: targetUid },
@@ -332,8 +329,14 @@ export default {
       if (!isEmpty(publishedAt)) {
         where[`${alias}.published_at`] = publishedAt;
       }
-      if (filterByLocale) {
+
+      // If target has localization we need to filter by locale
+      if (isTargetLocalized && locale) {
         where[`${alias}.locale`] = locale;
+      }
+
+      if (isSourceLocalized && locale) {
+        where.locale = locale;
       }
 
       /**
@@ -372,9 +375,9 @@ export default {
       });
     }
 
-    const res = await strapi.db
-      .query(targetUid)
-      .findPage(strapi.get('query-params').transform(targetUid, queryParams));
+    const dbQuery = strapi.get('query-params').transform(targetUid, queryParams);
+
+    const res = await strapi.db.query(targetUid).findPage(dbQuery);
 
     ctx.body = {
       ...res,
