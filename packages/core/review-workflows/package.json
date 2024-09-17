@@ -1,6 +1,6 @@
 {
   "name": "@strapi/review-workflows",
-  "version": "5.0.0-rc.25",
+  "version": "5.0.0-rc.26",
   "description": "Review workflows for your content",
   "repository": {
     "type": "git",
