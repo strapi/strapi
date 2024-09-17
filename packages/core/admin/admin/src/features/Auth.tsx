@@ -46,7 +46,8 @@ interface AuthContextValue {
    */
   checkUserHasPermissions: (
     permissions?: Permission[],
-    passedPermissions?: Permission[]
+    passedPermissions?: Permission[],
+    rawQueryContext?: string
   ) => Promise<Permission[]>;
   isLoading: boolean;
   permissions: Permission[];
@@ -197,7 +198,20 @@ const AuthProvider = ({
 
   const [checkPermissions] = useLazyCheckPermissionsQuery();
   const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
-    async (permissions, passedPermissions) => {
+    async (
+      permissions,
+      passedPermissions,
+      // TODO:
+      // Here we have parameterised checkUserHasPermissions in order to pass
+      // query context from elsewhere in the application.
+      // See packages/core/content-manager/admin/src/features/DocumentRBAC.tsx
+
+      // This is in order to calculate permissions on accurate query params.
+      // We should be able to rely on the query params in this provider
+      // If we need to pass additional context to the RBAC middleware
+      // we should define a better context type.
+      rawQueryContext
+    ) => {
       /**
        * If there's no permissions to check, then we allow it to
        * pass to preserve existing behaviours.
@@ -221,29 +235,15 @@ const AuthProvider = ({
           ) >= 0
       );
 
-      // const doLog = permissions.some((permission) => {
-      //   return permission?.subject?.includes('homepage');
-      // });
-
-      // if (doLog) {
-      //   console.log('__local auth before', queryParams);
-      //   console.trace('__local auth before');
-      // }
-
       const middlewaredPermissions = await runRbacMiddleware(
         {
           user,
           permissions: userPermissions,
           pathname: location.pathname,
-          search: rawQuery.split('?')[1] ?? '',
+          search: (rawQueryContext || rawQuery).split('?')[1] ?? '',
         },
         matchingPermissions
       );
-
-      // if (doLog) {
-      //   console.log('__local matchingPermissions', middlewaredPermissions);
-      //   console.trace('__local');
-      // }
 
       const shouldCheckConditions = middlewaredPermissions.some(
         (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
@@ -268,14 +268,6 @@ const AuthProvider = ({
     },
     [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
   );
-
-  React.useEffect(() => {
-    // Running this can show that the recognition of locale change happens too late
-    // here.
-    // If we dont debounce the locale in useRBAC it happens after the call to checkUserHasPermissions has been made so we
-    // end up using the old locale.
-    // console.log('__local auth permissions', rawQuery);
-  }, [rawQuery]);
 
   const isLoading = isLoadingUser || isLoadingPermissions;
 

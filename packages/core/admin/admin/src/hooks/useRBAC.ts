@@ -6,9 +6,7 @@ import { useAuth, Permission } from '../features/Auth';
 import { once } from '../utils/once';
 import { capitalise } from '../utils/strings';
 
-import { useDebounce } from './useDebounce';
 import { usePrev } from './usePrev';
-import { useQueryParams } from './useQueryParams';
 
 type AllowedActions = Record<string, boolean>;
 
@@ -45,7 +43,8 @@ type AllowedActions = Record<string, boolean>;
  */
 const useRBAC = (
   permissionsToCheck: Record<string, Permission[]> | Permission[] = [],
-  passedPermissions?: Permission[]
+  passedPermissions?: Permission[],
+  rawQueryContext?: string
 ): {
   allowedActions: AllowedActions;
   isLoading: boolean;
@@ -56,13 +55,6 @@ const useRBAC = (
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<unknown>();
   const [data, setData] = React.useState<Record<string, boolean>>();
-
-  // TODO:
-  // We need to listen for changes to the locale query param in order to
-  // recalculate a users permissions when the locale changes.
-  // We are debouncing the locale so that we only call checkUserHasPermissions once the value is stable.
-  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
-  const debouncedLocale = useDebounce(query.plugins?.i18n?.locale, 200);
 
   const warnOnce = React.useMemo(() => once(console.warn), []);
 
@@ -94,19 +86,19 @@ const useRBAC = (
   const checkUserHasPermissions = useAuth('useRBAC', (state) => state.checkUserHasPermissions);
 
   const permssionsChecked = usePrev(actualPermissionsToCheck);
-  const localeChecked = usePrev(debouncedLocale);
+  const contextChecked = usePrev(rawQueryContext);
 
   React.useEffect(() => {
     if (
       !isEqual(permssionsChecked, actualPermissionsToCheck) ||
-      // TODO: also run the checkUserHasPermissions when the locale changes
-      localeChecked !== debouncedLocale
+      // TODO: also run this when the query context changes
+      contextChecked !== rawQueryContext
     ) {
       setIsLoading(true);
       setData(undefined);
       setError(undefined);
 
-      checkUserHasPermissions(actualPermissionsToCheck, passedPermissions)
+      checkUserHasPermissions(actualPermissionsToCheck, passedPermissions, rawQueryContext)
         .then((res) => {
           if (res) {
             setData(
@@ -132,8 +124,8 @@ const useRBAC = (
     passedPermissions,
     permissionsToCheck,
     permssionsChecked,
-    localeChecked,
-    debouncedLocale,
+    contextChecked,
+    rawQueryContext,
   ]);
 
   /**
