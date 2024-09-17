@@ -42,25 +42,27 @@ export const StageSelect = () => {
   const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const { data, isLoading } = useGetStagesQuery(
-    {
-      slug: collectionType,
-      model: model,
-      id: id!,
-      params,
-    },
-    {
-      skip: !id,
-    }
-  );
-  const { document } = unstable_useDocument(
+  const { document, isLoading: isLoadingDocument } = unstable_useDocument(
     {
       collectionType,
       model,
       documentId: id,
     },
     {
-      skip: !id,
+      skip: !id && collectionType !== 'single-types',
+    }
+  );
+
+  const { data, isLoading: isLoadingStages } = useGetStagesQuery(
+    {
+      slug: collectionType,
+      model: model,
+      // @ts-expect-error – `id` is not correctly typed in the DS.
+      id: document?.documentId,
+      params,
+    },
+    {
+      skip: !document?.documentId,
     }
   );
 
@@ -108,10 +110,10 @@ export const StageSelect = () => {
       ) {
         setShowLimitModal('stage');
       } else {
-        if (id) {
+        if (document?.documentId) {
           const res = await updateStage({
             model,
-            id,
+            id: document.documentId,
             slug: collectionType,
             params,
             data: { id: stageId },
@@ -140,6 +142,8 @@ export const StageSelect = () => {
   };
 
   const { themeColorName } = getStageColorByHex(activeWorkflowStage?.color) ?? {};
+
+  const isLoading = isLoadingStages || isLoadingDocument;
 
   return (
     <>
