@@ -195,16 +195,23 @@ const useDoc = () => {
     throw new Error('Could not find model in url params');
   }
 
+  const document = useDocument(
+    { documentId: origin || id, model: slug, collectionType, params },
+    {
+      skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
+    }
+  );
+
+  const singleTypeId = collectionType === SINGLE_TYPES ? document.document?.documentId : undefined;
+
+  const returnId = origin || id === 'create' ? undefined : id || singleTypeId;
+
+  // console.log('return id', returnId);
   return {
     collectionType,
     model: slug,
-    id: origin || id === 'create' ? undefined : id,
-    ...useDocument(
-      { documentId: origin || id, model: slug, collectionType, params },
-      {
-        skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
-      }
-    ),
+    id: returnId,
+    ...document,
   };
 };
 
