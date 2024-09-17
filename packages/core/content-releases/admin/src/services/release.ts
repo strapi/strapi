@@ -79,7 +79,7 @@ const extendInvalidatesTags = (
 
 const releaseApi = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease', 'ReleaseSettings'],
+    addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease', 'ReleaseSettings', 'Document'],
     endpoints: {
       updateDocument(endpoint: AnyEndpointDefinition) {
         extendInvalidatesTags(endpoint, [
@@ -330,7 +330,10 @@ const releaseApi = adminApi
               method: 'POST',
             };
           },
-          invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+          invalidatesTags: (result, error, arg) => [
+            { type: 'Release', id: arg.id },
+            { type: 'Document', id: `ALL_LIST` },
+          ],
         }),
         deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request['params']>({
           query({ id }) {
