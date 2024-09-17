@@ -135,7 +135,7 @@ export default {
           {
             name: 'admin::hasPermissions',
             config: {
-              actions: ['admin::users.read', 'admin::review-workflows.read'],
+              actions: ['admin::users.read'],
             },
           },
         ],
