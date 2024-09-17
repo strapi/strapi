@@ -37,15 +37,6 @@ class RBAC {
   }
 
   run = async (ctx: RBACContext, permissions: Permission[]): Promise<Permission[]> => {
-    // const doLog = permissions.some((permission) => {
-    //   return permission?.subject?.includes('homepage');
-    // });
-
-    // if (doLog) {
-    // console.log('__local rbac middleware run', permissions, ctx);
-    // console.trace('__local');
-    // }
-
     let index = 0;
 
     const middlewaresToRun = this.middlewares.map((middleware) => middleware(ctx));

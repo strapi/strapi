@@ -57,13 +57,11 @@ const useRBAC = (
   const [error, setError] = React.useState<unknown>();
   const [data, setData] = React.useState<Record<string, boolean>>();
 
-  const [{ query }] = useQueryParams<{ plugins: { i18n: { locale: string } } }>();
-
   // TODO:
-  // I am debouncing the locale so that we only call
-  // checkUserHasPermissions once the value is stable
-  // Otherwise I found the permnission generating logic would work off the wrong
-  // locale value.
+  // We need to listen for changes to the locale query param in order to
+  // recalculate a users permissions when the locale changes.
+  // We are debouncing the locale so that we only call checkUserHasPermissions once the value is stable.
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const debouncedLocale = useDebounce(query.plugins?.i18n?.locale, 200);
 
   const warnOnce = React.useMemo(() => once(console.warn), []);

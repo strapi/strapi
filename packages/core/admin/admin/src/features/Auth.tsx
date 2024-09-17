@@ -47,15 +47,6 @@ interface AuthContextValue {
   checkUserHasPermissions: (
     permissions?: Permission[],
     passedPermissions?: Permission[]
-
-    // TODO: this was a temporary solution that worked for me
-    // If we parameterise the RBAC middleware we can pass the query in from
-    // e.g. packages/core/admin/admin/src/hooks/useRBAC.ts
-    // Then the permissions are updated correctly based on locale switches
-
-    // We shouldn't have to do this though, as this provider uses the same
-    // method for extracting query params as the hook does 🤔
-    // rawQueryOverride?: string
   ) => Promise<Permission[]>;
   isLoading: boolean;
   permissions: Permission[];
@@ -205,7 +196,6 @@ const AuthProvider = ({
   }, [isUninitialized, refetch]);
 
   const [checkPermissions] = useLazyCheckPermissionsQuery();
-
   const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
     async (permissions, passedPermissions) => {
       /**
