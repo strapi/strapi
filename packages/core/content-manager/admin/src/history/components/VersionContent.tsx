@@ -109,7 +109,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
 
     return (
       <Grid.Root key={field.name} gap={4}>
-        <Grid.Item col={12} s={12} xs={12}>
+        <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
           <VersionInputRenderer {...field} />
         </Grid.Item>
       </Grid.Root>
@@ -132,7 +132,14 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
           <Grid.Root key={gridRowIndex} gap={4}>
             {row.map(({ size, ...field }) => {
               return (
-                <Grid.Item col={size} key={field.name} s={12} xs={12}>
+                <Grid.Item
+                  col={size}
+                  key={field.name}
+                  s={12}
+                  xs={12}
+                  direction="column"
+                  alignItems="stretch"
+                >
                   <VersionInputRenderer {...field} />
                 </Grid.Item>
               );

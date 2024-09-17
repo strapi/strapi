@@ -87,7 +87,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         <Field.Label action={props.labelAction}>{props.label}</Field.Label>
         <Box marginTop={1}>
           {/* @ts-expect-error – we dont need closeLabel */}
-          <StyledAlert variant="default">
+          <StyledAlert variant="default" shadow="none">
             {formatMessage({
               id: 'content-manager.history.content.no-relations',
               defaultMessage: 'No relations.',
