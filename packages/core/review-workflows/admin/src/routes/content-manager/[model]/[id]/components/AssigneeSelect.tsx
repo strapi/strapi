@@ -45,7 +45,7 @@ const AssigneeSelect = () => {
       documentId: id,
     },
     {
-      skip: !id,
+      skip: !id && collectionType !== 'single-types',
     }
   );
 
@@ -55,7 +55,7 @@ const AssigneeSelect = () => {
 
   const [updateAssignee, { error, isLoading: isMutating }] = useUpdateAssigneeMutation();
 
-  if (!collectionType || !model || !id) {
+  if (!collectionType || !model || !document?.documentId) {
     return null;
   }
 
@@ -68,7 +68,7 @@ const AssigneeSelect = () => {
     const res = await updateAssignee({
       slug: collectionType,
       model,
-      id,
+      id: document.documentId,
       params,
       data: {
         id: assigneeId ? parseInt(assigneeId, 10) : null,
@@ -112,7 +112,9 @@ const AssigneeSelect = () => {
           id: 'content-manager.reviewWorkflows.assignee.clear',
           defaultMessage: 'Clear assignee',
         })}
-        disabled={(!isLoadingPermissions && !isLoading && users.length === 0) || !id}
+        disabled={
+          (!isLoadingPermissions && !isLoading && users.length === 0) || !document.documentId
+        }
         value={currentAssignee ? currentAssignee.id.toString() : null}
         onChange={handleChange}
         onClear={() => handleChange(null)}

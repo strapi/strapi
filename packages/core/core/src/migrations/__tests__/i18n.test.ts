@@ -1,8 +1,4 @@
-import enable from '../content-type/enable';
-import disable from '../content-type/disable';
-import contentTypesServiceFactory from '../../services/content-types';
-
-const ctService = contentTypesServiceFactory();
+import { enable, disable } from '../i18n';
 
 const createDBQueryMock = () => {
   const obj = {
@@ -20,13 +16,18 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
       plugins: {
         i18n: {
           services: {
-            'content-types': ctService,
             locales: {
               getDefaultLocale: jest.fn(() => 'default-locale'),
+            },
+            'content-types': {
+              isLocalizedContentType: jest.fn(
+                (contentType) => contentType?.pluginOptions?.i18n?.localized === true
+              ),
             },
           },
         },
       },
+      plugin: jest.fn((name) => global.strapi.plugins[name]),
     } as any;
   });
 
@@ -39,8 +40,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = {};
 
         await enable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
 
         expect(strapi.db.query).not.toHaveBeenCalled();
@@ -53,8 +54,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = {};
 
         await enable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
 
         expect(strapi.db.query).not.toHaveBeenCalled();
@@ -67,8 +68,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
         await enable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
 
         expect(strapi.db.query).not.toHaveBeenCalled();
@@ -83,8 +84,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
         await enable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
 
         expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();
@@ -102,8 +103,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = {};
 
         await disable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
         expect(strapi.db.query).not.toHaveBeenCalled();
       });
@@ -115,8 +116,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
         await disable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
         expect(strapi.db.query).not.toHaveBeenCalled();
       });
@@ -128,8 +129,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
         await disable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
         expect(strapi.db.query).not.toHaveBeenCalled();
       });
@@ -143,8 +144,8 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
         const definition = {};
 
         await disable({
-          oldContentTypes: { test: previousDefinition },
-          contentTypes: { test: definition },
+          oldContentTypes: { test: previousDefinition as any },
+          contentTypes: { test: definition as any },
         });
 
         expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();

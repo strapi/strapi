@@ -231,12 +231,12 @@ const Information = ({ activeTab }: InformationProps) => {
       isDisplayed: !!publishDocument?.[PUBLISHED_AT_ATTRIBUTE_NAME],
       label: formatMessage({
         id: 'content-manager.containers.edit.information.last-published.label',
-        defaultMessage: 'Last published',
+        defaultMessage: 'Published',
       }),
       value: formatMessage(
         {
           id: 'content-manager.containers.edit.information.last-published.value',
-          defaultMessage: `Published {time}{isAnonymous, select, true {} other { by {author}}}`,
+          defaultMessage: `{time}{isAnonymous, select, true {} other { by {author}}}`,
         },
         {
           time: (
@@ -253,12 +253,12 @@ const Information = ({ activeTab }: InformationProps) => {
       isDisplayed: !!createAndUpdateDocument?.[UPDATED_AT_ATTRIBUTE_NAME],
       label: formatMessage({
         id: 'content-manager.containers.edit.information.last-draft.label',
-        defaultMessage: 'Last draft',
+        defaultMessage: 'Updated',
       }),
       value: formatMessage(
         {
           id: 'content-manager.containers.edit.information.last-draft.value',
-          defaultMessage: `Modified {time}{isAnonymous, select, true {} other { by {author}}}`,
+          defaultMessage: `{time}{isAnonymous, select, true {} other { by {author}}}`,
         },
         {
           time: (
@@ -275,12 +275,12 @@ const Information = ({ activeTab }: InformationProps) => {
       isDisplayed: !!createAndUpdateDocument?.[CREATED_AT_ATTRIBUTE_NAME],
       label: formatMessage({
         id: 'content-manager.containers.edit.information.document.label',
-        defaultMessage: 'Document',
+        defaultMessage: 'Created',
       }),
       value: formatMessage(
         {
           id: 'content-manager.containers.edit.information.document.value',
-          defaultMessage: `Created {time}{isAnonymous, select, true {} other { by {author}}}`,
+          defaultMessage: `{time}{isAnonymous, select, true {} other { by {author}}}`,
         },
         {
           time: (
