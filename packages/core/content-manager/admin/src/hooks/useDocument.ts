@@ -202,11 +202,8 @@ const useDoc = () => {
     }
   );
 
-  const singleTypeId = collectionType === SINGLE_TYPES ? document.document?.documentId : undefined;
+  const returnId = origin || id === 'create' ? undefined : id;
 
-  const returnId = origin || id === 'create' ? undefined : id || singleTypeId;
-
-  // console.log('return id', returnId);
   return {
     collectionType,
     model: slug,
