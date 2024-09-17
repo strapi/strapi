@@ -64,6 +64,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         const entryWithRelations = await Object.entries(entry.schema).reduce(
           async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
             const attributeValue = entry.data[attributeKey];
+
             const attributeValues = Array.isArray(attributeValue)
               ? attributeValue
               : [attributeValue];
@@ -105,9 +106,14 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                       return null;
                     }
 
-                    return strapi
-                      .query('admin::user')
-                      .findOne({ where: { id: userToPopulate.id } });
+                    return strapi.query('admin::user').findOne({
+                      where: {
+                        ...(userToPopulate.id ? { id: userToPopulate.id } : {}),
+                        ...(userToPopulate.documentId
+                          ? { documentId: userToPopulate.documentId }
+                          : {}),
+                      },
+                    });
                   })
                 );
 
