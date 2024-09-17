@@ -53,8 +53,11 @@ const RepeatableComponent = ({
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { components } = useDoc();
 
-  const { value = [], error } =
-    useField<Schema.Attribute.ComponentValue<`${string}.${string}`, true>>(name);
+  const {
+    value = [],
+    error,
+    rawError,
+  } = useField<Schema.Attribute.ComponentValue<`${string}.${string}`, true>>(name);
   const addFieldRow = useForm('RepeatableComponent', (state) => state.addFieldRow);
   const moveFieldRow = useForm('RepeatableComponent', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
@@ -62,6 +65,29 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
+
+  React.useEffect(() => {
+    const hasNestedErrors = rawError && Array.isArray(rawError) && rawError.length > 0;
+    const hasNestedValue = value && Array.isArray(value) && value.length > 0;
+
+    if (hasNestedErrors && hasNestedValue) {
+      const errorOpenItems = rawError
+        .map((_: unknown, idx: number) => {
+          return value[idx].__temp_key__;
+        })
+        .filter((value) => !!value);
+
+      if (errorOpenItems && errorOpenItems.length > 0) {
+        setCollapseToOpen((collapseToOpen) => {
+          if (!errorOpenItems.includes(collapseToOpen)) {
+            return errorOpenItems[0];
+          }
+
+          return collapseToOpen;
+        });
+      }
+    }
+  }, [rawError, value]);
 
   /**
    * Get the temp key of the component that has the field that is currently focussed

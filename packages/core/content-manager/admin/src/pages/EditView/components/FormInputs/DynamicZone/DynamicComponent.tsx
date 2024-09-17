@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useForm } from '@strapi/admin/strapi-admin';
+import { useForm, useField } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   Box,
@@ -100,6 +100,22 @@ const DynamicComponent = ({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
+  /**
+   * We don't need the accordion's to communicate with each other,
+   * so a unique value for their state is enough.
+   */
+  const accordionValue = React.useId();
+
+  const { value = [], rawError } = useField(`${name}.${index}`);
+
+  const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
+
+  React.useEffect(() => {
+    if (rawError && value) {
+      setCollapseToOpen(accordionValue);
+    }
+  }, [rawError, value, accordionValue]);
+
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
   const accordionActions = disabled ? null : (
@@ -187,11 +203,6 @@ const DynamicComponent = ({
   );
 
   const accordionTitle = title ? `${displayName} ${title}` : displayName;
-  /**
-   * We don't need the accordion's to communicate with each other,
-   * so a unique value for their state is enough.
-   */
-  const accordionValue = React.useId();
 
   return (
     <ComponentContainer tag="li" width="100%">
@@ -202,7 +213,7 @@ const DynamicComponent = ({
         {isDragging ? (
           <Preview />
         ) : (
-          <Accordion.Root>
+          <Accordion.Root value={collapseToOpen} onValueChange={setCollapseToOpen}>
             <Accordion.Item value={accordionValue}>
               <Accordion.Header>
                 <Accordion.Trigger

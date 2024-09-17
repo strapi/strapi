@@ -169,7 +169,9 @@ const createComponentValidator =
         updatedAttribute,
       });
 
-      validator = addMinMax(validator, { attr, updatedAttribute });
+      if (!isDraft) {
+        validator = addMinMax(validator, { attr, updatedAttribute });
+      }
 
       return validator;
     }
