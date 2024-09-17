@@ -370,7 +370,8 @@ module.exports = {
       try {
         await getService('user').sendConfirmationEmail(sanitizedUser);
       } catch (err) {
-        throw new ApplicationError(err.message);
+        strapi.log.error(err);
+        throw new ApplicationError('Error sending confirmation email');
       }
 
       return ctx.send({ user: sanitizedUser });

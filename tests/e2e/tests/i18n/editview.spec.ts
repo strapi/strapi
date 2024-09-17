@@ -291,7 +291,7 @@ test.describe('Edit view', () => {
      * Verify we can create a new entry in the english locale as expected
      */
     await page.getByRole('link', { name: 'Create new entry' }).click();
-    await page.getByLabel('titleThis value is unique for').fill('english content');
+    await page.getByLabel('title').fill('the richmond way');
     await page.getByRole('button', { name: 'Save' }).click();
     await findAndClose(page, 'Success:Saved');
 
@@ -303,8 +303,66 @@ test.describe('Edit view', () => {
     await expect(page.getByLabel('Create French (fr) locale')).toBeDisabled();
   });
 
-  test.skip('As a user I should be able to delete a locale of a single type and collection type', async ({}) => {
-    // TODO
+  test('As a user I should be able to delete a locale of a single type and collection type', async ({
+    page,
+  }) => {
+    const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
+    const HOMEPAGE_LIST_URL =
+      /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
+
+    /**
+     * Navigate to our articles list-view and create a new entry
+     */
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.waitForURL(LIST_URL);
+    await page.getByRole('link', { name: 'Create new entry' }).click();
+    await page.getByLabel('title').fill('trent crimm');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Success:Saved');
+
+    /**
+     * Create a Spanish (es) locale for the entry
+     */
+    await page.getByLabel('Locales').click();
+    await page.getByRole('option', { name: 'Spanish (es)' }).click();
+    await page.getByLabel('title').fill('dani rojas');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Success:Saved');
+
+    /**
+     * Delete the Spanish (es) locale entry
+     */
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
+    await page.getByRole('button', { name: 'Confirm' }).click();
+    await findAndClose(page, 'Success:Deleted');
+
+    /**
+     * Navigate to our homepage single-type and create a new entry
+     */
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Homepage' }).click();
+    await page.waitForURL(HOMEPAGE_LIST_URL);
+    await page.getByLabel('title').fill('football is life');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Success:Saved');
+
+    /**
+     * Create a Spanish (es) locale for the homepage entry
+     */
+    await page.getByLabel('Locales').click();
+    await page.getByRole('option', { name: 'Spanish (es)' }).click();
+    await page.getByLabel('title').fill('el fútbol también es muerte.');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Success:Saved');
+
+    /**
+     * Delete the Spanish (es) locale homepage entry
+     */
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: 'Delete entry (Spanish (es))' }).click();
+    await page.getByRole('button', { name: 'Confirm' }).click();
+    await findAndClose(page, 'Success:Deleted');
   });
 
   test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {

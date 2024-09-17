@@ -3,7 +3,7 @@ import { hooks } from '@strapi/utils';
 import { defineProvider } from './provider';
 import * as registries from '../registries';
 import { loadApplicationContext } from '../loaders';
-import * as draftAndPublishSync from '../migrations/draft-publish';
+import * as syncMigrations from '../migrations';
 import { discardDocumentDrafts } from '../migrations/database/5.0.0-discard-drafts';
 
 export default defineProvider({
@@ -31,8 +31,8 @@ export default defineProvider({
     strapi.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
 
     // Content migration to enable draft and publish
-    strapi.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
-    strapi.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
+    strapi.hook('strapi::content-types.beforeSync').register(syncMigrations.disable);
+    strapi.hook('strapi::content-types.afterSync').register(syncMigrations.enable);
 
     // Database migrations
     strapi.db.migrations.providers.internal.register(discardDocumentDrafts);

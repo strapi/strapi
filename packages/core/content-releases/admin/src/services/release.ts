@@ -276,7 +276,11 @@ const releaseApi = adminApi
               data: body,
             };
           },
-          invalidatesTags: () => [{ type: 'ReleaseAction', id: 'LIST' }],
+          invalidatesTags: (res, error, arg) => [
+            { type: 'ReleaseAction', id: 'LIST' },
+            { type: 'Release', id: 'LIST' },
+            { type: 'Release', id: arg.params.releaseId },
+          ],
           async onQueryStarted({ body, params, query, actionPath }, { dispatch, queryFulfilled }) {
             // We need to mimic the same params received by the getReleaseActions query
             const paramsWithoutActionId = {
