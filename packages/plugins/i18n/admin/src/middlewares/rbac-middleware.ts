@@ -37,10 +37,22 @@ const localeMiddleware: RBACMiddleware = (ctx) => (next) => (permissions) => {
     return next(permissions);
   }
 
+  // const doLog = permissions.some((permission) => {
+  //   return permission?.subject?.includes('homepage');
+  // });
+
+  // if (doLog) {
+  //   console.trace('__local');
+  //   console.log('__local localeMiddleware locale stuff', search, locale, typeof locale);
+  //   console.log('__local i18n rbac middle before', locale, permissions);
+  // }
   const revisedPermissions = permissions.filter(
     (permission) =>
       !permission.properties?.locales || permission.properties.locales.includes(locale)
   );
+  // if (doLog) {
+  //   console.log('__local i18n rbac middle', locale, revisedPermissions);
+  // }
 
   return next(revisedPermissions);
 };

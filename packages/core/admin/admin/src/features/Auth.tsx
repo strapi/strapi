@@ -6,6 +6,7 @@ import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
+import { useQueryParams } from '../hooks/useQueryParams';
 import { login as loginAction, logout as logoutAction, setLocale } from '../reducer';
 import { adminApi } from '../services/api';
 import {
@@ -46,6 +47,15 @@ interface AuthContextValue {
   checkUserHasPermissions: (
     permissions?: Permission[],
     passedPermissions?: Permission[]
+
+    // TODO: this was a temporary solution that worked for me
+    // If we parameterise the RBAC middleware we can pass the query in from
+    // e.g. packages/core/admin/admin/src/hooks/useRBAC.ts
+    // Then the permissions are updated correctly based on locale switches
+
+    // We shouldn't have to do this though, as this provider uses the same
+    // method for extracting query params as the hook does 🤔
+    // rawQueryOverride?: string
   ) => Promise<Permission[]>;
   isLoading: boolean;
   permissions: Permission[];
@@ -80,6 +90,8 @@ const AuthProvider = ({
   const dispatch = useTypedDispatch();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
+  const [{ rawQuery }] = useQueryParams();
+
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
   const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
@@ -193,6 +205,7 @@ const AuthProvider = ({
   }, [isUninitialized, refetch]);
 
   const [checkPermissions] = useLazyCheckPermissionsQuery();
+
   const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
     async (permissions, passedPermissions) => {
       /**
@@ -218,15 +231,29 @@ const AuthProvider = ({
           ) >= 0
       );
 
+      // const doLog = permissions.some((permission) => {
+      //   return permission?.subject?.includes('homepage');
+      // });
+
+      // if (doLog) {
+      //   console.log('__local auth before', queryParams);
+      //   console.trace('__local auth before');
+      // }
+
       const middlewaredPermissions = await runRbacMiddleware(
         {
           user,
           permissions: userPermissions,
           pathname: location.pathname,
-          search: location.search.split('?')[1] ?? '',
+          search: rawQuery.split('?')[1] ?? '',
         },
         matchingPermissions
       );
+
+      // if (doLog) {
+      //   console.log('__local matchingPermissions', middlewaredPermissions);
+      //   console.trace('__local');
+      // }
 
       const shouldCheckConditions = middlewaredPermissions.some(
         (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
@@ -249,8 +276,16 @@ const AuthProvider = ({
         return middlewaredPermissions.filter((_, index) => data?.data[index] === true);
       }
     },
-    [checkPermissions, location.pathname, location.search, runRbacMiddleware, user, userPermissions]
+    [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
   );
+
+  React.useEffect(() => {
+    // Running this can show that the recognition of locale change happens too late
+    // here.
+    // If we dont debounce the locale in useRBAC it happens after the call to checkUserHasPermissions has been made so we
+    // end up using the old locale.
+    // console.log('__local auth permissions', rawQuery);
+  }, [rawQuery]);
 
   const isLoading = isLoadingUser || isLoadingPermissions;
 

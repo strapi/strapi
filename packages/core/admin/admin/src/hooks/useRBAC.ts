@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
 
 import isEqual from 'lodash/isEqual';
 
@@ -6,7 +6,9 @@ import { useAuth, Permission } from '../features/Auth';
 import { once } from '../utils/once';
 import { capitalise } from '../utils/strings';
 
+import { useDebounce } from './useDebounce';
 import { usePrev } from './usePrev';
+import { useQueryParams } from './useQueryParams';
 
 type AllowedActions = Record<string, boolean>;
 
@@ -51,13 +53,22 @@ const useRBAC = (
   permissions: Permission[];
 } => {
   const isLoadingAuth = useAuth('useRBAC', (state) => state.isLoading);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<unknown>();
-  const [data, setData] = useState<Record<string, boolean>>();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<unknown>();
+  const [data, setData] = React.useState<Record<string, boolean>>();
 
-  const warnOnce = useMemo(() => once(console.warn), []);
+  const [{ query }] = useQueryParams<{ plugins: { i18n: { locale: string } } }>();
 
-  const actualPermissionsToCheck: Permission[] = useMemo(() => {
+  // TODO:
+  // I am debouncing the locale so that we only call
+  // checkUserHasPermissions once the value is stable
+  // Otherwise I found the permnission generating logic would work off the wrong
+  // locale value.
+  const debouncedLocale = useDebounce(query.plugins?.i18n?.locale, 200);
+
+  const warnOnce = React.useMemo(() => once(console.warn), []);
+
+  const actualPermissionsToCheck: Permission[] = React.useMemo(() => {
     if (Array.isArray(permissionsToCheck)) {
       return permissionsToCheck;
     } else {
@@ -73,7 +84,7 @@ const useRBAC = (
    * This is the default value we return until the queryResults[i].data
    * are all resolved with data. This preserves the original behaviour.
    */
-  const defaultAllowedActions = useMemo(() => {
+  const defaultAllowedActions = React.useMemo(() => {
     return actualPermissionsToCheck.reduce<Record<string, boolean>>((acc, permission) => {
       return {
         ...acc,
@@ -85,8 +96,14 @@ const useRBAC = (
   const checkUserHasPermissions = useAuth('useRBAC', (state) => state.checkUserHasPermissions);
 
   const permssionsChecked = usePrev(actualPermissionsToCheck);
-  useEffect(() => {
-    if (!isEqual(permssionsChecked, actualPermissionsToCheck)) {
+  const localeChecked = usePrev(debouncedLocale);
+
+  React.useEffect(() => {
+    if (
+      !isEqual(permssionsChecked, actualPermissionsToCheck) ||
+      // TODO: also run the checkUserHasPermissions when the locale changes
+      localeChecked !== debouncedLocale
+    ) {
       setIsLoading(true);
       setData(undefined);
       setError(undefined);
@@ -117,6 +134,8 @@ const useRBAC = (
     passedPermissions,
     permissionsToCheck,
     permssionsChecked,
+    localeChecked,
+    debouncedLocale,
   ]);
 
   /**
