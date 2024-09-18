@@ -345,7 +345,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           .filter((el) => el.selected)
           .map((el) => el.value);
       } else {
-        val = value;
+        // NOTE: reset value to null so it failes required checks.
+        // The API only considers a required field invalid if the value is null|undefined, to differentiate from min 1
+        if (value === '') {
+          val = null;
+        } else {
+          val = value;
+        }
       }
 
       if (field) {

@@ -261,11 +261,7 @@ type ValidationFn = (
   options: ValidationOptions
 ) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
-const addNullableValidation: ValidationFn = (attribute) => (schema) => {
-  if (attribute.required) {
-    return schema;
-  }
-
+const addNullableValidation: ValidationFn = () => (schema) => {
   return nullableSchema(schema);
 };
 
