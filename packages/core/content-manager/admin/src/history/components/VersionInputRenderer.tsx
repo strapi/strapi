@@ -40,7 +40,7 @@ import type { RelationResult } from '../../services/relations';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {} })`
+const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {}, shadow: 'none' })`
   button {
     display: none;
   }
@@ -87,7 +87,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         <Field.Label action={props.labelAction}>{props.label}</Field.Label>
         <Box marginTop={1}>
           {/* @ts-expect-error – we dont need closeLabel */}
-          <StyledAlert variant="default" shadow="none">
+          <StyledAlert variant="default">
             {formatMessage({
               id: 'content-manager.history.content.no-relations',
               defaultMessage: 'No relations.',
