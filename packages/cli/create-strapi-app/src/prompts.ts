@@ -38,7 +38,7 @@ async function example() {
       type: 'confirm',
       name: 'useExample',
       message: 'Start with an example structure & data?',
-      default: true,
+      default: false,
     },
   ]);
 

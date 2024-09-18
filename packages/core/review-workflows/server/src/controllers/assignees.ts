@@ -2,6 +2,7 @@ import type { Context } from 'koa';
 
 import { getService } from '../utils';
 import { validateUpdateAssigneeOnEntity, validateLocale } from '../validation/review-workflows';
+import { ENTITY_STAGE_ATTRIBUTE, STAGE_TRANSITION_UID } from '../constants/workflows';
 
 export default {
   /**
@@ -20,31 +21,52 @@ export default {
   async updateEntity(ctx: Context) {
     const assigneeService = getService('assignees');
     const workflowService = getService('workflows');
+    const stagePermissions = getService('stage-permissions');
 
     const { model_uid: model, id: documentId } = ctx.params;
-    const { locale } = ctx.request.query || {};
+    const locale = (await validateLocale(ctx.request.query?.locale)) ?? undefined;
 
     const { sanitizeOutput } = strapi
       .plugin('content-manager')
       .service('permission-checker')
       .create({ userAbility: ctx.state.userAbility, model });
 
+    // Retrieve the entity so we can get its current stage
+    const entity = await strapi.documents(model).findOne({
+      documentId,
+      locale,
+      populate: [ENTITY_STAGE_ATTRIBUTE],
+    });
+
+    if (!entity) {
+      ctx.throw(404, 'Entity not found');
+    }
+
+    // Only allow users who can update the current stage to change the assignee
+    const canTransitionStage = stagePermissions.can(
+      STAGE_TRANSITION_UID,
+      entity[ENTITY_STAGE_ATTRIBUTE]?.id
+    );
+
+    if (!canTransitionStage) {
+      ctx.throw(403, 'Stage transition permission is required');
+    }
+
     // TODO: check if user has update permission on the entity
     const { id: assigneeId } = await validateUpdateAssigneeOnEntity(
       ctx.request?.body?.data,
       'You should pass a valid id to the body of the put request.'
     );
-    await validateLocale(locale);
 
     await workflowService.assertContentTypeBelongsToWorkflow(model);
 
-    const entity = await assigneeService.updateEntityAssignee(
+    const updatedEntity = await assigneeService.updateEntityAssignee(
       documentId,
       locale || null,
       model,
       assigneeId
     );
 
-    ctx.body = { data: await sanitizeOutput(entity) };
+    ctx.body = { data: await sanitizeOutput(updatedEntity) };
   },
 };

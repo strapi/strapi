@@ -159,10 +159,9 @@ export default {
     }
 
     // Load entity
-    const locale = await validateLocale(query?.locale);
+    const locale = (await validateLocale(query?.locale)) ?? undefined;
     const entity = await strapi.documents(modelUID).findOne({
       documentId,
-      // @ts-expect-error - locale should be also null in the doc service types
       locale,
       populate: [ENTITY_STAGE_ATTRIBUTE],
     });

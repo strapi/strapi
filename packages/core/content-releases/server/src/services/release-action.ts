@@ -291,7 +291,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const actionStatus =
         update.type === 'publish'
-          ? getDraftEntryValidStatus(
+          ? await getDraftEntryValidStatus(
               {
                 contentType: action.contentType,
                 documentId: action.entryDocumentId,

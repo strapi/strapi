@@ -5,6 +5,25 @@ const path = require('path');
 const mime = require('mime-types');
 const { categories, authors, articles, global, about } = require('../data/data.json');
 
+async function seedExampleApp() {
+  const shouldImportSeedData = await isFirstRun();
+
+  if (shouldImportSeedData) {
+    try {
+      console.log('Setting up the template...');
+      await importSeedData();
+      console.log('Ready to go');
+    } catch (error) {
+      console.log('Could not import seed data');
+      console.error(error);
+    }
+  } else {
+    console.log(
+      'Seed data has already been imported. We cannot reimport unless you clear your database first.'
+    );
+  }
+}
+
 async function isFirstRun() {
   const pluginStore = strapi.store({
     environment: strapi.config.environment,
@@ -235,17 +254,21 @@ async function importSeedData() {
   await importAbout();
 }
 
-module.exports = async () => {
-  const shouldImportSeedData = await isFirstRun();
+async function main() {
+  const { createStrapi, compileStrapi } = require('@strapi/strapi');
 
-  if (shouldImportSeedData) {
-    try {
-      console.log('Setting up the template...');
-      await importSeedData();
-      console.log('Ready to go');
-    } catch (error) {
-      console.log('Could not import seed data');
-      console.error(error);
-    }
-  }
-};
+  const appContext = await compileStrapi();
+  const app = await createStrapi(appContext).load();
+
+  app.log.level = 'error';
+
+  await seedExampleApp();
+  await app.destroy();
+
+  process.exit(0);
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
