@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "5.0.0-rc.29",
+  "version": "5.0.0-rc.30",
   "description": "Strapi maintained Custom Fields",
   "repository": {
     "type": "git",
