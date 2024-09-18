@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-local",
-  "version": "5.0.0-rc.28",
+  "version": "5.0.0-rc.29",
   "description": "Local provider for strapi upload",
   "keywords": [
     "upload",
