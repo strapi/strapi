@@ -8,7 +8,15 @@ import {
   useStrapiApp,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Box, Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  SingleSelect,
+  SingleSelectOption,
+  Typography,
+  IconButton,
+  Dialog,
+} from '@strapi/design-system';
 import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
@@ -77,21 +85,21 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
  * HeaderToolbar
  * -----------------------------------------------------------------------------------------------*/
 
-interface HeaderButtonAction {
+interface DialogOptions {
+  type: 'dialog';
+  title: string;
+  content?: React.ReactNode;
+  footer?: React.ReactNode;
+}
+
+interface HeaderActionDescription {
   disabled?: boolean;
   label: string;
   icon?: React.ReactNode;
-  /**
-   * @default 'default'
-   */
   type?: 'icon' | 'default';
-  onClick?: (event: React.SyntheticEvent) => void;
-}
-
-interface HeaderSelectAction {
-  disabled?: boolean;
-  label: string;
-  options: Array<{
+  onClick?: (event: React.SyntheticEvent) => Promise<boolean | void> | boolean | void;
+  dialog?: DialogOptions;
+  options?: Array<{
     disabled?: boolean;
     label: string;
     startIcon?: React.ReactNode;
@@ -100,9 +108,8 @@ interface HeaderSelectAction {
   }>;
   onSelect?: (value: string) => void;
   value?: string;
+  customizeContent?: (value: string) => React.ReactNode;
 }
-
-type HeaderActionDescription = HeaderButtonAction | HeaderSelectAction;
 
 /**
  * @description Contains the document actions that have `position: header`, if there are
@@ -330,19 +337,38 @@ interface HeaderActionsProps {
 }
 
 const HeaderActions = ({ actions }: HeaderActionsProps) => {
+  const [dialogId, setDialogId] = React.useState<string | null>(null);
+
+  const handleClick =
+    (action: HeaderActionDescription & { id: string }) => async (e: React.MouseEvent) => {
+      if (!('options' in action)) {
+        const { onClick = () => false, dialog, id } = action;
+
+        const muteDialog = await onClick(e);
+
+        if (dialog && !muteDialog) {
+          e.preventDefault();
+          setDialogId(id);
+        }
+      }
+    };
+
+  const handleClose = () => {
+    setDialogId(null);
+  };
+
   return (
-    <Flex>
+    <Flex gap={1}>
       {actions.map((action) => {
-        if ('options' in action) {
+        if (action.options) {
           return (
             <SingleSelect
               key={action.id}
               size="S"
-              disabled={action.disabled}
-              aria-label={action.label}
               // @ts-expect-error – the DS will handle numbers, but we're not allowing the API.
               onChange={action.onSelect}
-              value={action.value}
+              aria-label={action.label}
+              {...action}
             >
               {action.options.map(({ label, ...option }) => (
                 <SingleSelectOption key={option.value} {...option}>
@@ -352,11 +378,66 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
             </SingleSelect>
           );
         } else {
-          // TODO: add button handler
-          return null;
+          if (action.type === 'icon') {
+            return (
+              <React.Fragment key={action.id}>
+                <IconButton
+                  disabled={action.disabled}
+                  label={action.label}
+                  size="S"
+                  onClick={handleClick(action)}
+                >
+                  {action.icon}
+                </IconButton>
+                {action.dialog ? (
+                  <HeaderActionDialog
+                    {...action.dialog}
+                    isOpen={dialogId === action.id}
+                    onClose={handleClose}
+                  />
+                ) : null}
+              </React.Fragment>
+            );
+          }
         }
       })}
     </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * HeaderActionDialog
+ * -----------------------------------------------------------------------------------------------*/
+interface HeaderActionDialogProps {
+  onClose: () => void;
+  onCancel?: () => Promise<void>;
+  title: string;
+  content?: React.ReactNode | ((props: { onClose: () => void }) => React.ReactNode);
+  isOpen: boolean;
+}
+
+const HeaderActionDialog = ({
+  onClose,
+  onCancel,
+  title,
+  content: Content,
+  isOpen,
+}: HeaderActionDialogProps) => {
+  const handleClose = async () => {
+    if (onCancel) {
+      await onCancel();
+    }
+
+    onClose();
+  };
+
+  return (
+    <Dialog.Root open={isOpen} onOpenChange={handleClose}>
+      <Dialog.Content>
+        <Dialog.Header>{title}</Dialog.Header>
+        {typeof Content === 'function' ? <Content onClose={handleClose} /> : Content}
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };
 
@@ -410,13 +491,17 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
   const { delete: deleteAction } = useDocumentActions();
   const { toggleNotification } = useNotification();
   const setSubmitting = useForm('DeleteAction', (state) => state.setSubmitting);
+  const isLocalized = document?.locale != null;
 
   return {
     disabled: !canDelete || !document,
-    label: formatMessage({
-      id: 'content-manager.actions.delete.label',
-      defaultMessage: 'Delete document',
-    }),
+    label: formatMessage(
+      {
+        id: 'content-manager.actions.delete.label',
+        defaultMessage: 'Delete entry{isLocalized, select, true { (all locales)} other {}}',
+      },
+      { isLocalized }
+    ),
     icon: <Trash />,
     dialog: {
       type: 'dialog',

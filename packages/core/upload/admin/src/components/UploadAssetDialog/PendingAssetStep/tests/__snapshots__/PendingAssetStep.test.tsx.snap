@@ -40,7 +40,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1080px) {
 
 }
 

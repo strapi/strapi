@@ -21,8 +21,7 @@ To update the app template:
 - Move into this folder and run `yarn develop`.
 - Login using the credentials found in `e2e/constants.js`.
 - Make any changes you need (i.e. create a content-type).
-- Kill the server and run [[`yarn strapi templates:generate <path>`]](https://docs.strapi.io/dev-docs/cli#strapi-templatesgenerate).
-- Replace the existing template in `e2e/app-template` with the newly generated one.
+- Replace the existing template in `e2e/app-template` with the current folder content (only keep the files you need).
 
 ## Content Schemas
 

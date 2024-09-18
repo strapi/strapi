@@ -36,7 +36,17 @@ const HeadersInput = () => {
 
   const addFieldRow = useForm('HeadersInput', (state) => state.addFieldRow);
   const removeFieldRow = useForm('HeadersInput', (state) => state.removeFieldRow);
+  const setFieldValue = useForm('HeadersInput', (state) => state.onChange);
   const { value = [] } = useField<Header[]>('headers');
+
+  const removeRow = (index: number) => {
+    // if we are removing the last row, simply clear it
+    if (value.length === 1) {
+      setFieldValue('headers', [{ key: '', value: '' }]);
+    } else {
+      removeFieldRow('headers', index);
+    }
+  };
 
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
@@ -47,9 +57,9 @@ const HeadersInput = () => {
         })}
       </DSField.Label>
       <Box padding={8} background="neutral100" hasRadius>
-        {value.map((_, index) => {
+        {value.map((val, index) => {
           return (
-            <Grid.Root key={index} gap={4} padding={2}>
+            <Grid.Root key={`${index}-${JSON.stringify(val.key)}`} gap={4} padding={2}>
               <Grid.Item col={6} direction="column" alignItems="stretch">
                 <HeaderCombobox
                   name={`headers.${index}.key`}
@@ -73,28 +83,22 @@ const HeadersInput = () => {
                       type="string"
                     />
                   </Box>
-                  <Flex paddingTop={6} style={{ alignSelf: 'flex-start' }}>
-                    <IconButton
-                      borderRadius="3rem"
-                      width="2rem"
-                      height="2rem"
-                      padding="0.4rem"
-                      alignItems="center"
-                      justifyContent="center"
-                      disabled={value.length === 1}
-                      onClick={() => removeFieldRow('headers', index)}
-                      color="primary600"
-                      label={formatMessage(
-                        {
-                          id: 'Settings.webhooks.headers.remove',
-                          defaultMessage: 'Remove header row {number}',
-                        },
-                        { number: index + 1 }
-                      )}
-                    >
-                      <Minus width="0.8rem" />
-                    </IconButton>
-                  </Flex>
+                  <IconButton
+                    width="4rem"
+                    height="4rem"
+                    onClick={() => removeRow(index)}
+                    color="primary600"
+                    label={formatMessage(
+                      {
+                        id: 'Settings.webhooks.headers.remove',
+                        defaultMessage: 'Remove header row {number}',
+                      },
+                      { number: index + 1 }
+                    )}
+                    type="button"
+                  >
+                    <Minus width="0.8rem" />
+                  </IconButton>
                 </Flex>
               </Grid.Item>
             </Grid.Root>

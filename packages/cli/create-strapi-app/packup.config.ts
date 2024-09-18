@@ -4,11 +4,12 @@ import { defineConfig } from '@strapi/pack-up';
 export default defineConfig({
   bundles: [
     {
-      source: './src/create-strapi-app.ts',
-      import: './dist/create-strapi-app.mjs',
-      require: './dist/create-strapi-app.js',
+      source: './src/index.ts',
+      import: './dist/index.mjs',
+      require: './dist/index.js',
+      types: './dist/index.d.ts',
+      runtime: 'node',
     },
   ],
   dist: './dist',
-  runtime: 'node',
 });

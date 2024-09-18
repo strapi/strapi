@@ -4,6 +4,7 @@ import {
   useStrapiApp,
   useForm,
   InputRenderer as FormInputRenderer,
+  useField,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
@@ -63,6 +64,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     edit: { components },
   } = useDocLayout();
 
+  // We pass field in case of Custom Fields to keep backward compatibility
+  const field = useField(props.name);
+
   if (!visible) {
     return null;
   }
@@ -86,7 +90,7 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
 
     if (CustomInput) {
       // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
-      return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return <CustomInput {...props} {...field} hint={hint} disabled={fieldIsDisabled} />;
     }
 
     return (

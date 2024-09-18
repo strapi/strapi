@@ -1,3 +1,5 @@
 {
-  "extends": "./tsconfig.json"
+  "extends": "./tsconfig.json",
+  "include": ["src", "packup.config.ts", "package.json"],
+  "exclude": ["node_modules"]
 }

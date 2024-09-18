@@ -61,6 +61,30 @@ const extendContentTypes = (strapi: Core.Strapi) => {
       visible: false,
       type: 'string',
     });
+
+    _.set(attributes, 'localizations', {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: contentType.uid,
+      writable: false,
+      private: false,
+      configurable: false,
+      visible: false,
+      unstable_virtual: true,
+      joinColumn: {
+        name: 'document_id',
+        referencedColumn: 'document_id',
+        referencedTable: strapi.db.metadata.identifiers.getTableName(contentType.collectionName!),
+        // ensure the population will not include the results we already loaded
+        on({ results }: { results: any[] }) {
+          return {
+            id: {
+              $notIn: results.map((r) => r.id),
+            },
+          };
+        },
+      },
+    });
   });
 
   if (strapi.plugin('graphql')) {

@@ -1,0 +1,481 @@
+{
+  "global": {
+    "id": 2,
+    "locale": "fr",
+    "metaTitleSuffix": "Strapi Corporate",
+    "metadata": {
+      "id": 5,
+      "metaTitle": "Strapi starter for Corporate Sites",
+      "metaDescription": "Créer votre site corporate avec Strapi",
+      "twitterCardType": "summary",
+      "twitterUsername": "strapijs",
+      "shareImage": null
+    },
+    "notificationBanner": {
+      "id": 2,
+      "text": "Cette page a été crée avec le Strapi starter pour les sites Corporate.\n [Voir les autres starters Strapi](https://strapi.io/starters)",
+      "type": "info"
+    },
+    "navbar": {
+      "id": 2,
+      "links": [
+        {
+          "id": 4,
+          "url": "/pricing",
+          "newTab": false,
+          "text": "tarifs"
+        },
+        {
+          "id": 5,
+          "url": "/contact",
+          "newTab": false,
+          "text": "nous contacter"
+        }
+      ],
+      "button": {
+        "id": 14,
+        "url": "#",
+        "newTab": false,
+        "text": "S'inscrire",
+        "type": "secondary"
+      },
+      "logo": null
+    },
+    "footer": {
+      "id": 2,
+      "smallText": "© Copyright Mon Entreprise™",
+      "columns": [
+        {
+          "id": 3,
+          "title": "Produit",
+          "links": [
+            {
+              "id": 12,
+              "url": "#",
+              "newTab": false,
+              "text": "Fonctionnalités"
+            },
+            {
+              "id": 14,
+              "url": "#",
+              "newTab": false,
+              "text": "S'inscrire"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Légal",
+          "links": [
+            {
+              "id": 17,
+              "url": "#",
+              "newTab": false,
+              "text": "Confidentialité"
+            },
+            {
+              "id": 19,
+              "url": "#",
+              "newTab": false,
+              "text": "Mentions légales"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Entreprise",
+          "links": [
+            {
+              "id": 20,
+              "url": "#",
+              "newTab": false,
+              "text": "Nous rejoindre"
+            },
+            {
+              "id": 22,
+              "url": "#",
+              "newTab": false,
+              "text": "L'équipe"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "title": "Réseaux sociaux",
+          "links": [
+            {
+              "id": 23,
+              "url": "#",
+              "newTab": false,
+              "text": "Twitter"
+            },
+            {
+              "id": 26,
+              "url": "#",
+              "newTab": false,
+              "text": "LinkedIn"
+            }
+          ]
+        }
+      ],
+      "logo": null
+    },
+    "favicon": null,
+    "localizations": [
+      {
+        "id": 1,
+        "locale": "en"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "id": 5,
+      "slug": "",
+      "locale": "fr",
+      "localizations": [
+        {
+          "id": 1,
+          "locale": "en"
+        }
+      ],
+      "shortName": "Home",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 6,
+        "metaTitle": "Strapi corporate site starter",
+        "metaDescription": "Construire un site modifiable avec Strapi",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 2,
+          "__component": "sections.hero",
+          "title": "La meilleure façon de faire votre site Corporate",
+          "label": "Nouveau starter Strapi",
+          "description": "Commencer vite avec votre site corporate",
+          "smallTextWithLink": "Vous voulez construire votre propre starter? Guide à venir",
+          "buttons": [
+            {
+              "id": 5,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "Commencer",
+              "type": "primary"
+            },
+            {
+              "id": 6,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": true,
+              "text": "Voir le code",
+              "type": "secondary"
+            }
+          ],
+          "picture": null
+        },
+        {
+          "id": 2,
+          "__component": "sections.feature-rows-group",
+          "features": [
+            {
+              "id": 3,
+              "title": "Les équipes marketing peuvent maintenant faire leurs propres pages",
+              "description": "Grace à une liste pré-construite de blocs UI, les équipes marketing peuvent faire la mise en page exactement comme elles veulent",
+              "link": {
+                "id": 9,
+                "url": "#",
+                "newTab": false,
+                "text": "Voir la liste de blocs UI"
+              },
+              "media": null
+            },
+            {
+              "id": 4,
+              "title": "Laissez vos développeurs tranquilles",
+              "description": "Vous pouvez publier, modifier, et supprimer des pages sans l'aide d'un développeur.  Votre équipe technique peut enfin se concentrer sur d'autre tâches.",
+              "link": {
+                "id": 10,
+                "url": "#",
+                "newTab": false,
+                "text": "Voir comment créer une page"
+              },
+              "media": null
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "__component": "sections.feature-columns-group",
+          "features": [
+            {
+              "id": 4,
+              "title": "Visualisez vos changments",
+              "description": "Grace à un mode preview, vous pouvez voir vos pages avant de les publier.",
+              "icon": null
+            },
+            {
+              "id": 5,
+              "title": "100% responsive",
+              "description": "Ce starter marche sur toutes les tailles d'écrans.",
+              "icon": null
+            },
+            {
+              "id": 6,
+              "title": "Facile à personnaliser",
+              "description": "On utilise Tailwind pour les styles. Vous pouvez changez le thème de votre site sans avoir besoin d'aller dans le code.",
+              "icon": null
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "__component": "sections.testimonials-group",
+          "title": "Ici, les témoignages des vos clients.",
+          "description": "Dans cette partie, vous pouvez mettre en avant vos clients.  Mettez des citations, et montrez les logos des entreprises qui aiment votre produit.",
+          "link": {
+            "id": 6,
+            "url": "#",
+            "newTab": false,
+            "text": "All testimonials"
+          },
+          "logos": [
+            {
+              "id": 4,
+              "title": "Strapi",
+              "logo": null
+            },
+            {
+              "id": 5,
+              "title": "Strapi 2",
+              "logo": null
+            },
+            {
+              "id": 6,
+              "title": "Strapi 3",
+              "logo": null
+            }
+          ],
+          "testimonials": [
+            {
+              "id": 2,
+              "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+              "authorName": "Nom d'un(e) Client(e) ici",
+              "authorTitle": "Un(e) Client(e) Satisfait(e)",
+              "link": "#",
+              "logo": null,
+              "picture": null
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "__component": "sections.lead-form",
+          "title": "S'inscrire à notre Newsletter",
+          "emailPlaceholder": "email@company.com",
+          "submitButton": {
+            "id": 2,
+            "__component": "links.button",
+            "text": "S'inscrire",
+            "type": "primary"
+          },
+          "location": "Home Page Bottom"
+        },
+        {
+          "id": 3,
+          "__component": "sections.bottom-actions",
+          "title": "Start building your website",
+          "buttons": [
+            {
+              "id": 10,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "Commencer",
+              "type": "primary"
+            },
+            {
+              "id": 12,
+              "url": "https://github.com/strapi/strapi-template-corporate",
+              "newTab": false,
+              "text": "Voir le code",
+              "type": "secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "slug": "pricing",
+      "locale": "fr",
+      "localizations": [
+        {
+          "id": 2,
+          "locale": "en"
+        }
+      ],
+      "shortName": "Pricing",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 8,
+        "metaTitle": "Pricing",
+        "metaDescription": "Les différentes offres",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 2,
+          "__component": "sections.pricing",
+          "title": "Tableau de tarifs",
+          "plans": [
+            {
+              "id": 4,
+              "name": "Hobby",
+              "description": "Parfait pour des projets personnels",
+              "isRecommended": null,
+              "price": 0,
+              "pricePeriod": "toujours",
+              "features": [
+                {
+                  "id": 10,
+                  "name": "Voilà une feature"
+                },
+                {
+                  "id": 11,
+                  "name": "Une autre"
+                },
+                {
+                  "id": 12,
+                  "name": "Encore une autre"
+                }
+              ]
+            },
+            {
+              "id": 5,
+              "name": "Premium",
+              "description": "Un plan plus avancé",
+              "isRecommended": true,
+              "price": 20,
+              "pricePeriod": "par mois",
+              "features": [
+                {
+                  "id": 13,
+                  "name": "Fonctionnalité 1"
+                },
+                {
+                  "id": 14,
+                  "name": "Fonctionnalité 2"
+                },
+                {
+                  "id": 15,
+                  "name": "Fonctionnalité 3"
+                }
+              ]
+            },
+            {
+              "id": 6,
+              "name": "Entreprise",
+              "description": "Pour les besoin des grands entreprises",
+              "isRecommended": null,
+              "price": 299,
+              "pricePeriod": "par mois",
+              "features": [
+                {
+                  "id": 16,
+                  "name": "Fonctionnalité 1"
+                },
+                {
+                  "id": 17,
+                  "name": "Fonctionnalité 2"
+                },
+                {
+                  "id": 18,
+                  "name": "Fonctionnalité 3"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "slug": "secret",
+      "locale": "fr",
+      "localizations": [
+        {
+          "id": 3,
+          "locale": "en"
+        }
+      ],
+      "shortName": "Secret",
+      "metadata": {
+        "id": 9,
+        "metaTitle": "Page secrète",
+        "metaDescription": "Preview-only page",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 3,
+          "__component": "sections.rich-text",
+          "content": "## Page secrète. \n\n Vous seul pouvez voir cette page en Preview Mode"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "slug": "contact",
+      "locale": "fr",
+      "localizations": [
+        {
+          "id": 4,
+          "locale": "en"
+        }
+      ],
+      "shortName": "Contact",
+      "publishedAt": "2021-10-22T08:11:55.490Z",
+      "metadata": {
+        "id": 10,
+        "metaTitle": "Nous Contacter",
+        "metaDescription": "Contactez notre équipe",
+        "twitterCardType": "summary",
+        "twitterUsername": null,
+        "shareImage": null
+      },
+      "contentSections": [
+        {
+          "id": 4,
+          "__component": "sections.rich-text",
+          "content": "# Contactez nous\n\n> Ceci est un exemple d'une page qui repose presque entièrement sur le composant RichText. Vous pouvez l'utiliser pour des articles de blog, ou pour des pages comportant beaucoup de texte, comme par exemple les conditions d'utilisation.\n\nNous aimerions beaucoup avoir vos retours.\n\n## Social media\n\n* [Twitter](#)\n* [Twitter](#)\n* [Twitter](#)\n\n## Postal address\n\n404 Headless Street\n__92210__ **Saint Cloud**, *France*\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+        },
+        {
+          "id": 4,
+          "__component": "sections.bottom-actions",
+          "title": "Get in touch",
+          "buttons": [
+            {
+              "id": 9,
+              "url": "#",
+              "newTab": false,
+              "text": "Envoyer un mail",
+              "type": "primary"
+            },
+            {
+              "id": 11,
+              "url": "#",
+              "newTab": false,
+              "text": "DM nous sur Twitter",
+              "type": "secondary"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

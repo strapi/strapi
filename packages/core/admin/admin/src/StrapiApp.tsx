@@ -50,14 +50,15 @@ interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>
   };
 }
 
+type Translation = { data: Record<string, string>; locale: string };
+type Translations = Array<Translation>;
+
 interface StrapiAppPlugin {
-  bootstrap: (
+  bootstrap?: (
     args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
   ) => void;
   register: (app: StrapiApp) => void;
-  registerTrads: (args: {
-    locales: string[];
-  }) => Promise<{ data: Record<string, string>; locale: string }[]>;
+  registerTrads?: (args: { locales: string[] }) => Promise<Translations>;
 }
 
 interface InjectionZoneComponent {
@@ -363,8 +364,6 @@ class StrapiApp {
         return null;
       })
       .filter((a) => a);
-
-    type Translation = Awaited<ReturnType<StrapiAppPlugin['registerTrads']>>[number];
 
     const pluginsTrads = (await Promise.all(arrayOfPromises)) as Array<Translation[]>;
     const mergedTrads = pluginsTrads.reduce<{ [locale: string]: Translation['data'] }>(

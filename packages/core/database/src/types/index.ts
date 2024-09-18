@@ -9,7 +9,7 @@ export interface ColumnInfo {
   notNullable?: boolean;
 }
 
-export type Attribute = ScalarAttribute | RelationalAttribute;
+export type Attribute = (ScalarAttribute | RelationalAttribute) & { unstable_virtual?: boolean };
 
 export type CountResult = { count: number };
 
@@ -66,6 +66,7 @@ export interface JoinColumn {
   referencedColumn: string;
   referencedTable?: string;
   columnType?: ScalarAttribute['type'];
+  on?: Record<string, unknown> | ((...args: any[]) => Record<string, unknown>);
 }
 
 export interface BaseJoinTable {
@@ -79,6 +80,11 @@ export interface BaseJoinTable {
     referencedColumn: string;
     referencedTable?: string;
   };
+  /**
+   * Use to flag joinTable we created internally vs user defined
+   * @internal
+   */
+  __internal__?: boolean;
 }
 
 export interface JoinTable extends BaseJoinTable {
@@ -194,6 +200,12 @@ export interface MorphJoinTable {
   on?: Record<string, unknown>;
   pivotColumns: string[];
   morphColumn: MorphColumn;
+
+  /**
+   * Use to flag joinTable we created internally vs user defined
+   * @internal
+   */
+  __internal__?: boolean;
 }
 
 export interface BaseRelationalAttribute {

@@ -25,6 +25,9 @@ import formatISO from 'date-fns/formatISO';
 import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 
+import { parseDateValue } from '../utils/parseDateValue';
+import { handleTimeChange, handleTimeChangeEvent } from '../utils/timeFormat';
+
 import type { Schema } from '@strapi/types';
 
 interface TranslationMessage extends MessageDescriptor {
@@ -266,6 +269,7 @@ const GenericInput = ({
         );
       }
       case 'datetime': {
+        const dateValue = parseDateValue(value);
         return (
           <DateTimePicker
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -278,11 +282,12 @@ const GenericInput = ({
             }}
             onClear={() => onChange({ target: { name, value: null, type } })}
             placeholder={formattedPlaceholder}
-            value={value}
+            value={dateValue}
           />
         );
       }
       case 'date': {
+        const dateValue = parseDateValue(value);
         return (
           <DatePicker
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -298,7 +303,7 @@ const GenericInput = ({
             }}
             onClear={() => onChange({ target: { name, value: null, type } })}
             placeholder={formattedPlaceholder}
-            value={value}
+            value={dateValue}
           />
         );
       }
@@ -409,26 +414,15 @@ const GenericInput = ({
         );
       }
       case 'time': {
-        let time = value;
-
-        // The backend send a value which has the following format: '00:45:00.000'
-        // or the time picker only supports hours & minutes so we need to mutate the value
-        if (typeof value === 'string' && value.split(':').length > 2) {
-          const [hour, minute] = value.split(':');
-          time = `${hour}:${minute}`;
-        }
+        const formattedValue = handleTimeChange({ value, onChange, name, type });
 
         return (
           <TimePicker
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
             disabled={disabled}
-            onChange={(time) => {
-              onChange({ target: { name, value: `${time}`, type } });
-            }}
-            onClear={() => {
-              onChange({ target: { name, value: null, type } });
-            }}
-            value={time}
+            onChange={(time) => handleTimeChangeEvent(onChange, name, type, time)}
+            onClear={() => handleTimeChangeEvent(onChange, name, type, undefined)}
+            value={formattedValue}
           />
         );
       }

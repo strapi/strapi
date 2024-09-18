@@ -283,7 +283,7 @@ const DocumentActionsMenu = ({
             })}
         </VisuallyHidden>
       </Menu.Trigger>
-      <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
+      <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
             <Menu.Item
@@ -432,14 +432,14 @@ const DocumentActionConfirmDialog = ({
         <Dialog.Body>{content}</Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
-            <Button variant="tertiary">
+            <Button variant="tertiary" fullWidth>
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
               })}
             </Button>
           </Dialog.Cancel>
-          <Button onClick={handleConfirm} variant={variant}>
+          <Button onClick={handleConfirm} variant={variant} fullWidth>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',

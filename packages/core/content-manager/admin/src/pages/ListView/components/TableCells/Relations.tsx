@@ -54,6 +54,8 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
     }
   );
 
+  const contentCount = Array.isArray(content) ? content.length : content.count;
+
   React.useEffect(() => {
     if (data) {
       notifyStatus(
@@ -69,13 +71,13 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
     <Menu.Root onOpenChange={(isOpen) => setIsOpen(isOpen)}>
       <Menu.Trigger onClick={(e) => e.stopPropagation()}>
         <Typography style={{ cursor: 'pointer' }} textColor="neutral800" fontWeight="regular">
-          {content.count > 0
+          {contentCount > 0
             ? formatMessage(
                 {
                   id: 'content-manager.containers.list.items',
                   defaultMessage: '{number} {number, plural, =0 {items} one {item} other {items}}',
                 },
-                { number: content.count }
+                { number: contentCount }
               )
             : '-'}
         </Typography>

@@ -31,3 +31,16 @@ export { render as renderAdmin };
 export type { RenderAdminArgs };
 
 export * from '@strapi/admin/strapi-admin';
+
+export {
+  unstable_useDocumentLayout,
+  unstable_useDocumentActions,
+  unstable_useDocument,
+  unstable_useContentManagerContext,
+  useDocumentRBAC,
+} from '@strapi/content-manager/strapi-admin';
+
+export {
+  private_useAutoReloadOverlayBlocker,
+  private_AutoReloadOverlayBlockerProvider,
+} from '@strapi/content-type-builder/strapi-admin';

@@ -6,13 +6,14 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
-import type { CLIContext, ProjectInfos } from '../types';
+import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfos } from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { notificationServiceFactory } from '../services/notification';
 import { loadPkg } from '../utils/pkg';
 import { buildLogsServiceFactory } from '../services/build-logs';
 import { promptLogin } from '../login/action';
+import { trackEvent } from '../utils/analytics';
 
 type PackageJson = {
   name: string;
@@ -99,18 +100,7 @@ async function upload(
       return data.build_id;
     } catch (e: any) {
       progressBar.stop();
-      if (e instanceof AxiosError && e.response?.data) {
-        if (e.response.status === 404) {
-          ctx.logger.error(
-            `The project does not exist. Remove the ${local.LOCAL_SAVE_FILENAME} file and try again.`
-          );
-        } else {
-          ctx.logger.error(e.response.data);
-        }
-      } else {
-        ctx.logger.error('An error occurred while deploying the project. Please try again later.');
-      }
-
+      ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       ctx.logger.debug(e);
     } finally {
       await fse.remove(tarFilePath);
@@ -137,6 +127,22 @@ async function getProject(ctx: CLIContext) {
   return project;
 }
 
+async function getConfig({
+  ctx,
+  cloudApiService,
+}: {
+  ctx: CLIContext;
+  cloudApiService: CloudApiService;
+}): Promise<CloudCliConfig | null> {
+  try {
+    const { data: cliConfig } = await cloudApiService.config();
+    return cliConfig;
+  } catch (e) {
+    ctx.logger.debug('Failed to get cli config', e);
+    return null;
+  }
+}
+
 export default async (ctx: CLIContext) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
@@ -149,17 +155,56 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  const cloudApiService = await cloudApiFactory(ctx);
+  const cloudApiService = await cloudApiFactory(ctx, token);
+
   try {
-    await cloudApiService.track('willDeployWithCLI', { projectInternalName: project.name });
-  } catch (e) {
-    ctx.logger.debug('Failed to track willDeploy', e);
+    const {
+      data: { data: projectData, metadata },
+    } = await cloudApiService.getProject({ name: project.name });
+
+    const isProjectSuspended = projectData.suspendedAt;
+
+    if (isProjectSuspended) {
+      ctx.logger.log(
+        '\n Oops! This project has been suspended. \n\n Please reactivate it from the dashboard to continue deploying: '
+      );
+      ctx.logger.log(chalk.underline(`${metadata.dashboardUrls.project}`));
+      return;
+    }
+  } catch (e: Error | unknown) {
+    if (e instanceof AxiosError && e.response?.data) {
+      if (e.response.status === 404) {
+        ctx.logger.warn(
+          `The project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+            'link'
+          )} command before deploying.`
+        );
+      } else {
+        ctx.logger.error(e.response.data);
+      }
+    } else {
+      ctx.logger.error(
+        "An error occurred while retrieving the project's information. Please try again later."
+      );
+    }
+    ctx.logger.debug(e);
+    return;
   }
+
+  await trackEvent(ctx, cloudApiService, 'willDeployWithCLI', {
+    projectInternalName: project.name,
+  });
 
   const notificationService = notificationServiceFactory(ctx);
   const buildLogsService = buildLogsServiceFactory(ctx);
 
-  const { data: cliConfig } = await cloudApiService.config();
+  const cliConfig = await getConfig({ ctx, cloudApiService });
+  if (!cliConfig) {
+    ctx.logger.error(
+      'An error occurred while retrieving data from Strapi Cloud. Please check your network or try again later.'
+    );
+    return;
+  }
 
   let maxSize: number = parseInt(cliConfig.maxProjectFileSize, 10);
   if (Number.isNaN(maxSize)) {
@@ -186,10 +231,11 @@ export default async (ctx: CLIContext) => {
       chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`)
     );
   } catch (e: Error | unknown) {
+    ctx.logger.debug(e);
     if (e instanceof Error) {
       ctx.logger.error(e.message);
     } else {
-      throw e;
+      ctx.logger.error('An error occurred while deploying the project. Please try again later.');
     }
   }
 };

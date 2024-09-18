@@ -1,5 +1,4 @@
-// TODO Migrate to fs-extra
-import fs from 'fs/promises';
+import * as fse from 'fs-extra';
 import os from 'os';
 import pkgUp from 'pkg-up';
 import * as yup from 'yup';
@@ -65,7 +64,7 @@ const loadPkg = async ({ cwd, logger }: { cwd: string; logger: Logger }): Promis
     throw new Error('Could not find a package.json in the current directory');
   }
 
-  const buffer = await fs.readFile(pkgPath);
+  const buffer = await fse.readFile(pkgPath);
 
   const pkg = JSON.parse(buffer.toString());
 
@@ -80,11 +79,9 @@ const loadPkg = async ({ cwd, logger }: { cwd: string; logger: Logger }): Promis
  */
 const validatePkg = async ({ pkg }: { pkg: object }): Promise<PackageJson> => {
   try {
-    const validatedPkg = await packageJsonSchema.validate(pkg, {
+    return await packageJsonSchema.validate(pkg, {
       strict: true,
     });
-
-    return validatedPkg;
   } catch (err) {
     if (err instanceof yup.ValidationError) {
       switch (err.type) {

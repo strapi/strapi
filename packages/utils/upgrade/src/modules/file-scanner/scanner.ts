@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { glob } from 'glob';
+import fastglob from 'fast-glob';
 
 import type { FileScanner as FileScannerInterface } from './types';
 
@@ -11,7 +11,10 @@ export class FileScanner implements FileScannerInterface {
   }
 
   scan(patterns: string[]) {
-    const filenames = glob.sync(patterns, { cwd: this.cwd });
+    // we use fastglob instead of glob because it supports negation patterns
+    const filenames = fastglob.sync(patterns, {
+      cwd: this.cwd,
+    });
 
     // Resolve the full paths for every filename
     return filenames.map((filename) => path.join(this.cwd, filename));

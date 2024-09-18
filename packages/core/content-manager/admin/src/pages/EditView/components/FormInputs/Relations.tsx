@@ -237,6 +237,10 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       };
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
+        // Remove the existing relation so it can be replaced with the new one
+        if (relations.length > 0) {
+          field.onChange(`${props.name}.disconnect`, relations);
+        }
         field.onChange(`${props.name}.connect`, [item]);
       } else {
         field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
@@ -498,7 +502,7 @@ const RelationsInput = ({
       <Combobox
         ref={fieldRef}
         name={name}
-        autocomplete="none"
+        autocomplete="list"
         placeholder={
           placeholder ||
           formatMessage({
@@ -967,17 +971,18 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>
-            <DisconnectButton
-              disabled={disabled}
-              type="button"
+            <IconButton
               onClick={() => handleDisconnect(relations[index])}
-              aria-label={formatMessage({
+              disabled={disabled}
+              label={formatMessage({
                 id: getTranslation('relation.disconnect'),
                 defaultMessage: 'Remove',
               })}
+              variant="ghost"
+              size="S"
             >
-              <Cross width="12px" />
-            </DisconnectButton>
+              <Cross />
+            </IconButton>
           </Box>
         </Flex>
       )}

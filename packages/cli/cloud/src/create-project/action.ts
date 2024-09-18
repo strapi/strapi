@@ -2,8 +2,14 @@ import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
 import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
-import { tokenServiceFactory, cloudApiFactory, local } from '../services';
+import { cloudApiFactory, local, tokenServiceFactory } from '../services';
+import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
 import { promptLogin } from '../login/action';
+import {
+  getDefaultsFromQuestions,
+  getProjectNodeVersionDefault,
+  questionDefaultValuesMapper,
+} from './utils/project-questions.utils';
 
 async function handleError(ctx: CLIContext, error: Error) {
   const { logger } = ctx;
@@ -63,7 +69,17 @@ export default async (ctx: CLIContext) => {
 
   const cloudApi = await cloudApiFactory(ctx, token);
   const { data: config } = await cloudApi.config();
-  const { questions, defaults: defaultValues } = config.projectCreation;
+  const projectName = await getProjectNameFromPackageJson(ctx);
+
+  const defaultAnswersMapper = questionDefaultValuesMapper({
+    name: projectName,
+    nodeVersion: getProjectNodeVersionDefault,
+  });
+  const questions = defaultAnswersMapper(config.projectCreation.questions);
+  const defaultValues = {
+    ...config.projectCreation.defaults,
+    ...getDefaultsFromQuestions(questions),
+  };
 
   const projectAnswersDefaulted = defaults(defaultValues);
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);

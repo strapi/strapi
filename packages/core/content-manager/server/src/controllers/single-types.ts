@@ -123,7 +123,7 @@ export default {
         permissionChecker,
         model,
         // @ts-expect-error - fix types
-        { id: document.documentId, locale, publishedAt: null },
+        { documentId: document.documentId, locale, publishedAt: null },
         { availableLocales: true, availableStatus: false }
       );
       ctx.body = { data: {}, meta };

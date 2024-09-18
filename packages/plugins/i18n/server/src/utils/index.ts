@@ -2,7 +2,6 @@ import type { LocaleService } from '../services/locales';
 import type { PermissionsService } from '../services/permissions';
 import type { ContentTypesService } from '../services/content-types';
 import type { MetricsService } from '../services/metrics';
-import type { EntityServiceDecoratorService } from '../services/entity-service-decorator';
 import type { ISOLocalesService } from '../services/iso-locales';
 import type { LocalizationsService } from '../services/localizations';
 
@@ -13,7 +12,6 @@ type S = {
   localizations: LocalizationsService;
   ['iso-locales']: ISOLocalesService;
   ['content-types']: ContentTypesService;
-  ['entity-service-decorator']: EntityServiceDecoratorService;
 };
 
 const getCoreStore = () => {

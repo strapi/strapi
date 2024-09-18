@@ -1,11 +1,37 @@
-export { default as bootstrap } from './bootstrap';
-export { default as register } from './register';
-export { default as destroy } from './destroy';
+import _ from 'lodash';
 
-export { default as config } from './config';
-export { default as policies } from './policies';
-export { default as routes } from './routes';
-export { default as services } from './services';
-export { default as controllers } from './controllers';
-export { default as contentTypes } from './content-types';
-export { default as middlewares } from './middlewares';
+import bootstrap from './bootstrap';
+import register from './register';
+import destroy from './destroy';
+import config from './config';
+import policies from './policies';
+import routes from './routes';
+import services from './services';
+import controllers from './controllers';
+import contentTypes from './content-types';
+import middlewares from './middlewares';
+import getEEAdmin from '../../ee/server/src';
+
+// eslint-disable-next-line import/no-mutable-exports
+let admin = {
+  bootstrap,
+  register,
+  destroy,
+  config,
+  policies,
+  routes,
+  services,
+  controllers,
+  contentTypes,
+  middlewares,
+};
+
+const mergeRoutes = (a: any, b: any, key: string) => {
+  return _.isArray(a) && _.isArray(b) && key === 'routes' ? a.concat(b) : undefined;
+};
+
+if (strapi.EE) {
+  admin = _.mergeWith({}, admin, getEEAdmin(), mergeRoutes);
+}
+
+export default admin;

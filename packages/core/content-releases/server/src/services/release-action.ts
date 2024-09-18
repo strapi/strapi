@@ -81,7 +81,8 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async create(
       releaseId: CreateReleaseAction.Request['params']['releaseId'],
-      action: CreateReleaseAction.Request['body']
+      action: CreateReleaseAction.Request['body'],
+      { disableUpdateReleaseStatus = false }: { disableUpdateReleaseStatus?: boolean } = {}
     ) {
       const { validateEntryData, validateUniqueEntry } = getService('release-validation', {
         strapi,
@@ -91,6 +92,18 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         validateEntryData(action.contentType, action.entryDocumentId),
         validateUniqueEntry(releaseId, action),
       ]);
+
+      // If we are adding a singleType, we need to append the documentId of that singleType
+      const model = strapi.contentType(action.contentType);
+      if (model.kind === 'singleType') {
+        const document = await strapi.db.query(model.uid).findOne({ select: ['documentId'] });
+
+        if (!document) {
+          throw new errors.NotFoundError(`No entry found for contentType ${action.contentType}`);
+        }
+
+        action.entryDocumentId = document.documentId;
+      }
 
       const release = await strapi.db
         .query(RELEASE_MODEL_UID)
@@ -129,7 +142,9 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         populate: { release: { select: ['id'] } },
       });
 
-      getService('release', { strapi }).updateReleaseStatus(release.id);
+      if (!disableUpdateReleaseStatus) {
+        getService('release', { strapi }).updateReleaseStatus(release.id);
+      }
 
       return releaseAction;
     },

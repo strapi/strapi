@@ -1,3 +1,5 @@
+import { StrapiAppPlugin } from './StrapiApp';
+
 /**
  * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
@@ -18,6 +20,7 @@ export * from './components/PageHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
+export * from './components/ContentBox';
 
 export { useGuidedTour } from './components/GuidedTour/Provider';
 
@@ -76,3 +79,5 @@ export type { CMAdminConfiguration } from './types/adminConfiguration';
  */
 
 export { Layouts, type LayoutProps } from './components/Layouts/Layout';
+
+export type PluginDefinition = StrapiAppPlugin;

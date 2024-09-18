@@ -86,6 +86,12 @@ module.exports = {
       relation: 'manyToMany',
       target: 'api::category.category',
     },
+    categories_private: {
+      private: true,
+      type: 'relation',
+      relation: 'manyToMany',
+      target: 'api::category.category',
+    },
     dz: {
       pluginOptions: {
         i18n: {

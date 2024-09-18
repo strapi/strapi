@@ -44,10 +44,18 @@ const AuthPage = () => {
   const Component = forms[authType as keyof FormDictionary];
 
   // Redirect the user to the login page if
-  // the endpoint does not exist or
+  // the endpoint does not exists
+  if (!Component) {
+    return <Navigate to="/" />;
+  }
+
+  // User is already logged in
+  if (authType !== 'register-admin' && authType !== 'register' && token) {
+    return <Navigate to="/" />;
+  }
+
   // there is already an admin user oo
-  // the user is already logged in
-  if (!Component || (hasAdmin && authType === 'register-admin') || token) {
+  if (hasAdmin && authType === 'register-admin' && token) {
     return <Navigate to="/" />;
   }
 

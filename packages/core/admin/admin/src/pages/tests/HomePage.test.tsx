@@ -9,8 +9,6 @@ jest.mock('../../features/AppInfo', () => ({
   useAppInfo: jest.fn((name, getter) => getter({ communityEdition: true })),
 }));
 
-jest.mock('../../components/GuidedTour/Provider');
-
 /**
  * TODO: remove this mock.
  */
@@ -23,7 +21,7 @@ describe('Homepage', () => {
   });
 
   test.each([
-    'strapi cloud a fully composable, and collaborative platform to boost your team velocity.',
+    'strapi cloud fully-managed cloud hosting for your strapi project.',
     'documentation discover the essential concepts, guides and instructions.',
     'code example learn by using ready-made starters for your projects.',
     'tutorials follow step-by-step instructions to use and customize strapi.',

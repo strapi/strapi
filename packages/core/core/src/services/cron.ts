@@ -1,10 +1,10 @@
-import { Job } from 'node-schedule';
+import { Job, Spec } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 
 interface JobSpec {
   job: Job;
-  options: string | number | Date;
+  options: Spec;
   name: string | null;
 }
 
@@ -14,7 +14,7 @@ type Task =
   | TaskFn
   | {
       task: TaskFn;
-      options: string;
+      options: Spec;
     };
 
 interface Tasks {
@@ -31,7 +31,7 @@ const createCronService = () => {
         const taskValue = tasks[taskExpression];
 
         let fn: TaskFn;
-        let options: string | number | Date;
+        let options: Spec;
         let taskName: string | null;
         if (isFunction(taskValue)) {
           // don't use task name if key is the rule

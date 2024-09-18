@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "5.0.0-rc.11",
+  "version": "5.0.0-rc.23",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
@@ -52,7 +52,8 @@
     "@strapi/utils": "workspace:*",
     "commander": "8.3.0",
     "koa": "2.15.2",
-    "node-schedule": "2.1.0",
+    "koa-body": "6.0.1",
+    "node-schedule": "2.1.1",
     "typedoc": "0.25.10",
     "typedoc-github-wiki-theme": "1.1.0",
     "typedoc-plugin-markdown": "3.17.1"
@@ -63,7 +64,7 @@
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",
-    "@types/node-schedule": "2.1.0",
+    "@types/node-schedule": "2.1.7",
     "eslint-config-custom": "workspace:*",
     "lodash": "4.17.21",
     "tsconfig": "workspace:*",

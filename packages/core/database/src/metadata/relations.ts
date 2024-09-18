@@ -120,7 +120,7 @@ const createOneToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  if (!isBidirectional(attribute)) {
+  if (shouldUseJoinTable(attribute) && !isBidirectional(attribute)) {
     createJoinTable(metadata, {
       attribute,
       attributeName,
@@ -190,7 +190,7 @@ const createManyToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  if (!isBidirectional(attribute) || isOwner(attribute)) {
+  if (shouldUseJoinTable(attribute) && (!isBidirectional(attribute) || isOwner(attribute))) {
     createJoinTable(metadata, {
       attribute,
       attributeName,
@@ -237,7 +237,7 @@ const createMorphToMany = (
   meta: Meta,
   metadata: Metadata
 ) => {
-  if ('joinTable' in attribute && attribute.joinTable) {
+  if ('joinTable' in attribute && attribute.joinTable && !attribute.joinTable.__internal__) {
     return;
   }
 
@@ -311,6 +311,7 @@ const createMorphToMany = (
   });
 
   const joinTable: MorphJoinTable = {
+    __internal__: true,
     name: joinTableName,
     joinColumn: {
       name: joinColumnName,
@@ -416,6 +417,10 @@ const createJoinTable = (
   metadata: Metadata,
   { attributeName, attribute, meta }: JoinTableOptions
 ) => {
+  if (!shouldUseJoinTable(attribute)) {
+    throw new Error('Attempted to create join table when useJoinTable is false');
+  }
+
   const targetMeta = metadata.get(attribute.target);
 
   if (!targetMeta) {
@@ -423,7 +428,7 @@ const createJoinTable = (
   }
 
   // TODO: implement overwrite logic instead
-  if ('joinTable' in attribute && attribute.joinTable) {
+  if ('joinTable' in attribute && attribute.joinTable && !attribute.joinTable.__internal__) {
     return;
   }
 
@@ -519,6 +524,7 @@ const createJoinTable = (
   };
 
   const joinTable = {
+    __internal__: true,
     name: joinTableName,
     joinColumn: {
       name: joinColumnName,
@@ -592,6 +598,7 @@ const createJoinTable = (
     }
 
     inverseAttribute.joinTable = {
+      __internal__: true,
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,

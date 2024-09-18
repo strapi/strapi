@@ -22,7 +22,12 @@ const createProvider = (emailConfig: EmailConfig) => {
   try {
     modulePath = require.resolve(`@strapi/provider-email-${providerName}`);
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'MODULE_NOT_FOUND') {
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 'MODULE_NOT_FOUND'
+    ) {
       modulePath = providerName;
     } else {
       throw error;

@@ -1,6 +1,4 @@
-export const {
-  CUSTOM_TRANSFER_TOKEN_ACCESS_KEY,
-} = require('./app-template/template/src/constants');
+export const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./app-template/src/constants');
 
 // NOTE: anything included here needs to be included in all test datasets exports
 export const ALLOWED_CONTENT_TYPES = [

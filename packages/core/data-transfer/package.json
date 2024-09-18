@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.0.0-rc.11",
+  "version": "5.0.0-rc.23",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -44,7 +44,7 @@
     "@strapi/types": "workspace:*",
     "@strapi/utils": "workspace:*",
     "chalk": "4.1.2",
-    "cli-table3": "0.6.2",
+    "cli-table3": "0.6.5",
     "commander": "8.3.0",
     "fs-extra": "11.2.0",
     "inquirer": "8.2.5",
