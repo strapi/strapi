@@ -4,7 +4,8 @@
     "start": "strapi start",
     "build": "strapi build",
     "strapi": "strapi",
-    "deploy": "strapi deploy"
+    "deploy": "strapi deploy",
+    "seed:example": "node ./scripts/seed.js"
   },
   "dependencies": {
     "fs-extra": "^10.0.0",

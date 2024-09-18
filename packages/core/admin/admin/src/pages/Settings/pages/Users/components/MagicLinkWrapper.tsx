@@ -21,7 +21,9 @@ const MagicLinkWrapper = ({ children, target }: MagicLinkWrapperProps) => {
     defaultMessage: 'Copy to clipboard',
   });
 
-  const handleClick = async () => {
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
     const didCopy = await copy(target);
 
     if (didCopy) {
