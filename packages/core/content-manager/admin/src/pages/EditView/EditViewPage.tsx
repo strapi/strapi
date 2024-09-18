@@ -153,7 +153,14 @@ const EditViewPage = () => {
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
-        validationSchema={createYupSchema(schema?.attributes, components, { status })}
+        validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+          const yupSchema = createYupSchema(schema?.attributes, components, {
+            status,
+            ...options,
+          });
+
+          return yupSchema.validate(values, { abortEarly: false });
+        }}
       >
         {({ resetForm }) => (
           <>

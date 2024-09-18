@@ -192,6 +192,7 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
   yup.object().shape({
     name: yup
       .string()
+      .nullable()
       .required(
         formatMessage({
           id: 'Settings.webhooks.validation.name.required',
@@ -208,6 +209,7 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
       ),
     url: yup
       .string()
+      .nullable()
       .required(
         formatMessage({
           id: 'Settings.webhooks.validation.url.required',
@@ -234,18 +236,24 @@ const makeWebhookValidationSchema = ({ formatMessage }: Pick<IntlShape, 'formatM
 
       return baseSchema.of(
         yup.object().shape({
-          key: yup.string().required(
-            formatMessage({
-              id: 'Settings.webhooks.validation.key',
-              defaultMessage: 'Key is required',
-            })
-          ),
-          value: yup.string().required(
-            formatMessage({
-              id: 'Settings.webhooks.validation.value',
-              defaultMessage: 'Value is required',
-            })
-          ),
+          key: yup
+            .string()
+            .required(
+              formatMessage({
+                id: 'Settings.webhooks.validation.key',
+                defaultMessage: 'Key is required',
+              })
+            )
+            .nullable(),
+          value: yup
+            .string()
+            .required(
+              formatMessage({
+                id: 'Settings.webhooks.validation.value',
+                defaultMessage: 'Value is required',
+              })
+            )
+            .nullable(),
         })
       );
     }),

@@ -327,15 +327,23 @@ const FORM_LAYOUT = [
 ] satisfies FormLayout;
 
 const FORM_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required({
-    id: translatedErrors.required.id,
-    defaultMessage: 'This field is required',
-  }),
+  firstname: yup
+    .string()
+    .trim()
+    .required({
+      id: translatedErrors.required.id,
+      defaultMessage: 'This field is required',
+    })
+    .nullable(),
   lastname: yup.string(),
-  email: yup.string().email(translatedErrors.email).required({
-    id: translatedErrors.required.id,
-    defaultMessage: 'This field is required',
-  }),
+  email: yup
+    .string()
+    .email(translatedErrors.email)
+    .required({
+      id: translatedErrors.required.id,
+      defaultMessage: 'This field is required',
+    })
+    .nullable(),
   roles: yup
     .array()
     .min(1, {

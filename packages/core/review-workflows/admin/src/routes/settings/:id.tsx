@@ -46,13 +46,15 @@ const WORKFLOW_SCHEMA = yup.object({
       id: 'review-workflows.validation.name.max-length',
       defaultMessage: 'Name can not be longer than 255 characters',
     })
-    .required(),
+    .required()
+    .nullable(),
   stages: yup
     .array()
     .of(
       yup.object().shape({
         name: yup
           .string()
+          .nullable()
           .required({
             id: 'review-workflows.validation.stage.name',
             defaultMessage: 'Name is required',
@@ -76,6 +78,7 @@ const WORKFLOW_SCHEMA = yup.object({
           ),
         color: yup
           .string()
+          .nullable()
           .required({
             id: 'review-workflows.validation.stage.color',
             defaultMessage: 'Color is required',

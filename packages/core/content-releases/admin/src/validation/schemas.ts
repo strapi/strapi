@@ -9,7 +9,7 @@ import * as yup from 'yup';
 export const RELEASE_SCHEMA = yup
   .object()
   .shape({
-    name: yup.string().trim().required(translatedErrors.required.id),
+    name: yup.string().trim().required(translatedErrors.required.id).nullable(),
     scheduledAt: yup.string().nullable(),
     isScheduled: yup.boolean().optional(),
     time: yup

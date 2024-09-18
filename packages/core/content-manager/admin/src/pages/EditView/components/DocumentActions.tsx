@@ -619,7 +619,9 @@ const PublishAction: DocumentActionComponent = ({
     setSubmitting(true);
 
     try {
-      const { errors } = await validate();
+      const { errors } = await validate(true, {
+        status: 'published',
+      });
 
       if (errors) {
         toggleNotification({
@@ -771,23 +773,21 @@ const UpdateAction: DocumentActionComponent = ({
       setSubmitting(true);
 
       try {
-        // TODO: This is not what we should do. We should just run some validation and skip others instead.
-        // Don't run the validation for drafts
-        if (activeTab !== 'draft') {
-          const { errors } = await validate();
+        const { errors } = await validate(true, {
+          status: 'draft',
+        });
 
-          if (errors) {
-            toggleNotification({
-              type: 'danger',
-              message: formatMessage({
-                id: 'content-manager.validation.error',
-                defaultMessage:
-                  'There are validation errors in your document. Please fix them before saving.',
-              }),
-            });
+        if (errors) {
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: 'content-manager.validation.error',
+              defaultMessage:
+                'There are validation errors in your document. Please fix them before saving.',
+            }),
+          });
 
-            return;
-          }
+          return;
         }
 
         if (isCloning) {

@@ -24,6 +24,29 @@ interface ValidationOptions {
   status: 'draft' | 'published' | null;
 }
 
+const arrayValidator = (attribute: Schema['attributes'][string], options: ValidationOptions) => ({
+  message: translatedErrors.required,
+  test(value: unknown) {
+    if (options.status === 'draft') {
+      return true;
+    }
+
+    if (!attribute.required) {
+      return true;
+    }
+
+    if (!value) {
+      return false;
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+      return false;
+    }
+
+    return true;
+  },
+});
+
 /**
  * TODO: should we create a Map to store these based on the hash of the schema?
  */
@@ -47,6 +70,7 @@ const createYupSchema = (
            * schema as it was passed.
            */
           const validations = [
+            addNullableValidation,
             addRequiredValidation,
             addMinLengthValidation,
             addMaxLengthValidation,
@@ -66,12 +90,12 @@ const createYupSchema = (
                   ...acc,
                   [name]: transformSchema(
                     yup.array().of(createModelSchema(attributes).nullable(false))
-                  ),
+                  ).test(arrayValidator(attribute, options)),
                 };
               } else {
                 return {
                   ...acc,
-                  [name]: transformSchema(createModelSchema(attributes)),
+                  [name]: transformSchema(createModelSchema(attributes).nullable()),
                 };
               }
             }
@@ -100,7 +124,7 @@ const createYupSchema = (
                       }
                     ) as unknown as yup.ObjectSchema<any>
                   )
-                ),
+                ).test(arrayValidator(attribute, options)),
               };
             case 'relation':
               return {
@@ -241,25 +265,20 @@ type ValidationFn = (
   options: ValidationOptions
 ) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
+const addNullableValidation: ValidationFn = () => (schema) => {
+  return nullableSchema(schema);
+};
+
 const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
-  if (options.status === 'draft') {
-    return nullableSchema(schema);
+  if (options.status === 'draft' || !attribute.required) {
+    return schema;
   }
 
-  if (
-    ((attribute.type === 'component' && attribute.repeatable) ||
-      attribute.type === 'dynamiczone') &&
-    attribute.required &&
-    'min' in schema
-  ) {
-    return schema.min(1, translatedErrors.required);
-  }
-
-  if (attribute.required && attribute.type !== 'relation') {
+  if (attribute.required && 'required' in schema) {
     return schema.required(translatedErrors.required);
   }
 
-  return nullableSchema(schema);
+  return schema;
 };
 
 const addMinLengthValidation: ValidationFn =
@@ -310,39 +329,15 @@ const addMaxLengthValidation: ValidationFn =
 const addMinValidation: ValidationFn =
   (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
-    if ('min' in attribute) {
+    // do not validate min for draft
+    if (options.status === 'draft') {
+      return schema;
+    }
+
+    if ('min' in attribute && 'min' in schema) {
       const min = toInteger(attribute.min);
 
-      if (
-        (attribute.type === 'component' && attribute.repeatable) ||
-        attribute.type === 'dynamiczone'
-      ) {
-        if (options.status !== 'draft' && !attribute.required && 'test' in schema && min) {
-          // @ts-expect-error - We know the schema is an array here but ts doesn't know.
-          return schema.test(
-            'custom-min',
-            {
-              ...translatedErrors.min,
-              values: {
-                min: attribute.min,
-              },
-            },
-            (value: Array<unknown>) => {
-              if (!value) {
-                return true;
-              }
-
-              if (Array.isArray(value) && value.length === 0) {
-                return true;
-              }
-
-              return value.length >= min;
-            }
-          );
-        }
-      }
-
-      if ('min' in schema && min) {
+      if (min) {
         return schema.min(min, {
           ...translatedErrors.min,
           values: {

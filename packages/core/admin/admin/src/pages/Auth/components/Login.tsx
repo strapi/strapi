@@ -26,12 +26,13 @@ interface LoginProps {
 const LOGIN_SCHEMA = yup.object().shape({
   email: yup
     .string()
+    .nullable()
     .email({
       id: translatedErrors.email.id,
       defaultMessage: 'Not a valid email',
     })
     .required(translatedErrors.required),
-  password: yup.string().required(translatedErrors.required),
+  password: yup.string().required(translatedErrors.required).nullable(),
   rememberMe: yup.bool().nullable(),
 });
 

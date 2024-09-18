@@ -21,7 +21,7 @@ const COMMON_USER_SCHEMA = {
     .nullable(),
   password: yup
     .string()
-    .transform((value) => (value === '' ? undefined : value))
+    .transform((value) => (value === '' || value === null ? undefined : value))
     .nullable()
     .min(8, {
       ...translatedErrors.minLength,
@@ -53,10 +53,12 @@ const COMMON_USER_SCHEMA = {
     })
     .when('password', (password, passSchema) => {
       return password
-        ? passSchema.required({
-            id: translatedErrors.required.id,
-            defaultMessage: 'This field is required',
-          })
+        ? passSchema
+            .required({
+              id: translatedErrors.required.id,
+              defaultMessage: 'This field is required',
+            })
+            .nullable()
         : passSchema;
     }),
 };

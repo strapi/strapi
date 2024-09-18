@@ -71,12 +71,13 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const LOCALE_SCHEMA = yup.object().shape({
-  code: yup.string().required({
+  code: yup.string().nullable().required({
     id: 'Settings.locales.modal.create.code.error',
     defaultMessage: 'Please select a locale',
   }),
   name: yup
     .string()
+    .nullable()
     .max(50, {
       id: 'Settings.locales.modal.create.name.error.min',
       defaultMessage: 'The locale display name can only be less than 50 characters.',

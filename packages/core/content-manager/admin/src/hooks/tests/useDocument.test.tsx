@@ -77,6 +77,14 @@ describe('useDocument', () => {
         id: 1,
         postal_code: 'N2',
         notrepeat_req: {},
+        repeat_req_min: [
+          {
+            name: 'toto',
+          },
+          {
+            name: 'toto',
+          },
+        ],
         city: 'London',
         repeat_req: [
           {
@@ -94,6 +102,14 @@ describe('useDocument', () => {
         postal_code: 12,
         city: 'London',
         repeat_req: [
+          {
+            name: 'toto',
+          },
+        ],
+        repeat_req_min: [
+          {
+            name: 'toto',
+          },
           {
             name: 'toto',
           },

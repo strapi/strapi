@@ -53,7 +53,10 @@ interface FormContextValue<TFormValues extends FormValues = FormValues>
   setErrors: (errors: FormErrors<TFormValues>) => void;
   setSubmitting: (isSubmitting: boolean) => void;
   setValues: (values: TFormValues) => void;
-  validate: () => Promise<
+  validate: (
+    shouldSetErrors?: boolean,
+    options?: Record<string, string>
+  ) => Promise<
     { data: TFormValues; errors?: never } | { data?: never; errors: FormErrors<TFormValues> }
   >;
 }
@@ -132,6 +135,8 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
   initialErrors?: FormErrors<TFormValues>;
+  // NOTE: we don't know what return type it can be here
+  validate?: (values: TFormValues, options: Record<string, string>) => Promise<any>;
 }
 
 /**
@@ -206,16 +211,23 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     /**
      * Uses the provided validation schema
      */
-    const validate: FormContextValue['validate'] = React.useCallback(
-      async (shouldSetErrors: boolean = true) => {
+    const validate = React.useCallback(
+      async (shouldSetErrors: boolean = true, options: Record<string, string> = {}) => {
         setErrors({});
 
-        if (!props.validationSchema) {
+        if (!props.validationSchema && !props.validate) {
           return { data: state.values };
         }
 
         try {
-          const data = await props.validationSchema.validate(state.values, { abortEarly: false });
+          let data;
+          if (props.validationSchema) {
+            data = await props.validationSchema.validate(state.values, { abortEarly: false });
+          } else if (props.validate) {
+            data = await props.validate(state.values, options);
+          } else {
+            throw new Error('No validation schema or validate function provided');
+          }
 
           return { data };
         } catch (err) {
@@ -333,7 +345,13 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           .filter((el) => el.selected)
           .map((el) => el.value);
       } else {
-        val = value;
+        // NOTE: reset value to null so it failes required checks.
+        // The API only considers a required field invalid if the value is null|undefined, to differentiate from min 1
+        if (value === '') {
+          val = null;
+        } else {
+          val = value;
+        }
       }
 
       if (field) {
@@ -653,6 +671,7 @@ interface FieldValue<TValue = any> {
   initialValue: TValue;
   onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: TValue) => void;
   value: TValue;
+  rawError?: any;
 }
 
 const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> => {
@@ -669,6 +688,8 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
   );
 
   const handleChange = useForm('useField', (state) => state.onChange);
+
+  const rawError = useForm('useField', (state) => getIn(state.errors, path));
 
   const error = useForm('useField', (state) => {
     const error = getIn(state.errors, path);
@@ -687,6 +708,7 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
      * Errors can be a string, or a MessageDescriptor, so we need to handle both cases.
      * If it's anything else, we don't return it.
      */
+    rawError,
     error: isErrorMessageDescriptor(error)
       ? formatMessage(
           {
