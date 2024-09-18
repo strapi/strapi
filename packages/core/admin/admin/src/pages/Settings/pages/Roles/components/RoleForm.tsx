@@ -86,7 +86,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
           <Grid.Item col={6} direction="column" alignItems="stretch">
             <Field.Root
               name="description"
-              error={errors.name && formatMessage({ id: errors.name })}
+              error={errors.description && formatMessage({ id: errors.description })}
             >
               <Field.Label>
                 {formatMessage({

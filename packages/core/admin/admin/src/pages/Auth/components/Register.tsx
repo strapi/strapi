@@ -32,7 +32,7 @@ import { isBaseQueryError } from '../../../utils/baseQuery';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
 const REGISTER_USER_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required(translatedErrors.required),
+  firstname: yup.string().trim().required(translatedErrors.required).nullable(),
   lastname: yup.string().nullable(),
   password: yup
     .string()
@@ -62,7 +62,8 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
-    }),
+    })
+    .nullable(),
   confirmPassword: yup
     .string()
     .required({
@@ -72,7 +73,8 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
     .oneOf([yup.ref('password'), null], {
       id: 'components.Input.error.password.noMatch',
       defaultMessage: 'Passwords must match',
-    }),
+    })
+    .nullable(),
   registrationToken: yup.string().required({
     id: translatedErrors.required.id,
     defaultMessage: 'Registration token is required',
@@ -80,10 +82,14 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
 });
 
 const REGISTER_ADMIN_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required({
-    id: translatedErrors.required.id,
-    defaultMessage: 'Firstname is required',
-  }),
+  firstname: yup
+    .string()
+    .trim()
+    .required({
+      id: translatedErrors.required.id,
+      defaultMessage: 'Firstname is required',
+    })
+    .nullable(),
   lastname: yup.string().nullable(),
   password: yup
     .string()
@@ -113,13 +119,15 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
-    }),
+    })
+    .nullable(),
   confirmPassword: yup
     .string()
     .required({
       id: translatedErrors.required,
       defaultMessage: 'Confirm password is required',
     })
+    .nullable()
     .oneOf([yup.ref('password'), null], {
       id: 'components.Input.error.password.noMatch',
       defaultMessage: 'Passwords must match',
@@ -138,7 +146,8 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Email is required',
-    }),
+    })
+    .nullable(),
 });
 
 interface RegisterProps {

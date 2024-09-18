@@ -73,7 +73,7 @@ const RepeatableComponent = ({
     if (hasNestedErrors && hasNestedValue) {
       const errorOpenItems = rawError
         .map((_: unknown, idx: number) => {
-          return value[idx].__temp_key__;
+          return value[idx] ? value[idx].__temp_key__ : null;
         })
         .filter((value) => !!value);
 

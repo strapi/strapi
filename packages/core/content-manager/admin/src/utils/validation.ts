@@ -24,10 +24,14 @@ interface ValidationOptions {
   status: 'draft' | 'published' | null;
 }
 
-const arrayValidator = (options: ValidationOptions) => ({
+const arrayValidator = (attribute: Schema['attributes'][string], options: ValidationOptions) => ({
   message: translatedErrors.required,
   test(value: unknown) {
     if (options.status === 'draft') {
+      return true;
+    }
+
+    if (!attribute.required) {
       return true;
     }
 
@@ -86,7 +90,7 @@ const createYupSchema = (
                   ...acc,
                   [name]: transformSchema(
                     yup.array().of(createModelSchema(attributes).nullable(false))
-                  ).test(arrayValidator(options)),
+                  ).test(arrayValidator(attribute, options)),
                 };
               } else {
                 return {
@@ -120,7 +124,7 @@ const createYupSchema = (
                       }
                     ) as unknown as yup.ObjectSchema<any>
                   )
-                ).test(arrayValidator(options)),
+                ).test(arrayValidator(attribute, options)),
               };
             case 'relation':
               return {
