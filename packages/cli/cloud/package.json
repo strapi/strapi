@@ -1,6 +1,6 @@
 {
   "name": "@strapi/cloud-cli",
-  "version": "5.0.0-rc.26",
+  "version": "5.0.0-rc.28",
   "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
     "strapi",
