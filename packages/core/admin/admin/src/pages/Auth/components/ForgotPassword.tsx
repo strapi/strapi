@@ -63,10 +63,14 @@ const ForgotPassword = () => {
               }
             }}
             validationSchema={yup.object().shape({
-              email: yup.string().email(translatedErrors.email).required({
-                id: translatedErrors.required.id,
-                defaultMessage: 'This field is required.',
-              }),
+              email: yup
+                .string()
+                .email(translatedErrors.email)
+                .required({
+                  id: translatedErrors.required.id,
+                  defaultMessage: 'This field is required.',
+                })
+                .nullable(),
             })}
           >
             <Flex direction="column" alignItems="stretch" gap={6}>

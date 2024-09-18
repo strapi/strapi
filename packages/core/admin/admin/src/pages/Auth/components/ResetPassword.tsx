@@ -50,7 +50,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .required({
       id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
-    }),
+    })
+    .nullable(),
   confirmPassword: yup
     .string()
     .required({
@@ -60,7 +61,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .oneOf([yup.ref('password'), null], {
       id: 'components.Input.error.password.noMatch',
       defaultMessage: 'Passwords must match',
-    }),
+    })
+    .nullable(),
 });
 
 const ResetPassword = () => {
