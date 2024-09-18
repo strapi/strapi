@@ -1008,7 +1008,9 @@ export const FormModal = () => {
           />
         )}
         {!isPickingAttribute && (
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}
+           style={{overflow:'auto'}}
+          >
             <Modal.Body>
               <Tabs.Root
                 variant="simple"
