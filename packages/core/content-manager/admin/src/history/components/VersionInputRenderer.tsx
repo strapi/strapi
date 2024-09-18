@@ -7,7 +7,7 @@ import {
   useField,
   Form,
 } from '@strapi/admin/strapi-admin';
-import { Alert, Box, Field, Flex, Link, Tooltip } from '@strapi/design-system';
+import { Alert, Box, Field, Flex, Link, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -40,7 +40,7 @@ import type { RelationResult } from '../../services/relations';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {} })`
+const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {}, shadow: 'none' })`
   button {
     display: none;
   }
@@ -107,12 +107,14 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
             // @ts-expect-error - targetModel does exist on the attribute. But it's not typed.
-            const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
+            const { targetModel } = props.attribute;
+            const href = `../${COLLECTION_TYPES}/${targetModel}/${relationData.documentId}`;
             const label = getRelationLabel(relationData, props.mainField);
+            const isAdminUserRelation = targetModel === 'admin::user';
 
             return (
               <Flex
-                key={relationData.documentId}
+                key={relationData.documentId ?? relationData.id}
                 paddingTop={2}
                 paddingBottom={2}
                 paddingLeft={4}
@@ -123,10 +125,14 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
                 justifyContent="space-between"
               >
                 <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                  <Tooltip description={label}>
-                    <LinkEllipsis tag={NavLink} to={href}>
-                      {label}
-                    </LinkEllipsis>
+                  <Tooltip label={label}>
+                    {isAdminUserRelation ? (
+                      <Typography>{label}</Typography>
+                    ) : (
+                      <LinkEllipsis tag={NavLink} to={href}>
+                        {label}
+                      </LinkEllipsis>
+                    )}
                   </Tooltip>
                 </Box>
                 <DocumentStatus status={relationData.status as string} />

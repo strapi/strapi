@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { useRBAC, useAuth, type Permission, createContext, Page } from '@strapi/admin/strapi-admin';
+import {
+  useRBAC,
+  useAuth,
+  type Permission,
+  createContext,
+  Page,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
 import { useParams } from 'react-router-dom';
 
 import type { Schema } from '@strapi/types';
@@ -63,6 +70,7 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
   if (!slug) {
     throw new Error('Cannot find the slug param in the URL');
   }
+  const [{ rawQuery }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
   const userPermissions = useAuth('DocumentRBAC', (state) => state.permissions);
 
@@ -76,7 +84,14 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
     }, {});
   }, [slug, userPermissions]);
 
-  const { isLoading, allowedActions } = useRBAC(contentTypePermissions, permissions ?? undefined);
+  const { isLoading, allowedActions } = useRBAC(
+    contentTypePermissions,
+    permissions ?? undefined,
+    // TODO: useRBAC context should be typed and built differently
+    // We are passing raw query as context to the hook so that it can
+    // rely on the locale provided from DocumentRBAC for its permission calculations.
+    rawQuery
+  );
 
   const canCreateFields =
     !isLoading && allowedActions.canCreate

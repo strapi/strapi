@@ -6,6 +6,7 @@ import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
+import { useQueryParams } from '../hooks/useQueryParams';
 import { login as loginAction, logout as logoutAction, setLocale } from '../reducer';
 import { adminApi } from '../services/api';
 import {
@@ -45,7 +46,8 @@ interface AuthContextValue {
    */
   checkUserHasPermissions: (
     permissions?: Permission[],
-    passedPermissions?: Permission[]
+    passedPermissions?: Permission[],
+    rawQueryContext?: string
   ) => Promise<Permission[]>;
   isLoading: boolean;
   permissions: Permission[];
@@ -80,6 +82,8 @@ const AuthProvider = ({
   const dispatch = useTypedDispatch();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
+  const [{ rawQuery }] = useQueryParams();
+
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
   const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
@@ -194,7 +198,20 @@ const AuthProvider = ({
 
   const [checkPermissions] = useLazyCheckPermissionsQuery();
   const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
-    async (permissions, passedPermissions) => {
+    async (
+      permissions,
+      passedPermissions,
+      // TODO:
+      // Here we have parameterised checkUserHasPermissions in order to pass
+      // query context from elsewhere in the application.
+      // See packages/core/content-manager/admin/src/features/DocumentRBAC.tsx
+
+      // This is in order to calculate permissions on accurate query params.
+      // We should be able to rely on the query params in this provider
+      // If we need to pass additional context to the RBAC middleware
+      // we should define a better context type.
+      rawQueryContext
+    ) => {
       /**
        * If there's no permissions to check, then we allow it to
        * pass to preserve existing behaviours.
@@ -223,7 +240,7 @@ const AuthProvider = ({
           user,
           permissions: userPermissions,
           pathname: location.pathname,
-          search: location.search.split('?')[1] ?? '',
+          search: (rawQueryContext || rawQuery).split('?')[1] ?? '',
         },
         matchingPermissions
       );
@@ -249,7 +266,7 @@ const AuthProvider = ({
         return middlewaredPermissions.filter((_, index) => data?.data[index] === true);
       }
     },
-    [checkPermissions, location.pathname, location.search, runRbacMiddleware, user, userPermissions]
+    [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
   const isLoading = isLoadingUser || isLoadingPermissions;

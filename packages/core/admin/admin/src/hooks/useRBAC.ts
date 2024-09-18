@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
 
 import isEqual from 'lodash/isEqual';
 
@@ -43,7 +43,8 @@ type AllowedActions = Record<string, boolean>;
  */
 const useRBAC = (
   permissionsToCheck: Record<string, Permission[]> | Permission[] = [],
-  passedPermissions?: Permission[]
+  passedPermissions?: Permission[],
+  rawQueryContext?: string
 ): {
   allowedActions: AllowedActions;
   isLoading: boolean;
@@ -51,13 +52,13 @@ const useRBAC = (
   permissions: Permission[];
 } => {
   const isLoadingAuth = useAuth('useRBAC', (state) => state.isLoading);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<unknown>();
-  const [data, setData] = useState<Record<string, boolean>>();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<unknown>();
+  const [data, setData] = React.useState<Record<string, boolean>>();
 
-  const warnOnce = useMemo(() => once(console.warn), []);
+  const warnOnce = React.useMemo(() => once(console.warn), []);
 
-  const actualPermissionsToCheck: Permission[] = useMemo(() => {
+  const actualPermissionsToCheck: Permission[] = React.useMemo(() => {
     if (Array.isArray(permissionsToCheck)) {
       return permissionsToCheck;
     } else {
@@ -73,7 +74,7 @@ const useRBAC = (
    * This is the default value we return until the queryResults[i].data
    * are all resolved with data. This preserves the original behaviour.
    */
-  const defaultAllowedActions = useMemo(() => {
+  const defaultAllowedActions = React.useMemo(() => {
     return actualPermissionsToCheck.reduce<Record<string, boolean>>((acc, permission) => {
       return {
         ...acc,
@@ -85,13 +86,19 @@ const useRBAC = (
   const checkUserHasPermissions = useAuth('useRBAC', (state) => state.checkUserHasPermissions);
 
   const permssionsChecked = usePrev(actualPermissionsToCheck);
-  useEffect(() => {
-    if (!isEqual(permssionsChecked, actualPermissionsToCheck)) {
+  const contextChecked = usePrev(rawQueryContext);
+
+  React.useEffect(() => {
+    if (
+      !isEqual(permssionsChecked, actualPermissionsToCheck) ||
+      // TODO: also run this when the query context changes
+      contextChecked !== rawQueryContext
+    ) {
       setIsLoading(true);
       setData(undefined);
       setError(undefined);
 
-      checkUserHasPermissions(actualPermissionsToCheck, passedPermissions)
+      checkUserHasPermissions(actualPermissionsToCheck, passedPermissions, rawQueryContext)
         .then((res) => {
           if (res) {
             setData(
@@ -117,6 +124,8 @@ const useRBAC = (
     passedPermissions,
     permissionsToCheck,
     permssionsChecked,
+    contextChecked,
+    rawQueryContext,
   ]);
 
   /**
