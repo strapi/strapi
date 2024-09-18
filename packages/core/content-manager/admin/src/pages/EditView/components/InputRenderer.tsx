@@ -8,6 +8,7 @@ import {
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
+import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocLayout } from '../../../hooks/useDocumentLayout';
@@ -35,7 +36,7 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
  * components such as Blocks / Relations.
  */
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id } = useDoc();
+  const { id, document, collectionType } = useDoc();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
@@ -45,8 +46,14 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
-  const editableFields = id ? canUpdateFields : canCreateFields;
-  const readableFields = id ? canReadFields : canCreateFields;
+  let idToCheck = id;
+  if (collectionType === SINGLE_TYPES) {
+    idToCheck = document?.documentId;
+  }
+
+  const editableFields = idToCheck ? canUpdateFields : canCreateFields;
+  const readableFields = idToCheck ? canReadFields : canCreateFields;
+
   /**
    * Component fields are always readable and editable,
    * however the fields within them may not be.
