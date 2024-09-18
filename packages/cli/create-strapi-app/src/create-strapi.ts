@@ -40,6 +40,8 @@ async function createApp(scope: Scope) {
     runApp,
   } = scope;
 
+  const shouldRunSeed = useExample && installDependencies;
+
   await trackUsage({ event: 'willCreateProject', scope });
 
   logger.title('Strapi', `Creating a new application at ${chalk.green(rootPath)}`);
@@ -150,9 +152,25 @@ async function createApp(scope: Scope) {
     logger.success('Initialized a git repository.');
   }
 
-  logger.title('Strapi', `Your application was created!`);
+  if (shouldRunSeed) {
+    if (await fse.exists(join(rootPath, 'scripts/seed.js'))) {
+      logger.title('Seed', 'Seeding your database with sample data');
+
+      try {
+        await execa(packageManager, ['run', 'seed:example'], {
+          stdio: 'inherit',
+          cwd: rootPath,
+        });
+        logger.success('Sample data added to your database');
+      } catch (error) {
+        logger.error('Failed to seed your database. Skipping');
+      }
+    }
+  }
 
   const cmd = chalk.cyan(`${packageManager} run`);
+
+  logger.title('Strapi', `Your application was created!`);
 
   logger.log([
     'Available commands in your project:',
@@ -169,19 +187,28 @@ async function createApp(scope: Scope) {
     'Deploy Strapi project.',
     `${cmd} deploy`,
     '',
-    'Display all available commands.',
-    `${cmd} strapi\n`,
   ]);
 
+  if (useExample) {
+    logger.log(['Seed your database with sample data.', `${cmd} seed:example`, '']);
+  }
+
+  logger.log(['Display all available commands.', `${cmd} strapi\n`]);
+
   if (installDependencies) {
-    logger.log(['To get started run', '', `${chalk.cyan('cd')} ${rootPath}`, `${cmd} develop`]);
+    logger.log([
+      'To get started run',
+      '',
+      `${chalk.cyan('cd')} ${rootPath}`,
+      !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
+    ]);
   } else {
     logger.log([
       'To get started run',
       '',
       `${chalk.cyan('cd')} ${rootPath}`,
       `${chalk.cyan(packageManager)} install`,
-      `${cmd} develop`,
+      !shouldRunSeed && useExample ? `${cmd} seed:example && ${cmd} develop` : `${cmd} develop`,
     ]);
   }
 

@@ -79,7 +79,7 @@ const extendInvalidatesTags = (
 
 const releaseApi = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease', 'ReleaseSettings'],
+    addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease', 'ReleaseSettings', 'Document'],
     endpoints: {
       updateDocument(endpoint: AnyEndpointDefinition) {
         extendInvalidatesTags(endpoint, [
@@ -276,7 +276,11 @@ const releaseApi = adminApi
               data: body,
             };
           },
-          invalidatesTags: () => [{ type: 'ReleaseAction', id: 'LIST' }],
+          invalidatesTags: (res, error, arg) => [
+            { type: 'ReleaseAction', id: 'LIST' },
+            { type: 'Release', id: 'LIST' },
+            { type: 'Release', id: arg.params.releaseId },
+          ],
           async onQueryStarted({ body, params, query, actionPath }, { dispatch, queryFulfilled }) {
             // We need to mimic the same params received by the getReleaseActions query
             const paramsWithoutActionId = {
@@ -330,7 +334,10 @@ const releaseApi = adminApi
               method: 'POST',
             };
           },
-          invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+          invalidatesTags: (result, error, arg) => [
+            { type: 'Release', id: arg.id },
+            { type: 'Document', id: `ALL_LIST` },
+          ],
         }),
         deleteRelease: build.mutation<DeleteRelease.Response, DeleteRelease.Request['params']>({
           query({ id }) {

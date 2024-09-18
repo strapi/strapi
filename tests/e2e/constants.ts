@@ -43,3 +43,6 @@ export const TITLE_HOME = 'Homepage | Strapi';
 // websites
 export const ADMIN_EMAIL_ADDRESS = 'test@testing.com';
 export const ADMIN_PASSWORD = 'Testing123!';
+
+export const EDITOR_EMAIL_ADDRESS = 'editor@testing.com';
+export const EDITOR_PASSWORD = 'Testing123!';

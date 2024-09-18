@@ -64,9 +64,15 @@ const releaseController = {
         populate: {
           actions: {
             fields: ['type'],
+            filters: {
+              contentType,
+              entryDocumentId: entryDocumentId ?? null,
+              locale: locale ?? null,
+            },
           },
         },
       });
+
       ctx.body = { data: releases };
     } else {
       const relatedReleases = await releaseService.findMany({

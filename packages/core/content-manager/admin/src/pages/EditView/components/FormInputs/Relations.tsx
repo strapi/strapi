@@ -57,6 +57,39 @@ import { useComponent } from './ComponentContext';
 
 import type { Schema } from '@strapi/types';
 
+/**
+ * Remove a relation, whether it's been already saved or not.
+ * It's used both in RelationsList, where the "remove relation" button is, and in the input,
+ * because we sometimes need to remove a previous relation when selecting a new one.
+ */
+function useHandleDisconnect(fieldName: string, consumerName: string) {
+  const field = useField(fieldName);
+  const removeFieldRow = useForm(consumerName, (state) => state.removeFieldRow);
+  const addFieldRow = useForm(consumerName, (state) => state.addFieldRow);
+
+  const handleDisconnect: ListItemProps['data']['handleDisconnect'] = (relation) => {
+    if (field.value && field.value.connect) {
+      /**
+       * A relation will exist in the `connect` array _if_ it has
+       * been added without saving. In this case, we just remove it
+       * from the connect array
+       */
+      const indexOfRelationInConnectArray = field.value.connect.findIndex(
+        (rel: NonNullable<RelationsFormValue['connect']>[number]) => rel.id === relation.id
+      );
+
+      if (indexOfRelationInConnectArray >= 0) {
+        removeFieldRow(`${fieldName}.connect`, indexOfRelationInConnectArray);
+        return;
+      }
+    }
+
+    addFieldRow(`${fieldName}.disconnect`, { id: relation.id });
+  };
+
+  return handleDisconnect;
+}
+
 /* -------------------------------------------------------------------------------------------------
  * RelationsField
  * -----------------------------------------------------------------------------------------------*/
@@ -219,6 +252,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       props.mainField,
     ]);
 
+    const handleDisconnect = useHandleDisconnect(props.name, 'RelationsField');
+
     const handleConnect: RelationsInputProps['onChange'] = (relation) => {
       const [lastItemInList] = relations.slice(-1);
 
@@ -237,10 +272,10 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       };
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
-        // Remove the existing relation so it can be replaced with the new one
-        if (relations.length > 0) {
-          field.onChange(`${props.name}.disconnect`, relations);
-        }
+        // Remove any existing relation so they can be replaced with the new one
+        field.value?.connect?.forEach(handleDisconnect);
+        relations.forEach(handleDisconnect);
+
         field.onChange(`${props.name}.connect`, [item]);
       } else {
         field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
@@ -586,8 +621,6 @@ const RelationsList = ({
   const [overflow, setOverflow] = React.useState<'top' | 'bottom' | 'top-bottom'>();
   const [liveText, setLiveText] = React.useState('');
   const field = useField(name);
-  const removeFieldRow = useForm('RelationsList', (state) => state.removeFieldRow);
-  const addFieldRow = useForm('RelationsList', (state) => state.addFieldRow);
 
   React.useEffect(() => {
     if (data.length <= RELATIONS_TO_DISPLAY) {
@@ -745,25 +778,7 @@ const RelationsList = ({
     );
   };
 
-  const handleDisconnect: ListItemProps['data']['handleDisconnect'] = (relation) => {
-    if (field.value && field.value.connect) {
-      /**
-       * A relation will exist in the `connect` array _if_ it has
-       * been added without saving. In this case, we just remove it
-       * from the connect array
-       */
-      const indexOfRelationInConnectArray = field.value.connect.findIndex(
-        (rel: NonNullable<RelationsFormValue['connect']>[number]) => rel.id === relation.id
-      );
-
-      if (indexOfRelationInConnectArray >= 0) {
-        removeFieldRow(`${name}.connect`, indexOfRelationInConnectArray);
-        return;
-      }
-    }
-
-    addFieldRow(`${name}.disconnect`, { id: relation.id });
-  };
+  const handleDisconnect = useHandleDisconnect(name, 'RelationsList');
 
   /**
    * These relation types will only ever have one item

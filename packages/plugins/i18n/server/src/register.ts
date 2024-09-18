@@ -4,13 +4,9 @@ import type { Core } from '@strapi/types';
 import validateLocaleCreation from './controllers/validate-locale-creation';
 import graphqlProvider from './graphql';
 
-import enableContentType from './migrations/content-type/enable';
-import disableContentType from './migrations/content-type/disable';
-
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   extendContentTypes(strapi);
   addContentManagerLocaleMiddleware(strapi);
-  addContentTypeSyncHooks(strapi);
 };
 
 // TODO: v5 if implemented in the CM => delete this middleware
@@ -34,15 +30,6 @@ const addContentManagerLocaleMiddleware = (strapi: Core.Strapi) => {
 
     return next();
   });
-};
-
-/**
- * Adds hooks to migration content types locales on enable/disable of I18N
- * @param {Strapi} strapi
- */
-const addContentTypeSyncHooks = (strapi: Core.Strapi) => {
-  strapi.hook('strapi::content-types.beforeSync').register(disableContentType);
-  strapi.hook('strapi::content-types.afterSync').register(enableContentType);
 };
 
 /**
