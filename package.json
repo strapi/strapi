@@ -49,7 +49,11 @@
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
-    "test:clean": "rimraf ./coverage",
+    "test:api:clean": "rimraf ./coverage",
+    "test:clean": "yarn test:api:clean && yarn test:e2e:clean",
+    "test:cli": "node tests/scripts/run-cli-tests.js",
+    "test:cli:clean": "node tests/scripts/run-cli-tests.js clean",
+    "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
     "test:e2e": "node tests/scripts/run-e2e-tests.js",
     "test:e2e:clean": "node tests/scripts/run-e2e-tests.js clean",
     "test:e2e:debug": "node tests/scripts/run-e2e-tests.js --debug",
@@ -72,7 +76,7 @@
     "test:unit:watch": "run test:unit --watch"
   },
   "resolutions": {
-    "@strapi/design-system": "1.19.0-typescript.0",
+    "@strapi/design-system": "1.20.0-typescript.0",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
@@ -97,6 +101,7 @@
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
+    "coffee": "5.5.1",
     "core-js": "3.33.0",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
@@ -129,7 +134,7 @@
     "jest-environment-jsdom": "29.6.1",
     "jest-watch-typeahead": "2.2.2",
     "lerna": "6.6.2",
-    "lint-staged": "13.3.0",
+    "lint-staged": "15.2.9",
     "lodash": "4.17.21",
     "nx": "16.8.1",
     "plop": "2.7.6",
@@ -141,7 +146,7 @@
     "typescript": "5.2.2",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.0.1",
+  "packageManager": "yarn@4.3.1",
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"

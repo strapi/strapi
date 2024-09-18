@@ -2,8 +2,9 @@
 
 ## Supported Versions
 
-As of June 2023 (and until this document is updated), only the v4.x.x _GA_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
+As of April 2024 (and until this document is updated), only the v4.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
 
+- v5.x.x **Beta** is considered unstable is only supported during the beta period for **NON-PRODUCTION** usage
 - v4.x.x **Stable** is considered LTS until further notice
 - v4.x.x **Beta** is considered unstable and not supported
 - v4.x.x **Alpha** is considered unstable and not supported
@@ -60,4 +61,4 @@ List of some (though not all) platforms **we do not support**:
 - Direct email or communication to Strapi employees (Discord, Slack, or Email)
 - Stack Overflow
 
-Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities. At most during our public disclosure we can give credit to the reporter and link to any social accounts you wish to have us add including linking to your own blog post detailing the vulnerability if you wish.
+**Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities.** At most during our public disclosure we can give credit to the reporter and link to any social accounts you wish to have us add including linking to your own blog post detailing the vulnerability if you wish.

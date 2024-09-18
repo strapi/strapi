@@ -1,3 +1,8 @@
+> [!WARNING]
+> This package is only compatible with Strapi v4 version <br/>
+> i18N is now a core feature of Strapi 5 and doesn't need to be installed <br/>
+> The most recent versions of Strapi packages can be found at [https://github.com/strapi/strapi](https://github.com/strapi/strapi)
+
 # Strapi plugin i18n
 
 The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales". For more information about the concept of internationalization, please refer to the [W3C definition](https://www.w3.org/International/questions/qa-i18n.en#i18n).

@@ -22,6 +22,7 @@ const LoginPage = () => {
 describe('PrivateRoute', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
   it('Authenticated users should be able to access protected routes', async () => {
@@ -44,7 +45,7 @@ describe('PrivateRoute', () => {
     expect(await screen.findByText('You are authenticated'));
   });
 
-  it.only('Unauthenticated users should not be able to access protected routes and get redirected', async () => {
+  it('Unauthenticated users should not be able to access protected routes and get redirected', async () => {
     let testLocation: Location = null!;
     let testHistory: History = null!;
 

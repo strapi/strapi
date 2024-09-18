@@ -21,7 +21,8 @@ const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
   const { setGuidedTourVisibility } = useGuidedTour();
-  const userInfo = useAuth('AuthenticatedApp', (state) => state.user);
+  const { user } = useAuth('AuthenticatedApp');
+  const userInfo = user;
   const [userDisplayName, setUserDisplayName] = React.useState<string>(() =>
     userInfo ? userInfo.username || getFullName(userInfo.firstname ?? '', userInfo.lastname) : ''
   );
@@ -76,7 +77,7 @@ const AuthenticatedApp = () => {
     }
   }, [showReleaseNotification]);
 
-  const userRoles = useAuth('AuthenticatedApp', (state) => state.user?.roles);
+  const userRoles = user?.roles;
 
   React.useEffect(() => {
     if (userRoles) {

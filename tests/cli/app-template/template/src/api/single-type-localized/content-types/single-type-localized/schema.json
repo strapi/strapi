@@ -1,0 +1,25 @@
+{
+  "kind": "singleType",
+  "collectionName": "single_type_localizeds",
+  "info": {
+    "singularName": "single-type-localized",
+    "pluralName": "single-type-localizeds",
+    "displayName": "singleTypeLocalized"
+  },
+  "options": {},
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "shorttext": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "string"
+    }
+  }
+}
