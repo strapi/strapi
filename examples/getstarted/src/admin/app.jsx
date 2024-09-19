@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@strapi/design-system';
 
 const config = {
-  locales: ['it', 'es', 'en'],
+  locales: ['it', 'es', 'en', 'en-GB'],
 };
 const bootstrap = (app) => {
   app.getPlugin('content-manager').injectComponent('editView', 'right-links', {
