@@ -6,7 +6,6 @@ export const languageNativeNames = {
   dk: 'Dansk',
   en: 'English',
   'en-GB': 'English (United Kingdom)',
-  'en-US': 'English (United States)',
   es: 'Español',
   eu: 'Euskara',
   fr: 'Français',
