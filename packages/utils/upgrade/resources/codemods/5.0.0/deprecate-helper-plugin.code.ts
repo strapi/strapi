@@ -18,7 +18,7 @@ const transform: Transform = (file, api) => {
     toChangeImportSpecifier: boolean;
     newDependency?: string;
     newName?: string;
-    newImport?:string;
+    newImport?: string;
   };
 
   const replacements: Replacement[] = [
@@ -81,7 +81,7 @@ const transform: Transform = (file, api) => {
     },
     {
       oldName: 'NoPermissions',
-      newImport:'Page',
+      newImport: 'Page',
       newName: 'Page.NoPermissions',
       oldDependency: '@strapi/helper-plugin',
       newDependency: '@strapi/strapi/admin',
