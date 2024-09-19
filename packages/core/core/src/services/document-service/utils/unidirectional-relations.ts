@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import { keyBy } from 'lodash/fp';
+import { omit, keyBy } from 'lodash/fp';
 
 import { UID, Schema } from '@strapi/types';
 
@@ -12,7 +12,11 @@ import { UID, Schema } from '@strapi/types';
  * @param oldEntries The old entries that are being overridden
  * @returns An array of relations that need to be updated with the join table reference.
  */
-const load = async (uid: UID.ContentType, oldEntries: { id: string; locale: string }[]) => {
+const load = async (
+  uid: UID.ContentType,
+  oldEntries: { id: string; locale: string }[],
+  draftEntries: { id: string; locale: string }[]
+) => {
   const updates = [] as any;
 
   // Iterate all components and content types to find relations that need to be updated
@@ -39,7 +43,10 @@ const load = async (uid: UID.ContentType, oldEntries: { id: string; locale: stri
         /**
          * Load all relations that need to be updated
          */
-        const oldEntriesIds = oldEntries.map((entry) => entry.id);
+
+        const oldEntriesIds = model.options?.draftAndPublish
+          ? oldEntries.map((entry) => entry.id)
+          : [...oldEntries, ...draftEntries].map((entry) => entry.id);
         const relations = await strapi.db
           .getConnection()
           .select('*')
@@ -74,6 +81,7 @@ const sync = async (
    *
    * Will be used to update the relation target ids
    */
+
   const newEntryByLocale = keyBy('locale', newEntries);
   const oldEntriesMap = oldEntries.reduce(
     (acc, entry) => {
@@ -94,11 +102,14 @@ const sync = async (
       const newRelations = relations.map((relation) => {
         const column = joinTable.inverseJoinColumn.name;
         const newId = oldEntriesMap[relation[column]];
-        return { ...relation, [column]: newId };
+        return omit('id', { ...relation, [column]: newId });
       });
 
+      // @ts-expect-error - poc
+      const uniqueRelations = Array.from(new Set(newRelations.map(JSON.stringify))).map(JSON.parse);
+
       // Insert those relations into the join table
-      await con.batchInsert(joinTable.name, newRelations).transacting(trx);
+      await con.batchInsert(joinTable.name, uniqueRelations).transacting(trx);
     }
   });
 };

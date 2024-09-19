@@ -16,7 +16,6 @@ const createEntriesService = (uid: UID.ContentType) => {
 
   async function createEntry(params = {} as any) {
     const { data, ...restParams } = await transformParamsDocumentId(uid, params);
-
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     // Validation

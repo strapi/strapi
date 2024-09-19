@@ -643,7 +643,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params,
         },
-        formValues
+        formDocumentToData(formValues)
       );
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
@@ -733,6 +733,40 @@ const PublishAction: DocumentActionComponent = ({
 
 PublishAction.type = 'publish';
 
+const formDocumentToData = (document: any) => {
+  return Object.keys(document).reduce((acc, key) => {
+    if (document[key] !== undefined) {
+      acc[key] = document[key];
+    }
+
+    if (typeof document[key] === 'object' && document[key] !== null) {
+      if ('connect' in document[key] && document[key].connect !== null) {
+        acc[key] = {
+          ...acc[key],
+          connect: document[key].connect.map((item: any) => {
+            return {
+              documentId: item.documentId,
+            };
+          }),
+        };
+      }
+
+      if ('disconnect' in document[key] && document[key].disconnect !== null) {
+        acc[key] = {
+          ...acc[key],
+          disconnect: document[key].disconnect.map((item: any) => {
+            return {
+              documentId: item.documentId,
+            };
+          }),
+        };
+      }
+    }
+
+    return acc;
+  }, {} as any);
+};
+
 const UpdateAction: DocumentActionComponent = ({
   activeTab,
   documentId,
@@ -797,7 +831,7 @@ const UpdateAction: DocumentActionComponent = ({
               documentId: cloneMatch.params.origin!,
               params,
             },
-            document
+            formDocumentToData(document)
           );
 
           if ('data' in res) {
@@ -823,7 +857,7 @@ const UpdateAction: DocumentActionComponent = ({
               documentId,
               params,
             },
-            document
+            formDocumentToData(document)
           );
 
           if (
@@ -841,7 +875,7 @@ const UpdateAction: DocumentActionComponent = ({
               model,
               params,
             },
-            document
+            formDocumentToData(document)
           );
 
           if ('data' in res && collectionType !== SINGLE_TYPES) {

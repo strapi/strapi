@@ -84,7 +84,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
       }
     }
 
-    addFieldRow(`${fieldName}.disconnect`, { id: relation.id });
+    addFieldRow(`${fieldName}.disconnect`, { id: relation.id, documentId: relation.documentId });
   };
 
   return handleDisconnect;
@@ -259,6 +259,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
       const item = {
         id: relation.id,
+        documentId: relation.documentId,
         status: relation.status,
         /**
          * If there's a last item, that's the first key we use to generate out next one.
