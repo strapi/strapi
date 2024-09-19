@@ -20,10 +20,10 @@ const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) 
 const processPopulate = (populate: any) => {
   // If it does not exist or it's not an object (like an array) return the default populate
   if (!populate) {
-    return populate;
+    return WORKFLOW_POPULATE;
   }
 
-  return WORKFLOW_POPULATE;
+  return populate;
 };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
@@ -87,6 +87,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         createOpts = set('data.stages', mapIds(stages), createOpts);
 
+        if (opts.data.stageRequiredForPublish) {
+          const stageRequiredForPublish = stages.find(
+            (stage: any) => stage.name === opts.data.stageRequiredForPublish
+          );
+          if (!stageRequiredForPublish) {
+            throw new errors.ApplicationError('Stage required for publish does not exist');
+          }
+
+          createOpts = set('data.stageRequiredForPublish', stageRequiredForPublish.id, createOpts);
+        }
+
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
           await workflowsContentTypes.migrate({
@@ -114,6 +125,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async update(workflow: any, opts: any) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
+      let updatedStages: any = [];
       let updatedStageIds: any;
 
       await workflowValidator.validateWorkflowCount();
@@ -128,9 +140,34 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
           updatedStageIds = await stageService
             .replaceStages(workflow.stages, opts.data.stages, workflow.contentTypes)
-            .then((stages: any) => stages.map((stage: any) => stage.id));
+            .then((stages: any) => {
+              updatedStages = stages;
+              return stages.map((stage: any) => stage.id);
+            });
 
           updateOpts = set('data.stages', updatedStageIds, updateOpts);
+        }
+
+        if (opts.data.stageRequiredForPublish !== undefined) {
+          const stages = updatedStages ?? workflow.stages;
+
+          if (opts.data.stageRequiredForPublish === null) {
+            updateOpts = set('data.stageRequiredForPublish', null, updateOpts);
+          } else {
+            const stageRequiredForPublish = stages.find(
+              (stage: any) => stage.name === opts.data.stageRequiredForPublish
+            );
+
+            if (!stageRequiredForPublish) {
+              throw new errors.ApplicationError('Stage required for publish does not exist');
+            }
+
+            updateOpts = set(
+              'data.stageRequiredForPublish',
+              stageRequiredForPublish.id,
+              updateOpts
+            );
+          }
         }
 
         // Update (un)assigned Content Types

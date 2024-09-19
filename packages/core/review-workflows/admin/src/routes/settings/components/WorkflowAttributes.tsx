@@ -7,12 +7,16 @@ import {
   MultiSelectOption,
   Typography,
   useCollator,
+  SingleSelect,
+  SingleSelectOption,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useGetContentTypesQuery } from '../../../services/content-manager';
 import { useReviewWorkflows } from '../hooks/useReviewWorkflows';
+
+import type { WorkflowStage } from './Stages';
 
 /* -------------------------------------------------------------------------------------------------
  * WorkflowAttributes
@@ -40,6 +44,9 @@ const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps) => {
       </Grid.Item>
       <Grid.Item col={6} direction="column" alignItems="stretch">
         <ContentTypesSelector disabled={!canUpdate} />
+      </Grid.Item>
+      <Grid.Item col={6} direction="column" alignItems="stretch">
+        <StageSelector disabled={!canUpdate} />
       </Grid.Item>
     </Grid.Root>
   );
@@ -195,6 +202,58 @@ const NestedOption = styled(MultiSelectOption)`
 const ContentTypeTakeNotice = styled(Typography)`
   font-style: italic;
 `;
+
+/* -------------------------------------------------------------------------------------------------
+ * StageSelector
+ * -----------------------------------------------------------------------------------------------*/
+interface StageSelectorProps {
+  disabled?: boolean;
+}
+
+const StageSelector = ({ disabled }: StageSelectorProps) => {
+  const { value: stages = [] } = useField<WorkflowStage[]>('stages');
+  const { formatMessage } = useIntl();
+
+  const { error, value, onChange } = useField('stageRequiredForPublish');
+
+  return (
+    <Field.Root
+      error={error}
+      name={'stageRequiredForPublish'}
+      hint={formatMessage({
+        id: 'settings.review-workflows.workflow.stageRequiredForPublish.hint',
+        defaultMessage: 'Prevents entries to be published if they are not at the required stage.',
+      })}
+    >
+      <Field.Label>
+        {formatMessage({
+          id: 'settings.review-workflows.workflow.stageRequiredForPublish.label',
+          defaultMessage: 'Required stage for publishing',
+        })}
+      </Field.Label>
+      <SingleSelect
+        disabled={disabled}
+        onChange={(value) => {
+          onChange('stageRequiredForPublish', value);
+        }}
+        value={value}
+      >
+        <SingleSelectOption value={''}>
+          {formatMessage({
+            id: 'settings.review-workflows.workflow.stageRequiredForPublish.any',
+            defaultMessage: 'Any stage',
+          })}
+        </SingleSelectOption>
+        {stages.map((stage, i) => (
+          <SingleSelectOption key={`requiredForPublishStage-${i}`} value={stage.name}>
+            {stage.name}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+      <Field.Hint />
+    </Field.Root>
+  );
+};
 
 export { WorkflowAttributes };
 export type { WorkflowAttributesProps };

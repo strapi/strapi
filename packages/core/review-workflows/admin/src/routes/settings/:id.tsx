@@ -103,6 +103,8 @@ const WORKFLOW_SCHEMA = yup.object({
             })
           )
           .strict(),
+
+        stageRequiredForPublish: yup.string().nullable(),
       })
     )
     .min(1),
@@ -150,6 +152,7 @@ const EditPage = () => {
     name: string;
     stages: WorkflowStage[];
     contentTypes: string[];
+    stageRequiredForPublish: string | null;
   }
 
   const submitForm = async (data: FormValues, helpers: Pick<FormHelpers, 'setErrors'>) => {
@@ -180,13 +183,19 @@ const EditPage = () => {
               permissions: hasUpdatedPermissions ? stage.permissions : undefined,
             } satisfies Stage;
           }),
+          stageRequiredForPublish:
+            data.stageRequiredForPublish === '' ? null : data.stageRequiredForPublish,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         }
       } else {
-        const res = await create(data);
+        const res = await create({
+          ...data,
+          stageRequiredForPublish:
+            data.stageRequiredForPublish === '' ? null : data.stageRequiredForPublish,
+        });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
@@ -298,12 +307,14 @@ const EditPage = () => {
         name: '',
         stages: [],
         contentTypes: [],
+        stageRequiredForPublish: '',
       };
     } else {
       return {
         name: currentWorkflow.name,
         stages: addTmpKeysToStages(currentWorkflow.stages),
         contentTypes: currentWorkflow.contentTypes,
+        stageRequiredForPublish: currentWorkflow.stageRequiredForPublish?.name ?? '',
       };
     }
   }, [currentWorkflow, isCreatingWorkflow]);
