@@ -282,12 +282,13 @@ const createHelpers = (db: Database) => {
         }
       }
 
+      // We drop columns after indexes to ensure that it doesn't cascade delete any indexes we expect to exist
       for (const removedColumn of table.columns.removed) {
         debug(`Dropping column ${removedColumn.name} on ${table.name}`);
         dropColumn(tableBuilder, removedColumn);
       }
 
-      // Update existing columns / foreign keys / indexes
+      // Update existing columns
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name} on ${table.name}`);
 
@@ -300,6 +301,7 @@ const createHelpers = (db: Database) => {
         }
       }
 
+      // Add any new columns
       for (const addedColumn of table.columns.added) {
         debug(`Creating column ${addedColumn.name} on ${table.name}`);
 
@@ -311,6 +313,7 @@ const createHelpers = (db: Database) => {
         }
       }
 
+      // once the columns have all been updated, we can create indexes again
       for (const updatedForeignKey of table.foreignKeys.updated) {
         debug(`Recreating updated foreign key ${updatedForeignKey.name} on ${table.name}`);
         createForeignKey(tableBuilder, updatedForeignKey.object);
