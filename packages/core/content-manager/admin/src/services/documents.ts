@@ -159,18 +159,11 @@ const documentApi = contentManagerApi.injectEndpoints({
      */
     getAllDocuments: builder.query<
       Find.Response,
-      Find.Params & {
-        params?: Find.Request['query'] & {
-          [key: string]: any;
-        };
-      }
+      Find.Params & { queryString?: string; }
     >({
-      query: ({ model, params }) => ({
-        url: `/content-manager/collection-types/${model}`,
+      query: ({ model, queryString }) => ({
+        url: `/content-manager/collection-types/${model}${queryString ? `?${queryString}` : ''}`,
         method: 'GET',
-        config: {
-          params,
-        },
       }),
       providesTags: (result, _error, arg) => {
         return [

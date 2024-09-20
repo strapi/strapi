@@ -100,9 +100,10 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const queryString = React.useMemo(() => stringify(params, { encode: true, encodeValuesOnly: true }), [params]);
   const { data, error, isFetching } = useGetAllDocumentsQuery({
     model,
-    params,
+    queryString
   });
 
   /**
@@ -187,7 +188,7 @@ const ListViewPage = () => {
     trackUsage('willEditEntryFromList');
     navigate({
       pathname: id.toString(),
-      search: stringify({ plugins: query.plugins }),
+      search: queryString,
     });
   };
 
