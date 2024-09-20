@@ -94,7 +94,7 @@ interface Workflow extends Entity {
   name: string;
   contentTypes: string[];
   stages: Stage[];
-  stageRequiredForPublish: Stage | null;
+  stageRequiredToPublish: Stage | null;
 }
 
 namespace GetAll {
@@ -116,8 +116,8 @@ namespace GetAll {
 namespace Update {
   export interface Request {
     body: {
-      data: Partial<Omit<Workflow, 'stageRequiredForPublish'>> & {
-        stageRequiredForPublish?: Stage['name'] | null;
+      data: Partial<Omit<Workflow, 'stageRequiredToPublish'>> & {
+        stageRequiredToPublish?: Stage['name'] | null;
       };
     };
     query: {};
@@ -139,7 +139,7 @@ namespace Create {
       data: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'> & {
         // We cannot use id because the stage could be not created yet
         // And considering name is unique inside the workflow, name is a better option
-        stageRequiredForPublish?: Stage['name'] | null;
+        stageRequiredToPublish?: Stage['name'] | null;
       };
     };
     query: {};

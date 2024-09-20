@@ -104,7 +104,7 @@ const WORKFLOW_SCHEMA = yup.object({
           )
           .strict(),
 
-        stageRequiredForPublish: yup.string().nullable(),
+        stageRequiredToPublish: yup.string().nullable(),
       })
     )
     .min(1),
@@ -152,7 +152,7 @@ const EditPage = () => {
     name: string;
     stages: WorkflowStage[];
     contentTypes: string[];
-    stageRequiredForPublish: string | null;
+    stageRequiredToPublish: string | null;
   }
 
   const submitForm = async (data: FormValues, helpers: Pick<FormHelpers, 'setErrors'>) => {
@@ -183,8 +183,8 @@ const EditPage = () => {
               permissions: hasUpdatedPermissions ? stage.permissions : undefined,
             } satisfies Stage;
           }),
-          stageRequiredForPublish:
-            data.stageRequiredForPublish === '' ? null : data.stageRequiredForPublish,
+          stageRequiredToPublish:
+            data.stageRequiredToPublish === '' ? null : data.stageRequiredToPublish,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -193,8 +193,8 @@ const EditPage = () => {
       } else {
         const res = await create({
           ...data,
-          stageRequiredForPublish:
-            data.stageRequiredForPublish === '' ? null : data.stageRequiredForPublish,
+          stageRequiredToPublish:
+            data.stageRequiredToPublish === '' ? null : data.stageRequiredToPublish,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -307,14 +307,14 @@ const EditPage = () => {
         name: '',
         stages: [],
         contentTypes: [],
-        stageRequiredForPublish: '',
+        stageRequiredToPublish: '',
       };
     } else {
       return {
         name: currentWorkflow.name,
         stages: addTmpKeysToStages(currentWorkflow.stages),
         contentTypes: currentWorkflow.contentTypes,
-        stageRequiredForPublish: currentWorkflow.stageRequiredForPublish?.name ?? '',
+        stageRequiredToPublish: currentWorkflow.stageRequiredToPublish?.name ?? '',
       };
     }
   }, [currentWorkflow, isCreatingWorkflow]);

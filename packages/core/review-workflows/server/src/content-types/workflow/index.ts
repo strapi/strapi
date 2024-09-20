@@ -29,7 +29,7 @@ export default {
         relation: 'oneToMany',
         mappedBy: 'workflow',
       },
-      stageRequiredForPublish: {
+      stageRequiredToPublish: {
         type: 'relation',
         target: 'plugin::review-workflows.workflow-stage',
         relation: 'oneToOne',

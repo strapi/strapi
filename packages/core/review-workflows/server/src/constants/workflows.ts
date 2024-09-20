@@ -34,5 +34,5 @@ export const WORKFLOW_POPULATE = {
       },
     },
   },
-  stageRequiredForPublish: true,
+  stageRequiredToPublish: true,
 };

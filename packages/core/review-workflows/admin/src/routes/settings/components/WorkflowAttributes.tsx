@@ -214,33 +214,34 @@ const StageSelector = ({ disabled }: StageSelectorProps) => {
   const { value: stages = [] } = useField<WorkflowStage[]>('stages');
   const { formatMessage } = useIntl();
 
-  const { error, value, onChange } = useField('stageRequiredForPublish');
+  const { error, value, onChange } = useField('stageRequiredToPublish');
 
   return (
     <Field.Root
       error={error}
-      name={'stageRequiredForPublish'}
+      name={'stageRequiredToPublish'}
       hint={formatMessage({
-        id: 'settings.review-workflows.workflow.stageRequiredForPublish.hint',
-        defaultMessage: 'Prevents entries to be published if they are not at the required stage.',
+        id: 'settings.review-workflows.workflow.stageRequiredToPublish.hint',
+        defaultMessage:
+          'Prevents entries from being published if they are not at the required stage.',
       })}
     >
       <Field.Label>
         {formatMessage({
-          id: 'settings.review-workflows.workflow.stageRequiredForPublish.label',
+          id: 'settings.review-workflows.workflow.stageRequiredToPublish.label',
           defaultMessage: 'Required stage for publishing',
         })}
       </Field.Label>
       <SingleSelect
         disabled={disabled}
         onChange={(value) => {
-          onChange('stageRequiredForPublish', value);
+          onChange('stageRequiredToPublish', value);
         }}
         value={value}
       >
         <SingleSelectOption value={''}>
           {formatMessage({
-            id: 'settings.review-workflows.workflow.stageRequiredForPublish.any',
+            id: 'settings.review-workflows.workflow.stageRequiredToPublish.any',
             defaultMessage: 'Any stage',
           })}
         </SingleSelectOption>

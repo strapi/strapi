@@ -87,15 +87,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         createOpts = set('data.stages', mapIds(stages), createOpts);
 
-        if (opts.data.stageRequiredForPublish) {
-          const stageRequiredForPublish = stages.find(
-            (stage: any) => stage.name === opts.data.stageRequiredForPublish
+        if (opts.data.stageRequiredToPublish) {
+          const stageRequiredToPublish = stages.find(
+            (stage: any) => stage.name === opts.data.stageRequiredToPublish
           );
-          if (!stageRequiredForPublish) {
-            throw new errors.ApplicationError('Stage required for publish does not exist');
+          if (!stageRequiredToPublish) {
+            throw new errors.ApplicationError('Stage required to publish does not exist');
           }
 
-          createOpts = set('data.stageRequiredForPublish', stageRequiredForPublish.id, createOpts);
+          createOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, createOpts);
         }
 
         // Update (un)assigned Content Types
@@ -138,35 +138,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
 
-          updatedStageIds = await stageService
-            .replaceStages(workflow.stages, opts.data.stages, workflow.contentTypes)
-            .then((stages: any) => {
-              updatedStages = stages;
-              return stages.map((stage: any) => stage.id);
-            });
+          updatedStages = await stageService.replaceStages(
+            workflow.stages,
+            opts.data.stages,
+            workflow.contentTypes
+          );
+          updatedStageIds = updatedStages.map((stage: any) => stage.id);
 
           updateOpts = set('data.stages', updatedStageIds, updateOpts);
         }
 
-        if (opts.data.stageRequiredForPublish !== undefined) {
+        if (opts.data.stageRequiredToPublish !== undefined) {
           const stages = updatedStages ?? workflow.stages;
 
-          if (opts.data.stageRequiredForPublish === null) {
-            updateOpts = set('data.stageRequiredForPublish', null, updateOpts);
+          if (opts.data.stageRequiredToPublish === null) {
+            updateOpts = set('data.stageRequiredToPublish', null, updateOpts);
           } else {
-            const stageRequiredForPublish = stages.find(
-              (stage: any) => stage.name === opts.data.stageRequiredForPublish
+            const stageRequiredToPublish = stages.find(
+              (stage: any) => stage.name === opts.data.stageRequiredToPublish
             );
 
-            if (!stageRequiredForPublish) {
-              throw new errors.ApplicationError('Stage required for publish does not exist');
+            if (!stageRequiredToPublish) {
+              throw new errors.ApplicationError('Stage required to publish does not exist');
             }
 
-            updateOpts = set(
-              'data.stageRequiredForPublish',
-              stageRequiredForPublish.id,
-              updateOpts
-            );
+            updateOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, updateOpts);
           }
         }
 
