@@ -156,13 +156,23 @@ const EditPage = () => {
 
   const submitForm = async (data: FormValues, helpers: Pick<FormHelpers, 'setErrors'>) => {
     try {
+      const { stageRequiredToPublish, ...rest } = data;
+      const stageRequiredToPublishName =
+        stageRequiredToPublish === ''
+          ? null
+          : rest.stages.find(
+              (stage) =>
+                stage.id === Number(stageRequiredToPublish) ||
+                stage.__temp_key__ === stageRequiredToPublish
+            )?.name;
+
       if (!isCreatingWorkflow) {
         const res = await update(id, {
-          ...data,
+          ...rest,
           // compare permissions of stages and only submit them if at least one has
           // changed; this enables partial updates e.g. for users who don't have
           // permissions to see roles
-          stages: data.stages.map((stage) => {
+          stages: rest.stages.map((stage) => {
             let hasUpdatedPermissions = true;
             const serverStage = currentWorkflow?.stages?.find(
               (serverStage) => serverStage.id === stage?.id
@@ -182,13 +192,7 @@ const EditPage = () => {
               permissions: hasUpdatedPermissions ? stage.permissions : undefined,
             } satisfies Stage;
           }),
-          stageRequiredToPublishName: data.stageRequiredToPublish
-            ? data.stages.find(
-                (stage) =>
-                  stage.id === Number(data.stageRequiredToPublish) ||
-                  stage.__temp_key__ === data.stageRequiredToPublish
-              )?.name
-            : null,
+          stageRequiredToPublishName,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -196,15 +200,8 @@ const EditPage = () => {
         }
       } else {
         const res = await create({
-          ...data,
-          stageRequiredToPublishName:
-            data.stageRequiredToPublish === ''
-              ? null
-              : data.stages.find(
-                  (stage) =>
-                    stage.id === Number(data.stageRequiredToPublish) ||
-                    stage.__temp_key__ === data.stageRequiredToPublish
-                )?.name,
+          ...rest,
+          stageRequiredToPublishName,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
