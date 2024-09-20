@@ -374,7 +374,7 @@ export const BrowseStep = ({
         </>
       )}
 
-      {pagination.pageCount > 0 && (
+      {pagination.total > pagination.pageSize && (
         <Flex justifyContent="space-between" paddingTop={4}>
           <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
           <PaginationFooter
@@ -420,6 +420,10 @@ BrowseStep.propTypes = {
     sort: PropTypes.string,
     folder: PropTypes.number,
   }).isRequired,
-  pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
+  pagination: PropTypes.shape({
+    pageCount: PropTypes.number.isRequired,
+    pageSize: PropTypes.number,
+    total: PropTypes.number,
+  }).isRequired,
   selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
