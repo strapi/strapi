@@ -289,6 +289,10 @@ const createHelpers = (db: Database) => {
     throw new Error(`Unsupported client: ${client}`);
   };
 
+  const warnIndexMissing = (index: Index, table: TableDiff['diff']) => {
+    console.warn('Missing index', index.name, 'in table', table.name);
+  };
+
   const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff['diff']) => {
     // Sequentially check for removed indexes existence to avoid opening multiple connections
     const indexExistenceChecks: boolean[] = [];
@@ -310,6 +314,8 @@ const createHelpers = (db: Database) => {
         if (indexExistenceChecks[index]) {
           debug(`Dropping index ${removedIndex.name} on ${table.name}`);
           dropIndex(tableBuilder, removedIndex);
+        } else {
+          warnIndexMissing(removedIndex, table);
         }
       });
 
@@ -317,6 +323,8 @@ const createHelpers = (db: Database) => {
         if (updatedIndexExistenceChecks[index]) {
           debug(`Dropping updated index ${updatedIndex.object.name} on ${table.name}`);
           dropIndex(tableBuilder, updatedIndex.object);
+        } else {
+          warnIndexMissing(updatedIndex.object, table);
         }
       });
 
