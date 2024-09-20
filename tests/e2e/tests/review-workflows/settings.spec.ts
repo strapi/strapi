@@ -68,4 +68,64 @@ describeOnCondition(edition === 'EE')('settings', () => {
       await expect(page.getByRole('option', { name: stage })).toBeVisible();
     }
   });
+
+  test('as a user I want to be able to edit an existing workflow', async ({ page }) => {
+    await page.getByRole('link', { name: 'Settings' }).click();
+    await page.getByRole('link', { name: 'Review Workflows' }).click();
+
+    // Click on the existing workflow
+    await page.getByRole('link', { name: 'Default' }).click();
+
+    // Edit workflow name
+    await page.getByRole('textbox', { name: 'Workflow Name' }).fill('Updated Workflow');
+
+    // Add a new stage
+    await page.getByRole('button', { name: 'Add new stage' }).click();
+    await page
+      .getByRole('region', { name: '', exact: true })
+      .getByLabel('Stage name*')
+      .fill('New Stage');
+    await page.getByRole('region', { name: 'New Stage' }).getByLabel('Color').click();
+    await page.getByRole('option', { name: 'Yellow', exact: true }).click();
+
+    // Save changes
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Updated Workflow');
+
+    // Verify changes
+    await expect(page.getByRole('heading', { name: 'Updated Workflow' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'New Stage' })).toBeVisible();
+  });
+
+  test('as a user I want to be able to set a required stage for publishing', async ({ page }) => {
+    await page.getByRole('link', { name: 'Settings' }).click();
+    await page.getByRole('link', { name: 'Review Workflows' }).click();
+
+    // Click on the existing workflow
+    await page.getByRole('link', { name: 'Default' }).click();
+
+    // Add a new stage
+    await page.getByRole('button', { name: 'Add new stage' }).click();
+    await page
+      .getByRole('region', { name: '', exact: true })
+      .getByLabel('Stage name*')
+      .fill('Required Stage');
+    await page.getByRole('region', { name: 'Required Stage' }).getByLabel('Color').click();
+    await page.getByRole('option', { name: 'Yellow', exact: true }).click();
+
+    // Set the new stage as required for publishing
+    await page.getByRole('combobox', { name: 'Required stage for publishing' }).click();
+    await page.getByRole('option', { name: 'Required Stage' }).click();
+
+    // Save changes
+    await page.getByRole('button', { name: 'Save' }).click();
+    await findAndClose(page, 'Updated Workflow');
+
+    // Verify changes
+    const requiredStageCombobox = page.getByRole('combobox', {
+      name: 'Required stage for publishing',
+    });
+    await expect(requiredStageCombobox).toBeVisible();
+    await expect(requiredStageCombobox.locator('span').first()).toHaveText('Required Stage');
+  });
 });
