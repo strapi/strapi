@@ -190,13 +190,13 @@ const handlers = [
   }),
 
   rest.get('*/an-image.png', (req, res, ctx) =>
-    res(ctx.set('Content-Type', 'image/png'), ctx.body('Successfull response'))
+    res(ctx.set('Content-Type', 'image/png'), ctx.body('Successful response'))
   ),
   rest.get('*/a-pdf.pdf', (req, res, ctx) =>
-    res(ctx.set('Content-Type', 'application/pdf'), ctx.body('Successfull response'))
+    res(ctx.set('Content-Type', 'application/pdf'), ctx.body('Successful response'))
   ),
   rest.get('*/a-video.mp4', (req, res, ctx) =>
-    res(ctx.set('Content-Type', 'video/mp4'), ctx.body('Successfull response'))
+    res(ctx.set('Content-Type', 'video/mp4'), ctx.body('Successful response'))
   ),
   rest.get('*/not-working-like-cors.lutin', (req, res, ctx) => res(ctx.json({}))),
   rest.get('*/some-where-not-existing.jpg', (req, res) => res.networkError('Failed to fetch')),
