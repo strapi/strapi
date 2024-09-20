@@ -29,8 +29,7 @@ const validateStructureMoveManyFoldersFilesSchema = yup
 
 const validateDuplicatesMoveManyFoldersFilesSchema = yup
   .object()
-  // eslint-disable-next-line func-names
-  .test('are-folders-unique', 'some folders already exist', async function (value) {
+  .test('are-folders-unique', 'some folders already exist', async function areFoldersUnique(value) {
     const { folderIds, destinationFolderId } = value;
     if (isEmpty(folderIds)) return true;
 
@@ -54,39 +53,40 @@ const validateDuplicatesMoveManyFoldersFilesSchema = yup
     return true;
   });
 
-const validateMoveFoldersNotInsideThemselvesSchema = yup.object().test(
-  'dont-move-inside-self',
-  'folders cannot be moved inside themselves or one of its children',
-  // eslint-disable-next-line func-names
-  async function (value) {
-    const { folderIds, destinationFolderId } = value;
-    if (destinationFolderId === null || isEmpty(folderIds)) return true;
+const validateMoveFoldersNotInsideThemselvesSchema = yup
+  .object()
+  .test(
+    'dont-move-inside-self',
+    'folders cannot be moved inside themselves or one of its children',
+    async function validateMoveFoldersNotInsideThemselves(value) {
+      const { folderIds, destinationFolderId } = value;
+      if (destinationFolderId === null || isEmpty(folderIds)) return true;
 
-    const destinationFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({
-      select: ['path'],
-      where: { id: destinationFolderId },
-    });
-
-    const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
-      select: ['name', 'path'],
-      where: { id: { $in: folderIds } },
-    });
-
-    const unmovableFoldersNames = folders
-      .filter((folder) => isFolderOrChild(destinationFolder, folder))
-      .map((f) => f.name);
-
-    if (unmovableFoldersNames.length > 0) {
-      return this.createError({
-        message: `folders cannot be moved inside themselves or one of its children: ${unmovableFoldersNames.join(
-          ', '
-        )}`,
+      const destinationFolder = await strapi.db.query(FOLDER_MODEL_UID).findOne({
+        select: ['path'],
+        where: { id: destinationFolderId },
       });
-    }
 
-    return true;
-  }
-);
+      const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
+        select: ['name', 'path'],
+        where: { id: { $in: folderIds } },
+      });
+
+      const unmovableFoldersNames = folders
+        .filter((folder) => isFolderOrChild(destinationFolder, folder))
+        .map((f) => f.name);
+
+      if (unmovableFoldersNames.length > 0) {
+        return this.createError({
+          message: `folders cannot be moved inside themselves or one of its children: ${unmovableFoldersNames.join(
+            ', '
+          )}`,
+        });
+      }
+
+      return true;
+    }
+  );
 
 export const validateDeleteManyFoldersFiles = validateYupSchema(
   validateDeleteManyFoldersFilesSchema

@@ -5,8 +5,12 @@ import set from 'lodash/set';
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
 import { init, initialState } from './init';
 
-// eslint-disable-next-line default-param-last
-const reducer = (state = initialState, action) =>
+const reducer = (
+  state = initialState,
+  action = {
+    type: '',
+  }
+) =>
   // eslint-disable-next-line consistent-return
   produce(state, (draftState) => {
     switch (action.type) {
