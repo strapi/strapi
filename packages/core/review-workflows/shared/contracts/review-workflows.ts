@@ -117,7 +117,7 @@ namespace Update {
   export interface Request {
     body: {
       data: Partial<Omit<Workflow, 'stageRequiredToPublish'>> & {
-        stageRequiredToPublish?: Stage['name'] | null;
+        stageRequiredToPublishName?: Stage['name'] | null;
       };
     };
     query: {};
@@ -139,7 +139,7 @@ namespace Create {
       data: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'> & {
         // We cannot use id because the stage could be not created yet
         // And considering name is unique inside the workflow, name is a better option
-        stageRequiredToPublish?: Stage['name'] | null;
+        stageRequiredToPublishName?: Stage['name'] | null;
       };
     };
     query: {};

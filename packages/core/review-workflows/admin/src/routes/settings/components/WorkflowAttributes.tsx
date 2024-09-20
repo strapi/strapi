@@ -216,10 +216,13 @@ const StageSelector = ({ disabled }: StageSelectorProps) => {
 
   const { error, value, onChange } = useField('stageRequiredToPublish');
 
+  // stages with empty names are not valid, so we avoid them from being used to avoid errors
+  const validStages = stages.filter((stage) => stage.name);
+
   return (
     <Field.Root
       error={error}
-      name={'stageRequiredToPublish'}
+      name="stageRequiredToPublish"
       hint={formatMessage({
         id: 'settings.review-workflows.workflow.stageRequiredToPublish.hint',
         defaultMessage:
@@ -245,8 +248,11 @@ const StageSelector = ({ disabled }: StageSelectorProps) => {
             defaultMessage: 'Any stage',
           })}
         </SingleSelectOption>
-        {stages.map((stage, i) => (
-          <SingleSelectOption key={`requiredForPublishStage-${i}`} value={stage.name}>
+        {validStages.map((stage, i) => (
+          <SingleSelectOption
+            key={`requiredToPublishStage-${stage.id || stage.__temp_key__}`}
+            value={stage.id?.toString() || stage.__temp_key__}
+          >
             {stage.name}
           </SingleSelectOption>
         ))}

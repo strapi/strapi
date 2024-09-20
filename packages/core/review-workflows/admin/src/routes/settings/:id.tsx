@@ -103,11 +103,10 @@ const WORKFLOW_SCHEMA = yup.object({
             })
           )
           .strict(),
-
-        stageRequiredToPublish: yup.string().nullable(),
       })
     )
     .min(1),
+  stageRequiredToPublish: yup.string().nullable(),
 });
 
 const EditPage = () => {
@@ -183,8 +182,13 @@ const EditPage = () => {
               permissions: hasUpdatedPermissions ? stage.permissions : undefined,
             } satisfies Stage;
           }),
-          stageRequiredToPublish:
-            data.stageRequiredToPublish === '' ? null : data.stageRequiredToPublish,
+          stageRequiredToPublishName: data.stageRequiredToPublish
+            ? data.stages.find(
+                (stage) =>
+                  stage.id === Number(data.stageRequiredToPublish) ||
+                  stage.__temp_key__ === data.stageRequiredToPublish
+              )?.name
+            : null,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -193,8 +197,14 @@ const EditPage = () => {
       } else {
         const res = await create({
           ...data,
-          stageRequiredToPublish:
-            data.stageRequiredToPublish === '' ? null : data.stageRequiredToPublish,
+          stageRequiredToPublishName:
+            data.stageRequiredToPublish === ''
+              ? null
+              : data.stages.find(
+                  (stage) =>
+                    stage.id === Number(data.stageRequiredToPublish) ||
+                    stage.__temp_key__ === data.stageRequiredToPublish
+                )?.name,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -314,7 +324,7 @@ const EditPage = () => {
         name: currentWorkflow.name,
         stages: addTmpKeysToStages(currentWorkflow.stages),
         contentTypes: currentWorkflow.contentTypes,
-        stageRequiredToPublish: currentWorkflow.stageRequiredToPublish?.name ?? '',
+        stageRequiredToPublish: currentWorkflow.stageRequiredToPublish?.id.toString() ?? '',
       };
     }
   }, [currentWorkflow, isCreatingWorkflow]);

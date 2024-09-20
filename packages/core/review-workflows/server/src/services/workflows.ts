@@ -87,9 +87,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         createOpts = set('data.stages', mapIds(stages), createOpts);
 
-        if (opts.data.stageRequiredToPublish) {
+        if (opts.data.stageRequiredToPublishName) {
           const stageRequiredToPublish = stages.find(
-            (stage: any) => stage.name === opts.data.stageRequiredToPublish
+            (stage: any) => stage.name === opts.data.stageRequiredToPublishName
           );
           if (!stageRequiredToPublish) {
             throw new errors.ApplicationError('Stage required to publish does not exist');
@@ -148,14 +148,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           updateOpts = set('data.stages', updatedStageIds, updateOpts);
         }
 
-        if (opts.data.stageRequiredToPublish !== undefined) {
+        if (opts.data.stageRequiredToPublishName !== undefined) {
           const stages = updatedStages ?? workflow.stages;
 
-          if (opts.data.stageRequiredToPublish === null) {
+          if (opts.data.stageRequiredToPublishName === null) {
             updateOpts = set('data.stageRequiredToPublish', null, updateOpts);
           } else {
             const stageRequiredToPublish = stages.find(
-              (stage: any) => stage.name === opts.data.stageRequiredToPublish
+              (stage: any) => stage.name === opts.data.stageRequiredToPublishName
             );
 
             if (!stageRequiredToPublish) {
