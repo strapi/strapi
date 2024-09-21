@@ -166,6 +166,7 @@ class Database {
   getConnection(): Knex;
   getConnection(tableName?: string): Knex.QueryBuilder;
   getConnection(tableName?: string): Knex | Knex.QueryBuilder {
+    if (!tableName) return this.connection;
     const schema = this.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
     return schema ? connection.withSchema(schema) : connection;
