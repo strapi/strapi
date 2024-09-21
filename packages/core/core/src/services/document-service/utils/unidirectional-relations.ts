@@ -86,7 +86,7 @@ const sync = async (
   );
 
   await strapi.db.transaction(async ({ trx }) => {
-    const con = strapi.db.getConnection();
+    const con = await strapi.db.getConnection();
 
     // Iterate old relations that are deleted and insert the new ones
     for (const { joinTable, relations } of oldRelations) {
