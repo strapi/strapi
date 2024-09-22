@@ -150,12 +150,25 @@ const cleanSchemaAttributes = (
           const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
           return finalComponentSchema;
         });
+        let discriminator: OpenAPIV3.DiscriminatorObject | undefined;
+        if (components.every(component => Object.hasOwn(component, '$ref'))) {
+          discriminator = {
+            propertyName: '__component',
+            mapping: attribute.components.reduce((acc, component) => {
+              acc[component] = `#/components/schemas/${pascalCase(component)}Component`;
+              return acc;
+            }, {} as {
+              [value: string]: string;
+            })
+          };
+        }
 
         schemaAttributes[prop] = {
           type: 'array',
           items: {
             anyOf: components,
           },
+          discriminator
         };
         break;
       }
