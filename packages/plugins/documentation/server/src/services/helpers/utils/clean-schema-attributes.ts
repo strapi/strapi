@@ -130,7 +130,7 @@ const cleanSchemaAttributes = (
             type: 'object',
             properties: {
               ...(isRequest ? {} : { id: { type: 'number' } }),
-              __component: { type: 'string' },
+              __component: { type: 'string', enum: [component] },
               ...cleanSchemaAttributes(componentAttributes, {
                 typeMap,
                 isRequest,
