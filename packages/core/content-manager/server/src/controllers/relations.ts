@@ -458,7 +458,7 @@ export default {
       ordering: 'desc',
     });
 
-    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
+    const relationsUnion = uniqBy('documentId', concat(sanitizedRes.results, res.results));
 
     ctx.body = {
       pagination: res.pagination || {

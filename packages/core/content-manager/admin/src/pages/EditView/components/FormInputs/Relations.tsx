@@ -84,7 +84,12 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
       }
     }
 
-    addFieldRow(`${fieldName}.disconnect`, { id: relation.id });
+    addFieldRow(`${fieldName}.disconnect`, {
+      id: relation.id,
+      api_data: {
+        documentId: relation.documentId,
+      },
+    });
   };
 
   return handleDisconnect;
@@ -145,14 +150,17 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
 
-    const { id: componentId, uid } = useComponent('RelationsField', ({ uid, id }) => ({ id, uid }));
+    const { id: componentId, uid: componentUID } = useComponent(
+      'RelationsField',
+      ({ uid, id }) => ({ id, uid })
+    );
 
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = uid ?? documentModel;
+    const model = componentUID ?? documentModel;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -259,6 +267,10 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
       const item = {
         id: relation.id,
+        api_data: {
+          documentId: relation.documentId,
+          locale: relation.locale,
+        },
         status: relation.status,
         /**
          * If there's a last item, that's the first key we use to generate out next one.
@@ -268,7 +280,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, props.mainField),
         // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
-        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}`,
+        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
       };
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
@@ -294,7 +306,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
           <RelationsInput
             disabled={isDisabled}
-            id={id}
+            // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
+            id={componentUID ? (componentId ? `${componentId}` : '') : documentId}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
             onChange={handleConnect}
@@ -389,7 +402,7 @@ const addLabelAndHref =
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
         [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, mainField),
-        href: `${href}/${relation.documentId}`,
+        href: `${href}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
       };
     });
 
@@ -454,6 +467,7 @@ const RelationsInput = ({
      * individual components. Therefore we split the string and take the last item.
      */
     const [targetField] = name.split('.').slice(-1);
+
     searchForTrigger({
       model,
       targetField,
