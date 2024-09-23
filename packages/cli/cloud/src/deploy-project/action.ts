@@ -6,7 +6,13 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
-import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfos } from '../types';
+import type {
+  CLIContext,
+  CloudApiService,
+  CloudCliConfig,
+  GetProjectResponse,
+  ProjectInput,
+} from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { notificationServiceFactory } from '../services/notification';
@@ -24,7 +30,7 @@ type PackageJson = {
 
 async function upload(
   ctx: CLIContext,
-  project: ProjectInfos,
+  project: ProjectInput,
   token: string,
   maxProjectFileSize: number
 ) {
@@ -143,34 +149,27 @@ async function getConfig({
   }
 }
 
-export default async (ctx: CLIContext) => {
-  const { getValidToken } = await tokenServiceFactory(ctx);
-  const token = await getValidToken(ctx, promptLogin);
-  if (!token) {
-    return;
+function assertProjectSuspension(
+  ctx: CLIContext,
+  projectSuspendedAt: string | undefined,
+  projectPageURL: string
+): asserts projectSuspendedAt is undefined {
+  if (projectSuspendedAt) {
+    ctx.logger.log(
+      '\n Oops! This project has been suspended. \n\n Please reactivate it from the dashboard to continue deploying: '
+    );
+    ctx.logger.log(chalk.underline(projectPageURL));
+    throw new Error('Project is suspended');
   }
+}
 
-  const project = await getProject(ctx);
-  if (!project) {
-    return;
-  }
-
-  const cloudApiService = await cloudApiFactory(ctx, token);
-
+async function getProjectData(
+  { ctx, cloudApiService }: { ctx: CLIContext; cloudApiService: CloudApiService },
+  projectInternalName: string
+): Promise<GetProjectResponse | null> {
   try {
-    const {
-      data: { data: projectData, metadata },
-    } = await cloudApiService.getProject({ name: project.name });
-
-    const isProjectSuspended = projectData.suspendedAt;
-
-    if (isProjectSuspended) {
-      ctx.logger.log(
-        '\n Oops! This project has been suspended. \n\n Please reactivate it from the dashboard to continue deploying: '
-      );
-      ctx.logger.log(chalk.underline(`${metadata.dashboardUrls.project}`));
-      return;
-    }
+    const { data } = await cloudApiService.getProject({ name: projectInternalName });
+    return data;
   } catch (e: Error | unknown) {
     if (e instanceof AxiosError && e.response?.data) {
       if (e.response.status === 404) {
@@ -188,6 +187,33 @@ export default async (ctx: CLIContext) => {
       );
     }
     ctx.logger.debug(e);
+    return null;
+  }
+}
+
+export default async (ctx: CLIContext) => {
+  const { getValidToken } = await tokenServiceFactory(ctx);
+  const token = await getValidToken(ctx, promptLogin);
+  if (!token) {
+    return;
+  }
+
+  const project = await getProject(ctx);
+
+  if (!project) {
+    return;
+  }
+  const cloudApiService = await cloudApiFactory(ctx, token);
+  const projectResponse = await getProjectData({ ctx, cloudApiService }, project.name);
+
+  if (!projectResponse) {
+    return;
+  }
+  const { data: projectData, metadata: projectMetadata } = projectResponse;
+
+  try {
+    assertProjectSuspension(ctx, projectData.suspendedAt, projectMetadata.dashboardUrls.project);
+  } catch (e) {
     return;
   }
 
@@ -227,9 +253,7 @@ export default async (ctx: CLIContext) => {
     ctx.logger.log(
       'Visit the following URL for deployment logs. Your deployment will be available here shortly.'
     );
-    ctx.logger.log(
-      chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`)
-    );
+    ctx.logger.log(chalk.underline(projectMetadata.dashboardUrls.deployments));
   } catch (e: Error | unknown) {
     ctx.logger.debug(e);
     if (e instanceof Error) {

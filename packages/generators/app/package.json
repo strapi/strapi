@@ -54,7 +54,7 @@
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.1",
     "semver": "7.5.4",
-    "tar": "6.1.13"
+    "tar": "6.2.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
