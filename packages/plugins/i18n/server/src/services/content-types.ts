@@ -1,10 +1,15 @@
 import _ from 'lodash';
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray, difference } from 'lodash/fp';
+import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getService } from '../utils';
 
-const { isRelationalAttribute, getVisibleAttributes, isTypedAttribute, getScalarAttributes } =
-  contentTypeUtils;
+const {
+  isRelationalAttribute,
+  getVisibleAttributes,
+  isTypedAttribute,
+  getScalarAttributes,
+  getRelationalAttributes,
+} = contentTypeUtils;
 const { ApplicationError } = errors;
 
 const hasLocalizedOption = (modelOrAttribute: any) => {
@@ -24,53 +29,6 @@ const getValidLocale = async (locale: any) => {
   }
 
   return locale;
-};
-
-/**
- * Get the related entity used for entity creation
- * @param {Object} relatedEntity related entity
- * @returns {id[]} related entity
- */
-const getNewLocalizationsFrom = async (relatedEntity: any) => {
-  if (relatedEntity) {
-    return [relatedEntity.id, ...relatedEntity.localizations.map(prop('id'))];
-  }
-
-  return [];
-};
-
-/**
- * Get the related entity used for entity creation
- * @param {id} relatedEntityId related entity id
- * @param {string} model corresponding model
- * @param {string} locale locale of the entity to create
- * @returns {Object} related entity
- */
-const getAndValidateRelatedEntity = async (relatedEntityId: any, model: any, locale: any) => {
-  const { kind } = strapi.getModel(model) as any;
-  let relatedEntity;
-
-  if (kind === 'singleType') {
-    relatedEntity = await strapi.query(model).findOne({ populate: ['localizations'] });
-  } else if (relatedEntityId) {
-    relatedEntity = await strapi
-      .query(model)
-      .findOne({ where: { id: relatedEntityId }, populate: ['localizations'] });
-  }
-
-  if (relatedEntityId && !relatedEntity) {
-    throw new ApplicationError("The related entity doesn't exist");
-  }
-
-  if (
-    relatedEntity &&
-    (relatedEntity.locale === locale ||
-      relatedEntity.localizations.map(prop('locale')).includes(locale))
-  ) {
-    throw new ApplicationError('The entity already exists in this locale');
-  }
-
-  return relatedEntity;
 };
 
 /**
@@ -196,9 +154,19 @@ const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
   const schema = strapi.getModel(modelUID);
   const scalarAttributes = getScalarAttributes(schema);
   const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
-  const currentAttributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
-  const attributesToPopulate = [...currentAttributesToPopulate];
 
+  const allAttributes = [...scalarAttributes, ...nonLocalizedAttributes];
+  if (schema.modelType === 'component') {
+    // When called recursively on a non localized component we
+    // need to explicitly populate that components relations
+    allAttributes.push(...getRelationalAttributes(schema));
+  }
+
+  const currentAttributesToPopulate = allAttributes.filter((value, index, self) => {
+    return self.indexOf(value) === index && self.lastIndexOf(value) === index;
+  });
+
+  const attributesToPopulate = [...currentAttributesToPopulate];
   for (const attrName of currentAttributesToPopulate) {
     const attr = schema.attributes[attrName];
     if (attr.type === 'component') {
@@ -222,11 +190,9 @@ const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
 const contentTypes = () => ({
   isLocalizedContentType,
   getValidLocale,
-  getNewLocalizationsFrom,
   getLocalizedAttributes,
   getNonLocalizedAttributes,
   copyNonLocalizedAttributes,
-  getAndValidateRelatedEntity,
   fillNonLocalizedAttributes,
   getNestedPopulateOfNonLocalizedAttributes,
 });

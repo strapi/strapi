@@ -5,50 +5,45 @@ import {
   Button,
   Flex,
   Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   Typography,
+  Breadcrumbs,
+  Crumb,
 } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import {
-  Form,
-  GenericInput,
-  useNotification,
-  useOverlayBlocker,
-  translatedErrors,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
-import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import { Form, type FormHelpers } from '../../../../../components/Form';
+import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { useNotification } from '../../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 import { useCreateUserMutation } from '../../../../../services/users';
-import { FormLayout } from '../../../../../types/form';
+import { FormLayoutInputProps } from '../../../../../types/forms';
 import { isBaseQueryError } from '../../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../../utils/translatedErrors';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
+
+import type { Data } from '@strapi/types';
 
 interface ModalFormProps {
   onToggle: () => void;
 }
 
+type FormLayout = FormLayoutInputProps[][];
+
 const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const roleLayout = useEnterprise(
+  const roleLayout = useEnterprise<FormLayout, FormLayout, FormLayout>(
     ROLE_LAYOUT,
     async () =>
       (
@@ -101,30 +96,22 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     defaultMessage: 'Invite new user',
   });
 
-  const handleSubmit = async (body: InitialData, { setErrors }: FormikHelpers<InitialData>) => {
-    // @ts-expect-error – this will be fixed in V5.
-    lockApp();
-
+  const handleSubmit = async (body: InitialData, { setErrors }: FormHelpers<InitialData>) => {
     const res = await createUser({
       ...body,
       roles: body.roles ?? [],
     });
 
     if ('data' in res) {
+      // NOTE: when enabling SSO, the user doesn't have to register and the token is undefined
       if (res.data.registrationToken) {
         setRegistrationToken(res.data.registrationToken);
-
-        goNext();
-      } else {
-        // This shouldn't happen, but just incase.
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
       }
+
+      goNext();
     } else {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(res.error),
       });
 
@@ -132,9 +119,6 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
         setErrors(formatValidationErrors(res.error));
       }
     }
-
-    // @ts-expect-error – this will be fixed in V5.
-    unlockApp();
   };
 
   const goNext = () => {
@@ -153,104 +137,112 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   }
 
   return (
-    <ModalLayout onClose={onToggle} labelledBy="title">
-      <ModalHeader>
-        {/**
-         * TODO: this is not semantically correct and should be amended.
-         */}
-        <Breadcrumbs label={headerTitle}>
-          <Crumb isCurrent>{headerTitle}</Crumb>
-        </Breadcrumbs>
-      </ModalHeader>
-      <Formik
-        enableReinitialize
-        initialValues={initialValues ?? {}}
-        onSubmit={handleSubmit}
-        validationSchema={FORM_SCHEMA}
-        validateOnChange={false}
-      >
-        {({ errors, handleChange, values, isSubmitting }) => {
-          return (
-            <Form>
-              <ModalBody>
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
-                  <Box>
-                    <Typography variant="beta" as="h2">
-                      {formatMessage({
-                        id: 'app.components.Users.ModalCreateBody.block-title.details',
-                        defaultMessage: 'User details',
-                      })}
-                    </Typography>
-                    <Box paddingTop={4}>
-                      <Flex direction="column" alignItems="stretch" gap={1}>
-                        <Grid gap={5}>
-                          {FORM_LAYOUT.map((row) => {
-                            return row.map((input) => {
+    <Modal.Root defaultOpen onOpenChange={onToggle}>
+      <Modal.Content>
+        <Modal.Header>
+          {/**
+           * TODO: this is not semantically correct and should be amended.
+           */}
+          <Breadcrumbs label={headerTitle}>
+            <Crumb isCurrent>{headerTitle}</Crumb>
+          </Breadcrumbs>
+        </Modal.Header>
+        <Form
+          method={currentStep === 'create' ? 'POST' : 'PUT'}
+          initialValues={initialValues ?? {}}
+          onSubmit={handleSubmit}
+          validationSchema={FORM_SCHEMA}
+        >
+          {({ isSubmitting }) => {
+            return (
+              <>
+                <Modal.Body>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
+                    {currentStep !== 'create' && (
+                      <MagicLink registrationToken={registrationToken} />
+                    )}
+                    <Box>
+                      <Typography variant="beta" tag="h2">
+                        {formatMessage({
+                          id: 'app.components.Users.ModalCreateBody.block-title.details',
+                          defaultMessage: 'User details',
+                        })}
+                      </Typography>
+                      <Box paddingTop={4}>
+                        <Flex direction="column" alignItems="stretch" gap={1}>
+                          <Grid.Root gap={5}>
+                            {FORM_LAYOUT.map((row) => {
+                              return row.map(({ size, ...field }) => {
+                                return (
+                                  <Grid.Item
+                                    key={field.name}
+                                    col={size}
+                                    direction="column"
+                                    alignItems="stretch"
+                                  >
+                                    <InputRenderer
+                                      {...field}
+                                      disabled={isDisabled}
+                                      label={formatMessage(field.label)}
+                                      placeholder={formatMessage(field.placeholder)}
+                                    />
+                                  </Grid.Item>
+                                );
+                              });
+                            })}
+                          </Grid.Root>
+                        </Flex>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Typography variant="beta" tag="h2">
+                        {formatMessage({
+                          id: 'global.roles',
+                          defaultMessage: "User's role",
+                        })}
+                      </Typography>
+                      <Box paddingTop={4}>
+                        <Grid.Root gap={5}>
+                          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
+                            <SelectRoles disabled={isDisabled} />
+                          </Grid.Item>
+                          {roleLayout.map((row) => {
+                            return row.map(({ size, ...field }) => {
                               return (
-                                <GridItem key={input.name} {...input.size}>
-                                  <GenericInput
-                                    {...input}
+                                <Grid.Item
+                                  key={field.name}
+                                  col={size}
+                                  direction="column"
+                                  alignItems="stretch"
+                                >
+                                  <InputRenderer
+                                    {...field}
                                     disabled={isDisabled}
-                                    error={errors[input.name as keyof InitialData]}
-                                    onChange={handleChange}
-                                    value={values[input.name as keyof InitialData]}
+                                    label={formatMessage(field.label)}
+                                    placeholder={
+                                      field.placeholder
+                                        ? formatMessage(field.placeholder)
+                                        : undefined
+                                    }
+                                    hint={field.hint ? formatMessage(field.hint) : undefined}
                                   />
-                                </GridItem>
+                                </Grid.Item>
                               );
                             });
                           })}
-                        </Grid>
-                      </Flex>
+                        </Grid.Root>
+                      </Box>
                     </Box>
-                  </Box>
-                  <Box>
-                    <Typography variant="beta" as="h2">
-                      {formatMessage({
-                        id: 'global.roles',
-                        defaultMessage: "User's role",
-                      })}
-                    </Typography>
-                    <Box paddingTop={4}>
-                      <Grid gap={5}>
-                        <GridItem col={6} xs={12}>
-                          <SelectRoles
-                            disabled={isDisabled}
-                            error={errors.roles}
-                            onChange={handleChange}
-                            value={values.roles ?? []}
-                          />
-                        </GridItem>
-                        {roleLayout.map((row) => {
-                          return row.map((input) => {
-                            return (
-                              <GridItem key={input.name} {...input.size}>
-                                <GenericInput
-                                  {...input}
-                                  disabled={isDisabled}
-                                  onChange={handleChange}
-                                  value={values[input.name]}
-                                />
-                              </GridItem>
-                            );
-                          });
-                        })}
-                      </Grid>
-                    </Box>
-                  </Box>
-                </Flex>
-              </ModalBody>
-              <ModalFooter
-                startActions={
+                  </Flex>
+                </Modal.Body>
+                <Modal.Footer>
                   <Button variant="tertiary" onClick={onToggle} type="button">
                     {formatMessage({
                       id: 'app.components.Button.cancel',
                       defaultMessage: 'Cancel',
                     })}
                   </Button>
-                }
-                endActions={
-                  currentStep === 'create' ? (
+                  {currentStep === 'create' ? (
                     <Button type="submit" loading={isSubmitting}>
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
@@ -258,14 +250,14 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                     <Button type="button" loading={isSubmitting} onClick={onToggle}>
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
-                  )
-                }
-              />
-            </Form>
-          );
-        }}
-      </Formik>
-    </ModalLayout>
+                  )}
+                </Modal.Footer>
+              </>
+            );
+          }}
+        </Form>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 
@@ -273,7 +265,7 @@ interface InitialData {
   firstname?: string;
   lastname?: string;
   email?: string;
-  roles?: Entity.ID[];
+  roles?: Data.ID[];
   useSSORegistration?: boolean;
 }
 
@@ -284,12 +276,12 @@ const FORM_INITIAL_VALUES = {
   roles: [],
 };
 
-const ROLE_LAYOUT = [] satisfies FormLayout[][];
+const ROLE_LAYOUT: FormLayout = [];
 
 const FORM_LAYOUT = [
   [
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.firstname.label',
         defaultMessage: 'First name',
       },
@@ -298,15 +290,12 @@ const FORM_LAYOUT = [
         id: 'Auth.form.firstname.placeholder',
         defaultMessage: 'e.g. Kai',
       },
-      type: 'text',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'string' as const,
+      size: 6,
       required: true,
     },
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.lastname.label',
         defaultMessage: 'Last name',
       },
@@ -315,16 +304,13 @@ const FORM_LAYOUT = [
         id: 'Auth.form.lastname.placeholder',
         defaultMessage: 'e.g. Doe',
       },
-      type: 'text',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'string' as const,
+      size: 6,
     },
   ],
   [
     {
-      intlLabel: {
+      label: {
         id: 'Auth.form.email.label',
         defaultMessage: 'Email',
       },
@@ -333,21 +319,41 @@ const FORM_LAYOUT = [
         id: 'Auth.form.email.placeholder',
         defaultMessage: 'e.g. kai.doe@strapi.io',
       },
-      type: 'email',
-      size: {
-        col: 6,
-        xs: 12,
-      },
+      type: 'email' as const,
+      size: 6,
       required: true,
     },
   ],
-] satisfies FormLayout[][];
+] satisfies FormLayout;
 
 const FORM_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required(translatedErrors.required),
+  firstname: yup
+    .string()
+    .trim()
+    .required({
+      id: translatedErrors.required.id,
+      defaultMessage: 'This field is required',
+    })
+    .nullable(),
   lastname: yup.string(),
-  email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
-  roles: yup.array().min(1, translatedErrors.required).required(translatedErrors.required),
+  email: yup
+    .string()
+    .email(translatedErrors.email)
+    .required({
+      id: translatedErrors.required.id,
+      defaultMessage: 'This field is required',
+    })
+    .nullable(),
+  roles: yup
+    .array()
+    .min(1, {
+      id: translatedErrors.required.id,
+      defaultMessage: 'This field is required',
+    })
+    .required({
+      id: translatedErrors.required.id,
+      defaultMessage: 'This field is required',
+    }),
 });
 
 const STEPPER = {

@@ -1,9 +1,124 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditFolderDialog renders and matches the snapshot 1`] = `
+.c0 {
+  margin-inline-start: -250px;
+  top: 4.6rem;
+  left: 50%;
+  width: 50rem;
+  z-index: 700;
+  position: fixed;
+}
+
+.c5 {
+  padding-block-start: 16px;
+  padding-inline-end: 20px;
+  padding-block-end: 16px;
+  padding-inline-start: 20px;
+  background: #f6f6f9;
+}
+
+.c9 {
+  border-radius: 4px;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.c24 {
+  padding-inline-end: 12px;
+}
+
+.c28 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c1 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c6 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c10 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c16 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c18 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c21 {
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c29 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c32 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c8 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c19 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+  font-weight: 600;
+}
+
+.c31 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
 .c2 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,253 +128,12 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c31 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c0 {
-  margin-left: -250px;
-  position: fixed;
-  left: 50%;
-  top: 2.875rem;
-  z-index: 10;
-  width: 31.25rem;
-}
-
-.c3 {
-  padding-right: 40px;
-  padding-left: 40px;
-  position: fixed;
-  z-index: 4;
-}
-
-.c6 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-  width: 51.875rem;
-}
-
-.c7 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
-}
-
-.c12 {
-  background: #ffffff;
-  padding: 8px;
-  border-radius: 4px;
-  border-color: #dcdce4;
-  border: 1px solid #dcdce4;
-  cursor: pointer;
-}
-
-.c15 {
-  padding: 32px;
-}
-
-.c24 {
-  padding-right: 12px;
-}
-
-.c29 {
-  background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
-  cursor: pointer;
-}
-
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.c4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c9 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c19 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c28 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c13 {
-  position: relative;
-  outline: none;
-}
-
-.c13 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c13 > svg > g,
-.c13 > svg path {
-  fill: #ffffff;
-}
-
-.c13[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c13:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c13:focus-visible {
-  outline: none;
-}
-
-.c13:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
 .c30 {
-  height: 2rem;
+  height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
-}
-
-.c30 svg {
-  height: 0.75rem;
-  width: auto;
-}
-
-.c30[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c30[aria-disabled='true'] .c10 {
-  color: #666687;
-}
-
-.c30[aria-disabled='true'] svg > g,
-.c30[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c30[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c30[aria-disabled='true']:active .c10 {
-  color: #666687;
-}
-
-.c30[aria-disabled='true']:active svg > g,
-.c30[aria-disabled='true']:active svg path {
-  fill: #666687;
+  color: #32324d;
 }
 
 .c30:hover {
@@ -270,109 +144,84 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   background-color: #eaeaef;
 }
 
-.c30 .c10 {
-  color: #32324d;
-}
-
-.c30 svg > g,
-.c30 svg path {
-  fill: #32324d;
-}
-
-.c32 {
-  height: 2rem;
-}
-
-.c32 svg {
-  height: 0.75rem;
-  width: auto;
-}
-
-.c32[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c32[aria-disabled='true'] .c10 {
   color: #666687;
+  cursor: default;
 }
 
-.c32[aria-disabled='true'] svg > g,
-.c32[aria-disabled='true'] svg path {
-  fill: #666687;
+.c33 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+  color: #ffffff;
 }
 
-.c32[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c32[aria-disabled='true']:active .c10 {
-  color: #666687;
-}
-
-.c32[aria-disabled='true']:active svg > g,
-.c32[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c32:hover {
+.c33:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c32:active {
+.c33:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c32 svg > g,
-.c32 svg path {
-  fill: #ffffff;
+.c33[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
-.c21 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
+.c11 {
+  text-decoration: none;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+  color: #8e8ea9;
+}
+
+.c11:hover {
+  background-color: #f6f6f9;
+  color: #666687;
+}
+
+.c11:active {
+  background-color: #eaeaef;
+}
+
+.c11[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c20 {
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c23 {
   border: none;
   border-radius: 4px;
-  padding-bottom: 0.65625rem;
-  padding-left: 16px;
-  padding-right: 16px;
-  padding-top: 0.65625rem;
   color: #32324d;
   font-weight: 400;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
   display: block;
   width: 100%;
   background: inherit;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  padding-block: 8px;
 }
 
-.c23::-webkit-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c23::-moz-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c23:-ms-input-placeholder {
-  color: #8e8ea9;
-  opacity: 1;
-}
-
-.c23::placeholder {
+.c23 ::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
@@ -390,11 +239,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
+  padding-inline-start: 0;
+  position: relative;
   outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
+  box-shadow: none;
   transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
 }
 
@@ -403,57 +252,74 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c17 {
-  display: grid;
-  grid-template-columns: repeat(12,1fr);
-  gap: 16px;
-}
-
-.c18 {
-  grid-column: span 6;
-  max-width: 100%;
+.c12 {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
 }
 
 .c14 {
-  border-color: #dcdce4;
-  height: 2rem;
-  width: 2rem;
+  min-width: 100%;
+  padding-inline: 4px;
 }
 
-.c14 svg g,
-.c14 svg path {
-  fill: #8e8ea9;
-}
-
-.c14:hover svg g,
-.c14:focus svg g,
-.c14:hover svg path,
-.c14:focus svg path {
-  fill: #666687;
-}
-
-.c14[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c5 {
-  background: #32324d1F;
+.c3 {
+  background: #32324d33;
+  position: fixed;
   inset: 0;
+  z-index: 300;
 }
 
-.c8 {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #eaeaef;
+.c4 {
+  max-width: 83rem;
+  max-height: 90vh;
+  height: auto;
+  width: 60%;
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
+  z-index: 310;
+}
+
+.c7 {
+  border-bottom: solid 1px #eaeaef;
+}
+
+.c13 {
+  padding-inline: 40px;
+}
+
+.c13>div {
+  padding-block: 40px;
+}
+
+.c13>div>div {
+  display: block!important;
 }
 
 .c27 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
+  border-top: solid 1px #eaeaef;
+  flex: 1;
 }
 
-.c16 {
-  overflow: auto;
-  max-height: 60vh;
+.c15 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c17 {
+  grid-column: span 12;
+  max-width: 100%;
 }
 
 .c25 {
@@ -464,8 +330,8 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 }
 
 .c25 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
+  height: 1.1rem;
+  width: 1.1rem;
 }
 
 .c25 svg path {
@@ -473,38 +339,89 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 }
 
 .c26 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   background: none;
   border: none;
 }
 
 .c26 svg {
-  width: 0.5625rem;
+  width: 0.9rem;
 }
 
-@media (max-width:68.75rem) {
-  .c18 {
-    grid-column: span;
+@media (prefers-reduced-motion: no-preference) {
+  .c30 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
-@media (max-width:34.375rem) {
-  .c18 {
+@media (prefers-reduced-motion: no-preference) {
+  .c33 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c11 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c3 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c4[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c4[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
+  }
+}
+
+@media (min-width: 520px) {
+  .c17 {
     grid-column: span 12;
   }
 }
 
+@media (min-width: 768px) {
+  .c17 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c17 {
+    grid-column: span 6;
+  }
+}
+
 <body
-  class="lock-body-scroll"
+  data-scroll-locked="1"
+  style="pointer-events: none;"
 >
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
   <div>
     <div
+      aria-hidden="true"
       class="c0 c1"
+      data-aria-hidden="true"
     />
-    <div
+    <span
       class="c2"
     >
       <p
@@ -525,237 +442,232 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
         id="live-region-alert"
         role="alert"
       />
-    </div>
+    </span>
   </div>
   <div
-    class=""
+    class="c3"
+    data-state="open"
+    style="pointer-events: auto;"
   >
     <div
-      class="c3 c4 c5"
+      aria-describedby="radix-:r2:"
+      aria-labelledby="radix-:r1:"
+      class="c4"
+      data-state="open"
+      id="radix-:r0:"
+      role="dialog"
+      style="pointer-events: auto;"
+      tabindex="-1"
     >
-      <div>
-        <div>
-          <div
-            aria-labelledby="title"
-            aria-modal="true"
-            class="c6"
-            role="dialog"
+      <form
+        action="#"
+        novalidate=""
+      >
+        <header
+          class="c5 c6 c7"
+        >
+          <h2
+            class="c8"
+            id="radix-:r1:"
           >
-            <form
-              action="#"
-              novalidate=""
+            Add new folder
+          </h2>
+          <button
+            aria-disabled="false"
+            class="c9 c10 c11"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              fill="currentColor"
+              focusable="false"
+              height="16"
+              viewBox="0 0 32 32"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+              />
+            </svg>
+            <span
+              class="c2"
+            >
+              Close modal
+            </span>
+          </button>
+        </header>
+        <div
+          class="c12 c13"
+          dir="ltr"
+          style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
+        >
+          <style>
+            [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+          </style>
+          <div
+            class="c14"
+            data-radix-scroll-area-viewport=""
+            style="overflow-x: scroll; overflow-y: scroll;"
+          >
+            <div
+              style="min-width: 100%; display: table;"
             >
               <div
-                class="c7 c8"
+                class="c15"
               >
                 <div
-                  class="c9"
-                >
-                  <h2
-                    class="c10 c11"
-                    id="title"
-                  >
-                    Add new folder
-                  </h2>
-                  <button
-                    aria-disabled="false"
-                    class="c12 c4 c13 c14"
-                    type="button"
-                  >
-                    <span
-                      class="c2"
-                    >
-                      Close the modal
-                    </span>
-                    <svg
-                      aria-hidden="true"
-                      fill="none"
-                      focusable="false"
-                      height="1rem"
-                      viewBox="0 0 24 24"
-                      width="1rem"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                        fill="#212134"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div
-                class="c15 c16"
-              >
-                <div
-                  class="c17"
+                  class="c16 c17"
                 >
                   <div
                     class="c18"
                   >
-                    <div>
-                      <div
-                        class=""
-                      >
-                        <div
-                          class="c19"
-                        >
-                          <label
-                            class="c10 c20 c21"
-                            for=":r0:"
-                          >
-                            Name
-                          </label>
-                          <div
-                            class="c9 c22"
-                          >
-                            <input
-                              aria-disabled="false"
-                              aria-invalid="false"
-                              aria-required="false"
-                              class="c23"
-                              id=":r0:"
-                              name="name"
-                              value=""
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="c18"
-                  >
+                    <label
+                      class="c19 c20"
+                      for=":r3:"
+                      id=":r3:-label"
+                    >
+                      Name
+                    </label>
                     <div
-                      class="c19"
+                      class="c21 c22"
                     >
-                      <label
-                        class="c10 c20 c21"
-                        for="folder-parent"
-                      >
-                        Location
-                      </label>
-                      <div
-                        class=" css-1iyvlxg-container"
-                      >
-                        <span
-                          class="css-1f43avz-a11yText-A11yText"
-                          id="react-select-2-live-region"
-                        />
-                        <span
-                          aria-atomic="false"
-                          aria-live="polite"
-                          aria-relevant="additions text"
-                          class="css-1f43avz-a11yText-A11yText"
-                        />
-                        <div
-                          class=" css-1ioi85f-control"
-                        >
-                          <div
-                            class=" css-onz4xi-ValueContainer"
-                          >
-                            <div
-                              class=" css-1ryi7up-singleValue"
-                            >
-                              Media Library
-                            </div>
-                            <input
-                              aria-autocomplete="list"
-                              aria-expanded="false"
-                              aria-haspopup="true"
-                              aria-invalid="false"
-                              aria-readonly="true"
-                              class="css-mohuvp-dummyInput-DummyInput"
-                              id="folder-parent"
-                              inputmode="none"
-                              role="combobox"
-                              tabindex="0"
-                              value=""
-                            />
-                          </div>
-                          <div
-                            class=" css-1hm8yhz-IndicatorsContainer"
-                          >
-                            <div
-                              aria-hidden="true"
-                              class="c24 c25 c26"
-                            >
-                              <svg
-                                fill="none"
-                                height="1rem"
-                                viewBox="0 0 14 8"
-                                width="1rem"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </div>
-                          </div>
-                        </div>
-                        <input
-                          name="parent"
-                          type="hidden"
-                          value=""
-                        />
-                      </div>
+                      <input
+                        aria-disabled="false"
+                        class="c23"
+                        id=":r3:"
+                        name="name"
+                        value=""
+                      />
                     </div>
                   </div>
                 </div>
-              </div>
-              <div
-                class="c7 c27"
-              >
                 <div
-                  class="c9"
+                  class="c16 c17"
                 >
                   <div
-                    class="c28"
+                    class="c18"
                   >
-                    <button
-                      aria-disabled="false"
-                      class="c29 c28 c13 c30"
-                      name="cancel"
-                      type="button"
+                    <label
+                      class="c19 c20"
+                      for="folder-parent"
+                      id="folder-parent-label"
+                    >
+                      Location
+                    </label>
+                    <div
+                      class=" css-1iyvlxg-container"
                     >
                       <span
-                        class="c10 c31"
+                        class="css-1f43avz-a11yText-A11yText"
+                        id="react-select-2-live-region"
+                      />
+                      <span
+                        aria-atomic="false"
+                        aria-live="polite"
+                        aria-relevant="additions text"
+                        class="css-1f43avz-a11yText-A11yText"
+                        role="log"
+                      />
+                      <div
+                        class=" css-oe0cnm-control"
                       >
-                        Cancel
-                      </span>
-                    </button>
-                  </div>
-                  <div
-                    class="c28"
-                  >
-                    <div
-                      class="c28"
-                    >
-                      <button
-                        aria-disabled="false"
-                        class="c29 c28 c13 c32"
-                        name="submit"
-                        type="submit"
-                      >
-                        <span
-                          class="c10 c31"
+                        <div
+                          class=" css-onz4xi-ValueContainer"
                         >
-                          Create
-                        </span>
-                      </button>
+                          <div
+                            class=" css-1ryi7up-singleValue"
+                          >
+                            Media Library
+                          </div>
+                          <input
+                            aria-activedescendant=""
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            aria-invalid="false"
+                            aria-readonly="true"
+                            class="css-mohuvp-dummyInput-DummyInput"
+                            id="folder-parent"
+                            inputmode="none"
+                            role="combobox"
+                            tabindex="0"
+                            value=""
+                          />
+                        </div>
+                        <div
+                          class=" css-1hm8yhz-IndicatorsContainer"
+                        >
+                          <div
+                            aria-hidden="true"
+                            class="c24 c25 c26"
+                          >
+                            <svg
+                              fill="currentColor"
+                              height="16"
+                              viewBox="0 0 32 32"
+                              width="16"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                      <input
+                        name="parent"
+                        type="hidden"
+                        value=""
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
-      </div>
+        <footer
+          class="c5 c6 c27"
+        >
+          <button
+            aria-disabled="false"
+            class="c28 c29 c30"
+            name="cancel"
+          >
+            <span
+              class="c31"
+            >
+              Cancel
+            </span>
+          </button>
+          <div
+            class="c32"
+          >
+            <button
+              aria-disabled="false"
+              class="c28 c29 c33"
+              name="submit"
+              type="submit"
+            >
+              <span
+                class="c31"
+              >
+                Create
+              </span>
+            </button>
+          </div>
+        </footer>
+      </form>
     </div>
   </div>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
 </body>
 `;

@@ -1,12 +1,12 @@
 import React from 'react';
 
 import { CarouselActions, IconButton } from '@strapi/design-system';
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { AssetDefinition } from '../../../constants';
+import { prefixFileUrlWithBackendUrl } from '../../../utils';
 import getTrad from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
 
@@ -21,9 +21,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: getTrad('control-card.add'),
             defaultMessage: 'Add',
           })}
-          icon={<Plus />}
           onClick={() => onAddAsset(asset)}
-        />
+        >
+          <Plus />
+        </IconButton>
       )}
 
       <CopyLinkButton url={prefixFileUrlWithBackendUrl(asset.url)} />
@@ -34,9 +35,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: 'global.delete',
             defaultMessage: 'Delete',
           })}
-          icon={<Trash />}
           onClick={() => onDeleteAsset(asset)}
-        />
+        >
+          <Trash />
+        </IconButton>
       )}
 
       {onEditAsset && (
@@ -45,9 +47,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: getTrad('control-card.edit'),
             defaultMessage: 'edit',
           })}
-          icon={<Pencil />}
           onClick={onEditAsset}
-        />
+        >
+          <Pencil />
+        </IconButton>
       )}
     </CarouselActions>
   );

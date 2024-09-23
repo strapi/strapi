@@ -1,13 +1,20 @@
-import React, { useMemo } from 'react';
+import * as React from 'react';
 
-import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
+import {
+  Checkbox,
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
+import { CaretDown } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme, css } from 'styled-components';
+import { styled, DefaultTheme, css } from 'styled-components';
 
 import { Action, SubjectProperty } from '../../../../../../../shared/contracts/permissions';
-import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
   usePermissionsDataManager,
@@ -46,7 +53,7 @@ const CollapsePropertyMatrix = ({
   pathToData,
   propertyName,
 }: CollapsePropertyMatrixProps) => {
-  const propertyActions = useMemo(
+  const propertyActions = React.useMemo(
     () =>
       availableActions.map((action) => {
         const isActionRelatedToCurrentProperty =
@@ -60,7 +67,7 @@ const CollapsePropertyMatrix = ({
   );
 
   return (
-    <Flex display="inline-flex" direction="column" minWidth={0}>
+    <Flex display="inline-flex" direction="column" alignItems="stretch" minWidth={0}>
       <Header label={label} headers={propertyActions} />
       <Box>
         {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (
@@ -120,7 +127,7 @@ const ActionRow = ({
 
   const isActive = rowToOpen === name;
 
-  const recursiveChildren = useMemo(() => {
+  const recursiveChildren = React.useMemo(() => {
     if (!Array.isArray(childrenForm)) {
       return [];
     }
@@ -148,7 +155,7 @@ const ActionRow = ({
     onChangeCollectionTypeLeftActionRowCheckbox(pathToData, propertyName, name, value);
   };
 
-  const { hasAllActionsSelected, hasSomeActionsSelected } = useMemo(() => {
+  const { hasAllActionsSelected, hasSomeActionsSelected } = React.useMemo(() => {
     return getRowLabelCheckboxState(propertyActions, modifiedData, pathToData, propertyName, name);
   }, [propertyActions, modifiedData, pathToData, propertyName, name]);
 
@@ -156,8 +163,8 @@ const ActionRow = ({
     <>
       <Wrapper
         alignItems="center"
-        isCollapsable={isCollapsable}
-        isActive={isActive}
+        $isCollapsable={isCollapsable}
+        $isActive={isActive}
         background={isOdd ? 'neutral100' : 'neutral0'}
       >
         <Flex>
@@ -199,7 +206,7 @@ const ActionRow = ({
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <BaseCheckbox
+                    <Checkbox
                       disabled={isFormDisabled}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
@@ -209,16 +216,15 @@ const ActionRow = ({
                         },
                         { label: `${name} ${label}` }
                       )}
-                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={(value) => {
+                      onCheckedChange={(value) => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName.join('..'),
-                            value,
+                            value: !!value,
                           },
                         });
                       }}
-                      value={checkboxValue}
+                      checked={checkboxValue}
                     />
                   </Flex>
                 );
@@ -236,15 +242,14 @@ const ActionRow = ({
                   justifyContent="center"
                   alignItems="center"
                 >
-                  <BaseCheckbox
+                  <Checkbox
                     disabled={isFormDisabled}
                     name={checkboxName.join('..')}
-                    // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onValueChange={(value) => {
+                    onCheckedChange={(value) => {
                       onChangeParentCheckbox({
                         target: {
                           name: checkboxName.join('..'),
-                          value,
+                          value: !!value,
                         },
                       });
                     }}
@@ -255,8 +260,7 @@ const ActionRow = ({
                       },
                       { label: `${name} ${label}` }
                     )}
-                    value={hasAllActionsSelected}
-                    indeterminate={hasSomeActionsSelected}
+                    checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
                   />
                 </Flex>
               );
@@ -313,27 +317,35 @@ const getRowLabelCheckboxState = (
   return getCheckboxState(data);
 };
 
-const Wrapper = styled(Flex)<{ isCollapsable?: boolean; isActive?: boolean }>`
+const Wrapper = styled<FlexComponent>(Flex)<{ $isCollapsable?: boolean; $isActive?: boolean }>`
   height: ${rowHeight};
   flex: 1;
 
-  ${({ isCollapsable, theme }) =>
-    isCollapsable &&
+  &:hover {
+    ${({ $isCollapsable, theme }) => $isCollapsable && activeStyle(theme)}
+  }
+
+  ${({ $isCollapsable }) =>
+    $isCollapsable &&
     `
       ${CarretIcon} {
-        display: block;
-        color: ${theme.colors.neutral100};
-      }
-      &:hover {
-        ${activeStyle(theme)}
+        display: flex;
       }
   `}
-  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+  ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
 `;
 
-const CarretIcon = styled(CarretDown)<{ $isActive: boolean }>`
+const CarretIcon = styled(CaretDown)<{ $isActive: boolean }>`
   display: none;
-  width: ${10 / 16}rem;
+
+  svg {
+    width: 1.4rem;
+  }
+
+  path {
+    fill: ${({ theme }) => theme.colors.neutral200};
+  }
+
   transform: rotate(${({ $isActive }) => ($isActive ? '180' : '0')}deg);
   margin-left: ${({ theme }) => theme.spaces[2]};
 `;
@@ -376,7 +388,7 @@ const SubActionRow = ({
     });
   };
 
-  const displayedRecursiveChildren = useMemo(() => {
+  const displayedRecursiveChildren = React.useMemo(() => {
     if (!rowToOpen) {
       return null;
     }
@@ -385,7 +397,7 @@ const SubActionRow = ({
   }, [rowToOpen, childrenForm]);
 
   return (
-    <Box paddingLeft={`2rem`}>
+    <Box paddingLeft={`3.2rem`}>
       <TopTimeline />
       {childrenForm.map(({ label, value, required, children: subChildrenForm }, index) => {
         const isVisible = index + 1 < childrenForm.length;
@@ -393,7 +405,7 @@ const SubActionRow = ({
         const isActive = rowToOpen === value;
 
         return (
-          <LeftBorderTimeline key={value} isVisible={isVisible}>
+          <LeftBorderTimeline key={value} $isVisible={isVisible}>
             <Flex height={rowHeight}>
               <StyledBox>
                 <Svg
@@ -402,7 +414,7 @@ const SubActionRow = ({
                   viewBox="0 0 20 23"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  color="primary200"
+                  $color="primary200"
                 >
                   <path
                     fillRule="evenodd"
@@ -413,21 +425,21 @@ const SubActionRow = ({
                 </Svg>
               </StyledBox>
               <Flex style={{ flex: 1 }}>
-                <RowStyle level={recursiveLevel} isActive={isActive} isCollapsable={isArrayType}>
+                <RowStyle $level={recursiveLevel} $isActive={isActive} $isCollapsable={isArrayType}>
                   <CollapseLabel
                     alignItems="center"
-                    isCollapsable={isArrayType}
+                    $isCollapsable={isArrayType}
                     {...(isArrayType && {
                       onClick: () => handleClickToggleSubLevel(value),
                       'aria-expanded': isActive,
-                      onKeyDown: ({ key }) =>
+                      onKeyDown: ({ key }: React.KeyboardEvent<HTMLDivElement>) =>
                         (key === 'Enter' || key === ' ') && handleClickToggleSubLevel(value),
                       tabIndex: 0,
                       role: 'button',
                     })}
                     title={label}
                   >
-                    <Typography ellipsis>{capitalise(label)}</Typography>
+                    <RowLabel ellipsis>{label}</RowLabel>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>
@@ -462,7 +474,7 @@ const SubActionRow = ({
                             justifyContent="center"
                             alignItems="center"
                           >
-                            <BaseCheckbox
+                            <Checkbox
                               disabled={isFormDisabled}
                               name={checkboxName.join('..')}
                               aria-label={formatMessage(
@@ -472,16 +484,15 @@ const SubActionRow = ({
                                 },
                                 { label: `${parentName} ${label} ${propertyLabel}` }
                               )}
-                              // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                              onValueChange={(value) => {
+                              onCheckedChange={(value) => {
                                 onChangeSimpleCheckbox({
                                   target: {
                                     name: checkboxName.join('..'),
-                                    value,
+                                    value: !!value,
                                   },
                                 });
                               }}
-                              value={checkboxValue}
+                              checked={checkboxValue}
                             />
                           </Flex>
                         );
@@ -498,7 +509,7 @@ const SubActionRow = ({
                           justifyContent="center"
                           alignItems="center"
                         >
-                          <BaseCheckbox
+                          <Checkbox
                             key={propertyLabel}
                             disabled={isFormDisabled}
                             name={checkboxName.join('..')}
@@ -510,16 +521,17 @@ const SubActionRow = ({
                               { label: `${parentName} ${label} ${propertyLabel}` }
                             )}
                             // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                            onValueChange={(value) => {
+                            onCheckedChange={(value) => {
                               onChangeParentCheckbox({
                                 target: {
                                   name: checkboxName.join('..'),
-                                  value,
+                                  value: !!value,
                                 },
                               });
                             }}
-                            value={hasAllActionsSelected}
-                            indeterminate={hasSomeActionsSelected}
+                            checked={
+                              hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected
+                            }
                           />
                         </Flex>
                       );
@@ -548,57 +560,63 @@ const SubActionRow = ({
   );
 };
 
-const LeftBorderTimeline = styled(Box)<{ isVisible?: boolean }>`
-  border-left: ${({ isVisible, theme }) =>
-    isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
+const LeftBorderTimeline = styled<BoxComponent>(Box)<{ $isVisible?: boolean }>`
+  border-left: ${({ $isVisible, theme }) =>
+    $isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
 `;
 
-const RowStyle = styled(Flex)<{ level: number; isCollapsable?: boolean; isActive?: boolean }>`
+const RowStyle = styled<FlexComponent>(Flex)<{
+  $level: number;
+  $isCollapsable?: boolean;
+  $isActive?: boolean;
+}>`
   padding-left: ${({ theme }) => theme.spaces[4]};
-  width: ${({ level }) => 145 - level * 36}px;
+  width: ${({ $level }) => 145 - $level * 36}px;
 
-  ${({ isCollapsable, theme }) =>
-    isCollapsable &&
+  &:hover {
+    ${({ $isCollapsable, theme }) => $isCollapsable && activeStyle(theme)}
+  }
+
+  ${({ $isCollapsable }) =>
+    $isCollapsable &&
     `
       ${CarretIcon} {
-        display: block;
-        color: ${theme.colors.neutral100};
-      }
-      &:hover {
-        ${activeStyle(theme)}
+        display: flex;
       }
   `}
-  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+  ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
 `;
+
+const RowLabel = styled<TypographyComponent>(Typography)``;
 
 const TopTimeline = styled.div`
   padding-top: ${({ theme }) => theme.spaces[2]};
   margin-top: ${({ theme }) => theme.spaces[2]};
-  width: ${4 / 16}rem;
+  width: 0.4rem;
   background-color: ${({ theme }) => theme.colors.primary200};
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
 `;
 
-const StyledBox = styled(Box)`
+const StyledBox = styled<BoxComponent>(Box)`
   transform: translate(-4px, -12px);
 
   &:before {
     content: '';
-    width: ${4 / 16}rem;
-    height: ${12 / 16}rem;
+    width: 0.4rem;
+    height: 1.2rem;
     background: ${({ theme }) => theme.colors.primary200};
     display: block;
   }
 `;
 
-const Svg = styled.svg<{ color: keyof DefaultTheme['colors'] }>`
+const Svg = styled.svg<{ $color: keyof DefaultTheme['colors'] }>`
   position: relative;
   flex-shrink: 0;
   transform: translate(-0.5px, -1px);
 
   * {
-    fill: ${({ theme, color }) => theme.colors[color]};
+    fill: ${({ theme, $color }) => theme.colors[$color]};
   }
 `;
 
@@ -647,26 +665,15 @@ const Header = ({ headers = [], label }: HeaderProps) => {
   );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * activeStyle (util)
- * -----------------------------------------------------------------------------------------------*/
-
-/**
- * @internal
- */
 const activeStyle = (theme: DefaultTheme) => css`
-  ${Typography} {
-    color: ${theme.colors.primary600};
-    font-weight: ${theme.fontWeights.bold};
-  }
-  ${CarretIcon} {
-    display: block;
+  color: ${theme.colors.primary600};
+  font-weight: ${theme.fontWeights.bold};
 
+  ${CarretIcon} {
     path {
       fill: ${theme.colors.primary600};
     }
   }
 `;
 
-export { activeStyle as _internalActiveStyle };
 export { CollapsePropertyMatrix };

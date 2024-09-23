@@ -1,5 +1,4 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import EE from '@strapi/strapi/dist/utils/ee';
 
 const roleCreateSchema = yup
   .object()
@@ -22,10 +21,10 @@ const rolesDeleteSchema = yup
         'Roles deletion checks have failed',
         async function rolesDeletionChecks(ids) {
           try {
-            await strapi.admin.services.role.checkRolesIdForDeletion(ids);
+            await strapi.service('admin::role').checkRolesIdForDeletion(ids);
 
-            if (EE.features.isEnabled('sso')) {
-              await strapi.admin.services.role.ssoCheckRolesIdForDeletion(ids);
+            if (strapi.ee.features.isEnabled('sso')) {
+              await strapi.service('admin::role').ssoCheckRolesIdForDeletion(ids);
             }
           } catch (e: any) {
             return this.createError({ path: 'ids', message: e.message });
@@ -45,10 +44,10 @@ const roleDeleteSchema = yup
     'Role deletion checks have failed',
     async function noAdminSingleDelete(id) {
       try {
-        await strapi.admin.services.role.checkRolesIdForDeletion([id]);
+        await strapi.service('admin::role').checkRolesIdForDeletion([id]);
 
-        if (EE.features.isEnabled('sso')) {
-          await strapi.admin.services.role.ssoCheckRolesIdForDeletion([id]);
+        if (strapi.ee.features.isEnabled('sso')) {
+          await strapi.service('admin::role').ssoCheckRolesIdForDeletion([id]);
         }
       } catch (e: any) {
         return this.createError({ path: 'id', message: e.message });

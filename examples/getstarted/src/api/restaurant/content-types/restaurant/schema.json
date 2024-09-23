@@ -9,9 +9,7 @@
     "name": "Restaurant"
   },
   "options": {
-    "draftAndPublish": true,
-    "populateCreatorFields": true,
-    "comment": ""
+    "draftAndPublish": true
   },
   "pluginOptions": {
     "i18n": {
@@ -147,12 +145,14 @@
       "component": "default.restaurantservice",
       "repeatable": true,
       "type": "component",
-      "max": 1,
+      "max": 4,
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "min": 2,
+      "required": true
     },
     "menu": {
       "type": "relation",
@@ -164,7 +164,7 @@
       "component": "default.openingtimes",
       "type": "component",
       "repeatable": true,
-      "min": 1,
+      "min": 2,
       "max": 10,
       "pluginOptions": {
         "i18n": {
@@ -184,7 +184,9 @@
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "required": true,
+      "min": 3
     }
   }
 }

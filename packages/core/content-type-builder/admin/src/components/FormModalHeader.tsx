@@ -3,9 +3,7 @@
  * FormModalHeader
  *
  */
-import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
-import { Breadcrumbs, Crumb, Link } from '@strapi/design-system/v2';
-import { CustomFieldUID } from '@strapi/helper-plugin';
+import { Box, Flex, Breadcrumbs, Crumb, Link, Modal } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -17,7 +15,7 @@ import { getTrad } from '../utils';
 import { AttributeIcon, IconByType } from './AttributeIcon';
 
 import type { SchemaType } from '../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface Header {
   label: string;
@@ -33,8 +31,8 @@ interface FormModalHeaderProps {
   dynamicZoneTarget: string;
   forTarget: SchemaType;
   modalType: string | null;
-  targetUid: UID.Any;
-  customFieldUid?: CustomFieldUID | null;
+  targetUid: Internal.UID.Schema;
+  customFieldUid?: string | null;
   showBackLink?: boolean;
 }
 
@@ -83,18 +81,16 @@ export const FormModalHeader = ({
     }
 
     return (
-      <ModalHeader>
+      <Modal.Header>
         <Flex>
           <Box>
             <AttributeIcon type={icon} />
           </Box>
           <Box paddingLeft={3}>
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-              {formatMessage({ id: headerId }, { name: displayName })}
-            </Typography>
+            <Modal.Title>{formatMessage({ id: headerId }, { name: displayName })}</Modal.Title>
           </Box>
         </Flex>
-      </ModalHeader>
+      </Modal.Header>
     );
   }
 
@@ -129,7 +125,7 @@ export const FormModalHeader = ({
   }
 
   return (
-    <ModalHeader>
+    <Modal.Header>
       <Flex gap={3}>
         {showBackLink && (
           // This is a workaround and should use the LinkButton with a variant that currently doesn't exist
@@ -168,6 +164,6 @@ export const FormModalHeader = ({
           })}
         </Breadcrumbs>
       </Flex>
-    </ModalHeader>
+    </Modal.Header>
   );
 };

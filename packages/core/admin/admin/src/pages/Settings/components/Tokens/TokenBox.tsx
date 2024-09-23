@@ -1,7 +1,11 @@
 import { IconButton } from '@strapi/design-system';
-import { ContentBox, useClipboard, useNotification, useTracking } from '@strapi/helper-plugin';
 import { Duplicate, Key } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
+import { ContentBox } from '../../../../components/ContentBox';
+import { useNotification } from '../../../../features/Notifications';
+import { useTracking } from '../../../../features/Tracking';
+import { useClipboard } from '../../../../hooks/useClipboard';
 
 interface TokenBoxProps {
   token?: string;
@@ -10,7 +14,7 @@ interface TokenBoxProps {
 
 export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { trackUsage } = useTracking();
 
   const { copy } = useClipboard();
@@ -25,7 +29,7 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
         });
         toggleNotification({
           type: 'success',
-          message: { id: 'Settings.tokens.notification.copied' },
+          message: formatMessage({ id: 'Settings.tokens.notification.copied' }),
         });
       }
     }
@@ -42,10 +46,11 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
                 defaultMessage: 'Copy to clipboard',
               })}
               onClick={handleClick(token)}
-              borderWidth={0}
-              icon={<Duplicate />}
-              style={{ padding: 0, height: '1rem' }}
-            />
+              variant="ghost"
+              style={{ padding: 0, height: '1.6rem' }}
+            >
+              <Duplicate />
+            </IconButton>
           </span>
         )
       }

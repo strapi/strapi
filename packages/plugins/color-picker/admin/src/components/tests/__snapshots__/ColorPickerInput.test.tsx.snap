@@ -1,9 +1,60 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
-.c9 {
+.c3 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c0 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c4 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c8 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c1 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+  font-weight: 600;
+}
+
+.c7 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c10 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
+.c11 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,139 +64,47 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
+.c5 {
+  height: 4rem;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
   color: #32324d;
 }
 
-.c8 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
+.c5:hover {
+  background-color: #f6f6f9;
 }
 
-.c3 {
-  background: #ffffff;
-  padding: 8px;
-  border-radius: 4px;
-  border-color: #dcdce4;
-  border: 1px solid #dcdce4;
-  cursor: pointer;
-}
-
-.c0 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c5 {
-  position: relative;
-  outline: none;
-}
-
-.c5 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c5 > svg > g,
-.c5 > svg path {
-  fill: #ffffff;
+.c5:active {
+  background-color: #eaeaef;
 }
 
 .c5[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c5:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c5:focus-visible {
-  outline: none;
-}
-
-.c5:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
 .c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
-.c7 {
+.c9 {
   border-radius: 50%;
   width: 20px;
   height: 20px;
   margin-right: 10px;
   background-color: #000000;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
+.c6>span {
   display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
+  width: 100%;
 }
 
 .c6 svg {
@@ -153,67 +112,81 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   height: 8px;
 }
 
-.c6 svg > path {
+.c6 svg>path {
   fill: #8e8ea9;
   justify-self: flex-end;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .c5 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
 <div>
-  <div
-    class=""
+  <form
+    method="POST"
+    novalidate=""
   >
     <div
       class="c0"
     >
-      <label
-        class="c1 c2"
-        for="color"
+      <div
+        class="c0"
       >
-        color-picker
-      </label>
-      <button
-        aria-controls="color-picker-value"
-        aria-disabled="false"
-        aria-expanded="false"
-        aria-haspopup="dialog"
-        aria-label="Color picker toggle"
-        class="c3 c4 c5 c6"
-        type="button"
-      >
-        <div
-          class="c4"
+        <label
+          class="c1 c2"
+          for="color"
+          id="color-label"
         >
-          <div
-            class="c7"
-            color="#000000"
-          />
+          color-picker
+        </label>
+        <button
+          aria-controls="color-picker-value"
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-haspopup="dialog"
+          aria-label="Color picker toggle"
+          class="c3 c4 c5 c6"
+          data-state="closed"
+          type="button"
+        >
           <span
-            class="c8"
-            style="text-transform: uppercase;"
+            class="c7"
           >
-            #000000
+            <div
+              class="c8"
+            >
+              <div
+                class="c9"
+                color="#000000"
+              />
+              <span
+                class="c10"
+                style="text-transform: uppercase;"
+              >
+                #000000
+              </span>
+            </div>
+            <svg
+              aria-hidden="true"
+              fill="currentColor"
+              height="16"
+              viewBox="0 0 32 32"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+              />
+            </svg>
           </span>
-        </div>
-        <svg
-          aria-hidden="true"
-          fill="none"
-          height="1rem"
-          viewBox="0 0 14 8"
-          width="1rem"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            clip-rule="evenodd"
-            d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-            fill="#32324D"
-            fill-rule="evenodd"
-          />
-        </svg>
-      </button>
+        </button>
+      </div>
     </div>
-  </div>
-  <div
-    class="c9"
+  </form>
+  <span
+    class="c11"
   >
     <p
       aria-live="polite"
@@ -233,6 +206,6 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

@@ -1,68 +1,35 @@
-import type { Route } from '../../../../../admin/src/pages/Settings/constants';
+import { RouteObject } from 'react-router-dom';
 
-export const ROUTES_EE: Route[] = [
+/**
+ * All these routes are relative to the `/admin/settings/*` route
+ * as such their path should not start with a `/` or include the `/settings` prefix.
+ */
+export const getEERoutes = (): RouteObject[] => [
   ...(window.strapi.features.isEnabled(window.strapi.features.AUDIT_LOGS)
     ? [
         {
-          async Component() {
+          path: 'audit-logs',
+          lazy: async () => {
             const { ProtectedListPage } = await import('./pages/AuditLogs/ListPage');
 
-            return ProtectedListPage;
+            return {
+              Component: ProtectedListPage,
+            };
           },
-          to: '/settings/audit-logs',
-          exact: true,
         },
       ]
     : []),
-
-  ...(window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)
-    ? [
-        {
-          async Component() {
-            const { ProtectedReviewWorkflowsPage } = await import(
-              './pages/ReviewWorkflows/ListPage'
-            );
-
-            return ProtectedReviewWorkflowsPage;
-          },
-          to: '/settings/review-workflows',
-          exact: true,
-        },
-
-        {
-          async Component() {
-            const { ReviewWorkflowsCreatePage } = await import(
-              './pages/ReviewWorkflows/CreatePage'
-            );
-
-            return ReviewWorkflowsCreatePage;
-          },
-          to: '/settings/review-workflows/create',
-          exact: true,
-        },
-
-        {
-          async Component() {
-            const { ReviewWorkflowsEditPage } = await import('./pages/ReviewWorkflows/EditPage');
-
-            return ReviewWorkflowsEditPage;
-          },
-          to: '/settings/review-workflows/:workflowId',
-          exact: true,
-        },
-      ]
-    : []),
-
   ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
     ? [
         {
-          async Component() {
+          path: 'single-sign-on',
+          lazy: async () => {
             const { ProtectedSSO } = await import('./pages/SingleSignOnPage');
 
-            return ProtectedSSO;
+            return {
+              Component: ProtectedSSO,
+            };
           },
-          to: '/settings/single-sign-on',
-          exact: true,
         },
       ]
     : []),

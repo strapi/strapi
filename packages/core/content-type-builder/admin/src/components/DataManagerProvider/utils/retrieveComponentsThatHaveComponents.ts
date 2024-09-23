@@ -1,18 +1,25 @@
 import get from 'lodash/get';
 
-import { makeUnique } from '../../../utils/makeUnique';
-
 import type { Component, AttributeType, Components } from '../../../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
+
+type ChildComponent = {
+  component: Internal.UID.Component;
+};
+
+export type ComponentWithChildren = {
+  component: Internal.UID.Component;
+  childComponents: ChildComponent[];
+};
 
 const retrieveComponentsThatHaveComponents = (allComponents: Components) => {
   const componentsThatHaveNestedComponents = Object.keys(allComponents).reduce(
-    (acc: UID.Component[], current) => {
+    (acc: ComponentWithChildren[], current) => {
       const currentComponent = get(allComponents, [current]);
-      const uid = currentComponent.uid;
 
-      if (doesComponentHaveAComponentField(currentComponent)) {
-        acc.push(uid);
+      const compoWithChildren = getComponentWithChildComponents(currentComponent);
+      if (compoWithChildren.childComponents.length > 0) {
+        acc.push(compoWithChildren);
       }
 
       return acc;
@@ -20,17 +27,25 @@ const retrieveComponentsThatHaveComponents = (allComponents: Components) => {
     []
   );
 
-  return makeUnique(componentsThatHaveNestedComponents);
+  return componentsThatHaveNestedComponents;
 };
 
-const doesComponentHaveAComponentField = (component: Component) => {
+const getComponentWithChildComponents = (component: Component): ComponentWithChildren => {
   const attributes = get(component, ['schema', 'attributes'], []) as AttributeType[];
+  return {
+    component: component.uid,
+    childComponents: attributes
+      .filter((attribute) => {
+        const { type } = attribute;
 
-  return attributes.some((attribute) => {
-    const { type } = attribute;
-
-    return type === 'component';
-  });
+        return type === 'component';
+      })
+      .map((attribute) => {
+        return {
+          component: attribute.component,
+        } as ChildComponent;
+      }),
+  };
 };
 
-export { doesComponentHaveAComponentField, retrieveComponentsThatHaveComponents };
+export { getComponentWithChildComponents, retrieveComponentsThatHaveComponents };

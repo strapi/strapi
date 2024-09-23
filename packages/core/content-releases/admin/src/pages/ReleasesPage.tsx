@@ -1,99 +1,48 @@
 import * as React from 'react';
 
 import {
+  Page,
+  Pagination,
+  useTracking,
+  useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+  useRBAC,
+  isFetchError,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
+import {
+  Alert,
+  Badge,
   Box,
   Button,
-  ContentLayout,
   Divider,
   EmptyStateLayout,
   Flex,
   Grid,
-  GridItem,
-  HeaderLayout,
   Main,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
   Tabs,
   Typography,
+  Link,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import {
-  AnErrorOccurred,
-  CheckPermissions,
-  LoadingIndicatorPage,
-  PageSizeURLQuery,
-  PaginationURLQuery,
-  useQueryParams,
-  useAPIErrorHandler,
-  useNotification,
-} from '@strapi/helper-plugin';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
+import { format } from 'date-fns';
 import { useIntl } from 'react-intl';
-import { useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { styled } from 'styled-components';
 
-import { GetReleases } from '../../../shared/contracts/releases';
+import { GetReleases, type Release } from '../../../shared/contracts/releases';
+import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
 import {
   useGetReleasesQuery,
+  useGetReleaseSettingsQuery,
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
-
-/* -------------------------------------------------------------------------------------------------
- * ReleasesLayout
- * -----------------------------------------------------------------------------------------------*/
-interface ReleasesLayoutProps {
-  isLoading?: boolean;
-  totalReleases?: number;
-  onClickAddRelease: () => void;
-  children: React.ReactNode;
-}
-
-export const ReleasesLayout = ({
-  isLoading,
-  totalReleases,
-  onClickAddRelease,
-  children,
-}: ReleasesLayoutProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <Main aria-busy={isLoading}>
-      <HeaderLayout
-        title={formatMessage({
-          id: 'content-releases.pages.Releases.title',
-          defaultMessage: 'Releases',
-        })}
-        subtitle={
-          !isLoading &&
-          formatMessage(
-            {
-              id: 'content-releases.pages.Releases.header-subtitle',
-              defaultMessage:
-                '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-            },
-            { number: totalReleases }
-          )
-        }
-        primaryAction={
-          <CheckPermissions permissions={PERMISSIONS.create}>
-            <Button startIcon={<Plus />} onClick={onClickAddRelease}>
-              {formatMessage({
-                id: 'content-releases.header.actions.add-release',
-                defaultMessage: 'New release',
-              })}
-            </Button>
-          </CheckPermissions>
-        }
-      />
-      {children}
-    </Main>
-  );
-};
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
@@ -108,11 +57,45 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
+const RelativeTime = styled(BaseRelativeTime)`
+  display: inline-block;
+  &::first-letter {
+    text-transform: uppercase;
+  }
+`;
+
+const getBadgeProps = (status: Release['status']) => {
+  let color;
+  switch (status) {
+    case 'ready':
+      color = 'success';
+      break;
+    case 'blocked':
+      color = 'warning';
+      break;
+    case 'failed':
+      color = 'danger';
+      break;
+    case 'done':
+      color = 'primary';
+      break;
+    case 'empty':
+    default:
+      color = 'neutral';
+  }
+
+  return {
+    textColor: `${color}600`,
+    backgroundColor: `${color}100`,
+    borderColor: `${color}200`,
+  };
+};
+
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
 
   if (isError) {
-    return <AnErrorOccurred />;
+    return <Page.Error />;
   }
 
   if (releases?.length === 0) {
@@ -127,16 +110,16 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
             target: sectionTitle,
           }
         )}
-        icon={<EmptyDocuments width="10rem" />}
+        icon={<EmptyDocuments width="16rem" />}
       />
     );
   }
 
   return (
-    <Grid gap={4}>
-      {releases.map(({ id, name, actions }) => (
-        <GridItem col={3} s={6} xs={12} key={id}>
-          <LinkCard href={`content-releases/${id}`} isExternal={false}>
+    <Grid.Root gap={4}>
+      {releases.map(({ id, name, scheduledAt, status }) => (
+        <Grid.Item col={3} s={6} xs={12} key={id} direction="column" alignItems="stretch">
+          <LinkCard tag={NavLink} to={`${id}`} isExternal={false}>
             <Flex
               direction="column"
               justifyContent="space-between"
@@ -147,61 +130,82 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               height="100%"
               width="100%"
               alignItems="start"
-              gap={2}
+              gap={4}
             >
-              <Typography as="h3" variant="delta" fontWeight="bold">
-                {name}
-              </Typography>
-              <Typography variant="pi">
-                {formatMessage(
-                  {
-                    id: 'content-releases.page.Releases.release-item.entries',
-                    defaultMessage:
-                      '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-                  },
-                  { number: actions.meta.count }
-                )}
-              </Typography>
+              <Flex direction="column" alignItems="start" gap={1}>
+                <Typography textColor="neutral800" tag="h3" variant="delta" fontWeight="bold">
+                  {name}
+                </Typography>
+                <Typography variant="pi" textColor="neutral600">
+                  {scheduledAt ? (
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
+                  ) : (
+                    formatMessage({
+                      id: 'content-releases.pages.Releases.not-scheduled',
+                      defaultMessage: 'Not scheduled',
+                    })
+                  )}
+                </Typography>
+              </Flex>
+              <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
           </LinkCard>
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesPage
  * -----------------------------------------------------------------------------------------------*/
-interface CustomLocationState {
-  errors?: Record<'code', string>[];
-}
+
+const StyledAlert = styled(Alert)`
+  button {
+    display: none;
+  }
+  p + div {
+    margin-left: auto;
+  }
+`;
 
 const INITIAL_FORM_VALUES = {
   name: '',
+  date: format(new Date(), 'yyyy-MM-dd'),
+  time: '',
+  isScheduled: true,
+  scheduledAt: null,
+  timezone: null,
 } satisfies FormValues;
 
 const ReleasesPage = () => {
-  const tabRef = React.useRef<any>(null);
-  const location = useLocation<CustomLocationState>();
+  const location = useLocation();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
-  const { push, replace } = useHistory();
+  const navigate = useNavigate();
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
+  const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
+  const { getFeature } = useLicenseLimits();
+  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
+    maximumReleases: number;
+  };
+  const { trackUsage } = useTracking();
+  const {
+    allowedActions: { canCreate },
+  } = useRBAC(PERMISSIONS);
 
-  const { isLoading, isSuccess, isError } = response;
+  const { isLoading: isLoadingReleases, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
-  const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
 
   // Check if we have some errors and show a notification to the user to explain the error
   React.useEffect(() => {
     if (location?.state?.errors) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         title: formatMessage({
           id: 'content-releases.pages.Releases.notification.error.title',
           defaultMessage: 'Your request could not be processed.',
@@ -211,50 +215,39 @@ const ReleasesPage = () => {
           defaultMessage: 'Please try again or open another release.',
         }),
       });
-      replace({ state: null });
+      navigate('', { replace: true, state: null });
     }
-  }, [formatMessage, location?.state?.errors, replace, toggleNotification]);
-
-  // TODO: Replace this solution with v2 of the Design System
-  // Check if the active tab index changes and call the handler of the ref to update the tab group component
-  React.useEffect(() => {
-    if (tabRef.current) {
-      tabRef.current._handlers.setSelectedTabIndex(activeTabIndex);
-    }
-  }, [activeTabIndex]);
+  }, [formatMessage, location?.state?.errors, navigate, toggleNotification]);
 
   const toggleAddReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
-  if (isLoading) {
-    return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </ReleasesLayout>
-    );
+  if (isLoadingReleases || isLoadingSettings) {
+    return <Page.Loading />;
   }
 
-  const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
+  const totalPendingReleases = (isSuccess && response.currentData?.meta?.pendingReleasesCount) || 0;
+  const hasReachedMaximumPendingReleases = totalPendingReleases >= maximumReleases;
 
-  const handleTabChange = (index: number) => {
+  const handleTabChange = (tabValue: string) => {
     setQuery({
       ...query,
       page: 1,
       pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
       filters: {
         releasedAt: {
-          $notNull: index === 0 ? false : true,
+          $notNull: tabValue !== 'pending',
         },
       },
     });
   };
 
-  const handleAddRelease = async (values: FormValues) => {
+  const handleAddRelease = async ({ name, scheduledAt, timezone }: FormValues) => {
     const response = await createRelease({
-      name: values.name,
+      name,
+      scheduledAt,
+      timezone,
     });
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
@@ -266,97 +259,145 @@ const ReleasesPage = () => {
         }),
       });
 
-      push(`/plugins/content-releases/${response.data.data.id}`);
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+      trackUsage('didCreateRelease');
+      navigate(response.data.data.id.toString());
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(response.error),
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
 
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} totalReleases={totalReleases}>
-      <ContentLayout>
+    <Main aria-busy={isLoadingReleases || isLoadingSettings}>
+      <Layouts.Header
+        title={formatMessage({
+          id: 'content-releases.pages.Releases.title',
+          defaultMessage: 'Releases',
+        })}
+        subtitle={formatMessage({
+          id: 'content-releases.pages.Releases.header-subtitle',
+          defaultMessage: 'Create and manage content updates',
+        })}
+        primaryAction={
+          canCreate ? (
+            <Button
+              startIcon={<Plus />}
+              onClick={toggleAddReleaseModal}
+              disabled={hasReachedMaximumPendingReleases}
+            >
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          ) : null
+        }
+      />
+      <Layouts.Content>
         <>
-          <TabGroup
-            label={formatMessage({
-              id: 'content-releases.pages.Releases.tab-group.label',
-              defaultMessage: 'Releases list',
-            })}
-            variant="simple"
-            initialSelectedTabIndex={activeTabIndex}
-            onTabChange={handleTabChange}
-            ref={tabRef}
-          >
-            <Box paddingBottom={8}>
-              <Tabs>
-                <Tab>
+          {hasReachedMaximumPendingReleases && (
+            <StyledAlert
+              marginBottom={6}
+              action={
+                <Link href="https://strapi.io/pricing-cloud" isExternal>
                   {formatMessage({
-                    id: 'content-releases.pages.Releases.tab.pending',
-                    defaultMessage: 'Pending',
+                    id: 'content-releases.pages.Releases.max-limit-reached.action',
+                    defaultMessage: 'Explore plans',
                   })}
-                </Tab>
-                <Tab>
+                </Link>
+              }
+              title={formatMessage(
+                {
+                  id: 'content-releases.pages.Releases.max-limit-reached.title',
+                  defaultMessage:
+                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
+                },
+                { number: maximumReleases }
+              )}
+              onClose={() => {}}
+              closeLabel=""
+            >
+              {formatMessage({
+                id: 'content-releases.pages.Releases.max-limit-reached.message',
+                defaultMessage: 'Upgrade to manage an unlimited number of releases.',
+              })}
+            </StyledAlert>
+          )}
+          <Tabs.Root variant="simple" onValueChange={handleTabChange} value={activeTab}>
+            <Box paddingBottom={8}>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: 'content-releases.pages.Releases.tab-group.label',
+                  defaultMessage: 'Releases list',
+                })}
+              >
+                <Tabs.Trigger value="pending">
+                  {formatMessage(
+                    {
+                      id: 'content-releases.pages.Releases.tab.pending',
+                      defaultMessage: 'Pending ({count})',
+                    },
+                    {
+                      count: totalPendingReleases,
+                    }
+                  )}
+                </Tabs.Trigger>
+                <Tabs.Trigger value="done">
                   {formatMessage({
                     id: 'content-releases.pages.Releases.tab.done',
                     defaultMessage: 'Done',
                   })}
-                </Tab>
-              </Tabs>
+                </Tabs.Trigger>
+              </Tabs.List>
               <Divider />
             </Box>
-            <TabPanels>
-              {/* Pending releases */}
-              <TabPanel>
-                <ReleasesGrid
-                  sectionTitle="pending"
-                  releases={response?.currentData?.data}
-                  isError={isError}
-                />
-              </TabPanel>
-              {/* Done releases */}
-              <TabPanel>
-                <ReleasesGrid
-                  sectionTitle="done"
-                  releases={response?.currentData?.data}
-                  isError={isError}
-                />
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
-          {totalReleases > 0 && (
-            <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
-              <PageSizeURLQuery
-                options={['8', '16', '32', '64']}
-                defaultValue={response?.currentData?.meta?.pagination?.pageSize.toString()}
+            {/* Pending releases */}
+            <Tabs.Content value="pending">
+              <ReleasesGrid
+                sectionTitle="pending"
+                releases={response?.currentData?.data}
+                isError={isError}
               />
-              <PaginationURLQuery
-                pagination={{
-                  pageCount: response?.currentData?.meta?.pagination?.pageCount || 0,
-                }}
+            </Tabs.Content>
+            {/* Done releases */}
+            <Tabs.Content value="done">
+              <ReleasesGrid
+                sectionTitle="done"
+                releases={response?.currentData?.data}
+                isError={isError}
               />
-            </Flex>
-          )}
+            </Tabs.Content>
+          </Tabs.Root>
+          <Pagination.Root
+            {...response?.currentData?.meta?.pagination}
+            defaultPageSize={response?.currentData?.meta?.pagination?.pageSize}
+          >
+            <Pagination.PageSize options={['8', '16', '32', '64']} />
+            <Pagination.Links />
+          </Pagination.Root>
         </>
-      </ContentLayout>
-      {releaseModalShown && (
-        <ReleaseModal
-          handleClose={toggleAddReleaseModal}
-          handleSubmit={handleAddRelease}
-          isLoading={isSubmittingForm}
-          initialValues={INITIAL_FORM_VALUES}
-        />
-      )}
-    </ReleasesLayout>
+      </Layouts.Content>
+      <ReleaseModal
+        open={releaseModalShown}
+        handleClose={toggleAddReleaseModal}
+        handleSubmit={handleAddRelease}
+        isLoading={isSubmittingForm}
+        initialValues={{
+          ...INITIAL_FORM_VALUES,
+          timezone: data?.data.defaultTimezone ? data.data.defaultTimezone.split('&')[1] : null,
+        }}
+      />
+    </Main>
   );
 };
 
-export { ReleasesPage };
+export { ReleasesPage, getBadgeProps };

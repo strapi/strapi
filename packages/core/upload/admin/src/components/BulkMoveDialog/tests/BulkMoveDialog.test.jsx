@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -23,11 +23,13 @@ function ComponentFixture(props) {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <NotificationsProvider toggleNotification={() => {}}>
-            <BulkMoveDialog {...props} />
+            <Modal.Root open>
+              <BulkMoveDialog {...props} />
+            </Modal.Root>
           </NotificationsProvider>
-        </ThemeProvider>
+        </DesignSystemProvider>
       </IntlProvider>
     </QueryClientProvider>
   );

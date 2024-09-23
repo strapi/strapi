@@ -1,8 +1,10 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src", "custom.d.ts"],
+  "include": ["src", "custom.d.ts", "../shared"],
   "exclude": ["node_modules"],
   "compilerOptions": {
+    "rootDir": "../",
+    "baseUrl": ".",
     "esModuleInterop": true
   }
 }

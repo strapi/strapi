@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
+import { Checkbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
 import { Eye, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -40,14 +39,9 @@ export const TableRows = ({
         );
 
         return (
-          <Tr
-            key={id}
-            {...onRowClick({
-              fn: () => handleRowClickFn(element, contentType, id, path),
-            })}
-          >
+          <Tr key={id} onClick={() => handleRowClickFn(element, contentType, id, path)}>
             <Td onClick={(e) => e.stopPropagation()}>
-              <BaseCheckbox
+              <Checkbox
                 aria-label={formatMessage(
                   {
                     id: contentType === 'asset' ? 'list-assets-select' : 'list.folder.select',
@@ -57,7 +51,7 @@ export const TableRows = ({
                   { name }
                 )}
                 disabled={!isSelectable}
-                onValueChange={() => onSelectOne(element)}
+                onCheckedChange={() => onSelectOne(element)}
                 checked={isSelected}
               />
             </Td>
@@ -74,18 +68,18 @@ export const TableRows = ({
               );
             })}
 
-            <Td {...stopPropagation}>
+            <Td onClick={(e) => e.stopPropagation()}>
               <Flex justifyContent="flex-end">
                 {contentType === 'folder' && (
                   <IconButton
-                    as={folderURL ? Link : undefined}
+                    tag={folderURL ? Link : 'button'}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',
                     })}
                     to={folderURL}
                     onClick={() => !folderURL && onChangeFolder(id)}
-                    noBorder
+                    variant="ghost"
                   >
                     <Eye />
                   </IconButton>
@@ -98,7 +92,7 @@ export const TableRows = ({
                   onClick={() =>
                     contentType === 'asset' ? onEditAsset(element) : onEditFolder(element)
                   }
-                  noBorder
+                  variant="ghost"
                 >
                   <Pencil />
                 </IconButton>

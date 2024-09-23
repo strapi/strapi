@@ -1,7 +1,7 @@
 {
-  "name": "@strapi/plugin-i18n",
-  "version": "4.19.0",
-  "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
+  "name": "@strapi/i18n",
+  "version": "5.0.0",
+  "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
     "url": "https://github.com/strapi/strapi.git",
@@ -38,56 +38,52 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi plugin:build --force",
+    "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "strapi plugin:watch"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "1.14.1",
-    "@strapi/helper-plugin": "4.19.0",
-    "@strapi/icons": "1.14.1",
-    "@strapi/utils": "4.19.0",
-    "axios": "1.6.0",
-    "formik": "2.4.0",
-    "immer": "9.0.19",
+    "@strapi/design-system": "2.0.0-rc.11",
+    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/utils": "workspace:*",
     "lodash": "4.17.21",
-    "prop-types": "^15.8.1",
     "qs": "6.11.1",
-    "react-intl": "6.4.1",
-    "react-query": "3.39.3",
-    "react-redux": "8.1.1",
+    "react-intl": "6.6.2",
+    "react-redux": "8.1.3",
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "4.19.0",
-    "@strapi/pack-up": "4.19.0",
-    "@strapi/strapi": "4.19.0",
-    "@strapi/types": "4.19.0",
-    "@testing-library/react": "14.0.0",
-    "@testing-library/user-event": "14.4.3",
+    "@strapi/admin": "workspace:*",
+    "@strapi/admin-test-utils": "workspace:*",
+    "@strapi/content-manager": "workspace:*",
+    "@strapi/pack-up": "5.0.0",
+    "@strapi/types": "workspace:*",
+    "@testing-library/react": "15.0.7",
+    "@testing-library/user-event": "14.5.2",
     "msw": "1.3.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-query": "3.39.3",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.0.0",
+    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/content-manager": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^5.2.0",
-    "styled-components": "^5.2.1"
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

@@ -1,6 +1,6 @@
-import { extendType } from 'nexus';
+import { extendType, nonNull, list } from 'nexus';
 import type * as Nexus from 'nexus';
-import type { Schema } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => {
@@ -8,18 +8,20 @@ export default ({ strapi }: Context) => {
 
   const { naming } = getService('utils');
   const { transformArgs, getContentTypeArgs } = getService('builders').utils;
-  const { toEntityResponse, toEntityResponseCollection } = getService('format').returnTypes;
+  const { toEntityResponseCollection } = getService('format').returnTypes;
 
   const {
     getFindOneQueryName,
-    getEntityResponseName,
+    getTypeName,
     getFindQueryName,
+    getFindConnectionQueryName,
     getEntityResponseCollectionName,
   } = naming;
 
-  const buildCollectionTypeQueries = (contentType: Schema.CollectionType) => {
+  const buildCollectionTypeQueries = (contentType: Struct.CollectionTypeSchema) => {
     const findOneQueryName = `Query.${getFindOneQueryName(contentType)}`;
     const findQueryName = `Query.${getFindQueryName(contentType)}`;
+    const findConnectionQueryName = `Query.${getFindConnectionQueryName(contentType)}`;
 
     const extension = getService('extension');
 
@@ -40,6 +42,7 @@ export default ({ strapi }: Context) => {
 
     if (isFindEnabled) {
       registerAuthConfig(findQueryName, { scope: [`${contentType.uid}.find`] });
+      registerAuthConfig(findConnectionQueryName, { scope: [`${contentType.uid}.find`] });
     }
 
     return extendType({
@@ -51,6 +54,7 @@ export default ({ strapi }: Context) => {
         }
 
         if (isFindEnabled) {
+          addFindConnectionQuery(t, contentType);
           addFindQuery(t, contentType);
         }
       },
@@ -62,15 +66,19 @@ export default ({ strapi }: Context) => {
    */
   const addFindOneQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
-    contentType: Schema.CollectionType
+    contentType: Struct.CollectionTypeSchema
   ) => {
-    const { uid } = contentType;
-
     const findOneQueryName = getFindOneQueryName(contentType);
-    const responseTypeName = getEntityResponseName(contentType);
+    const typeName = getTypeName(contentType);
 
     t.field(findOneQueryName, {
-      type: responseTypeName,
+      type: typeName,
+
+      extensions: {
+        strapi: {
+          contentType,
+        },
+      },
 
       args: getContentTypeArgs(contentType, { multiple: false }),
 
@@ -82,9 +90,7 @@ export default ({ strapi }: Context) => {
           .buildQueriesResolvers({ contentType });
 
         // queryResolvers will sanitize params
-        const value = findOne(parent, transformedArgs, ctx);
-
-        return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
+        return findOne(parent, transformedArgs, ctx);
       },
     });
   };
@@ -94,27 +100,67 @@ export default ({ strapi }: Context) => {
    */
   const addFindQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
-    contentType: Schema.CollectionType
+    contentType: Struct.CollectionTypeSchema
   ) => {
-    const { uid } = contentType;
-
     const findQueryName = getFindQueryName(contentType);
-    const responseCollectionTypeName = getEntityResponseCollectionName(contentType);
+    const typeName = getTypeName(contentType);
 
     t.field(findQueryName, {
-      type: responseCollectionTypeName,
+      type: nonNull(list(typeName)),
+
+      extensions: {
+        strapi: {
+          contentType,
+        },
+      },
 
       args: getContentTypeArgs(contentType),
 
       async resolve(parent, args, ctx) {
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
-        const { find } = getService('builders')
+        const { findMany } = getService('builders')
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
         // queryResolvers will sanitize params
-        const nodes = await find(parent, transformedArgs, ctx);
+        return findMany(parent, transformedArgs, ctx);
+      },
+    });
+  };
+
+  /**
+   * Register a "find" query field to the nexus type definition
+   */
+  const addFindConnectionQuery = (
+    t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
+    contentType: Struct.CollectionTypeSchema
+  ) => {
+    const { uid } = contentType;
+
+    const queryName = getFindConnectionQueryName(contentType);
+    const responseCollectionTypeName = getEntityResponseCollectionName(contentType);
+
+    t.field(queryName, {
+      type: responseCollectionTypeName,
+
+      extensions: {
+        strapi: {
+          contentType,
+        },
+      },
+
+      args: getContentTypeArgs(contentType),
+
+      async resolve(parent, args, ctx) {
+        const transformedArgs = transformArgs(args, { contentType, usePagination: true });
+
+        const { findMany } = getService('builders')
+          .get('content-api')
+          .buildQueriesResolvers({ contentType });
+
+        // queryResolvers will sanitize params
+        const nodes = await findMany(parent, transformedArgs, ctx);
 
         return toEntityResponseCollection(nodes, { args: transformedArgs, resourceUID: uid });
       },

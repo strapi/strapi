@@ -50,8 +50,6 @@
   "contentType.collectionName.description": "콘텐츠 타입과 테이블 이름이 다를 때 유용합니다.",
   "contentType.collectionName.label": "콜렉션 이름",
   "contentType.displayName.label": "표시 이름",
-  "contentType.draftAndPublish.description": "각 항목을 발행하기 전에 초안 버전을 작성합니다.",
-  "contentType.draftAndPublish.label": "초안/발행 시스템",
   "contentType.kind.change.warning": "콘텐츠 타입을 수정했습니다. API가 리셋됩니다(라우트, 컨트롤러, 서비스가 덮어씌워집니다.)",
   "error.attributeName.reserved-name": "이 이름은 다른 기능을 손상시킬 수 있으므로 사용할 수 없습니다.",
   "error.contentType.pluralName-used": "이 값은 단수 이름과 같을 수 없습니다.",

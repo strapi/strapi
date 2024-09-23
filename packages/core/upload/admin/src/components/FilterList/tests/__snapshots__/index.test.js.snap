@@ -1,9 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<FilterList /> renders and matches the snapshot 1`] = `
+.c0 {
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 12px;
+  height: 3.2rem;
+  color: #4945ff;
+  background: #f0f0ff;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d8ff;
+}
+
+.c4 {
+  padding-block-start: 8px;
+  padding-inline-end: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 8px;
+}
+
+.c1 {
+  align-items: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c2 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
 .c6 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,54 +46,25 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c4 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
+.c5 {
+  display: inline-flex;
+  border: none;
 }
 
-.c0 {
-  padding: 4px;
+.c5>svg {
+  height: 1.2rem;
+  width: 1.2rem;
 }
 
-.c1 {
-  background: #f0f0ff;
-  color: #4945ff;
-  padding-right: 12px;
-  padding-left: 12px;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #d9d8ff;
-  height: 2rem;
-}
-
-.c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c3 > svg {
-  height: 0.5rem;
-  width: 0.5rem;
-}
-
-.c3 > svg path {
+.c5>svg path {
   fill: #4945ff;
 }
 
-.c5 {
+.c5:hover {
+  cursor: pointer;
+}
+
+.c3 {
   color: inherit;
   border-right: 1px solid #d9d8ff;
   padding-right: 8px;
@@ -68,162 +72,156 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
 
 <div>
   <div
-    class="c0"
+    class="c0 c1"
   >
+    <span
+      class="c2 c3"
+    >
+      type is image
+    </span>
     <button
       aria-disabled="false"
-      class="c1 c2 c3"
+      class="c4 c5"
     >
-      <span
-        class="c4 c5"
-      >
-        type is image
-      </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
   </div>
   <div
-    class="c0"
+    class="c0 c1"
   >
+    <span
+      class="c2 c3"
+    >
+      type is not image
+    </span>
     <button
       aria-disabled="false"
-      class="c1 c2 c3"
+      class="c4 c5"
     >
-      <span
-        class="c4 c5"
-      >
-        type is not image
-      </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
   </div>
   <div
-    class="c0"
+    class="c0 c1"
   >
+    <span
+      class="c2 c3"
+    >
+      createdAt is Thursday, October 7, 2021
+    </span>
     <button
       aria-disabled="false"
-      class="c1 c2 c3"
+      class="c4 c5"
     >
-      <span
-        class="c4 c5"
-      >
-        createdAt is Thursday, October 7, 2021
-      </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
   </div>
   <div
-    class="c0"
+    class="c0 c1"
   >
+    <span
+      class="c2 c3"
+    >
+      type is video
+    </span>
     <button
       aria-disabled="false"
-      class="c1 c2 c3"
+      class="c4 c5"
     >
-      <span
-        class="c4 c5"
-      >
-        type is video
-      </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
   </div>
   <div
-    class="c0"
+    class="c0 c1"
   >
+    <span
+      class="c2 c3"
+    >
+      type is file
+    </span>
     <button
       aria-disabled="false"
-      class="c1 c2 c3"
+      class="c4 c5"
     >
-      <span
-        class="c4 c5"
-      >
-        type is file
-      </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
   </div>
   <div
-    class="c0"
+    class="c0 c1"
   >
+    <span
+      class="c2 c3"
+    >
+      type is not file
+    </span>
     <button
       aria-disabled="false"
-      class="c1 c2 c3"
+      class="c4 c5"
     >
-      <span
-        class="c4 c5"
-      >
-        type is not file
-      </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
   </div>
-  <div
+  <span
     class="c6"
   >
     <p
@@ -244,6 +242,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

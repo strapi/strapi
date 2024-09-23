@@ -27,18 +27,14 @@ module.exports = {
   modulePathIgnorePatterns: ['.*__mocks__.*'],
   testPathIgnorePatterns: ['node_modules/', 'dist/'],
   globalSetup: '@strapi/admin-test-utils/global-setup',
-  setupFiles: ['@strapi/admin-test-utils/environment'],
+  setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
-  testEnvironment: 'jsdom',
+  testEnvironment: '@strapi/admin-test-utils/environment',
+  prettierPath: require.resolve('prettier-2'),
   transform: {
     '^.+\\.js(x)?$': [
       '@swc/jest',
       {
-        env: {
-          coreJs: '3.33.0',
-          mode: 'usage',
-        },
-
         jsc: {
           parser: {
             jsx: true,
@@ -88,4 +84,8 @@ module.exports = {
   // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
   // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
+
+  // NOTE: this doesn't work with projects due to a jest bug, so we also set it
+  // using jest.setTimeout() in the after-env script
+  testTimeout: 60 * 1000,
 };

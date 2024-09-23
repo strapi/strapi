@@ -119,6 +119,7 @@ export declare namespace Plugins {
     name: string;
     displayName: string;
     description: string;
+    packageName: string;
   }
 
   export interface Request {
@@ -172,6 +173,20 @@ export interface ReviewWorkflowsFeature {
   options?: { numberOfWorkflows: number | null; stagesPerWorkflow: number | null };
 }
 
+export interface ContentReleasesFeature {
+  name: 'cms-content-releases';
+  options?: {
+    maximumReleases: number;
+  };
+}
+
+export interface ContentHistoryFeature {
+  name: 'cms-content-history';
+  options: {
+    retentionDays: number;
+  };
+}
+
 /**
  * TODO: this response needs refactoring because we're mixing the admin seat limit info with
  * regular EE feature info.
@@ -185,7 +200,13 @@ export declare namespace GetLicenseLimitInformation {
     data: {
       currentActiveUserCount: number;
       enforcementUserCount: number;
-      features: (SSOFeature | AuditLogsFeature | ReviewWorkflowsFeature)[];
+      features: (
+        | SSOFeature
+        | AuditLogsFeature
+        | ReviewWorkflowsFeature
+        | ContentReleasesFeature
+        | ContentHistoryFeature
+      )[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
       permittedSeats: number;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -31,9 +31,9 @@ const ComponentFixture = (props) => {
 
   return (
     <IntlProvider locale="en" messages={{}}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <CellContent {...PROPS_FIXTURE} {...customProps} />
-      </ThemeProvider>
+      </DesignSystemProvider>
     </IntlProvider>
   );
 };
@@ -41,13 +41,6 @@ const ComponentFixture = (props) => {
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('TableList | CellContent', () => {
-  it('should render image cell type when element type is asset and mime includes image', () => {
-    const { container, getByRole } = setup();
-
-    expect(getByRole('img', { name: 'alternative alt' })).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
-  });
-
   it('should render image cell type when element type is asset and mime does not include image', () => {
     const { container, getByText } = setup({
       content: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },

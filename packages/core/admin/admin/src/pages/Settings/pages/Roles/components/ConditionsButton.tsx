@@ -1,39 +1,34 @@
-import { Box, Button, ButtonProps } from '@strapi/design-system';
+import * as React from 'react';
+
+import { Box, BoxComponent, Button, ButtonProps } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface ConditionsButtonProps extends Pick<ButtonProps, 'className' | 'onClick' | 'variant'> {
   hasConditions?: boolean;
 }
 
-const ConditionsButtonImpl = ({
-  onClick,
-  className,
-  hasConditions = false,
-  variant = 'tertiary',
-}: ConditionsButtonProps) => {
-  const { formatMessage } = useIntl();
+const ConditionsButtonImpl = React.forwardRef<HTMLButtonElement, ConditionsButtonProps>(
+  ({ onClick, className, hasConditions = false, variant = 'tertiary' }, ref) => {
+    const { formatMessage } = useIntl();
 
-  return (
-    <ButtonContainer hasConditions={hasConditions} className={className}>
-      <Button variant={variant} startIcon={<Cog />} onClick={onClick}>
-        {formatMessage({
-          id: 'global.settings',
-          defaultMessage: 'Settings',
-        })}
-      </Button>
-    </ButtonContainer>
-  );
-};
+    return (
+      <ButtonContainer $hasConditions={hasConditions} className={className}>
+        <Button variant={variant} startIcon={<Cog />} onClick={onClick} ref={ref}>
+          {formatMessage({
+            id: 'global.settings',
+            defaultMessage: 'Settings',
+          })}
+        </Button>
+      </ButtonContainer>
+    );
+  }
+);
 
-interface ButtonContainerProps extends Pick<ConditionsButtonProps, 'hasConditions'> {
-  disabled?: boolean;
-}
-
-const ButtonContainer = styled(Box)<ButtonContainerProps>`
-  ${({ hasConditions, disabled, theme }) =>
-    hasConditions &&
+const ButtonContainer = styled<BoxComponent>(Box)<{ $hasConditions?: boolean }>`
+  ${({ $hasConditions, theme }) =>
+    $hasConditions &&
     `
     &:before {
       content: '';
@@ -42,8 +37,8 @@ const ButtonContainer = styled(Box)<ButtonContainerProps>`
       left: -10px;
       width: 6px;
       height: 6px;
-      border-radius: ${20 / 16}rem;;
-      background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
+      border-radius: 2rem;
+      background: ${theme.colors.primary600};
     }
   `}
 `;

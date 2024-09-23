@@ -1,5 +1,4 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
     "production": [
@@ -23,17 +22,16 @@
   "targetDefaults": {
     "build": {
       "inputs": ["production", "^production"],
-      "dependsOn": ["^build"]
-    },
-    "build:ts": {
-      "inputs": ["production", "^production", "{workspaceRoot}/packages/utils/tsconfig/**/*"],
-      "dependsOn": ["^build:ts"]
+      "dependsOn": ["^build"],
+      "cache": true
     },
     "test:unit": {
-      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"]
+      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"],
+      "cache": true
     },
     "test:front": {
-      "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"]
+      "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"],
+      "cache": true
     },
     "lint": {
       "inputs": [
@@ -43,15 +41,9 @@
         "{projectRoot}/.eslintignore",
         "{projectRoot}/tsconfig.eslint.json",
         "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
-      ]
+      ],
+      "cache": true
     }
   },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "build:ts", "lint", "test:unit", "test:front"]
-      }
-    }
-  }
+  "useInferencePlugins": false
 }

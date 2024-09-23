@@ -46,7 +46,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v18 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version `>= v18 and <= v20` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -101,10 +101,17 @@ Start the administration panel server for development:
 
 ```bash
 cd ./packages/core/admin
-yarn develop
+yarn watch
 ```
 
-The administration panel should now be available at http://localhost:4000/admin. Make sure the example application (step 4) is still running.
+Run the example application but watching the admin panel:
+
+```bash
+cd ./examples/getstarted
+yarn develop --watch-admin
+```
+
+Both commands must be running at same time; now you will be able to see the admin panel changes on the application example.
 
 **Awesome! You are now able to contribute to Strapi.**
 
@@ -112,6 +119,7 @@ The administration panel should now be available at http://localhost:4000/admin.
 
 - `yarn watch` starts yarn watch in all packages.
 - `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
+- `yarn commit` runs an interactive commit CLI to help you write a good commit message inline with our git conventions.
 - `yarn setup` installs dependencies.
 - `yarn lint` lints the codebase.
 - `yarn test:clean` removes the coverage reports.
@@ -160,6 +168,51 @@ $ STRAPI_LICENSE=<license> yarn test:api
 
 ---
 
+## Git Conventions
+
+### Commit messages
+
+We use the following convention:
+
+```
+type: subject
+
+body
+```
+
+The goal of this convention is to help us generate changelogs that can be communicated to our users.
+
+#### Type
+
+The types are based on our GitHub label, here are a subset:
+
+- `fix` – When fixing an issue.
+- `chore` – When doing some cleanup, working on tooling, some refactoring. (usually reserved for **internal** work)
+- `doc` – When writing documentation.
+- `feat` – When working on a feature.
+
+You can see the complete list [here](https://github.com/strapi/strapi/blob/1cb6f95889ccaad897759cfa14d2804adeaeb7ee/.commitlintrc.ts#L11).
+
+#### Subject
+
+The subject of a commit should be a summary of what the commit is about. It should not describe what the code is doing:
+
+- `feat: what the feature is`
+- `fix: what the problem is`
+- `chore: what the PR is about`
+- `doc: what is documented`
+
+Examples:
+
+- `feat: introduce document service`
+- `fix: unable to publish documents due to missing permissions`
+- `chore: refactor data-fetching in EditView to use react-query`
+- `doc: document service API reference`
+
+> ⚠️ For a `fix` commit the message should explain what the commit is fixing. Not what the solution is.
+
+---
+
 ## Miscellaneous
 
 ### Repository Organization
@@ -174,7 +227,7 @@ Before submitting an issue you need to make sure:
 
 - You are experiencing a technical issue with Strapi.
 - You have already searched for related [issues](https://github.com/strapi/strapi/issues) and found none open (if you found a related _closed_ issue, please link to it from your post).
-- You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
+- You are not asking a question about how to use Strapi or about whether Strapi has a certain feature. For general help using Strapi, you may:
   - Refer to the [official Strapi documentation](https://docs.strapi.io).
   - Ask a member of the community in the [Strapi Discord Community](https://discord.strapi.io/).
   - Ask a question on the [Strapi community forum](https://forum.strapi.io).

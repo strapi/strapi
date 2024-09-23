@@ -6,7 +6,14 @@
 
 import React, { useState } from 'react';
 
-import { Box, Button, Flex, Option, Popover, Select } from '@strapi/design-system';
+import {
+  Box,
+  Button,
+  Flex,
+  SingleSelectOption,
+  Popover,
+  SingleSelect,
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -14,7 +21,7 @@ import { useIntl } from 'react-intl';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
 
-const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }) => {
+const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
   const { formatMessage } = useIntl();
 
   const [modifiedData, setModifiedData] = useState({
@@ -189,11 +196,11 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
   const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
 
   return (
-    <Popover onDismiss={onToggle} source={source} padding={3} spacing={4}>
+    <Popover.Content sideOffset={4}>
       <form onSubmit={handleSubmit}>
-        <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
+        <Flex padding={3} direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
           <Box>
-            <Select
+            <SingleSelect
               aria-label={formatMessage({
                 id: 'app.utils.select-field',
                 defaultMessage: 'Select field',
@@ -205,15 +212,15 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
             >
               {displayedFilters.map((filter) => {
                 return (
-                  <Option key={filter.name} value={filter.name}>
+                  <SingleSelectOption key={filter.name} value={filter.name}>
                     {filter.metadatas.label}
-                  </Option>
+                  </SingleSelectOption>
                 );
               })}
-            </Select>
+            </SingleSelect>
           </Box>
           <Box>
-            <Select
+            <SingleSelect
               aria-label={formatMessage({
                 id: 'app.utils.select-filter',
                 defaultMessage: 'Select filter',
@@ -225,12 +232,12 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
             >
               {getFilterList(appliedFilter).map((option) => {
                 return (
-                  <Option key={option.value} value={option.value}>
+                  <SingleSelectOption key={option.value} value={option.value}>
                     {formatMessage(option.intlLabel)}
-                  </Option>
+                  </SingleSelectOption>
                 );
               })}
-            </Select>
+            </SingleSelect>
           </Box>
           <Box>
             <FilterValueInput
@@ -247,7 +254,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
           </Box>
         </Flex>
       </form>
-    </Popover>
+    </Popover.Content>
   );
 };
 
@@ -262,7 +269,6 @@ FilterPopover.propTypes = {
   filters: PropTypes.array.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
-  source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
 };
 
 export default FilterPopover;

@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -95,13 +95,13 @@ const queryClient = new QueryClient({
 const renderCompo = (props = { canUpdate: true, canCopyLink: true, canDownload: true }) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
           <NotificationsProvider>
-            <EditAssetDialog asset={asset} onClose={jest.fn()} {...props} />
+            <EditAssetDialog open asset={asset} onClose={jest.fn()} {...props} />
           </NotificationsProvider>
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );
@@ -170,22 +170,22 @@ describe('<EditAssetDialog />', () => {
     it('opens the delete dialog when pressing the delete button when the user is allowed to update', () => {
       renderCompo({ canUpdate: true, canCopyLink: false, canDownload: false });
 
-      fireEvent.click(screen.getByLabelText('Delete'));
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
       expect(screen.getByText('Confirmation')).toBeVisible();
-      expect(screen.getByText('Are you sure you want to delete this?')).toBeVisible();
+      expect(screen.getByText('Are you sure?')).toBeVisible();
     });
 
     it('does not open the delete dialog when the user is not allowed to update', () => {
       renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
 
-      expect(screen.queryByLabelText('Delete')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
     });
 
     it('copies the link and shows a notification when pressing "Copy link" and the user has permission to copy', async () => {
       renderCompo({ canUpdate: false, canCopyLink: true, canDownload: false });
 
-      fireEvent.click(screen.getByLabelText('Copy link'));
+      fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
 
       await waitFor(() =>
         expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument()
@@ -195,13 +195,13 @@ describe('<EditAssetDialog />', () => {
     it('hides the copy link button when the user is not allowed to see it', () => {
       renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
 
-      expect(screen.queryByLabelText('Copy link')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Copy link' })).not.toBeInTheDocument();
     });
 
     it('downloads the file when pressing "Download" and the user has the right to download', () => {
       renderCompo({ canUpdate: false, canCopyLink: false, canDownload: true });
 
-      fireEvent.click(screen.getByLabelText('Download'));
+      fireEvent.click(screen.getByRole('button', { name: 'Download' }));
       expect(downloadFile).toHaveBeenCalledWith(
         'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
         'Screenshot 2.png'
@@ -217,13 +217,13 @@ describe('<EditAssetDialog />', () => {
     it('shows the crop link when the user is allowed to update', () => {
       renderCompo({ canUpdate: true, canCopyLink: false, canDownload: false });
 
-      expect(screen.getByLabelText('Crop')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Crop' })).toBeInTheDocument();
     });
 
     it('hides the crop link when the user is not allowed to update', () => {
       renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
 
-      expect(screen.queryByLabelText('Crop')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Crop' })).not.toBeInTheDocument();
     });
   });
 

@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - v5/main
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -30,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: .github/filters.yaml
@@ -42,10 +43,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run lint
@@ -59,10 +60,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -75,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Monorepo install
@@ -91,10 +92,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - uses: nrwl/nx-set-shas@v3
+          node-version: 20
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -119,10 +120,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -141,10 +142,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -152,47 +153,118 @@ jobs:
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
-  e2e:
+  e2e_ce:
     timeout-minutes: 60
-    needs: [changes, build, typescript, unit_front]
-    name: 'e2e (browser: ${{ matrix.project }})'
+    needs: [changes, build]
+    name: '[CE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: npx playwright@1.42.1 install --with-deps
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run [CE] E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: false
+          jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ce-${{ matrix.project }}--playwright-trace
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+  e2e_ee:
+    timeout-minutes: 60
+    needs: [changes, build]
+    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    runs-on: ubuntu-latest
+    env:
+      STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: npx playwright@1.42.1 install --with-deps
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run [EE] E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: true
+          enableFutureFeatures: true
+          jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ee-${{ matrix.project }}--playwright-trace
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+  cli:
+    timeout-minutes: 60
+    needs: [changes, build, typescript]
+    name: 'CLI Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
 
-      - name: Install Playwright Browsers
-        run: npx playwright@1.38.1 install --with-deps
-
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
-      - name: Run E2E tests
-        run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
-
-      - uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
-          retention-days: 1
+      - name: Run CLI tests
+        run: yarn test:cli
 
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -219,7 +291,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -235,11 +307,10 @@ jobs:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [18, 20]
-        db_client: ['mysql', 'mysql2']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -249,7 +320,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -260,47 +330,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
-      - uses: ./.github/actions/run-api-tests
-        with:
-          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
-          jestOptions: '--shard=${{ matrix.shard }}'
-
-  api_ce_mysql_5:
-    if: needs.changes.outputs.backend == 'true'
-    runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:5, client: ${{ matrix.db_client }} , node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    strategy:
-      matrix:
-        node: [18, 20]
-        db_client: ['mysql', 'mysql2']
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
-    services:
-      mysql:
-        image: bitnami/mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: strapi
-          MYSQL_USER: strapi
-          MYSQL_PASSWORD: strapi
-          MYSQL_DATABASE: strapi_test
-        options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-        ports:
-          # Maps tcp port 5432 on service container to the host
-          - 3306:3306
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -316,15 +346,14 @@ jobs:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [18, 20]
-        sqlite_pkg: ['better-sqlite3', 'sqlite3']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -332,16 +361,14 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
-        env:
-          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
         with:
-          dbOptions: '--dbclient=sqlite-legacy --dbfile=./tmp/data.db'
+          dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           jestOptions: '--shard=${{ matrix.shard }}'
 
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
@@ -371,7 +398,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -387,14 +414,13 @@ jobs:
   api_ee_mysql:
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[EE] API Integration (mysql:latest, client: ${{ matrix.db_client }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [18, 20]
-        db_client: ['mysql', 'mysql2']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -404,7 +430,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -415,7 +440,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -424,25 +449,24 @@ jobs:
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           runEE: true
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
     needs: [changes, build, typescript, unit_back, unit_front]
-    name: '[EE] API Integration (sqlite, client: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [18, 20]
-        sqlite_pkg: ['better-sqlite3', 'sqlite3']
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -450,9 +474,37 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
-        env:
-          SQLITE_PKG: ${{ matrix.sqlite_pkg }}
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
           jestOptions: '--shard=${{ matrix.shard }}'
+
+  test_result:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: aggregate_test_result
+    needs:
+      [
+        pretty,
+        lint,
+        build,
+        typescript,
+        unit_back,
+        unit_front,
+        e2e_ce,
+        e2e_ee,
+        cli,
+        api_ce_pg,
+        api_ce_mysql,
+        api_ce_sqlite,
+        api_ee_pg,
+        api_ee_mysql,
+        api_ee_sqlite,
+      ]
+    steps:
+      - run: exit 1
+        if: >-
+          ${{
+                contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+          }}

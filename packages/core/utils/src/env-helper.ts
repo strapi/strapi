@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+export type Env = typeof envFn & typeof utils;
+
 function envFn<T>(key: string, defaultValue?: T): string | T | undefined {
   return _.has(process.env, key) ? process.env[key] : defaultValue;
 }
@@ -94,6 +96,6 @@ const utils = {
   },
 };
 
-const env = Object.assign(envFn, utils);
+const env: Env = Object.assign(envFn, utils);
 
 export default env;

@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddStage should render a list of stages 1`] = `
+.c0 {
+  margin-inline-start: -250px;
+  top: 4.6rem;
+  left: 50%;
+  width: 50rem;
+  z-index: 700;
+  position: fixed;
+}
+
+.c2 {
+  padding-block-start: 12px;
+  padding-block-end: 12px;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  background: #ffffff;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+}
+
+.c1 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c5 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c6 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c3 {
+  border-radius: 26px;
+  color: #8e8ea9;
+}
+
+.c3:hover {
+  color: #4945ff;
+}
+
+.c3:active {
+  color: #4945ff;
+}
+
+<div>
+  <div
+    class="c0 c1"
+  />
+  <button
+    class="c2 c3"
+  >
+    <span
+      class="c4"
+    >
+      <span
+        class="c5"
+      >
+        <svg
+          aria-hidden="true"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a13 13 0 1 0 13 13A13.016 13.016 0 0 0 16 3m5 14h-4v4a1 1 0 0 1-2 0v-4h-4a1 1 0 0 1 0-2h4v-4a1 1 0 0 1 2 0v4h4a1 1 0 0 1 0 2"
+          />
+        </svg>
+        Add stage
+      </span>
+    </span>
+  </button>
+  <span
+    class="c6"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

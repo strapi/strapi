@@ -5,34 +5,41 @@
 
 import { adminApi } from './api';
 
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { ContentType } from '../../../shared/contracts/content-types';
+interface ContentTypes {
+  collectionType: ContentType[];
+  singleType: ContentType[];
+}
 
 const contentManager = adminApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
-     * Components
-     */
-    getComponents: builder.query<Contracts.Components.FindComponents.Response['data'], void>({
-      query: () => ({
-        url: `/content-manager/components`,
-        method: 'GET',
-      }),
-      transformResponse: (res: Contracts.Components.FindComponents.Response) => res.data,
-    }),
-    /**
      * Content Types
      */
-    getContentTypes: builder.query<Contracts.ContentTypes.FindContentTypes.Response['data'], void>({
+    getContentTypes: builder.query<ContentTypes, void>({
       query: () => ({
         url: `/content-manager/content-types`,
         method: 'GET',
       }),
-      transformResponse: (res: Contracts.ContentTypes.FindContentTypes.Response) => res.data,
+      transformResponse: (res: { data: ContentType[] }) => {
+        return res.data.reduce<ContentTypes>(
+          (acc, curr) => {
+            if (curr.isDisplayed) {
+              acc[curr.kind].push(curr);
+            }
+            return acc;
+          },
+          {
+            collectionType: [],
+            singleType: [],
+          }
+        );
+      },
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
-const { useGetComponentsQuery, useGetContentTypesQuery } = contentManager;
+const { useGetContentTypesQuery } = contentManager;
 
-export { useGetComponentsQuery, useGetContentTypesQuery };
+export { useGetContentTypesQuery };

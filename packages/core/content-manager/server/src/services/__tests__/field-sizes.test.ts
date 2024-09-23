@@ -4,28 +4,26 @@ import createFieldSizesService from '../field-sizes';
 const { ApplicationError } = errors;
 
 const strapi = {
-  container: {
-    // Mock container.get('custom-fields')
-    get: jest.fn(() => ({
-      // Mock container.get('custom-fields').getAll()
-      getAll: jest.fn(() => ({
-        'plugin::mycustomfields.color': {
-          name: 'color',
-          plugin: 'mycustomfields',
-          type: 'string',
+  // Mock container.get('custom-fields')
+  get: jest.fn(() => ({
+    // Mock container.get('custom-fields').getAll()
+    getAll: jest.fn(() => ({
+      'plugin::mycustomfields.color': {
+        name: 'color',
+        plugin: 'mycustomfields',
+        type: 'string',
+      },
+      'plugin::mycustomfields.smallColor': {
+        name: 'smallColor',
+        plugin: 'mycustomfields',
+        type: 'string',
+        inputSize: {
+          default: 4,
+          isResizable: false,
         },
-        'plugin::mycustomfields.smallColor': {
-          name: 'smallColor',
-          plugin: 'mycustomfields',
-          type: 'string',
-          inputSize: {
-            default: 4,
-            isResizable: false,
-          },
-        },
-      })),
+      },
     })),
-  },
+  })),
 } as any;
 
 describe('field sizes service', () => {

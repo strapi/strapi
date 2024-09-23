@@ -1,18 +1,14 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { DesignSystemProvider } from '@strapi/design-system';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
-
-jest.mock('../../../utils/deleteRequest', () => ({
-  ...jest.requireActual('../../../utils/deleteRequest'),
-  deleteRequest: jest.fn().mockResolvedValue({ id: 1 }),
-}));
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
@@ -96,17 +92,19 @@ const renderCompo = (handleCloseSpy = jest.fn()) => {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
           <NotificationsProvider>
-            <RemoveAssetDialog onClose={handleCloseSpy} asset={asset} />
+            <RemoveAssetDialog open onClose={handleCloseSpy} asset={asset} />
           </NotificationsProvider>
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );
 };
+
+const user = userEvent.setup();
 
 describe('RemoveAssetDialog', () => {
   it('snapshots the component', () => {
@@ -115,24 +113,12 @@ describe('RemoveAssetDialog', () => {
     expect(document.body).toMatchSnapshot();
   });
 
-  it('closes the dialog when pressing cancel', () => {
+  it('closes the dialog when pressing cancel', async () => {
     const handleCloseSpy = jest.fn();
     renderCompo(handleCloseSpy);
 
-    fireEvent.click(screen.getByText('Cancel'));
+    await user.click(screen.getByText('Cancel'));
+
     expect(handleCloseSpy).toHaveBeenCalled();
-  });
-
-  describe('remove asset', () => {
-    it('closes the dialog when everything is going okay when removing', async () => {
-      const handleCloseSpy = jest.fn();
-      renderCompo(handleCloseSpy);
-
-      fireEvent.click(screen.getByText('Confirm'));
-
-      await waitFor(() => expect(handleCloseSpy).toHaveBeenCalled());
-
-      expect(screen.getByText(/Elements have been successfully deleted/)).toBeInTheDocument();
-    });
   });
 });

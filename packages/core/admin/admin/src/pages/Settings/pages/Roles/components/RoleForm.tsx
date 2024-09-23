@@ -1,9 +1,9 @@
 import {
   Box,
   Button,
+  Field,
   Flex,
   Grid,
-  GridItem,
   Textarea,
   TextInput,
   Typography,
@@ -61,38 +61,49 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
             )}
           </Button>
         </Flex>
-        <Grid gap={4}>
-          <GridItem col={6}>
-            <TextInput
-              disabled={disabled}
+        <Grid.Root gap={4}>
+          <Grid.Item col={6} direction="column" alignItems="stretch">
+            <Field.Root
               name="name"
               error={errors.name && formatMessage({ id: errors.name })}
-              label={formatMessage({
-                id: 'global.name',
-                defaultMessage: 'Name',
-              })}
-              onChange={onChange}
-              onBlur={onBlur}
               required
-              value={values.name || ''}
-            />
-          </GridItem>
-          <GridItem col={6}>
-            <Textarea
-              disabled={disabled}
-              label={formatMessage({
-                id: 'global.description',
-                defaultMessage: 'Description',
-              })}
-              id="description"
-              error={errors.name && formatMessage({ id: errors.name })}
-              onChange={onChange}
-              onBlur={onBlur}
             >
-              {values.description || ''}
-            </Textarea>
-          </GridItem>
-        </Grid>
+              <Field.Label>
+                {formatMessage({
+                  id: 'global.name',
+                  defaultMessage: 'Name',
+                })}
+              </Field.Label>
+              <TextInput
+                disabled={disabled}
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values.name || ''}
+              />
+              <Field.Error />
+            </Field.Root>
+          </Grid.Item>
+          <Grid.Item col={6} direction="column" alignItems="stretch">
+            <Field.Root
+              name="description"
+              error={errors.description && formatMessage({ id: errors.description })}
+            >
+              <Field.Label>
+                {formatMessage({
+                  id: 'global.description',
+                  defaultMessage: 'Description',
+                })}
+              </Field.Label>
+              <Textarea
+                disabled={disabled}
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values.description}
+              />
+              <Field.Error />
+            </Field.Root>
+          </Grid.Item>
+        </Grid.Root>
       </Flex>
     </Box>
   );

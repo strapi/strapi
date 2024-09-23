@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { within } from '@testing-library/dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -11,9 +11,8 @@ import { useEditFolder } from '../../../hooks/useEditFolder';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { EditFolderDialog } from '../EditFolderDialog';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     put: jest.fn().mockImplementation({}),
   }),
@@ -22,6 +21,8 @@ jest.mock('@strapi/helper-plugin', () => ({
 jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../hooks/useEditFolder');
+
+jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
 
 const client = new QueryClient({
   defaultOptions: {
@@ -40,11 +41,11 @@ function ComponentFixture(props) {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <NotificationsProvider toggleNotification={() => {}}>
-            <EditFolderDialog onClose={() => {}} {...nextProps} />
+            <EditFolderDialog open onClose={() => {}} {...nextProps} />
           </NotificationsProvider>
-        </ThemeProvider>
+        </DesignSystemProvider>
       </IntlProvider>
     </QueryClientProvider>
   );
@@ -156,7 +157,7 @@ describe('EditFolderDialog', () => {
       fireEvent.click(getButton(baseElement, 'delete'));
     });
 
-    expect(queryByText('Are you sure you want to delete this?')).toBeInTheDocument();
+    expect(queryByText('Are you sure?')).toBeInTheDocument();
   });
 
   test('keeps edit folder dialog open and show error message on API error', async () => {

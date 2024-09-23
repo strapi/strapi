@@ -1,9 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ContextInfo renders 1`] = `
+.c0 {
+  padding-block-start: 16px;
+  padding-block-end: 16px;
+  padding-inline-start: 24px;
+  padding-inline-end: 24px;
+  background: #f6f6f9;
+  border-radius: 4px;
+}
+
+.c2 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c4 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c5 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
 .c6 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+}
+
+.c7 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,64 +48,32 @@ exports[`ContextInfo renders 1`] = `
   width: 1px;
 }
 
-.c4 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4a4a6a;
-}
-
-.c0 {
-  background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 24px;
-  padding-bottom: 16px;
-  padding-left: 24px;
-  border-radius: 4px;
-}
-
-.c3 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .c1 {
   display: grid;
-  grid-template-columns: repeat(12,1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 16px;
 }
 
-.c2 {
-  grid-column: span 6;
+.c3 {
+  grid-column: span 12;
   max-width: 100%;
 }
 
-@media (max-width:68.75rem) {
-  .c2 {
-    grid-column: span;
+@media (min-width: 520px) {
+  .c3 {
+    grid-column: span 12;
   }
 }
 
-@media (max-width:34.375rem) {
-  .c2 {
+@media (min-width: 768px) {
+  .c3 {
     grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c3 {
+    grid-column: span 6;
   }
 }
 
@@ -82,54 +85,54 @@ exports[`ContextInfo renders 1`] = `
       class="c1"
     >
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class="c3"
+          class="c4"
         >
           <span
-            class="c4"
+            class="c5"
           >
             Label 1
           </span>
           <span
-            class="c5"
+            class="c6"
           >
             value1
           </span>
         </div>
       </div>
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class="c3"
+          class="c4"
         >
           <span
-            class="c4"
+            class="c5"
           >
             Label 2
           </span>
           <span
-            class="c5"
+            class="c6"
           >
             value2
           </span>
         </div>
       </div>
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class="c3"
+          class="c4"
         >
           <span
-            class="c4"
+            class="c5"
           >
             Label 3
           </span>
           <span
-            class="c5"
+            class="c6"
           >
             value3
           </span>
@@ -137,8 +140,8 @@ exports[`ContextInfo renders 1`] = `
       </div>
     </div>
   </div>
-  <div
-    class="c6"
+  <span
+    class="c7"
   >
     <p
       aria-live="polite"
@@ -158,6 +161,6 @@ exports[`ContextInfo renders 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

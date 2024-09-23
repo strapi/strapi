@@ -1,12 +1,12 @@
 import type { Context, Next } from 'koa';
 import path from 'path';
 import utils from '@strapi/utils';
-import { isString, has, toLower } from 'lodash/fp';
-import type { Strapi } from '@strapi/types';
+import { isString, has, toLower, get } from 'lodash/fp';
+import type { Core } from '@strapi/types';
 
 const { RateLimitError } = utils.errors;
 
-export default (config: any, { strapi }: { strapi: Strapi }) =>
+export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
     let rateLimitConfig = strapi.config.get('admin.rateLimit') as any;
 
@@ -25,7 +25,9 @@ export default (config: any, { strapi }: { strapi: Strapi }) =>
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const rateLimit = require('koa2-ratelimit').RateLimit;
 
-      const userEmail = toLower(ctx.request.body.email) || 'unknownEmail';
+      const requestEmail = get('request.body.email')(ctx);
+      const userEmail = isString(requestEmail) ? requestEmail.toLowerCase() : 'unknownEmail';
+
       const requestPath = isString(ctx.request.path)
         ? toLower(path.normalize(ctx.request.path)).replace(/\/$/, '')
         : 'invalidPath';

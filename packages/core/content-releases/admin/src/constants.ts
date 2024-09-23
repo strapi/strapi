@@ -1,4 +1,4 @@
-import { Permission as StrapiPermission } from '@strapi/helper-plugin';
+import type { Permission as StrapiPermission } from '@strapi/admin/strapi-admin';
 
 export const PERMISSIONS = {
   main: [
@@ -64,6 +64,29 @@ export const PERMISSIONS = {
   publish: [
     {
       action: 'plugin::content-releases.publish',
+      subject: null,
+      id: '',
+      actionParameters: {},
+      properties: {},
+      conditions: [],
+    },
+  ],
+} satisfies Record<string, StrapiPermission[]>;
+
+export const PERMISSIONS_SETTINGS = {
+  read: [
+    {
+      action: 'plugin::content-releases.settings.read',
+      subject: null,
+      id: '',
+      actionParameters: {},
+      properties: {},
+      conditions: [],
+    },
+  ],
+  update: [
+    {
+      action: 'plugin::content-releases.settings.update',
       subject: null,
       id: '',
       actionParameters: {},

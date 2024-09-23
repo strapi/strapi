@@ -1,0 +1,89 @@
+{
+  "name": "@strapi/upgrade",
+  "version": "5.0.0",
+  "description": "CLI to upgrade Strapi applications effortless",
+  "keywords": [
+    "strapi",
+    "package",
+    "tool",
+    "upgrade",
+    "migrate",
+    "version"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/utils/upgrade"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "bin": "./bin/upgrade.js",
+  "files": [
+    "bin",
+    "dist",
+    "resources"
+  ],
+  "scripts": {
+    "build": "pack-up build",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "prepublishOnly": "yarn clean && yarn build",
+    "test:ts": "run -T tsc --noEmit",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
+  },
+  "dependencies": {
+    "@strapi/utils": "workspace:*",
+    "chalk": "4.1.2",
+    "cli-table3": "0.6.2",
+    "commander": "8.3.0",
+    "esbuild-register": "3.5.0",
+    "fast-glob": "3.3.2",
+    "fs-extra": "11.2.0",
+    "jscodeshift": "0.15.1",
+    "lodash": "4.17.21",
+    "memfs": "4.6.0",
+    "ora": "5.4.1",
+    "prompts": "2.4.2",
+    "semver": "7.5.4",
+    "simple-git": "3.21.0"
+  },
+  "devDependencies": {
+    "@strapi/pack-up": "5.0.0",
+    "@strapi/types": "workspace:*",
+    "@types/fs-extra": "11.0.4",
+    "@types/jscodeshift": "0.11.10",
+    "eslint-config-custom": "workspace:*",
+    "rimraf": "5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  }
+}

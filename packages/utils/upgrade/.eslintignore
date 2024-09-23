@@ -1,0 +1,6 @@
+bin
+coverage
+dist
+# Prevent linting error (import/no-extraneous-dependencies)
+# "'@strapi/pack-up' should be listed in the project's dependencies, not devDependencies"
+packup.config.ts

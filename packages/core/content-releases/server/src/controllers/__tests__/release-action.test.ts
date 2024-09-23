@@ -1,12 +1,15 @@
+import { AlreadyOnReleaseError } from '../../services/validation';
 import releaseActionController from '../release-action';
 
 const mockSanitizedQueryRead = jest.fn().mockResolvedValue({});
 const mockFindActions = jest.fn().mockResolvedValue({ results: [], pagination: {} });
 const mockSanitizeOutput = jest.fn((entry: { id: number; name: string }) => ({ id: entry.id }));
+const mockCreateAction = jest.fn();
+const mockUpdateReleaseStatus = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
-    create: jest.fn(),
+    create: mockCreateAction,
     findActions: mockFindActions,
     getContentTypesDataForActions: jest.fn(() => ({
       'api::contentTypeA.contentTypeA': {
@@ -18,6 +21,7 @@ jest.mock('../../utils', () => ({
         displayName: 'contentTypeB',
       },
     })),
+    updateReleaseStatus: mockUpdateReleaseStatus,
   })),
   getPermissionsChecker: jest.fn(() => ({
     sanitizedQuery: {
@@ -55,19 +59,6 @@ describe('Release Action controller', () => {
           draftAndPublish: true,
         },
       });
-      // @ts-expect-error Ignore missing properties
-      global.strapi.entityService = {
-        findOne: jest.fn().mockReturnValue({
-          actions: [
-            {
-              contentType: 'api::category.category',
-              entry: {
-                id: 2,
-              },
-            },
-          ],
-        }),
-      };
 
       const ctx = {
         state: {
@@ -79,16 +70,129 @@ describe('Release Action controller', () => {
         request: {
           // Mock missing type property
           body: {
-            entry: {
-              id: 1,
-              contentType: 'api::category.category',
-            },
+            entryDocumentId: '1',
+            contentType: 'api::category.category',
           },
         },
       };
 
       // @ts-expect-error Ignore missing properties
       expect(() => releaseActionController.create(ctx)).rejects.toThrow('type is a required field');
+    });
+  });
+
+  describe('createMany', () => {
+    beforeEach(() => {
+      global.strapi = {
+        db: {
+          transaction: jest.fn((cb) => cb()),
+        },
+      };
+
+      jest.clearAllMocks();
+    });
+
+    it('creates multiple release actions', async () => {
+      mockCreateAction.mockResolvedValue({ id: 1 });
+
+      const ctx: any = {
+        params: {
+          releaseId: 1,
+        },
+        created: jest.fn(),
+        request: {
+          body: [
+            {
+              entryDocumentId: 'abcd',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+            {
+              entryDocumentId: 'abcde',
+              contentType: 'api::contentTypeB.contentTypeB',
+              type: 'unpublish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      expect(mockCreateAction).toHaveBeenCalledTimes(2);
+
+      expect(ctx.created).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.any(Array), // Ensure data is an array
+          meta: expect.objectContaining({
+            totalEntries: 2,
+            entriesAlreadyInRelease: 0,
+          }),
+        })
+      );
+      const firstCallArgument = ctx.created.mock.calls[0][0];
+      expect(firstCallArgument.data.length).toBe(2);
+    });
+
+    it('should count already added entries and dont throw an error', async () => {
+      mockCreateAction.mockRejectedValue(
+        new AlreadyOnReleaseError(
+          'Entry with id 1 and contentType api::contentTypeA.contentTypeA already exists in release with id 1'
+        )
+      );
+
+      const ctx: any = {
+        params: {
+          releaseId: 1,
+        },
+        created: jest.fn(),
+        request: {
+          body: [
+            {
+              entryDocumentId: 'abcd',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      expect(mockCreateAction).toHaveBeenCalledTimes(1);
+      expect(ctx.created).toHaveBeenCalledWith({
+        data: [],
+        meta: { totalEntries: 1, entriesAlreadyInRelease: 1 },
+      });
+    });
+
+    it('should call updateReleaseStatus only once', async () => {
+      mockCreateAction.mockResolvedValue({ id: 1 });
+      mockUpdateReleaseStatus.mockResolvedValue({ id: 1 });
+
+      const ctx: any = {
+        params: {
+          releaseId: 1,
+        },
+        created: jest.fn(),
+        request: {
+          body: [
+            {
+              entryDocumentId: 'abcd1',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+            {
+              entryDocumentId: 'abcd2',
+              contentType: 'api::contentTypeA.contentTypeA',
+              type: 'publish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      expect(mockUpdateReleaseStatus).toHaveBeenCalledTimes(1);
     });
   });
 

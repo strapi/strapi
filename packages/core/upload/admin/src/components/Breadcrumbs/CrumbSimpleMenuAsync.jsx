@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Loader } from '@strapi/design-system';
-import { CrumbSimpleMenu, MenuItem } from '@strapi/design-system/v2';
-import { useQueryParams } from '@strapi/helper-plugin';
+import { CrumbSimpleMenu, MenuItem } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -49,7 +49,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
           if (onChangeFolder) {
             return (
               <MenuItem
-                as="button"
+                tag="button"
                 type="button"
                 onClick={() => onChangeFolder(ascendant.id, ascendant.path)}
                 key={ascendant.id}
@@ -65,7 +65,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
           });
 
           return (
-            <MenuItem isLink as={NavLink} to={url} key={ascendant.id}>
+            <MenuItem isLink tag={NavLink} to={url} key={ascendant.id}>
               {ascendant.label}
             </MenuItem>
           );

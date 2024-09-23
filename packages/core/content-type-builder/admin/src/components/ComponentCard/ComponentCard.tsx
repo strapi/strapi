@@ -1,8 +1,7 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../hooks/useDataManager';
 
@@ -21,11 +20,11 @@ const CloseButton = styled(Box)`
   position: absolute;
   display: none;
   top: 5px;
-  right: ${pxToRem(8)};
+  right: 0.8rem;
 
   svg {
-    width: ${pxToRem(10)};
-    height: ${pxToRem(10)};
+    width: 1rem;
+    height: 1rem;
 
     path {
       fill: ${({ theme }) => theme.colors.primary600};
@@ -34,8 +33,8 @@ const CloseButton = styled(Box)`
 `;
 
 const ComponentBox = styled(Flex)`
-  width: ${pxToRem(140)};
-  height: ${pxToRem(80)};
+  width: 14rem;
+  height: 8rem;
   position: relative;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral100};
@@ -47,13 +46,10 @@ const ComponentBox = styled(Flex)`
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
+    color: ${({ theme }) => theme.colors.primary600};
 
     ${CloseButton} {
       display: block;
-    }
-
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600};
     }
 
     /* > ComponentIcon */
@@ -115,7 +111,7 @@ export const ComponentCard = ({
       </Box>
 
       {isInDevelopmentMode && (
-        <CloseButton as="button" onClick={onClose}>
+        <CloseButton tag="button" onClick={onClose}>
           <Cross />
         </CloseButton>
       )}

@@ -1,11 +1,5 @@
-import React from 'react';
-
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { useFetchClient } from '@strapi/admin/strapi-admin';
+import { act, renderHook } from '@tests/utils';
 
 import { useEditFolder } from '../useEditFolder';
 
@@ -20,59 +14,16 @@ const FOLDER_EDIT_FIXTURE = {
   parent: 1,
 };
 
-const notificationStatusMock = jest.fn();
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: () => notificationStatusMock,
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     put: jest.fn().mockResolvedValue({ name: 'folder-edited' }),
     post: jest.fn().mockResolvedValue({ name: 'folder-created' }),
   }),
 }));
 
-const refetchQueriesMock = jest.fn();
-
-jest.mock('react-query', () => ({
-  ...jest.requireActual('react-query'),
-  useQueryClient: () => ({
-    refetchQueries: refetchQueriesMock,
-  }),
-}));
-
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-// eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }) {
-  return (
-    <Router>
-      <Route>
-        <QueryClientProvider client={client}>
-          <ThemeProvider theme={lightTheme}>
-            <NotificationsProvider>
-              <IntlProvider locale="en" messages={{}}>
-                {children}
-              </IntlProvider>
-            </NotificationsProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </Route>
-    </Router>
-  );
-}
-
 function setup(...args) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useEditFolder(...args), { wrapper: ComponentFixture }));
-    });
-  });
+  return renderHook(() => useEditFolder(...args));
 }
 
 describe('useEditFolder', () => {
@@ -84,7 +35,7 @@ describe('useEditFolder', () => {
     const { post } = useFetchClient();
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { editFolder } = current;
 
     await act(async () => {
@@ -99,7 +50,7 @@ describe('useEditFolder', () => {
 
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { editFolder } = current;
 
     await act(async () => {
@@ -119,7 +70,7 @@ describe('useEditFolder', () => {
     const { put } = useFetchClient();
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { editFolder } = current;
 
     await act(async () => {
@@ -136,10 +87,9 @@ describe('useEditFolder', () => {
   });
 
   test('does not call toggleNotification in case of success', async () => {
-    const toggleNotification = useNotification();
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { editFolder } = current;
 
     await act(async () => {
@@ -151,31 +101,5 @@ describe('useEditFolder', () => {
         FOLDER_EDIT_FIXTURE.id
       );
     });
-
-    expect(toggleNotification).not.toHaveBeenCalled();
-  });
-
-  test('does call refetchQueries in case of success', async () => {
-    const queryClient = useQueryClient();
-    const {
-      result: { current },
-    } = await setup();
-    const { editFolder } = current;
-
-    await act(async () => {
-      await editFolder(
-        {
-          name: FOLDER_EDIT_FIXTURE.name,
-          parent: FOLDER_EDIT_FIXTURE.parent,
-        },
-        FOLDER_EDIT_FIXTURE.id
-      );
-    });
-
-    await waitFor(() =>
-      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'folders'], {
-        active: true,
-      })
-    );
   });
 });

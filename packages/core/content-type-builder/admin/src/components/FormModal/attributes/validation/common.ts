@@ -1,4 +1,5 @@
-import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
+import { snakeCase } from 'lodash/fp';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
 
@@ -11,12 +12,16 @@ const alreadyUsedAttributeNames = (
 ): yup.TestConfig<string | undefined, Record<string, unknown>> => {
   return {
     name: 'attributeNameAlreadyUsed',
-    message: errorsTrads.unique,
+    message: errorsTrads.unique.id,
     test(value: string | undefined) {
       if (!value) {
         return false;
       }
-      return !usedNames.includes(value);
+      const snakeCaseKey = snakeCase(value);
+
+      return !usedNames.some((existingKey) => {
+        return snakeCase(existingKey) === snakeCaseKey;
+      });
     },
   };
 };
@@ -47,8 +52,11 @@ const isNameAllowed = (
       if (!value) {
         return false;
       }
+      const snakeCaseKey = snakeCase(value);
 
-      return !reservedNames.includes(value);
+      return !reservedNames.some((existingKey) => {
+        return snakeCase(existingKey) === snakeCaseKey;
+      });
     },
   };
 };
@@ -73,7 +81,7 @@ const validators = {
     yup
       .number()
       .integer()
-      .min(0)
+      .min(1)
       .when('maxLength', (maxLength, schema) => {
         if (maxLength) {
           return schema.max(maxLength, getTrad('error.validation.minSupMax'));
@@ -87,11 +95,11 @@ const validators = {
       .string()
       .test(alreadyUsedAttributeNames(usedNames))
       .test(isNameAllowed(reservedNames))
-      .matches(NAME_REGEX, errorsTrads.regex)
-      .required(errorsTrads.required);
+      .matches(NAME_REGEX, errorsTrads.regex.id)
+      .required(errorsTrads.required.id);
   },
   required: () => yup.boolean(),
-  type: () => yup.string().required(errorsTrads.required),
+  type: () => yup.string().required(errorsTrads.required.id),
   unique: () => yup.boolean().nullable(),
 };
 
@@ -110,7 +118,11 @@ const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array
         name: 'isValidRegExpPattern',
         message: getTrad('error.validation.regex'),
         test(value) {
-          return new RegExp(value || '') !== null;
+          try {
+            return new RegExp(value || '') !== null;
+          } catch (e) {
+            return false;
+          }
         },
       })
       .nullable(),
@@ -125,7 +137,7 @@ type GenericIsMinSuperiorThanMax<T extends (string | null) | number> = yup.TestC
 >;
 
 const isMinSuperiorThanMax = <
-  T extends (string | null) | number
+  T extends (string | null) | number,
 >(): GenericIsMinSuperiorThanMax<T> => ({
   name: 'isMinSuperiorThanMax',
   message: getTrad('error.validation.minSupMax'),

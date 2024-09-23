@@ -9,8 +9,8 @@
     "name": "Country"
   },
   "options": {
-    "draftAndPublish": false,
-    "comment": ""
+    "comment": "",
+    "draftAndPublish": false
   },
   "pluginOptions": {
     "i18n": {

@@ -8,8 +8,8 @@
     "pluralName": "menus"
   },
   "options": {
-    "draftAndPublish": false,
-    "comment": ""
+    "comment": "",
+    "draftAndPublish": false
   },
   "attributes": {
     "description": {

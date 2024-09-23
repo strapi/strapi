@@ -26,4 +26,20 @@ module.exports = ({ env }) => ({
       requestTimeout: 1000 * 60 * 10, // set request timeout to 600000ms (10 minutes)
     },
   },
+  transfer: {
+    remote: {
+      // enabled: false,
+    },
+  },
+  logger: {
+    config: {
+      level: 'silly',
+    },
+    updates: {
+      // enabled: false,
+    },
+    startup: {
+      // enabled: false,
+    },
+  },
 });

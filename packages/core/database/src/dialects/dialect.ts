@@ -19,7 +19,10 @@ export default class Dialect {
 
   configure() {}
 
-  initialize() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async initialize(_nativeConnection?: unknown) {
+    // noop
+  }
 
   getSqlType(type: unknown) {
     return type;
@@ -39,10 +42,6 @@ export default class Dialect {
 
   supportsUnsigned() {
     return false;
-  }
-
-  supportsWindowFunctions() {
-    return true;
   }
 
   supportsOperator(operator?: string): boolean;

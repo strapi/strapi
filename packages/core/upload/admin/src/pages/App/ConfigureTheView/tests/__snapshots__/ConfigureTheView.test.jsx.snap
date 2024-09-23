@@ -1,9 +1,168 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Upload - Configure initial render renders and matches the snapshot 1`] = `
+.c1 {
+  padding-block-end: 56px;
+}
+
+.c4 {
+  padding-block-start: 24px;
+  padding-block-end: 40px;
+  padding-inline-start: 56px;
+  padding-inline-end: 56px;
+  background: #f6f6f9;
+}
+
+.c5 {
+  padding-block-end: 8px;
+}
+
+.c6 {
+  cursor: pointer;
+}
+
+.c11 {
+  min-width: 0;
+}
+
+.c14 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c19 {
+  padding-inline-start: 56px;
+  padding-inline-end: 56px;
+}
+
+.c20 {
+  padding-block-start: 24px;
+  padding-block-end: 24px;
+  padding-inline-start: 32px;
+  padding-inline-end: 32px;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+}
+
+.c27 {
+  background: #ffffff;
+  border-radius: 4px;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.c30 {
+  flex: 1;
+}
+
+.c10 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c12 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c15 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c22 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c24 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c28 {
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c31 {
+  gap: 12px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c9 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c13 {
+  font-weight: 600;
+  font-size: 3.2rem;
+  line-height: 1.25;
+  color: currentcolor;
+}
+
+.c17 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c18 {
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: #666687;
+}
+
+.c25 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+  font-weight: 600;
+}
+
+.c32 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
 .c36 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c37 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,298 +172,20 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   width: 1px;
 }
 
-.c8 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #4945ff;
+.c7 {
+  text-decoration: none;
 }
 
-.c12 {
-  font-weight: 600;
-  font-size: 2rem;
-  line-height: 1.25;
-  color: #32324d;
-}
-
-.c17 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c18 {
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #666687;
-}
-
-.c24 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c31 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c35 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c1 {
-  padding-bottom: 56px;
-}
-
-.c4 {
-  background: #f6f6f9;
-  padding-top: 24px;
-  padding-right: 56px;
-  padding-bottom: 40px;
-  padding-left: 56px;
-}
-
-.c5 {
-  padding-bottom: 8px;
-}
-
-.c10 {
-  min-width: 0;
-}
-
-.c13 {
-  background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
-  cursor: pointer;
-}
-
-.c19 {
-  padding-right: 56px;
-  padding-left: 56px;
-}
-
-.c20 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c26 {
-  background: #ffffff;
-  padding-right: 12px;
-  padding-left: 12px;
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  cursor: default;
-}
-
-.c29 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c9 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c23 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c27 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 16px;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c30 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 12px;
-}
-
-.c15 {
-  position: relative;
-  outline: none;
-}
-
-.c15 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c15 > svg > g,
-.c15 > svg path {
-  fill: #ffffff;
-}
-
-.c15[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c15:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c15:focus-visible {
-  outline: none;
-}
-
-.c15:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
+.c7:visited {
+  color: inherit;
 }
 
 .c16 {
-  height: 2rem;
-}
-
-.c16 svg {
-  height: 0.75rem;
-  width: auto;
-}
-
-.c16[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true'] .c7 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true'] svg > g,
-.c16[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c16[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true']:active .c7 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true']:active svg > g,
-.c16[aria-disabled='true']:active svg path {
-  fill: #666687;
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+  color: #ffffff;
 }
 
 .c16:hover {
@@ -317,84 +198,126 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   background: #4945ff;
 }
 
-.c16 svg > g,
-.c16 svg path {
-  fill: #ffffff;
-}
-
-.c25 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-.c28 {
+.c16[aria-disabled='true'] {
   border: 1px solid #dcdce4;
-  min-height: 2.5rem;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c8 {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 8px;
+  position: relative;
   outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
+}
+
+.c8 svg {
+  font-size: 1rem;
+}
+
+.c8 svg path {
+  fill: #4945ff;
+}
+
+.c8:hover>span {
+  color: #7b79ff;
+}
+
+.c8:active {
+  color: #271fe0;
+}
+
+.c8:after {
+  transition-property: all;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c8:focus-visible {
+  outline: none;
+}
+
+.c8:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c26 {
+  display: flex;
+}
+
+.c29 {
+  border: 1px solid #dcdce4;
+  padding-block: 8px;
+  padding-inline-start: 16px;
+  padding-inline-end: 12px;
+  outline: none;
+  box-shadow: none;
   transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
 }
 
-.c28[aria-disabled='true'] {
-  color: #666687;
+.c29[aria-disabled='true'] {
+  color: #8e8ea9;
 }
 
-.c28:focus-visible {
+.c29:focus-visible {
   outline: none;
 }
 
-.c28:focus-within {
+.c29:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c34 > svg {
-  width: 0.375rem;
+.c35 {
+  display: flex;
 }
 
-.c34 > svg > path {
-  fill: #666687;
-}
-
-.c32 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
+.c35>svg {
+  fill: #8e8ea9;
 }
 
 .c33 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
+  flex: 1;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
+}
+
+.c34 {
   display: flex;
   gap: 4px;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
   flex-wrap: wrap;
 }
 
-.c37[data-state='checked'] .c7 {
-  font-weight: bold;
-  color: #4945ff;
+.c3:focus-visible {
+  outline: none;
 }
 
 .c21 {
   display: grid;
-  grid-template-columns: repeat(12,1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 16px;
 }
 
-.c22 {
-  grid-column: span 6;
+.c23 {
+  grid-column: span 12;
   max-width: 100%;
 }
 
@@ -407,81 +330,31 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   overflow-x: hidden;
 }
 
-.c3:focus-visible {
-  outline: none;
+@media (prefers-reduced-motion: no-preference) {
+  .c16 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
-.c6 {
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  gap: 8px;
-  position: relative;
-  outline: none;
+@media (prefers-reduced-motion: no-preference) {
+
 }
 
-.c6 svg {
-  font-size: 0.625rem;
-}
-
-.c6 svg path {
-  fill: #4945ff;
-}
-
-.c6:hover {
-  color: #7b79ff;
-}
-
-.c6:active {
-  color: #271fe0;
-}
-
-.c6:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c6:focus-visible {
-  outline: none;
-}
-
-.c6:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-@media (max-width:68.75rem) {
-  .c22 {
+@media (min-width: 520px) {
+  .c23 {
     grid-column: span 12;
   }
 }
 
-@media (max-width:34.375rem) {
-  .c22 {
-    grid-column: span;
+@media (min-width: 768px) {
+  .c23 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c23 {
+    grid-column: span 6;
   }
 }
 
@@ -510,73 +383,72 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 class="c5"
               >
                 <a
-                  class="c6"
+                  aria-disabled="false"
+                  class="c6 c7 c8"
                   href="/plugins/upload"
                   id="go-back"
                 >
                   <svg
-                    fill="none"
-                    height="1rem"
-                    viewBox="0 0 24 24"
-                    width="1rem"
+                    fill="currentColor"
+                    height="16"
+                    viewBox="0 0 32 32"
+                    width="16"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M24 13.3a.2.2 0 0 1-.2.2H5.74l8.239 8.239a.2.2 0 0 1 0 .282L12.14 23.86a.2.2 0 0 1-.282 0L.14 12.14a.2.2 0 0 1 0-.282L11.86.14a.2.2 0 0 1 .282 0L13.98 1.98a.2.2 0 0 1 0 .282L5.74 10.5H23.8c.11 0 .2.09.2.2v2.6Z"
-                      fill="#212134"
+                      d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H8.625l6.44 6.439a1.502 1.502 0 1 1-2.125 2.125l-9-9a1.5 1.5 0 0 1 0-2.125l9-9a1.503 1.503 0 0 1 2.125 2.125L8.625 14.5H27a1.5 1.5 0 0 1 1.5 1.5"
                     />
                   </svg>
                   <span
-                    class="c7 c8"
+                    class="c9"
                   >
                     Back
                   </span>
                 </a>
               </div>
               <div
-                class="c9"
+                class="c10"
               >
                 <div
-                  class="c10 c11"
+                  class="c11 c12"
                 >
                   <h1
-                    class="c7 c12"
+                    class="c13"
                   >
                     Configure the view - Media Library
                   </h1>
                 </div>
                 <button
                   aria-disabled="true"
-                  class="c13 c14 c15 c16"
+                  class="c14 c15 c16"
                   disabled=""
                   type="submit"
                 >
-                  <div
+                  <span
                     aria-hidden="true"
-                    class=""
+                    class="c12"
                   >
                     <svg
-                      fill="none"
-                      height="1rem"
-                      viewBox="0 0 24 24"
-                      width="1rem"
+                      fill="currentColor"
+                      height="16"
+                      viewBox="0 0 32 32"
+                      width="16"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
-                        d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
-                        fill="#212134"
+                        d="m29.061 10.061-16 16a1.5 1.5 0 0 1-2.125 0l-7-7a1.504 1.504 0 0 1 2.125-2.125L12 22.875 26.939 7.939a1.502 1.502 0 1 1 2.125 2.125z"
                       />
                     </svg>
-                  </div>
+                  </span>
                   <span
-                    class="c7 c17"
+                    class="c17"
                   >
                     Save
                   </span>
                 </button>
               </div>
               <p
-                class="c7 c18"
+                class="c18"
               >
                 Define the view settings of the media library.
               </p>
@@ -592,153 +464,141 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 class="c21"
               >
                 <div
-                  class="c22"
+                  class="c22 c23"
                 >
                   <div
-                    class=""
+                    class="c24"
                   >
-                    <div
-                      class="c23"
+                    <label
+                      class="c25 c26"
+                      for=":r0:"
+                      id=":r0:-label"
                     >
-                      <label
-                        class="c7 c24 c25"
-                        for=":r0:"
-                      >
-                        Entries per page
-                      </label>
-                      <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-:r3:"
-                        aria-describedby=":r0:-hint :r0:-error"
-                        aria-expanded="false"
-                        aria-label="Entries per page"
-                        class="c26 c27 c28"
-                        data-state="closed"
-                        dir="ltr"
-                        id=":r0:"
-                        overflow="hidden"
-                        role="combobox"
-                        tabindex="0"
+                      Entries per page
+                    </label>
+                    <div
+                      aria-autocomplete="none"
+                      aria-controls="radix-:r2:"
+                      aria-describedby=":r0:-hint"
+                      aria-expanded="false"
+                      aria-labelledby=":r0:-label"
+                      aria-required="false"
+                      class="c27 c28 c29"
+                      data-state="closed"
+                      dir="ltr"
+                      name="pageSize"
+                      role="combobox"
+                      tabindex="0"
+                    >
+                      <span
+                        class="c30 c31"
                       >
                         <span
-                          class="c29 c30"
+                          class="c32 c33"
                         >
                           <span
-                            class="c7 c31 c32"
-                          >
-                            <span
-                              class="c33"
-                            >
-                              10
-                            </span>
-                          </span>
-                        </span>
-                        <span
-                          class="c30"
-                        >
-                          <span
-                            aria-hidden="true"
                             class="c34"
                           >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
+                            10
                           </span>
                         </span>
-                      </div>
-                      <p
-                        class="c7 c35"
-                        id=":r0:-hint"
+                      </span>
+                      <span
+                        class="c31"
                       >
-                        Number of assets displayed by default in the Media Library
-                      </p>
+                        <span
+                          aria-hidden="true"
+                          class="c35"
+                        >
+                          <svg
+                            fill="currentColor"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                            />
+                          </svg>
+                        </span>
+                      </span>
                     </div>
+                    <p
+                      class="c36"
+                      id=":r0:-hint"
+                    >
+                      Number of assets displayed by default in the Media Library
+                    </p>
                   </div>
                 </div>
                 <div
-                  class="c22"
+                  class="c22 c23"
                 >
                   <div
-                    class=""
+                    class="c24"
                   >
-                    <div
-                      class="c23"
+                    <label
+                      class="c25 c26"
+                      for=":r3:"
+                      id=":r3:-label"
                     >
-                      <label
-                        class="c7 c24 c25"
-                        for=":r4:"
-                      >
-                        Default sort order
-                      </label>
-                      <div
-                        aria-autocomplete="none"
-                        aria-controls="radix-:r7:"
-                        aria-describedby=":r4:-hint :r4:-error"
-                        aria-expanded="false"
-                        aria-label="Default sort order"
-                        class="c26 c27 c28"
-                        data-state="closed"
-                        dir="ltr"
-                        id=":r4:"
-                        overflow="hidden"
-                        role="combobox"
-                        tabindex="0"
+                      Default sort order
+                    </label>
+                    <div
+                      aria-autocomplete="none"
+                      aria-controls="radix-:r5:"
+                      aria-describedby=":r3:-hint"
+                      aria-expanded="false"
+                      aria-labelledby=":r3:-label"
+                      aria-required="false"
+                      class="c27 c28 c29"
+                      data-state="closed"
+                      dir="ltr"
+                      name="sort"
+                      role="combobox"
+                      tabindex="0"
+                    >
+                      <span
+                        class="c30 c31"
                       >
                         <span
-                          class="c29 c30"
+                          class="c32 c33"
                         >
                           <span
-                            class="c7 c31 c32"
-                          >
-                            <span
-                              class="c33"
-                            >
-                              createdAt:DESC
-                            </span>
-                          </span>
-                        </span>
-                        <span
-                          class="c30"
-                        >
-                          <span
-                            aria-hidden="true"
                             class="c34"
                           >
-                            <svg
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
+                            createdAt:DESC
                           </span>
                         </span>
-                      </div>
-                      <p
-                        class="c7 c35"
-                        id=":r4:-hint"
+                      </span>
+                      <span
+                        class="c31"
                       >
-                        Note: You can override this value in the media library.
-                      </p>
+                        <span
+                          aria-hidden="true"
+                          class="c35"
+                        >
+                          <svg
+                            fill="currentColor"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                            />
+                          </svg>
+                        </span>
+                      </span>
                     </div>
+                    <p
+                      class="c36"
+                      id=":r3:-hint"
+                    >
+                      Note: You can override this value in the media library.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -748,8 +608,8 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
       </main>
     </div>
   </div>
-  <div
-    class="c36"
+  <span
+    class="c37"
   >
     <p
       aria-live="polite"
@@ -769,6 +629,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

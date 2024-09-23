@@ -9,25 +9,44 @@ import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
-
-// TODO: move back into strapi
-import { transformContentTypes } from './utils/content-types';
 import { validateDatabase } from './validations';
-import { Model } from './types';
+import type { Model } from './types';
+import type { Migration } from './migrations';
+import { type Identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+  migrations: {
+    dir: string;
+  };
   [key: string]: unknown;
 }
+
+export type Logger = Record<
+  'info' | 'warn' | 'error' | 'debug',
+  (message: string | Record<string, unknown>) => void
+>;
 
 export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
-  models: Model[];
+  logger?: Logger;
 }
+
+const afterCreate =
+  (db: Database) =>
+  (
+    nativeConnection: unknown,
+    done: (error: Error | null, nativeConnection: unknown) => Promise<void>
+  ) => {
+    // run initialize for it since commands such as postgres SET and sqlite PRAGMA are per-connection
+    db.dialect.initialize(nativeConnection).then(() => {
+      return done(null, nativeConnection);
+    });
+  };
 
 class Database {
   connection: Knex;
@@ -46,17 +65,9 @@ class Database {
 
   entityManager: EntityManager;
 
-  static transformContentTypes = transformContentTypes;
-
-  static async init(config: DatabaseConfig) {
-    const db = new Database(config);
-    await validateDatabase(db);
-    return db;
-  }
+  logger: Logger;
 
   constructor(config: DatabaseConfig) {
-    this.metadata = createMetadata(config.models);
-
     this.config = {
       ...config,
       settings: {
@@ -69,9 +80,11 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    this.connection = createConnection(this.config.connection);
+    this.metadata = createMetadata([]);
 
-    this.dialect.initialize();
+    this.connection = createConnection(this.config.connection, {
+      pool: { afterCreate: afterCreate(this) },
+    });
 
     this.schema = createSchemaProvider(this);
 
@@ -79,6 +92,14 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+
+    this.logger = config.logger ?? console;
+  }
+
+  async init({ models }: { models: Model[] }) {
+    this.metadata.loadModels(models);
+    await validateDatabase(this);
+    return this;
   }
 
   query(uid: string) {
@@ -166,3 +187,4 @@ class Database {
 }
 
 export { Database, errors };
+export type { Model, Identifiers, Migration };

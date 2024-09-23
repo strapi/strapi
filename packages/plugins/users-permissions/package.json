@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -27,9 +27,9 @@
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "source": "./strapi-server.js",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "source": "./server/index.js",
+      "require": "./server/index.js",
+      "default": "./server/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -46,45 +46,44 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.14.1",
-    "@strapi/helper-plugin": "4.19.0",
-    "@strapi/icons": "1.14.1",
-    "@strapi/utils": "4.19.0",
+    "@strapi/design-system": "2.0.0-rc.11",
+    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/utils": "workspace:*",
     "bcryptjs": "2.4.3",
-    "formik": "2.4.0",
+    "formik": "2.4.5",
     "grant-koa": "5.4.8",
-    "immer": "9.0.19",
+    "immer": "9.0.21",
     "jsonwebtoken": "9.0.0",
     "jwk-to-pem": "2.0.5",
-    "koa": "2.13.4",
-    "koa2-ratelimit": "^1.1.2",
+    "koa": "2.15.2",
+    "koa2-ratelimit": "^1.1.3",
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
     "purest": "4.0.2",
-    "react-intl": "6.4.1",
+    "react-intl": "6.6.2",
     "react-query": "3.39.3",
-    "react-redux": "8.1.1",
+    "react-redux": "8.1.3",
     "url-join": "4.0.1",
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.19.0",
-    "@strapi/strapi": "4.19.0",
-    "@testing-library/dom": "9.2.0",
-    "@testing-library/react": "14.0.0",
-    "@testing-library/user-event": "14.4.3",
+    "@strapi/pack-up": "5.0.0",
+    "@strapi/strapi": "workspace:*",
+    "@testing-library/dom": "10.1.0",
+    "@testing-library/react": "15.0.7",
+    "@testing-library/user-event": "14.5.2",
     "msw": "1.3.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.0.0",
+    "@strapi/strapi": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^5.2.0",
-    "styled-components": "^5.2.1"
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

@@ -1,17 +1,18 @@
 import React, { useReducer, useState } from 'react';
 
-import { Button, ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
 import {
   ConfirmDialog,
-  Link,
-  useFocusWhenNavigate,
-  useNotification,
   useTracking,
-} from '@strapi/helper-plugin';
+  useNotification,
+  Page,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import { Button, Dialog, Link } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
 import { useConfig } from '../../../hooks/useConfig';
 import pluginID from '../../../pluginId';
@@ -25,7 +26,7 @@ import reducer from './state/reducer';
 const ConfigureTheView = ({ config }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { mutateConfig } = useConfig();
   const { isLoading: isSubmittingForm } = mutateConfig;
 
@@ -43,14 +44,14 @@ const ConfigureTheView = ({ config }) => {
   const handleConfirm = async () => {
     trackUsage('willEditMediaLibraryConfig');
     await mutateConfig.mutateAsync(modifiedData);
-    toggleWarningSubmit();
+    setWarningSubmit(false);
     dispatch(setLoaded());
     toggleNotification({
       type: 'success',
-      message: {
+      message: formatMessage({
         id: 'notification.form.success.fields',
         defaultMessage: 'Changes saved',
-      },
+      }),
     });
   };
 
@@ -58,15 +59,18 @@ const ConfigureTheView = ({ config }) => {
     dispatch(onChange({ name, value }));
   };
 
-  useFocusWhenNavigate();
-
   return (
-    <Layout>
-      <Main aria-busy={isSubmittingForm}>
+    <Layouts.Root>
+      <Page.Main aria-busy={isSubmittingForm}>
         <form onSubmit={handleSubmit}>
-          <HeaderLayout
+          <Layouts.Header
             navigationAction={
-              <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
+              <Link
+                tag={NavLink}
+                startIcon={<ArrowLeft />}
+                to={`/plugins/${pluginID}`}
+                id="go-back"
+              >
                 {formatMessage({ id: getTrad('config.back'), defaultMessage: 'Back' })}
               </Link>
             }
@@ -90,30 +94,26 @@ const ConfigureTheView = ({ config }) => {
             })}
           />
 
-          <ContentLayout>
+          <Layouts.Content>
             <Settings
               data-testid="settings"
               pageSize={modifiedData.pageSize || ''}
               sort={modifiedData.sort || ''}
               onChange={handleChange}
             />
-          </ContentLayout>
+          </Layouts.Content>
 
-          <ConfirmDialog
-            bodyText={{
-              id: getTrad('config.popUpWarning.warning.updateAllSettings'),
-              defaultMessage: 'This will modify all your settings',
-            }}
-            iconRightButton={<Check />}
-            isConfirmButtonLoading={isSubmittingForm}
-            isOpen={showWarningSubmit}
-            onToggleDialog={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variantRightButton="success-light"
-          />
+          <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
+            <ConfirmDialog onConfirm={handleConfirm} variant="default">
+              {formatMessage({
+                id: getTrad('config.popUpWarning.warning.updateAllSettings'),
+                defaultMessage: 'This will modify all your settings',
+              })}
+            </ConfirmDialog>
+          </Dialog.Root>
         </form>
-      </Main>
-    </Layout>
+      </Page.Main>
+    </Layouts.Root>
   );
 };
 

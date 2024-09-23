@@ -1,5 +1,6 @@
+import type { Utils } from '@strapi/types';
+
 import { providerFactory } from '@strapi/utils';
-import { Utils } from '@strapi/types';
 import {
   pipe,
   set,
@@ -146,11 +147,19 @@ export const sanitizeConditions = curry(
  * @param  payload - Can either be a single object of attributes or an array of those objects.
  */
 
-export const toPermission = <T extends object | object[]>(
-  payload: T
-): T extends object[] ? Permission[] : Permission =>
-  // @ts-expect-error
-  isArray(payload) ? map(create, payload) : create(payload);
+function toPermission<T extends CreatePermissionPayload>(payload: T[]): Permission[];
+function toPermission<T extends CreatePermissionPayload>(payload: T): Permission;
+function toPermission<T extends CreatePermissionPayload>(
+  payload: T[] | T
+): Permission[] | Permission {
+  if (isArray(payload)) {
+    return map((value) => create(value), payload);
+  }
+
+  return create(payload);
+}
+
+export { toPermission };
 
 export default {
   addCondition,

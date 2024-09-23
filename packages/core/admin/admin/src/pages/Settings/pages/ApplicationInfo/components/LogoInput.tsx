@@ -17,32 +17,21 @@ import {
   CarouselInput,
   CarouselInputProps,
   CarouselSlide,
-  Divider,
   Field,
-  FieldError,
-  FieldInput,
   Flex,
-  Icon,
   IconButton,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
+  Modal,
   Tabs,
   TextInput,
   TextInputProps,
   Typography,
 } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
-import { PicturePlus, Plus, Refresh } from '@strapi/icons';
+import { PlusCircle, Plus, ArrowClockwise } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
-import { ConfigurationProviderProps } from '../../../../../features/Configuration';
+import { ConfigurationContextValue } from '../../../../../features/Configuration';
 import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../utils/constants';
 import { ImageAsset, ParsingFileError, parseFileMetadatas } from '../utils/files';
 
@@ -68,7 +57,7 @@ interface LogoInputProps
   extends Pick<PendingLogoDialogProps, 'onChangeLogo'>,
     Pick<CarouselInputProps, 'label' | 'hint'> {
   canUpdate: boolean;
-  customLogo?: ConfigurationProviderProps['authLogo']['custom'];
+  customLogo?: ConfigurationContextValue['logos']['auth']['custom'];
   defaultLogo: string;
 }
 
@@ -92,70 +81,81 @@ const LogoInput = ({
   };
 
   return (
-    <LogoInputContextProvider
-      setLocalImage={setLocalImage}
-      localImage={localImage}
-      goToStep={setCurrentStep}
-      onClose={handleClose}
-    >
-      <CarouselInput
-        label={label}
-        selectedSlide={0}
-        hint={hint}
-        // Carousel is used here for a single media,
-        // we don't need previous and next labels but these props are required
-        previousLabel=""
-        nextLabel=""
-        onNext={() => {}}
-        onPrevious={() => {}}
-        secondaryLabel={customLogo?.name || 'logo.png'}
-        actions={
-          <CarouselActions>
-            <IconButton
-              disabled={!canUpdate}
-              onClick={() => setCurrentStep('upload')}
-              label={formatMessage({
-                id: 'Settings.application.customization.carousel.change-action',
-                defaultMessage: 'Change logo',
-              })}
-              icon={<Plus />}
-            />
-            {customLogo?.url && (
-              <IconButton
-                disabled={!canUpdate}
-                onClick={() => onChangeLogo(null)}
-                label={formatMessage({
-                  id: 'Settings.application.customization.carousel.reset-action',
-                  defaultMessage: 'Reset logo',
-                })}
-                icon={<Refresh />}
-              />
-            )}
-          </CarouselActions>
+    <Modal.Root
+      open={!!currentStep}
+      onOpenChange={(state) => {
+        if (state === false) {
+          handleClose();
         }
+      }}
+    >
+      <LogoInputContextProvider
+        setLocalImage={setLocalImage}
+        localImage={localImage}
+        goToStep={setCurrentStep}
+        onClose={handleClose}
       >
-        <CarouselSlide
-          label={formatMessage({
-            id: 'Settings.application.customization.carousel-slide.label',
-            defaultMessage: 'Logo slide',
-          })}
+        <CarouselInput
+          label={label}
+          selectedSlide={0}
+          hint={hint}
+          // Carousel is used here for a single media,
+          // we don't need previous and next labels but these props are required
+          previousLabel=""
+          nextLabel=""
+          onNext={() => {}}
+          onPrevious={() => {}}
+          secondaryLabel={customLogo?.name || 'logo.png'}
+          actions={
+            <CarouselActions>
+              <Modal.Trigger>
+                <IconButton
+                  disabled={!canUpdate}
+                  onClick={() => setCurrentStep('upload')}
+                  label={formatMessage({
+                    id: 'Settings.application.customization.carousel.change-action',
+                    defaultMessage: 'Change logo',
+                  })}
+                >
+                  <Plus />
+                </IconButton>
+              </Modal.Trigger>
+              {customLogo?.url && (
+                <IconButton
+                  disabled={!canUpdate}
+                  onClick={() => onChangeLogo(null)}
+                  label={formatMessage({
+                    id: 'Settings.application.customization.carousel.reset-action',
+                    defaultMessage: 'Reset logo',
+                  })}
+                >
+                  <ArrowClockwise />
+                </IconButton>
+              )}
+            </CarouselActions>
+          }
         >
-          <Box
-            maxHeight="40%"
-            maxWidth="40%"
-            as="img"
-            src={customLogo?.url || defaultLogo}
-            alt={formatMessage({
-              id: 'Settings.application.customization.carousel.title',
-              defaultMessage: 'Logo',
+          <CarouselSlide
+            label={formatMessage({
+              id: 'Settings.application.customization.carousel-slide.label',
+              defaultMessage: 'Logo slide',
             })}
-          />
-        </CarouselSlide>
-      </CarouselInput>
-      {currentStep ? (
-        <ModalLayout labelledBy="modal" onClose={handleClose}>
-          <ModalHeader>
-            <Typography fontWeight="bold" as="h2" id="modal">
+          >
+            <Box
+              maxHeight="40%"
+              maxWidth="40%"
+              tag="img"
+              src={customLogo?.url || defaultLogo}
+              alt={formatMessage({
+                id: 'Settings.application.customization.carousel.title',
+                defaultMessage: 'Logo',
+              })}
+            />
+          </CarouselSlide>
+        </CarouselInput>
+        <Modal.Content>
+          <Modal.Header>
+            <Modal.Title>
               {formatMessage(
                 currentStep === 'upload'
                   ? {
@@ -167,16 +167,16 @@ const LogoInput = ({
                       defaultMessage: 'Pending logo',
                     }
               )}
-            </Typography>
-          </ModalHeader>
+            </Modal.Title>
+          </Modal.Header>
           {currentStep === 'upload' ? (
             <AddLogoDialog />
           ) : (
             <PendingLogoDialog onChangeLogo={onChangeLogo} />
           )}
-        </ModalLayout>
-      ) : null}
-    </LogoInputContextProvider>
+        </Modal.Content>
+      </LogoInputContextProvider>
+    </Modal.Root>
   );
 };
 
@@ -188,39 +188,35 @@ const AddLogoDialog = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <TabGroup
-      label={formatMessage({
-        id: 'Settings.application.customization.modal.tab.label',
-        defaultMessage: 'How do you want to upload your assets?',
-      })}
-      variant="simple"
-    >
+    <Tabs.Root variant="simple" defaultValue="computer">
       <Box paddingLeft={8} paddingRight={8}>
-        <Tabs>
-          <Tab>
+        <Tabs.List
+          aria-label={formatMessage({
+            id: 'Settings.application.customization.modal.tab.label',
+            defaultMessage: 'How do you want to upload your assets?',
+          })}
+        >
+          <Tabs.Trigger value="computer">
             {formatMessage({
               id: 'Settings.application.customization.modal.upload.from-computer',
               defaultMessage: 'From computer',
             })}
-          </Tab>
-          <Tab>
+          </Tabs.Trigger>
+          <Tabs.Trigger value="url">
             {formatMessage({
               id: 'Settings.application.customization.modal.upload.from-url',
               defaultMessage: 'From url',
             })}
-          </Tab>
-        </Tabs>
-        <Divider />
+          </Tabs.Trigger>
+        </Tabs.List>
       </Box>
-      <TabPanels>
-        <TabPanel>
-          <ComputerForm />
-        </TabPanel>
-        <TabPanel>
-          <URLForm />
-        </TabPanel>
-      </TabPanels>
-    </TabGroup>
+      <Tabs.Content value="computer">
+        <ComputerForm />
+      </Tabs.Content>
+      <Tabs.Content value="url">
+        <URLForm />
+      </Tabs.Content>
+    </Tabs.Root>
   );
 };
 
@@ -279,32 +275,28 @@ const URLForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-        <TextInput
-          label={formatMessage({
-            id: 'Settings.application.customization.modal.upload.from-url.input-label',
-            defaultMessage: 'URL',
-          })}
-          error={error}
-          onChange={handleChange}
-          value={logoUrl}
-          name="logo-url"
-        />
-      </Box>
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-          </Button>
-        }
-        endActions={
-          <Button type="submit">
+        <Field.Root error={error} name="logo-url">
+          <Field.Label>
             {formatMessage({
-              id: 'Settings.application.customization.modal.upload.next',
-              defaultMessage: 'Next',
+              id: 'Settings.application.customization.modal.upload.from-url.input-label',
+              defaultMessage: 'URL',
             })}
-          </Button>
-        }
-      />
+          </Field.Label>
+          <TextInput onChange={handleChange} value={logoUrl} />
+          <Field.Error />
+        </Field.Root>
+      </Box>
+      <Modal.Footer>
+        <Button onClick={onClose} variant="tertiary">
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+        </Button>
+        <Button type="submit">
+          {formatMessage({
+            id: 'Settings.application.customization.modal.upload.next',
+            defaultMessage: 'Next',
+          })}
+        </Button>
+      </Modal.Footer>
     </form>
   );
 };
@@ -322,8 +314,12 @@ const ComputerForm = () => {
 
   const { setLocalImage, goToStep, onClose } = useLogoInputContext('ComputerForm');
 
-  const handleDragEnter = () => setDragOver(true);
-  const handleDragLeave = () => setDragOver(false);
+  const handleDragEnter = () => {
+    setDragOver(true);
+  };
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
 
   const handleClick: ButtonProps['onClick'] = (e) => {
     e.preventDefault();
@@ -357,7 +353,7 @@ const ComputerForm = () => {
     <>
       <form>
         <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-          <Field name={id} error={fileError}>
+          <Field.Root name={id} error={fileError}>
             <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex
                 paddingTop={9}
@@ -373,30 +369,26 @@ const ComputerForm = () => {
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
               >
-                <Icon
-                  color="primary600"
-                  width={pxToRem(60)}
-                  height={pxToRem(60)}
-                  as={PicturePlus}
-                  aria-hidden
-                />
+                <PlusCircle fill="primary600" width="6rem" height="6rem" aria-hidden />
                 <Box paddingTop={3} paddingBottom={5}>
-                  <Typography variant="delta" as="label" htmlFor={id}>
+                  <Typography variant="delta" tag="label" htmlFor={id}>
                     {formatMessage({
                       id: 'Settings.application.customization.modal.upload.drag-drop',
                       defaultMessage: 'Drag and Drop here or',
                     })}
                   </Typography>
                 </Box>
-                <FileInput
-                  accept={ACCEPTED_FORMAT.join(', ')}
-                  type="file"
-                  name="files"
-                  tabIndex={-1}
-                  onChange={handleChange}
-                  ref={inputRef}
-                  id={id}
-                />
+                <Box position="relative">
+                  <FileInput
+                    accept={ACCEPTED_FORMAT.join(', ')}
+                    type="file"
+                    name="files"
+                    tabIndex={-1}
+                    onChange={handleChange}
+                    ref={inputRef}
+                    id={id}
+                  />
+                </Box>
                 <Button type="button" onClick={handleClick}>
                   {formatMessage({
                     id: 'Settings.application.customization.modal.upload.cta.browse',
@@ -416,26 +408,21 @@ const ComputerForm = () => {
                   </Typography>
                 </Box>
               </Flex>
-              <FieldError />
+              <Field.Error />
             </Flex>
-          </Field>
+          </Field.Root>
         </Box>
       </form>
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({
-              id: 'Settings.application.customization.modal.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-      />
+      <Modal.Footer>
+        <Button onClick={onClose} variant="tertiary">
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+        </Button>
+      </Modal.Footer>
     </>
   );
 };
 
-const FileInput = styled(FieldInput)`
+const FileInput = styled(Field.Input)`
   opacity: 0;
   position: absolute;
   top: 0;
@@ -471,51 +458,51 @@ const PendingLogoDialog = ({ onChangeLogo }: PendingLogoDialogProps) => {
 
   return (
     <>
-      <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-        <Flex justifyContent="space-between" paddingBottom={6}>
-          <Flex direction="column" alignItems="flex-start">
-            <Typography variant="pi" fontWeight="bold">
+      <Modal.Body>
+        <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
+          <Flex justifyContent="space-between" paddingBottom={6}>
+            <Flex direction="column" alignItems="flex-start">
+              <Typography variant="pi" fontWeight="bold">
+                {formatMessage({
+                  id: 'Settings.application.customization.modal.pending.title',
+                  defaultMessage: 'Logo ready to upload',
+                })}
+              </Typography>
+              <Typography variant="pi" textColor="neutral500">
+                {formatMessage({
+                  id: 'Settings.application.customization.modal.pending.subtitle',
+                  defaultMessage: 'Manage the chosen logo before uploading it',
+                })}
+              </Typography>
+            </Flex>
+            <Button onClick={handleGoBack} variant="secondary">
               {formatMessage({
-                id: 'Settings.application.customization.modal.pending.title',
-                defaultMessage: 'Logo ready to upload',
+                id: 'Settings.application.customization.modal.pending.choose-another',
+                defaultMessage: 'Choose another logo',
               })}
-            </Typography>
-            <Typography variant="pi" textColor="neutral500">
-              {formatMessage({
-                id: 'Settings.application.customization.modal.pending.subtitle',
-                defaultMessage: 'Manage the chosen logo before uploading it',
-              })}
-            </Typography>
+            </Button>
           </Flex>
-          <Button onClick={handleGoBack} variant="secondary">
-            {formatMessage({
-              id: 'Settings.application.customization.modal.pending.choose-another',
-              defaultMessage: 'Choose another logo',
-            })}
-          </Button>
-        </Flex>
-        <Box maxWidth={pxToRem(180)}>
-          {localImage?.url ? <ImageCardAsset asset={localImage} /> : null}
+          <Box maxWidth={`18rem`}>
+            {localImage?.url ? <ImageCardAsset asset={localImage} /> : null}
+          </Box>
         </Box>
-      </Box>
-      <ModalFooter
-        startActions={
+      </Modal.Body>
+      <Modal.Footer>
+        <Modal.Close>
           <Button onClick={onClose} variant="tertiary">
             {formatMessage({
               id: 'Settings.application.customization.modal.cancel',
               defaultMessage: 'Cancel',
             })}
           </Button>
-        }
-        endActions={
-          <Button onClick={handleUpload}>
-            {formatMessage({
-              id: 'Settings.application.customization.modal.pending.upload',
-              defaultMessage: 'Upload logo',
-            })}
-          </Button>
-        }
-      />
+        </Modal.Close>
+        <Button onClick={handleUpload}>
+          {formatMessage({
+            id: 'Settings.application.customization.modal.pending.upload',
+            defaultMessage: 'Upload logo',
+          })}
+        </Button>
+      </Modal.Footer>
     </>
   );
 };

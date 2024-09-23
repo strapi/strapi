@@ -1,9 +1,215 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
+.c2 {
+  padding-block-start: 24px;
+  padding-block-end: 8px;
+  padding-inline-start: 24px;
+  padding-inline-end: 16px;
+}
+
+.c4 {
+  width: 100%;
+}
+
+.c7 {
+  border-radius: 4px;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.c11 {
+  padding-block-start: 16px;
+}
+
+.c12 {
+  background: #eaeaef;
+}
+
+.c15 {
+  padding-block-start: 8px;
+  padding-block-end: 16px;
+}
+
+.c18 {
+  padding-block-start: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 24px;
+  padding-inline-end: 16px;
+}
+
+.c20 {
+  padding-inline-end: 24px;
+  position: relative;
+}
+
+.c21 {
+  text-align: left;
+}
+
+.c23 {
+  padding-inline-end: 4px;
+}
+
+.c25 {
+  padding-inline-start: 8px;
+  padding-inline-end: 8px;
+  top: 50%;
+  right: 0;
+  min-width: 20px;
+  background: #eaeaef;
+  transform: translateY(-50%);
+  position: absolute;
+}
+
+.c29 {
+  padding-block-start: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 32px;
+  width: 100%;
+  background: #f6f6f9;
+  cursor: pointer;
+}
+
+.c35 {
+  padding-inline-start: 8px;
+}
+
+.c37 {
+  padding-inline-start: 32px;
+}
+
+.c38 {
+  margin-block-start: 8px;
+  cursor: pointer;
+}
+
+.c42 {
+  padding-block-start: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 32px;
+  padding-inline-end: 16px;
+}
+
+.c46 {
+  padding-block-start: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 48px;
+  background: #f6f6f9;
+  cursor: pointer;
+}
+
+.c47 {
+  padding-block-end: 56px;
+}
+
+.c3 {
+  align-items: flex-start;
+  flex-direction: column;
+  display: flex;
+}
+
+.c5 {
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c8 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c16 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c17 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c22 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c26 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c39 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c43 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c6 {
+  font-weight: 600;
+  font-size: 1.8rem;
+  line-height: 1.22;
+  color: currentcolor;
+}
+
+.c24 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c28 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+  line-height: 1rem;
+}
+
+.c36 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c41 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+}
+
+.c45 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: #32324d;
+  font-weight: 500;
+}
+
 .c10 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,427 +219,54 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c5 {
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.22;
-  color: #32324d;
-}
-
-.c25 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c34 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c41 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4945ff;
-}
-
-.c47 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c2 {
-  padding-top: 24px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 24px;
-}
-
-.c6 {
-  background: #ffffff;
-  padding: 8px;
-  border-radius: 4px;
-  border-color: #dcdce4;
-  border: 1px solid #dcdce4;
-  cursor: pointer;
-}
-
-.c11 {
-  padding-top: 16px;
-}
-
-.c12 {
-  background: #eaeaef;
-}
-
-.c15 {
-  padding-top: 8px;
-  padding-bottom: 16px;
-}
-
-.c18 {
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 24px;
-}
-
-.c20 {
-  padding-right: 24px;
-  position: relative;
-}
-
-.c21 {
-  text-align: left;
-}
-
-.c24 {
-  padding-right: 4px;
-}
-
 .c27 {
-  background: #eaeaef;
-  padding-right: 8px;
-  padding-left: 8px;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  min-width: 20px;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
+  border-radius: 4px;
+  padding-block: 0.7rem;
 }
 
 .c30 {
-  background: #f6f6f9;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 32px;
+  text-decoration: none;
 }
 
-.c33 {
-  padding-left: 8px;
+.c30:visited {
+  color: inherit;
 }
 
-.c35 {
-  padding-left: 32px;
+.c9 {
+  text-decoration: none;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+  color: #8e8ea9;
 }
 
-.c36 {
-  background: transparent;
-  margin-top: 8px;
-}
-
-.c39 {
+.c9:hover {
+  background-color: #f6f6f9;
   color: #666687;
-  width: 0.5rem;
-  height: 0.5rem;
 }
 
-.c42 {
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 32px;
+.c9:active {
+  background-color: #eaeaef;
 }
 
-.c48 {
-  background: #f6f6f9;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 48px;
-}
-
-.c49 {
-  padding-bottom: 56px;
-}
-
-.c3 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
-  align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c7 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c16 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.c17 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c22 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c28 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c37 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c44 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c38 {
-  border: none;
-  position: relative;
-  outline: none;
-}
-
-.c38[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c38[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c38 svg path {
-  fill: #4945ff;
-}
-
-.c38:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c38:focus-visible {
-  outline: none;
-}
-
-.c38:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c40 path {
-  fill: #666687;
-}
-
-.c29 {
-  border-radius: 4px;
-  height: 1.5rem;
-}
-
-.c8 {
-  position: relative;
-  outline: none;
-}
-
-.c8 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c8 > svg > g,
-.c8 > svg path {
-  fill: #ffffff;
-}
-
-.c8[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c8:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c8:focus-visible {
-  outline: none;
-}
-
-.c8:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
+.c9[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
 .c13 {
   height: 1px;
   border: none;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
   flex-shrink: 0;
-  margin: 0;
-}
-
-.c9 {
-  border-color: #dcdce4;
-  height: 2rem;
-  width: 2rem;
-}
-
-.c9 svg g,
-.c9 svg path {
-  fill: #8e8ea9;
-}
-
-.c9:hover svg g,
-.c9:focus svg g,
-.c9:hover svg path,
-.c9:focus svg path {
-  fill: #666687;
-}
-
-.c9[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c0 {
-  display: grid;
-  grid-template-columns: auto 1fr;
-}
-
-.c50 {
-  overflow-x: hidden;
 }
 
 .c1 {
-  width: 14.5rem;
+  width: 23.2rem;
   background: #f6f6f9;
-  position: -webkit-sticky;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -443,122 +276,123 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 }
 
 .c14 {
-  width: 1.5rem;
+  width: 2.4rem;
   background-color: #dcdce4;
 }
 
+.c34 {
+  width: 0.4rem;
+  height: 0.4rem;
+  background-color: #666687;
+  border-radius: 50%;
+}
+
 .c31 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-text-decoration: none;
   text-decoration: none;
   color: #32324d;
 }
 
-.c31 svg > * {
+.c31 svg>* {
   fill: #666687;
 }
 
 .c31.active {
   background-color: #f0f0ff;
   border-right: 2px solid #4945ff;
-}
-
-.c31.active svg > * {
-  fill: #271fe0;
-}
-
-.c31.active .c4 {
   color: #271fe0;
   font-weight: 500;
+}
+
+.c31.active .c33 {
+  background-color: #4945ff;
 }
 
 .c31:focus-visible {
   outline-offset: -2px;
 }
 
-.c32 {
-  width: 0.75rem;
-  height: 0.25rem;
-}
-
-.c32 * {
-  fill: #666687;
-}
-
-.c43 svg {
-  height: 0.25rem;
-}
-
-.c43 svg path {
-  fill: #4a4a6a;
-}
-
-.c45 {
+.c44 {
   border: none;
   padding: 0;
   background: transparent;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
 }
 
-.c46 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  width: 0.75rem;
-  -webkit-transform: rotateX(0deg);
-  -ms-transform: rotateX(0deg);
-  transform: rotateX(0deg);
-}
-
-.c23 {
-  border: none;
-  padding: 0;
-  background: transparent;
-}
-
-.c26 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  -webkit-transform: rotateX(0deg);
-  -ms-transform: rotateX(0deg);
-  transform: rotateX(0deg);
-}
-
-.c19 svg {
-  height: 0.25rem;
-}
-
-.c19 svg path {
+.c19>svg {
+  height: 0.4rem;
   fill: #8e8ea9;
+}
+
+.c40 {
+  border: none;
+  background-color: transparent;
+  color: #4945ff;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+}
+
+.c40[aria-disabled='true'] {
+  pointer-events: none;
+  color: #666687;
+}
+
+.c40:after {
+  transition-property: all;
+  transition-duration: 0.2s;
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -4px;
+  right: -4px;
+  border: 2px solid transparent;
+}
+
+.c40:focus-visible {
+  outline: none;
+}
+
+.c40:focus-visible:after {
+  border-radius: 8px;
+  content: '';
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  left: -5px;
+  right: -5px;
+  border: 2px solid #4945ff;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.c48 {
+  overflow-x: hidden;
+}
+
+.c32 div {
+  width: inherit;
+}
+
+.c32 div span:nth-child(2) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: inherit;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c9 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
 <div>
@@ -566,57 +400,52 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
     class="c0"
   >
     <nav
-      aria-label="Content-Types Builder"
+      aria-label="Content-Type Builder"
       class="c1"
     >
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class="c3"
+          class="c4 c5"
         >
           <h2
-            class="c4 c5"
+            class="c6"
           >
-            Content-Types Builder
+            Content-Type Builder
           </h2>
-          <span>
-            <button
-              aria-disabled="false"
-              aria-labelledby=":r1:"
-              class="c6 c7 c8 c9"
-              tabindex="0"
-              type="button"
+          <button
+            aria-disabled="false"
+            class="c7 c8 c9"
+            data-state="closed"
+          >
+            <svg
+              aria-hidden="true"
+              fill="currentColor"
+              focusable="false"
+              height="16"
+              viewBox="0 0 32 32"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <span
-                class="c10"
-              >
-                Search
-              </span>
-              <svg
-                aria-hidden="true"
-                fill="none"
-                focusable="false"
-                height="1rem"
-                viewBox="0 0 24 24"
-                width="1rem"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  clip-rule="evenodd"
-                  d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
-                  fill="#32324D"
-                  fill-rule="evenodd"
-                />
-              </svg>
-            </button>
-          </span>
+              <path
+                d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
+              />
+            </svg>
+            <span
+              class="c10"
+            >
+              Search
+            </span>
+          </button>
         </div>
         <div
           class="c11"
         >
-          <hr
+          <div
             class="c12 c13 c14"
+            data-orientation="horizontal"
+            role="separator"
           />
         </div>
       </div>
@@ -637,45 +466,38 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls=":r3:"
+                    aria-controls=":r2:"
                     aria-expanded="true"
-                    class="c21 c22 c23"
+                    class="c21 c22"
                   >
                     <div
-                      class="c24"
+                      class="c23"
                     >
                       <span
-                        class="c4 c25"
+                        class="c24"
                       >
                         Collection Types
                       </span>
                     </div>
-                    <div
-                      class="c26"
+                    <svg
+                      aria-hidden="true"
+                      fill="#8e8ea9"
+                      height="16"
+                      style="transform: rotateX(0deg);"
+                      viewBox="0 0 32 32"
+                      width="1.2rem"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-hidden="true"
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 14 8"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                          fill="#32324D"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                      <path
+                        d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                      />
+                    </svg>
                   </button>
                   <div
-                    class="c27 c28 c29"
-                    transform="translateY(-50%)"
+                    class="c25 c26 c27"
                   >
                     <span
-                      class="c4 c25"
+                      class="c28"
                     >
                       2
                     </span>
@@ -683,103 +505,71 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id=":r3:"
+                id=":r2:"
               >
                 <li>
                   <a
-                    class="c30 c31"
+                    aria-disabled="false"
+                    class="c29 c30 c31 c32"
                     href="/plugins/content-type-builder/content-types/application::address.address"
                   >
                     <div
                       class="c22"
                     >
-                      <svg
-                        class="c32"
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 4 4"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <span
+                        class="c33 c34"
+                      />
+                      <span
+                        class="c35 c36"
                       >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
-                      <div
-                        class="c33"
-                      >
-                        <span
-                          class="c4 c34"
-                        >
-                          Address
-                        </span>
-                      </div>
+                        Address
+                      </span>
                     </div>
                   </a>
                 </li>
                 <li>
                   <a
-                    class="c30 c31"
+                    aria-disabled="false"
+                    class="c29 c30 c31 c32"
                     href="/plugins/content-type-builder/content-types/application::category.category"
                   >
                     <div
                       class="c22"
                     >
-                      <svg
-                        class="c32"
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 4 4"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <span
+                        class="c33 c34"
+                      />
+                      <span
+                        class="c35 c36"
                       >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
-                      <div
-                        class="c33"
-                      >
-                        <span
-                          class="c4 c34"
-                        >
-                          Category
-                        </span>
-                      </div>
+                        Category
+                      </span>
                     </div>
                   </a>
                 </li>
               </ol>
             </div>
             <div
-              class="c35"
+              class="c37"
             >
               <button
                 aria-disabled="false"
-                class="c36 c37 c38"
+                class="c38 c39 c40"
                 type="button"
               >
                 <svg
-                  class="c39 c40"
-                  fill="none"
-                  height="1rem"
-                  viewBox="0 0 24 24"
-                  width="1rem"
+                  fill="currentColor"
+                  height="0.8rem"
+                  viewBox="0 0 32 32"
+                  width="0.8rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
-                    fill="#212134"
+                    d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
                   />
                 </svg>
                 <span
-                  class="c4 c41"
+                  class="c41"
                 >
                   Create new collection type
                 </span>
@@ -797,45 +587,38 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls=":r4:"
+                    aria-controls=":r3:"
                     aria-expanded="true"
-                    class="c21 c22 c23"
+                    class="c21 c22"
                   >
                     <div
-                      class="c24"
+                      class="c23"
                     >
                       <span
-                        class="c4 c25"
+                        class="c24"
                       >
                         Single Types
                       </span>
                     </div>
-                    <div
-                      class="c26"
+                    <svg
+                      aria-hidden="true"
+                      fill="#8e8ea9"
+                      height="16"
+                      style="transform: rotateX(0deg);"
+                      viewBox="0 0 32 32"
+                      width="1.2rem"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-hidden="true"
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 14 8"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                          fill="#32324D"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                      <path
+                        d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                      />
+                    </svg>
                   </button>
                   <div
-                    class="c27 c28 c29"
-                    transform="translateY(-50%)"
+                    class="c25 c26 c27"
                   >
                     <span
-                      class="c4 c25"
+                      class="c28"
                     >
                       1
                     </span>
@@ -843,68 +626,51 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 </div>
               </div>
               <ol
-                id=":r4:"
+                id=":r3:"
               >
                 <li>
                   <a
-                    class="c30 c31"
+                    aria-disabled="false"
+                    class="c29 c30 c31 c32"
                     href="/plugins/content-type-builder/content-types/application::homepage.homepage"
                   >
                     <div
                       class="c22"
                     >
-                      <svg
-                        class="c32"
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 4 4"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
+                      <span
+                        class="c33 c34"
+                      />
+                      <span
+                        class="c35 c36"
                       >
-                        <rect
-                          fill="#A5A5BA"
-                          height="4"
-                          rx="2"
-                          width="4"
-                        />
-                      </svg>
-                      <div
-                        class="c33"
-                      >
-                        <span
-                          class="c4 c34"
-                        >
-                          Homepage
-                        </span>
-                      </div>
+                        Homepage
+                      </span>
                     </div>
                   </a>
                 </li>
               </ol>
             </div>
             <div
-              class="c35"
+              class="c37"
             >
               <button
                 aria-disabled="false"
-                class="c36 c37 c38"
+                class="c38 c39 c40"
                 type="button"
               >
                 <svg
-                  class="c39 c40"
-                  fill="none"
-                  height="1rem"
-                  viewBox="0 0 24 24"
-                  width="1rem"
+                  fill="currentColor"
+                  height="0.8rem"
+                  viewBox="0 0 32 32"
+                  width="0.8rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
-                    fill="#212134"
+                    d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
                   />
                 </svg>
                 <span
-                  class="c4 c41"
+                  class="c41"
                 >
                   Create new single type
                 </span>
@@ -922,95 +688,148 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                   class="c20"
                 >
                   <button
-                    aria-controls=":r5:"
+                    aria-controls=":r4:"
                     aria-expanded="true"
-                    class="c21 c22 c23"
+                    class="c21 c22"
                   >
                     <div
-                      class="c24"
+                      class="c23"
                     >
                       <span
-                        class="c4 c25"
+                        class="c24"
                       >
                         Components
                       </span>
                     </div>
-                    <div
-                      class="c26"
+                    <svg
+                      aria-hidden="true"
+                      fill="#8e8ea9"
+                      height="16"
+                      style="transform: rotateX(0deg);"
+                      viewBox="0 0 32 32"
+                      width="1.2rem"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-hidden="true"
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 14 8"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                          fill="#32324D"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                      <path
+                        d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                      />
+                    </svg>
                   </button>
                   <div
-                    class="c27 c28 c29"
-                    transform="translateY(-50%)"
+                    class="c25 c26 c27"
                   >
                     <span
-                      class="c4 c25"
+                      class="c28"
                     >
-                      2
+                      3
                     </span>
                   </div>
                 </div>
               </div>
               <ol
-                id=":r5:"
+                id=":r4:"
               >
                 <li>
                   <div
                     class=""
                   >
                     <div
-                      class="c42 c43"
+                      class="c42"
                     >
                       <div
-                        class="c44"
+                        class="c43"
+                      >
+                        <button
+                          aria-controls=":r5:"
+                          aria-expanded="true"
+                          class="c44"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            fill="#4a4a6a"
+                            height="1.2rem"
+                            style="transform: rotateX(0deg);"
+                            viewBox="0 0 32 32"
+                            width="1.2rem"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                            />
+                          </svg>
+                          <div
+                            class="c35"
+                          >
+                            <span
+                              class="c45"
+                            >
+                              Basic
+                            </span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                    <ul
+                      id=":r5:"
+                    >
+                      <li>
+                        <a
+                          aria-disabled="false"
+                          class="c46 c30 c31"
+                          href="/plugins/content-type-builder/component-categories/basic/basic.simple"
+                        >
+                          <div
+                            class="c22"
+                          >
+                            <span
+                              class="c33 c34"
+                            />
+                            <span
+                              class="c35 c36"
+                            >
+                              Simple
+                            </span>
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <li>
+                  <div
+                    class=""
+                  >
+                    <div
+                      class="c42"
+                    >
+                      <div
+                        class="c43"
                       >
                         <button
                           aria-controls=":r6:"
                           aria-expanded="true"
-                          class="c45"
+                          class="c44"
                         >
-                          <div
-                            class="c46"
+                          <svg
+                            aria-hidden="true"
+                            fill="#4a4a6a"
+                            height="1.2rem"
+                            style="transform: rotateX(0deg);"
+                            viewBox="0 0 32 32"
+                            width="1.2rem"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              aria-hidden="true"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </div>
+                            <path
+                              d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                            />
+                          </svg>
                           <div
-                            class="c33"
+                            class="c35"
                           >
                             <span
-                              class="c4 c47"
+                              class="c45"
                             >
-                              Basic
+                              Default
                             </span>
                           </div>
                         </button>
@@ -1021,158 +840,41 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     >
                       <li>
                         <a
-                          class="c48 c31"
-                          href="/plugins/content-type-builder/component-categories/basic/basic.simple"
-                        >
-                          <div
-                            class="c22"
-                          >
-                            <svg
-                              class="c32"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 4 4"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <rect
-                                fill="#A5A5BA"
-                                height="4"
-                                rx="2"
-                                width="4"
-                              />
-                            </svg>
-                            <div
-                              class="c33"
-                            >
-                              <span
-                                class="c4 c34"
-                              >
-                                Simple
-                              </span>
-                            </div>
-                          </div>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-                <li>
-                  <div
-                    class=""
-                  >
-                    <div
-                      class="c42 c43"
-                    >
-                      <div
-                        class="c44"
-                      >
-                        <button
-                          aria-controls=":r7:"
-                          aria-expanded="true"
-                          class="c45"
-                        >
-                          <div
-                            class="c46"
-                          >
-                            <svg
-                              aria-hidden="true"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 14 8"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                fill="#32324D"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                          <div
-                            class="c33"
-                          >
-                            <span
-                              class="c4 c47"
-                            >
-                              Default
-                            </span>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                    <ul
-                      id=":r7:"
-                    >
-                      <li>
-                        <a
-                          class="c48 c31"
+                          aria-disabled="false"
+                          class="c46 c30 c31"
                           href="/plugins/content-type-builder/component-categories/default/default.closingperiod"
                         >
                           <div
                             class="c22"
                           >
-                            <svg
-                              class="c32"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 4 4"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              class="c33 c34"
+                            />
+                            <span
+                              class="c35 c36"
                             >
-                              <rect
-                                fill="#A5A5BA"
-                                height="4"
-                                rx="2"
-                                width="4"
-                              />
-                            </svg>
-                            <div
-                              class="c33"
-                            >
-                              <span
-                                class="c4 c34"
-                              >
-                                Closingperiod
-                              </span>
-                            </div>
+                              Closingperiod
+                            </span>
                           </div>
                         </a>
                       </li>
                       <li>
                         <a
-                          class="c48 c31"
+                          aria-disabled="false"
+                          class="c46 c30 c31"
                           href="/plugins/content-type-builder/component-categories/default/default.dish"
                         >
                           <div
                             class="c22"
                           >
-                            <svg
-                              class="c32"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 4 4"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
+                            <span
+                              class="c33 c34"
+                            />
+                            <span
+                              class="c35 c36"
                             >
-                              <rect
-                                fill="#A5A5BA"
-                                height="4"
-                                rx="2"
-                                width="4"
-                              />
-                            </svg>
-                            <div
-                              class="c33"
-                            >
-                              <span
-                                class="c4 c34"
-                              >
-                                Dish
-                              </span>
-                            </div>
+                              Dish
+                            </span>
                           </div>
                         </a>
                       </li>
@@ -1182,28 +884,26 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
               </ol>
             </div>
             <div
-              class="c35"
+              class="c37"
             >
               <button
                 aria-disabled="false"
-                class="c36 c37 c38"
+                class="c38 c39 c40"
                 type="button"
               >
                 <svg
-                  class="c39 c40"
-                  fill="none"
-                  height="1rem"
-                  viewBox="0 0 24 24"
-                  width="1rem"
+                  fill="currentColor"
+                  height="0.8rem"
+                  viewBox="0 0 32 32"
+                  width="0.8rem"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    d="M24 13.604a.3.3 0 0 1-.3.3h-9.795V23.7a.3.3 0 0 1-.3.3h-3.21a.3.3 0 0 1-.3-.3v-9.795H.3a.3.3 0 0 1-.3-.3v-3.21a.3.3 0 0 1 .3-.3h9.795V.3a.3.3 0 0 1 .3-.3h3.21a.3.3 0 0 1 .3.3v9.795H23.7a.3.3 0 0 1 .3.3v3.21Z"
-                    fill="#212134"
+                    d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
                   />
                 </svg>
                 <span
-                  class="c4 c41"
+                  class="c41"
                 >
                   Create a new component
                 </span>
@@ -1214,12 +914,12 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
       </div>
     </nav>
     <div
-      class="c49 c50"
+      class="c47 c48"
     >
       <div />
     </div>
   </div>
-  <div
+  <span
     class="c10"
   >
     <p
@@ -1240,6 +940,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

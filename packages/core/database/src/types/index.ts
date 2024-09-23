@@ -2,12 +2,16 @@ import type { Action, SubscriberFn } from '../lifecycles';
 import type { ForeignKey, Index } from '../schema/types';
 
 export type ID = string | number;
+
 export interface ColumnInfo {
   unsigned?: boolean;
   defaultTo?: unknown;
+  notNullable?: boolean;
 }
 
-export type Attribute = ScalarAttribute | RelationalAttribute;
+export type Attribute = (ScalarAttribute | RelationalAttribute) & { unstable_virtual?: boolean };
+
+export type CountResult = { count: number };
 
 export type RelationalAttribute =
   | Relation.OneToOne
@@ -19,23 +23,22 @@ export type RelationalAttribute =
   | Relation.MorphToOne
   | Relation.MorphToMany;
 
-export interface BasAttribute {
+export interface BaseAttribute {
   type: string;
   columnName?: string;
   default?: any;
   column?: ColumnInfo;
   required?: boolean;
   unique?: boolean;
-  component?: string;
-  repeatable?: boolean;
   columnType?: {
     type: string;
     args: unknown[];
   };
   searchable?: boolean;
+  enum?: string[];
 }
 
-export interface ScalarAttribute extends BasAttribute {
+export interface ScalarAttribute extends BaseAttribute {
   type:
     | 'increments'
     | 'password'
@@ -62,6 +65,8 @@ export interface JoinColumn {
   name: string;
   referencedColumn: string;
   referencedTable?: string;
+  columnType?: ScalarAttribute['type'];
+  on?: Record<string, unknown> | ((...args: any[]) => Record<string, unknown>);
 }
 
 export interface BaseJoinTable {
@@ -73,7 +78,13 @@ export interface BaseJoinTable {
   inverseJoinColumn: {
     name: string;
     referencedColumn: string;
+    referencedTable?: string;
   };
+  /**
+   * Use to flag joinTable we created internally vs user defined
+   * @internal
+   */
+  __internal__?: boolean;
 }
 
 export interface JoinTable extends BaseJoinTable {
@@ -189,6 +200,12 @@ export interface MorphJoinTable {
   on?: Record<string, unknown>;
   pivotColumns: string[];
   morphColumn: MorphColumn;
+
+  /**
+   * Use to flag joinTable we created internally vs user defined
+   * @internal
+   */
+  __internal__?: boolean;
 }
 
 export interface BaseRelationalAttribute {
@@ -201,8 +218,6 @@ export interface BaseRelationalAttribute {
   owner?: boolean;
   morphColumn?: MorphColumn;
   joinColumn?: JoinColumn;
-  // TODO: remove this
-  component?: string;
 }
 
 export interface MorphRelationalAttribute extends BaseRelationalAttribute {
@@ -222,3 +237,7 @@ export interface Model {
   foreignKeys?: ForeignKey[];
   lifecycles?: Partial<Record<Action, SubscriberFn>>;
 }
+
+export type MetadataOptions = {
+  maxLength: number;
+};

@@ -1,5 +1,5 @@
 import {
-  doesComponentHaveAComponentField,
+  getComponentWithChildComponents,
   retrieveComponentsThatHaveComponents,
 } from '../retrieveComponentsThatHaveComponents';
 
@@ -80,18 +80,37 @@ const data: any = {
 
 describe('retrieveComponentsThatHaveComponents', () => {
   describe('doesComponentHaveAComponentField', () => {
-    it('Should return true if one of its attributes is a component', () => {
-      expect(doesComponentHaveAComponentField(data['blog.slider'])).toBe(true);
+    it('Should return correct child component if component has a component', () => {
+      expect(getComponentWithChildComponents(data['blog.slider'])).toEqual({
+        component: 'blog.slider',
+        childComponents: [
+          {
+            component: 'default.slide',
+          },
+        ],
+      });
     });
 
-    it('Should return false if none of its attributes is a component', () => {
-      expect(doesComponentHaveAComponentField(data['default.dish'])).toBe(false);
+    it('Should return no child components if component has no child components', () => {
+      expect(getComponentWithChildComponents(data['default.dish'])).toEqual({
+        component: 'default.dish',
+        childComponents: [],
+      });
     });
   });
 
   describe('retrievComponentsThatHaveComponents', () => {
     it('should return an array with all the components that have nested components', () => {
-      expect(retrieveComponentsThatHaveComponents(data)).toEqual(['blog.slider']);
+      expect(retrieveComponentsThatHaveComponents(data)).toEqual([
+        {
+          component: 'blog.slider',
+          childComponents: [
+            {
+              component: 'default.slide',
+            },
+          ],
+        },
+      ]);
     });
   });
 });

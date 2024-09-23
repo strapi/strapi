@@ -4,6 +4,7 @@ import {
   getStrapiFactory,
   getContentTypes,
   setGlobalStrapi,
+  getStrapiModels,
 } from '../../../../__tests__/test-utils';
 import { IConfiguration } from '../../../../../types';
 
@@ -36,6 +37,14 @@ const entities = [
     entity: { id: 9, age: 0 },
     contentType: { uid: 'bar' },
   },
+  {
+    entity: { id: 10, age: 0 },
+    model: { uid: 'model::foo' },
+  },
+  {
+    entity: { id: 11, age: 0 },
+    model: { uid: 'model::bar' },
+  },
 ];
 
 afterEach(() => {
@@ -44,11 +53,25 @@ afterEach(() => {
 
 const deleteMany = (uid: string) =>
   jest.fn(async () => ({
-    count: entities.filter((entity) => entity.contentType.uid === uid).length,
+    count: entities.filter((entity) => {
+      if (entity.model) {
+        return entity.model.uid === uid;
+      }
+
+      return entity.contentType.uid === uid;
+    }).length,
   }));
 
 const findMany = (uid: string) => {
-  return jest.fn(async () => entities.filter((entity) => entity.contentType.uid === uid));
+  return jest.fn(async () =>
+    entities.filter((entity) => {
+      if (entity.model) {
+        return entity.model.uid === uid;
+      }
+
+      return entity.contentType.uid === uid;
+    })
+  );
 };
 
 const create = jest.fn((data) => data);
@@ -64,12 +87,21 @@ const query = jest.fn((uid) => {
 });
 
 describe('Restore ', () => {
-  test('Should delete all contentTypes', async () => {
+  test('Should delete all models and contentTypes', async () => {
     const strapi = getStrapiFactory({
       contentTypes: getContentTypes(),
       query,
       getModel,
-      db: { query },
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
+      db: {
+        query,
+      },
     })();
 
     setGlobalStrapi(strapi);
@@ -83,7 +115,16 @@ describe('Restore ', () => {
       contentTypes: getContentTypes(),
       query,
       getModel,
-      db: { query },
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
+      db: {
+        query,
+      },
     })();
 
     setGlobalStrapi(strapi);
@@ -94,6 +135,34 @@ describe('Restore ', () => {
       },
     });
     expect(count).toBe(3);
+  });
+
+  test('Should only delete chosen model ', async () => {
+    const strapi = getStrapiFactory({
+      contentTypes: getContentTypes(),
+      query,
+      getModel,
+      get() {
+        return {
+          get() {
+            return getStrapiModels();
+          },
+        };
+      },
+      db: {
+        query,
+      },
+    })();
+
+    setGlobalStrapi(strapi);
+
+    const { count } = await deleteRecords(strapi, {
+      entities: {
+        include: ['model::foo'],
+      },
+    });
+
+    expect(count).toBe(1);
   });
 
   test('Should add core store data', async () => {
@@ -163,7 +232,7 @@ describe('Restore ', () => {
     };
     const result = await restoreConfigs(strapi, config);
     expect(strapi.db.query).toBeCalledTimes(1);
-    expect(strapi.db.query).toBeCalledWith('webhook');
+    expect(strapi.db.query).toBeCalledWith('strapi::webhook');
     expect(result.data).toMatchObject(omit(['id'])(config.value));
   });
 });

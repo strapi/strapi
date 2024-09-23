@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 
 import { ContextInfo } from '../index';
@@ -8,7 +8,7 @@ import { ContextInfo } from '../index';
 describe('ContextInfo', () => {
   it('renders', () => {
     const { container } = render(
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <ContextInfo
           blocks={[
             {
@@ -27,7 +27,7 @@ describe('ContextInfo', () => {
             },
           ]}
         />
-      </ThemeProvider>
+      </DesignSystemProvider>
     );
 
     expect(container).toMatchSnapshot();

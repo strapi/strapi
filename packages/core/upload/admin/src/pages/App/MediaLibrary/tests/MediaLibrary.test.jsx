@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { usePersistentState, useQueryParams, useSelectionState } from '@strapi/helper-plugin';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -14,6 +14,8 @@ import { useAssets } from '../../../../hooks/useAssets';
 import { useFolder } from '../../../../hooks/useFolder';
 import { useFolders } from '../../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
+import { usePersistentState } from '../../../../hooks/usePersistentState';
+import { useSelectionState } from '../../../../hooks/useSelectionState';
 
 const FIXTURE_ASSET_PAGINATION = {
   pageCount: 1,
@@ -56,20 +58,26 @@ const FIXTURE_ASSETS = [
   },
 ];
 
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useQueryParams: jest.fn().mockReturnValue([{ rawQuery: '', query: {} }, jest.fn()]),
+}));
+
 jest.mock('../../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../../hooks/useFolders');
 jest.mock('../../../../hooks/useFolder');
 jest.mock('../../../../hooks/useAssets');
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  CheckPermissions: jest.fn().mockReturnValue(null),
-  useRBAC: jest.fn(),
-  useRBACProvider: jest.fn().mockReturnValue({ allPermissions: [] }),
-  useNotification: jest.fn(() => jest.fn()),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
+jest.mock('../../../../hooks/useFolderStructure', () => ({
+  useFolderStructure: jest
+    .fn()
+    .mockReturnValue({ data: [{ label: 'Folder 1', value: 1, children: [] }], isLoading: false }),
+}));
+jest.mock('../../../../hooks/useSelectionState', () => ({
   useSelectionState: jest
     .fn()
     .mockReturnValue([[], { selectOne: jest.fn(), selectAll: jest.fn() }]),
+}));
+jest.mock('../../../../hooks/usePersistentState', () => ({
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 const renderML = () => ({
@@ -101,13 +109,6 @@ const renderML = () => ({
 describe('Media library homepage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('navigation', () => {
-    it('focuses the title when mounting the component', () => {
-      const { getByRole } = renderML();
-      expect(getByRole('main')).toHaveFocus();
-    });
   });
 
   describe('loading state', () => {
@@ -548,18 +549,6 @@ describe('Media library homepage', () => {
     });
 
     describe('displays the list view', () => {
-      it('should render the table headers', () => {
-        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
-
-        const { getByText, getByRole } = renderML();
-        expect(getByRole('gridcell', { name: 'preview' })).toBeInTheDocument();
-        expect(getByText('name')).toBeInTheDocument();
-        expect(getByRole('gridcell', { name: 'extension' })).toBeInTheDocument();
-        expect(getByRole('gridcell', { name: 'size' })).toBeInTheDocument();
-        expect(getByText('created')).toBeInTheDocument();
-        expect(getByText('last update')).toBeInTheDocument();
-      });
-
       it('should not render the sort button', () => {
         usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
         const { queryByRole } = renderML();

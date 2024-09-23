@@ -1,24 +1,17 @@
 import * as React from 'react';
 
-import {
-  Permission,
-  hasPermissions,
-  useAppInfo,
-  useRBACProvider,
-  useStrapiApp,
-  StrapiAppContextValue,
-} from '@strapi/helper-plugin';
-import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
+import { Cog, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
-import { useSelector } from 'react-redux';
 
-import { selectAdminPermissions } from '../selectors';
+import { useTypedSelector } from '../core/store/hooks';
+import { useAuth, AuthContextValue } from '../features/Auth';
+import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 
 /* -------------------------------------------------------------------------------------------------
  * useMenu
  * -----------------------------------------------------------------------------------------------*/
 
-type MenuItem = StrapiAppContextValue['menu'][number];
+export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
 
 export interface Menu {
   generalSectionLinks: MenuItem[];
@@ -26,21 +19,21 @@ export interface Menu {
   isLoading: boolean;
 }
 
-const useMenu = () => {
-  const { allPermissions: userPermissions } = useRBACProvider();
-  const { shouldUpdateStrapi } = useAppInfo();
-  const { menu } = useStrapiApp();
-  const permissions = useSelector(selectAdminPermissions);
+const useMenu = (shouldUpdateStrapi: boolean) => {
+  const checkUserHasPermissions = useAuth('useMenu', (state) => state.checkUserHasPermissions);
+  const menu = useStrapiApp('useMenu', (state) => state.menu);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
       {
-        icon: Puzzle,
+        icon: House,
         intlLabel: {
-          id: 'global.plugins',
-          defaultMessage: 'Plugins',
+          id: 'global.home',
+          defaultMessage: 'Home',
         },
-        to: '/list-plugins',
-        permissions: permissions.marketplace?.main ?? [],
+        to: '/',
+        permissions: [],
+        position: 0,
       },
       {
         icon: ShoppingCart,
@@ -50,6 +43,7 @@ const useMenu = () => {
         },
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
+        position: 7,
       },
       {
         icon: Cog,
@@ -62,6 +56,7 @@ const useMenu = () => {
         // using the settings menu
         permissions: [],
         notificationsCount: 0,
+        position: 9,
       },
     ],
     pluginsSectionLinks: [],
@@ -71,12 +66,15 @@ const useMenu = () => {
 
   React.useEffect(() => {
     async function applyMenuPermissions() {
-      const authorizedPluginSectionLinks = await getPluginSectionLinks(userPermissions, menu);
+      const authorizedPluginSectionLinks = await getPluginSectionLinks(
+        menu,
+        checkUserHasPermissions
+      );
 
       const authorizedGeneralSectionLinks = await getGeneralLinks(
-        userPermissions,
         generalSectionLinksRef.current,
-        shouldUpdateStrapi
+        shouldUpdateStrapi,
+        checkUserHasPermissions
       );
 
       setMenuWithUserPermissions((state) => ({
@@ -91,10 +89,10 @@ const useMenu = () => {
   }, [
     setMenuWithUserPermissions,
     generalSectionLinksRef,
-    userPermissions,
     menu,
     permissions,
     shouldUpdateStrapi,
+    checkUserHasPermissions,
   ]);
 
   return menuWithUserPermissions;
@@ -105,16 +103,16 @@ const useMenu = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const getGeneralLinks = async (
-  userPermissions: Permission[],
   generalSectionRawLinks: MenuItem[],
-  shouldUpdateStrapi: boolean = false
+  shouldUpdateStrapi: boolean = false,
+  checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
   const generalSectionLinksPermissions = await Promise.all(
-    generalSectionRawLinks.map(({ permissions }) => hasPermissions(userPermissions, permissions))
+    generalSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
   const authorizedGeneralSectionLinks = generalSectionRawLinks.filter(
-    (_, index) => generalSectionLinksPermissions[index]
+    (_, index) => generalSectionLinksPermissions[index].length > 0
   );
 
   const settingsLinkIndex = authorizedGeneralSectionLinks.findIndex(
@@ -133,15 +131,15 @@ const getGeneralLinks = async (
 };
 
 const getPluginSectionLinks = async (
-  userPermissions: Permission[],
-  pluginsSectionRawLinks: MenuItem[]
+  pluginsSectionRawLinks: MenuItem[],
+  checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
   const pluginSectionLinksPermissions = await Promise.all(
-    pluginsSectionRawLinks.map(({ permissions }) => hasPermissions(userPermissions, permissions))
+    pluginsSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
   const authorizedPluginSectionLinks = pluginsSectionRawLinks.filter(
-    (_, index) => pluginSectionLinksPermissions[index]
+    (_, index) => pluginSectionLinksPermissions[index].length > 0
   );
 
   return authorizedPluginSectionLinks;

@@ -4,8 +4,8 @@
  *
  */
 
-import { Box, Flex, Typography, Icon } from '@strapi/design-system';
-import { Spark } from '@strapi/icons';
+import { Box, Flex, Typography } from '@strapi/design-system';
+import { Sparkle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
@@ -18,8 +18,8 @@ const newAttributes: string[] = [];
 
 const NewBadge = () => (
   <Flex grow={1} justifyContent="flex-end">
-    <Flex gap={1} hasRadius background="alternative100" padding={`${2 / 16}rem ${4 / 16}rem`}>
-      <Icon width={`${10 / 16}rem`} height={`${10 / 16}rem`} as={Spark} color="alternative600" />
+    <Flex gap={1} hasRadius background="alternative100" padding={`0.2rem 0.4rem`}>
+      <Sparkle width={`1rem`} height={`1rem`} fill="alternative600" />
       <Typography textColor="alternative600" variant="sigma">
         New
       </Typography>
@@ -46,12 +46,12 @@ export const AttributeOption = ({ type = 'text' }: AttributeOptionProps) => {
   };
 
   return (
-    <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
+    <OptionBoxWrapper padding={4} tag="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} />
         <Box paddingLeft={4} width="100%">
           <Flex justifyContent="space-between">
-            <Typography fontWeight="bold">
+            <Typography fontWeight="bold" textColor="neutral800">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Typography>
             {newAttributes.includes(type) && <NewBadge />}

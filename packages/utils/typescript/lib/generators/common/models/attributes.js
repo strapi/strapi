@@ -28,8 +28,8 @@ const getAttributeType = (attributeName, attribute, uid) => {
 
   const [attributeType, typeParams] = mappers[attribute.type]({ uid, attribute, attributeName });
 
-  // Make sure the attribute namespace is imported
-  addImport(NAMESPACES.attribute);
+  // Make sure the schema namespace is imported
+  addImport(NAMESPACES.Schema);
 
   return getTypeNode(attributeType, typeParams);
 };
@@ -114,21 +114,21 @@ const getAttributeModifiers = (attribute) => {
       throw new Error('typeof min/max values mismatch');
     }
 
-    const typeofMinMax = (max && typeofMax) ?? (min && typeofMin);
     let typeKeyword;
 
-    // Determines type keyword (string/number) based on min/max options, throws error for invalid types
-    switch (typeofMinMax) {
-      case 'string':
-        typeKeyword = ts.SyntaxKind.StringKeyword;
-        break;
-      case 'number':
-        typeKeyword = ts.SyntaxKind.NumberKeyword;
-        break;
-      default:
-        throw new Error(
-          `Invalid data type for min/max options. Must be string or number, but found ${typeofMinMax}`
-        );
+    // use 'string'
+    if (typeofMin === 'string' || typeofMax === 'string') {
+      typeKeyword = ts.SyntaxKind.StringKeyword;
+    }
+    // use 'number'
+    else if (typeofMin === 'number' || typeofMax === 'number') {
+      typeKeyword = ts.SyntaxKind.NumberKeyword;
+    }
+    // invalid type
+    else {
+      throw new Error(
+        `Invalid data type for min/max options. Must be string, number or undefined, but found { min: ${min} (${typeofMin}), max: ${max} (${typeofMax}) }`
+      );
     }
 
     modifiers.push(
@@ -151,8 +151,8 @@ const getAttributeModifiers = (attribute) => {
     );
   }
 
-  // Default
-  if (!_.isNil(attribute.default)) {
+  // Default (ignore if default is a function)
+  if (!_.isNil(attribute.default) && !_.isFunction(attribute.default)) {
     const defaultLiteral = toTypeLiteral(attribute.default);
 
     modifiers.push(
@@ -195,6 +195,4 @@ const attributeToPropertySignature = (schema, attributeName, attribute) => {
 
 module.exports = attributeToPropertySignature;
 
-module.exports.mappers = mappers;
-module.exports.getAttributeType = getAttributeType;
-module.exports.getAttributeModifiers = getAttributeModifiers;
+Object.assign(module.exports, { mappers, getAttributeModifiers, getAttributeType });

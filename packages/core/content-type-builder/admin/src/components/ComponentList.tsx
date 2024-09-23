@@ -5,10 +5,10 @@ import { useDataManager } from '../hooks/useDataManager';
 import { List } from './List';
 import { Tr } from './Tr';
 
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface ComponentListProps {
-  component: UID.Component;
+  component: Internal.UID.Component;
   customRowComponent: any;
   firstLoopComponentUid?: string;
   isFromDynamicZone?: boolean;
@@ -30,7 +30,7 @@ export const ComponentList = ({
   });
 
   return (
-    <Tr isChildOfDynamicZone={isFromDynamicZone} className="component-row">
+    <Tr $isChildOfDynamicZone={isFromDynamicZone} className="component-row">
       <td colSpan={12}>
         <List
           customRowComponent={customRowComponent}

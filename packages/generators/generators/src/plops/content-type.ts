@@ -2,14 +2,13 @@ import { join } from 'path';
 import { NodePlopAPI, ActionType } from 'plop';
 import slugify from '@sindresorhus/slugify';
 import fs from 'fs-extra';
-import * as utils from '@strapi/utils';
+import { strings } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
 
 import getDestinationPrompts from './prompts/get-destination-prompts';
 import getFilePath from './utils/get-file-path';
 import ctNamesPrompts from './prompts/ct-names-prompts';
 import kindPrompts from './prompts/kind-prompts';
-import draftAndPublishPrompts from './prompts/draft-and-publish-prompts';
 import getAttributesPrompts from './prompts/get-attributes-prompts';
 import bootstrapApiPrompts from './prompts/bootstrap-api-prompts';
 
@@ -18,11 +17,7 @@ export default (plop: NodePlopAPI) => {
   plop.setGenerator('content-type', {
     description: 'Generate a content type for an API',
     async prompts(inquirer) {
-      const config = await inquirer.prompt([
-        ...ctNamesPrompts,
-        ...kindPrompts,
-        ...draftAndPublishPrompts,
-      ]);
+      const config = await inquirer.prompt([...ctNamesPrompts, ...kindPrompts]);
       const attributes = await getAttributesPrompts(inquirer);
 
       const api = await inquirer.prompt([
@@ -34,7 +29,7 @@ export default (plop: NodePlopAPI) => {
           default: config.singularName,
           message: 'Name of the new API?',
           async validate(input) {
-            if (!utils.isKebabCase(input)) {
+            if (!strings.isKebabCase(input)) {
               return 'Value must be in kebab-case';
             }
 

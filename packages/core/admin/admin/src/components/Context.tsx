@@ -2,6 +2,12 @@ import * as React from 'react';
 
 import * as ContextSelector from 'use-context-selector';
 
+/**
+ * @experimental
+ * @description Create a context provider and a hook to consume the context.
+ *
+ * @warning this may be removed to the design-system instead of becoming stable.
+ */
 function createContext<ContextValueType extends object | null>(
   rootComponentName: string,
   defaultContext?: ContextValueType
@@ -13,6 +19,7 @@ function createContext<ContextValueType extends object | null>(
     // Only re-memoize when prop values change
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const value = React.useMemo(() => context, Object.values(context)) as ContextValueType;
+
     return <Context.Provider value={value}>{children}</Context.Provider>;
   };
 

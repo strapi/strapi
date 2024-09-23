@@ -43,8 +43,6 @@ This code is separated into several elements:
   - _validation_: `packages/core/admin/ee/server/services/review-workflows/validation.js`
   - _assignees_: `packages/core/admin/ee/server/services/review-workflows/assignees.js`
   - _stage-permissions_: `packages/core/admin/ee/server/services/review-workflows/stage-permissions.js`
-- Decorators
-  - _EntityService_ decorator: `packages/core/admin/ee/server/services/review-workflows/entity-service-decorator.js`
 - Utils file
   - _Review workflows utils_: `packages/core/admin/ee/server/utils/review-workflows.js`
 - A bootstrap and a register part
@@ -164,12 +162,6 @@ This service is used to enable RBAC functionality for review workflow stages. Ea
 #### validation
 
 This service is used to ensure the feature is working as expected and validate the data to be valid.
-
-### Decorators
-
-#### Entity Service
-
-The entity service is decorated so that entities can be linked to a default stage upon creation. This allows the entities to be automatically associated with a specific workflow stage when they are created.
 
 ## Alternatives
 

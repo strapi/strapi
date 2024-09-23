@@ -1,32 +1,95 @@
+import type { Utils } from '@strapi/types';
+
 import { curry, pipe, merge, set, pick, omit, includes, isArray, prop } from 'lodash/fp';
-import { Utils } from '@strapi/types';
+
+export interface ActionAlias {
+  /**
+   * The action ID to alias
+   */
+  actionId: string;
+
+  /**
+   * An optional array of subject to restrict the alias usage
+   */
+  subjects?: string[];
+}
 
 export type Action = {
-  actionId: string; // The unique identifier of the action
-  section: string; // The section linked to the action - These can be 'contentTypes' | 'plugins' | 'settings' | 'internal'
-  displayName: string; // The human readable name of an action
-  category: string; // The main category of an action
-  subCategory?: string; // The secondary category of an action (only for settings and plugins section)
-  pluginName?: string; // The plugin which provide the action
-  subjects?: string[]; // A list of subjects on which the action can be applied
+  /**
+   * The unique identifier of the action
+   */
+  actionId: string;
+
+  /**
+   * The section linked to the action - These can be 'contentTypes' | 'plugins' | 'settings' | 'internal'
+   */
+  section: string;
+
+  /**
+   * The human readable name of an action
+   */
+  displayName: string;
+
+  /**
+   * The main category of an action
+   */
+  category: string;
+
+  /**
+   * The secondary category of an action (only for settings and plugins section)
+   */
+  subCategory?: string;
+
+  /**
+   * The plugin that provides the action
+   */
+  pluginName?: string;
+
+  /**
+   * A list of subjects on which the action can be applied
+   */
+  subjects?: string[];
+
+  /**
+   * The options of an action
+   */
   options: {
-    // The options of an action
-    applyToProperties: string[] | null; // The list of properties that can be associated with an action
+    /**
+     * The list of properties that can be associated with an action
+     */
+    applyToProperties: string[] | null;
   };
+
+  /**
+   * An optional array of @see {@link ActionAlias}.
+   *
+   * It represents the possible aliases for the current action.
+   *
+   * Aliases are unidirectional.
+   *
+   * Note: This is an internal property and probably shouldn't be used outside Strapi core features.
+   *       Its behavior might change at any time without notice.
+   *
+   * @internal
+   */
+  aliases?: ActionAlias[];
 };
 
 /**
  * Set of attributes used to create a new {@link Action} object
  * @typedef {Action, { uid: string }} CreateActionPayload
  */
-export type CreateActionPayload = Utils.Object.PartialBy<
-  // Action Id is computed from the uid value
-  Omit<Action, 'actionId'>,
-  // Options is filled with default values
-  'options'
-> & {
-  uid: string;
-};
+export type CreateActionPayload = Utils.Intersect<
+  [
+    Utils.Object.PartialBy<
+      // Action Id is computed from the uid value
+      Omit<Action, 'actionId'>,
+      // Options is filled with default values
+      'options'
+    >,
+    { uid: string },
+  ]
+>;
 
 /**
  * Return the default attributes of a new {@link Action}
@@ -50,6 +113,7 @@ const actionFields = [
   'subjects',
   'options',
   'actionId',
+  'aliases',
 ] as const;
 
 /**

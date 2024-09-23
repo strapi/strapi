@@ -48,7 +48,7 @@ describe('Attributes', () => {
 
       expect(prop.type.types).toHaveLength(1);
       expect(prop.type.types[0].kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(prop.type.types[0].typeName.escapedText).toBe('Attribute.String');
+      expect(prop.type.types[0].typeName.escapedText).toBe('Schema.Attribute.String');
       expect(prop.type.types[0].typeArguments).toBeUndefined();
     });
 
@@ -60,10 +60,11 @@ describe('Attributes', () => {
 
       expect(prop.type.types).toHaveLength(1);
       expect(prop.type.types[0].kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(prop.type.types[0].typeName.escapedText).toBe('Attribute.Component');
-      expect(prop.type.types[0].typeArguments).toHaveLength(1);
+      expect(prop.type.types[0].typeName.escapedText).toBe('Schema.Attribute.Component');
+      expect(prop.type.types[0].typeArguments).toHaveLength(2);
       expect(prop.type.types[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
       expect(prop.type.types[0].typeArguments[0].text).toBe('default.comp');
+      expect(prop.type.types[0].typeArguments[1].kind).toBe(ts.SyntaxKind.FalseKeyword);
     });
 
     test('Attribute with type argument and options', () => {
@@ -82,14 +83,14 @@ describe('Attributes', () => {
       const [attributeType, requiredOptionType] = prop.type.types;
 
       expect(attributeType.kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(attributeType.typeName.escapedText).toBe('Attribute.Enumeration');
+      expect(attributeType.typeName.escapedText).toBe('Schema.Attribute.Enumeration');
       expect(attributeType.typeArguments).toHaveLength(1);
       expect(attributeType.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
       expect(attributeType.typeArguments[0].elements[0].text).toBe('a');
       expect(attributeType.typeArguments[0].elements[1].text).toBe('b');
 
       expect(requiredOptionType.kind).toBe(ts.SyntaxKind.TypeReference);
-      expect(requiredOptionType.typeName.escapedText).toBe('Attribute.DefaultTo');
+      expect(requiredOptionType.typeName.escapedText).toBe('Schema.Attribute.DefaultTo');
       expect(requiredOptionType.typeArguments).toHaveLength(1);
       expect(requiredOptionType.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
       expect(requiredOptionType.typeArguments[0].text).toBe('b');
@@ -108,22 +109,22 @@ describe('Attributes', () => {
     });
 
     test.each([
-      ['string', 'Attribute.String'],
-      ['text', 'Attribute.Text'],
-      ['richtext', 'Attribute.RichText'],
-      ['password', 'Attribute.Password'],
-      ['email', 'Attribute.Email'],
-      ['date', 'Attribute.Date'],
-      ['time', 'Attribute.Time'],
-      ['datetime', 'Attribute.DateTime'],
-      ['timestamp', 'Attribute.Timestamp'],
-      ['integer', 'Attribute.Integer'],
-      ['biginteger', 'Attribute.BigInteger'],
-      ['float', 'Attribute.Float'],
-      ['decimal', 'Attribute.Decimal'],
-      ['boolean', 'Attribute.Boolean'],
-      ['json', 'Attribute.JSON'],
-      ['media', 'Attribute.Media'],
+      ['string', 'Schema.Attribute.String'],
+      ['text', 'Schema.Attribute.Text'],
+      ['richtext', 'Schema.Attribute.RichText'],
+      ['password', 'Schema.Attribute.Password'],
+      ['email', 'Schema.Attribute.Email'],
+      ['date', 'Schema.Attribute.Date'],
+      ['time', 'Schema.Attribute.Time'],
+      ['datetime', 'Schema.Attribute.DateTime'],
+      ['timestamp', 'Schema.Attribute.Timestamp'],
+      ['integer', 'Schema.Attribute.Integer'],
+      ['biginteger', 'Schema.Attribute.BigInteger'],
+      ['float', 'Schema.Attribute.Float'],
+      ['decimal', 'Schema.Attribute.Decimal'],
+      ['boolean', 'Schema.Attribute.Boolean'],
+      ['json', 'Schema.Attribute.JSON'],
+      ['media', 'Schema.Attribute.Media'],
     ])('Basic %p attribute should map to a %p type', (type, expectedType) => {
       const typeNode = getAttributeType('foo', { type });
 
@@ -134,7 +135,7 @@ describe('Attributes', () => {
       expect(typeNode.typeArguments).toBeUndefined();
 
       expect(consoleWarnMock).not.toHaveBeenCalled();
-      expect(addImport).toHaveBeenCalledWith('Attribute');
+      expect(addImport).toHaveBeenCalledWith('Schema');
     });
 
     describe('Complex types (with generic type parameters)', () => {
@@ -145,15 +146,81 @@ describe('Attributes', () => {
         expect(typeNode.typeName.escapedText).toBe(typeName);
 
         expect(consoleWarnMock).not.toHaveBeenCalled();
-        expect(addImport).toHaveBeenCalledWith('Attribute');
+        expect(addImport).toHaveBeenCalledWith('Schema');
       };
+
+      describe('Media', () => {
+        test('Media with multiple and with no allowedTypes', () => {
+          const attribute = { type: 'media', multiple: true };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Schema.Attribute.Media');
+
+          expect(typeNode.typeArguments).toHaveLength(2);
+
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
+
+          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.TrueKeyword);
+        });
+
+        test('Media without multiple with allowedTypes', () => {
+          const attribute = { type: 'media', allowedTypes: ['images', 'videos'] };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Schema.Attribute.Media');
+
+          expect(typeNode.typeArguments).toHaveLength(1);
+
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UnionType);
+
+          const unionTypes = typeNode.typeArguments[0].types;
+
+          attribute.allowedTypes.forEach((value, index) => {
+            const element = unionTypes[index];
+
+            expect(element.kind).toBe(ts.SyntaxKind.StringLiteral);
+            expect(element.text).toBe(value);
+          });
+        });
+
+        test('Media with multiple and with allowedTypes', () => {
+          const attribute = { type: 'media', multiple: true, allowedTypes: ['images', 'videos'] };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Schema.Attribute.Media');
+
+          expect(typeNode.typeArguments).toHaveLength(2);
+
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UnionType);
+
+          const unionTypes = typeNode.typeArguments[0].types;
+
+          attribute.allowedTypes.forEach((value, index) => {
+            const element = unionTypes[index];
+
+            expect(element.kind).toBe(ts.SyntaxKind.StringLiteral);
+            expect(element.text).toBe(value);
+          });
+
+          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.TrueKeyword);
+        });
+
+        test('Media without multiple and with no allowedTypes', () => {
+          const attribute = { type: 'media' };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Schema.Attribute.Media');
+
+          expect(typeNode.typeArguments).toBeUndefined();
+        });
+      });
 
       describe('Enumeration', () => {
         test('Enumeration with an enum property', () => {
           const attribute = { type: 'enumeration', enum: ['a', 'b', 'c'] };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'Attribute.Enumeration');
+          defaultAssertions(typeNode, 'Schema.Attribute.Enumeration');
 
           expect(typeNode.typeArguments).toHaveLength(1);
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.TupleType);
@@ -174,7 +241,7 @@ describe('Attributes', () => {
           const attribute = { type: 'uid' };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'Attribute.UID');
+          defaultAssertions(typeNode, 'Schema.Attribute.UID');
 
           expect(typeNode.typeArguments).toBeUndefined();
         });
@@ -183,30 +250,26 @@ describe('Attributes', () => {
           const attribute = { type: 'uid', targetField: 'bar' };
           const typeNode = getAttributeType('foo', attribute, 'api::bar.bar');
 
-          defaultAssertions(typeNode, 'Attribute.UID');
+          defaultAssertions(typeNode, 'Schema.Attribute.UID');
 
           expect(typeNode.typeArguments).not.toBeUndefined();
-          expect(typeNode.typeArguments).toHaveLength(2);
+          expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::bar.bar');
-
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('bar');
+          expect(typeNode.typeArguments[0].text).toBe('bar');
         });
 
         test('UID with partial options and no target field', () => {
           const attribute = { type: 'uid', options: { separator: '_' } };
-          const typeNode = getAttributeType('foo', attribute);
+          const typeNode = getAttributeType('foo', attribute, 'api::foo.foo');
 
-          defaultAssertions(typeNode, 'Attribute.UID');
+          defaultAssertions(typeNode, 'Schema.Attribute.UID');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
 
-          const optionsLiteralNode = typeNode.typeArguments[2];
+          const optionsLiteralNode = typeNode.typeArguments[1];
 
           expect(optionsLiteralNode.kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(optionsLiteralNode.members).toHaveLength(1);
@@ -224,17 +287,14 @@ describe('Attributes', () => {
           const attribute = { type: 'uid', options: { separator: '_' }, targetField: 'bar' };
           const typeNode = getAttributeType('foo', attribute, 'api::bar.bar');
 
-          defaultAssertions(typeNode, 'Attribute.UID');
+          defaultAssertions(typeNode, 'Schema.Attribute.UID');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::bar.bar');
+          expect(typeNode.typeArguments[0].text).toBe('bar');
 
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('bar');
-
-          const optionsLiteralNode = typeNode.typeArguments[2];
+          const optionsLiteralNode = typeNode.typeArguments[1];
 
           expect(optionsLiteralNode.kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(optionsLiteralNode.members).toHaveLength(1);
@@ -254,33 +314,27 @@ describe('Attributes', () => {
           const attribute = { type: 'relation', relation: 'oneToOne', target: 'api::bar.bar' };
           const typeNode = getAttributeType('foo', attribute, 'api::foo.foo');
 
-          defaultAssertions(typeNode, 'Attribute.Relation');
+          defaultAssertions(typeNode, 'Schema.Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(3);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
+          expect(typeNode.typeArguments[0].text).toBe('oneToOne');
 
           expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('oneToOne');
-
-          expect(typeNode.typeArguments[2].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[2].text).toBe('api::bar.bar');
+          expect(typeNode.typeArguments[1].text).toBe('api::bar.bar');
         });
 
         test('Polymorphic relation', () => {
           const attribute = { type: 'relation', relation: 'morphMany' };
           const typeNode = getAttributeType('foo', attribute, 'api::foo.foo');
 
-          defaultAssertions(typeNode, 'Attribute.Relation');
+          defaultAssertions(typeNode, 'Schema.Attribute.Relation');
 
-          expect(typeNode.typeArguments).toHaveLength(2);
+          expect(typeNode.typeArguments).toHaveLength(1);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[0].text).toBe('api::foo.foo');
-
-          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.StringLiteral);
-          expect(typeNode.typeArguments[1].text).toBe('morphMany');
+          expect(typeNode.typeArguments[0].text).toBe('morphMany');
         });
       });
 
@@ -289,7 +343,7 @@ describe('Attributes', () => {
           const attribute = { type: 'component', component: 'default.comp', repeatable: true };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'Attribute.Component');
+          defaultAssertions(typeNode, 'Schema.Attribute.Component');
 
           expect(typeNode.typeArguments).toHaveLength(2);
 
@@ -303,12 +357,14 @@ describe('Attributes', () => {
           const attribute = { type: 'component', component: 'default.comp' };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'Attribute.Component');
+          defaultAssertions(typeNode, 'Schema.Attribute.Component');
 
-          expect(typeNode.typeArguments).toHaveLength(1);
+          expect(typeNode.typeArguments).toHaveLength(2);
 
           expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
           expect(typeNode.typeArguments[0].text).toBe('default.comp');
+
+          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.FalseKeyword);
         });
       });
 
@@ -317,7 +373,7 @@ describe('Attributes', () => {
           const attribute = { type: 'dynamiczone', components: ['default.comp1', 'default.comp2'] };
           const typeNode = getAttributeType('foo', attribute);
 
-          defaultAssertions(typeNode, 'Attribute.DynamicZone');
+          defaultAssertions(typeNode, 'Schema.Attribute.DynamicZone');
 
           expect(typeNode.typeArguments).toHaveLength(1);
 
@@ -359,7 +415,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Required');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.Required');
         });
       });
 
@@ -384,7 +440,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Private');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.Private');
         });
       });
 
@@ -409,7 +465,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Unique');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.Unique');
         });
       });
 
@@ -434,7 +490,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.Configurable');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.Configurable');
         });
       });
 
@@ -455,7 +511,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.CustomField');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.CustomField');
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
           expect(modifiers[0].typeArguments[0].text).toBe('plugin::color-picker.color');
@@ -473,7 +529,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.CustomField');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.CustomField');
           expect(modifiers[0].typeArguments).toHaveLength(2);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.StringLiteral);
           expect(modifiers[0].typeArguments[0].text).toBe('plugin::color-picker.color');
@@ -507,7 +563,7 @@ describe('Attributes', () => {
 
           expect(modifiers).toHaveLength(1);
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetPluginOptions');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetPluginOptions');
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(modifiers[0].typeArguments[0].members).toHaveLength(1);
@@ -546,7 +602,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMax');
 
           const [setMinMax] = modifiers;
           const { typeArguments } = setMinMax;
@@ -578,7 +634,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMax');
 
           const [setMinMax] = modifiers;
           const { typeArguments } = setMinMax;
@@ -610,7 +666,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMax');
 
           const [setMinMax] = modifiers;
           const { typeArguments } = setMinMax;
@@ -647,7 +703,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMax');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMax');
 
           const [setMinMax] = modifiers;
           const { typeArguments } = setMinMax;
@@ -671,6 +727,38 @@ describe('Attributes', () => {
           // Check for string keyword on the second typeArgument
           expect(typeofMinMax.kind).toBe(ts.SyntaxKind.StringKeyword);
         });
+
+        test('Min: 0', () => {
+          const attribute = { min: 0 };
+          const modifiers = getAttributeModifiers(attribute);
+
+          expect(modifiers).toHaveLength(1);
+
+          expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMax');
+
+          const [setMinMax] = modifiers;
+          const { typeArguments } = setMinMax;
+
+          expect(typeArguments).toBeDefined();
+          expect(typeArguments).toHaveLength(2);
+
+          const [definition, typeofMinMax] = typeArguments;
+
+          // Min/Max
+          expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
+          expect(definition.members).toHaveLength(1);
+
+          const [min] = definition.members;
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(min.type.text).toBe('0');
+
+          // Check for string keyword on the second typeArgument
+          expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
+        });
       });
 
       describe('MinLength / MaxLength', () => {
@@ -688,7 +776,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMaxLength');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMaxLength');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -712,7 +800,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMaxLength');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMaxLength');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -736,7 +824,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.SetMinMaxLength');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.SetMinMaxLength');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -778,7 +866,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.DefaultTo');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.DefaultTo');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TrueKeyword);
@@ -791,7 +879,7 @@ describe('Attributes', () => {
           expect(modifiers).toHaveLength(1);
 
           expect(modifiers[0].kind).toBe(ts.SyntaxKind.TypeReference);
-          expect(modifiers[0].typeName.escapedText).toBe('Attribute.DefaultTo');
+          expect(modifiers[0].typeName.escapedText).toBe('Schema.Attribute.DefaultTo');
 
           expect(modifiers[0].typeArguments).toHaveLength(1);
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
@@ -803,6 +891,16 @@ describe('Attributes', () => {
           expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
             ts.SyntaxKind.TrueKeyword
           );
+        });
+
+        test('Default: <function>', () => {
+          const anyFunction = jest.fn();
+          const attribute = { default: anyFunction };
+
+          const modifiers = getAttributeModifiers(attribute);
+
+          // The default modifier shouldn't be processed when encountering a function
+          expect(modifiers).toHaveLength(0);
         });
       });
     });

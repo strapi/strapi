@@ -1,13 +1,15 @@
-import { useRBAC } from '@strapi/helper-plugin';
 import { fireEvent, render, waitFor, screen } from '@tests/utils';
 
 import { SingleSignOnPage } from '../SingleSignOnPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn(),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-  useFocusWhenNavigate: jest.fn(),
+jest.mock('../../../../../../../admin/src/hooks/useRBAC', () => ({
+  useRBAC: () => ({
+    isLoading: false,
+    allowedActions: {
+      canRead: true,
+      canUpdate: true,
+    },
+  }),
 }));
 
 describe('Admin | ee | SettingsPage | SSO', () => {
@@ -16,12 +18,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
   });
 
   it('renders', async () => {
-    jest.mocked(useRBAC).mockImplementation(() => ({
-      isLoading: false,
-      setIsLoading: jest.fn(),
-      allowedActions: { canUpdate: true, canReadRoles: true },
-    }));
-
     render(<SingleSignOnPage />);
 
     await waitFor(() =>
@@ -42,12 +38,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
   });
 
   it('should disable the form when there is no change', async () => {
-    jest.mocked(useRBAC).mockImplementation(() => ({
-      isLoading: false,
-      setIsLoading: jest.fn(),
-      allowedActions: { canUpdate: true, canReadRoles: true },
-    }));
-
     render(<SingleSignOnPage />);
 
     await waitFor(() =>
@@ -58,12 +48,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
   });
 
   it('should not disable the form when there is a change', async () => {
-    jest.mocked(useRBAC).mockImplementation(() => ({
-      isLoading: false,
-      setIsLoading: jest.fn(),
-      allowedActions: { canUpdate: true, canReadRoles: true },
-    }));
-
     render(<SingleSignOnPage />);
 
     await waitFor(() =>

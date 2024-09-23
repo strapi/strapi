@@ -1,8 +1,7 @@
-import EE from '@strapi/strapi/dist/utils/ee';
 import { isEmpty } from 'lodash/fp';
 
 export const isSsoLocked = async (user: any) => {
-  if (!EE.features.isEnabled('sso')) {
+  if (!strapi.ee.features.isEnabled('sso')) {
     return false;
   }
 
@@ -22,7 +21,7 @@ export const isSsoLocked = async (user: any) => {
     // If the roles are pre-loaded for the given user, then use them
     user.roles ??
     // Otherwise, try to load the role based on the given user ID
-    (await strapi.query('admin::user').load(user, 'roles', { roles: { fields: ['id'] } })) ??
+    (await strapi.db.query('admin::user').load(user, 'roles', { roles: { fields: ['id'] } })) ??
     // If the query fails somehow, default to an empty array
     [];
 

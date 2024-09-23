@@ -22,10 +22,19 @@ jobs:
         with:
           fetch-depth: 0
       # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: .github/filters.yaml
+
+  pretty:
+    name: 'pretty (node: 20)'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20]
+    steps:
+      - run: echo "Skipped"
 
   lint:
     name: 'lint (node: ${{ matrix.node }})'
@@ -33,6 +42,13 @@ jobs:
     strategy:
       matrix:
         node: [20]
+    steps:
+      - run: echo "Skipped"
+
+  typescript:
+    runs-on: ubuntu-latest
+    needs: [build]
+    name: 'typescript'
     steps:
       - run: echo "Skipped"
 
@@ -52,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18]
+        node: [20]
     steps:
       - run: echo "Skipped"
 
@@ -63,6 +79,33 @@ jobs:
     strategy:
       matrix:
         node: [18, 20]
+    steps:
+      - run: echo "Skipped"
+
+  cli:
+    name: 'CLI Tests'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Skipped"
+
+  e2e_ce:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] e2e (browser: ${{ matrix.project }})'
+    strategy:
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
+    steps:
+      - run: echo "Skipped"
+
+  e2e_ee:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    strategy:
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
     steps:
       - run: echo "Skipped"
 
@@ -80,16 +123,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
     name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
-    strategy:
-      matrix:
-        node: [18, 20]
-    steps:
-      - run: echo "Skipped"
-
-  api_ce_mysql_5:
-    runs-on: ubuntu-latest
-    needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql:5 , node: ${{ matrix.node }})'
     strategy:
       matrix:
         node: [18, 20]

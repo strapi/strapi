@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-workspace-plugin",
-  "version": "4.19.0",
+  "version": "0.0.0",
   "private": true,
   "description": "This is the description of my plugin.",
   "exports": {
@@ -10,9 +10,9 @@
       "default": "./admin/src/index.js"
     },
     "./strapi-server": {
-      "source": "./strapi-server.js",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "source": "./server/index.js",
+      "require": "./server/index.js",
+      "default": "./server/index.js"
     },
     "./package.json": "./package.json"
   },

@@ -1,12 +1,12 @@
-import { Box, Button, Flex, Main, TextInput, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { Form, translatedErrors, useAPIErrorHandler } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { Form } from '../../../components/Form';
+import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import {
   Column,
   LayoutContent,
@@ -14,11 +14,12 @@ import {
 } from '../../../layouts/UnauthenticatedLayout';
 import { useForgotPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 import type { ForgotPassword } from '../../../../../shared/contracts/authentication';
 
 const ForgotPassword = () => {
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
@@ -31,7 +32,7 @@ const ForgotPassword = () => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={7}>
-              <Typography as="h1" variant="alpha">
+              <Typography tag="h1" variant="alpha">
                 {formatMessage({
                   id: 'Auth.form.button.password-recovery',
                   defaultMessage: 'Password Recovery',
@@ -49,8 +50,8 @@ const ForgotPassword = () => {
               </Typography>
             ) : null}
           </Column>
-          <Formik
-            enableReinitialize
+          <Form
+            method="POST"
             initialValues={{
               email: '',
             }}
@@ -58,51 +59,47 @@ const ForgotPassword = () => {
               const res = await forgotPassword(body);
 
               if (!('error' in res)) {
-                push('/auth/forgot-password-success');
+                navigate('/auth/forgot-password-success');
               }
             }}
             validationSchema={yup.object().shape({
-              email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
+              email: yup
+                .string()
+                .email(translatedErrors.email)
+                .required({
+                  id: translatedErrors.required.id,
+                  defaultMessage: 'This field is required.',
+                })
+                .nullable(),
             })}
-            validateOnChange={false}
           >
-            {({ values, errors, handleChange }) => (
-              <Form>
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  <TextInput
-                    error={
-                      errors.email
-                        ? formatMessage({
-                            id: errors.email,
-                            defaultMessage: 'This email is invalid.',
-                          })
-                        : ''
-                    }
-                    value={values.email}
-                    onChange={handleChange}
-                    label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
-                    placeholder={formatMessage({
-                      id: 'Auth.form.email.placeholder',
-                      defaultMessage: 'kai@doe.com',
-                    })}
-                    name="email"
-                    required
-                  />
-                  <Button type="submit" fullWidth>
-                    {formatMessage({
-                      id: 'Auth.form.button.forgot-password',
-                      defaultMessage: 'Send Email',
-                    })}
-                  </Button>
-                </Flex>
-              </Form>
-            )}
-          </Formik>
+            <Flex direction="column" alignItems="stretch" gap={6}>
+              {[
+                {
+                  label: formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' }),
+                  name: 'email',
+                  placeholder: formatMessage({
+                    id: 'Auth.form.email.placeholder',
+                    defaultMessage: 'kai@doe.com',
+                  }),
+                  required: true,
+                  type: 'string' as const,
+                },
+              ].map((field) => (
+                <InputRenderer key={field.name} {...field} />
+              ))}
+              <Button type="submit" fullWidth>
+                {formatMessage({
+                  id: 'Auth.form.button.forgot-password',
+                  defaultMessage: 'Send Email',
+                })}
+              </Button>
+            </Flex>
+          </Form>
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
-            <Link as={NavLink} to="/auth/login">
+            <Link tag={NavLink} to="/auth/login">
               {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
             </Link>
           </Box>

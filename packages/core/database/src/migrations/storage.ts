@@ -2,11 +2,11 @@ import type { Database } from '..';
 
 export interface Options {
   db: Database;
-  tableName?: string;
+  tableName: string;
 }
 
 export const createStorage = (opts: Options) => {
-  const { db, tableName = 'strapi_migrations' } = opts;
+  const { db, tableName } = opts;
 
   const hasMigrationTable = () => db.getSchemaConnection().hasTable(tableName);
 

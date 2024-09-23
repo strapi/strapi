@@ -1,18 +1,15 @@
 import * as React from 'react';
 
-import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
+import { useTracking } from '@strapi/admin/strapi-admin';
+import { useNotifyAT } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
+  Page,
   useAPIErrorHandler,
-  useFetchClient,
-  useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
+  useFetchClient,
   useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+  Layouts,
+} from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -23,22 +20,18 @@ import EmailForm from './components/EmailForm';
 import EmailTable from './components/EmailTable';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
+  <Page.Protect permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
-
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { notifyStatus } = useNotifyAT();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [templateToEdit, setTemplateToEdit] = React.useState(null);
@@ -66,7 +59,7 @@ const EmailTemplatesPage = () => {
       },
       onError(error) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
       },
@@ -92,29 +85,24 @@ const EmailTemplatesPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
         });
 
         trackUsage('didEditEmailTemplates');
 
-        unlockApp();
         handleToggle();
       },
       onError(error) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
-
-        unlockApp();
       },
       refetchActive: true,
     }
   );
 
   const handleSubmit = (body) => {
-    lockApp();
-
     trackUsage('willEditEmailTemplates');
 
     const editedTemplates = { ...data, [templateToEdit]: body };
@@ -122,53 +110,39 @@ const EmailTemplatesPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <SettingsPageTitle
-          name={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   return (
-    <Main aria-busy={submitMutation.isLoading}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.emailTemplates'),
-          defaultMessage: 'Email templates',
-        })}
-      />
-      <HeaderLayout
+    <Page.Main aria-busy={submitMutation.isLoading}>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.emailTemplates'),
+              defaultMessage: 'Email templates',
+            }),
+          }
+        )}
+      </Page.Title>
+      <Layouts.Header
         title={formatMessage({
           id: getTrad('HeaderNav.link.emailTemplates'),
           defaultMessage: 'Email templates',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
-        {isModalOpen && (
-          <EmailForm
-            template={data[templateToEdit]}
-            onToggle={handleToggle}
-            onSubmit={handleSubmit}
-          />
-        )}
-      </ContentLayout>
-    </Main>
+        <EmailForm
+          template={data[templateToEdit]}
+          onToggle={handleToggle}
+          open={isModalOpen}
+          onSubmit={handleSubmit}
+        />
+      </Layouts.Content>
+    </Page.Main>
   );
 };
 
-export default ProtectedEmailTemplatesPage;
+export { ProtectedEmailTemplatesPage, EmailTemplatesPage };

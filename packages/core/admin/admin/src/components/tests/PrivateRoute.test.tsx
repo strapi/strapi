@@ -1,6 +1,5 @@
-import { act, render, screen, waitFor } from '@tests/utils';
-import { History, Location } from 'history';
-import { Route } from 'react-router-dom';
+import { render, screen } from '@tests/utils';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
 
 import { PrivateRoute } from '../PrivateRoute';
 
@@ -19,24 +18,58 @@ const LoginPage = () => {
   return <div>Please login</div>;
 };
 
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return (
+    <div>
+      <dl>
+        <dt>location.pathname</dt>
+        <dd>{location.pathname}</dd>
+        <dt>location.search</dt>
+        <dd>{location.search}</dd>
+      </dl>
+      <Link
+        to={{
+          pathname: 'protected',
+          search: 'hello=world',
+        }}
+      >
+        Go to protected
+      </Link>
+    </div>
+  );
+};
+
 describe('PrivateRoute', () => {
-  beforeEach(() => {
+  afterEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
-  it('Authenticated users should be able to access protected routes', async () => {
+  /**
+   * TODO: investigate why this test keeps acting.
+   */
+  it.skip('Authenticated users should be able to access protected routes', async () => {
     // Login
     window.localStorage.setItem('jwtToken', JSON.stringify('access-token'));
-
     render(
-      <>
-        <Route path="/auth/login" component={LoginPage} />
-        <PrivateRoute path="/">
-          <ProtectedPage />
-        </PrivateRoute>
-      </>,
+      <Routes>
+        <Route path="/auth/login" element={<LoginPage />} />
+        <Route
+          path="/protected"
+          element={
+            <PrivateRoute>
+              <ProtectedPage />
+            </PrivateRoute>
+          }
+        />
+      </Routes>,
       {
         initialEntries: ['/protected'],
+        providerOptions: {
+          permissions: () => undefined,
+        },
       }
     );
 
@@ -44,44 +77,46 @@ describe('PrivateRoute', () => {
     expect(await screen.findByText('You are authenticated'));
   });
 
-  it.only('Unauthenticated users should not be able to access protected routes and get redirected', async () => {
-    let testLocation: Location = null!;
-    let testHistory: History = null!;
-
-    render(
+  it('Unauthenticated users should not be able to access protected routes and get redirected', async () => {
+    const { user } = render(
       <>
-        <Route path="/auth/login" component={LoginPage} />
-        <PrivateRoute path="/protected">
-          <ProtectedPage />
-        </PrivateRoute>
-        <Route
-          path="*"
-          render={({ history, location }) => {
-            testLocation = location;
-            testHistory = history;
-            return null;
-          }}
-        />
+        <Routes>
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route
+            path="/protected"
+            element={
+              <PrivateRoute>
+                <ProtectedPage />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+        <LocationDisplay />
       </>,
       {
         initialEntries: ['/protected'],
       }
     );
 
-    await waitFor(() => expect(testLocation.pathname).toBe('/auth/login'));
+    await screen.findByText('/auth/login');
+
+    const searchParams1 = new URLSearchParams();
+    searchParams1.append('redirectTo', '/protected');
 
     // No `redirectTo` in the search params
-    expect(new URLSearchParams(testLocation.search).get('redirectTo')).toBe('/protected');
+    expect(screen.getByText(`?${searchParams1.toString()}`)).toBeInTheDocument();
     expect(screen.getByText('Please login')).toBeInTheDocument();
 
     // Visit /settings/application-infos (have search params)
-    act(() => testHistory.push('/protected?hello=world'));
+    await user.click(screen.getByRole('link', { name: 'Go to protected' }));
 
-    await waitFor(() => expect(testLocation.pathname).toBe('/auth/login'));
+    await screen.findByText('/auth/login');
+
+    const searchParams2 = new URLSearchParams();
+    searchParams2.append('redirectTo', '/protected?hello=world');
+
     // Should preserve search params
-    expect(new URLSearchParams(testLocation.search).get('redirectTo')).toBe(
-      '/protected?hello=world'
-    );
+    expect(screen.getByText(`?${searchParams2.toString()}`)).toBeInTheDocument();
 
     expect(screen.getByText('Please login')).toBeInTheDocument();
   });

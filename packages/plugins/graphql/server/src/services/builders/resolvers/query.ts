@@ -1,5 +1,4 @@
 import { omit } from 'lodash/fp';
-import { sanitize, validate } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../../types';
 
@@ -8,26 +7,46 @@ export default ({ strapi }: Context) => ({
     const { uid } = contentType;
 
     return {
-      async find(parent: any, args: any, ctx: any) {
-        await validate.contentAPI.query(args, contentType, {
-          auth: ctx?.state?.auth,
-        });
-        const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
+      async findMany(parent: any, args: any, ctx: any) {
+        await strapi.contentAPI.validate.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
 
-        return strapi.entityService!.findMany(uid, sanitizedQuery);
+        const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
+          auth: ctx?.state?.auth,
+        });
+
+        return strapi.documents!(uid).findMany({ status: 'published', ...sanitizedQuery });
+      },
+
+      async findFirst(parent: any, args: any, ctx: any) {
+        await strapi.contentAPI.validate.query(args, contentType, {
+          auth: ctx?.state?.auth,
+        });
+
+        const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
+          auth: ctx?.state?.auth,
+        });
+
+        return strapi.documents!(uid).findFirst({ status: 'published', ...sanitizedQuery });
       },
 
       async findOne(parent: any, args: any, ctx: any) {
-        await validate.contentAPI.query(args, contentType, {
-          auth: ctx?.state?.auth,
-        });
-        const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
+        const { documentId } = args;
+
+        await strapi.contentAPI.validate.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
 
-        return strapi.entityService!.findOne(uid, args.id, omit('id', sanitizedQuery));
+        const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
+          auth: ctx?.state?.auth,
+        });
+
+        return strapi.documents!(uid).findOne({
+          status: 'published',
+          ...omit(['id', 'documentId'], sanitizedQuery),
+          documentId,
+        });
       },
     };
   },

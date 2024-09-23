@@ -10,11 +10,16 @@ const createAgent = (strapi, initialState = {}) => {
   const utils = createUtils(strapi);
 
   const agent = (options) => {
-    const { method, url, body, formData, qs: queryString } = options;
+    const { method, url, body, formData, qs: queryString, headers } = options;
     const supertestAgent = request.agent(strapi.server.httpServer);
 
     if (has('token', state)) {
       supertestAgent.auth(state.token, { type: 'bearer' });
+    }
+    if (headers) {
+      supertestAgent.set(headers);
+    } else if (has('headers', state)) {
+      supertestAgent.set(state.headers);
     }
 
     const fullUrl = concat(state.urlPrefix, url).join('');
@@ -63,6 +68,10 @@ const createAgent = (strapi, initialState = {}) => {
 
     setLoggedUser(loggedUser) {
       return this.assignState({ loggedUser });
+    },
+
+    setHeaders(headers) {
+      return this.assignState({ headers });
     },
 
     getLoggedUser() {

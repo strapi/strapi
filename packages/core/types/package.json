@@ -1,6 +1,6 @@
 {
   "name": "@strapi/types",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "Shared typescript types for Strapi internal use",
   "keywords": [
     "strapi"
@@ -31,41 +31,45 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "doc:ts": "typedoc",
+    "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
-    "@koa/cors": "3.4.3",
-    "@koa/router": "10.1.1",
-    "@strapi/database": "4.19.0",
-    "@strapi/logger": "4.19.0",
-    "@strapi/permissions": "4.19.0",
-    "@strapi/utils": "4.19.0",
+    "@koa/cors": "5.0.0",
+    "@koa/router": "12.0.1",
+    "@strapi/database": "workspace:*",
+    "@strapi/logger": "workspace:*",
+    "@strapi/permissions": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "commander": "8.3.0",
-    "https-proxy-agent": "5.0.1",
-    "koa": "2.13.4",
-    "node-fetch": "2.7.0",
-    "node-schedule": "2.1.0"
+    "koa": "2.15.2",
+    "koa-body": "6.0.1",
+    "node-schedule": "2.1.1",
+    "typedoc": "0.25.10",
+    "typedoc-github-wiki-theme": "1.1.0",
+    "typedoc-plugin-markdown": "3.17.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.19.0",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",
-    "@types/node-schedule": "2.1.0",
-    "eslint-config-custom": "4.19.0",
-    "tsconfig": "4.19.0",
-    "typescript": "5.2.2"
+    "@types/node-schedule": "2.1.7",
+    "eslint-config-custom": "workspace:*",
+    "lodash": "4.17.21",
+    "tsconfig": "workspace:*",
+    "typescript": "5.3.2",
+    "undici": "6.19.2"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

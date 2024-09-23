@@ -1,7 +1,7 @@
 import { camelCase, upperFirst, lowerFirst, pipe, get } from 'lodash/fp';
 import { singular } from 'pluralize';
 import { errors } from '@strapi/utils';
-import type { Attribute, Schema } from '@strapi/types';
+import type { Struct, Schema } from '@strapi/types';
 import type { Context } from '../types';
 
 const { ApplicationError } = errors;
@@ -10,9 +10,9 @@ export default ({ strapi }: Context) => {
   /**
    * Build a type name for a enum based on a content type & an attribute name
    */
-  const getEnumName = (contentType: Schema.Any, attributeName: string) => {
+  const getEnumName = (contentType: Struct.Schema, attributeName: string) => {
     const { attributes } = contentType;
-    const { enumName } = attributes[attributeName] as Attribute.Enumeration;
+    const { enumName } = attributes[attributeName] as Schema.Attribute.Enumeration;
     const { modelType } = contentType;
 
     const typeName =
@@ -27,7 +27,7 @@ export default ({ strapi }: Context) => {
    * Build the base type name for a given content type
    */
   const getTypeName = (
-    contentType: Schema.Any,
+    contentType: Struct.Schema,
     {
       plurality = 'singular',
     }: {
@@ -50,56 +50,56 @@ export default ({ strapi }: Context) => {
   /**
    * Build the entity's type name for a given content type
    */
-  const getEntityName = (contentType: Schema.Any) => {
+  const getEntityName = (contentType: Struct.Schema) => {
     return `${getTypeName(contentType)}Entity`;
   };
 
   /**
    * Build the entity meta type name for a given content type
    */
-  const getEntityMetaName = (contentType: Schema.Any) => {
+  const getEntityMetaName = (contentType: Struct.Schema) => {
     return `${getEntityName(contentType)}Meta`;
   };
 
   /**
    * Build the entity response's type name for a given content type
    */
-  const getEntityResponseName = (contentType: Schema.Any) => {
+  const getEntityResponseName = (contentType: Struct.Schema) => {
     return `${getEntityName(contentType)}Response`;
   };
 
   /**
    * Build the entity response collection's type name for a given content type
    */
-  const getEntityResponseCollectionName = (contentType: Schema.Any) => {
+  const getEntityResponseCollectionName = (contentType: Struct.Schema) => {
     return `${getEntityName(contentType)}ResponseCollection`;
   };
 
   /**
    * Build the relation response collection's type name for a given content type
    */
-  const getRelationResponseCollectionName = (contentType: Schema.Any) => {
+  const getRelationResponseCollectionName = (contentType: Struct.Schema) => {
     return `${getTypeName(contentType)}RelationResponseCollection`;
   };
 
   /**
    * Build a component type name based on its definition
    */
-  const getComponentName = (contentType: Schema.Any) => {
+  const getComponentName = (contentType: Struct.Schema) => {
     return contentType.globalId;
   };
 
   /**
    * Build a component type name based on a content type's attribute
    */
-  const getComponentNameFromAttribute = (attribute: Attribute.Component) => {
+  const getComponentNameFromAttribute = (attribute: Schema.Attribute.Component) => {
     return strapi.components[attribute.component].globalId;
   };
 
   /**
    * Build a dynamic zone type name based on a content type and an attribute name
    */
-  const getDynamicZoneName = (contentType: Schema.Any, attributeName: string) => {
+  const getDynamicZoneName = (contentType: Struct.Schema, attributeName: string) => {
     const typeName = getTypeName(contentType);
     const dzName = upperFirst(camelCase(attributeName));
     const suffix = 'DynamicZone';
@@ -110,7 +110,7 @@ export default ({ strapi }: Context) => {
   /**
    * Build a dynamic zone input type name based on a content type and an attribute name
    */
-  const getDynamicZoneInputName = (contentType: Schema.Any, attributeName: string) => {
+  const getDynamicZoneInputName = (contentType: Struct.Schema, attributeName: string) => {
     const dzName = getDynamicZoneName(contentType, attributeName);
 
     return `${dzName}Input`;
@@ -119,7 +119,7 @@ export default ({ strapi }: Context) => {
   /**
    * Build a component input type name based on a content type and an attribute name
    */
-  const getComponentInputName = (contentType: Schema.Any) => {
+  const getComponentInputName = (contentType: Struct.Schema) => {
     const componentName = getComponentName(contentType);
 
     return `${componentName}Input`;
@@ -128,7 +128,7 @@ export default ({ strapi }: Context) => {
   /**
    * Build a content type input name based on a content type and an attribute name
    */
-  const getContentTypeInputName = (contentType: Schema.Any) => {
+  const getContentTypeInputName = (contentType: Struct.Schema) => {
     const typeName = getTypeName(contentType);
 
     return `${typeName}Input`;
@@ -137,21 +137,21 @@ export default ({ strapi }: Context) => {
   /**
    * Build the queries type name for a given content type
    */
-  const getEntityQueriesTypeName = (contentType: Schema.Any) => {
+  const getEntityQueriesTypeName = (contentType: Struct.Schema) => {
     return `${getEntityName(contentType)}Queries`;
   };
 
   /**
    * Build the mutations type name for a given content type
    */
-  const getEntityMutationsTypeName = (contentType: Schema.Any) => {
+  const getEntityMutationsTypeName = (contentType: Struct.Schema) => {
     return `${getEntityName(contentType)}Mutations`;
   };
 
   /**
    * Build the filters type name for a given content type
    */
-  const getFiltersInputTypeName = (contentType: Schema.Any) => {
+  const getFiltersInputTypeName = (contentType: Struct.Schema) => {
     const isComponent = contentType.modelType === 'component';
 
     const baseName = isComponent ? getComponentName(contentType) : getTypeName(contentType);
@@ -169,7 +169,7 @@ export default ({ strapi }: Context) => {
   /**
    * Build a type name for a given content type & polymorphic attribute
    */
-  const getMorphRelationTypeName = (contentType: Schema.Any, attributeName: string) => {
+  const getMorphRelationTypeName = (contentType: Struct.Schema, attributeName: string) => {
     const typeName = getTypeName(contentType);
     const formattedAttr = upperFirst(camelCase(attributeName));
 
@@ -199,13 +199,17 @@ export default ({ strapi }: Context) => {
       firstLetterCase === 'upper' ? upperFirst : lowerFirst
     );
 
-    return (contentType: Schema.Any) => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
+    return (contentType: Struct.Schema) => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
   };
 
   const getFindQueryName = buildCustomTypeNameGenerator({
     plurality: 'plural',
     firstLetterCase: 'lower',
   });
+
+  const getFindConnectionQueryName = (contentType: Struct.Schema) => {
+    return `${getFindQueryName(contentType)}_connection`;
+  };
 
   const getFindOneQueryName = buildCustomTypeNameGenerator({ firstLetterCase: 'lower' });
 
@@ -249,5 +253,6 @@ export default ({ strapi }: Context) => {
     getCreateMutationTypeName,
     getUpdateMutationTypeName,
     getDeleteMutationTypeName,
+    getFindConnectionQueryName,
   };
 };

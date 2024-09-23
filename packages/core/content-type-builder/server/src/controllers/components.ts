@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
-import type { Common } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { getService } from '../utils';
 import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
@@ -16,9 +16,10 @@ export default {
    */
   async getComponents(ctx: Context) {
     const componentService = getService('components');
+    const componentUIDs = Object.keys(strapi.components) as UID.Component[];
 
-    const data = Object.keys(strapi.components).map((uid) => {
-      return componentService.formatComponent(strapi.components[uid as Common.UID.Component]);
+    const data = componentUIDs.map((uid) => {
+      return componentService.formatComponent(strapi.components[uid]);
     });
 
     ctx.send({ data });
@@ -49,7 +50,7 @@ export default {
    * @param {Object} ctx - koa context
    */
   async createComponent(ctx: Context) {
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     try {
       await validateComponentInput(body);
@@ -83,7 +84,7 @@ export default {
    */
   async updateComponent(ctx: Context) {
     const { uid } = ctx.params;
-    const { body } = ctx.request;
+    const body = ctx.request.body as any;
 
     if (!_.has(strapi.components, uid)) {
       return ctx.send({ error: 'component.notFound' }, 404);

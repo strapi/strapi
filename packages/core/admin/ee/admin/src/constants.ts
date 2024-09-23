@@ -1,7 +1,6 @@
-import { AuthResponse } from './pages/AuthResponse';
-
 import type { SettingsMenu } from '../../../admin/src/constants';
 import type { PermissionMap } from '../../../admin/src/types/permissions';
+import type { RouteObject } from 'react-router-dom';
 
 export const ADMIN_PERMISSIONS_EE = {
   settings: {
@@ -22,18 +21,45 @@ export const ADMIN_PERMISSIONS_EE = {
       read: [{ action: 'admin::provider-login.read', subject: null }],
       update: [{ action: 'admin::provider-login.update', subject: null }],
     },
+    releases: {
+      read: [
+        {
+          action: 'plugin::content-releases.settings.read',
+          subject: null,
+        },
+      ],
+      update: [
+        {
+          action: 'plugin::content-releases.settings.update',
+          subject: null,
+        },
+      ],
+    },
   },
 } satisfies {
-  settings: Pick<PermissionMap['settings'], 'auditLogs' | 'review-workflows' | 'sso'>;
+  settings: Pick<PermissionMap['settings'], 'auditLogs' | 'review-workflows' | 'sso' | 'releases'>;
 };
 
-export const ROUTES_EE = [
-  {
-    Component: () => ({ default: AuthResponse }),
-    to: '/auth/login/:authResponse',
-    exact: true,
-  },
-];
+/**
+ * Base EE routes, these are relative to the `root` of the app.
+ * We use a function to get them so we're not looking at window
+ * during build time.
+ */
+export const getEERoutes = (): RouteObject[] =>
+  window.strapi.isEE
+    ? [
+        {
+          path: 'auth/login/:authResponse',
+          lazy: async () => {
+            const { AuthResponse } = await import('./pages/AuthResponse');
+
+            return {
+              Component: AuthResponse,
+            };
+          },
+        },
+      ]
+    : [];
 
 // TODO: the constants.js file is imported before the React application is setup and
 // therefore `window.strapi` might not exist at import-time. We should probably define
@@ -46,19 +72,6 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/single-sign-on',
             id: 'sso',
-          },
-        ]
-      : []),
-
-    ...(window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)
-      ? [
-          {
-            intlLabel: {
-              id: 'Settings.review-workflows.page.title',
-              defaultMessage: 'Review Workflows',
-            },
-            to: '/settings/review-workflows',
-            id: 'review-workflows',
           },
         ]
       : []),

@@ -1,6 +1,6 @@
 /* eslint-disable import/no-relative-packages */
 // @ts-expect-error - test purposes
-import createContext from '../../../../../../../test/helpers/create-context';
+import createContext from '../../../../../../../tests/helpers/create-context';
 import adminAuthStrategy from '../admin';
 
 describe('Admin Auth Strategy', () => {
@@ -25,7 +25,7 @@ describe('Admin Auth Strategy', () => {
             permission: { engine: { generateUserAbility } },
           },
         },
-        query: jest.fn(() => ({ findOne })),
+        db: { query: jest.fn(() => ({ findOne })) },
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
@@ -84,7 +84,7 @@ describe('Admin Auth Strategy', () => {
             token: { decodeJwtToken },
           },
         },
-        query: jest.fn(() => ({ findOne })),
+        db: { query: jest.fn(() => ({ findOne })) },
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);
@@ -105,7 +105,7 @@ describe('Admin Auth Strategy', () => {
             token: { decodeJwtToken },
           },
         },
-        query: jest.fn(() => ({ findOne })),
+        db: { query: jest.fn(() => ({ findOne })) },
       } as any;
 
       const response = await adminAuthStrategy.authenticate(ctx);

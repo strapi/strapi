@@ -1,11 +1,17 @@
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+import { type SetupServer, setupServer } from 'msw/node';
 import * as qs from 'qs';
 
 import { MockData, mockData } from './mockData';
 
-export const server = setupServer(
+export const server: SetupServer = setupServer(
   ...[
+    /**
+     * TRACKING
+     */
+    rest.post('https://analytics.strapi.io/api/v2/track', (req, res, ctx) => {
+      return res(ctx.status(200));
+    }),
     /**
      *
      * ADMIN ROLES
@@ -344,164 +350,11 @@ export const server = setupServer(
       );
     }),
     /**
-     * REVIEW_WORKFLOWS
+     *
+     * CONTENT_MANAGER
+     *
      */
-    rest.get('/admin/review-workflows/workflows', (req, res, ctx) => {
-      return res(
-        ctx.json({
-          data: [
-            {
-              id: 1,
-              stages: [
-                {
-                  id: 1,
-                  name: 'To Review',
-                  color: '#FFFFFF',
-                },
-              ],
-            },
-          ],
-        })
-      );
-    }),
-    rest.get('/admin/review-workflows/workflows/:id', (req, res, ctx) =>
-      res(
-        ctx.json({
-          data: {
-            id: 1,
-            stages: [
-              {
-                id: 1,
-                name: 'To Review',
-                color: '#FFFFFF',
-              },
-            ],
-          },
-        })
-      )
-    ),
-    rest.get('/content-manager/collection-types/:contentType/stages', (req, res, ctx) =>
-      res(
-        ctx.json({
-          data: [
-            {
-              id: 1,
-              name: 'Todo',
-            },
-
-            {
-              id: 2,
-              name: 'Done',
-            },
-          ],
-
-          meta: {
-            workflowCount: 10,
-            stagesCount: 5,
-          },
-        })
-      )
-    ),
-    rest.get('/content-manager/single-types/:contentType/stages', (req, res, ctx) =>
-      res(
-        ctx.json({
-          data: [
-            {
-              id: 2,
-              name: 'Todo',
-            },
-
-            {
-              id: 3,
-              name: 'Done',
-            },
-          ],
-
-          meta: {
-            workflowCount: 10,
-            stagesCount: 5,
-          },
-        })
-      )
-    ),
-    rest.put(
-      '/admin/content-manager/collection-types/:contentType/:id/assignee',
-      (req, res, ctx) => {
-        return res(ctx.status(200));
-      }
-    ),
-    rest.get('/admin/content-manager/:collectionType/:contentType/:id/stages', (req, res, ctx) =>
-      res(
-        ctx.json({
-          data: [
-            {
-              id: 1,
-              color: '#4945FF',
-              name: 'Stage 1',
-            },
-
-            {
-              id: 2,
-              color: '#4945FF',
-              name: 'Stage 2',
-            },
-          ],
-          meta: {
-            workflowCount: 10,
-          },
-        })
-      )
-    ),
-    // /**
-    //  *
-    //  * CONTENT_MANAGER
-    //  *
-    //  */
-    rest.put('/content-manager/content-types/:contentType/configuration', (req, res, ctx) => {
-      return res(ctx.status(200));
-    }),
-    rest.post('/content-manager/uid/generate', async (req, res, ctx) => {
-      const body = await req.json();
-
-      return res(
-        ctx.json({
-          data: body?.data?.target ?? 'regenerated',
-        })
-      );
-    }),
-    rest.post('/content-manager/uid/check-availability', async (req, res, ctx) => {
-      const body = await req.json();
-
-      return res(
-        ctx.json({
-          isAvailable: body?.value === 'available',
-        })
-      );
-    }),
-    rest.get('/content-manager/collection-types/:contentType', (req, res, ctx) => {
-      return res(
-        ctx.json({
-          results: [
-            {
-              id: 1,
-              name: 'Entry 1',
-              publishedAt: null,
-            },
-            {
-              id: 2,
-              name: 'Entry 2',
-              publishedAt: null,
-            },
-            {
-              id: 3,
-              name: 'Entry 3',
-              publishedAt: null,
-            },
-          ],
-        })
-      );
-    }),
-    rest.get('*/content-manager/content-types', (req, res, ctx) =>
+    rest.get('/content-manager/content-types', (req, res, ctx) =>
       res(
         ctx.json({
           data: [
@@ -534,7 +387,7 @@ export const server = setupServer(
         })
       )
     ),
-    rest.get('*/content-manager/components', (req, res, ctx) =>
+    rest.get('/content-manager/components', (req, res, ctx) =>
       res(
         ctx.json({
           data: [
@@ -564,51 +417,6 @@ export const server = setupServer(
         })
       )
     ),
-    rest.post(
-      '/content-manager/collection-types/:contentType/actions/bulkPublish',
-      (req, res, ctx) => {
-        return res(
-          ctx.json({
-            data: {
-              count: 3,
-            },
-          })
-        );
-      }
-    ),
-    rest.get(
-      '/content-manager/collection-types/:contentType/actions/countManyEntriesDraftRelations',
-      (req, res, ctx) => {
-        return res(
-          ctx.json({
-            data: 0,
-          })
-        );
-      }
-    ),
-    rest.get('/content-manager/relations/:contentType/:id/:fieldName', (req, res, ctx) => {
-      return res(
-        ctx.json({
-          results: [
-            {
-              id: 1,
-              name: 'Relation entity 1',
-            },
-            {
-              id: 2,
-              name: 'Relation entity 2',
-            },
-            {
-              id: 3,
-              name: 'Relation entity 3',
-            },
-          ],
-          pagination: {
-            total: 1,
-          },
-        })
-      );
-    }),
     /**
      *
      * MARKETPLACE
@@ -951,6 +759,27 @@ export const server = setupServer(
           },
         })
       );
+    }),
+    /**
+     *
+     * fetchClient, useFetchClient and getFetchClient
+     *
+     */
+    rest.get('/use-fetch-client-test', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            results: [
+              { id: 2, name: 'newest', publishedAt: null },
+              { id: 1, name: 'oldest', publishedAt: null },
+            ],
+            pagination: { page: 1, pageCount: 10 },
+          },
+        })
+      );
+    }),
+    rest.get('/test-fetch-client', (req, res, ctx) => {
+      return res(ctx.status(200));
     }),
   ]
 );

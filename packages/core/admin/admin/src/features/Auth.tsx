@@ -1,35 +1,72 @@
 import * as React from 'react';
 
-import { auth } from '@strapi/helper-plugin';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
-import { useTypedDispatch } from '../core/store/hooks';
-import { setLocale } from '../reducer';
+import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
+import { useStrapiApp } from '../features/StrapiApp';
+import { useQueryParams } from '../hooks/useQueryParams';
+import { login as loginAction, logout as logoutAction, setLocale } from '../reducer';
+import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
+  useGetMyPermissionsQuery,
+  useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
   useRenewTokenMutation,
 } from '../services/auth';
 
-import type { SanitizedAdminUser } from '../../../shared/contracts/shared';
+import type {
+  Permission as PermissionContract,
+  SanitizedAdminUser,
+} from '../../../shared/contracts/shared';
+
+interface Permission
+  extends Pick<PermissionContract, 'action' | 'subject'>,
+    Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
+
+interface User
+  extends Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
+    Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
 
 interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
   logout: () => Promise<void>;
-  setToken: (token: string | null) => void;
+  /**
+   * @alpha
+   * @description given a list of permissions, this function checks
+   * those against the current user's permissions or those passed as
+   * the second argument, if the user has those permissions the complete
+   * permission object form the API is returned. Therefore, if the list is
+   * empty, the user does not have any of those permissions.
+   */
+  checkUserHasPermissions: (
+    permissions?: Permission[],
+    passedPermissions?: Permission[],
+    rawQueryContext?: string
+  ) => Promise<Permission[]>;
+  isLoading: boolean;
+  permissions: Permission[];
+  refetchPermissions: () => Promise<void>;
   token: string | null;
-  user?: SanitizedAdminUser;
+  user?: User;
 }
 
 const [Provider, useAuth] = createContext<AuthContextValue>('Auth');
 
 interface AuthProviderProps {
   children: React.ReactNode;
+  /**
+   * @internal could be removed at any time.
+   */
+  _defaultPermissions?: Permission[];
+
+  // NOTE: this is used for testing purposed only
+  _disableRenewToken?: boolean;
 }
 
 const STORAGE_KEYS = {
@@ -37,39 +74,46 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-const AuthProvider = ({ children }: AuthProviderProps) => {
+const AuthProvider = ({
+  children,
+  _defaultPermissions = [],
+  _disableRenewToken = false,
+}: AuthProviderProps) => {
   const dispatch = useTypedDispatch();
-  const [token, setToken] = React.useState<string | null>(() => {
-    const token =
-      localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
+  const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
+  const location = useLocation();
+  const [{ rawQuery }] = useQueryParams();
 
-    if (typeof token === 'string') {
-      return JSON.parse(token);
-    }
+  const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
-    return null;
-  });
-
-  const { data: user } = useGetMeQuery(undefined, {
+  const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
     /**
      * If there's no token, we don't try to fetch
      * the user data because it will fail.
      */
     skip: !token,
   });
-  const { push } = useHistory();
+
+  const {
+    data: userPermissions = _defaultPermissions,
+    refetch,
+    isUninitialized,
+    isLoading: isLoadingPermissions,
+  } = useGetMyPermissionsQuery(undefined, {
+    skip: !token,
+  });
+
+  const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
   const [renewTokenMutation] = useRenewTokenMutation();
   const [logoutMutation] = useLogoutMutation();
 
-  const clearStorage = React.useCallback(() => {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
-    sessionStorage.removeItem(STORAGE_KEYS.USER);
-    setToken(null);
-  }, []);
+  const clearStateAndLogout = React.useCallback(() => {
+    dispatch(adminApi.util.resetApiState());
+    dispatch(logoutAction());
+    navigate('/auth/login');
+  }, [dispatch, navigate]);
 
   /**
    * Fetch data from storages on mount and store it in our state.
@@ -77,28 +121,22 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
    * does click "remember me" when they login. We also need to renew the token.
    */
   React.useEffect(() => {
-    const token =
-      localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
-
-    if (token) {
-      renewTokenMutation({ token: JSON.parse(token) }).then((res) => {
+    if (token && !_disableRenewToken) {
+      renewTokenMutation({ token }).then((res) => {
         if ('data' in res) {
-          setToken(res.data.token);
+          dispatch(
+            loginAction({
+              token: res.data.token,
+            })
+          );
         } else {
-          clearStorage();
-          push('/auth/login');
+          clearStateAndLogout();
         }
       });
     }
-  }, [renewTokenMutation, clearStorage, push]);
+  }, [token, dispatch, renewTokenMutation, clearStateAndLogout, _disableRenewToken]);
 
-  /**
-   * Backwards compat – store the user info in the session storage
-   *
-   * TODO: V5 remove this and only explicitly set it when required.
-   */
   React.useEffect(() => {
-    auth.setUserInfo(user, true);
     if (user) {
       if (user.preferedLanguage) {
         dispatch(setLocale(user.preferedLanguage));
@@ -106,23 +144,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [dispatch, user]);
 
-  /**
-   * Backwards compat – store the token in the session storage
-   *
-   * TODO: V5 remove this and only explicitly set it when required.
-   */
-  React.useEffect(() => {
-    auth.setToken(token, false);
-  }, [token]);
-
   React.useEffect(() => {
     /**
      * This will log a user out of all tabs if they log out in one tab.
      */
     const handleUserStorageChange = (event: StorageEvent) => {
       if (event.key === STORAGE_KEYS.USER && event.newValue === null) {
-        clearStorage();
-        push('/auth/login');
+        clearStateAndLogout();
       }
     };
 
@@ -144,26 +172,120 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       if ('data' in res) {
         const { token } = res.data;
 
-        auth.setToken(token, rememberMe);
-        setToken(token);
+        dispatch(
+          loginAction({
+            token,
+            persist: rememberMe,
+          })
+        );
       }
 
       return res;
     },
-    [loginMutation]
+    [dispatch, loginMutation]
   );
 
   const logout = React.useCallback(async () => {
     await logoutMutation();
-    clearStorage();
-    push('/auth/login');
-  }, [clearStorage, logoutMutation, push]);
+    clearStateAndLogout();
+  }, [clearStateAndLogout, logoutMutation]);
+
+  const refetchPermissions = React.useCallback(async () => {
+    if (!isUninitialized) {
+      await refetch();
+    }
+  }, [isUninitialized, refetch]);
+
+  const [checkPermissions] = useLazyCheckPermissionsQuery();
+  const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
+    async (
+      permissions,
+      passedPermissions,
+      // TODO:
+      // Here we have parameterised checkUserHasPermissions in order to pass
+      // query context from elsewhere in the application.
+      // See packages/core/content-manager/admin/src/features/DocumentRBAC.tsx
+
+      // This is in order to calculate permissions on accurate query params.
+      // We should be able to rely on the query params in this provider
+      // If we need to pass additional context to the RBAC middleware
+      // we should define a better context type.
+      rawQueryContext
+    ) => {
+      /**
+       * If there's no permissions to check, then we allow it to
+       * pass to preserve existing behaviours.
+       *
+       * TODO: should we review this? it feels more dangerous than useful.
+       */
+      if (!permissions || permissions.length === 0) {
+        return [{ action: '', subject: '' }];
+      }
+
+      /**
+       * Given the provided permissions, return the permissions from either passedPermissions
+       * or userPermissions as this is expected to be the full permission entity.
+       */
+      const actualUserPermissions = passedPermissions ?? userPermissions;
+
+      const matchingPermissions = actualUserPermissions.filter(
+        (permission) =>
+          permissions.findIndex(
+            (perm) => perm.action === permission.action && perm.subject === permission.subject
+          ) >= 0
+      );
+
+      const middlewaredPermissions = await runRbacMiddleware(
+        {
+          user,
+          permissions: userPermissions,
+          pathname: location.pathname,
+          search: (rawQueryContext || rawQuery).split('?')[1] ?? '',
+        },
+        matchingPermissions
+      );
+
+      const shouldCheckConditions = middlewaredPermissions.some(
+        (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
+      );
+
+      if (!shouldCheckConditions) {
+        return middlewaredPermissions;
+      }
+
+      const { data, error } = await checkPermissions({
+        permissions: middlewaredPermissions.map((perm) => ({
+          action: perm.action,
+          subject: perm.subject,
+        })),
+      });
+
+      if (error) {
+        throw error;
+      } else {
+        return middlewaredPermissions.filter((_, index) => data?.data[index] === true);
+      }
+    },
+    [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
+  );
+
+  const isLoading = isLoadingUser || isLoadingPermissions;
 
   return (
-    <Provider token={token} user={user} login={login} logout={logout} setToken={setToken}>
+    <Provider
+      token={token}
+      user={user}
+      login={login}
+      logout={logout}
+      permissions={userPermissions}
+      checkUserHasPermissions={checkUserHasPermissions}
+      refetchPermissions={refetchPermissions}
+      isLoading={isLoading}
+    >
       {children}
     </Provider>
   );
 };
 
-export { AuthProvider, useAuth };
+export { AuthProvider, useAuth, STORAGE_KEYS };
+export type { AuthContextValue, Permission, User };

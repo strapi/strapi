@@ -1,7 +1,8 @@
-import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
-import { GenericInput } from '@strapi/helper-plugin';
+import { Box, Grid, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
+
+import { GenericInput } from './GenericInputs';
 
 interface TabFormProps {
   form: Array<Record<string, any>>;
@@ -33,14 +34,15 @@ export const TabForm = ({
           <Box key={sectionIndex}>
             {section.sectionTitle && (
               <Box paddingBottom={4}>
-                <Typography variant="delta" as="h3">
+                <Typography variant="delta" tag="h3">
                   {formatMessage(section.sectionTitle)}
                 </Typography>
               </Box>
             )}
-            <Grid gap={4}>
+            <Grid.Root gap={4}>
               {section.items.map((input: any, i: number) => {
                 const key = `${sectionIndex}.${i}`;
+
                 /**
                  * Use undefined as the default value because not every input wants a string e.g. Date pickers
                  */
@@ -76,14 +78,24 @@ export const TabForm = ({
 
                 if (input.type === 'pushRight') {
                   return (
-                    <GridItem col={input.size || 6} key={input.name || key}>
+                    <Grid.Item
+                      col={input.size || 6}
+                      key={input.name || key}
+                      direction="column"
+                      alignItems="stretch"
+                    >
                       <div />
-                    </GridItem>
+                    </Grid.Item>
                   );
                 }
 
                 return (
-                  <GridItem col={input.size || 6} key={input.name || key}>
+                  <Grid.Item
+                    col={input.size || 6}
+                    key={input.name || key}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <GenericInput
                       {...input}
                       {...genericInputProps}
@@ -91,10 +103,10 @@ export const TabForm = ({
                       onChange={onChange}
                       value={value}
                     />
-                  </GridItem>
+                  </Grid.Item>
                 );
               })}
-            </Grid>
+            </Grid.Root>
           </Box>
         );
       })}

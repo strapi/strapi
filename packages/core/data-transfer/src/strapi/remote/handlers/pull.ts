@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { randomUUID } from 'crypto';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
@@ -135,7 +135,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     return this.provider?.[action]();
   },
 
-  async flush(this: PullHandler, stage: Exclude<Client.TransferPullStep, 'assets'>, id) {
+  async flush(this: PullHandler, stage: Client.TransferPullStep, id) {
     type Stage = typeof stage;
     const batchSize = 1024 * 1024;
     let batch = [] as Client.GetTransferPullStreamData<Stage>;
@@ -158,14 +158,24 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     try {
       for await (const chunk of stream) {
-        batch.push(chunk);
-        if (batchLength() >= batchSize) {
-          await sendBatch();
-          batch = [];
+        if (stage !== 'assets') {
+          batch.push(chunk);
+          if (batchLength() >= batchSize) {
+            await sendBatch();
+            batch = [];
+          }
+        } else {
+          await this.confirm({
+            type: 'transfer',
+            data: [chunk],
+            ended: false,
+            error: null,
+            id,
+          });
         }
       }
 
-      if (batch.length > 0) {
+      if (batch.length > 0 && stage !== 'assets') {
         await sendBatch();
         batch = [];
       }
@@ -294,7 +304,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     this.provider = createLocalStrapiSourceProvider({
       autoDestroy: false,
-      getStrapi: () => strapi as LoadedStrapi,
+      getStrapi: () => strapi as Core.Strapi,
     });
 
     return { transferID: this.transferID };

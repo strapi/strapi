@@ -1,132 +1,92 @@
-import * as React from 'react';
-
-import { Box, Flex, Popover, Tooltip, Typography } from '@strapi/design-system';
-import { SortIcon } from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
+import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
+import { Box, Flex, Popover, Typography, useCollator, Button } from '@strapi/design-system';
+import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
-import { useTypedSelector } from '../store/hooks';
-import { getTranslation } from '../utils/getTranslation';
+import { Locale } from '../../../shared/contracts/locales';
+import { useGetLocalesQuery } from '../services/locales';
 
 interface LocaleListCellProps {
-  id?: Entity.ID;
-  localizations?: Array<{ locale: string }>;
-  locale?: string;
+  documentId: string;
+  collectionType: string;
+  locale: string;
+  model: string;
 }
 
 const LocaleListCell = ({
-  localizations = [],
-  locale: currentLocaleCode,
-  id,
+  documentId,
+  locale: currentLocale,
+  collectionType,
+  model,
 }: LocaleListCellProps) => {
-  const [visible, setVisible] = React.useState(false);
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const { formatMessage } = useIntl();
+  // TODO: avoid loading availableLocales for each row but get that from the BE
+  const { meta, isLoading } = useDocument({
+    documentId,
+    collectionType,
+    model,
+    params: {
+      locale: currentLocale,
+    },
+  });
 
-  const locales = useTypedSelector((state) => state.i18n_locales.locales);
-  const defaultLocale = locales.find((locale) => locale.isDefault);
-  const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];
-  const localizationNames = allLocalizations.map((locale) => locale.locale);
-  const hasDefaultLocale = defaultLocale ? localizationNames.includes(defaultLocale.code) : false;
+  const { locale: language } = useIntl();
+  const { data: locales = [] } = useGetLocalesQuery();
+  const formatter = useCollator(language, {
+    sensitivity: 'base',
+  });
 
-  const ctLocales = hasDefaultLocale
-    ? localizationNames.filter((locale) => locale !== defaultLocale?.code)
-    : localizationNames;
+  if (!Array.isArray(locales) || isLoading) {
+    return null;
+  }
 
-  const ctLocalesAsNames = ctLocales.map(
-    (locale) => locales.find(({ code }) => code === locale)?.name ?? locale
-  );
+  const availableLocales = meta?.availableLocales.map((doc) => doc.locale) ?? [];
+  const localesForDocument = locales
+    .reduce<Locale[]>((acc, locale) => {
+      const createdLocale = [currentLocale, ...availableLocales].find((loc) => {
+        return loc === locale.code;
+      });
 
-  ctLocalesAsNames.sort();
+      if (createdLocale) {
+        acc.push(locale);
+      }
 
-  const ctLocalesNamesWithDefault = hasDefaultLocale
-    ? [`${defaultLocale?.name} (default)`, ...ctLocalesAsNames]
-    : ctLocalesAsNames;
+      return acc;
+    }, [])
+    .map((locale) => {
+      if (locale.isDefault) {
+        return `${locale.name} (default)`;
+      }
 
-  const localesArray = ctLocalesNamesWithDefault;
-
-  const handleTogglePopover = () => setVisible((prev) => !prev);
-
-  const elId = `entry-${id}__locale`;
-  const localesNames = localesArray.join(', ');
+      return locale.name;
+    })
+    .toSorted((a, b) => formatter.compare(a, b));
 
   return (
-    <Flex onClick={(e) => e.stopPropagation()}>
-      <Tooltip
-        label={formatMessage({
-          id: getTranslation('CMListView.popover.display-locales.label'),
-          defaultMessage: 'Display translated locales',
-        })}
-      >
-        <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
-          <ActionWrapper alignItems="center" justifyContent="center" height="2rem" width="2rem">
-            <Typography
-              style={{ maxWidth: '252px', cursor: 'pointer' }}
-              data-for={elId}
-              data-tip={localesNames}
-              textColor="neutral800"
-              ellipsis
-            >
-              {localesNames}
+    <Popover.Root>
+      <Popover.Trigger>
+        <Button variant="ghost" type="button" onClick={(e) => e.stopPropagation()}>
+          <Flex minWidth="100%" alignItems="center" justifyContent="center" fontWeight="regular">
+            <Typography textColor="neutral800" ellipsis marginRight={2}>
+              {localesForDocument.join(', ')}
             </Typography>
             <Flex>
-              <SortIcon />
-
-              {visible && (
-                <Popover
-                  onDismiss={handleTogglePopover}
-                  source={buttonRef as React.MutableRefObject<HTMLElement>}
-                  spacing={16}
-                  centered
-                >
-                  <ul>
-                    {localesArray.map((name) => (
-                      <Box key={name} padding={3} as="li">
-                        <Typography>{name}</Typography>
-                      </Box>
-                    ))}
-                  </ul>
-                </Popover>
-              )}
+              <CaretDown width="1.2rem" height="1.2rem" />
             </Flex>
-          </ActionWrapper>
+          </Flex>
         </Button>
-      </Tooltip>
-    </Flex>
+      </Popover.Trigger>
+      <Popover.Content sideOffset={16}>
+        <ul>
+          {localesForDocument.map((name) => (
+            <Box key={name} padding={3} tag="li">
+              <Typography>{name}</Typography>
+            </Box>
+          ))}
+        </ul>
+      </Popover.Content>
+    </Popover.Root>
   );
 };
-
-const Button = styled.button`
-  svg {
-    > g,
-    path {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
-  }
-  &:hover {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral600};
-      }
-    }
-  }
-  &:active {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral400};
-      }
-    }
-  }
-`;
-
-const ActionWrapper = styled(Flex)`
-  svg {
-    height: ${4 / 16}rem;
-  }
-`;
 
 export { LocaleListCell };
 export type { LocaleListCellProps };

@@ -1,8 +1,6 @@
-import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
+import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 import { Check, Cross, Loader } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme, css } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * TriggerContainer
@@ -22,19 +20,19 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
 
   return (
     <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius>
-      <Grid gap={4} style={{ alignItems: 'center' }}>
-        <GridItem col={3}>
+      <Grid.Root gap={4} style={{ alignItems: 'center' }}>
+        <Grid.Item col={3} direction="column" alignItems="stretch">
           <Typography>
             {formatMessage({
               id: 'Settings.webhooks.trigger.test',
               defaultMessage: 'Test-trigger',
             })}
           </Typography>
-        </GridItem>
-        <GridItem col={3}>
+        </Grid.Item>
+        <Grid.Item col={3} direction="column" alignItems="stretch">
           <Status isPending={isPending} statusCode={statusCode} />
-        </GridItem>
-        <GridItem col={6}>
+        </Grid.Item>
+        <Grid.Item col={6} direction="column" alignItems="stretch">
           {!isPending ? (
             <Message statusCode={statusCode} message={message} />
           ) : (
@@ -47,34 +45,16 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
                       defaultMessage: 'cancel',
                     })}
                   </Typography>
-                  <Icon as={Cross} color="neutral400" />
+                  <Cross fill="neutral400" height="1.2rem" width="1.2rem" />
                 </Flex>
               </button>
             </Flex>
           )}
-        </GridItem>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </Box>
   );
 };
-
-const Icon = styled.svg<{ color?: keyof DefaultTheme['colors'] }>(
-  ({ theme, color }) => `
-  width: ${12 / 16}rem;
-  height: ${12 / 16}rem;
-
-
-  ${
-    color
-      ? css`
-          path {
-            fill: ${theme.colors[color]};
-          }
-        `
-      : ''
-  }
-`
-);
 
 /* -------------------------------------------------------------------------------------------------
  * Status
@@ -91,7 +71,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
   if (isPending || !statusCode) {
     return (
       <Flex gap={2} alignItems="center">
-        <Icon as={Loader} />
+        <Loader height="1.2rem" width="1.2rem" />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
         </Typography>
@@ -102,7 +82,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
   if (statusCode >= 200 && statusCode < 300) {
     return (
       <Flex gap={2} alignItems="center">
-        <Icon as={Check} color="success700" />
+        <Check fill="success700" height="1.2rem" width="1.2rem" />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
         </Typography>
@@ -113,7 +93,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
   if (statusCode >= 300) {
     return (
       <Flex gap={2} alignItems="center">
-        <Icon as={Cross} color="danger700" />
+        <Cross fill="danger700" height="1.2rem" width="1.2rem" />
         <Typography>
           {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
         </Typography>
@@ -156,7 +136,7 @@ const Message = ({ statusCode, message }: MessageProps) => {
   if (statusCode >= 300) {
     return (
       <Flex justifyContent="flex-end">
-        <Flex maxWidth={pxToRem(250)} justifyContent="flex-end" title={message}>
+        <Flex maxWidth={`25rem`} justifyContent="flex-end" title={message}>
           <Typography ellipsis textColor="neutral600">
             {message}
           </Typography>

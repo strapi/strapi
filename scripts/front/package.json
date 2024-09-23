@@ -1,6 +1,6 @@
 {
   "name": "scripts-front",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "private": true,
   "scripts": {
     "test:front": "jest --config jest.config.front.js"

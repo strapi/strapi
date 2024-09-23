@@ -2,10 +2,7 @@
   "extends": "tsconfig/base.json",
   "include": ["src"],
   "compilerOptions": {
-    "types": ["lodash", "jest"],
     "rootDir": "../../",
-    "baseUrl": ".",
-    "esModuleInterop": true,
-    "allowJs": true
+    "baseUrl": "."
   }
 }

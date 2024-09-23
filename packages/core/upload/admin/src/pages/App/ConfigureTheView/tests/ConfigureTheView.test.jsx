@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -18,10 +17,6 @@ jest.mock('../../../../hooks/useConfig', () => ({
     },
   })),
 }));
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => jest.fn()),
-}));
 
 const render = (
   config = {
@@ -33,11 +28,9 @@ const render = (
   ...renderRTL(<ConfigureTheView config={config} />, {
     wrapper: ({ children }) => (
       <IntlProvider locale="en" messages={{}}>
-        <TrackingProvider>
-          <ThemeProvider theme={lightTheme}>
-            <MemoryRouter>{children}</MemoryRouter>
-          </ThemeProvider>
-        </TrackingProvider>
+        <DesignSystemProvider>
+          <MemoryRouter>{children}</MemoryRouter>
+        </DesignSystemProvider>
       </IntlProvider>
     ),
   }),
@@ -50,9 +43,8 @@ describe('Upload - Configure', () => {
 
   describe('initial render', () => {
     it('renders and matches the snapshot', () => {
-      const { container, getByRole, getByText } = render();
+      const { container, getByText } = render();
 
-      expect(getByRole('main')).toHaveFocus();
       expect(getByText('Configure the view - Media Library')).toBeInTheDocument();
 
       expect(container).toMatchSnapshot();

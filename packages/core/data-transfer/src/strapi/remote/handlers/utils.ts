@@ -1,4 +1,4 @@
-import type { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'node:http';
 import { randomUUID } from 'crypto';
 import type { Context } from 'koa';
 import type { RawData, ServerOptions } from 'ws';
@@ -23,9 +23,14 @@ export const transformUpgradeHeader = (header = '') => {
 
 let timeouts: Record<string, number> | undefined;
 
+const hasHttpServer = () => {
+  // during server restarts, strapi may not have ever been defined at all, so we have to check it first
+  return typeof strapi !== 'undefined' && !!strapi?.server?.httpServer;
+};
+
 // temporarily disable server timeouts while transfer is running
 const disableTimeouts = () => {
-  if (!strapi?.server?.httpServer) {
+  if (!hasHttpServer()) {
     return;
   }
 
@@ -45,7 +50,7 @@ const disableTimeouts = () => {
   strapi.log.info('[Data transfer] Disabling http timeouts');
 };
 const resetTimeouts = () => {
-  if (!strapi?.server?.httpServer || !timeouts) {
+  if (!hasHttpServer() || !timeouts) {
     return;
   }
 

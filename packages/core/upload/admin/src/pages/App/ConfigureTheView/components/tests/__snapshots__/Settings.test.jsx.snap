@@ -1,27 +1,69 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
+.c0 {
+  padding-block-start: 24px;
+  padding-block-end: 24px;
+  padding-inline-start: 32px;
+  padding-inline-end: 32px;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+}
+
+.c7 {
+  background: #ffffff;
+  border-radius: 4px;
+  cursor: default;
+  position: relative;
   overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
+}
+
+.c10 {
+  flex: 1;
+}
+
+.c2 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c4 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c8 {
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c11 {
+  gap: 12px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c5 {
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c12 {
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   line-height: 1.43;
   display: block;
   white-space: nowrap;
@@ -31,111 +73,39 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 .c16 {
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c0 {
-  background: #ffffff;
-  padding-top: 24px;
-  padding-right: 32px;
-  padding-bottom: 24px;
-  padding-left: 32px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c7 {
-  background: #ffffff;
-  padding-right: 12px;
-  padding-left: 12px;
-  border-radius: 4px;
-  position: relative;
+.c17 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
   overflow: hidden;
-  width: 100%;
-  cursor: default;
-}
-
-.c10 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
-}
-
-.c3 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 16px;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
-  justify-content: space-between;
-}
-
-.c11 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 12px;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
 }
 
 .c9 {
   border: 1px solid #dcdce4;
-  min-height: 2.5rem;
+  padding-block: 8px;
+  padding-inline-start: 16px;
+  padding-inline-end: 12px;
   outline: none;
-  box-shadow: 0;
-  -webkit-transition-property: border-color,box-shadow,fill;
+  box-shadow: none;
   transition-property: border-color,box-shadow,fill;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
 }
 
 .c9[aria-disabled='true'] {
-  color: #666687;
+  color: #8e8ea9;
 }
 
 .c9:focus-visible {
@@ -147,56 +117,56 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c15 > svg {
-  width: 0.375rem;
+.c15 {
+  display: flex;
 }
 
-.c15 > svg > path {
-  fill: #666687;
+.c15>svg {
+  fill: #8e8ea9;
 }
 
 .c13 {
-  -webkit-flex: 1;
-  -ms-flex: 1;
   flex: 1;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
 }
 
 .c14 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   gap: 4px;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
   flex-wrap: wrap;
-}
-
-.c18[data-state='checked'] .c4 {
-  font-weight: bold;
-  color: #4945ff;
 }
 
 .c1 {
   display: grid;
-  grid-template-columns: repeat(12,1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 16px;
 }
 
-.c2 {
-  grid-column: span 6;
+.c3 {
+  grid-column: span 12;
   max-width: 100%;
 }
 
-@media (max-width:68.75rem) {
-  .c2 {
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (min-width: 520px) {
+  .c3 {
     grid-column: span 12;
   }
 }
 
-@media (max-width:34.375rem) {
-  .c2 {
-    grid-column: span;
+@media (min-width: 768px) {
+  .c3 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c3 {
+    grid-column: span 6;
   }
 }
 
@@ -208,158 +178,146 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
       class="c1"
     >
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class=""
+          class="c4"
         >
-          <div
-            class="c3"
+          <label
+            class="c5 c6"
+            for=":r0:"
+            id=":r0:-label"
           >
-            <label
-              class="c4 c5 c6"
-              for=":r0:"
-            >
-              Entries per page
-            </label>
-            <div
-              aria-autocomplete="none"
-              aria-controls="radix-:r3:"
-              aria-describedby=":r0:-hint :r0:-error"
-              aria-expanded="false"
-              aria-label="Entries per page"
-              class="c7 c8 c9"
-              data-state="closed"
-              dir="ltr"
-              id=":r0:"
-              overflow="hidden"
-              role="combobox"
-              tabindex="0"
+            Entries per page
+          </label>
+          <div
+            aria-autocomplete="none"
+            aria-controls="radix-:r2:"
+            aria-describedby=":r0:-hint"
+            aria-expanded="false"
+            aria-labelledby=":r0:-label"
+            aria-required="false"
+            class="c7 c8 c9"
+            data-state="closed"
+            dir="ltr"
+            name="pageSize"
+            role="combobox"
+            tabindex="0"
+          >
+            <span
+              class="c10 c11"
             >
               <span
-                class="c10 c11"
+                class="c12 c13"
               >
                 <span
-                  class="c4 c12 c13"
+                  class="c14"
                 >
-                  <span
-                    class="c14"
-                  >
-                    10
-                  </span>
+                  10
                 </span>
               </span>
-              <span
-                class="c11"
-              >
-                <span
-                  aria-hidden="true"
-                  class="c15"
-                >
-                  <svg
-                    fill="none"
-                    height="1rem"
-                    viewBox="0 0 14 8"
-                    width="1rem"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      clip-rule="evenodd"
-                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                      fill="#32324D"
-                      fill-rule="evenodd"
-                    />
-                  </svg>
-                </span>
-              </span>
-            </div>
-            <p
-              class="c4 c16"
-              id=":r0:-hint"
+            </span>
+            <span
+              class="c11"
             >
-              Number of assets displayed by default in the Media Library
-            </p>
+              <span
+                aria-hidden="true"
+                class="c15"
+              >
+                <svg
+                  fill="currentColor"
+                  height="16"
+                  viewBox="0 0 32 32"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                  />
+                </svg>
+              </span>
+            </span>
           </div>
+          <p
+            class="c16"
+            id=":r0:-hint"
+          >
+            Number of assets displayed by default in the Media Library
+          </p>
         </div>
       </div>
       <div
-        class="c2"
+        class="c2 c3"
       >
         <div
-          class=""
+          class="c4"
         >
-          <div
-            class="c3"
+          <label
+            class="c5 c6"
+            for=":r3:"
+            id=":r3:-label"
           >
-            <label
-              class="c4 c5 c6"
-              for=":r4:"
-            >
-              Default sort order
-            </label>
-            <div
-              aria-autocomplete="none"
-              aria-controls="radix-:r7:"
-              aria-describedby=":r4:-hint :r4:-error"
-              aria-expanded="false"
-              aria-label="Default sort order"
-              class="c7 c8 c9"
-              data-state="closed"
-              dir="ltr"
-              id=":r4:"
-              overflow="hidden"
-              role="combobox"
-              tabindex="0"
+            Default sort order
+          </label>
+          <div
+            aria-autocomplete="none"
+            aria-controls="radix-:r5:"
+            aria-describedby=":r3:-hint"
+            aria-expanded="false"
+            aria-labelledby=":r3:-label"
+            aria-required="false"
+            class="c7 c8 c9"
+            data-state="closed"
+            dir="ltr"
+            name="sort"
+            role="combobox"
+            tabindex="0"
+          >
+            <span
+              class="c10 c11"
             >
               <span
-                class="c10 c11"
+                class="c12 c13"
               >
                 <span
-                  class="c4 c12 c13"
+                  class="c14"
                 >
-                  <span
-                    class="c14"
-                  >
-                    createdAt:DESC
-                  </span>
+                  createdAt:DESC
                 </span>
               </span>
-              <span
-                class="c11"
-              >
-                <span
-                  aria-hidden="true"
-                  class="c15"
-                >
-                  <svg
-                    fill="none"
-                    height="1rem"
-                    viewBox="0 0 14 8"
-                    width="1rem"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      clip-rule="evenodd"
-                      d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                      fill="#32324D"
-                      fill-rule="evenodd"
-                    />
-                  </svg>
-                </span>
-              </span>
-            </div>
-            <p
-              class="c4 c16"
-              id=":r4:-hint"
+            </span>
+            <span
+              class="c11"
             >
-              Note: You can override this value in the media library.
-            </p>
+              <span
+                aria-hidden="true"
+                class="c15"
+              >
+                <svg
+                  fill="currentColor"
+                  height="16"
+                  viewBox="0 0 32 32"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                  />
+                </svg>
+              </span>
+            </span>
           </div>
+          <p
+            class="c16"
+            id=":r3:-hint"
+          >
+            Note: You can override this value in the media library.
+          </p>
         </div>
       </div>
     </div>
   </div>
-  <div
+  <span
     class="c17"
   >
     <p
@@ -380,6 +338,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

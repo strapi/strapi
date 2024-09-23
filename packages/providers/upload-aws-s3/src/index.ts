@@ -27,6 +27,7 @@ export interface File {
   ext?: string;
   mime: string;
   size: number;
+  sizeInBytes: number;
   url: string;
   previewUrl?: string;
   path?: string;
@@ -137,6 +138,7 @@ export default {
         const fileKey = getFileKey(file);
 
         const url = await getSignedUrl(
+          // @ts-expect-error - TODO fix client type
           s3Client,
           new GetObjectCommand({
             Bucket: config.params.Bucket,

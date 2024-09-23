@@ -1,10 +1,10 @@
-import type { Job } from 'node-schedule';
+import type { Job, Spec } from 'node-schedule';
 
-import type { Strapi } from '..';
+import type { Strapi } from '../core';
 
 interface JobSpec {
   job: Job;
-  options: string | number | Date;
+  options: Spec;
   name: string | null;
 }
 
@@ -14,7 +14,7 @@ type Task =
   | TaskFn
   | {
       task: TaskFn;
-      options: string;
+      options: Spec;
     };
 
 interface Tasks {

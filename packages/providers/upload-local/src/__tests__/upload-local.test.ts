@@ -1,33 +1,30 @@
-import type { File } from '@strapi/plugin-upload';
+/* eslint-disable import/first */
+import { fs } from 'memfs';
+
+jest.mock('fs', () => fs);
+
+import fse from 'fs-extra';
+
 import localProvider from '../index';
-
-jest.mock('fs', () => {
-  return {
-    writeFile: jest.fn((_path, _buffer, callback) => callback()),
-  };
-});
-
-jest.mock('fs-extra', () => {
-  return {
-    pathExistsSync: jest.fn(() => true),
-  };
-});
 
 describe('Local provider', () => {
   beforeAll(() => {
-    globalThis.strapi = {};
-    globalThis.strapi.dirs = { static: { public: '' } };
+    global.strapi = {
+      dirs: { static: { public: '' } },
+    } as any;
+
+    fse.ensureDirSync('uploads');
   });
 
   afterAll(() => {
-    globalThis.strapi.dirs = undefined;
+    global.strapi.dirs = undefined as any;
   });
 
   describe('upload', () => {
     test('Should have relative url to file object', async () => {
       const providerInstance = localProvider.init({});
 
-      const file: File = {
+      const file = {
         name: 'test',
         size: 100,
         url: '/',
@@ -36,7 +33,7 @@ describe('Local provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
-      };
+      } as any;
 
       await providerInstance.upload(file);
 

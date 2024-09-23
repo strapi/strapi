@@ -1,34 +1,24 @@
 /* eslint-disable testing-library/no-node-access */
 import { screen, within } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
-import { Location } from 'history';
-import { Route } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { MarketplacePage } from '../MarketplacePage';
 
-// Increase the jest timeout to accommodate long running tests
-jest.setTimeout(50000);
 jest.mock('../hooks/useNavigatorOnline');
 jest.mock('../../../hooks/useDebounce', () => ({
   useDebounce: jest.fn((value) => value),
 }));
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfo: jest.fn(() => ({
-    autoReload: true,
-    dependencies: {
-      '@strapi/plugin-documentation': '4.2.0',
-      '@strapi/provider-upload-cloudinary': '4.2.0',
-    },
-    useYarn: true,
-  })),
-}));
 
 const waitForReload = async () => {
-  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
 };
 
-let testLocation: Location = null!;
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <span data-testId="location">{location.search}</span>;
+};
 
 const render = () =>
   renderRTL(<MarketplacePage />, {
@@ -37,14 +27,7 @@ const render = () =>
         return (
           <>
             {children}
-            <Route
-              path="*"
-              render={({ location }) => {
-                testLocation = location;
-
-                return null;
-              }}
-            />
+            <LocationDisplay />
           </>
         );
       },
@@ -81,7 +64,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('should return empty plugin search results given a bad query', async () => {
-    const { getByPlaceholderText, getByText, user } = render();
+    const { getByPlaceholderText, findByText, user } = render();
 
     await waitForReload();
 
@@ -89,7 +72,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.type(getByPlaceholderText('Search'), badQuery);
     await waitForReload();
 
-    expect(getByText(`No result for "${badQuery}"`)).toBeVisible();
+    await findByText(`No result for "${badQuery}"`);
   });
 
   it('shows the installed text for installed plugins', async () => {
@@ -169,7 +152,7 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
 
     const collectionCards = getAllByTestId('npm-package-card');
     expect(collectionCards.length).toEqual(2);
@@ -194,7 +177,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.keyboard('[Escape]');
     await waitForReload();
 
-    const optionTag = getByRole('button', { name: 'Custom fields' });
+    const optionTag = getByText('Custom fields');
     expect(optionTag).toBeVisible();
 
     const categoryCards = getAllByTestId('npm-package-card');
@@ -233,8 +216,8 @@ describe('Marketplace page - plugins tab', () => {
     await user.keyboard('[Escape]');
     // When the page reloads they should see a tag for the selected option
     await waitForReload();
-    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
-    expect(getByRole('button', { name: 'Custom fields' })).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
+    expect(getByText('Custom fields')).toBeVisible();
     // They should see the correct number of results
     const filterCards = getAllByTestId('npm-package-card');
     expect(filterCards.length).toEqual(4);
@@ -275,8 +258,8 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
-    expect(getByRole('button', { name: 'Verified' })).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
+    expect(getByText('Verified')).toBeVisible();
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('Gatsby Preview')).toBeVisible();
     expect(getByText('Config Sync')).toBeVisible();
@@ -308,8 +291,8 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(getByRole('button', { name: 'Custom fields' })).toBeVisible();
-    expect(getByRole('button', { name: 'Monitoring' })).toBeVisible();
+    expect(getByText('Custom fields')).toBeVisible();
+    expect(getByText('Monitoring')).toBeVisible();
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('CKEditor 5 custom field')).toBeVisible();
     expect(getByText('Sentry')).toBeVisible();
@@ -317,7 +300,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, getByText, user } = render();
 
     await waitForReload();
 
@@ -331,12 +314,14 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(testLocation.search).toBe('?collections[0]=Made by Strapi&page=1');
-    await user.click(getByRole('button', { name: 'Made by Strapi' }));
-
-    await waitForReload();
-
-    expect(testLocation.search).toBe('?page=1');
+    expect(screen.getByText('?collections[0]=Made by Strapi&page=1')).toBeInTheDocument();
+    const removeButton = getByText('Made by Strapi').nextElementSibling;
+    expect(removeButton).toBeInTheDocument();
+    if (removeButton && removeButton?.tagName === 'BUTTON') {
+      await user.click(removeButton);
+      await waitForReload();
+      expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(`"?page=1"`);
+    }
   });
 
   it('only filters in the plugins tab', async () => {
@@ -384,7 +369,9 @@ describe('Marketplace page - plugins tab', () => {
     await user.click(getByRole('option', { name: 'Newest' }));
 
     await waitForReload();
-    expect(testLocation.search).toEqual('?sort=submissionDate:desc&page=1');
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?sort=submissionDate:desc&page=1"`
+    );
   });
 
   it('shows github stars and weekly downloads count for each plugin', async () => {
@@ -423,16 +410,22 @@ describe('Marketplace page - plugins tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
-    expect(testLocation.search).toBe('?page=2');
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=2"`
+    );
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
-    expect(testLocation.search).toBe('?page=1');
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=1"`
+    );
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
-    expect(testLocation.search).toBe('?page=3');
+    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
+      `"?pageSize=24&page=3"`
+    );
   });
 });

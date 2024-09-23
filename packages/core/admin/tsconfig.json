@@ -3,10 +3,8 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "noEmit": true
-  },
-  "include": ["_internal", "packup.config.ts"],
-  "compilerOptions": {
+    "noEmit": true,
     "outDir": "./dist/cli"
-  }
+  },
+  "include": ["_internal"]
 }

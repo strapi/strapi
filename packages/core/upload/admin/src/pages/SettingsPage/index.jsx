@@ -1,29 +1,9 @@
 import React, { useReducer } from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Layout,
-  Main,
-  ToggleInput,
-  Typography,
-} from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-} from '@strapi/helper-plugin';
+import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
@@ -35,11 +15,8 @@ import reducer, { initialState } from './reducer';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
-
-  useFocusWhenNavigate();
 
   const [{ initialData, modifiedData }, dispatch] = useReducer(reducer, initialState, init);
 
@@ -74,7 +51,7 @@ export const SettingsPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.form.success.fields' },
+        message: formatMessage({ id: 'notification.form.success.fields' }),
       });
     },
     onError(err) {
@@ -89,11 +66,7 @@ export const SettingsPage = () => {
       return;
     }
 
-    lockApp();
-
     await mutateAsync(modifiedData);
-
-    unlockApp();
   };
 
   const handleChange = ({ target: { name, value } }) => {
@@ -104,16 +77,20 @@ export const SettingsPage = () => {
     });
   };
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
-    <Main tabIndex={-1}>
-      <Helmet
-        title={formatMessage({
+    <Page.Main tabIndex={-1}>
+      <Page.Title>
+        {formatMessage({
           id: getTrad('page.title'),
           defaultMessage: 'Settings - Media Libray',
         })}
-      />
+      </Page.Title>
       <form onSubmit={handleSubmit}>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: getTrad('settings.header.label'),
             defaultMessage: 'Media Library',
@@ -137,37 +114,37 @@ export const SettingsPage = () => {
             defaultMessage: 'Configure the settings for the Media Library',
           })}
         />
-        <ContentLayout>
-          {isLoading ? (
-            <LoadingIndicatorPage />
-          ) : (
-            <Layout>
-              <Flex direction="column" alignItems="stretch" gap={12}>
-                <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                  <Flex direction="column" alignItems="stretch" gap={4}>
-                    <Flex>
-                      <Typography variant="delta" as="h2">
-                        {formatMessage({
-                          id: getTrad('settings.blockTitle'),
-                          defaultMessage: 'Asset management',
+        <Layouts.Content>
+          <Layouts.Root>
+            <Flex direction="column" alignItems="stretch" gap={12}>
+              <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                <Flex direction="column" alignItems="stretch" gap={4}>
+                  <Flex>
+                    <Typography variant="delta" tag="h2">
+                      {formatMessage({
+                        id: getTrad('settings.blockTitle'),
+                        defaultMessage: 'Asset management',
+                      })}
+                    </Typography>
+                  </Flex>
+                  <Grid.Root gap={6}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Field.Root
+                        hint={formatMessage({
+                          id: getTrad('settings.form.responsiveDimensions.description'),
+                          defaultMessage:
+                            'Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.',
                         })}
-                      </Typography>
-                    </Flex>
-                    <Grid gap={6}>
-                      <GridItem col={6} s={12}>
-                        <ToggleInput
-                          aria-label="responsiveDimensions"
-                          checked={modifiedData.responsiveDimensions}
-                          hint={formatMessage({
-                            id: getTrad('settings.form.responsiveDimensions.description'),
-                            defaultMessage:
-                              'Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.',
-                          })}
-                          label={formatMessage({
+                        name="responsiveDimensions"
+                      >
+                        <Field.Label>
+                          {formatMessage({
                             id: getTrad('settings.form.responsiveDimensions.label'),
                             defaultMessage: 'Responsive friendly upload',
                           })}
-                          name="responsiveDimensions"
+                        </Field.Label>
+                        <Toggle
+                          checked={modifiedData.responsiveDimensions}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
                             defaultMessage: 'Off',
@@ -182,21 +159,26 @@ export const SettingsPage = () => {
                             });
                           }}
                         />
-                      </GridItem>
-                      <GridItem col={6} s={12}>
-                        <ToggleInput
-                          aria-label="sizeOptimization"
-                          checked={modifiedData.sizeOptimization}
-                          hint={formatMessage({
-                            id: getTrad('settings.form.sizeOptimization.description'),
-                            defaultMessage:
-                              'Enabling this option will reduce the image size and slightly reduce its quality.',
-                          })}
-                          label={formatMessage({
+                        <Field.Hint />
+                      </Field.Root>
+                    </Grid.Item>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Field.Root
+                        hint={formatMessage({
+                          id: getTrad('settings.form.sizeOptimization.description'),
+                          defaultMessage:
+                            'Enabling this option will reduce the image size and slightly reduce its quality.',
+                        })}
+                        name="sizeOptimization"
+                      >
+                        <Field.Label>
+                          {formatMessage({
                             id: getTrad('settings.form.sizeOptimization.label'),
                             defaultMessage: 'Size optimization',
                           })}
-                          name="sizeOptimization"
+                        </Field.Label>
+                        <Toggle
+                          checked={modifiedData.sizeOptimization}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
                             defaultMessage: 'Off',
@@ -211,21 +193,26 @@ export const SettingsPage = () => {
                             });
                           }}
                         />
-                      </GridItem>
-                      <GridItem col={6} s={12}>
-                        <ToggleInput
-                          aria-label="autoOrientation"
-                          checked={modifiedData.autoOrientation}
-                          hint={formatMessage({
-                            id: getTrad('settings.form.autoOrientation.description'),
-                            defaultMessage:
-                              'Enabling this option will automatically rotate the image according to EXIF orientation tag.',
-                          })}
-                          label={formatMessage({
+                        <Field.Hint />
+                      </Field.Root>
+                    </Grid.Item>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Field.Root
+                        hint={formatMessage({
+                          id: getTrad('settings.form.autoOrientation.description'),
+                          defaultMessage:
+                            'Enabling this option will automatically rotate the image according to EXIF orientation tag.',
+                        })}
+                        name="autoOrientation"
+                      >
+                        <Field.Label>
+                          {formatMessage({
                             id: getTrad('settings.form.autoOrientation.label'),
                             defaultMessage: 'Auto orientation',
                           })}
-                          name="autoOrientation"
+                        </Field.Label>
+                        <Toggle
+                          checked={modifiedData.autoOrientation}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
                             defaultMessage: 'Off',
@@ -240,23 +227,24 @@ export const SettingsPage = () => {
                             });
                           }}
                         />
-                      </GridItem>
-                    </Grid>
-                  </Flex>
-                </Box>
-              </Flex>
-            </Layout>
-          )}
-        </ContentLayout>
+                        <Field.Hint />
+                      </Field.Root>
+                    </Grid.Item>
+                  </Grid.Root>
+                </Flex>
+              </Box>
+            </Flex>
+          </Layouts.Root>
+        </Layouts.Content>
       </form>
-    </Main>
+    </Page.Main>
   );
 };
 
 const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.settings}>
+  <Page.Protect permissions={PERMISSIONS.settings}>
     <SettingsPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
 
 export default ProtectedSettingsPage;

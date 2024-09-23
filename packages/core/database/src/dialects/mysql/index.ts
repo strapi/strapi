@@ -1,10 +1,8 @@
-import semver from 'semver';
 import type { Knex } from 'knex';
 
 import Dialect from '../dialect';
 import MysqlSchemaInspector from './schema-inspector';
 import MysqlDatabaseInspector from './database-inspector';
-import { MYSQL } from './constants';
 import type { Database } from '../..';
 
 import type { Information } from './database-inspector';
@@ -54,14 +52,24 @@ export default class MysqlDialect extends Dialect {
     };
   }
 
-  async initialize() {
+  async initialize(nativeConnection: unknown) {
     try {
-      await this.db.connection.raw(`set session sql_require_primary_key = 0;`);
+      await this.db.connection
+        .raw(`set session sql_require_primary_key = 0;`)
+        .connection(nativeConnection);
     } catch (err) {
       // Ignore error due to lack of session permissions
     }
 
-    this.info = await this.databaseInspector.getInformation();
+    // We only need to get info on the first connection in the pool
+    /**
+     * Note: There is a race condition here where if two connections are opened at the same time, both will retrieve
+     * db info, but it doesn't cause issues, it's just one wasted query one time, so we can safely leave it to avoid
+     * adding extra complexity
+     * */
+    if (!this.info) {
+      this.info = await this.databaseInspector.getInformation(nativeConnection);
+    }
   }
 
   async startSchemaUpdate() {
@@ -78,18 +86,6 @@ export default class MysqlDialect extends Dialect {
   }
 
   supportsUnsigned() {
-    return true;
-  }
-
-  supportsWindowFunctions() {
-    const isMysqlDB = !this.info?.database || this.info.database === MYSQL;
-    const isBeforeV8 =
-      !semver.valid(this.info?.version) || semver.lt(this.info?.version ?? '', '8.0.0');
-
-    if (isMysqlDB && isBeforeV8) {
-      return false;
-    }
-
     return true;
   }
 

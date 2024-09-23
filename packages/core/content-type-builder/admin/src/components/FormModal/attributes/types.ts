@@ -1,5 +1,4 @@
-import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
-import { RelationKind } from '@strapi/types/dist/types/core/attributes';
+import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
 import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 
@@ -15,6 +14,8 @@ import {
   NAME_REGEX,
   validators,
 } from './validation/common';
+
+import type { Schema } from '@strapi/types';
 
 export const attributeTypes = {
   date(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
@@ -62,12 +63,12 @@ export const attributeTypes = {
       max: yup
         .string()
         .nullable()
-        .matches(/^-?\d*$/, errorsTrads.regex),
+        .matches(/^-?\d*$/, errorsTrads.regex.id),
       min: yup
         .string()
         .nullable()
         .test(isMinSuperiorThanMax<string | null>())
-        .matches(/^-?\d*$/, errorsTrads.regex),
+        .matches(/^-?\d*$/, errorsTrads.regex.id),
     };
 
     return yup.object(shape);
@@ -89,7 +90,7 @@ export const attributeTypes = {
       required: validators.required(),
       max: validators.max(),
       min: validators.min(),
-      component: yup.string().required(errorsTrads.required),
+      component: yup.string().required(errorsTrads.required.id),
     };
 
     return yup.object(shape);
@@ -150,8 +151,8 @@ export const attributeTypes = {
         .string()
         .test(alreadyUsedAttributeNames(usedAttributeNames))
         .test(isNameAllowed(reservedNames))
-        .matches(GRAPHQL_ENUM_REGEX, errorsTrads.regex)
-        .required(errorsTrads.required),
+        .matches(GRAPHQL_ENUM_REGEX, errorsTrads.regex.id)
+        .required(errorsTrads.required.id),
       type: validators.type(),
       default: validators.default(),
       unique: validators.unique(),
@@ -159,7 +160,7 @@ export const attributeTypes = {
       enum: yup
         .array()
         .of(yup.string())
-        .min(1, errorsTrads.min)
+        .min(1, errorsTrads.min.id)
         .test({
           name: 'areEnumValuesUnique',
           message: getTrad('error.validation.enum-duplicate'),
@@ -277,14 +278,14 @@ export const attributeTypes = {
       initialData: { targetAttribute?: string };
       modifiedData: {
         name?: string;
-        relation?: RelationKind.WithTarget;
+        relation?: Schema.Attribute.RelationKind.WithTarget;
         targetAttribute?: string;
       };
     }
   ) {
     const shape = {
       name: validators.name(usedAttributeNames, reservedNames),
-      target: yup.string().required(errorsTrads.required),
+      target: yup.string().required(errorsTrads.required.id),
       relation: yup.string().required(),
       type: yup.string().required(),
       targetAttribute: yup.lazy(() => {
@@ -305,7 +306,7 @@ export const attributeTypes = {
         );
 
         return schema
-          .matches(NAME_REGEX, errorsTrads.regex)
+          .matches(NAME_REGEX, errorsTrads.regex.id)
           .test({
             name: 'forbiddenTargetAttributeName',
             message: getTrad('error.validation.relation.targetAttribute-taken'),
@@ -317,7 +318,7 @@ export const attributeTypes = {
               return !forbiddenTargetAttributeName.includes(value);
             },
           })
-          .required(errorsTrads.required);
+          .required(errorsTrads.required.id);
       }),
     };
 

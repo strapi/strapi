@@ -1,13 +1,10 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 
-import { Main } from '@strapi/design-system';
-import { LoadingIndicatorPage, useFocusWhenNavigate, useQueryParams } from '@strapi/helper-plugin';
-import { Helmet } from 'react-helmet';
+import { Page, useQueryParams } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
 import { useConfig } from '../../hooks/useConfig';
-import pluginID from '../../pluginId';
 import { getTrad } from '../../utils';
 
 import { MediaLibrary } from './MediaLibrary';
@@ -30,25 +27,26 @@ const Upload = () => {
     setQuery({ sort: config.sort, page: 1, pageSize: config.pageSize });
   }, [isLoading, isError, config, rawQuery, setQuery]);
 
-  useFocusWhenNavigate();
+  if (isLoading) {
+    return (
+      <>
+        <Page.Title>{title}</Page.Title>
+        <Page.Loading />
+      </>
+    );
+  }
 
   return (
-    <Main aria-busy={isLoading}>
-      <Helmet title={title} />
-      {isLoading && <LoadingIndicatorPage />}
+    <Page.Main>
       {rawQuery ? (
-        <Suspense fallback={<LoadingIndicatorPage />}>
-          <Switch>
-            <Route exact path={`/plugins/${pluginID}`} component={MediaLibrary} />
-            <Route
-              exact
-              path={`/plugins/${pluginID}/configuration`}
-              render={() => <ConfigureTheView config={config} />}
-            />
-          </Switch>
+        <Suspense fallback={<Page.Loading />}>
+          <Routes>
+            <Route index element={<MediaLibrary />} />
+            <Route path="configuration" element={<ConfigureTheView config={config} />} />
+          </Routes>
         </Suspense>
       ) : null}
-    </Main>
+    </Page.Main>
   );
 };
 

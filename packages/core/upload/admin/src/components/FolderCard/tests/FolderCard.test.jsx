@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Flex, lightTheme, ThemeProvider, Typography } from '@strapi/design-system';
+import { Flex, DesignSystemProvider, Typography } from '@strapi/design-system';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ const ID_FIXTURE = 'folder';
 // eslint-disable-next-line react/prop-types
 const ComponentFixture = ({ to, ...props }) => {
   return (
-    <ThemeProvider theme={lightTheme}>
+    <DesignSystemProvider>
       <MemoryRouter>
         <FolderCard
           id={ID_FIXTURE}
@@ -24,7 +24,7 @@ const ComponentFixture = ({ to, ...props }) => {
           to={to}
           {...props}
         >
-          <FolderCardBody as="h2">
+          <FolderCardBody tag="h2">
             <FolderCardBodyAction onClick={() => {}} to={to}>
               <Flex direction="column" alignItems="flex-start">
                 <Typography variant="omega" fontWeight="semiBold">
@@ -35,7 +35,7 @@ const ComponentFixture = ({ to, ...props }) => {
           </FolderCardBody>
         </FolderCard>
       </MemoryRouter>
-    </ThemeProvider>
+    </DesignSystemProvider>
   );
 };
 
@@ -75,7 +75,7 @@ describe('FolderCard', () => {
       to: '/michka-page',
     });
 
-    const link = container.querySelector('a[aria-hidden=true]');
+    const link = container.querySelector('a');
     expect(link).toHaveAttribute('href', '/michka-page');
   });
 

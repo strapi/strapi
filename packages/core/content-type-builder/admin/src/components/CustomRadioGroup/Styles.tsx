@@ -1,5 +1,5 @@
-import { Flex, inputFocusStyle, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { Flex, inputFocusStyle } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
 const Wrapper = styled(Flex)`
   position: relative;
@@ -11,6 +11,9 @@ const Wrapper = styled(Flex)`
     cursor: pointer;
     user-select: none;
     flex: 1;
+    border-radius: 4px;
+    border: 1px solid ${({ theme }) => theme.colors.neutral200};
+
     ${inputFocusStyle()}
   }
 
@@ -22,7 +25,6 @@ const Wrapper = styled(Flex)`
   .option {
     height: 100%;
     border-radius: 4px;
-    border: 1px solid ${({ theme }) => theme.colors.neutral200};
     will-change: transform, opacity;
     background: ${({ theme }) => theme.colors.neutral0};
 
@@ -58,10 +60,7 @@ const Wrapper = styled(Flex)`
 
   .container input:checked ~ div {
     background: ${({ theme }) => theme.colors.primary100};
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
-    border: 1px solid ${({ theme }) => theme.colors.primary200};
+    color: ${({ theme }) => theme.colors.primary600};
     .checkmark {
       border: solid 1px ${({ theme }) => theme.colors.primary600};
       &::after {

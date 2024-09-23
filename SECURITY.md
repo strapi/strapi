@@ -2,17 +2,27 @@
 
 ## Supported Versions
 
-As of June 2023 (and until this document is updated), only the v4.x.x _GA_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
+As of April 2024 (and until this document is updated), only the v4.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
 
-- v4.x.x **Stable** is considered LTS until further notice
-- v4.x.x **Beta** is considered unstable and not supported
-- v4.x.x **Alpha** is considered unstable and not supported
-- v3.x.x is considered deprecated and not supported
+| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes                |
+| ------- | ----------- | -------------- | -------------- | ---------------------- | -------------------- |
+| 5.x.x   | GA          | October 2024   | Further Notice | Further Notice         | LTS (Future)         |
+| 5.x.x   | RC          | N/A            | October 2024   | N/A                    | Non-Production Usage |
+| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported        |
+| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported        |
+| 4.x.x   | GA          | November 2021  | October 2025   | April 2026             | LTS                  |
+| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported        |
+| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported        |
+| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life          |
 
 ## Reporting a Vulnerability
 
 Please report (suspected) security vulnerabilities via GitHub's security advisory reporting system:
 Submit your vulnerability via [this link](https://github.com/strapi/strapi/security/advisories/new)
+
+**Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities.**
+
+During our public disclosure, we can give credit to the reporter and link to any social accounts you wish to have us add, including linking to your own blog post detailing the vulnerability.
 
 Please note the following requirements (all are required):
 
@@ -59,5 +69,3 @@ List of some (though not all) platforms **we do not support**:
 - huntr.dev
 - Direct email or communication to Strapi employees (Discord, Slack, or Email)
 - Stack Overflow
-
-Strapi does not currently and has no plans to offer any bug bounties, swag, or any other reward for reporting vulnerabilities. At most during our public disclosure we can give credit to the reporter and link to any social accounts you wish to have us add including linking to your own blog post detailing the vulnerability if you wish.

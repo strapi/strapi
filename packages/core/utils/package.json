@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -32,7 +32,7 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
@@ -46,20 +46,24 @@
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "date-fns": "2.30.0",
-    "http-errors": "1.8.1",
+    "execa": "5.1.1",
+    "http-errors": "2.0.0",
     "lodash": "4.17.21",
+    "node-machine-id": "1.1.12",
     "p-map": "4.0.0",
-    "yup": "0.32.9"
+    "preferred-pm": "3.1.2",
+    "yup": "0.32.9",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.19.0",
-    "@strapi/types": "4.19.0",
+    "@strapi/pack-up": "5.0.0",
+    "@types/http-errors": "2.0.4",
     "@types/koa": "2.13.4",
-    "@types/node": "18.18.4",
-    "eslint-config-custom": "4.19.0",
-    "koa": "2.13.4",
-    "koa-body": "4.2.0",
-    "tsconfig": "4.19.0"
+    "@types/node": "18.19.24",
+    "eslint-config-custom": "workspace:*",
+    "koa": "2.15.2",
+    "koa-body": "6.0.1",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

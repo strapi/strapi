@@ -28,10 +28,8 @@ const getDialectName = (client: unknown) => {
     case 'postgres':
       return 'postgres';
     case 'mysql':
-    case 'mysql2':
       return 'mysql';
     case 'sqlite':
-    case 'sqlite-legacy':
       return 'sqlite';
     default:
       throw new Error(`Unknown dialect ${client}`);

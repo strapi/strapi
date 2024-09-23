@@ -3,7 +3,6 @@
   "include": ["./src", "../shared"],
   "compilerOptions": {
     "rootDir": "../",
-    "baseUrl": ".",
-    "esModuleInterop": true
+    "baseUrl": "."
   }
 }

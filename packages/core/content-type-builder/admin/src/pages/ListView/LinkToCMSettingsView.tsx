@@ -1,12 +1,12 @@
 import { memo } from 'react';
 
+import { type Permission, useRBAC } from '@strapi/admin/strapi-admin';
 import { Button } from '@strapi/design-system';
-import { CheckPermissions } from '@strapi/helper-plugin';
-import { Layer } from '@strapi/icons';
+import { ListPlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-const cmPermissions = {
+const cmPermissions: Record<string, Permission[]> = {
   collectionTypesConfigurations: [
     {
       action: 'plugin::content-manager.collection-types.configure-view',
@@ -44,7 +44,7 @@ export const LinkToCMSettingsView = memo(
     targetUid = '',
   }: LinkToCMSettingsViewProps) => {
     const { formatMessage } = useIntl();
-    const { push } = useHistory();
+    const navigate = useNavigate();
     const { collectionTypesConfigurations, componentsConfigurations, singleTypesConfigurations } =
       cmPermissions;
     const label = formatMessage({
@@ -59,9 +59,9 @@ export const LinkToCMSettingsView = memo(
       }
 
       if (isInContentTypeView) {
-        push(`/content-manager/collection-types/${targetUid}/configurations/edit`);
+        navigate(`/content-manager/collection-types/${targetUid}/configurations/edit`);
       } else {
-        push(`/content-manager/components/${targetUid}/configurations/edit`);
+        navigate(`/content-manager/components/${targetUid}/configurations/edit`);
       }
 
       return false;
@@ -74,18 +74,27 @@ export const LinkToCMSettingsView = memo(
     if (!isInContentTypeView) {
       permissionsToApply = componentsConfigurations;
     }
+    const { isLoading, allowedActions } = useRBAC({
+      viewConfig: permissionsToApply,
+    });
+
+    if (isLoading) {
+      return null;
+    }
+
+    if (!allowedActions.canConfigureView) {
+      return null;
+    }
 
     return (
-      <CheckPermissions permissions={permissionsToApply}>
-        <Button
-          startIcon={<Layer />}
-          variant="tertiary"
-          onClick={handleClick}
-          disabled={isTemporary || disabled}
-        >
-          {label}
-        </Button>
-      </CheckPermissions>
+      <Button
+        startIcon={<ListPlus />}
+        variant="tertiary"
+        onClick={handleClick}
+        disabled={isTemporary || disabled}
+      >
+        {label}
+      </Button>
     );
   }
 );

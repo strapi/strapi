@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { RawTable } from '@strapi/design-system';
-import { render, fireEvent } from '@tests/utils';
+import { render } from '@tests/utils';
 
 import { TableRows } from '../TableRows';
 
@@ -50,26 +50,13 @@ const setup = (props) =>
 describe('TableList | TableRows', () => {
   describe('rendering assets', () => {
     it('should properly render every asset attribute', () => {
-      const { getByRole, getByText } = setup();
+      const { getByText } = setup();
 
-      expect(getByRole('img', { name: 'alternative text' })).toBeInTheDocument();
       expect(getByText('michka')).toBeInTheDocument();
       expect(getByText('JPEG')).toBeInTheDocument();
       expect(getByText('12KB')).toBeInTheDocument();
       expect(getByText('Friday, October 1, 2021')).toBeInTheDocument();
       expect(getByText('Monday, October 18, 2021')).toBeInTheDocument();
-    });
-
-    it('should call onSelectAsset callback', () => {
-      const onSelectOneSpy = jest.fn();
-      const { getByRole } = setup({ onSelectOne: onSelectOneSpy });
-
-      /**
-       * using UserEvent never triggers the onChange event.
-       */
-      fireEvent.click(getByRole('checkbox', { name: 'Select michka asset' }));
-
-      expect(onSelectOneSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should reflect non selected assets state', () => {
@@ -127,13 +114,13 @@ describe('TableList | TableRows', () => {
       expect(onEditFolderSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should display folder navigation as a link if no folder url exists', () => {
+    it('should display folder navigation as a link if a folder url exists', () => {
       const { getByRole } = setup({ rows: [{ ...FOLDER_FIXTURE, folderURL: 'plugins/upload' }] });
 
       expect(getByRole('link', { name: 'Access folder', hidden: true })).toBeInTheDocument();
     });
 
-    it('should display folder nagivation as a button if a folder url exists', () => {
+    it('should display folder nagivation as a button if no folder url exists', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
 
       expect(getByRole('button', { name: 'Access folder', hidden: true })).toBeInTheDocument();

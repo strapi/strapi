@@ -1,24 +1,19 @@
 import * as React from 'react';
 
 import { Main } from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useNotification,
-} from '@strapi/helper-plugin';
-import { Webhook } from '@strapi/types';
-import { FormikHelpers } from 'formik';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { Modules } from '@strapi/types';
+import { useIntl } from 'react-intl';
+import { useNavigate, useMatch } from 'react-router-dom';
 
 import { CreateWebhook, TriggerWebhook } from '../../../../../../shared/contracts/webhooks';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
-import { useContentTypes } from '../../../../hooks/useContentTypes';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 
-import { WebhookForm, WebhookFormValues } from './components/WebhookForm';
+import { WebhookForm, WebhookFormProps, WebhookFormValues } from './components/WebhookForm';
 import { useWebhooks } from './hooks/useWebhooks';
 
 /* -------------------------------------------------------------------------------------------------
@@ -29,7 +24,7 @@ const cleanData = (
   data: WebhookFormValues
 ): Omit<CreateWebhook.Request['body'], 'id' | 'isEnabled'> => ({
   ...data,
-  headers: data.headers.reduce<Webhook['headers']>((acc, { key, value }) => {
+  headers: data.headers.reduce<Modules.WebhookStore.Webhook['headers']>((acc, { key, value }) => {
     if (key !== '') {
       acc[key] = value;
     }
@@ -39,17 +34,24 @@ const cleanData = (
 });
 
 const EditPage = () => {
-  const match = useRouteMatch<{ id: string }>('/settings/webhooks/:id');
+  const { formatMessage } = useIntl();
+  const match = useMatch('/settings/webhooks/:id');
   const id = match?.params.id;
   const isCreating = id === 'create';
 
-  const { replace } = useHistory();
-  const toggleNotification = useNotification();
+  const navigate = useNavigate();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const { isLoading: isLoadingForModels } = useContentTypes();
+
+  /**
+   * Prevents the notifications from showing up twice because the function identity
+   * coming from the helper plugin is not stable
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableFormatAPIError = React.useCallback(formatAPIError, []);
   const [isTriggering, setIsTriggering] = React.useState(false);
   const [triggerResponse, setTriggerResponse] = React.useState<TriggerWebhook.Response['data']>();
 
@@ -63,11 +65,11 @@ const EditPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
-        message: formatAPIError(error),
+        type: 'danger',
+        message: stableFormatAPIError(error),
       });
     }
-  }, [error, toggleNotification, formatAPIError]);
+  }, [error, toggleNotification, stableFormatAPIError]);
 
   const handleTriggerWebhook = async () => {
     try {
@@ -77,7 +79,7 @@ const EditPage = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -87,31 +89,28 @@ const EditPage = () => {
       setTriggerResponse(res.data);
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     } finally {
       setIsTriggering(false);
     }
   };
 
-  const handleSubmit = async (
-    data: WebhookFormValues,
-    formik: FormikHelpers<WebhookFormValues>
-  ) => {
+  const handleSubmit: WebhookFormProps['handleSubmit'] = async (data, helpers) => {
     try {
       if (isCreating) {
         const res = await createWebhook(cleanData(data));
 
         if ('error' in res) {
           if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-            formik.setErrors(formatValidationErrors(res.error));
+            helpers.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -121,19 +120,19 @@ const EditPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: 'Settings.webhooks.created' },
+          message: formatMessage({ id: 'Settings.webhooks.created' }),
         });
 
-        replace(`/settings/webhooks/${res.data.id}`);
+        navigate(`../webhooks/${res.data.id}`, { replace: true });
       } else {
         const res = await updateWebhook({ id: id!, ...cleanData(data) });
 
         if ('error' in res) {
           if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-            formik.setErrors(formatValidationErrors(res.error));
+            helpers.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -143,29 +142,36 @@ const EditPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.form.success.fields' },
+          message: formatMessage({ id: 'notification.form.success.fields' }),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
 
-  if (isLoading || isLoadingForModels) {
-    return <LoadingIndicatorPage />;
+  if (isLoading) {
+    return <Page.Loading />;
   }
 
   const [webhook] = webhooks ?? [];
 
   return (
     <Main>
-      <SettingsPageTitle name="Webhooks" />
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Webhooks',
+          }
+        )}
+      </Page.Title>
       <WebhookForm
         data={webhook}
         handleSubmit={handleSubmit}
@@ -186,9 +192,9 @@ const ProtectedEditPage = () => {
   const permissions = useTypedSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.webhooks.update}>
+    <Page.Protect permissions={permissions.settings?.webhooks.update}>
       <EditPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

@@ -1,7 +1,7 @@
-import { Flex, Grid, GridItem, Tooltip, Typography } from '@strapi/design-system';
+import { Flex, Grid, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { GetProviders } from '../../../../../../shared/contracts/providers';
 
@@ -19,25 +19,25 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
 
   if (displayAllProviders) {
     return (
-      <Grid gap={4}>
+      <Grid.Root gap={4}>
         {providers.map((provider) => (
-          <GridItem key={provider.uid} col={4}>
+          <Grid.Item key={provider.uid} col={4} direction="column" alignItems="stretch">
             <SSOProviderButton provider={provider} />
-          </GridItem>
+          </Grid.Item>
         ))}
-      </Grid>
+      </Grid.Root>
     );
   }
 
   if (providers.length > 2 && !displayAllProviders) {
     return (
-      <Grid gap={4}>
+      <Grid.Root gap={4}>
         {providers.slice(0, 2).map((provider) => (
-          <GridItem key={provider.uid} col={4}>
+          <Grid.Item key={provider.uid} col={4} direction="column" alignItems="stretch">
             <SSOProviderButton provider={provider} />
-          </GridItem>
+          </Grid.Item>
         ))}
-        <GridItem col={4}>
+        <Grid.Item col={4} direction="column" alignItems="stretch">
           <Tooltip
             label={formatMessage({
               id: 'global.see-more',
@@ -47,8 +47,8 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
               <span aria-hidden>•••</span>
             </SSOButton>
           </Tooltip>
-        </GridItem>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     );
   }
 
@@ -96,11 +96,11 @@ const SSOProviderButton = ({ provider }: SSOProviderButtonProps) => {
 };
 
 const SSOButton = styled.a`
-  width: ${136 / 16}rem;
+  width: 13.6rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: ${48 / 16}rem;
+  height: 4.8rem;
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   border-radius: ${({ theme }) => theme.borderRadius};
   text-decoration: inherit;

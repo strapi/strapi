@@ -1,8 +1,16 @@
-import { EntityService, Common } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 
-type Entity = EntityService.Result<Common.UID.Schema>;
+type Document = Modules.Documents.Document<any>;
+type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
+type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
+type DocumentMetadata = {
+  // All status of the returned locale
+  availableStatus: Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>[];
+  // Available locales within the same status of the returned document
+  availableLocales: Pick<Document, 'id' | 'locale' | 'status' | AT_FIELDS>[];
+};
 
 /**
  * GET /single-types/:model
@@ -20,7 +28,8 @@ export declare namespace Find {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -30,7 +39,7 @@ export declare namespace Find {
  */
 export declare namespace CreateOrUpdate {
   export interface Request {
-    body: Entity;
+    body: Document;
     query: {
       plugins: {
         i18n: {
@@ -41,7 +50,8 @@ export declare namespace CreateOrUpdate {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -58,7 +68,8 @@ export declare namespace Delete {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -75,7 +86,8 @@ export declare namespace Publish {
   }
 
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }
@@ -85,13 +97,18 @@ export declare namespace Publish {
  */
 export declare namespace UnPublish {
   export interface Request {
-    body: {};
+    body: {
+      // Discards the draft version before un-publishing, so the document is be reverted to the last published version.
+      // Default: false
+      discardDraft?: boolean; // Defaults to false
+    };
     query: {
       locale: string;
     };
   }
   export interface Response {
-    data: Entity;
+    data: Document;
+    meta: DocumentMetadata;
     error?: errors.ApplicationError;
   }
 }

@@ -1,9 +1,97 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`RemoveAssetDialog snapshots the component 1`] = `
+.c0 {
+  margin-inline-start: -250px;
+  top: 4.6rem;
+  left: 50%;
+  width: 50rem;
+  z-index: 700;
+  position: fixed;
+}
+
+.c5 {
+  padding-block-start: 24px;
+  padding-inline-end: 24px;
+  padding-block-end: 24px;
+  padding-inline-start: 24px;
+}
+
+.c8 {
+  padding-block-start: 40px;
+  padding-block-end: 40px;
+  padding-inline-start: 24px;
+  padding-inline-end: 24px;
+}
+
+.c12 {
+  padding-block-start: 16px;
+  padding-inline-end: 16px;
+  padding-block-end: 16px;
+  padding-inline-start: 16px;
+}
+
+.c15 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  width: 100%;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c1 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c9 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+}
+
+.c13 {
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c16 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c6 {
+  font-weight: 600;
+  font-size: 1.8rem;
+  line-height: 1.22;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c11 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c18 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
 .c2 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,345 +101,150 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c11 {
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.22;
+.c17 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
   color: #32324d;
 }
 
-.c15 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c22 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c0 {
-  margin-left: -250px;
-  position: fixed;
-  left: 50%;
-  top: 2.875rem;
-  z-index: 10;
-  width: 31.25rem;
-}
-
-.c3 {
-  padding: 40px;
-  position: fixed;
-  z-index: 4;
-}
-
-.c5 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-}
-
-.c7 {
-  padding: 24px;
-}
-
-.c12 {
-  padding-top: 40px;
-  padding-right: 24px;
-  padding-bottom: 40px;
-  padding-left: 24px;
-}
-
-.c13 {
-  padding-bottom: 8px;
-}
-
-.c16 {
-  padding: 16px;
-}
-
-.c19 {
-  background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
-  cursor: pointer;
-}
-
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-}
-
-.c18 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c20 {
-  position: relative;
-  outline: none;
-}
-
-.c20 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c20 > svg > g,
-.c20 > svg path {
-  fill: #ffffff;
-}
-
-.c20[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c20:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c20:focus-visible {
-  outline: none;
-}
-
-.c20:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c21 {
-  height: 2rem;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c21 svg {
-  height: 0.75rem;
-  width: auto;
-}
-
-.c21[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true'] .c10 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true'] svg > g,
-.c21[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c21[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true']:active .c10 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true']:active svg > g,
-.c21[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c21:hover {
+.c17:hover {
   background-color: #f6f6f9;
 }
 
-.c21:active {
+.c17:active {
   background-color: #eaeaef;
 }
 
-.c21 .c10 {
-  color: #32324d;
+.c17[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
-.c21 svg > g,
-.c21 svg path {
-  fill: #32324d;
-}
-
-.c23 {
-  height: 2rem;
+.c19 {
+  height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #f5c0b8;
   background: #fcecea;
-}
-
-.c23 svg {
-  height: 0.75rem;
-  width: auto;
-}
-
-.c23[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c23[aria-disabled='true'] .c10 {
-  color: #666687;
-}
-
-.c23[aria-disabled='true'] svg > g,
-.c23[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c23[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c23[aria-disabled='true']:active .c10 {
-  color: #666687;
-}
-
-.c23[aria-disabled='true']:active svg > g,
-.c23[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c23:hover {
-  background-color: #ffffff;
-}
-
-.c23:active {
-  background-color: #ffffff;
-  border: 1px solid #d02b20;
-}
-
-.c23:active .c10 {
-  color: #d02b20;
-}
-
-.c23:active svg > g,
-.c23:active svg path {
-  fill: #d02b20;
-}
-
-.c23 .c10 {
   color: #b72b1a;
 }
 
-.c23 svg > g,
-.c23 svg path {
-  fill: #b72b1a;
+.c19:hover {
+  background-color: #ffffff;
+}
+
+.c19:active {
+  background-color: #ffffff;
+  border: 1px solid #d02b20;
+  color: #d02b20;
+}
+
+.c19[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c3 {
+  background-color: #32324d;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  opacity: 0.2;
 }
 
 .c4 {
-  inset: 0;
-  background: #32324d33;
-}
-
-.c6 {
-  max-width: 25.75rem;
-  margin: 0 auto;
+  max-width: 42rem;
+  height: min-content;
+  width: 100%;
   overflow: hidden;
-  margin-top: 10%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
+  z-index: 310;
 }
 
-.c9 {
-  border-bottom: 1px solid #eaeaef;
+.c7 {
+  display: flex;
+  justify-content: center;
+  border-bottom: solid 1px #eaeaef;
 }
 
-.c14 svg {
+.c14 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
+}
+
+.c10 {
   width: 24px;
   height: 24px;
 }
 
-.c14 svg path {
+.c10 path {
   fill: #d02b20;
 }
 
-.c17 {
-  border-top: 1px solid #eaeaef;
+@media (prefers-reduced-motion: no-preference) {
+  .c17 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
-.c17 button {
-  width: 100%;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
+@media (prefers-reduced-motion: no-preference) {
+  .c19 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c3 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c4[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c4[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
+  }
 }
 
 <body
-  class="lock-body-scroll"
+  data-scroll-locked="1"
+  style="pointer-events: none;"
 >
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
   <div>
     <div
+      aria-hidden="true"
       class="c0 c1"
+      data-aria-hidden="true"
     />
-    <div
+    <span
       class="c2"
     >
       <p
@@ -372,130 +265,86 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
         id="live-region-alert"
         role="alert"
       />
-    </div>
+    </span>
   </div>
   <div
-    class=""
+    aria-hidden="true"
+    class="c3"
+    data-aria-hidden="true"
+    data-state="open"
+    style="pointer-events: auto;"
+  />
+  <div
+    aria-describedby="radix-:r2:"
+    aria-labelledby="radix-:r1:"
+    class="c4"
+    data-state="open"
+    id="radix-:r0:"
+    role="alertdialog"
+    style="pointer-events: auto;"
+    tabindex="-1"
   >
-    <div
-      class="c3 c4"
+    <h2
+      class="c5 c6 c7"
+      id="radix-:r1:"
     >
-      <div>
-        <div>
-          <div
-            aria-labelledby="confirmation-label"
-            aria-modal="true"
-            class="c5 c6"
-            role="dialog"
-          >
-            <div
-              class="c7 c8 c9"
-            >
-              <h2
-                class="c10 c11"
-                id="confirmation-label"
-              >
-                Confirmation
-              </h2>
-            </div>
-            <div
-              class=""
-            >
-              <div
-                class=""
-                id="confirm-description"
-              >
-                <div
-                  class="c12"
-                >
-                  <div
-                    class="c13 c14"
-                  >
-                    <div
-                      class="c8"
-                    >
-                      <svg
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 24 24"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0Zm1.154 18.456h-2.308V16.15h2.308v2.307Zm-.23-3.687h-1.847l-.346-9.23h2.538l-.346 9.23Z"
-                          fill="#212134"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <div
-                    class="c1"
-                  >
-                    <div
-                      class="c8"
-                    >
-                      <span
-                        class="c10 c15"
-                      >
-                        Are you sure you want to delete this?
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="c16 c17"
-              >
-                <div
-                  class="c18"
-                >
-                  <button
-                    aria-disabled="false"
-                    class="c19 c18 c20 c21"
-                    type="button"
-                  >
-                    <span
-                      class="c10 c22"
-                    >
-                      Cancel
-                    </span>
-                  </button>
-                  <button
-                    aria-disabled="false"
-                    class="c19 c18 c20 c23"
-                    id="confirm-delete"
-                    type="button"
-                  >
-                    <div
-                      aria-hidden="true"
-                      class=""
-                    >
-                      <svg
-                        fill="none"
-                        height="1rem"
-                        viewBox="0 0 24 24"
-                        width="1rem"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
-                          fill="#32324D"
-                        />
-                      </svg>
-                    </div>
-                    <span
-                      class="c10 c22"
-                    >
-                      Confirm
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      Confirmation
+    </h2>
+    <div
+      class="c8 c9"
+    >
+      <svg
+        class="c10"
+        fill="currentColor"
+        height="24"
+        viewBox="0 0 32 32"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 3a13 13 0 1 0 13 13A13.013 13.013 0 0 0 16 3m-1 7a1 1 0 0 1 2 0v7a1 1 0 0 1-2 0zm1 13a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+        />
+      </svg>
+      <p
+        class="c11"
+        id="radix-:r2:"
+      >
+        Are you sure?
+      </p>
     </div>
+    <footer
+      class="c12 c13 c14"
+    >
+      <button
+        aria-disabled="false"
+        class="c15 c16 c17"
+        type="button"
+      >
+        <span
+          class="c18"
+        >
+          Cancel
+        </span>
+      </button>
+      <button
+        aria-disabled="false"
+        class="c15 c16 c19"
+        type="button"
+      >
+        <span
+          class="c18"
+        >
+          Confirm
+        </span>
+      </button>
+    </footer>
   </div>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
 </body>
 `;

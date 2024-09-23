@@ -9,25 +9,26 @@
  */
 const crypto = require('crypto');
 const _ = require('lodash');
-const urljoin = require('url-join');
-const { isArray } = require('lodash/fp');
 const { getService } = require('../utils');
-const getGrantConfig = require('./grant-config');
-
 const usersPermissionsActions = require('./users-permissions-actions');
-const userSchema = require('../content-types/user');
 
 const initGrant = async (pluginStore) => {
-  const apiPrefix = strapi.config.get('api.rest.prefix');
-  const baseURL = urljoin(strapi.config.server.url, apiPrefix, 'auth');
+  const allProviders = getService('providers-registry').getAll();
 
-  const grantConfig = getGrantConfig(baseURL);
+  const grantConfig = Object.entries(allProviders).reduce((acc, [name, provider]) => {
+    const { icon, enabled, grantConfig } = provider;
+
+    acc[name] = {
+      icon,
+      enabled,
+      ...grantConfig,
+    };
+    return acc;
+  }, {});
 
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
-  // store grant auth config to db
-  // when plugin_users-permissions_grant is not existed in db
-  // or we have added/deleted provider here.
-  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
+
+  if (!prevGrantConfig || !_.isEqual(prevGrantConfig, grantConfig)) {
     // merge with the previous provider config.
     _.keys(grantConfig).forEach((key) => {
       if (key in prevGrantConfig) {
@@ -99,27 +100,6 @@ const initAdvancedOptions = async (pluginStore) => {
   }
 };
 
-const userSchemaAdditions = () => {
-  const defaultSchema = Object.keys(userSchema.attributes);
-  const currentSchema = Object.keys(
-    strapi.contentTypes['plugin::users-permissions.user'].attributes
-  );
-
-  // Some dynamic fields may not have been initialized yet, so we need to ignore them
-  // TODO: we should have a global method for finding these
-  const ignoreDiffs = [
-    'createdBy',
-    'createdAt',
-    'updatedBy',
-    'updatedAt',
-    'publishedAt',
-    'strapi_stage',
-    'strapi_assignee',
-  ];
-
-  return currentSchema.filter((key) => !(ignoreDiffs.includes(key) || defaultSchema.includes(key)));
-};
-
 module.exports = async ({ strapi }) => {
   const pluginStore = strapi.store({ type: 'plugin', name: 'users-permissions' });
 
@@ -127,13 +107,13 @@ module.exports = async ({ strapi }) => {
   await initEmails(pluginStore);
   await initAdvancedOptions(pluginStore);
 
-  await strapi.admin.services.permission.actionProvider.registerMany(
-    usersPermissionsActions.actions
-  );
+  await strapi
+    .service('admin::permission')
+    .actionProvider.registerMany(usersPermissionsActions.actions);
 
   await getService('users-permissions').initialize();
 
-  if (!strapi.config.get('plugin.users-permissions.jwtSecret')) {
+  if (!strapi.config.get('plugin::users-permissions.jwtSecret')) {
     if (process.env.NODE_ENV !== 'development') {
       throw new Error(
         `Missing jwtSecret. Please, set configuration variable "jwtSecret" for the users-permissions plugin in config/plugins.js (ex: you can generate one using Node with \`crypto.randomBytes(16).toString('base64')\`).
@@ -143,26 +123,13 @@ For security reasons, prefer storing the secret in an environment variable and r
 
     const jwtSecret = crypto.randomBytes(16).toString('base64');
 
-    strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
+    strapi.config.set('plugin::users-permissions.jwtSecret', jwtSecret);
 
     if (!process.env.JWT_SECRET) {
       const envPath = process.env.ENV_PATH || '.env';
       strapi.fs.appendFile(envPath, `JWT_SECRET=${jwtSecret}\n`);
       strapi.log.info(
         `The Users & Permissions plugin automatically generated a jwt secret and stored it in ${envPath} under the name JWT_SECRET.`
-      );
-    }
-  }
-
-  // TODO v5: Remove this block of code and default allowedFields to empty array
-  if (!isArray(strapi.config.get('plugin.users-permissions.register.allowedFields'))) {
-    const modifications = userSchemaAdditions();
-    if (modifications.length > 0) {
-      // if there is a potential vulnerability, show a warning
-      strapi.log.warn(
-        `Users-permissions registration has defaulted to accepting the following additional user fields during registration: ${modifications.join(
-          ','
-        )}`
       );
     }
   }

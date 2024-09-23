@@ -1,10 +1,9 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 
-import { useNotification } from '@strapi/helper-plugin';
+import { useField, useNotification } from '@strapi/admin/strapi-admin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition } from '../../constants';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import getTrad from '../../utils/getTrad';
 import { AssetDialog } from '../AssetDialog';
@@ -21,29 +20,18 @@ const STEPS = {
 
 export const MediaLibraryInput = forwardRef(
   (
-    {
-      attribute: { allowedTypes },
-      intlLabel,
-      description,
-      disabled,
-      error,
-      labelAction,
-      multiple,
-      name,
-      onChange,
-      value,
-      required,
-    },
+    { attribute: { allowedTypes, multiple }, label, hint, disabled, labelAction, name, required },
     forwardedRef
   ) => {
+    const { formatMessage } = useIntl();
+    const { onChange, value, error } = useField(name);
     const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [step, setStep] = useState(undefined);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [droppedAssets, setDroppedAssets] = useState();
     const [folderId, setFolderId] = useState(null);
-    const { formatMessage } = useIntl();
-    const toggleNotification = useNotification();
+    const { toggleNotification } = useNotification();
 
     useEffect(() => {
       // Clear the uploaded files on close
@@ -52,7 +40,13 @@ export const MediaLibraryInput = forwardRef(
       }
     }, [step]);
 
-    const selectedAssets = Array.isArray(value) ? value : [value];
+    let selectedAssets = [];
+
+    if (Array.isArray(value)) {
+      selectedAssets = value;
+    } else if (value) {
+      selectedAssets = [value];
+    }
 
     const handleValidation = (nextSelectedAssets) => {
       onChange({
@@ -115,15 +109,17 @@ export const MediaLibraryInput = forwardRef(
         callback(allowedAssets);
       } else {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           timeout: 4000,
-          message: {
-            id: getTrad('input.notification.not-supported'),
-            defaultMessage: `You can't upload this type of file.`,
-            values: {
-              fileTypes: fieldAllowedTypes.join(','),
+          message: formatMessage(
+            {
+              id: getTrad('input.notification.not-supported'),
+              defaultMessage: `You can't upload this type of file.`,
             },
-          },
+            {
+              fileTypes: fieldAllowedTypes.join(','),
+            }
+          ),
         });
       }
     };
@@ -134,8 +130,6 @@ export const MediaLibraryInput = forwardRef(
         setStep(STEPS.AssetUpload);
       });
     };
-
-    let label = intlLabel.id ? formatMessage(intlLabel) : '';
 
     if (multiple && selectedAssets.length > 0) {
       label = `${label} (${selectedIndex + 1} / ${selectedAssets.length})`;
@@ -152,13 +146,6 @@ export const MediaLibraryInput = forwardRef(
     const handleFilesUploadSucceeded = (uploadedFiles) => {
       setUploadedFiles((prev) => [...prev, ...uploadedFiles]);
     };
-
-    const hint = description
-      ? formatMessage(
-          { id: description.id, defaultMessage: description.defaultMessage },
-          { ...description.values }
-        )
-      : '';
 
     let initiallySelectedAssets = selectedAssets;
 
@@ -201,6 +188,7 @@ export const MediaLibraryInput = forwardRef(
               setStep(undefined);
               setFolderId(null);
             }}
+            open={step === STEPS.AssetSelect}
             onValidate={handleValidation}
             multiple={multiple}
             onAddAsset={() => setStep(STEPS.AssetUpload)}
@@ -212,6 +200,7 @@ export const MediaLibraryInput = forwardRef(
 
         {step === STEPS.AssetUpload && (
           <UploadAssetDialog
+            open={step === STEPS.AssetUpload}
             onClose={() => setStep(STEPS.AssetSelect)}
             initialAssetsToAdd={droppedAssets}
             addUploadedFiles={handleFilesUploadSucceeded}
@@ -222,7 +211,11 @@ export const MediaLibraryInput = forwardRef(
         )}
 
         {step === STEPS.FolderCreate && (
-          <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
+          <EditFolderDialog
+            open={step === STEPS.FolderCreate}
+            onClose={() => setStep(STEPS.AssetSelect)}
+            parentFolderId={folderId}
+          />
         )}
       </>
     );
@@ -230,31 +223,24 @@ export const MediaLibraryInput = forwardRef(
 );
 
 MediaLibraryInput.defaultProps = {
-  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'] },
+  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'], multiple: false },
   disabled: false,
-  description: undefined,
-  error: undefined,
-  intlLabel: undefined,
+  hint: undefined,
+  label: undefined,
   labelAction: undefined,
-  multiple: false,
   required: false,
-  value: [],
 };
 
 MediaLibraryInput.propTypes = {
-  attribute: PropTypes.shape({ allowedTypes: PropTypes.arrayOf(PropTypes.string) }),
-  disabled: PropTypes.bool,
-  description: PropTypes.shape({
-    id: PropTypes.string,
-    defaultMessage: PropTypes.string,
-    values: PropTypes.shape({}),
+  attribute: PropTypes.shape({
+    allowedTypes: PropTypes.arrayOf(PropTypes.string),
+    multiple: PropTypes.bool,
   }),
-  error: PropTypes.string,
-  intlLabel: PropTypes.shape({ id: PropTypes.string, defaultMessage: PropTypes.string }),
+  disabled: PropTypes.bool,
+  hint: PropTypes.string,
+  label: PropTypes.string,
   labelAction: PropTypes.node,
-  multiple: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
+
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
-  value: PropTypes.oneOfType([PropTypes.arrayOf(AssetDefinition), AssetDefinition]),
 };

@@ -52,9 +52,12 @@ export declare namespace CreateLocale {
  */
 export declare namespace DeleteLocale {
   export interface Request {
-    params: { id: Locale['id'] };
     query: {};
     body: {};
+  }
+
+  export interface Params {
+    id: Locale['id'];
   }
 
   /**
@@ -73,9 +76,12 @@ export declare namespace DeleteLocale {
  */
 export declare namespace UpdateLocale {
   export interface Request {
-    params: { id: Locale['id'] };
     query: {};
     body: Pick<Locale, 'name' | 'isDefault'>;
+  }
+
+  export interface Params {
+    id: Locale['id'];
   }
 
   /**

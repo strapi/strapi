@@ -1,0 +1,99 @@
+{
+  "name": "@strapi/review-workflows",
+  "version": "5.0.0",
+  "description": "Review workflows for your content",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "strapi-server.js"
+  ],
+  "scripts": {
+    "build": "pack-up build",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "pack-up watch"
+  },
+  "dependencies": {
+    "@reduxjs/toolkit": "1.9.7",
+    "@strapi/design-system": "2.0.0-rc.11",
+    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/utils": "workspace:*",
+    "fractional-indexing": "3.2.0",
+    "react-dnd": "16.0.1",
+    "react-dnd-html5-backend": "16.0.1",
+    "react-helmet": "^6.1.0",
+    "react-intl": "6.6.2",
+    "react-redux": "8.1.3",
+    "yup": "0.32.9"
+  },
+  "devDependencies": {
+    "@strapi/admin": "workspace:*",
+    "@strapi/content-manager": "workspace:*",
+    "@strapi/pack-up": "5.0.0",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "workspace:*",
+    "@testing-library/react": "15.0.7",
+    "msw": "1.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8"
+  },
+  "peerDependencies": {
+    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/content-manager": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "review-workflows",
+    "description": "Review workflows for your content",
+    "kind": "plugin",
+    "displayName": "Review Workflows",
+    "required": true
+  }
+}

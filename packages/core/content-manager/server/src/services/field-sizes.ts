@@ -1,9 +1,9 @@
 import { errors } from '@strapi/utils';
-import { LoadedStrapi as Strapi, CustomFields } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 const { ApplicationError } = errors;
 
-type FieldSize = CustomFields.CustomFieldServerOptions['inputSize'];
+type FieldSize = Modules.CustomFields.CustomFieldServerOptions['inputSize'];
 
 const needsFullSize: FieldSize = {
   default: 12,
@@ -50,7 +50,7 @@ const fieldSizes: Record<string, FieldSize> = {
   uid: defaultSize,
 };
 
-const createFieldSizesService = ({ strapi }: { strapi: Strapi }) => {
+const createFieldSizesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const fieldSizesService = {
     getAllFieldSizes() {
       return fieldSizes;
@@ -87,7 +87,7 @@ const createFieldSizesService = ({ strapi }: { strapi: Strapi }) => {
 
     setCustomFieldInputSizes() {
       // Find all custom fields already registered
-      const customFields = strapi.container.get('custom-fields').getAll();
+      const customFields = strapi.get('custom-fields').getAll();
 
       // If they have a custom field size, register it
       // TODO types can be inferred when customFields is typed

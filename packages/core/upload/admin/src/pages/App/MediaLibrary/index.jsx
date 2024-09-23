@@ -1,35 +1,28 @@
 import React, { useRef, useState } from 'react';
 
 import {
-  ActionLayout,
-  BaseCheckbox,
+  Page,
+  SearchInput,
+  Pagination,
+  useTracking,
+  useQueryParams,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import {
+  Checkbox,
   Box,
-  ContentLayout,
   Divider,
   Flex,
-  GridItem,
   IconButton,
-  Layout,
-  Main,
   Typography,
   VisuallyHidden,
+  Grid,
 } from '@strapi/design-system';
-import {
-  AnErrorOccurred,
-  CheckPermissions,
-  LoadingIndicatorPage,
-  SearchURLQuery,
-  useFocusWhenNavigate,
-  usePersistentState,
-  useQueryParams,
-  useSelectionState,
-  useTracking,
-} from '@strapi/helper-plugin';
-import { Cog, Grid, List, Pencil } from '@strapi/icons';
+import { Cog, GridFour as GridIcon, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink, useHistory, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { AssetGridList } from '../../../components/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
@@ -41,15 +34,16 @@ import {
   FolderCardCheckbox,
 } from '../../../components/FolderCard';
 import { FolderGridList } from '../../../components/FolderGridList';
-import { PaginationFooter } from '../../../components/PaginationFooter';
 import SortPicker from '../../../components/SortPicker';
 import { TableList } from '../../../components/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
-import { localStorageKeys, PERMISSIONS, viewOptions } from '../../../constants';
+import { localStorageKeys, viewOptions } from '../../../constants';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { usePersistentState } from '../../../hooks/usePersistentState';
+import { useSelectionState } from '../../../hooks/useSelectionState';
 import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../../utils';
 
 import { BulkActions } from './components/BulkActions';
@@ -58,7 +52,7 @@ import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 
 const BoxWithHeight = styled(Box)`
-  height: ${32 / 16}rem;
+  height: 3.2rem;
   display: flex;
   align-items: center;
 `;
@@ -76,13 +70,14 @@ const ActionContainer = styled(Box)`
 `;
 
 export const MediaLibrary = () => {
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const {
     canRead,
     canCreate,
     canUpdate,
     canCopyLink,
     canDownload,
+    canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
   const currentFolderToEditRef = useRef();
@@ -122,7 +117,7 @@ export const MediaLibrary = () => {
 
   // Folder was not found: redirect to the media library root
   if (currentFolderError?.response?.status === 404) {
-    push(pathname);
+    navigate(pathname);
   }
 
   const folders =
@@ -162,8 +157,8 @@ export const MediaLibrary = () => {
     setShowEditFolderDialog((prev) => !prev);
   };
 
-  const handleBulkSelect = (event, elements) => {
-    if (event.target.checked) {
+  const handleBulkSelect = (checked, elements) => {
+    if (checked) {
       trackUsage('didSelectAllMediaLibraryElements');
     }
 
@@ -211,11 +206,17 @@ export const MediaLibrary = () => {
     handleAssetDeleted(selected.length);
   };
 
-  useFocusWhenNavigate();
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
+  if (assetsError || foldersError) {
+    return <Page.Error />;
+  }
 
   return (
-    <Layout>
-      <Main aria-busy={isLoading}>
+    <Layouts.Root>
+      <Page.Main>
         <Header
           breadcrumbs={
             !isCurrentFolderLoading && getBreadcrumbDataML(currentFolder, { pathname, query })
@@ -225,7 +226,7 @@ export const MediaLibrary = () => {
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
           folder={currentFolder}
         />
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <>
               {canUpdate && isGridView && (assetCount > 0 || folderCount > 0) && (
@@ -236,17 +237,18 @@ export const MediaLibrary = () => {
                   hasRadius
                   borderColor="neutral200"
                 >
-                  <BaseCheckbox
+                  <Checkbox
                     aria-label={formatMessage({
                       id: getTrad('bulk.select.label'),
                       defaultMessage: 'Select all folders & assets',
                     })}
-                    indeterminate={indeterminateBulkSelect}
-                    value={
-                      (assetCount > 0 || folderCount > 0) &&
-                      selected.length === assetCount + folderCount
+                    checked={
+                      indeterminateBulkSelect
+                        ? 'indeterminate'
+                        : (assetCount > 0 || folderCount > 0) &&
+                          selected.length === assetCount + folderCount
                     }
-                    onChange={(e) => handleBulkSelect(e, [...assets, ...folders])}
+                    onCheckedChange={(e) => handleBulkSelect(e, [...assets, ...folders])}
                   />
                 </BoxWithHeight>
               )}
@@ -258,25 +260,25 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
-              <CheckPermissions permissions={PERMISSIONS.configureView}>
+              {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    forwardedAs={ReactRouterLink}
+                    tag={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,
                       search: stringify(query, { encode: false }),
                     }}
-                    icon={<Cog />}
                     label={formatMessage({
                       id: 'app.links.configure-view',
                       defaultMessage: 'Configure the view',
                     })}
-                  />
+                  >
+                    <Cog />
+                  </IconButton>
                 </ActionContainer>
-              </CheckPermissions>
+              ) : null}
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
-                  icon={isGridView ? <List /> : <Grid />}
                   label={
                     isGridView
                       ? formatMessage({
@@ -289,9 +291,11 @@ export const MediaLibrary = () => {
                         })
                   }
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                />
+                >
+                  {isGridView ? <List /> : <GridIcon />}
+                </IconButton>
               </ActionContainer>
-              <SearchURLQuery
+              <SearchInput
                 label={formatMessage({
                   id: getTrad('search.label'),
                   defaultMessage: 'Search for an asset',
@@ -303,7 +307,7 @@ export const MediaLibrary = () => {
           }
         />
 
-        <ContentLayout>
+        <Layouts.Content>
           {selected.length > 0 && (
             <BulkActions
               currentFolder={currentFolder}
@@ -311,10 +315,6 @@ export const MediaLibrary = () => {
               onSuccess={handleBulkActionSuccess}
             />
           )}
-
-          {isLoading && <LoadingIndicatorPage />}
-
-          {(assetsError || foldersError) && <AnErrorOccurred />}
 
           {folderCount === 0 && assetCount === 0 && (
             <EmptyOrNoPermissions
@@ -333,7 +333,7 @@ export const MediaLibrary = () => {
               indeterminate={indeterminateBulkSelect}
               onChangeSort={handleChangeSort}
               onChangeFolder={(folderID, folderPath) =>
-                push(getFolderURL(pathname, query, { folder: folderID, folderPath }))
+                navigate(getFolderURL(pathname, query, { folder: folderID, folderPath }))
               }
               onEditAsset={setAssetToEdit}
               onEditFolder={handleEditFolder}
@@ -377,7 +377,12 @@ export const MediaLibrary = () => {
                     });
 
                     return (
-                      <GridItem col={3} key={`folder-${folder.id}`}>
+                      <Grid.Item
+                        col={3}
+                        key={`folder-${folder.id}`}
+                        direction="column"
+                        alignItems="stretch"
+                      >
                         <FolderCard
                           ref={
                             folderToEdit && folder.id === folderToEdit.id
@@ -391,32 +396,37 @@ export const MediaLibrary = () => {
                             selectOne && folder.isSelectable ? (
                               <FolderCardCheckbox
                                 data-testid={`folder-checkbox-${folder.id}`}
-                                value={isSelected}
-                                onChange={() => selectOne(folder)}
+                                checked={isSelected}
+                                onCheckedChange={() => selectOne(folder)}
                               />
                             ) : null
                           }
                           cardActions={
                             <IconButton
-                              icon={<Pencil />}
                               aria-label={formatMessage({
                                 id: getTrad('list.folder.edit'),
                                 defaultMessage: 'Edit folder',
                               })}
                               onClick={() => handleEditFolder(folder)}
-                            />
+                            >
+                              <Pencil />
+                            </IconButton>
                           }
                         >
                           <FolderCardBody>
                             <FolderCardBodyAction to={url}>
-                              <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
-                                <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                              <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
+                                <TypographyMaxWidth
+                                  fontWeight="semiBold"
+                                  textColor="neutral800"
+                                  ellipsis
+                                >
                                   {folder.name}
                                   <VisuallyHidden>:</VisuallyHidden>
                                 </TypographyMaxWidth>
 
                                 <TypographyMaxWidth
-                                  as="span"
+                                  tag="span"
                                   textColor="neutral600"
                                   variant="pi"
                                   ellipsis
@@ -437,7 +447,7 @@ export const MediaLibrary = () => {
                             </FolderCardBodyAction>
                           </FolderCardBody>
                         </FolderCard>
-                      </GridItem>
+                      </Grid.Item>
                     );
                   })}
                 </FolderGridList>
@@ -475,28 +485,29 @@ export const MediaLibrary = () => {
               )}
             </>
           )}
-
-          {assetsData?.pagination && <PaginationFooter pagination={assetsData.pagination} />}
-        </ContentLayout>
-      </Main>
-
+          <Pagination.Root {...assetsData.pagination}>
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
+        </Layouts.Content>
+      </Page.Main>
       {showUploadAssetDialog && (
         <UploadAssetDialog
+          open={showUploadAssetDialog}
           onClose={toggleUploadAssetDialog}
           trackedLocation="upload"
           folderId={query?.folder}
         />
       )}
-
       {showEditFolderDialog && (
         <EditFolderDialog
+          open={showEditFolderDialog}
           onClose={handleEditFolderClose}
           folder={folderToEdit}
           parentFolderId={query?.folder}
           location="upload"
         />
       )}
-
       {assetToEdit && (
         <EditAssetDialog
           onClose={(editedAsset) => {
@@ -507,6 +518,7 @@ export const MediaLibrary = () => {
 
             setAssetToEdit(undefined);
           }}
+          open={!!assetToEdit}
           asset={assetToEdit}
           canUpdate={canUpdate}
           canCopyLink={canCopyLink}
@@ -514,6 +526,6 @@ export const MediaLibrary = () => {
           trackedLocation="upload"
         />
       )}
-    </Layout>
+    </Layouts.Root>
   );
 };

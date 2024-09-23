@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi",
+    "deploy": "strapi deploy",
+    "seed:example": "node ./scripts/seed.js"
+  },
+  "dependencies": {
+    "fs-extra": "^10.0.0",
+    "mime-types": "^2.1.27"
+  }
+}

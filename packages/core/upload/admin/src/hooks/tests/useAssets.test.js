@@ -1,28 +1,10 @@
-import React from 'react';
-
-import { lightTheme, ThemeProvider, useNotifyAT } from '@strapi/design-system';
-import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { useFetchClient } from '@strapi/admin/strapi-admin';
+import { renderHook, waitFor, screen } from '@tests/utils';
 
 import { useAssets } from '../useAssets';
 
-const notifyStatusMock = jest.fn();
-
-jest.mock('@strapi/design-system', () => ({
-  ...jest.requireActual('@strapi/design-system'),
-  useNotifyAT: () => ({
-    notifyStatus: notifyStatusMock,
-  }),
-}));
-
-const notificationStatusMock = jest.fn();
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: () => notificationStatusMock,
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn().mockResolvedValue({
       data: {
@@ -32,39 +14,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-// eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }) {
-  return (
-    <Router>
-      <Route>
-        <QueryClientProvider client={client}>
-          <ThemeProvider theme={lightTheme}>
-            <NotificationsProvider>
-              <IntlProvider locale="en" messages={{}}>
-                {children}
-              </IntlProvider>
-            </NotificationsProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </Route>
-    </Router>
-  );
-}
-
 function setup(...args) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useAssets(...args), { wrapper: ComponentFixture }));
-    });
-  });
+  return renderHook(() => useAssets(...args));
 }
 
 describe('useAssets', () => {
@@ -73,7 +24,7 @@ describe('useAssets', () => {
   });
 
   test('fetches data from the right URL if no query was set', async () => {
-    await setup();
+    setup();
 
     const { get } = useFetchClient();
 
@@ -93,7 +44,7 @@ describe('useAssets', () => {
   });
 
   test('fetches data from the right URL if a query was set', async () => {
-    const { result } = await setup({ query: { folderPath: '/1/2' } });
+    const { result } = setup({ query: { folderPath: '/1/2' } });
 
     await waitFor(() => result.current.isSuccess);
     const { get } = useFetchClient();
@@ -114,7 +65,7 @@ describe('useAssets', () => {
   });
 
   test('allows to merge filter query params using filters.$and', async () => {
-    const { result } = await setup({
+    const { result } = setup({
       query: { folderPath: '/1/2', filters: { $and: [{ something: 'true' }] } },
     });
 
@@ -140,7 +91,7 @@ describe('useAssets', () => {
   });
 
   test('does not use folderPath filter in params if _q', async () => {
-    const { result } = await setup({
+    const { result } = setup({
       query: { folderPath: '/1/2', _q: 'something', filters: { $and: [{ something: 'true' }] } },
     });
 
@@ -163,7 +114,7 @@ describe('useAssets', () => {
 
   test('correctly encodes the search query _q', async () => {
     const _q = 'something&else';
-    const { result } = await setup({
+    const { result } = setup({
       query: { folderPath: '/1/2', _q, filters: { $and: [{ something: 'true' }] } },
     });
 
@@ -185,24 +136,13 @@ describe('useAssets', () => {
   });
 
   test('it does not fetch, if skipWhen is set', async () => {
-    const { result } = await setup({ skipWhen: true });
+    const { result } = setup({ skipWhen: true });
 
     await waitFor(() => result.current.isSuccess);
 
     const { get } = useFetchClient();
 
     expect(get).toBeCalledTimes(0);
-  });
-
-  test('calls notifyStatus in case of success', async () => {
-    const { notifyStatus } = useNotifyAT();
-    const toggleNotification = useNotification();
-    const { result } = await setup({});
-
-    await waitFor(() => result.current.isSuccess);
-    await waitFor(() => expect(notifyStatus).toBeCalledWith('The assets have finished loading.'));
-
-    expect(toggleNotification).toBeCalledTimes(0);
   });
 
   test('calls toggleNotification in case of error', async () => {
@@ -212,14 +152,10 @@ describe('useAssets', () => {
 
     get.mockRejectedValueOnce(new Error('Jest mock error'));
 
-    const { notifyStatus } = useNotifyAT();
-    const toggleNotification = useNotification();
-    const { result } = await setup({});
+    const { result } = setup({});
 
     await waitFor(() => result.current.isSuccess);
-    await waitFor(() => expect(toggleNotification).toBeCalled());
-
-    expect(notifyStatus).not.toBeCalled();
+    await screen.findByText('notification.error');
 
     console.error = originalConsoleError;
   });
@@ -244,7 +180,7 @@ describe('useAssets', () => {
       },
     });
 
-    const { result } = await setup({});
+    const { result } = setup({});
 
     await waitFor(() =>
       expect(result.current.data.results).toEqual([
@@ -287,7 +223,7 @@ describe('useAssets', () => {
       },
     });
 
-    const { result } = await setup({});
+    const { result } = setup({});
 
     await waitFor(() =>
       expect(result.current.data.results).toMatchInlineSnapshot(`

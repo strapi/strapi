@@ -1,11 +1,4 @@
-import {
-  AppState,
-  reducer,
-  setAdminPermissions,
-  setAppTheme,
-  setAvailableThemes,
-  setLocale,
-} from '../reducer';
+import { reducer, setAppTheme, setAvailableThemes, setLocale } from '../reducer';
 
 describe('admin_app reducer', () => {
   afterEach(() => {
@@ -30,135 +23,9 @@ describe('admin_app reducer', () => {
           "availableThemes": [],
           "currentTheme": "system",
         },
+        "token": null,
       }
     `);
-  });
-
-  describe('permissions', () => {
-    it('should set the permissions if there is no current state', () => {
-      expect(
-        reducer(
-          undefined,
-          setAdminPermissions({
-            contentManager: {
-              main: [{ action: 'plugins::content-manager.explorer.create' }],
-              collectionTypesConfigurations: [
-                { action: 'plugin::content-manager.collection-types.configure-view' },
-              ],
-
-              singleTypesConfigurations: [
-                { action: 'plugin::content-manager.single-types.configure-view' },
-              ],
-
-              componentsConfigurations: [
-                { action: 'plugin::content-manager.components.configure-layout' },
-              ],
-            },
-          })
-        )
-      ).toMatchInlineSnapshot(`
-        {
-          "language": {
-            "locale": "en",
-            "localeNames": {
-              "en": "English",
-            },
-          },
-          "permissions": {
-            "contentManager": {
-              "collectionTypesConfigurations": [
-                {
-                  "action": "plugin::content-manager.collection-types.configure-view",
-                },
-              ],
-              "componentsConfigurations": [
-                {
-                  "action": "plugin::content-manager.components.configure-layout",
-                },
-              ],
-              "main": [
-                {
-                  "action": "plugins::content-manager.explorer.create",
-                },
-              ],
-              "singleTypesConfigurations": [
-                {
-                  "action": "plugin::content-manager.single-types.configure-view",
-                },
-              ],
-            },
-          },
-          "theme": {
-            "availableThemes": [],
-            "currentTheme": "system",
-          },
-        }
-      `);
-    });
-
-    it('should overwrite any existing permissions when we set new ones', () => {
-      const previousState: AppState = {
-        language: {
-          locale: 'en',
-          localeNames: { en: 'English' },
-        },
-        permissions: {
-          contentManager: {
-            main: [{ action: 'plugins::content-manager.explorer.create' }],
-            collectionTypesConfigurations: [
-              { action: 'plugin::content-manager.collection-types.configure-view' },
-            ],
-
-            singleTypesConfigurations: [
-              { action: 'plugin::content-manager.single-types.configure-view' },
-            ],
-
-            componentsConfigurations: [
-              { action: 'plugin::content-manager.components.configure-layout' },
-            ],
-          },
-        },
-        theme: {
-          availableThemes: [],
-          currentTheme: 'system',
-        },
-      };
-
-      expect(
-        reducer(
-          previousState,
-          setAdminPermissions({
-            contentManager: {
-              main: [],
-              collectionTypesConfigurations: [],
-              singleTypesConfigurations: [],
-              componentsConfigurations: [],
-            },
-          })
-        )
-      ).toMatchInlineSnapshot(`
-        {
-          "language": {
-            "locale": "en",
-            "localeNames": {
-              "en": "English",
-            },
-          },
-          "permissions": {
-            "contentManager": {
-              "collectionTypesConfigurations": [],
-              "componentsConfigurations": [],
-              "main": [],
-              "singleTypesConfigurations": [],
-            },
-          },
-          "theme": {
-            "availableThemes": [],
-            "currentTheme": "system",
-          },
-        }
-      `);
-    });
   });
 
   describe('theme', () => {
@@ -176,6 +43,7 @@ describe('admin_app reducer', () => {
             "availableThemes": [],
             "currentTheme": "dark",
           },
+          "token": null,
         }
       `);
     });
@@ -197,6 +65,7 @@ describe('admin_app reducer', () => {
             ],
             "currentTheme": "system",
           },
+          "token": null,
         }
       `);
     });
@@ -217,6 +86,7 @@ describe('admin_app reducer', () => {
             "availableThemes": [],
             "currentTheme": "system",
           },
+          "token": null,
         }
       `);
     });

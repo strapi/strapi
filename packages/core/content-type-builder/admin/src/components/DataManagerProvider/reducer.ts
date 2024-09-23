@@ -9,7 +9,7 @@ import * as actions from './constants';
 import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
 
 import type { DataManagerStateType, ContentType, AttributeType, Component } from '../../types';
-import type { UID, Attribute } from '@strapi/types';
+import type { Internal, Schema } from '@strapi/types';
 
 // TODO: Define all possible actions based on type
 export type Action = {
@@ -38,7 +38,7 @@ const initialState: DataManagerStateType = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-const getOppositeRelation = (originalRelation?: Attribute.RelationKind.WithTarget) => {
+const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.WithTarget) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
   }
@@ -112,12 +112,12 @@ const reducer = (state = initialState, action: Action) =>
 
           // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
           const nestedComponentsToAddInModifiedData = nestedComponents.filter(
-            (compoUID: UID.Component) => {
+            (compoUID: Internal.UID.Component) => {
               return get(state, ['modifiedData', 'components', compoUID]) === undefined;
             }
           );
 
-          nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
+          nestedComponentsToAddInModifiedData.forEach((compoUID: Internal.UID.Component) => {
             const compoSchema = get(state, ['components', compoUID], {}) as Component;
             const isTemporary = compoSchema.isTemporary || false;
 
@@ -183,7 +183,7 @@ const reducer = (state = initialState, action: Action) =>
           dynamicZoneTarget
         );
 
-        componentsToAdd.forEach((componentUid: UID.Component) => {
+        componentsToAdd.forEach((componentUid: Internal.UID.Component) => {
           if (
             !draftState.modifiedData.contentType?.schema.attributes[dzAttributeIndex].components
           ) {
@@ -251,7 +251,7 @@ const reducer = (state = initialState, action: Action) =>
           return get(state, ['modifiedData', 'components', compoUID]) === undefined;
         });
 
-        nestedComponentsToAddInModifiedData.forEach((compoUID: UID.Component) => {
+        nestedComponentsToAddInModifiedData.forEach((compoUID: Internal.UID.Component) => {
           const compoSchema = get(state, ['components', compoUID], {}) as Component;
           const isTemporary = compoSchema.isTemporary || false;
 
@@ -268,7 +268,7 @@ const reducer = (state = initialState, action: Action) =>
       }
       case actions.CREATE_COMPONENT_SCHEMA: {
         const newSchema: Component = {
-          uid: action.uid as UID.Component,
+          uid: action.uid as Internal.UID.Component,
           isTemporary: true,
           category: action.componentCategory,
           schema: {
@@ -286,7 +286,7 @@ const reducer = (state = initialState, action: Action) =>
       }
       case actions.CREATE_SCHEMA: {
         const newSchema: ContentType = {
-          uid: action.uid as UID.Any,
+          uid: action.uid as Internal.UID.ContentType,
           isTemporary: true,
           schema: {
             ...action.data,
@@ -542,6 +542,10 @@ const reducer = (state = initialState, action: Action) =>
         draftState.contentTypes = action.contentTypes;
         draftState.reservedNames = action.reservedNames;
         draftState.isLoading = false;
+        break;
+      }
+      case actions.UPDATE_INITIAL_STATE: {
+        draftState.initialData = draftState.modifiedData;
 
         break;
       }

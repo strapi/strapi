@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { Avatar, Box, Icon, Initials } from '@strapi/design-system';
-import { getFileExtension, prefixFileUrlWithBackendUrl, pxToRem } from '@strapi/helper-plugin';
+import { Avatar, Box, Flex } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetType } from '../../constants';
-import { createAssetUrl } from '../../utils';
+import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
 
 const VideoPreviewWrapper = styled(Box)`
@@ -28,9 +27,15 @@ const VideoPreviewWrapper = styled(Box)`
 export const PreviewCell = ({ type, content }) => {
   if (type === 'folder') {
     return (
-      <Initials background="secondary100" textColor="secondary600">
-        <Icon color="secondary500" width={pxToRem(16)} height={pxToRem(16)} as={Folder} />
-      </Initials>
+      <Flex
+        justifyContent="center"
+        background="secondary100"
+        width="3.2rem"
+        height="3.2rem"
+        borderRadius="50%"
+      >
+        <Folder fill="secondary500" width="1.6rem" height="1.6rem" />
+      </Flex>
     );
   }
 
@@ -40,7 +45,7 @@ export const PreviewCell = ({ type, content }) => {
     const mediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
 
-    return <Avatar src={mediaURL} alt={alternativeText} preview />;
+    return <Avatar.Item src={mediaURL} alt={alternativeText} preview />;
   }
 
   if (mime.includes(AssetType.Video)) {
@@ -56,9 +61,9 @@ export const PreviewCell = ({ type, content }) => {
   }
 
   return (
-    <Initials background="secondary100" textColor="secondary600">
+    <Box background="secondary100" color="secondary600" width="3.2rem" height="3.2rem">
       {getFileExtension(ext)}
-    </Initials>
+    </Box>
   );
 };
 

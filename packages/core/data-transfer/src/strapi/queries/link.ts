@@ -1,12 +1,12 @@
 import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
 
@@ -171,6 +171,34 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
           yield link;
         }
       }
+
+      if (attribute.morphColumn) {
+        const { typeColumn, idColumn } = attribute.morphColumn;
+
+        const qb = connection
+          .queryBuilder()
+          .select('id', typeColumn.name, idColumn.name)
+          .from(addSchema(metadata.tableName))
+          .whereNotNull(typeColumn.name)
+          .whereNotNull(idColumn.name);
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        const entries = await qb;
+
+        for (const entry of entries) {
+          const ref = entry[idColumn.name];
+
+          yield {
+            kind,
+            relation,
+            left: { type: uid, ref: entry.id, field: fieldName },
+            right: { type: entry[typeColumn.name], ref },
+          };
+        }
+      }
     }
 
     async function* generateAll(uid: string): AsyncGenerator<ILink> {
@@ -196,6 +224,14 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
       const attribute = metadata.attributes[left.field];
 
       const payload = {};
+
+      /**
+       * This _should_ only happen for attributes that are added dynamically e.g. review-workflow stages
+       * and a user is importing EE data into a CE project.
+       */
+      if (!attribute) {
+        return;
+      }
 
       if (attribute.type !== 'relation') {
         throw new Error(`Attribute ${left.field} is not a relation`);
@@ -271,6 +307,23 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
           });
         }
       }
+
+      if ('morphColumn' in attribute && attribute.morphColumn) {
+        const { morphColumn } = attribute;
+
+        const qb = connection(addSchema(metadata.tableName))
+          .where('id', left.ref)
+          .update({
+            [morphColumn.idColumn.name]: right.ref,
+            [morphColumn.typeColumn.name]: right.type,
+          });
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        await qb;
+      }
     };
 
     return { generateAll, generateAllForAttribute, insert };
@@ -279,14 +332,12 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
   return query;
 };
 
-const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
+export const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
   const isOwner = (attribute: any) => {
     return attribute.owner || (!attribute.mappedBy && !attribute.morphBy);
   };
 
-  const isComponentLike = (attribute: any) => {
-    return attribute.component || attribute.components;
-  };
+  const isComponentLike = (attribute: any) => attribute.joinTable?.name.endsWith('_cmps');
 
   return Object.entries(attributes)
     .filter(([, attribute]) => {

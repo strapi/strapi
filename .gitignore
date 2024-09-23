@@ -101,17 +101,15 @@ test-apps
 coverage
 
 ############################
-# Documentation
-############################
-
-dist
-
-############################
 # Builds
 ############################
 
 packages/generators/app/files/public/
 schema.graphql
+dist
+.nx
+.tsbuildinfo
+.eslintcache
 
 ############################
 # Example app
@@ -130,8 +128,9 @@ front-workspace.code-workspace
 .yarnrc
 
 ############################
-# Yarn
+# Package managers
 ############################
+
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -139,15 +138,25 @@ front-workspace.code-workspace
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+yarn-error.log
+pnpm-debug.log
+npm-debug.log
 
 ############################
 # Playwright
 ############################
 playwright-report
 test-results
-!e2e/data/*.tar
+!tests/e2e/data/*.tar
+tests/e2e/.env
+!tests/cli/data/*.tar.gz
+tests/cli/.env
 
 ############################
 # Strapi
 ############################
 examples/**/types/generated
+.nx/cache
+
+# Ignore yarn.lock inside templates
+templates/yarn.lock

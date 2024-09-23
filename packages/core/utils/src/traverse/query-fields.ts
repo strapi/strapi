@@ -2,14 +2,24 @@ import { curry, isArray, isString, eq, trim, constant } from 'lodash/fp';
 
 import traverseFactory from './factory';
 
-const isStringArray = (value: unknown): value is string[] =>
-  isArray(value) && value.every(isString);
+const isStringArray = (value: unknown): value is string[] => {
+  return isArray(value) && value.every(isString);
+};
 
 const fields = traverseFactory()
-  // Interecept array of strings
+  // Intercept array of strings
+  // e.g. fields=['title', 'description']
   .intercept(isStringArray, async (visitor, options, fields, { recurse }) => {
     return Promise.all(fields.map((field) => recurse(visitor, options, field)));
   })
+  // Intercept comma separated fields (as string)
+  // e.g. fields='title,description'
+  .intercept(
+    (value): value is string => isString(value) && value.includes(','),
+    (visitor, options, fields, { recurse }) => {
+      return Promise.all(fields.split(',').map((field) => recurse(visitor, options, field)));
+    }
+  )
   // Return wildcards as is
   .intercept((value): value is string => eq('*', value), constant('*'))
   // Parse string values

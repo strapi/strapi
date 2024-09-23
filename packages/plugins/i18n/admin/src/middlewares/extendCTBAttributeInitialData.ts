@@ -1,9 +1,12 @@
-import { Middleware } from '@reduxjs/toolkit';
 import get from 'lodash/get';
 
-import { RootState } from '../store/reducers';
+import type { Middleware } from '@reduxjs/toolkit';
+import type { Store } from '@strapi/admin/strapi-admin';
 
-const extendCTBAttributeInitialDataMiddleware: () => Middleware<object, RootState> = () => {
+const extendCTBAttributeInitialDataMiddleware: () => Middleware<
+  object,
+  ReturnType<Store['getState']>
+> = () => {
   return ({ getState }) =>
     (next) =>
     (action) => {

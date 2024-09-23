@@ -3,16 +3,6 @@ import { isSsoLocked } from '../sso-lock';
 // allow toggling the feature within tests
 let ssoEnabled = true;
 
-jest.mock('@strapi/strapi/dist/utils/ee', () => {
-  return {
-    features: {
-      isEnabled() {
-        return ssoEnabled;
-      },
-    },
-  };
-});
-
 describe('isSsoLocked', () => {
   const lockedRoles = ['1', '2'];
 
@@ -35,13 +25,15 @@ describe('isSsoLocked', () => {
   };
 
   global.strapi = {
-    query: jest.fn(() => {
-      return {
-        load: jest.fn(async () => {
-          return [{ id: 2 }];
-        }),
-      };
-    }),
+    db: {
+      query: jest.fn(() => {
+        return {
+          load: jest.fn(async () => {
+            return [{ id: 2 }];
+          }),
+        };
+      }),
+    },
     store: jest.fn(() => {
       return {
         get: jest.fn(() => {
@@ -53,6 +45,13 @@ describe('isSsoLocked', () => {
         }),
       };
     }),
+    ee: {
+      features: {
+        isEnabled() {
+          return ssoEnabled;
+        },
+      },
+    },
   } as any;
 
   afterEach(() => {
@@ -77,6 +76,6 @@ describe('isSsoLocked', () => {
   it('queries for roles when user object does not have it populated', async () => {
     ssoEnabled = true;
     expect(await isSsoLocked(userWithLoadedLockedRoles)).toBe(true);
-    expect(global.strapi.query).toHaveBeenCalledTimes(1);
+    expect(global.strapi.db.query).toHaveBeenCalledTimes(1);
   });
 });

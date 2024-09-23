@@ -4,11 +4,10 @@
  *
  */
 
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { Box, Flex, Typography, LinkButton } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../utils/getTrad';
 
@@ -16,7 +15,7 @@ import { UploadIcon } from './Icons/UploadIcon';
 
 const EmptyStateIconWrapper = styled(Box)`
   svg {
-    height: ${88 / 16}rem;
+    height: 8.8rem;
   }
 `;
 
@@ -30,14 +29,14 @@ const CloudBox = () => {
           <UploadIcon />
         </EmptyStateIconWrapper>
         <Box paddingBottom={4}>
-          <Typography variant="beta" as="p" textAlign="center" textColor="neutral1000">
+          <Typography variant="beta" tag="p" textAlign="center" textColor="neutral1000">
             {formatMessage({
               id: getTrad('Homepage.cloudBox.title'),
               defaultMessage: 'Deploy to Strapi Cloud',
             })}
           </Typography>
         </Box>
-        <Typography variant="epsilon" as="p" textAlign="center" textColor="neutral600">
+        <Typography variant="epsilon" tag="p" textAlign="center" textColor="neutral600">
           {formatMessage({
             id: getTrad('Homepage.cloudBox.subTitle'),
             defaultMessage:

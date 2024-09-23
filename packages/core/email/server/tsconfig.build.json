@@ -1,7 +1,7 @@
 {
-  "extends": "./server/tsconfig.json",
+  "extends": "./tsconfig.json",
   "include": ["./src", "../shared"],
-  "exclude": ["./server/src/**/*.test.ts"],
+  "exclude": ["node_modules", "**/*.test.ts"],
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": ".",

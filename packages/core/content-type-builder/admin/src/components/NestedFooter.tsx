@@ -1,19 +1,19 @@
 import type { ReactNode } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const IconBox = styled(Box)`
-  height: ${24 / 16}rem;
-  width: ${24 / 16}rem;
+  height: 2.4rem;
+  width: 2.4rem;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
 
   svg {
-    height: ${10 / 16}rem;
-    width: ${10 / 16}rem;
+    height: 1rem;
+    width: 1rem;
   }
 
   svg path {
@@ -27,7 +27,7 @@ const ButtonBox = styled(Box)`
   width: 100%;
   border: none;
   position: relative;
-  left: -0.25rem;
+  left: -0.4rem;
 `;
 
 interface NestedTFooterProps {
@@ -39,7 +39,7 @@ interface NestedTFooterProps {
 
 export const NestedTFooter = ({ children, icon, color, ...props }: NestedTFooterProps) => {
   return (
-    <ButtonBox paddingBottom={4} paddingTop={4} as="button" type="button" {...props}>
+    <ButtonBox paddingBottom={4} paddingTop={4} tag="button" type="button" {...props}>
       <Flex>
         <IconBox color={color} aria-hidden background={`${color}200`}>
           {icon}

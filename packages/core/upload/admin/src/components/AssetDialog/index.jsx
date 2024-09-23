@@ -1,36 +1,22 @@
 import React, { useState } from 'react';
 
-import {
-  Badge,
-  Button,
-  Divider,
-  Flex,
-  Loader,
-  ModalBody,
-  ModalHeader,
-  ModalLayout,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Typography,
-} from '@strapi/design-system';
-import { AnErrorOccurred, NoPermissions, pxToRem, useSelectionState } from '@strapi/helper-plugin';
+import { Page } from '@strapi/admin/strapi-admin';
+import { Badge, Button, Divider, Flex, Loader, Modal, Tabs } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetDefinition } from '../../constants';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
+import { useSelectionState } from '../../hooks/useSelectionState';
 import { containsAssetFilter, getTrad } from '../../utils';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import { moveElement } from '../../utils/moveElement';
-import { EditAssetDialog } from '../EditAssetDialog';
-import { EditFolderDialog } from '../EditFolderDialog';
+import { EditAssetContent } from '../EditAssetDialog';
+import { EditFolderContent } from '../EditFolderDialog';
 
 import { BrowseStep } from './BrowseStep';
 import { DialogFooter } from './DialogFooter';
@@ -38,10 +24,10 @@ import { SelectedStep } from './SelectedStep';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
+  min-height: ${() => `calc(60vh + 8rem)`};
 `;
 
-export const AssetDialog = ({
+export const AssetContent = ({
   allowedTypes,
   folderId,
   onClose,
@@ -97,10 +83,6 @@ export const AssetDialog = ({
     { selectOne, selectOnly, setSelections, selectMultiple, deselectMultiple },
   ] = useSelectionState(['id'], initiallySelectedAssets);
 
-  const [initialSelectedTabIndex, setInitialSelectedTabIndex] = useState(
-    selectedAssets.length > 0 ? 1 : 0
-  );
-
   const handleSelectAllAssets = () => {
     const allowedAssets = getAllowedFiles(allowedTypes, assets);
 
@@ -129,15 +111,15 @@ export const AssetDialog = ({
 
   if (isLoading) {
     return (
-      <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy>
-        <ModalHeader>
-          <Typography fontWeight="bold">
+      <>
+        <Modal.Header>
+          <Modal.Title>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
               defaultMessage: 'Add new assets',
             })}
-          </Typography>
-        </ModalHeader>
+          </Modal.Title>
+        </Modal.Header>
         <LoadingBody justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
             {formatMessage({
@@ -147,47 +129,47 @@ export const AssetDialog = ({
           </Loader>
         </LoadingBody>
         <DialogFooter onClose={onClose} />
-      </ModalLayout>
+      </>
     );
   }
 
   if (hasError) {
     return (
-      <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <ModalHeader>
-          <Typography fontWeight="bold">
+      <>
+        <Modal.Header>
+          <Modal.Title>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
               defaultMessage: 'Add new assets',
             })}
-          </Typography>
-        </ModalHeader>
-        <AnErrorOccurred />
+          </Modal.Title>
+        </Modal.Header>
+        <Page.Error />
         <DialogFooter onClose={onClose} />
-      </ModalLayout>
+      </>
     );
   }
 
   if (!canRead) {
     return (
-      <ModalLayout onClose={onClose} labelledBy="asset-dialog-title">
-        <ModalHeader fontWeight="bold">
-          <Typography>
+      <>
+        <Modal.Header>
+          <Modal.Title>
             {formatMessage({
               id: getTrad('header.actions.add-assets'),
               defaultMessage: 'Add new assets',
             })}
-          </Typography>
-        </ModalHeader>
-        <NoPermissions />
+          </Modal.Title>
+        </Modal.Header>
+        <Page.NoPermissions />
         <DialogFooter onClose={onClose} />
-      </ModalLayout>
+      </>
     );
   }
 
   if (assetToEdit) {
     return (
-      <EditAssetDialog
+      <EditAssetContent
         onClose={() => setAssetToEdit(undefined)}
         asset={assetToEdit}
         canUpdate={canUpdate}
@@ -200,7 +182,7 @@ export const AssetDialog = ({
 
   if (folderToEdit) {
     return (
-      <EditFolderDialog
+      <EditFolderContent
         folder={folderToEdit}
         onClose={() => setFolderToEdit(undefined)}
         location="content-manager"
@@ -222,41 +204,33 @@ export const AssetDialog = ({
   };
 
   return (
-    <ModalLayout onClose={onClose} labelledBy="asset-dialog-title" aria-busy={isLoading}>
-      <ModalHeader>
-        <Typography fontWeight="bold">
+    <>
+      <Modal.Header>
+        <Modal.Title>
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
             defaultMessage: 'Add new assets',
           })}
-        </Typography>
-      </ModalHeader>
+        </Modal.Title>
+      </Modal.Header>
 
-      <TabGroup
-        label={formatMessage({
-          id: getTrad('tabs.title'),
-          defaultMessage: 'How do you want to upload your assets?',
-        })}
-        variant="simple"
-        initialSelectedTabIndex={initialSelectedTabIndex}
-        onTabChange={() => setInitialSelectedTabIndex(0)}
-      >
+      <TabsRoot variant="simple" defaultValue={selectedAssets.length > 0 ? 'selected' : 'browse'}>
         <Flex paddingLeft={8} paddingRight={8} paddingTop={6} justifyContent="space-between">
-          <Tabs>
-            <Tab>
+          <Tabs.List>
+            <Tabs.Trigger value="browse">
               {formatMessage({
                 id: getTrad('modal.nav.browse'),
                 defaultMessage: 'Browse',
               })}
-            </Tab>
-            <Tab>
+            </Tabs.Trigger>
+            <Tabs.Trigger value="selected">
               {formatMessage({
                 id: getTrad('modal.header.select-files'),
                 defaultMessage: 'Selected files',
               })}
               <Badge marginLeft={2}>{selectedAssets.length}</Badge>
-            </Tab>
-          </Tabs>
+            </Tabs.Trigger>
+          </Tabs.List>
           <Flex gap={2}>
             <Button
               variant="secondary"
@@ -276,50 +250,46 @@ export const AssetDialog = ({
           </Flex>
         </Flex>
         <Divider />
-        <TabPanels>
-          <TabPanel>
-            <ModalBody>
-              <BrowseStep
-                allowedTypes={allowedTypes}
-                assets={assets}
-                canCreate={canCreate}
-                canRead={canRead}
-                folders={folders}
-                onSelectAsset={handleSelectAsset}
-                selectedAssets={selectedAssets}
-                multiple={multiple}
-                onSelectAllAsset={handleSelectAllAssets}
-                onEditAsset={setAssetToEdit}
-                onEditFolder={setFolderToEdit}
-                pagination={pagination}
-                queryObject={queryObject}
-                onAddAsset={onAddAsset}
-                onChangeFilters={onChangeFilters}
-                onChangeFolder={handleFolderChange}
-                onChangePage={onChangePage}
-                onChangePageSize={onChangePageSize}
-                onChangeSort={onChangeSort}
-                onChangeSearch={onChangeSearch}
-              />
-            </ModalBody>
-          </TabPanel>
-          <TabPanel>
-            <ModalBody>
-              <SelectedStep
-                selectedAssets={selectedAssets}
-                onSelectAsset={handleSelectAsset}
-                onReorderAsset={handleMoveItem}
-              />
-            </ModalBody>
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
+        <Modal.Body>
+          <Tabs.Content value="browse">
+            <BrowseStep
+              allowedTypes={allowedTypes}
+              assets={assets}
+              canCreate={canCreate}
+              canRead={canRead}
+              folders={folders}
+              onSelectAsset={handleSelectAsset}
+              selectedAssets={selectedAssets}
+              multiple={multiple}
+              onSelectAllAsset={handleSelectAllAssets}
+              onEditAsset={setAssetToEdit}
+              onEditFolder={setFolderToEdit}
+              pagination={pagination}
+              queryObject={queryObject}
+              onAddAsset={onAddAsset}
+              onChangeFilters={onChangeFilters}
+              onChangeFolder={handleFolderChange}
+              onChangePage={onChangePage}
+              onChangePageSize={onChangePageSize}
+              onChangeSort={onChangeSort}
+              onChangeSearch={onChangeSearch}
+            />
+          </Tabs.Content>
+          <Tabs.Content value="selected">
+            <SelectedStep
+              selectedAssets={selectedAssets}
+              onSelectAsset={handleSelectAsset}
+              onReorderAsset={handleMoveItem}
+            />
+          </Tabs.Content>
+        </Modal.Body>
+      </TabsRoot>
       <DialogFooter onClose={onClose} onValidate={() => onValidate(selectedAssets)} />
-    </ModalLayout>
+    </>
   );
 };
 
-AssetDialog.defaultProps = {
+AssetContent.defaultProps = {
   allowedTypes: [],
   folderId: null,
   initiallySelectedAssets: [],
@@ -327,7 +297,7 @@ AssetDialog.defaultProps = {
   trackedLocation: undefined,
 };
 
-AssetDialog.propTypes = {
+AssetContent.propTypes = {
   allowedTypes: PropTypes.arrayOf(PropTypes.string),
   folderId: PropTypes.number,
   initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
@@ -339,3 +309,42 @@ AssetDialog.propTypes = {
   onValidate: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,
 };
+
+export const AssetDialog = ({ open, onClose, ...restProps }) => {
+  return (
+    <Modal.Root open={open} onOpenChange={onClose}>
+      <Modal.Content>
+        <AssetContent onClose={onClose} {...restProps} />
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
+AssetDialog.defaultProps = {
+  allowedTypes: [],
+  folderId: null,
+  initiallySelectedAssets: [],
+  multiple: false,
+  open: false,
+  trackedLocation: undefined,
+};
+
+AssetDialog.propTypes = {
+  allowedTypes: PropTypes.arrayOf(PropTypes.string),
+  folderId: PropTypes.number,
+  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
+  multiple: PropTypes.bool,
+  onAddAsset: PropTypes.func.isRequired,
+  onAddFolder: PropTypes.func.isRequired,
+  onChangeFolder: PropTypes.func.isRequired,
+  open: PropTypes.bool,
+  onClose: PropTypes.func.isRequired,
+  onValidate: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
+};
+
+const TabsRoot = styled(Tabs.Root)`
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;

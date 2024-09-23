@@ -1,4 +1,4 @@
-import { Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
+import { Flex, Grid, KeyboardNavigable } from '@strapi/design-system';
 
 import { IconByType } from '../AttributeIcon';
 
@@ -14,13 +14,13 @@ export const AttributeList = ({ attributes }: AttributeListProps) => (
       {attributes.map((attributeRow, index) => {
         return (
           // eslint-disable-next-line react/no-array-index-key
-          <Grid key={index} gap={3}>
+          <Grid.Root key={index} gap={3}>
             {attributeRow.map((attribute) => (
-              <GridItem key={attribute} col={6}>
+              <Grid.Item key={attribute} col={6} direction="column" alignItems="stretch">
                 <AttributeOption type={attribute} />
-              </GridItem>
+              </Grid.Item>
             ))}
-          </Grid>
+          </Grid.Root>
         );
       })}
     </Flex>

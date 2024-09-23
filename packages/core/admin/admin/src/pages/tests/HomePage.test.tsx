@@ -1,57 +1,27 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useAppInfo } from '@strapi/helper-plugin';
-import { render } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
-import { IntlProvider } from 'react-intl';
-import { Router } from 'react-router-dom';
+import { render } from '@tests/utils';
 
+import { useAppInfo } from '../../features/AppInfo';
 import { useContentTypes } from '../../hooks/useContentTypes';
 import { HomePage } from '../HomePage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfo: jest.fn(() => ({ communityEdition: true })),
-  useGuidedTour: jest.fn(() => ({
-    isGuidedTourVisible: false,
-    guidedTourState: {
-      apiTokens: {
-        create: false,
-        success: false,
-      },
-      contentManager: {
-        create: false,
-        success: false,
-      },
-      contentTypeBuilder: {
-        create: false,
-        success: false,
-      },
-    },
-  })),
+jest.mock('../../features/AppInfo', () => ({
+  ...jest.requireActual('../../features/AppInfo'),
+  useAppInfo: jest.fn((name, getter) => getter({ communityEdition: true })),
 }));
 
+/**
+ * TODO: remove this mock.
+ */
 jest.mock('../../hooks/useContentTypes');
-
-const history = createMemoryHistory();
-
-const App = (
-  <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{}} textComponent="span">
-      <Router history={history}>
-        <HomePage />
-      </Router>
-    </IntlProvider>
-  </ThemeProvider>
-);
 
 describe('Homepage', () => {
   test('should render all homepage links', () => {
-    const { getByRole } = render(App);
+    const { getByRole } = render(<HomePage />);
     expect(getByRole('link', { name: /we are hiring/i })).toBeInTheDocument();
   });
 
   test.each([
-    'strapi cloud a fully composable, and collaborative platform to boost your team velocity.',
+    'strapi cloud fully-managed cloud hosting for your strapi project.',
     'documentation discover the essential concepts, guides and instructions.',
     'code example learn by using ready-made starters for your projects.',
     'tutorials follow step-by-step instructions to use and customize strapi.',
@@ -64,13 +34,13 @@ describe('Homepage', () => {
     'forum',
     'we are hiring',
   ])('should display %s link', (link) => {
-    const { getByRole } = render(App);
+    const { getByRole } = render(<HomePage />);
 
     expect(getByRole('link', { name: new RegExp(link, 'i') })).toBeInTheDocument();
   });
 
   test('should display discord link for CE edition', () => {
-    const { getByRole } = render(App);
+    const { getByRole } = render(<HomePage />);
 
     expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
       'href',
@@ -80,8 +50,8 @@ describe('Homepage', () => {
 
   test('should display support link for EE edition', () => {
     // @ts-expect-error - mock implementation
-    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
-    const { getByRole } = render(App);
+    useAppInfo.mockImplementation((name, getter) => getter({ communityEdition: false }));
+    const { getByRole } = render(<HomePage />);
 
     expect(getByRole('link', { name: /get help/i })).toHaveAttribute(
       'href',
@@ -90,7 +60,7 @@ describe('Homepage', () => {
   });
 
   it('should display particular text and action when there are no collectionTypes and singletypes', () => {
-    const { getByText, getByRole } = render(App);
+    const { getByText, getByRole } = render(<HomePage />);
 
     expect(
       getByText(
@@ -101,14 +71,15 @@ describe('Homepage', () => {
   });
 
   it('should display particular text and action when there are collectionTypes and singletypes', () => {
-    // @ts-expect-error - mock implementation
-    useContentTypes.mockReturnValue({
+    jest.mocked(useContentTypes).mockReturnValue({
       isLoading: false,
+      // @ts-expect-error - mock implementation
       collectionTypes: [{ uuid: 102 }],
+      // @ts-expect-error - mock implementation
       singleTypes: [{ isDisplayed: true }],
     });
 
-    const { getByText, getByRole } = render(App);
+    const { getByText, getByRole } = render(<HomePage />);
 
     expect(
       getByText(

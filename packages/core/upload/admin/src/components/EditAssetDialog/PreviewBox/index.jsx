@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -160,9 +160,10 @@ export const PreviewBox = ({
                   id: 'global.delete',
                   defaultMessage: 'Delete',
                 })}
-                icon={<Trash />}
                 onClick={() => setShowConfirmDialog(true)}
-              />
+              >
+                <Trash />
+              </IconButton>
             )}
 
             {canDownload && (
@@ -171,9 +172,10 @@ export const PreviewBox = ({
                   id: getTrad('control-card.download'),
                   defaultMessage: 'Download',
                 })}
-                icon={<DownloadIcon />}
                 onClick={() => downloadFile(assetUrl, asset.name)}
-              />
+              >
+                <DownloadIcon />
+              </IconButton>
             )}
 
             {canCopyLink && <CopyLinkButton url={assetUrl} />}
@@ -181,9 +183,10 @@ export const PreviewBox = ({
             {canUpdate && asset.mime.includes(AssetType.Image) && (
               <IconButton
                 label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
-                icon={<Resize />}
                 onClick={handleCropStart}
-              />
+              >
+                <Resize />
+              </IconButton>
             )}
           </Flex>
         </ActionRow>
@@ -224,7 +227,7 @@ export const PreviewBox = ({
           paddingLeft={2}
           paddingRight={2}
           justifyContent="flex-end"
-          blurry={isInCroppingMode}
+          $blurry={isInCroppingMode}
         >
           {isInCroppingMode && width && height && (
             <BadgeOverride background="neutral900" color="neutral0">
@@ -234,15 +237,14 @@ export const PreviewBox = ({
         </ActionRow>
       </RelativeBox>
 
-      {showConfirmDialog && (
-        <RemoveAssetDialog
-          onClose={() => {
-            setShowConfirmDialog(false);
-            onDelete(null);
-          }}
-          asset={asset}
-        />
-      )}
+      <RemoveAssetDialog
+        open={showConfirmDialog}
+        onClose={() => {
+          setShowConfirmDialog(false);
+          onDelete(null);
+        }}
+        asset={asset}
+      />
     </>
   );
 };

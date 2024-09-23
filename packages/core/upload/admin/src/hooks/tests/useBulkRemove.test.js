@@ -1,11 +1,5 @@
-import React from 'react';
-
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { useFetchClient } from '@strapi/admin/strapi-admin';
+import { act, renderHook, screen } from '@tests/utils';
 
 import { useBulkRemove } from '../useBulkRemove';
 
@@ -33,11 +27,8 @@ const FIXTURE_FOLDERS = [
   },
 ];
 
-const notificationStatusMock = jest.fn();
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: () => notificationStatusMock,
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     post: jest.fn((url, payload) => {
       const res = { data: { data: {} } };
@@ -55,48 +46,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   }),
 }));
 
-const refetchQueriesMock = jest.fn();
-
-jest.mock('react-query', () => ({
-  ...jest.requireActual('react-query'),
-  useQueryClient: () => ({
-    refetchQueries: refetchQueriesMock,
-  }),
-}));
-
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-// eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }) {
-  return (
-    <Router>
-      <Route>
-        <QueryClientProvider client={client}>
-          <ThemeProvider theme={lightTheme}>
-            <NotificationsProvider>
-              <IntlProvider locale="en" messages={{}}>
-                {children}
-              </IntlProvider>
-            </NotificationsProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </Route>
-    </Router>
-  );
-}
-
 function setup(...args) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useBulkRemove(...args), { wrapper: ComponentFixture }));
-    });
-  });
+  return renderHook(() => useBulkRemove(...args));
 }
 
 describe('useBulkRemove', () => {
@@ -107,7 +58,7 @@ describe('useBulkRemove', () => {
   test('does call the proper endpoint', async () => {
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { remove } = current;
     const { post } = useFetchClient();
 
@@ -121,7 +72,7 @@ describe('useBulkRemove', () => {
   test('does properly collect all asset ids', async () => {
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { remove } = current;
     const { post } = useFetchClient();
 
@@ -137,7 +88,7 @@ describe('useBulkRemove', () => {
   test('does properly collect all folder ids', async () => {
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { remove } = current;
     const { post } = useFetchClient();
 
@@ -153,7 +104,7 @@ describe('useBulkRemove', () => {
   test('does properly collect folder and asset ids', async () => {
     const {
       result: { current },
-    } = await setup();
+    } = setup();
     const { remove } = current;
     const { post } = useFetchClient();
 
@@ -168,46 +119,22 @@ describe('useBulkRemove', () => {
   });
 
   test('does re-fetch assets, if files were deleted', async () => {
-    const toggleNotification = useNotification();
-    const queryClient = useQueryClient();
-
-    const {
-      result: { current },
-    } = await setup();
-    const { remove } = current;
+    const { result } = setup();
 
     await act(async () => {
-      await remove(FIXTURE_ASSETS);
+      await result.current.remove(FIXTURE_ASSETS);
     });
 
-    await waitFor(() =>
-      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'assets'], {
-        active: true,
-      })
-    );
-
-    await waitFor(() => expect(toggleNotification).toHaveBeenCalled());
+    await screen.findByText('Elements have been successfully deleted.');
   });
 
   test('does re-fetch folders, if folders were deleted', async () => {
-    const queryClient = useQueryClient();
-    const toggleNotification = useNotification();
-
-    const {
-      result: { current },
-    } = await setup();
-    const { remove } = current;
+    const { result } = setup();
 
     await act(async () => {
-      await remove(FIXTURE_FOLDERS);
+      await result.current.remove(FIXTURE_FOLDERS);
     });
 
-    await waitFor(() =>
-      expect(queryClient.refetchQueries).toHaveBeenCalledWith(['upload', 'folders'], {
-        active: true,
-      })
-    );
-
-    await waitFor(() => expect(toggleNotification).toHaveBeenCalled());
+    await screen.findByText('Elements have been successfully deleted.');
   });
 });

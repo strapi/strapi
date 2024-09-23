@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { differenceWith, isEqual } from 'lodash/fp';
 
 interface PersistedTable {
@@ -23,7 +23,7 @@ const transformTableName = (table: string | PersistedTable) => {
  * @param {RegExp} regex
  * @returns {Promise<string[]>}
  */
-export async function findTables({ strapi }: { strapi: LoadedStrapi }, regex: any) {
+export async function findTables({ strapi }: { strapi: Core.Strapi }, regex: any) {
   // @ts-expect-error - getTables is not typed into the schema inspector
   const tables = await strapi.db.dialect.schemaInspector.getTables();
   return tables.filter((tableName: string) => regex.test(tableName));
@@ -33,7 +33,7 @@ export async function findTables({ strapi }: { strapi: LoadedStrapi }, regex: an
  * Add tables name to the reserved tables in core store
  */
 async function addPersistTables(
-  { strapi }: { strapi: LoadedStrapi },
+  { strapi }: { strapi: Core.Strapi },
   tableNames: Array<string | PersistedTable>
 ) {
   const persistedTables = await getPersistedTables({ strapi });
@@ -69,7 +69,7 @@ async function addPersistTables(
  * @returns {Promise<string[]>}
  */
 
-async function getPersistedTables({ strapi }: { strapi: LoadedStrapi }) {
+async function getPersistedTables({ strapi }: { strapi: Core.Strapi }) {
   const persistedTables: any = await strapi.store.get({
     type: 'core',
     key: 'persisted_tables',
@@ -86,7 +86,7 @@ async function getPersistedTables({ strapi }: { strapi: LoadedStrapi }) {
  * @returns {Promise<void>}
  */
 async function setPersistedTables(
-  { strapi }: { strapi: LoadedStrapi },
+  { strapi }: { strapi: Core.Strapi },
   tableNames: Array<string | PersistedTable>
 ) {
   await strapi.store.set({

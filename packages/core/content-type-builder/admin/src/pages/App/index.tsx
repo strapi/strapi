@@ -3,12 +3,11 @@
 /* eslint-disable check-file/no-index */
 import { lazy, Suspense, useEffect, useRef } from 'react';
 
-import { Layout } from '@strapi/design-system';
-import { CheckPagePermissions, LoadingIndicatorPage, useGuidedTour } from '@strapi/helper-plugin';
-import { Helmet } from 'react-helmet';
+import { Page, useGuidedTour, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 
+import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider/DataManagerProvider';
 import { FormModalNavigationProvider } from '../../components/FormModalNavigationProvider/FormModalNavigationProvider';
@@ -24,7 +23,7 @@ const App = () => {
     id: `${pluginId}.plugin.name`,
     defaultMessage: 'Content Types Builder',
   });
-  const { startSection } = useGuidedTour();
+  const startSection = useGuidedTour('App', (state) => state.startSection);
   const startSectionRef = useRef(startSection);
 
   useEffect(() => {
@@ -33,31 +32,27 @@ const App = () => {
     }
   }, []);
 
+  // FIXME Error here
   return (
-    <CheckPagePermissions permissions={PERMISSIONS.main}>
-      <Helmet title={title} />
-      <FormModalNavigationProvider>
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/* @ts-ignore */}
-        <DataManagerProvider>
-          <Layout sideNav={<ContentTypeBuilderNav />}>
-            <Suspense fallback={<LoadingIndicatorPage />}>
-              <Switch>
-                <Route
-                  path={`/plugins/${pluginId}/content-types/create-content-type`}
-                  component={ListView}
-                />
-                <Route path={`/plugins/${pluginId}/content-types/:uid`} component={ListView} />
-                <Route
-                  path={`/plugins/${pluginId}/component-categories/:categoryUid`}
-                  component={RecursivePath}
-                />
-              </Switch>
-            </Suspense>
-          </Layout>
-        </DataManagerProvider>
-      </FormModalNavigationProvider>
-    </CheckPagePermissions>
+    <Page.Protect permissions={PERMISSIONS.main}>
+      <Page.Title>{title}</Page.Title>
+      <AutoReloadOverlayBlockerProvider>
+        <FormModalNavigationProvider>
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+          <DataManagerProvider>
+            <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
+              <Suspense fallback={<Page.Loading />}>
+                <Routes>
+                  <Route path="content-types/:uid" element={<ListView />} />
+                  <Route path={`component-categories/:categoryUid/*`} element={<RecursivePath />} />
+                </Routes>
+              </Suspense>
+            </Layouts.Root>
+          </DataManagerProvider>
+        </FormModalNavigationProvider>
+      </AutoReloadOverlayBlockerProvider>
+    </Page.Protect>
   );
 };
 

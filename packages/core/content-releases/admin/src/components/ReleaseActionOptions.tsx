@@ -1,16 +1,9 @@
 import * as React from 'react';
 
-import {
-  FieldInput,
-  FieldLabel,
-  VisuallyHidden,
-  Field,
-  Flex,
-  type FieldProps,
-} from '@strapi/design-system';
-import styled from 'styled-components';
+import { VisuallyHidden, Field, Flex } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
-interface FieldWrapperProps extends FieldProps {
+interface FieldWrapperProps extends Field.Props {
   actionType: 'publish' | 'unpublish';
 }
 
@@ -22,15 +15,17 @@ const getBorderRightRadiusValue = (actionType: FieldWrapperProps['actionType']) 
   return actionType === 'publish' ? 0 : 1;
 };
 
-const FieldWrapper = styled(Field)<FieldWrapperProps>`
-  border-top-left-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderLeftRadiusValue(actionType)]};
-  border-bottom-left-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderLeftRadiusValue(actionType)]};
-  border-top-right-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderRightRadiusValue(actionType)]};
-  border-bottom-right-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderRightRadiusValue(actionType)]};
+const FieldWrapper = styled(Field.Root)<{
+  $actionType: 'publish' | 'unpublish';
+}>`
+  border-top-left-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderLeftRadiusValue($actionType)]};
+  border-bottom-left-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderLeftRadiusValue($actionType)]};
+  border-top-right-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderRightRadiusValue($actionType)]};
+  border-bottom-right-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderRightRadiusValue($actionType)]};
 
   > label {
     color: inherit;
@@ -40,16 +35,34 @@ const FieldWrapper = styled(Field)<FieldWrapperProps>`
     text-transform: capitalize;
   }
 
-  &:active,
   &[data-checked='true'] {
-    color: ${({ theme }) => theme.colors.primary700};
-    background-color: ${({ theme }) => theme.colors.primary100};
-    border-color: ${({ theme }) => theme.colors.primary700};
+    color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
+    background-color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary100 : theme.colors.danger100};
+    border-color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
   }
 
   &[data-checked='false'] {
-    border-left: ${({ actionType }) => actionType === 'unpublish' && 'none'};
-    border-right: ${({ actionType }) => actionType === 'publish' && 'none'};
+    border-left: ${({ $actionType }) => $actionType === 'unpublish' && 'none'};
+    border-right: ${({ $actionType }) => $actionType === 'publish' && 'none'};
+  }
+
+  &[data-checked='false'][data-disabled='false']:hover {
+    color: ${({ theme }) => theme.colors.neutral700};
+    background-color: ${({ theme }) => theme.colors.neutral100};
+    border-color: ${({ theme }) => theme.colors.neutral200};
+
+    & > label {
+      cursor: pointer;
+    }
+  }
+
+  &[data-disabled='true'] {
+    color: ${({ theme }) => theme.colors.neutral600};
+    background-color: ${({ theme }) => theme.colors.neutral150};
+    border-color: ${({ theme }) => theme.colors.neutral300};
   }
 `;
 
@@ -57,41 +70,54 @@ interface ActionOptionProps {
   selected: 'publish' | 'unpublish';
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   name: string;
+  disabled?: boolean;
 }
 
 interface OptionProps extends ActionOptionProps {
   actionType: 'publish' | 'unpublish';
 }
 
-const ActionOption = ({ selected, actionType, handleChange, name }: OptionProps) => {
+const ActionOption = ({
+  selected,
+  actionType,
+  handleChange,
+  name,
+  disabled = false,
+}: OptionProps) => {
   return (
     <FieldWrapper
-      actionType={actionType}
+      $actionType={actionType}
       background="primary0"
       borderColor="neutral200"
       color={selected === actionType ? 'primary600' : 'neutral600'}
       position="relative"
       cursor="pointer"
       data-checked={selected === actionType}
+      data-disabled={disabled && selected !== actionType}
     >
-      <FieldLabel htmlFor={`${name}-${actionType}`}>
+      <Field.Label>
         <VisuallyHidden>
-          <FieldInput
+          <Field.Input
             type="radio"
-            id={`${name}-${actionType}`}
             name={name}
             checked={selected === actionType}
             onChange={handleChange}
             value={actionType}
+            disabled={disabled}
           />
         </VisuallyHidden>
         {actionType}
-      </FieldLabel>
+      </Field.Label>
     </FieldWrapper>
   );
 };
 
-export const ReleaseActionOptions = ({ selected, handleChange, name }: ActionOptionProps) => {
+export const ReleaseActionOptions = ({
+  selected,
+  handleChange,
+  name,
+  disabled = false,
+}: ActionOptionProps) => {
   return (
     <Flex>
       <ActionOption
@@ -99,12 +125,14 @@ export const ReleaseActionOptions = ({ selected, handleChange, name }: ActionOpt
         selected={selected}
         handleChange={handleChange}
         name={name}
+        disabled={disabled}
       />
       <ActionOption
         actionType="unpublish"
         selected={selected}
         handleChange={handleChange}
         name={name}
+        disabled={disabled}
       />
     </Flex>
   );

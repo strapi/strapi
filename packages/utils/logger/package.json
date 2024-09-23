@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -28,7 +28,7 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
@@ -42,9 +42,9 @@
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.19.0",
-    "eslint-config-custom": "4.19.0",
-    "tsconfig": "4.19.0"
+    "@strapi/pack-up": "5.0.0",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

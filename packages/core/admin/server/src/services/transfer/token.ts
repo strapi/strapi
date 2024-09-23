@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import assert from 'assert';
-import { map, isArray, omit, uniq, isNil, difference, isEmpty } from 'lodash/fp';
+import { map, isArray, omit, uniq, isNil, difference, isEmpty, isNumber } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import '@strapi/types';
 import constants from '../constants';
@@ -36,7 +36,7 @@ const POPULATE_FIELDS = ['permissions'] as const;
  * Return a list of all tokens and their permissions
  */
 const list = async (): Promise<SanitizedTransferToken[]> => {
-  const tokens: DatabaseTransferToken[] = await strapi.query(TRANSFER_TOKEN_UID).findMany({
+  const tokens: DatabaseTransferToken[] = await strapi.db.query(TRANSFER_TOKEN_UID).findMany({
     select: SELECT_FIELDS,
     populate: POPULATE_FIELDS,
     orderBy: { name: 'ASC' },
@@ -79,10 +79,10 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
   delete attributes.accessKey;
 
   assertTokenPermissionsValidity(attributes);
-  assertValidLifespan(attributes);
+  assertValidLifespan(attributes.lifespan);
 
   const result = (await strapi.db.transaction(async () => {
-    const transferToken = await strapi.query(TRANSFER_TOKEN_UID).create({
+    const transferToken = await strapi.db.query(TRANSFER_TOKEN_UID).create({
       select: SELECT_FIELDS,
       populate: POPULATE_FIELDS,
       data: {
@@ -94,17 +94,15 @@ const create = async (attributes: TokenCreatePayload): Promise<TransferToken> =>
 
     await Promise.all(
       uniq(attributes.permissions).map((action) =>
-        strapi
+        strapi.db
           .query(TRANSFER_TOKEN_PERMISSION_UID)
           .create({ data: { action, token: transferToken } })
       )
     );
 
-    const currentPermissions: TransferTokenPermission[] = await strapi.entityService.load(
-      TRANSFER_TOKEN_UID,
-      transferToken,
-      'permissions'
-    );
+    const currentPermissions: TransferTokenPermission[] = await strapi.db
+      .query(TRANSFER_TOKEN_UID)
+      .load(transferToken, 'permissions');
 
     if (currentPermissions) {
       Object.assign(transferToken, { permissions: map('action', currentPermissions) });
@@ -124,17 +122,17 @@ const update = async (
   attributes: TokenUpdatePayload
 ): Promise<SanitizedTransferToken> => {
   // retrieve token without permissions
-  const originalToken = await strapi.query(TRANSFER_TOKEN_UID).findOne({ where: { id } });
+  const originalToken = await strapi.db.query(TRANSFER_TOKEN_UID).findOne({ where: { id } });
 
   if (!originalToken) {
     throw new NotFoundError('Token not found');
   }
 
   assertTokenPermissionsValidity(attributes);
-  assertValidLifespan(attributes);
+  assertValidLifespan(attributes.lifespan);
 
   return strapi.db.transaction(async () => {
-    const updatedToken = await strapi.query(TRANSFER_TOKEN_UID).update({
+    const updatedToken = await strapi.db.query(TRANSFER_TOKEN_UID).update({
       select: SELECT_FIELDS,
       where: { id },
       data: {
@@ -143,11 +141,9 @@ const update = async (
     });
 
     if (attributes.permissions) {
-      const currentPermissionsResult = await strapi.entityService.load(
-        TRANSFER_TOKEN_UID,
-        updatedToken,
-        'permissions'
-      );
+      const currentPermissionsResult = await strapi.db
+        .query(TRANSFER_TOKEN_UID)
+        .load(updatedToken, 'permissions');
 
       const currentPermissions = map('action', currentPermissionsResult || []);
       const newPermissions = uniq(attributes.permissions);
@@ -159,7 +155,7 @@ const update = async (
       // method using a loop -- works but very inefficient
       await Promise.all(
         actionsToDelete.map((action) =>
-          strapi.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
+          strapi.db.query(TRANSFER_TOKEN_PERMISSION_UID).delete({
             where: { action, token: id },
           })
         )
@@ -169,7 +165,7 @@ const update = async (
       // using a loop -- works but very inefficient
       await Promise.all(
         actionsToAdd.map((action) =>
-          strapi.query(TRANSFER_TOKEN_PERMISSION_UID).create({
+          strapi.db.query(TRANSFER_TOKEN_PERMISSION_UID).create({
             data: { action, token: id },
           })
         )
@@ -177,11 +173,9 @@ const update = async (
     }
 
     // retrieve permissions
-    const permissionsFromDb = (await strapi.entityService.load(
-      TRANSFER_TOKEN_UID,
-      updatedToken,
-      'permissions'
-    )) as TransferTokenPermission[];
+    const permissionsFromDb: TransferTokenPermission[] = await strapi.db
+      .query(TRANSFER_TOKEN_UID)
+      .load(updatedToken, 'permissions');
 
     return {
       ...updatedToken,
@@ -195,7 +189,7 @@ const update = async (
  */
 const revoke = async (id: string | number): Promise<SanitizedTransferToken> => {
   return strapi.db.transaction(async () =>
-    strapi
+    strapi.db
       .query(TRANSFER_TOKEN_UID)
       .delete({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: { id } })
   ) as unknown as Promise<SanitizedTransferToken>;
@@ -217,7 +211,7 @@ const getBy = async (
     return null;
   }
 
-  const token = await strapi
+  const token = await strapi.db
     .query(TRANSFER_TOKEN_UID)
     .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
 
@@ -262,7 +256,7 @@ const exists = async (
 const regenerate = async (id: string | number): Promise<TransferToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
   const transferToken = (await strapi.db.transaction(async () =>
-    strapi.query(TRANSFER_TOKEN_UID).update({
+    strapi.db.query(TRANSFER_TOKEN_UID).update({
       select: ['id', 'accessKey'],
       where: { id },
       data: {
@@ -281,11 +275,9 @@ const regenerate = async (id: string | number): Promise<TransferToken> => {
   };
 };
 
-const getExpirationFields = (
-  lifespan: number | null
-): { lifespan: null | number; expiresAt: null | number } => {
+const getExpirationFields = (lifespan: TransferToken['lifespan']) => {
   // it must be nil or a finite number >= 0
-  const isValidNumber = Number.isFinite(lifespan) && lifespan !== null && lifespan > 0;
+  const isValidNumber = isNumber(lifespan) && Number.isFinite(lifespan) && lifespan > 0;
   if (!isValidNumber && !isNil(lifespan)) {
     throw new ValidationError('lifespan must be a positive number or null');
   }
@@ -313,10 +305,10 @@ const hash = (accessKey: string): string => {
 };
 
 const checkSaltIsDefined = () => {
-  const { hasValidTokenSalt, isDisabledFromEnv } = getService('transfer').utils;
+  const { hasValidTokenSalt } = getService('transfer').utils;
 
   // Ignore the check if the data-transfer feature is manually disabled
-  if (isDisabledFromEnv()) {
+  if (!strapi.config.get('server.transfer.remote.enabled')) {
     return;
   }
 
@@ -349,7 +341,7 @@ const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken =>
  * Assert that a token's permissions are valid
  */
 const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
-  const permissionService = strapi.admin.services.transfer.permission;
+  const permissionService = strapi.service('admin::transfer').permission;
   const validPermissions = permissionService.providers.action.keys();
   const invalidPermissions = difference(attributes.permissions, validPermissions);
 
@@ -359,16 +351,30 @@ const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
 };
 
 /**
- * Assert that a token's lifespan is valid
+ * Check if a token's lifespan is valid
  */
-const assertValidLifespan = ({ lifespan }: { lifespan?: TransferToken['lifespan'] }) => {
+const isValidLifespan = (lifespan: unknown) => {
   if (isNil(lifespan)) {
-    return;
+    return true;
   }
 
-  if (!Object.values(constants.TRANSFER_TOKEN_LIFESPANS).includes(lifespan)) {
+  if (
+    !isNumber(lifespan) ||
+    !Object.values(constants.TRANSFER_TOKEN_LIFESPANS).includes(lifespan)
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Assert that a token's lifespan is valid
+ */
+const assertValidLifespan = (lifespan: unknown) => {
+  if (!isValidLifespan(lifespan)) {
     throw new ValidationError(
-      `lifespan must be one of the following values: 
+      `lifespan must be one of the following values:
       ${Object.values(constants.TRANSFER_TOKEN_LIFESPANS).join(', ')}`
     );
   }

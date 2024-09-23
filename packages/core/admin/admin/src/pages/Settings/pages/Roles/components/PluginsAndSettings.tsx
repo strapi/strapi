@@ -2,18 +2,17 @@ import * as React from 'react';
 
 import {
   Accordion,
-  AccordionContent,
-  AccordionToggle,
   Box,
+  BoxComponent,
   Checkbox,
   Flex,
   Grid,
-  GridItem,
+  Modal,
   Typography,
 } from '@strapi/design-system';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import {
   SettingPermission,
@@ -48,28 +47,22 @@ const PluginsAndSettingsPermissions = ({
   layout,
   ...restProps
 }: PluginsAndSettingsPermissionsProps) => {
-  const [openedCategory, setOpenedCategory] = React.useState<string | null>(null);
-
-  const handleOpenCategory = (categoryName: string) => {
-    setOpenedCategory(categoryName === openedCategory ? null : categoryName);
-  };
-
   return (
     <Box padding={6} background="neutral0">
-      {layout.map(({ category, categoryId, childrenForm }, index) => {
-        return (
-          <Row
-            key={category}
-            childrenForm={childrenForm}
-            isOpen={openedCategory === category}
-            isWhite={index % 2 === 1}
-            name={category}
-            onOpenCategory={handleOpenCategory}
-            pathToData={[restProps.kind, categoryId]}
-            {...restProps}
-          />
-        );
-      })}
+      <Accordion.Root size="M">
+        {layout.map(({ category, categoryId, childrenForm }, index) => {
+          return (
+            <Row
+              key={category}
+              childrenForm={childrenForm}
+              variant={index % 2 === 1 ? 'primary' : 'secondary'}
+              name={category}
+              pathToData={[restProps.kind, categoryId]}
+              {...restProps}
+            />
+          );
+        })}
+      </Accordion.Root>
     </Box>
   );
 };
@@ -78,13 +71,12 @@ const PluginsAndSettingsPermissions = ({
  * Row
  * -----------------------------------------------------------------------------------------------*/
 
-interface RowProps extends Pick<Layout[number], 'childrenForm'> {
+interface RowProps
+  extends Pick<Layout[number], 'childrenForm'>,
+    Pick<Accordion.HeaderProps, 'variant'> {
   kind: Exclude<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
   name: string;
   isFormDisabled?: boolean;
-  isOpen?: boolean;
-  isWhite?: boolean;
-  onOpenCategory: (categoryName: string) => void;
   pathToData: string[];
 }
 
@@ -92,35 +84,28 @@ const Row = ({
   childrenForm,
   kind,
   name,
-  isOpen = false,
   isFormDisabled = false,
-  isWhite,
-  onOpenCategory,
+  variant,
   pathToData,
 }: RowProps) => {
   const { formatMessage } = useIntl();
-  const handleClick = () => {
-    onOpenCategory(name);
-  };
 
   const categoryName = name.split('::').pop() ?? '';
 
   return (
-    <Accordion
-      expanded={isOpen}
-      onToggle={handleClick}
-      id={`accordion-${name}`}
-      variant={isWhite ? 'primary' : 'secondary'}
-    >
-      <AccordionToggle
-        title={capitalise(categoryName)}
-        description={`${formatMessage(
-          { id: 'Settings.permissions.category', defaultMessage: categoryName },
-          { category: categoryName }
-        )} ${kind === 'plugins' ? 'plugin' : kind}`}
-      />
-
-      <AccordionContent>
+    <Accordion.Item value={name}>
+      <Accordion.Header variant={variant}>
+        <Accordion.Trigger
+          caretPosition="right"
+          description={`${formatMessage(
+            { id: 'Settings.permissions.category', defaultMessage: categoryName },
+            { category: categoryName }
+          )} ${kind === 'plugins' ? 'plugin' : kind}`}
+        >
+          {capitalise(categoryName)}
+        </Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content>
         <Box padding={6}>
           {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
             <SubCategory
@@ -133,8 +118,8 @@ const Row = ({
             />
           ))}
         </Box>
-      </AccordionContent>
-    </Accordion>
+      </Accordion.Content>
+    </Accordion.Item>
   );
 };
 
@@ -157,9 +142,9 @@ const SubCategory = ({
   subCategoryName,
   pathToData,
 }: SubCategoryProps) => {
-  const [isModalOpen, setModalOpen] = React.useState(false);
   const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
     usePermissionsDataManager();
+  const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
 
   const mainData = get(modifiedData, pathToData, {});
@@ -174,13 +159,6 @@ const SubCategory = ({
 
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
-  const handleToggleModalIsOpen = () => {
-    setModalOpen((s) => !s);
-  };
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
   // We need to format the actions so it matches the shape of the ConditionsModal actions props
   const formattedActions = React.useMemo(() => {
     return actions.map((action) => {
@@ -230,87 +208,91 @@ const SubCategory = ({
               name={pathToData.join('..')}
               disabled={isFormDisabled}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-              onValueChange={(value) => {
+              onCheckedChange={(value) => {
                 onChangeParentCheckbox({
                   target: {
                     name: pathToData.join('..'),
-                    value,
+                    value: !!value,
                   },
                 });
               }}
-              indeterminate={hasSomeActionsSelected}
-              value={hasAllActionsSelected}
+              checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
             >
               {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
             </Checkbox>
           </Box>
         </Flex>
         <Flex paddingTop={6} paddingBottom={6}>
-          <Grid gap={2} style={{ flex: 1 }}>
+          <Grid.Root gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
-                <GridItem col={3} key={action}>
-                  <CheckboxWrapper disabled={isFormDisabled} hasConditions={hasConditions}>
+                <Grid.Item col={3} key={action} direction="column" alignItems="start">
+                  <CheckboxWrapper $disabled={isFormDisabled} $hasConditions={hasConditions}>
                     <Checkbox
                       name={checkboxName}
                       disabled={isFormDisabled}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={(value) => {
+                      onCheckedChange={(value) => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName,
-                            value,
+                            value: !!value,
                           },
                         });
                       }}
-                      value={value}
+                      checked={value}
                     >
                       {displayName}
                     </Checkbox>
                   </CheckboxWrapper>
-                </GridItem>
+                </Grid.Item>
               );
             })}
-          </Grid>
-          <ConditionsButton
-            hasConditions={doesButtonHasCondition}
-            onClick={handleToggleModalIsOpen}
-          />
+          </Grid.Root>
+          <Modal.Root
+            open={isConditionModalOpen}
+            onOpenChange={() => {
+              setIsConditionModalOpen((prev) => !prev);
+            }}
+          >
+            <Modal.Trigger>
+              <ConditionsButton hasConditions={doesButtonHasCondition} />
+            </Modal.Trigger>
+            <ConditionsModal
+              headerBreadCrumbs={[categoryName, subCategoryName]}
+              actions={formattedActions}
+              isFormDisabled={isFormDisabled}
+              onClose={() => {
+                setIsConditionModalOpen(false);
+              }}
+            />
+          </Modal.Root>
         </Flex>
       </Box>
-      {isModalOpen && (
-        <ConditionsModal
-          headerBreadCrumbs={[categoryName, subCategoryName]}
-          actions={formattedActions}
-          isFormDisabled={isFormDisabled}
-          onClosed={handleModalClose}
-          onToggle={handleToggleModalIsOpen}
-        />
-      )}
     </>
   );
 };
 
-const Border = styled(Box)`
+const Border = styled<BoxComponent>(Box)`
   align-self: center;
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const CheckboxWrapper = styled.div<{ hasConditions?: boolean; disabled?: boolean }>`
+const CheckboxWrapper = styled.div<{ $hasConditions?: boolean; $disabled?: boolean }>`
   position: relative;
   word-break: keep-all;
-  ${({ hasConditions, disabled, theme }) =>
-    hasConditions &&
+  ${({ $hasConditions, $disabled, theme }) =>
+    $hasConditions &&
     `
     &:before {
       content: '';
       position: absolute;
-      top: ${-4 / 16}rem;
-      left: ${-8 / 16}rem;
-      width: ${6 / 16}rem;
-      height: ${6 / 16}rem;
-      border-radius: ${20 / 16}rem;
-      background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
+      top: -0.4rem;
+      left: -0.8rem;
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 2rem;
+      background: ${$disabled ? theme.colors.neutral100 : theme.colors.primary600};
     }
   `}
 `;

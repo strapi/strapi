@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -29,7 +29,7 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
@@ -40,14 +40,13 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/logger": "4.19.0",
-    "@strapi/strapi": "4.19.0",
-    "@strapi/types": "4.19.0",
-    "@strapi/utils": "4.19.0",
+    "@strapi/logger": "workspace:*",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "chalk": "4.1.2",
-    "cli-table3": "0.6.2",
+    "cli-table3": "0.6.5",
     "commander": "8.3.0",
-    "fs-extra": "10.0.0",
+    "fs-extra": "11.2.0",
     "inquirer": "8.2.5",
     "lodash": "4.17.21",
     "ora": "5.4.1",
@@ -57,28 +56,26 @@
     "stream-json": "1.8.0",
     "tar": "6.1.13",
     "tar-stream": "2.2.0",
-    "ws": "8.13.0"
+    "ws": "8.17.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.19.0",
-    "@types/fs-extra": "9.0.13",
+    "@strapi/database": "workspace:*",
+    "@strapi/pack-up": "5.0.0",
+    "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
-    "@types/node": "18.18.4",
+    "@types/node": "18.19.24",
     "@types/semver": "7.5.0",
     "@types/stream-chain": "2.0.1",
     "@types/stream-json": "1.7.3",
     "@types/tar": "6.1.4",
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
-    "knex": "2.5.0",
-    "koa": "2.13.4",
-    "rimraf": "3.0.2",
-    "typescript": "5.2.2"
-  },
-  "peerDependencies": {
-    "@strapi/strapi": "^4.14.4"
+    "knex": "3.0.1",
+    "koa": "2.15.2",
+    "rimraf": "5.0.5",
+    "typescript": "5.3.2"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

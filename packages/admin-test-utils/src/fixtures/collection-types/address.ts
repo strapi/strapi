@@ -342,7 +342,6 @@ const address = {
   kind: 'collectionType',
   info: { displayName: 'addresse', name: 'address', description: '', label: 'Addresses' },
   options: {
-    draftAndPublish: true,
     increments: true,
     timestamps: ['createdAt', 'updatedAt'],
     comment: '',

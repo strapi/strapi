@@ -1,13 +1,13 @@
-import type { Strapi } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 import type { Config } from 'src/config';
 import * as Sentry from '@sentry/node';
 
-const createSentryService = (strapi: Strapi) => {
+const createSentryService = (strapi: Core.Strapi) => {
   let isReady = false;
   let instance: typeof Sentry | null = null;
 
   // Retrieve user config and merge it with the default one
-  const config = strapi.config.get('plugin.sentry') as Config;
+  const config = strapi.config.get('plugin::sentry') as Config;
 
   return {
     /**
@@ -72,4 +72,4 @@ const createSentryService = (strapi: Strapi) => {
   };
 };
 
-export default ({ strapi }: { strapi: Strapi }) => createSentryService(strapi);
+export default ({ strapi }: { strapi: Core.Strapi }) => createSentryService(strapi);

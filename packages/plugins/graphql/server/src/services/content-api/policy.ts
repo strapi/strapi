@@ -1,15 +1,15 @@
 import { propOr } from 'lodash/fp';
 import { GraphQLFieldResolver, GraphQLResolveInfo } from 'graphql';
 import { policy as policyUtils, errors } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 const { PolicyError } = errors;
 
 const getPoliciesConfig = propOr([], 'policies');
 
-const createPoliciesMiddleware = (resolverConfig: any, { strapi }: { strapi: Strapi }) => {
+const createPoliciesMiddleware = (resolverConfig: any, { strapi }: { strapi: Core.Strapi }) => {
   const resolverPolicies = getPoliciesConfig(resolverConfig);
-  const policies = policyUtils.resolve(resolverPolicies, {});
+  const policies = strapi.get('policies').resolve(resolverPolicies, {});
 
   return async (
     resolve: GraphQLFieldResolver<any, any>,

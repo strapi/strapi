@@ -1,11 +1,12 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
+
+import { Cloud } from '@strapi/icons';
 
 import { Initializer } from './components/Initializer';
-import { PluginIcon } from './components/PluginIcon';
 import { pluginId } from './pluginId';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
-const name = 'Strapi Cloud';
+const name = 'Deploy';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -15,8 +16,8 @@ export default {
     // Only add the plugin menu link and registering it if the project is on development (localhost).
     if (backendURL?.includes('localhost')) {
       app.addMenuLink({
-        to: `/plugins/${pluginId}`,
-        icon: PluginIcon,
+        to: `plugins/${pluginId}`,
+        icon: Cloud,
         intlLabel: {
           id: `${pluginId}.plugin.name`,
           defaultMessage: name,

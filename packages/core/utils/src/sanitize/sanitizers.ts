@@ -1,8 +1,8 @@
 import { curry, isEmpty, isNil, isArray, isObject } from 'lodash/fp';
 
-import { pipeAsync } from '../async';
+import { pipe as pipeAsync } from '../async';
 import traverseEntity from '../traverse-entity';
-import { isScalarAttribute } from '../content-types';
+import { isScalarAttribute, constants } from '../content-types';
 
 import {
   traverseQueryFilters,
@@ -16,176 +16,177 @@ import {
   removePrivate,
   removeDynamicZones,
   removeMorphToRelations,
+  expandWildcardPopulate,
 } from './visitors';
 import { isOperator } from '../operators';
 
 import type { Model, Data } from '../types';
 
-const sanitizePasswords = (schema: Model) => async (entity: Data) => {
-  if (!schema) {
+interface Context {
+  schema: Model;
+  getModel: (model: string) => Model;
+}
+
+const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
+
+const sanitizePasswords = (ctx: Context) => async (entity: Data) => {
+  if (!ctx.schema) {
     throw new Error('Missing schema in sanitizePasswords');
   }
-  return traverseEntity(removePassword, { schema }, entity);
+
+  return traverseEntity(removePassword, ctx, entity);
 };
 
-const defaultSanitizeOutput = async (schema: Model, entity: Data) => {
-  if (!schema) {
+const defaultSanitizeOutput = async (ctx: Context, entity: Data) => {
+  if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizeOutput');
   }
+
   return traverseEntity(
     (...args) => {
       removePassword(...args);
       removePrivate(...args);
     },
-    { schema },
+    ctx,
     entity
   );
 };
 
-const defaultSanitizeFilters = curry((schema: Model, filters: unknown) => {
-  if (!schema) {
+const defaultSanitizeFilters = curry((ctx: Context, filters: unknown) => {
+  if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizeFilters');
   }
+
   return pipeAsync(
     // Remove keys that are not attributes or valid operators
-    traverseQueryFilters(
-      ({ key, attribute }, { remove }) => {
-        const isAttribute = !!attribute;
+    traverseQueryFilters(({ key, attribute }, { remove }) => {
+      const isAttribute = !!attribute;
 
-        // ID is not an attribute per se, so we need to make
-        // an extra check to ensure we're not checking it
-        if (key === 'id') {
-          return;
-        }
+      // ID is not an attribute per se, so we need to make
+      // an extra check to ensure we're not checking it
+      if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
+        return;
+      }
 
-        if (!isAttribute && !isOperator(key)) {
-          remove(key);
-        }
-      },
-      { schema }
-    ),
+      if (!isAttribute && !isOperator(key)) {
+        remove(key);
+      }
+    }, ctx),
     // Remove dynamic zones from filters
-    traverseQueryFilters(removeDynamicZones, { schema }),
+    traverseQueryFilters(removeDynamicZones, ctx),
     // Remove morpTo relations from filters
-    traverseQueryFilters(removeMorphToRelations, { schema }),
+    traverseQueryFilters(removeMorphToRelations, ctx),
     // Remove passwords from filters
-    traverseQueryFilters(removePassword, { schema }),
+    traverseQueryFilters(removePassword, ctx),
     // Remove private from filters
-    traverseQueryFilters(removePrivate, { schema }),
+    traverseQueryFilters(removePrivate, ctx),
     // Remove empty objects
-    traverseQueryFilters(
-      ({ key, value }, { remove }) => {
-        if (isObject(value) && isEmpty(value)) {
-          remove(key);
-        }
-      },
-      { schema }
-    )
+    traverseQueryFilters(({ key, value }, { remove }) => {
+      if (isObject(value) && isEmpty(value)) {
+        remove(key);
+      }
+    }, ctx)
   )(filters);
 });
 
-const defaultSanitizeSort = curry((schema: Model, sort: unknown) => {
-  if (!schema) {
+const defaultSanitizeSort = curry((ctx: Context, sort: unknown) => {
+  if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizeSort');
   }
+
   return pipeAsync(
     // Remove non attribute keys
-    traverseQuerySort(
-      ({ key, attribute }, { remove }) => {
-        // ID is not an attribute per se, so we need to make
-        // an extra check to ensure we're not checking it
-        if (key === 'id') {
-          return;
-        }
+    traverseQuerySort(({ key, attribute }, { remove }) => {
+      // ID is not an attribute per se, so we need to make
+      // an extra check to ensure we're not checking it
+      if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
+        return;
+      }
 
-        if (!attribute) {
-          remove(key);
-        }
-      },
-      { schema }
-    ),
+      if (!attribute) {
+        remove(key);
+      }
+    }, ctx),
     // Remove dynamic zones from sort
-    traverseQuerySort(removeDynamicZones, { schema }),
+    traverseQuerySort(removeDynamicZones, ctx),
     // Remove morpTo relations from sort
-    traverseQuerySort(removeMorphToRelations, { schema }),
+    traverseQuerySort(removeMorphToRelations, ctx),
     // Remove private from sort
-    traverseQuerySort(removePrivate, { schema }),
+    traverseQuerySort(removePrivate, ctx),
     // Remove passwords from filters
-    traverseQuerySort(removePassword, { schema }),
+    traverseQuerySort(removePassword, ctx),
     // Remove keys for empty non-scalar values
-    traverseQuerySort(
-      ({ key, attribute, value }, { remove }) => {
-        // ID is not an attribute per se, so we need to make
-        // an extra check to ensure we're not removing it
-        if (key === 'id') {
-          return;
-        }
+    traverseQuerySort(({ key, attribute, value }, { remove }) => {
+      // ID is not an attribute per se, so we need to make
+      // an extra check to ensure we're not removing it
+      if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
+        return;
+      }
 
-        if (!isScalarAttribute(attribute) && isEmpty(value)) {
-          remove(key);
-        }
-      },
-      { schema }
-    )
+      if (!isScalarAttribute(attribute) && isEmpty(value)) {
+        remove(key);
+      }
+    }, ctx)
   )(sort);
 });
 
-const defaultSanitizeFields = curry((schema: Model, fields: unknown) => {
-  if (!schema) {
+const defaultSanitizeFields = curry((ctx: Context, fields: unknown) => {
+  if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizeFields');
   }
+
   return pipeAsync(
     // Only keep scalar attributes
-    traverseQueryFields(
-      ({ key, attribute }, { remove }) => {
-        // ID is not an attribute per se, so we need to make
-        // an extra check to ensure we're not checking it
-        if (key === 'id') {
-          return;
-        }
+    traverseQueryFields(({ key, attribute }, { remove }) => {
+      // ID is not an attribute per se, so we need to make
+      // an extra check to ensure we're not checking it
+      if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
+        return;
+      }
 
-        if (isNil(attribute) || !isScalarAttribute(attribute)) {
-          remove(key);
-        }
-      },
-      { schema }
-    ),
+      if (isNil(attribute) || !isScalarAttribute(attribute)) {
+        remove(key);
+      }
+    }, ctx),
     // Remove private fields
-    traverseQueryFields(removePrivate, { schema }),
+    traverseQueryFields(removePrivate, ctx),
     // Remove password fields
-    traverseQueryFields(removePassword, { schema }),
+    traverseQueryFields(removePassword, ctx),
     // Remove nil values from fields array
     (value) => (isArray(value) ? value.filter((field) => !isNil(field)) : value)
   )(fields);
 });
 
-const defaultSanitizePopulate = curry((schema: Model, populate: unknown) => {
-  if (!schema) {
+const defaultSanitizePopulate = curry((ctx: Context, populate: unknown) => {
+  if (!ctx.schema) {
     throw new Error('Missing schema in defaultSanitizePopulate');
   }
+
   return pipeAsync(
-    traverseQueryPopulate(
-      async ({ key, value, schema, attribute }, { set }) => {
-        if (attribute) {
-          return;
-        }
+    traverseQueryPopulate(expandWildcardPopulate, ctx),
+    traverseQueryPopulate(async ({ key, value, schema, attribute, getModel }, { set }) => {
+      if (attribute) {
+        return;
+      }
 
-        if (key === 'sort') {
-          set(key, await defaultSanitizeSort(schema, value));
-        }
+      if (key === 'sort') {
+        set(key, await defaultSanitizeSort({ schema, getModel }, value));
+      }
 
-        if (key === 'filters') {
-          set(key, await defaultSanitizeFilters(schema, value));
-        }
+      if (key === 'filters') {
+        set(key, await defaultSanitizeFilters({ schema, getModel }, value));
+      }
 
-        if (key === 'fields') {
-          set(key, await defaultSanitizeFields(schema, value));
-        }
-      },
-      { schema }
-    ),
+      if (key === 'fields') {
+        set(key, await defaultSanitizeFields({ schema, getModel }, value));
+      }
+
+      if (key === 'populate') {
+        set(key, await defaultSanitizePopulate({ schema, getModel }, value));
+      }
+    }, ctx),
     // Remove private fields
-    traverseQueryPopulate(removePrivate, { schema })
+    traverseQueryPopulate(removePrivate, ctx)
   )(populate);
 });
 

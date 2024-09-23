@@ -1,5 +1,5 @@
 import { Badge, Box, Flex } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const RelativeBox = styled(Box)`
   position: relative;
@@ -7,7 +7,8 @@ export const RelativeBox = styled(Box)`
 
 export const Wrapper = styled.div`
   position: relative;
-  text-align: center;
+  display: flex;
+  justify-content: center;
   background: repeating-conic-gradient(
       ${({ theme }) => theme.colors.neutral100} 0% 25%,
       transparent 0% 50%
@@ -15,27 +16,27 @@ export const Wrapper = styled.div`
     50% / 20px 20px;
 
   svg {
-    font-size: 3rem;
-    height: ${264 / 16}rem;
+    font-size: 4.8rem;
+    height: 26.4rem;
   }
 
   img,
   video {
     margin: 0;
     padding: 0;
-    max-height: ${264 / 16}rem;
+    max-height: 26.4rem;
     max-width: 100%;
   }
 `;
 
 export const ActionRow = styled(Flex)`
-  height: ${52 / 16}rem;
-  background-color: ${({ blurry }) => (blurry ? `rgba(33, 33, 52, 0.4)` : undefined)};
+  height: 5.2rem;
+  background-color: ${({ $blurry }) => ($blurry ? `rgba(33, 33, 52, 0.4)` : undefined)};
 `;
 
 export const CroppingActionRow = styled(Flex)`
   z-index: 1;
-  height: ${52 / 16}rem;
+  height: 5.2rem;
   position: absolute;
   background-color: rgba(33, 33, 52, 0.4);
   width: 100%;

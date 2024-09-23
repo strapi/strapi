@@ -5,11 +5,15 @@ type ID = number | string;
 
 export type Data = {
   id?: ID;
+  __component?: string;
+  __type?: string;
   [key: string]: string | number | ID | boolean | null | undefined | Date | Data | Data[];
 };
 
-export interface Config {
-  get<T = unknown>(key: string, defaultVal?: T): T;
+export type Config = Record<string, unknown>;
+
+export interface RelationOrderingOptions {
+  strict?: boolean;
 }
 
 export interface Attribute {
@@ -99,7 +103,7 @@ declare module 'koa' {
     notFound: (response?: string | object) => Koa.Context;
     locked: (response?: string | object) => Koa.Context;
     internalServerError: (response?: string | object) => Koa.Context;
-    notImplemented: (response?: string | object) => Koa.Context;
+    notImplemented: (response?: string | object, data?: Record<string, unknown>) => Koa.Context;
   }
 }
 

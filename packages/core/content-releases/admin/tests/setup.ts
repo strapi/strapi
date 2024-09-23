@@ -1,4 +1,4 @@
-import { server } from './server';
+import { server } from '@strapi/admin/strapi-admin/test';
 
 beforeAll(() => {
   server.listen();

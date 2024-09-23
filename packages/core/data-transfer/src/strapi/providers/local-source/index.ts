@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { chain } from 'stream-chain';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
@@ -11,7 +11,7 @@ import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
 
 export interface ILocalStrapiSourceProviderOptions {
-  getStrapi(): LoadedStrapi | Promise<LoadedStrapi>; // return an initialized instance of Strapi
+  getStrapi(): Core.Strapi | Promise<Core.Strapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
 }
@@ -27,7 +27,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   options: ILocalStrapiSourceProviderOptions;
 
-  strapi?: LoadedStrapi;
+  strapi?: Core.Strapi;
 
   constructor(options: ILocalStrapiSourceProviderOptions) {
     this.options = options;
@@ -82,13 +82,13 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     return createConfigurationStream(this.strapi);
   }
 
-  getSchemas() {
+  getSchemas(): Record<string, Struct.Schema> {
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
 
-    const schemas = {
+    const schemas = utils.schema.schemasToValidJSON({
       ...this.strapi.contentTypes,
       ...this.strapi.components,
-    };
+    });
 
     return utils.schema.mapSchemasValues(schemas);
   }

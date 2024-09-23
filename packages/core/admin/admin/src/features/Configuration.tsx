@@ -1,17 +1,25 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { Page } from '../components/PageHelpers';
+import { useTypedSelector } from '../core/store/hooks';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
+import { useRBAC } from '../hooks/useRBAC';
 import {
   ConfigurationLogo,
+  useInitQuery,
   useProjectSettingsQuery,
   useUpdateProjectSettingsMutation,
 } from '../services/admin';
 
 import { useAuth } from './Auth';
+import { useNotification } from './Notifications';
+import { useTracking } from './Tracking';
+
+import type { StrapiApp } from '../StrapiApp';
 
 /* -------------------------------------------------------------------------------------------------
  * Configuration Context
@@ -40,12 +48,6 @@ interface ConfigurationContextValue {
   updateProjectSettings: (body: UpdateProjectSettingsBody) => Promise<void>;
 }
 
-/**
- * TODO: it would be nice if this context actually lived in redux.
- * But we'd probably need to reconcile the fact we get the data three
- * different ways and what that actually looks like.
- */
-
 const [ConfigurationContextProvider, useConfiguration] =
   createContext<ConfigurationContextValue>('ConfigurationContext');
 
@@ -53,32 +55,51 @@ const [ConfigurationContextProvider, useConfiguration] =
  * ConfigurationProvider
  * -----------------------------------------------------------------------------------------------*/
 
-interface ConfigurationProviderProps extends Required<Logos> {
+interface ConfigurationProviderProps {
   children: React.ReactNode;
+  defaultAuthLogo: StrapiApp['configurations']['authLogo'];
+  defaultMenuLogo: StrapiApp['configurations']['menuLogo'];
   showReleaseNotification?: boolean;
   showTutorials?: boolean;
 }
 
-interface Logos {
-  menuLogo: ConfigurationContextValue['logos']['menu'];
-  authLogo: ConfigurationContextValue['logos']['auth'];
-}
-
 const ConfigurationProvider = ({
   children,
-  authLogo: defaultAuthLogo,
-  menuLogo: defaultMenuLogo,
+  defaultAuthLogo,
+  defaultMenuLogo,
   showReleaseNotification = false,
   showTutorials = false,
 }: ConfigurationProviderProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.settings?.['project-settings']
+  );
   const token = useAuth('ConfigurationProvider', (state) => state.token);
 
+  const {
+    allowedActions: { canRead },
+  } = useRBAC(permissions);
+
+  const {
+    data: { authLogo: customAuthLogo, menuLogo: customMenuLogo } = {},
+    error,
+    isLoading,
+  } = useInitQuery();
+
+  React.useEffect(() => {
+    if (error) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'app.containers.App.notification.error.init' }),
+      });
+    }
+  }, [error, formatMessage, toggleNotification]);
+
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
-    skip: !token,
+    skip: !token || !canRead,
   });
 
   const [updateProjectSettingsMutation] = useUpdateProjectSettingsMutation();
@@ -124,7 +145,7 @@ const ConfigurationProvider = ({
         });
       } else {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
@@ -132,18 +153,30 @@ const ConfigurationProvider = ({
     [formatAPIError, formatMessage, toggleNotification, trackUsage, updateProjectSettingsMutation]
   );
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
     <ConfigurationContextProvider
       showReleaseNotification={showReleaseNotification}
       showTutorials={showTutorials}
       logos={{
         menu: {
-          custom: isSuccess ? data?.menuLogo : defaultMenuLogo.custom,
-          default: defaultMenuLogo.default,
+          custom: isSuccess
+            ? data?.menuLogo
+            : {
+                url: customMenuLogo ?? '',
+              },
+          default: defaultMenuLogo,
         },
         auth: {
-          custom: isSuccess ? data?.authLogo : defaultAuthLogo.custom,
-          default: defaultAuthLogo.default,
+          custom: isSuccess
+            ? data?.authLogo
+            : {
+                url: customAuthLogo ?? '',
+              },
+          default: defaultAuthLogo,
         },
       }}
       updateProjectSettings={updateProjectSettings}

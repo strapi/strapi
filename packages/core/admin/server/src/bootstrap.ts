@@ -1,6 +1,6 @@
 import { merge, map, difference, uniq } from 'lodash/fp';
-import { Strapi } from '@strapi/types';
-import { pipeAsync } from '@strapi/utils';
+import type { Core } from '@strapi/types';
+import { async } from '@strapi/utils';
 import { getService } from './utils';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
@@ -55,22 +55,21 @@ const syncAuthSettings = async () => {
 
 const syncAPITokensPermissions = async () => {
   const validPermissions = strapi.contentAPI.permissions.providers.action.keys();
-  const permissionsInDB = await pipeAsync(
-    strapi.query('admin::api-token-permission').findMany,
-    // @ts-expect-error lodash types
+  const permissionsInDB = await async.pipe(
+    strapi.db.query('admin::api-token-permission').findMany,
     map('action')
   )();
 
   const unknownPermissions = uniq(difference(permissionsInDB, validPermissions));
 
   if (unknownPermissions.length > 0) {
-    await strapi
+    await strapi.db
       .query('admin::api-token-permission')
       .deleteMany({ where: { action: { $in: unknownPermissions } } });
   }
 };
 
-export default async ({ strapi }: { strapi: Strapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   await registerAdminConditions();
   await registerPermissionActions();
   registerModelHooks();
@@ -93,6 +92,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
   await syncAuthSettings();
   await syncAPITokensPermissions();
 
+  await getService('metrics').sendUpdateProjectInformation(strapi);
   getService('metrics').startCron(strapi);
 
   apiTokenService.checkSaltIsDefined();

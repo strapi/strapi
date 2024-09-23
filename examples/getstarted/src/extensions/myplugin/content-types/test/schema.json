@@ -6,9 +6,7 @@
     "pluralName": "tests",
     "description": ""
   },
-  "options": {
-    "draftAndPublish": false
-  },
+  "options": {},
   "pluginOptions": {
     "i18n": {
       "localized": true

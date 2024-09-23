@@ -6,31 +6,28 @@
 
 import React, { useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
-  FieldLabel,
+  Field,
   Flex,
   Grid,
-  GridItem,
   Loader,
-  ModalBody,
-  ModalFooter,
-  ModalLayout,
+  Modal,
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Form, getFileExtension, pxToRem, useTracking } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { AssetDefinition } from '../../constants';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { findRecursiveFolderByValue, getTrad } from '../../utils';
+import { findRecursiveFolderByValue, getTrad, getFileExtension } from '../../utils';
 import formatBytes from '../../utils/formatBytes';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
@@ -41,7 +38,7 @@ import { ReplaceMediaButton } from './ReplaceMediaButton';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
+  min-height: ${() => `calc(60vh + 8rem)`};
 `;
 
 const fileInfoSchema = yup.object({
@@ -51,7 +48,7 @@ const fileInfoSchema = yup.object({
   folder: yup.number(),
 });
 
-export const EditAssetDialog = ({
+export const EditAssetContent = ({
   onClose,
   asset,
   canUpdate,
@@ -147,7 +144,7 @@ export const EditAssetDialog = ({
 
   if (folderStructureIsLoading) {
     return (
-      <ModalLayout onClose={() => handleClose()} labelledBy="title">
+      <>
         <DialogHeader />
         <LoadingBody minHeight="60vh" justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
@@ -157,14 +154,12 @@ export const EditAssetDialog = ({
             })}
           </Loader>
         </LoadingBody>
-        <ModalFooter
-          startActions={
-            <Button onClick={() => handleClose()} variant="tertiary">
-              {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-            </Button>
-          }
-        />
-      </ModalLayout>
+        <Modal.Footer>
+          <Button onClick={() => handleClose()} variant="tertiary">
+            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+          </Button>
+        </Modal.Footer>
+      </>
     );
   }
 
@@ -176,11 +171,11 @@ export const EditAssetDialog = ({
       initialValues={initialFormData}
     >
       {({ values, errors, handleChange, setFieldValue }) => (
-        <ModalLayout onClose={() => handleClose(values)} labelledBy="title">
+        <>
           <DialogHeader />
-          <ModalBody>
-            <Grid gap={4}>
-              <GridItem xs={12} col={6}>
+          <Modal.Body>
+            <Grid.Root gap={4}>
+              <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <PreviewBox
                   asset={asset}
                   canUpdate={canUpdate}
@@ -193,8 +188,8 @@ export const EditAssetDialog = ({
                   replacementFile={replacementFile}
                   trackedLocation={trackedLocation}
                 />
-              </GridItem>
-              <GridItem xs={12} col={6}>
+              </Grid.Item>
+              <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <Form noValidate>
                   <Flex direction="column" alignItems="stretch" gap={3}>
                     <ContextInfo
@@ -241,68 +236,81 @@ export const EditAssetDialog = ({
                         },
                       ]}
                     />
+                    <Field.Root name="name" error={errors.name}>
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.file-name'),
+                          defaultMessage: 'File name',
+                        })}
+                      </Field.Label>
+                      <TextInput
+                        value={values.name}
+                        onChange={handleChange}
+                        disabled={formDisabled}
+                      />
+                      <Field.Error />
+                    </Field.Root>
 
-                    <TextInput
-                      label={formatMessage({
-                        id: getTrad('form.input.label.file-name'),
-                        defaultMessage: 'File name',
-                      })}
-                      name="name"
-                      value={values.name}
-                      error={errors.name}
-                      onChange={handleChange}
-                      disabled={formDisabled}
-                    />
-
-                    <TextInput
-                      label={formatMessage({
-                        id: getTrad('form.input.label.file-alt'),
-                        defaultMessage: 'Alternative text',
-                      })}
+                    <Field.Root
                       name="alternativeText"
                       hint={formatMessage({
                         id: getTrad('form.input.decription.file-alt'),
                         defaultMessage: 'This text will be displayed if the asset can’t be shown.',
                       })}
-                      value={values.alternativeText}
                       error={errors.alternativeText}
-                      onChange={handleChange}
-                      disabled={formDisabled}
-                    />
+                    >
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.file-alt'),
+                          defaultMessage: 'Alternative text',
+                        })}
+                      </Field.Label>
+                      <TextInput
+                        value={values.alternativeText}
+                        onChange={handleChange}
+                        disabled={formDisabled}
+                      />
+                      <Field.Hint />
+                      <Field.Error />
+                    </Field.Root>
 
-                    <TextInput
-                      label={formatMessage({
-                        id: getTrad('form.input.label.file-caption'),
-                        defaultMessage: 'Caption',
-                      })}
-                      name="caption"
-                      value={values.caption}
-                      error={errors.caption}
-                      onChange={handleChange}
-                      disabled={formDisabled}
-                    />
+                    <Field.Root name="caption" error={errors.caption}>
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.file-caption'),
+                          defaultMessage: 'Caption',
+                        })}
+                      </Field.Label>
+                      <TextInput
+                        value={values.caption}
+                        onChange={handleChange}
+                        disabled={formDisabled}
+                      />
+                    </Field.Root>
 
                     <Flex direction="column" alignItems="stretch" gap={1}>
-                      <FieldLabel htmlFor="asset-folder">
-                        {formatMessage({
-                          id: getTrad('form.input.label.file-location'),
-                          defaultMessage: 'Location',
-                        })}
-                      </FieldLabel>
+                      <Field.Root name="parent" id="asset-folder">
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('form.input.label.file-location'),
+                            defaultMessage: 'Location',
+                          })}
+                        </Field.Label>
 
-                      <SelectTree
-                        name="parent"
-                        defaultValue={values.parent}
-                        options={folderStructure}
-                        onChange={(value) => {
-                          setFieldValue('parent', value);
-                        }}
-                        menuPortalTarget={document.querySelector('body')}
-                        inputId="asset-folder"
-                        isDisabled={formDisabled}
-                        error={errors?.parent}
-                        ariaErrorMessage="folder-parent-error"
-                      />
+                        <SelectTree
+                          name="parent"
+                          defaultValue={values.parent}
+                          options={folderStructure}
+                          onChange={(value) => {
+                            setFieldValue('parent', value);
+                          }}
+                          menuPortalTarget={document.querySelector('body')}
+                          inputId="asset-folder"
+                          isDisabled={formDisabled}
+                          error={errors?.parent}
+                          ariaErrorMessage="folder-parent-error"
+                        />
+                      </Field.Root>
                     </Flex>
                   </Flex>
 
@@ -317,49 +325,77 @@ export const EditAssetDialog = ({
                     </button>
                   </VisuallyHidden>
                 </Form>
-              </GridItem>
-            </Grid>
-          </ModalBody>
-          <ModalFooter
-            startActions={
-              <Button onClick={() => handleClose(values)} variant="tertiary">
-                {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
-              </Button>
-            }
-            endActions={
-              <>
-                <ReplaceMediaButton
-                  onSelectMedia={setReplacementFile}
-                  acceptedMime={asset.mime}
-                  disabled={formDisabled}
-                  trackedLocation={trackedLocation}
-                />
+              </Grid.Item>
+            </Grid.Root>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={() => handleClose(values)} variant="tertiary">
+              {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+            <Flex gap={2}>
+              <ReplaceMediaButton
+                onSelectMedia={setReplacementFile}
+                acceptedMime={asset.mime}
+                disabled={formDisabled}
+                trackedLocation={trackedLocation}
+              />
 
-                <Button
-                  onClick={() => submitButtonRef.current.click()}
-                  loading={isLoading}
-                  disabled={formDisabled}
-                >
-                  {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
-                </Button>
-              </>
-            }
-          />
-        </ModalLayout>
+              <Button
+                onClick={() => submitButtonRef.current.click()}
+                loading={isLoading}
+                disabled={formDisabled}
+              >
+                {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
+              </Button>
+            </Flex>
+          </Modal.Footer>
+        </>
       )}
     </Formik>
   );
 };
 
-EditAssetDialog.defaultProps = {
+EditAssetContent.defaultProps = {
+  asset: {},
   trackedLocation: undefined,
+  canUpdate: false,
+  canCopyLink: false,
+  canDownload: false,
+};
+
+EditAssetContent.propTypes = {
+  asset: AssetDefinition,
+  canUpdate: PropTypes.bool,
+  canCopyLink: PropTypes.bool,
+  canDownload: PropTypes.bool,
+  onClose: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
+};
+
+export const EditAssetDialog = ({ open, onClose, ...restProps }) => {
+  return (
+    <Modal.Root open={open} onOpenChange={onClose}>
+      <Modal.Content>
+        <EditAssetContent onClose={onClose} {...restProps} />
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
+EditAssetDialog.defaultProps = {
+  asset: {},
+  trackedLocation: undefined,
+  canUpdate: false,
+  canCopyLink: false,
+  canDownload: false,
 };
 
 EditAssetDialog.propTypes = {
-  asset: AssetDefinition.isRequired,
-  canUpdate: PropTypes.bool.isRequired,
-  canCopyLink: PropTypes.bool.isRequired,
-  canDownload: PropTypes.bool.isRequired,
+  asset: AssetDefinition,
+  canUpdate: PropTypes.bool,
+  canCopyLink: PropTypes.bool,
+  canDownload: PropTypes.bool,
+  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,
 };

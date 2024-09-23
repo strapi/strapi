@@ -33,8 +33,8 @@ export default class SqliteDialect extends Dialect {
     return true;
   }
 
-  async initialize() {
-    await this.db.connection.raw('pragma foreign_keys = on');
+  async initialize(nativeConnection: unknown) {
+    await this.db.connection.raw('pragma foreign_keys = on').connection(nativeConnection);
   }
 
   canAlterConstraints() {

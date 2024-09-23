@@ -1,15 +1,20 @@
 /* eslint-disable testing-library/no-node-access */
-import { useAppInfo, useTracking } from '@strapi/helper-plugin';
+
 import { screen, within, fireEvent } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
 
+import { useAppInfo } from '../../../features/AppInfo';
+import { useTracking } from '../../../features/Tracking';
 import { MarketplacePage } from '../MarketplacePage';
 
 jest.mock('../hooks/useNavigatorOnline');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../features/Tracking', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
+jest.mock('../../../features/AppInfo', () => ({
+  ...jest.requireActual('../../../features/AppInfo'),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -24,7 +29,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 const render = () => renderRTL(<MarketplacePage />);
 
 const waitForReload = async () => {
-  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - layout', () => {
@@ -45,24 +50,16 @@ describe('Marketplace page - layout', () => {
     // Shows the filters button
     expect(getByRole('button', { name: 'Filters' })).toBeVisible();
   });
-
-  it('disables the button and shows compatibility tooltip message when version provided', async () => {
-    const { findByTestId, findAllByTestId } = render();
+  it('does not display the button when incompatible version provided', async () => {
+    const { findAllByTestId } = render();
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Transformer')
     )!;
 
-    const button = within(alreadyInstalledCard)
-      .getByText(/copy install command/i)
-      .closest('button')!;
+    const button = within(alreadyInstalledCard).queryByText(/copy install command/i);
 
-    // User event throws an error that there are no pointer events
-    fireEvent.mouseOver(button);
-    const tooltip = await findByTestId('tooltip-Transformer');
-    expect(button).toBeDisabled();
-    expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveTextContent('Update your Strapi version: "4.1.0" to: "4.0.7"');
+    expect(button).not.toBeInTheDocument();
   });
 
   it('shows compatibility tooltip message when no version provided', async () => {

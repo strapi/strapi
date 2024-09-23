@@ -28,7 +28,6 @@ describe('Content Type Generator', () => {
         pluralName: 'testContentTypes',
         kind: 'singleType',
         id: 'testContentType',
-        useDraftAndPublish: false,
         destination: 'new',
         bootstrapApi: false,
         attributes: [],
@@ -59,7 +58,6 @@ describe('Content Type Generator', () => {
         displayName: 'testContentType',
       },
       options: {
-        draftAndPublish: false,
         comment: '',
       },
       attributes: {},
@@ -75,7 +73,6 @@ describe('Content Type Generator', () => {
         pluralName: 'testContentTypes',
         kind: 'singleType',
         id: 'testContentType',
-        useDraftAndPublish: false,
         destination: 'new',
         bootstrapApi: true,
         attributes: [],
@@ -148,7 +145,6 @@ describe('Content Type Generator', () => {
         pluralName: 'testContentTypes',
         kind: 'singleType',
         id: 'testContentType',
-        useDraftAndPublish: false,
         destination: 'new',
         bootstrapApi: false,
         attributes: [

@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
-import { Button } from '@strapi/design-system';
-import { useQueryParams, useTracking } from '@strapi/helper-plugin';
+import { useTracking, useQueryParams } from '@strapi/admin/strapi-admin';
+import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -10,14 +10,11 @@ import FilterPopover from '../../../components/FilterPopover';
 import displayedFilters from '../../../utils/displayedFilters';
 
 export const Filters = () => {
-  const buttonRef = useRef(null);
-  const [isVisible, setVisible] = useState(false);
+  const [open, setOpen] = React.useState(false);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const [{ query }, setQuery] = useQueryParams();
   const filters = query?.filters?.$and || [];
-
-  const toggleFilter = () => setVisible((prev) => !prev);
 
   const handleRemoveFilter = (nextFilters) => {
     setQuery({ filters: { $and: nextFilters }, page: 1 });
@@ -32,30 +29,23 @@ export const Filters = () => {
   };
 
   return (
-    <>
-      <Button
-        variant="tertiary"
-        ref={buttonRef}
-        startIcon={<Filter />}
-        onClick={toggleFilter}
-        size="S"
-      >
-        {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-      </Button>
-      {isVisible && (
-        <FilterPopover
-          displayedFilters={displayedFilters}
-          filters={filters}
-          onSubmit={handleSubmit}
-          onToggle={toggleFilter}
-          source={buttonRef}
-        />
-      )}
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger>
+        <Button variant="tertiary" startIcon={<Filter />} size="S">
+          {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+        </Button>
+      </Popover.Trigger>
+      <FilterPopover
+        displayedFilters={displayedFilters}
+        filters={filters}
+        onToggle={setOpen}
+        onSubmit={handleSubmit}
+      />
       <FilterList
         appliedFilters={filters}
         filtersSchema={displayedFilters}
         onRemoveFilter={handleRemoveFilter}
       />
-    </>
+    </Popover.Root>
   );
 };

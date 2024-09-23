@@ -16,7 +16,29 @@ import type {
 } from './types';
 import type { Database } from '..';
 
-const RESERVED_TABLE_NAMES = ['strapi_migrations', 'strapi_database_schema'];
+type PersistedTable = {
+  name: string;
+  dependsOn?: Array<{ name: string }>;
+};
+
+type TableDiffContext = {
+  previousTable?: Table;
+  databaseTable: Table;
+  userSchemaTable: Table;
+};
+
+type SchemaDiffContext = {
+  previousSchema?: Schema;
+  databaseSchema: Schema;
+  userSchema: Schema;
+};
+
+// TODO: get that list dynamically instead
+const RESERVED_TABLE_NAMES = [
+  'strapi_migrations',
+  'strapi_migrations_internal',
+  'strapi_database_schema',
+];
 
 const statuses = {
   CHANGED: 'CHANGED',
@@ -65,7 +87,7 @@ export default (db: Database) => {
    * @param {Object} index - newly generate index info
    */
   const diffIndexes = (oldIndex: Index, index: Index): IndexDiff => {
-    const changes = [];
+    const changes: string[] = [];
 
     if (!_.isEqual(oldIndex.columns, index.columns)) {
       changes.push('columns');
@@ -90,7 +112,7 @@ export default (db: Database) => {
    * @param {Object} foreignKey - newly generate foreignKey info
    */
   const diffForeignKeys = (oldForeignKey: ForeignKey, foreignKey: ForeignKey): ForeignKeyDiff => {
-    const changes = [];
+    const changes: string[] = [];
 
     if (_.difference(oldForeignKey.columns, foreignKey.columns).length > 0) {
       changes.push('columns');
@@ -155,7 +177,7 @@ export default (db: Database) => {
    * @param {Object} column - newly generate column info
    */
   const diffColumns = (oldColumn: Column, column: Column): ColumnDiff => {
-    const changes = [];
+    const changes: string[] = [];
 
     const isIgnoredType = ['increments'].includes(column.type);
     const oldType = oldColumn.type;
@@ -189,30 +211,37 @@ export default (db: Database) => {
     };
   };
 
-  const diffTableColumns = (srcTable: Table, destTable: Table): ColumnsDiff => {
+  const diffTableColumns = (diffCtx: TableDiffContext): ColumnsDiff => {
+    const { databaseTable, userSchemaTable, previousTable } = diffCtx;
+
     const addedColumns: Column[] = [];
     const updatedColumns: ColumnDiff['diff'][] = [];
     const unchangedColumns: Column[] = [];
     const removedColumns: Column[] = [];
 
-    for (const destColumn of destTable.columns) {
-      const srcColumn = helpers.findColumn(srcTable, destColumn.name);
-      if (srcColumn) {
-        const { status, diff } = diffColumns(srcColumn, destColumn);
+    for (const userSchemaColumn of userSchemaTable.columns) {
+      const databaseColumn = helpers.findColumn(databaseTable, userSchemaColumn.name);
+
+      if (databaseColumn) {
+        const { status, diff } = diffColumns(databaseColumn, userSchemaColumn);
 
         if (status === statuses.CHANGED) {
           updatedColumns.push(diff);
         } else {
-          unchangedColumns.push(srcColumn);
+          unchangedColumns.push(databaseColumn);
         }
       } else {
-        addedColumns.push(destColumn);
+        addedColumns.push(userSchemaColumn);
       }
     }
 
-    for (const srcColumn of srcTable.columns) {
-      if (!helpers.hasColumn(destTable, srcColumn.name)) {
-        removedColumns.push(srcColumn);
+    for (const databaseColumn of databaseTable.columns) {
+      if (
+        !helpers.hasColumn(userSchemaTable, databaseColumn.name) &&
+        previousTable &&
+        helpers.hasColumn(previousTable, databaseColumn.name)
+      ) {
+        removedColumns.push(databaseColumn);
       }
     }
 
@@ -229,30 +258,36 @@ export default (db: Database) => {
     };
   };
 
-  const diffTableIndexes = (srcTable: Table, destTable: Table): IndexesDiff => {
+  const diffTableIndexes = (diffCtx: TableDiffContext): IndexesDiff => {
+    const { databaseTable, userSchemaTable, previousTable } = diffCtx;
+
     const addedIndexes: Index[] = [];
     const updatedIndexes: IndexDiff['diff'][] = [];
     const unchangedIndexes: Index[] = [];
     const removedIndexes: Index[] = [];
 
-    for (const destIndex of destTable.indexes) {
-      const srcIndex = helpers.findIndex(srcTable, destIndex.name);
-      if (srcIndex) {
-        const { status, diff } = diffIndexes(srcIndex, destIndex);
+    for (const userSchemaIndex of userSchemaTable.indexes) {
+      const databaseIndex = helpers.findIndex(databaseTable, userSchemaIndex.name);
+      if (databaseIndex) {
+        const { status, diff } = diffIndexes(databaseIndex, userSchemaIndex);
 
         if (status === statuses.CHANGED) {
           updatedIndexes.push(diff);
         } else {
-          unchangedIndexes.push(srcIndex);
+          unchangedIndexes.push(databaseIndex);
         }
       } else {
-        addedIndexes.push(destIndex);
+        addedIndexes.push(userSchemaIndex);
       }
     }
 
-    for (const srcIndex of srcTable.indexes) {
-      if (!helpers.hasIndex(destTable, srcIndex.name)) {
-        removedIndexes.push(srcIndex);
+    for (const databaseIndex of databaseTable.indexes) {
+      if (
+        !helpers.hasIndex(userSchemaTable, databaseIndex.name) &&
+        previousTable &&
+        helpers.hasIndex(previousTable, databaseIndex.name)
+      ) {
+        removedIndexes.push(databaseIndex);
       }
     }
 
@@ -269,7 +304,9 @@ export default (db: Database) => {
     };
   };
 
-  const diffTableForeignKeys = (srcTable: Table, destTable: Table): ForeignKeysDiff => {
+  const diffTableForeignKeys = (diffCtx: TableDiffContext): ForeignKeysDiff => {
+    const { databaseTable, userSchemaTable, previousTable } = diffCtx;
+
     const addedForeignKeys: ForeignKey[] = [];
     const updatedForeignKeys: ForeignKeyDiff['diff'][] = [];
     const unchangedForeignKeys: ForeignKey[] = [];
@@ -287,24 +324,28 @@ export default (db: Database) => {
       };
     }
 
-    for (const destForeignKey of destTable.foreignKeys) {
-      const srcForeignKey = helpers.findForeignKey(srcTable, destForeignKey.name);
-      if (srcForeignKey) {
-        const { status, diff } = diffForeignKeys(srcForeignKey, destForeignKey);
+    for (const userSchemaForeignKeys of userSchemaTable.foreignKeys) {
+      const databaseForeignKeys = helpers.findForeignKey(databaseTable, userSchemaForeignKeys.name);
+      if (databaseForeignKeys) {
+        const { status, diff } = diffForeignKeys(databaseForeignKeys, userSchemaForeignKeys);
 
         if (status === statuses.CHANGED) {
           updatedForeignKeys.push(diff);
         } else {
-          unchangedForeignKeys.push(srcForeignKey);
+          unchangedForeignKeys.push(databaseForeignKeys);
         }
       } else {
-        addedForeignKeys.push(destForeignKey);
+        addedForeignKeys.push(userSchemaForeignKeys);
       }
     }
 
-    for (const srcForeignKey of srcTable.foreignKeys) {
-      if (!helpers.hasForeignKey(destTable, srcForeignKey.name)) {
-        removedForeignKeys.push(srcForeignKey);
+    for (const databaseForeignKeys of databaseTable.foreignKeys) {
+      if (
+        !helpers.hasForeignKey(userSchemaTable, databaseForeignKeys.name) &&
+        previousTable &&
+        helpers.hasForeignKey(previousTable, databaseForeignKeys.name)
+      ) {
+        removedForeignKeys.push(databaseForeignKeys);
       }
     }
 
@@ -323,17 +364,19 @@ export default (db: Database) => {
     };
   };
 
-  const diffTables = (srcTable: Table, destTable: Table): TableDiff => {
-    const columnsDiff = diffTableColumns(srcTable, destTable);
-    const indexesDiff = diffTableIndexes(srcTable, destTable);
-    const foreignKeysDiff = diffTableForeignKeys(srcTable, destTable);
+  const diffTables = (diffCtx: TableDiffContext): TableDiff => {
+    const { databaseTable } = diffCtx;
+
+    const columnsDiff = diffTableColumns(diffCtx);
+    const indexesDiff = diffTableIndexes(diffCtx);
+    const foreignKeysDiff = diffTableForeignKeys(diffCtx);
 
     const hasChanged = [columnsDiff, indexesDiff, foreignKeysDiff].some(hasChangedStatus);
 
     return {
       status: hasChanged ? statuses.CHANGED : statuses.UNCHANGED,
       diff: {
-        name: srcTable.name,
+        name: databaseTable.name,
         indexes: indexesDiff.diff,
         foreignKeys: foreignKeysDiff.diff,
         columns: columnsDiff.diff,
@@ -341,27 +384,38 @@ export default (db: Database) => {
     };
   };
 
-  const diffSchemas = async (srcSchema: Schema, destSchema: Schema): Promise<SchemaDiff> => {
+  const diffSchemas = async (schemaDiffCtx: SchemaDiffContext): Promise<SchemaDiff> => {
+    const { previousSchema, databaseSchema, userSchema } = schemaDiffCtx;
+
     const addedTables: Table[] = [];
     const updatedTables: TableDiff['diff'][] = [];
     const unchangedTables: Table[] = [];
-    const removedTables = [];
+    const removedTables: Table[] = [];
 
-    for (const destTable of destSchema.tables) {
-      const srcTable = helpers.findTable(srcSchema, destTable.name);
-      if (srcTable) {
-        const { status, diff } = diffTables(srcTable, destTable);
+    // for each table in the user schema, check if it already exists in the database schema
+    for (const userSchemaTable of userSchema.tables) {
+      const databaseTable = helpers.findTable(databaseSchema, userSchemaTable.name);
+      const previousTable =
+        previousSchema && helpers.findTable(previousSchema, userSchemaTable.name);
+
+      if (databaseTable) {
+        const { status, diff } = diffTables({
+          previousTable,
+          databaseTable,
+          userSchemaTable,
+        });
 
         if (status === statuses.CHANGED) {
           updatedTables.push(diff);
         } else {
-          unchangedTables.push(srcTable);
+          unchangedTables.push(databaseTable);
         }
       } else {
-        addedTables.push(destTable);
+        addedTables.push(userSchemaTable);
       }
     }
 
+    // maintain audit logs table from EE -> CE
     const parsePersistedTable = (persistedTable: string | Table) => {
       if (typeof persistedTable === 'string') {
         return persistedTable;
@@ -369,22 +423,29 @@ export default (db: Database) => {
       return persistedTable.name;
     };
 
-    const persistedTables = helpers.hasTable(srcSchema, 'strapi_core_store_settings')
-      ? (await strapi.store.get({
+    const persistedTables = helpers.hasTable(databaseSchema, 'strapi_core_store_settings')
+      ? // TODO: replace with low level db query instead
+        ((await strapi.store.get({
           type: 'core',
           key: 'persisted_tables',
-        })) ?? []
+        })) ?? [])
       : [];
 
     const reservedTables = [...RESERVED_TABLE_NAMES, ...persistedTables.map(parsePersistedTable)];
 
-    type PersistedTable = {
-      name: string;
-      dependsOn?: Array<{ name: string }>;
-    };
+    // for all tables in the database schema, check if they are not in the user schema
+    for (const databaseTable of databaseSchema.tables) {
+      const isInUserSchema = helpers.hasTable(userSchema, databaseTable.name);
+      const wasTracked = previousSchema && helpers.hasTable(previousSchema, databaseTable.name);
+      const isReserved = reservedTables.includes(databaseTable.name);
 
-    for (const srcTable of srcSchema.tables) {
-      if (!helpers.hasTable(destSchema, srcTable.name) && !reservedTables.includes(srcTable.name)) {
+      // NOTE: if db table is not in the user schema and is not in the previous stored schema leave it alone. it is a user custom table that we should not touch
+      if (!isInUserSchema && !wasTracked) {
+        continue;
+      }
+
+      // if a db table is not in the user schema I want to delete it
+      if (!isInUserSchema && wasTracked && !isReserved) {
         const dependencies = persistedTables
           .filter((table: PersistedTable) => {
             const dependsOn = table?.dependsOn;
@@ -393,15 +454,17 @@ export default (db: Database) => {
               return;
             }
 
-            return dependsOn.some((table) => table.name === srcTable.name);
+            return dependsOn.some((table) => table.name === databaseTable.name);
           })
           .map((dependsOnTable: PersistedTable) => {
-            return srcSchema.tables.find((srcTable) => srcTable.name === dependsOnTable.name);
+            return databaseSchema.tables.find(
+              (databaseTable) => databaseTable.name === dependsOnTable.name
+            );
           })
           // In case the table is not found, filter undefined values
           .filter((table: PersistedTable) => !_.isNil(table));
 
-        removedTables.push(srcTable, ...dependencies);
+        removedTables.push(databaseTable, ...dependencies);
       }
     }
 

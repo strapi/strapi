@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import type { Webhook } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 /**
  * /webhooks - GET all webhooks
@@ -11,7 +11,7 @@ export declare namespace GetWebhooks {
   }
 
   export interface Response {
-    data: Webhook[];
+    data: Modules.WebhookStore.Webhook[];
     error?: errors.ApplicationError;
   }
 }
@@ -26,11 +26,11 @@ export declare namespace GetWebhook {
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {
-    data: Webhook;
+    data: Modules.WebhookStore.Webhook;
     error?: errors.ApplicationError;
   }
 }
@@ -40,12 +40,12 @@ export declare namespace GetWebhook {
  */
 export declare namespace CreateWebhook {
   export interface Request {
-    body: Webhook;
+    body: Modules.WebhookStore.Webhook;
     query: {};
   }
 
   export interface Response {
-    data: Webhook;
+    data: Modules.WebhookStore.Webhook;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -55,16 +55,16 @@ export declare namespace CreateWebhook {
  */
 export declare namespace UpdateWebhook {
   export interface Request {
-    body: Partial<Webhook>;
+    body: Partial<Modules.WebhookStore.Webhook>;
     query: {};
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {
-    data: Webhook;
+    data: Modules.WebhookStore.Webhook;
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -79,11 +79,11 @@ export declare namespace DeleteWebhook {
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {
-    data: Webhook;
+    data: Modules.WebhookStore.Webhook;
     error?: errors.ApplicationError;
   }
 }
@@ -94,7 +94,7 @@ export declare namespace DeleteWebhook {
 export declare namespace DeleteWebhooks {
   export interface Request {
     body: {
-      ids: string[];
+      ids: Modules.WebhookStore.Webhook['id'][];
     };
     query: {};
   }
@@ -115,7 +115,7 @@ export declare namespace TriggerWebhook {
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {

@@ -50,8 +50,6 @@
   "contentType.collectionName.description": "Nützlich wenn sich der Name der Sammlung und der Tabellenname unterscheiden",
   "contentType.collectionName.label": "Name der Sammlung",
   "contentType.displayName.label": "Anzeigename",
-  "contentType.draftAndPublish.description": "Lege einen Entwurf des Eintrags an bevor er veröffentlicht wird",
-  "contentType.draftAndPublish.label": "Entwurf/Veröffentlichen-System",
   "contentType.kind.change.warning": "Du hast die Art eines Inhaltstyps geändert: API wird resettet (Routen, Controller und Services werden überschrieben).",
   "error.attributeName.reserved-name": "Dieser Name kann nicht für Attribute genutzt werden, da er andere Funktionalitäten beeinträchtigen würde",
   "error.contentType.pluralName-used": "Dieser Wert kann nicht gleich sein wie der Singular-Wert",

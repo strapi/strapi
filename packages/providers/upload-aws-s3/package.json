@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-aws-s3",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "AWS S3 provider for strapi upload",
   "keywords": [
     "upload",
@@ -34,7 +34,7 @@
   "source": "./src/index.ts",
   "types": "./dist/index.d.ts",
   "files": [
-    "./dist"
+    "dist/"
   ],
   "scripts": {
     "build": "pack-up build",
@@ -45,17 +45,17 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.433.0",
+    "@aws-sdk/client-s3": "3.600.0",
     "@aws-sdk/lib-storage": "3.433.0",
     "@aws-sdk/s3-request-presigner": "3.433.0",
     "@aws-sdk/types": "3.433.0",
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.19.0",
+    "@strapi/pack-up": "5.0.0",
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "4.19.0",
-    "tsconfig": "4.19.0"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

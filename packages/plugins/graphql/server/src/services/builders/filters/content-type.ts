@@ -1,6 +1,6 @@
 import { inputObjectType } from 'nexus';
 import type * as Nexus from 'nexus';
-import type { Attribute, Schema } from '@strapi/types';
+import type { Struct, Schema } from '@strapi/types';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => {
@@ -13,7 +13,7 @@ export default ({ strapi }: Context) => {
   const addScalarAttribute = (
     builder: Nexus.blocks.InputDefinitionBlock<any>,
     attributeName: string,
-    attribute: Attribute.Any
+    attribute: Schema.Attribute.AnyAttribute
   ) => {
     const { naming, mappers } = strapi.plugin('graphql').service('utils');
 
@@ -25,7 +25,7 @@ export default ({ strapi }: Context) => {
   const addRelationalAttribute = (
     builder: Nexus.blocks.InputDefinitionBlock<any>,
     attributeName: string,
-    attribute: Attribute.Relation
+    attribute: Schema.Attribute.Relation
   ) => {
     const utils = strapi.plugin('graphql').service('utils');
     const extension = strapi.plugin('graphql').service('extension');
@@ -47,7 +47,7 @@ export default ({ strapi }: Context) => {
   const addComponentAttribute = (
     builder: Nexus.blocks.InputDefinitionBlock<any>,
     attributeName: string,
-    attribute: Attribute.Component
+    attribute: Schema.Attribute.Component
   ) => {
     const utils = strapi.plugin('graphql').service('utils');
     const extension = strapi.plugin('graphql').service('extension');
@@ -64,7 +64,7 @@ export default ({ strapi }: Context) => {
     builder.field(attributeName, { type: getFiltersInputTypeName(component) });
   };
 
-  const buildContentTypeFilters = (contentType: Schema.ContentType) => {
+  const buildContentTypeFilters = (contentType: Struct.ContentTypeSchema) => {
     const utils = strapi.plugin('graphql').service('utils');
     const extension = strapi.plugin('graphql').service('extension');
 
@@ -85,11 +85,11 @@ export default ({ strapi }: Context) => {
 
         const isIDFilterEnabled = extension
           .shadowCRUD(contentType.uid)
-          .field('id')
+          .field('documentId')
           .hasFiltersEnabeld();
         // Add an ID filter to the collection types
         if (contentType.kind === 'collectionType' && isIDFilterEnabled) {
-          t.field('id', { type: getScalarFilterInputTypeName('ID') });
+          t.field('documentId', { type: getScalarFilterInputTypeName('ID') });
         }
 
         // Add every defined attribute
@@ -101,12 +101,12 @@ export default ({ strapi }: Context) => {
 
           // Handle relations
           else if (isRelation(attribute)) {
-            addRelationalAttribute(t, attributeName, attribute as Attribute.Relation);
+            addRelationalAttribute(t, attributeName, attribute as Schema.Attribute.Relation);
           }
 
           // Handle components
           else if (isComponent(attribute)) {
-            addComponentAttribute(t, attributeName, attribute as Attribute.Component);
+            addComponentAttribute(t, attributeName, attribute as Schema.Attribute.Component);
           }
         }
 

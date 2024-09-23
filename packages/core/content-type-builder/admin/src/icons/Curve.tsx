@@ -1,15 +1,15 @@
 import { Box } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const StyledBox = styled(Box)`
   position: absolute;
-  left: -1.125rem;
+  left: -1.8rem;
   top: 0px;
 
   &:before {
     content: '';
-    width: ${4 / 16}rem;
-    height: ${12 / 16}rem;
+    width: 0.4rem;
+    height: 1.2rem;
     background: ${({ theme, color }) => theme.colors[color!]};
     display: block;
   }

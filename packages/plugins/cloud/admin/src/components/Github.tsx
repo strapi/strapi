@@ -4,11 +4,10 @@
  *
  */
 
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { Github } from '@strapi/icons';
+import { Box, Flex, Typography, LinkButton } from '@strapi/design-system';
+import { GitHub } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../utils/getTrad';
 
@@ -16,7 +15,7 @@ import { LinkIcon } from './Icons/LinkIcon';
 
 const EmptyStateIconWrapper = styled(Box)`
   svg {
-    height: ${88 / 16}rem;
+    height: 8.8rem;
   }
 `;
 
@@ -24,9 +23,14 @@ const CustomGithubButton = styled(LinkButton)`
   background-color: #000000;
   color: #ffffff;
   border: none;
-  :hover {
-    background-color: #32324d;
-    border: none;
+
+  & svg > path {
+    fill: ${({ theme }) => theme.colors.neutral0};
+  }
+
+  &:hover {
+    background-color: #32324d !important;
+    border: none !important;
   }
 `;
 
@@ -40,14 +44,14 @@ const GithubBox = () => {
           <LinkIcon />
         </EmptyStateIconWrapper>
         <Box paddingBottom={4}>
-          <Typography variant="beta" as="p" textAlign="center" textColor="neutral1000">
+          <Typography variant="beta" tag="p" textAlign="center" textColor="neutral1000">
             {formatMessage({
               id: getTrad('Homepage.githubBox.title.not-versioned'),
               defaultMessage: 'Push your project on GitHub',
             })}
           </Typography>
         </Box>
-        <Typography variant="epsilon" as="p" textAlign="center" textColor="neutral600">
+        <Typography variant="epsilon" tag="p" textAlign="center" textColor="neutral600">
           {formatMessage({
             id: getTrad('Homepage.githubBox.subTitle.not-versioned'),
             defaultMessage:
@@ -57,7 +61,7 @@ const GithubBox = () => {
         <Box marginTop={4}>
           <CustomGithubButton
             isExternal
-            startIcon={<Github />}
+            startIcon={<GitHub />}
             href="https://github.com/new"
             target="_blank"
           >

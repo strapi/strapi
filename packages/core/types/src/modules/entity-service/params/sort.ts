@@ -1,4 +1,7 @@
-import type { Attribute, Common, Utils } from '../../../types';
+import type * as Schema from '../../../schema';
+
+import type * as UID from '../../../uid';
+import type { Constants, Guard, If } from '../../../utils';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace OrderKind {
@@ -17,9 +20,9 @@ export namespace OrderKind {
  * type C = 'title:asc'; // ❌
  * type D = 'title,description'; // ❌
  */
-type SingleAttribute<TSchemaUID extends Common.UID.Schema> =
+type SingleAttribute<TSchemaUID extends UID.Schema> =
   | 'id'
-  | Utils.Guard.Never<string & Attribute.GetNonPopulatableKeys<TSchemaUID>, string>;
+  | Guard.Never<string & Schema.NonPopulatableAttributeNames<TSchemaUID>, string>;
 
 /**
  * Ordered single non-populatable attribute representation
@@ -30,7 +33,7 @@ type SingleAttribute<TSchemaUID extends Common.UID.Schema> =
  * type C = 'title'; // ❌
  * type D = 'title,description'; // ❌
  */
-type OrderedSingleAttribute<TSchemaUID extends Common.UID.Schema> =
+type OrderedSingleAttribute<TSchemaUID extends UID.Schema> =
   `${SingleAttribute<TSchemaUID>}:${OrderKind.Any}`;
 
 /**
@@ -44,7 +47,7 @@ type OrderedSingleAttribute<TSchemaUID extends Common.UID.Schema> =
  * type E = [42]; // ❌
  * type F = { title: 'asc' }; // ❌
  */
-export type StringNotation<TSchemaUID extends Common.UID.Schema> =
+export type StringNotation<TSchemaUID extends UID.Schema> =
   | SingleAttribute<TSchemaUID>
   | OrderedSingleAttribute<TSchemaUID>
   // TODO: Loose type checking to avoid circular dependencies & infinite recursion
@@ -61,7 +64,9 @@ export type StringNotation<TSchemaUID extends Common.UID.Schema> =
  * type E = [42]; // ❌
  * type F = 'title'; // ❌
  */
-export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID>[];
+export type ArrayNotation<TSchemaUID extends UID.Schema> =
+  | StringNotation<TSchemaUID>[]
+  | ObjectNotation<TSchemaUID>[];
 
 /**
  * Object notation for a sort
@@ -74,15 +79,21 @@ export type ArrayNotation<TSchemaUID extends Common.UID.Schema> = Any<TSchemaUID
  * type E = ['title']; // ❌
  * type F = 'title'; // ❌
  */
-export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
-  [TKey in ObjectNotationKeys<TSchemaUID>]?: TKey extends SingleAttribute<TSchemaUID>
-    ? // First level sort (scalar attributes, id, ...)
-      OrderKind.Any
-    : TKey extends Attribute.GetKeysWithTarget<TSchemaUID>
-    ? // Deep sort (relations with a target, components, media, ...)
-      ObjectNotation<Attribute.GetTarget<TSchemaUID, TKey>>
-    : never;
-};
+export type ObjectNotation<TSchemaUID extends UID.Schema> = If<
+  Constants.AreSchemaRegistriesExtended,
+  {
+    [TKey in ObjectNotationKeys<TSchemaUID>]?: TKey extends SingleAttribute<TSchemaUID>
+      ? // First level sort (scalar attributes, id, ...)
+        OrderKind.Any
+      : TKey extends Schema.AttributeNamesWithTarget<TSchemaUID>
+        ? // Deep sort (relations with a target, components, media, ...)
+          ObjectNotation<Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TKey>>>
+        : never;
+  },
+  {
+    [key: string]: OrderKind.Any | ObjectNotation<TSchemaUID>;
+  }
+>;
 
 /**
  * Represents the keys of an object notation for a sort
@@ -91,9 +102,9 @@ export type ObjectNotation<TSchemaUID extends Common.UID.Schema> = {
  *
  * This means that every member of ObjectNotationKeys can represent either a single non-populatable attribute or an attribute with a target.
  */
-type ObjectNotationKeys<TSchemaUID extends Common.UID.Schema> =
+type ObjectNotationKeys<TSchemaUID extends UID.Schema> =
   | SingleAttribute<TSchemaUID>
-  | Attribute.GetKeysWithTarget<TSchemaUID>;
+  | Schema.AttributeNamesWithTarget<TSchemaUID>;
 
 /**
  * Represents any notation for a sort (string, array, object)
@@ -111,7 +122,7 @@ type ObjectNotationKeys<TSchemaUID extends Common.UID.Schema> =
  * type J = { title: 'asc', author: { name: 'asc' } }; // ✅
  * type K = { author: { email: 'asc', role: { name: 'desc' } } }; // ✅
  */
-export type Any<TSchemaUID extends Common.UID.Schema> =
+export type Any<TSchemaUID extends UID.Schema> =
   | StringNotation<TSchemaUID>
   | ArrayNotation<TSchemaUID>
   | ObjectNotation<TSchemaUID>;

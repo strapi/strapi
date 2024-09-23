@@ -47,7 +47,7 @@ module.exports = {
   decimal() {
     return [withAttributeNamespace('Decimal')];
   },
-  uid({ attribute, uid }) {
+  uid({ attribute }) {
     const { targetField, options } = attribute;
 
     // If there are no params to compute, then return the attribute type alone
@@ -58,18 +58,15 @@ module.exports = {
     const params = [];
 
     // If the targetField property is defined, then reference it,
-    // otherwise, put `undefined` keyword type nodes as placeholders
-    const targetFieldParams = _.isUndefined(targetField)
-      ? [
-          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-          factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword),
-        ]
-      : [factory.createStringLiteral(uid), factory.createStringLiteral(targetField)];
+    // otherwise, put `undefined` keyword type node as placeholder
+    const targetFieldParam = _.isUndefined(targetField)
+      ? factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword)
+      : factory.createStringLiteral(targetField);
 
-    params.push(...targetFieldParams);
+    params.push(targetFieldParam);
 
     // If the options property is defined, transform it to
-    // a type literral node and add it to the params list
+    // a type literal node and add it to the params list
     if (_.isObject(options)) {
       params.push(toTypeLiteral(options));
     }
@@ -90,28 +87,39 @@ module.exports = {
   blocks() {
     return [withAttributeNamespace('Blocks')];
   },
-  media() {
-    return [withAttributeNamespace('Media')];
+  media({ attribute }) {
+    const { allowedTypes, multiple } = attribute;
+
+    const params = [];
+
+    const typesParam = allowedTypes
+      ? factory.createUnionTypeNode(
+          allowedTypes.map((allowedType) => factory.createStringLiteral(allowedType))
+        )
+      : factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
+
+    if (allowedTypes || multiple) {
+      params.push(typesParam);
+    }
+
+    if (multiple) {
+      params.push(factory.createTrue());
+    }
+
+    return [withAttributeNamespace('Media'), params];
   },
-  relation({ uid, attribute }) {
+  relation({ attribute }) {
     const { relation, target } = attribute;
 
     const isMorphRelation = relation.toLowerCase().includes('morph');
 
     if (isMorphRelation) {
-      return [
-        withAttributeNamespace('Relation'),
-        [factory.createStringLiteral(uid, true), factory.createStringLiteral(relation, true)],
-      ];
+      return [withAttributeNamespace('Relation'), [factory.createStringLiteral(relation, true)]];
     }
 
     return [
       withAttributeNamespace('Relation'),
-      [
-        factory.createStringLiteral(uid, true),
-        factory.createStringLiteral(relation, true),
-        factory.createStringLiteral(target, true),
-      ],
+      [factory.createStringLiteral(relation, true), factory.createStringLiteral(target, true)],
     ];
   },
   component({ attribute }) {
@@ -120,6 +128,8 @@ module.exports = {
 
     if (attribute.repeatable) {
       params.push(factory.createTrue());
+    } else {
+      params.push(factory.createFalse());
     }
 
     return [withAttributeNamespace('Component'), params];

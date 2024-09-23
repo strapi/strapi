@@ -5,28 +5,23 @@ import {
   Button,
   Divider,
   Flex,
-  Icon,
-  PopoverPrimitives,
-  Portal,
+  FlexComponent,
+  Popover,
   Typography,
+  TypographyComponent,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { useAppInfo } from '@strapi/helper-plugin';
 import { Cross, Message, Play, Question, Book, PaperPlane } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import onboardingPreview from '../assets/images/onboarding-preview.png';
+import { useAppInfo } from '../features/AppInfo';
 
 const Onboarding = () => {
-  const triggerRef = React.useRef<HTMLButtonElement>(null!);
   const [isOpen, setIsOpen] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfo();
-
-  const handlePopoverVisibility = () => {
-    setIsOpen((prev) => !prev);
-  };
+  const communityEdition = useAppInfo('Onboarding', (state) => state.communityEdition);
 
   const docLinks = [
     ...DOCUMENTATION_LINKS,
@@ -39,130 +34,123 @@ const Onboarding = () => {
     },
   ];
 
-  return (
-    <Box as="aside" position="fixed" bottom={2} right={2}>
-      <HelperButton
-        aria-label={formatMessage(
-          isOpen
-            ? {
-                id: 'app.components.Onboarding.help.button-close',
-                defaultMessage: 'Close help menu',
-              }
-            : {
-                id: 'app.components.Onboarding.help.button',
-                defaultMessage: 'Open help menu',
-              }
-        )}
-        onClick={handlePopoverVisibility}
-        ref={triggerRef}
-      >
-        <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
-      </HelperButton>
+  const Icon = isOpen ? Cross : Question;
 
-      {isOpen && (
-        <Portal>
-          <PopoverPrimitives.Content
-            padding={0}
-            onDismiss={handlePopoverVisibility}
-            source={triggerRef}
-            placement="top-end"
-            spacing={12}
+  return (
+    <Popover.Root onOpenChange={setIsOpen}>
+      <Box position="fixed" bottom={2} right={2}>
+        <Popover.Trigger>
+          <HelperButton
+            aria-label={formatMessage(
+              isOpen
+                ? {
+                    id: 'app.components.Onboarding.help.button-close',
+                    defaultMessage: 'Close help menu',
+                  }
+                : {
+                    id: 'app.components.Onboarding.help.button',
+                    defaultMessage: 'Open help menu',
+                  }
+            )}
           >
-            <Flex
-              justifyContent="space-between"
-              paddingBottom={5}
-              paddingRight={6}
+            <Icon fill="buttonNeutral0" />
+          </HelperButton>
+        </Popover.Trigger>
+        <Popover.Content align="end" side="top" sideOffset={12}>
+          <Flex
+            justifyContent="space-between"
+            paddingBottom={5}
+            paddingRight={6}
+            paddingLeft={6}
+            paddingTop={6}
+          >
+            <TypographyLineHeight fontWeight="bold">
+              {formatMessage({
+                id: 'app.components.Onboarding.title',
+                defaultMessage: 'Get started videos',
+              })}
+            </TypographyLineHeight>
+            <TextLink
+              tag="a"
+              href={WATCH_MORE.href}
+              target="_blank"
+              rel="noreferrer noopener"
+              variant="pi"
+              textColor="primary600"
+            >
+              {formatMessage(WATCH_MORE.label)}
+            </TextLink>
+          </Flex>
+          <Divider />
+          {VIDEO_LINKS.map(({ href, duration, label }, index) => (
+            <VideoLinkWrapper
+              tag="a"
+              href={href}
+              target="_blank"
+              rel="noreferrer noopener"
+              key={href}
+              hasRadius
+              paddingTop={4}
+              paddingBottom={4}
               paddingLeft={6}
-              paddingTop={6}
+              paddingRight={11}
             >
-              <TypographyLineHeight fontWeight="bold">
-                {formatMessage({
-                  id: 'app.components.Onboarding.title',
-                  defaultMessage: 'Get started videos',
-                })}
-              </TypographyLineHeight>
-              <TextLink
-                as="a"
-                href={WATCH_MORE.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                variant="pi"
-                textColor="primary600"
-              >
-                {formatMessage(WATCH_MORE.label)}
-              </TextLink>
-            </Flex>
-            <Divider />
-            {VIDEO_LINKS.map(({ href, duration, label }, index) => (
-              <VideoLinkWrapper
-                as="a"
-                href={href}
-                target="_blank"
-                rel="noreferrer noopener"
-                key={href}
-                hasRadius
-                paddingTop={4}
-                paddingBottom={4}
-                paddingLeft={6}
-                paddingRight={11}
-              >
-                <Box paddingRight={5}>
-                  <Typography textColor="neutral200" variant="alpha">
-                    {index + 1}
-                  </Typography>
-                </Box>
-                <Box position="relative">
-                  <Preview src={onboardingPreview} alt="" />
-                  <IconWrapper
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    background="primary600"
-                    borderRadius="50%"
-                    justifyContent="center"
-                    width={6}
-                    height={6}
-                  >
-                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
-                  </IconWrapper>
-                </Box>
-                <Flex direction="column" alignItems="start" paddingLeft={4}>
-                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
-                  <VisuallyHidden>:</VisuallyHidden>
-                  <Typography textColor="neutral600" variant="pi">
-                    {duration}
-                  </Typography>
-                </Flex>
-              </VideoLinkWrapper>
+              <Box paddingRight={5}>
+                <Number textColor="neutral200" variant="alpha">
+                  {index + 1}
+                </Number>
+              </Box>
+              <Box position="relative">
+                <Preview src={onboardingPreview} alt="" />
+                <IconWrapper
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  background="primary600"
+                  borderRadius="50%"
+                  justifyContent="center"
+                  width={6}
+                  height={6}
+                >
+                  <Play fill="buttonNeutral0" width="1.2rem" height="1.2rem" />
+                </IconWrapper>
+              </Box>
+              <Flex direction="column" alignItems="start" paddingLeft={4}>
+                <Label fontWeight="bold">{formatMessage(label)}</Label>
+                <VisuallyHidden>:</VisuallyHidden>
+                <Typography textColor="neutral600" variant="pi">
+                  {duration}
+                </Typography>
+              </Flex>
+            </VideoLinkWrapper>
+          ))}
+          <Flex
+            direction="column"
+            alignItems="stretch"
+            gap={2}
+            paddingLeft={5}
+            paddingTop={2}
+            paddingBottom={5}
+          >
+            {docLinks.map(({ label, href, icon: Icon }) => (
+              <Flex gap={3} key={href}>
+                <Icon fill="primary600" />
+                <TextLink
+                  tag="a"
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  variant="sigma"
+                  textColor="primary700"
+                >
+                  {formatMessage(label)}
+                </TextLink>
+              </Flex>
             ))}
-            <Flex
-              direction="column"
-              alignItems="stretch"
-              gap={2}
-              paddingLeft={5}
-              paddingTop={2}
-              paddingBottom={5}
-            >
-              {docLinks.map(({ label, href, icon }) => (
-                <Flex gap={3} key={href}>
-                  <Icon as={icon} color="primary600" />
-                  <TextLink
-                    as="a"
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    variant="sigma"
-                    textColor="primary700"
-                  >
-                    {formatMessage(label)}
-                  </TextLink>
-                </Flex>
-              ))}
-            </Flex>
-          </PopoverPrimitives.Content>
-        </Portal>
-      )}
-    </Box>
+          </Flex>
+        </Popover.Content>
+      </Box>
+    </Popover.Root>
   );
 };
 
@@ -171,14 +159,28 @@ const HelperButton = styled(Button)`
   border-radius: 50%;
   padding: ${({ theme }) => theme.spaces[3]};
   /* Resetting 2rem height defined by Button component */
-  height: 100%;
+  height: unset;
+  width: unset;
+
+  & > span {
+    display: flex;
+
+    svg {
+      width: 1.6rem;
+      height: 1.6rem;
+    }
+  }
 `;
 
-const IconWrapper = styled(Flex)`
+const IconWrapper = styled<FlexComponent>(Flex)`
   transform: translate(-50%, -50%);
 `;
 
-const VideoLinkWrapper = styled(Flex)`
+const Number = styled<TypographyComponent>(Typography)``;
+
+const Label = styled<TypographyComponent>(Typography)``;
+
+const VideoLinkWrapper = styled<FlexComponent<'a'>>(Flex)`
   text-decoration: none;
 
   :focus-visible {
@@ -189,12 +191,12 @@ const VideoLinkWrapper = styled(Flex)`
     background: ${({ theme }) => theme.colors.primary100};
 
     /* Hover style for the number displayed */
-    ${Typography}:first-child {
+    ${Number} {
       color: ${({ theme }) => theme.colors.primary500};
     }
 
     /* Hover style for the label */
-    ${Typography}:nth-child(1) {
+    ${Label} {
       color: ${({ theme }) => theme.colors.primary600};
     }
   }
@@ -208,13 +210,14 @@ const Preview = styled.img`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
-const TypographyLineHeight = styled(Typography)`
+const TypographyLineHeight = styled<TypographyComponent>(Typography)`
   /* line height of label and watch more to 1 so they can be better aligned visually */
   line-height: 1;
 `;
 
-const TextLink = styled(TypographyLineHeight)`
+const TextLink = styled<TypographyComponent<'a'>>(Typography)`
   text-decoration: none;
+  line-height: 1;
 
   :hover {
     text-decoration: underline;

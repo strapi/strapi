@@ -1,4 +1,4 @@
-import 'koa-bodyparser';
+import type {} from 'koa-body';
 
 import admin from './admin';
 import apiToken from './api-token';

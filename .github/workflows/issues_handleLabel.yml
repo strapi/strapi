@@ -37,17 +37,6 @@ jobs:
 
             Thank you!
 
-      # Support team auto assign
-      - name: 'Assign: add random solution engineer to reproduction issues'
-        if: "${{ github.event.label.name == 'status: pending reproduction' }}"
-        uses: actions-cool/issues-helper@v3
-        with:
-          actions: 'add-assignees'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.issue.number }}
-          assignees: 'derrickmehaffy, kasonde, bolg55, Eventyret'
-          random-to: 1
-
       # v3 Legacy Issues
       - name: 'Comment: unsupported v3 issues'
         if: "${{ github.event.label.name == 'flag: v3-unsupported' }}"
@@ -171,37 +160,17 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'complete'
 
-      # Critical issue alerting
-      # - name: alert team to critical issue
-      #   if: "${{ github.event.label.name == 'severity: critical' }}"
-      #   uses: rtCamp/action-slack-notify@v2
-      #   env:
-      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-      #     SLACK_CHANNEL: crisis
-      #     SLACK_COLOR: bad
-      #     SLACK_TITLE: Issue marked as Critical!
-      #     SLACK_USERNAME: Strapi-Alerts
-      #     SLACK_FOOTER: Triggered by GitHub Actions
-
-      # Auto assign issues to projects based on source
-      - name: assign issues to Content squad project
-        uses: actions/add-to-project@v0.4.1
-        with:
-          project-url: https://github.com/orgs/strapi/projects/11
-          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:admin, source: core:content-manager, source: core:upload, source: plugin:i18n'
-          label-operator: OR
       - name: assign issues to DevExp squad project
         uses: actions/add-to-project@v0.4.1
         with:
           project-url: https://github.com/orgs/strapi/projects/13
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:content-type-builder, source: core:database, source: core:email, source: core:strapi, source: core:utils, source: plugin:graphql, source: plugin:users-permissions, source: typescript, source: core:data-transfer'
+          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: docs, source: external, source: generators:app, source: generators, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:pack-up, source: utils:upgrade'
           label-operator: OR
-      - name: assign issues to Expansions squad project
+      - name: assign issues to Content squad project
         uses: actions/add-to-project@v0.4.1
         with:
-          project-url: https://github.com/orgs/strapi/projects/4
+          project-url: https://github.com/orgs/strapi/projects/23
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: marketplace, source: plugin:sentry, source: plugin:documentation'
+          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:email, source: core:permissions, source: core:review-workflows, source: core:upload, source: plugin:cloud, source: plugin:color-picker, source:  plugin:documentation, source: , plugin:i18n, source: plugin:sentry, source: providers'
           label-operator: OR

@@ -25,7 +25,7 @@ export const createDispatcher = (
   ws: WebSocket,
   retryMessageOptions = {
     retryMessageMaxRetries: 5,
-    retryMessageTimeout: 15000,
+    retryMessageTimeout: 30000,
   }
 ) => {
   const state: IDispatcherState = {};
@@ -117,7 +117,7 @@ export const createDispatcher = (
   const dispatchTransferStep = async <
     T,
     A extends Client.TransferPushMessage['action'] = Client.TransferPushMessage['action'],
-    S extends Client.TransferPushStep = Client.TransferPushStep
+    S extends Client.TransferPushStep = Client.TransferPushStep,
   >(
     payload: {
       step: S;
@@ -214,4 +214,18 @@ export const connectToWebsocket = (address: Address, options?: Options): Promise
 
 export const trimTrailingSlash = (input: string): string => {
   return input.replace(/\/$/, '');
+};
+
+export const wait = (ms: number) => {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
+
+export const waitUntil = async (test: () => boolean, interval: number): Promise<void> => {
+  while (!test()) {
+    await wait(interval);
+  }
+
+  return Promise.resolve();
 };

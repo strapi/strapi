@@ -8,7 +8,6 @@
 const _ = require('lodash');
 const urlJoin = require('url-join');
 
-const { getAbsoluteServerUrl } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => {
@@ -60,7 +59,7 @@ module.exports = ({ strapi }) => {
       throw new Error('Email was not available.');
     }
 
-    const users = await strapi.query('plugin::users-permissions.user').findMany({
+    const users = await strapi.db.query('plugin::users-permissions.user').findMany({
       where: { email },
     });
 
@@ -83,7 +82,7 @@ module.exports = ({ strapi }) => {
     }
 
     // Retrieve default role.
-    const defaultRole = await strapi
+    const defaultRole = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
@@ -96,7 +95,7 @@ module.exports = ({ strapi }) => {
       confirmed: true,
     };
 
-    const createdUser = await strapi
+    const createdUser = await strapi.db
       .query('plugin::users-permissions.user')
       .create({ data: newUser });
 
@@ -105,7 +104,13 @@ module.exports = ({ strapi }) => {
 
   const buildRedirectUri = (provider = '') => {
     const apiPrefix = strapi.config.get('api.rest.prefix');
-    return urlJoin(getAbsoluteServerUrl(strapi.config), apiPrefix, 'connect', provider, 'callback');
+    return urlJoin(
+      strapi.config.get('server.absoluteUrl'),
+      apiPrefix,
+      'connect',
+      provider,
+      'callback'
+    );
   };
 
   return {

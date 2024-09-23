@@ -1,9 +1,9 @@
 import { has, propEq, isNil, isDate, isObject } from 'lodash/fp';
-import type { Schema } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 // todo[v4]: Find a way to get that dynamically
-const virtualScalarAttributes = ['id'];
+const virtualScalarAttributes = ['id', 'documentId'];
 
 export default ({ strapi }: Context) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -41,7 +41,7 @@ export default ({ strapi }: Context) => {
      * @param {object} contentType
      * @return {object | object[]}
      */
-    graphQLFiltersToStrapiQuery(filters: any, contentType: Schema.Any): any {
+    graphQLFiltersToStrapiQuery(filters: any, contentType: Struct.Schema): any {
       const { isStrapiScalar, isMedia, isRelation, isComponent } = getService('utils').attributes;
       const { operators } = getService('builders').filters;
 

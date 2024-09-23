@@ -17,9 +17,15 @@ export interface Store {
 const storage = new AsyncLocalStorage<Store>();
 
 const transactionCtx = {
-  async run<TCallback extends Callback>(store: Knex.Transaction, cb: TCallback) {
+  async run<TCallback extends Callback>(trx: Knex.Transaction, cb: TCallback) {
+    const store = storage.getStore();
     return storage.run<ReturnType<TCallback>, void[]>(
-      { trx: store, commitCallbacks: [], rollbackCallbacks: [] },
+      {
+        trx,
+        // Fill with existing callbacks if nesting transactions
+        commitCallbacks: store?.commitCallbacks || [],
+        rollbackCallbacks: store?.rollbackCallbacks || [],
+      },
       cb
     );
   },

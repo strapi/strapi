@@ -5,8 +5,9 @@ backend:
   - 'packages/**/server/**/*.(js|ts)'
   - 'packages/**/strapi-server.js'
   - 'packages/{utils,generators,cli,providers}/**'
-  - 'packages/core/*/{lib,bin,ee}/**'
-  - 'api-tests/**'
+  - 'packages/core/*/{lib,bin,ee,src}/**'
+  - 'tests/api/**'
+  - 'packages/core/database/**'
 frontend:
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'
@@ -14,5 +15,4 @@ frontend:
   - 'packages/**/admin/src/**'
   - 'packages/**/admin/ee/admin/**'
   - 'packages/**/strapi-admin.js'
-  - 'packages/core/helper-plugin/**'
   - 'packages/admin-test-utils/**'

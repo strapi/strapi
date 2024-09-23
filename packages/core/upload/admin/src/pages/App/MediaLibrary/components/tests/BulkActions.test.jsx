@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -9,12 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { BulkActions } from '../BulkActions';
 
 jest.mock('../../../../../hooks/useBulkRemove');
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
-}));
+jest.mock('../../../../../components/BulkMoveDialog');
 
 const setup = (
   props = {
@@ -33,13 +28,13 @@ const setup = (
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <MemoryRouter>
           <IntlProvider locale="en">
             <BulkActions {...props} />
           </IntlProvider>
         </MemoryRouter>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>
   );
 };
@@ -49,7 +44,7 @@ describe('BulkActions', () => {
     jest.clearAllMocks();
   });
 
-  test('renders', () => {
+  test('renders', async () => {
     const { container } = setup();
 
     expect(container).toMatchSnapshot();

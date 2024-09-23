@@ -1,20 +1,54 @@
 import * as React from 'react';
 
-import {
-  GuidedTourContextValue,
-  GuidedTourProvider as GuidedTourProviderComponent,
-  GuidedTourSectionKey,
-  GuidedTourStep,
-  GuidedTourStepKey,
-  auth,
-} from '@strapi/helper-plugin';
-import produce from 'immer';
+import { produce } from 'immer';
 import get from 'lodash/get';
 import set from 'lodash/set';
+
+const GUIDED_TOUR_COMPLETED_STEPS = 'GUIDED_TOUR_COMPLETED_STEPS';
+const GUIDED_TOUR_CURRENT_STEP = 'GUIDED_TOUR_CURRENT_STEP';
+const GUIDED_TOUR_SKIPPED = 'GUIDED_TOUR_SKIPPED';
+
+const GUIDED_TOUR_KEYS = {
+  GUIDED_TOUR_COMPLETED_STEPS,
+  GUIDED_TOUR_CURRENT_STEP,
+  GUIDED_TOUR_SKIPPED,
+} as const;
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourProvider
  * -----------------------------------------------------------------------------------------------*/
+
+import { createContext } from '../Context';
+
+type SectionKey = keyof GuidedTourContextValue['guidedTourState'];
+type StepKey = keyof GuidedTourContextValue['guidedTourState'][SectionKey];
+type Step = `${SectionKey}.${StepKey}`;
+interface GuidedTourContextValue {
+  currentStep: Step | null;
+  guidedTourState: {
+    contentTypeBuilder: {
+      create: boolean;
+      success: boolean;
+    };
+    contentManager: {
+      create: boolean;
+      success: boolean;
+    };
+    apiTokens: {
+      create: boolean;
+      success: boolean;
+    };
+  };
+  isGuidedTourVisible: boolean;
+  isSkipped: boolean;
+  setCurrentStep: (step: Step | null) => void | null;
+  setGuidedTourVisibility: (isVisible: boolean) => void;
+  setSkipped: (isSkipped: boolean) => void;
+  setStepState: (step: Step, state: boolean) => void;
+  startSection: (section: SectionKey) => void;
+}
+
+const [GuidedTourProviderImpl, useGuidedTour] = createContext<GuidedTourContextValue>('GuidedTour');
 
 interface GuidedTourProviderProps {
   children: React.ReactNode;
@@ -28,7 +62,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
     // if step is null it is intentional, we need to dispatch it
     if (step !== null) {
       const isStepAlreadyDone = get(guidedTourState, step);
-      const [sectionName, stepName] = step.split('.') as [GuidedTourSectionKey, GuidedTourStepKey];
+      const [sectionName, stepName] = step.split('.') as [SectionKey, StepKey];
       const sectionArray = Object.entries(guidedTourState[sectionName]);
 
       const currentStepIndex = sectionArray.findIndex(([key]) => key === stepName);
@@ -41,7 +75,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       }
     }
 
-    auth.set(null, 'GUIDED_TOUR_CURRENT_STEP', true);
+    window.localStorage.setItem(GUIDED_TOUR_CURRENT_STEP, JSON.stringify(null));
 
     return dispatch({
       type: 'SET_CURRENT_STEP',
@@ -56,7 +90,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
     });
   };
 
-  const setStepState = (currentStep: GuidedTourStep, value: SetStepStateAction['value']) => {
+  const setStepState = (currentStep: Step, value: SetStepStateAction['value']) => {
     addCompletedStep(currentStep);
 
     dispatch({
@@ -66,7 +100,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
     });
   };
 
-  const startSection = (sectionName: GuidedTourSectionKey) => {
+  const startSection = (sectionName: SectionKey) => {
     const sectionSteps = guidedTourState[sectionName];
 
     if (sectionSteps) {
@@ -82,7 +116,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
         Object.values(sectionValue).every(Boolean)
       );
 
-      const [firstStep] = Object.keys(sectionSteps) as [GuidedTourStepKey];
+      const [firstStep] = Object.keys(sectionSteps) as [StepKey];
       const isFirstStepDone = sectionSteps[firstStep];
 
       if (isSectionToShow && !currentStep && !isFirstStepDone) {
@@ -92,7 +126,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
   };
 
   const setSkipped = (value: SetSkippedAction['value']) => {
-    auth.set(value, 'GUIDED_TOUR_SKIPPED', true);
+    window.localStorage.setItem(GUIDED_TOUR_SKIPPED, JSON.stringify(value));
 
     dispatch({
       type: 'SET_SKIPPED',
@@ -101,7 +135,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
   };
 
   return (
-    <GuidedTourProviderComponent
+    <GuidedTourProviderImpl
       guidedTourState={guidedTourState}
       currentStep={currentStep}
       setCurrentStep={setCurrentStep}
@@ -113,7 +147,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       isSkipped={isSkipped}
     >
       {children}
-    </GuidedTourProviderComponent>
+    </GuidedTourProviderImpl>
   );
 };
 
@@ -137,10 +171,6 @@ const initialState = {
       create: false,
       success: false,
     },
-    transferTokens: {
-      create: false,
-      success: false,
-    },
   },
   isGuidedTourVisible: false,
   isSkipped: false,
@@ -148,12 +178,12 @@ const initialState = {
 
 interface SetCurrentStepAction {
   type: 'SET_CURRENT_STEP';
-  step: GuidedTourStep | null;
+  step: Step | null;
 }
 
 interface SetStepStateAction {
   type: 'SET_STEP_STATE';
-  currentStep: GuidedTourStep;
+  currentStep: Step;
   value: boolean;
 }
 
@@ -181,10 +211,7 @@ const reducer: React.Reducer<State, Action> = (state: State = initialState, acti
         break;
       }
       case 'SET_STEP_STATE': {
-        const [section, step] = action.currentStep.split('.') as [
-          GuidedTourSectionKey,
-          GuidedTourStepKey
-        ];
+        const [section, step] = action.currentStep.split('.') as [SectionKey, StepKey];
         draftState.guidedTourState[section][step] = action.value;
         break;
       }
@@ -204,9 +231,15 @@ const reducer: React.Reducer<State, Action> = (state: State = initialState, acti
 
 const initialiseState = (initialState: State) => {
   const copyInitialState = { ...initialState };
-  const guidedTourLocaleStorage = auth.get('GUIDED_TOUR_COMPLETED_STEPS');
-  const currentStepLocaleStorage = auth.get('GUIDED_TOUR_CURRENT_STEP');
-  const skippedLocaleStorage = auth.get('GUIDED_TOUR_SKIPPED');
+  const guidedTourLocaleStorage = JSON.parse(
+    window.localStorage.getItem(GUIDED_TOUR_COMPLETED_STEPS) ?? '[]'
+  );
+  const currentStepLocaleStorage = JSON.parse(
+    window.localStorage.getItem(GUIDED_TOUR_CURRENT_STEP) ?? 'null'
+  );
+  const skippedLocaleStorage = JSON.parse(
+    window.localStorage.getItem(GUIDED_TOUR_SKIPPED) ?? 'null'
+  );
 
   if (Array.isArray(guidedTourLocaleStorage)) {
     guidedTourLocaleStorage.forEach((step) => {
@@ -217,15 +250,12 @@ const initialiseState = (initialState: State) => {
 
   // if current step when initializing mark it as done
   if (currentStepLocaleStorage) {
-    const [sectionName, stepName] = currentStepLocaleStorage.split('.') as [
-      GuidedTourSectionKey,
-      GuidedTourStepKey
-    ];
+    const [sectionName, stepName] = currentStepLocaleStorage.split('.') as [SectionKey, StepKey];
     set(copyInitialState, ['guidedTourState', sectionName, stepName], true);
 
-    addCompletedStep(currentStepLocaleStorage as GuidedTourStep);
+    addCompletedStep(currentStepLocaleStorage as Step);
 
-    auth.set(null, 'GUIDED_TOUR_CURRENT_STEP', true);
+    window.localStorage.setItem(GUIDED_TOUR_CURRENT_STEP, JSON.stringify(null));
   }
 
   if (skippedLocaleStorage !== null) {
@@ -238,8 +268,8 @@ const initialiseState = (initialState: State) => {
 /**
  * @description Add a completed step to the local storage if it does not already exist.
  */
-const addCompletedStep = (completedStep: GuidedTourStep) => {
-  const currentSteps = auth.get('GUIDED_TOUR_COMPLETED_STEPS') ?? [];
+const addCompletedStep = (completedStep: Step) => {
+  const currentSteps = JSON.parse(window.localStorage.getItem(GUIDED_TOUR_COMPLETED_STEPS) ?? '[]');
 
   if (!Array.isArray(currentSteps)) {
     return;
@@ -251,7 +281,10 @@ const addCompletedStep = (completedStep: GuidedTourStep) => {
     return;
   }
 
-  auth.set([...currentSteps, completedStep], 'GUIDED_TOUR_COMPLETED_STEPS', true);
+  window.localStorage.setItem(
+    GUIDED_TOUR_COMPLETED_STEPS,
+    JSON.stringify([...currentSteps, completedStep])
+  );
 };
 
-export { GuidedTourProvider };
+export { GuidedTourProvider, useGuidedTour, GuidedTourContextValue, GUIDED_TOUR_KEYS };

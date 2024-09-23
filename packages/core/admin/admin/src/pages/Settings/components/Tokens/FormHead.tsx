@@ -1,15 +1,17 @@
 import * as React from 'react';
 
-import { Button, Flex, HeaderLayout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Refresh } from '@strapi/icons';
+import { Button, Dialog, Flex } from '@strapi/design-system';
+import { Check, ArrowClockwise } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 
-import { useRegenerateTokenMutation } from '../../../../services/api';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
+import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRegenerateTokenMutation } from '../../../../services/transferTokens';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 interface RegenerateProps {
   onRegenerate?: (newKey: string) => void;
@@ -21,7 +23,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
   const [isLoadingConfirmation, setIsLoadingConfirmation] = React.useState(false);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const [regenerateToken] = useRegenerateTokenMutation();
@@ -32,7 +34,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -44,11 +46,11 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
       }
     } catch (error) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'Something went wrong',
-        },
+        }),
       });
     } finally {
       setIsLoadingConfirmation(false);
@@ -61,50 +63,52 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   };
 
   return (
-    <>
-      <Button
-        startIcon={<Refresh />}
-        type="button"
-        size="S"
-        variant="tertiary"
-        onClick={() => setShowConfirmDialog(true)}
-        name="regenerate"
-      >
-        {formatMessage({
-          id: 'Settings.tokens.regenerate',
-          defaultMessage: 'Regenerate',
-        })}
-      </Button>
+    <Dialog.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <Dialog.Trigger>
+        <Button
+          startIcon={<ArrowClockwise />}
+          type="button"
+          size="S"
+          variant="tertiary"
+          onClick={() => setShowConfirmDialog(true)}
+          name="regenerate"
+        >
+          {formatMessage({
+            id: 'Settings.tokens.regenerate',
+            defaultMessage: 'Regenerate',
+          })}
+        </Button>
+      </Dialog.Trigger>
 
       <ConfirmDialog
-        bodyText={{
-          id: 'Settings.tokens.popUpWarning.message',
-          defaultMessage: 'Are you sure you want to regenerate this token?',
-        }}
-        iconRightButton={<Refresh />}
-        isConfirmButtonLoading={isLoadingConfirmation}
-        isOpen={showConfirmDialog}
-        onToggleDialog={() => setShowConfirmDialog(false)}
-        onConfirm={handleConfirmRegeneration}
-        leftButtonText={{
-          id: 'Settings.tokens.Button.cancel',
-          defaultMessage: 'Cancel',
-        }}
-        rightButtonText={{
-          id: 'Settings.tokens.Button.regenerate',
-          defaultMessage: 'Regenerate',
-        }}
-        title={{
+        title={formatMessage({
           id: 'Settings.tokens.RegenerateDialog.title',
           defaultMessage: 'Regenerate token',
-        }}
-      />
-    </>
+        })}
+        endAction={
+          <Button
+            startIcon={<ArrowClockwise />}
+            loading={isLoadingConfirmation}
+            onClick={handleConfirmRegeneration}
+          >
+            {formatMessage({
+              id: 'Settings.tokens.Button.regenerate',
+              defaultMessage: 'Regenerate',
+            })}
+          </Button>
+        }
+      >
+        {formatMessage({
+          id: 'Settings.tokens.popUpWarning.message',
+          defaultMessage: 'Are you sure you want to regenerate this token?',
+        })}
+      </ConfirmDialog>
+    </Dialog.Root>
   );
 };
 
 interface Token {
-  id: Entity.ID;
+  id: Data.ID;
   name: string;
 }
 
@@ -115,7 +119,6 @@ interface FormHeadProps<TToken extends Token | null> {
   canRegenerate: boolean;
   setToken: (token: TToken) => void;
   isSubmitting: boolean;
-  backUrl: string;
   regenerateUrl: string;
 }
 
@@ -126,7 +129,6 @@ export const FormHead = <TToken extends Token | null>({
   canEditInputs,
   canRegenerate,
   isSubmitting,
-  backUrl,
   regenerateUrl,
 }: FormHeadProps<TToken>) => {
   const { formatMessage } = useIntl();
@@ -138,7 +140,7 @@ export const FormHead = <TToken extends Token | null>({
   };
 
   return (
-    <HeaderLayout
+    <Layouts.Header
       title={token?.name || formatMessage(title)}
       primaryAction={
         canEditInputs ? (
@@ -172,17 +174,7 @@ export const FormHead = <TToken extends Token | null>({
           )
         )
       }
-      navigationAction={
-        <>
-          {/* @ts-expect-error polymorphic */}
-          <Link as={NavLink} startIcon={<ArrowLeft />} to={backUrl}>
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        </>
-      }
+      navigationAction={<BackButton />}
       ellipsis
     />
   );

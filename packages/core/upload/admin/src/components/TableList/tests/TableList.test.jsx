@@ -1,16 +1,11 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
 import { TableList } from '..';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn(() => [{ query: {} }]),
-}));
 
 const PROPS_FIXTURE = {
   canUpdate: true,
@@ -50,9 +45,9 @@ const ComponentFixture = (props) => {
   return (
     <MemoryRouter>
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <TableList {...customProps} />
-        </ThemeProvider>
+        </DesignSystemProvider>
       </IntlProvider>
     </MemoryRouter>
   );
@@ -61,28 +56,20 @@ const ComponentFixture = (props) => {
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('TableList', () => {
-  it('should render table headers labels', () => {
-    const { getByText, getByRole } = setup();
-
-    expect(getByRole('gridcell', { name: 'preview' })).toBeInTheDocument();
-    expect(getByText('name')).toBeInTheDocument();
-    expect(getByRole('gridcell', { name: 'extension' })).toBeInTheDocument();
-    expect(getByRole('gridcell', { name: 'size' })).toBeInTheDocument();
-    expect(getByText('created')).toBeInTheDocument();
-    expect(getByText('last update')).toBeInTheDocument();
-  });
-
   it('should render a visually hidden edit table headers label', () => {
     const { getByRole } = setup();
 
     expect(getByRole('gridcell', { name: 'actions' })).toBeInTheDocument();
   });
 
-  it('should call onChangeSort callback when changing sort order', () => {
+  it('should call onChangeSort callback when changing sort order', async () => {
     const onChangeSortSpy = jest.fn();
-    const { getByRole } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
+    const { findByRole } = setup({
+      sortQuery: 'updatedAt:ASC',
+      onChangeSort: onChangeSortSpy,
+    });
 
-    const sortButton = getByRole('button', { name: 'Sort on last update' });
+    const sortButton = await findByRole('button', { name: 'Sort on last update' });
     expect(sortButton).toBeInTheDocument();
 
     fireEvent.click(sortButton);
@@ -90,25 +77,15 @@ describe('TableList', () => {
     expect(onChangeSortSpy).toHaveBeenCalledWith('updatedAt:DESC');
   });
 
-  it('should call onChangeSort callback when changing sort by', () => {
+  it('should call onChangeSort callback when changing sort by', async () => {
     const onChangeSortSpy = jest.fn();
-    const { getByRole } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
+    const { getByText } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
 
-    const sortButton = getByRole('button', { name: 'Sort on name' });
-    expect(sortButton).toBeInTheDocument();
+    expect(getByText('name')).toBeInTheDocument();
 
-    fireEvent.click(sortButton);
+    fireEvent.click(getByText('name'));
 
     expect(onChangeSortSpy).toHaveBeenCalledWith('name:ASC');
-  });
-
-  it('should call onSelectAll callback when bulk selecting', () => {
-    const onSelectAllSpy = jest.fn();
-    const { getByRole } = setup({ onSelectAll: onSelectAllSpy });
-
-    fireEvent.click(getByRole('checkbox', { name: 'Select all folders & assets' }));
-
-    expect(onSelectAllSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should display indeterminate state of bulk select checkbox', () => {

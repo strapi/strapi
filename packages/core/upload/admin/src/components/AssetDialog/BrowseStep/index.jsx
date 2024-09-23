@@ -1,21 +1,20 @@
 import React from 'react';
 
 import {
-  BaseCheckbox,
+  Checkbox,
   Box,
   Button,
   Divider,
   Flex,
-  GridItem,
   IconButton,
   Typography,
   VisuallyHidden,
+  Grid,
 } from '@strapi/design-system';
-import { usePersistentState } from '@strapi/helper-plugin';
-import { Grid, List, Pencil, Plus } from '@strapi/icons';
+import { GridFour as GridIcon, List, Pencil, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import {
   AssetDefinition,
@@ -24,6 +23,7 @@ import {
   viewOptions,
 } from '../../../constants';
 import { useFolder } from '../../../hooks/useFolder';
+import { usePersistentState } from '../../../hooks/usePersistentState';
 import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import getTrad from '../../../utils/getTrad';
@@ -131,16 +131,19 @@ export const BrowseStep = ({
                     background="neutral0"
                     hasRadius
                     borderColor="neutral200"
-                    height={`${32 / 16}rem`}
+                    height="3.2rem"
                   >
-                    <BaseCheckbox
+                    <Checkbox
                       aria-label={formatMessage({
                         id: getTrad('bulk.select.label'),
                         defaultMessage: 'Select all assets',
                       })}
-                      indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
-                      value={areAllAssetSelected}
-                      onChange={onSelectAllAsset}
+                      checked={
+                        !areAllAssetSelected && hasSomeAssetSelected
+                          ? 'indeterminate'
+                          : areAllAssetSelected
+                      }
+                      onCheckedChange={onSelectAllAsset}
                     />
                   </Flex>
                 )}
@@ -156,7 +159,6 @@ export const BrowseStep = ({
               <Flex marginLeft="auto" shrink={0}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    icon={isGridView ? <List /> : <Grid />}
                     label={
                       isGridView
                         ? formatMessage({
@@ -169,7 +171,9 @@ export const BrowseStep = ({
                           })
                     }
                     onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                  />
+                  >
+                    {isGridView ? <List /> : <GridIcon />}
+                  </IconButton>
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
               </Flex>
@@ -182,7 +186,7 @@ export const BrowseStep = ({
         <Box paddingTop={3}>
           <Breadcrumbs
             onChangeFolder={onChangeFolder}
-            as="nav"
+            tag="nav"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',
@@ -218,14 +222,14 @@ export const BrowseStep = ({
                     defaultMessage: 'There are no assets with the applied filters',
                   })
                 : canCreate && !isSearching
-                ? formatMessage({
-                    id: getTrad('list.assets.empty'),
-                    defaultMessage: 'Upload your first assets...',
-                  })
-                : formatMessage({
-                    id: getTrad('list.assets.empty.no-permissions'),
-                    defaultMessage: 'The asset list is empty',
-                  })
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
             }
           />
         </Box>
@@ -269,7 +273,12 @@ export const BrowseStep = ({
             >
               {folders.map((folder) => {
                 return (
-                  <GridItem col={3} key={`folder-${folder.id}`}>
+                  <Grid.Item
+                    col={3}
+                    key={`folder-${folder.id}`}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}
@@ -277,13 +286,15 @@ export const BrowseStep = ({
                       cardActions={
                         onEditFolder && (
                           <IconButton
-                            icon={<Pencil />}
-                            aria-label={formatMessage({
+                            withTooltip={false}
+                            label={formatMessage({
                               id: getTrad('list.folder.edit'),
                               defaultMessage: 'Edit folder',
                             })}
                             onClick={() => onEditFolder(folder)}
-                          />
+                          >
+                            <Pencil />
+                          </IconButton>
                         )
                       }
                     >
@@ -291,15 +302,19 @@ export const BrowseStep = ({
                         <FolderCardBodyAction
                           onClick={() => handleClickFolderCard(folder.id, folder.path)}
                         >
-                          <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
-                            <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                          <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
+                            <TypographyMaxWidth
+                              fontWeight="semiBold"
+                              ellipsis
+                              textColor="neutral800"
+                            >
                               {folder.name}
                               {/* VisuallyHidden dash here allows to separate folder title and count informations
                               for voice reading structure purpose */}
                               <VisuallyHidden>-</VisuallyHidden>
                             </TypographyMaxWidth>
                             <TypographyMaxWidth
-                              as="span"
+                              tag="span"
                               textColor="neutral600"
                               variant="pi"
                               ellipsis
@@ -320,7 +335,7 @@ export const BrowseStep = ({
                         </FolderCardBodyAction>
                       </FolderCardBody>
                     </FolderCard>
-                  </GridItem>
+                  </Grid.Item>
                 );
               })}
             </FolderGridList>

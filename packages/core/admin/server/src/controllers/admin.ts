@@ -26,16 +26,6 @@ import type {
 
 const { isUsingTypeScript } = tsUtils;
 
-/* TODO extend the request in this way once Replace is available
-  type FileRequest = Context['request'] & { file: unknown };
-  type FileContext = Replace<Context, { request: FileRequest }>;
-*/
-declare module 'koa' {
-  interface Request {
-    files: unknown;
-  }
-}
-
 /**
  * A set of functions called "actions" for `Admin`
  */
@@ -74,11 +64,13 @@ export default {
       },
     } satisfies Init.Response;
   },
+
   async getProjectSettings() {
     return getService(
       'project-settings'
     ).getProjectSettings() satisfies Promise<GetProjectSettings.Response>;
   },
+
   async updateProjectSettings(ctx: Context) {
     const {
       request: { files, body },
@@ -97,6 +89,7 @@ export default {
       ...formatedFiles,
     }) satisfies Promise<UpdateProjectSettings.Response>;
   },
+
   async telemetryProperties(ctx: Context) {
     // If the telemetry is disabled, ignore the request and return early
     if (strapi.telemetry.isDisabled) {
@@ -133,6 +126,7 @@ export default {
       },
     } satisfies TelemetryProperties.Response;
   },
+
   async information() {
     const currentEnvironment: string = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
@@ -141,7 +135,6 @@ export default {
     const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
-    // @ts-expect-error replace use of exists
     const useYarn: boolean = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
@@ -157,15 +150,30 @@ export default {
       },
     } satisfies Information.Response;
   },
+
   async plugins(ctx: Context) {
     const enabledPlugins = strapi.config.get('enabledPlugins') as any;
 
-    const plugins = Object.entries(enabledPlugins).map(([key, plugin]: any) => ({
-      name: plugin.info.name || key,
-      displayName: plugin.info.displayName || plugin.info.name || key,
-      description: plugin.info.description || '',
-      packageName: plugin.info.packageName,
-    }));
+    // List of core plugins that are always enabled,
+    // and so it's not necessary to display them in the plugins list
+    const CORE_PLUGINS = [
+      'content-manager',
+      'content-type-builder',
+      'email',
+      'upload',
+      'i18n',
+      'content-releases',
+      'review-workflows',
+    ];
+
+    const plugins = Object.entries(enabledPlugins)
+      .filter(([key]: any) => !CORE_PLUGINS.includes(key))
+      .map(([key, plugin]: any) => ({
+        name: plugin.info.name || key,
+        displayName: plugin.info.displayName || plugin.info.name || key,
+        description: plugin.info.description || '',
+        packageName: plugin.info.packageName,
+      }));
 
     ctx.send({ plugins }) satisfies Plugins.Response;
   },

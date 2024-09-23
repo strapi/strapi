@@ -1,42 +1,29 @@
 import * as React from 'react';
 
-import {
-  ActionLayout,
-  ContentLayout,
-  HeaderLayout,
-  Main,
-  Flex,
-  Typography,
-  Box,
-} from '@strapi/design-system';
-import {
-  DynamicTable,
-  NoPermissions,
-  SearchURLQuery,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-  Status,
-  PageSizeURLQuery,
-  PaginationURLQuery,
-  CheckPagePermissions,
-  TableHeader,
-} from '@strapi/helper-plugin';
+import { Flex, Typography, Status, IconButton, Dialog } from '@strapi/design-system';
+import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
-import { IntlShape, MessageDescriptor, useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { MessageDescriptor, useIntl } from 'react-intl';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Filters } from '../../../../components/Filters';
+import { Layouts } from '../../../../components/Layouts/Layout';
+import { Page } from '../../../../components/PageHelpers';
+import { Pagination } from '../../../../components/Pagination';
+import { SearchInput } from '../../../../components/SearchInput';
+import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
-import { Filters } from '../../components/Filters';
+import { getDisplayName } from '../../../../utils/users';
 
 import { CreateActionCE } from './components/CreateActionCE';
 import { ModalForm } from './components/NewUserForm';
-import { TableRows } from './components/TableRows';
 
 /* -------------------------------------------------------------------------------------------------
  * ListPageCE
@@ -49,18 +36,15 @@ const ListPageCE = () => {
   const {
     allowedActions: { canCreate, canDelete, canRead },
   } = useRBAC(permissions.settings?.users);
-  const toggleNotification = useNotification();
+  const navigate = useNavigate();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
-  useFocusWhenNavigate();
-  const { data, isError, isLoading } = useAdminUsers(
-    qs.parse(search, { ignoreQueryPrefix: true }),
-    {
-      skip: !canRead,
-    }
-  );
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
+  const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
+  const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
 
-  const { pagination, users } = data ?? {};
+  const { pagination, users = [] } = data ?? {};
 
   const CreateAction = useEnterprise(
     CreateActionCE,
@@ -74,10 +58,7 @@ const ListPageCE = () => {
 
   const headers = TABLE_HEADERS.map((header) => ({
     ...header,
-    metadatas: {
-      ...header.metadatas,
-      label: formatMessage(header.metadatas.label),
-    },
+    label: formatMessage(header.label),
   }));
 
   const title = formatMessage({
@@ -90,16 +71,63 @@ const ListPageCE = () => {
   };
 
   const [deleteAll] = useDeleteManyUsersMutation();
+  const handleDeleteAll = async (ids: Array<SanitizedAdminUser['id']>) => {
+    try {
+      const res = await deleteAll({ ids });
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(res.error),
+        });
+      }
+    } catch (err) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'global.error',
+          defaultMessage: 'An error occurred',
+        }),
+      });
+    }
+  };
+
+  const handleRowClick = (id: SanitizedAdminUser['id']) => () => {
+    if (canRead) {
+      navigate(id.toString());
+    }
+  };
+
+  const handleDeleteClick = (id: SanitizedAdminUser['id']) => async () => {
+    setIdsToDelete([id]);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = async () => {
+    await handleDeleteAll(idsToDelete);
+    setShowDeleteConfirmation(false);
+  };
 
   // block rendering until the EE component is fully loaded
   if (!CreateAction) {
     return null;
   }
 
+  if (isError) {
+    return <Page.Error />;
+  }
+
   return (
-    <Main aria-busy={isLoading}>
-      <SettingsPageTitle name="Users" />
-      <HeaderLayout
+    <Page.Main aria-busy={isLoading}>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Users',
+          }
+        )}
+      </Page.Title>
+      <Layouts.Header
         primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
         subtitle={formatMessage({
@@ -107,221 +135,201 @@ const ListPageCE = () => {
           defaultMessage: 'All the users who have access to the Strapi admin panel',
         })}
       />
-      {canRead && (
-        <ActionLayout
-          startActions={
-            <>
-              <SearchURLQuery
-                label={formatMessage(
-                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                  { target: title }
-                )}
-              />
-              {/* @ts-expect-error – TODO: fix the way filters work and are passed around, this will be a headache. */}
-              <Filters displayedFilters={DISPLAYED_HEADERS} />
-            </>
-          }
-        />
-      )}
-
-      <ContentLayout>
-        {!canRead && <NoPermissions />}
-        {/* TODO: Replace error message with something better */}
-        {isError && <div>TODO: An error occurred</div>}
-        {canRead && (
+      <Layouts.Action
+        startActions={
           <>
-            <DynamicTable
-              contentType="Users"
-              isLoading={isLoading}
-              onConfirmDeleteAll={async (ids) => {
-                const res = await deleteAll({ ids });
-
-                if ('error' in res) {
-                  toggleNotification({
-                    type: 'warning',
-                    message: formatAPIError(res.error),
-                  });
-                }
-              }}
-              onConfirmDelete={async (id) => {
-                const res = await deleteAll({ ids: [id] });
-
-                if ('error' in res) {
-                  toggleNotification({
-                    type: 'warning',
-                    message: formatAPIError(res.error),
-                  });
-                }
-              }}
-              headers={headers}
-              rows={users}
-              withBulkActions
-              withMainAction={canDelete}
-            >
-              <TableRows canDelete={canDelete} />
-            </DynamicTable>
-
-            {pagination && (
-              <Box paddingTop={4}>
-                <Flex alignItems="flex-end" justifyContent="space-between">
-                  <PageSizeURLQuery />
-                  <PaginationURLQuery pagination={pagination} />
-                </Flex>
-              </Box>
-            )}
+            <SearchInput
+              label={formatMessage(
+                { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                { target: title }
+              )}
+            />
+            <Filters.Root options={FILTERS}>
+              <Filters.Trigger />
+              <Filters.Popover />
+              <Filters.List />
+            </Filters.Root>
           </>
-        )}
-      </ContentLayout>
+        }
+      />
+      <Layouts.Content>
+        <Table.Root rows={users} headers={headers}>
+          <Table.ActionBar />
+          <Table.Content>
+            <Table.Head>
+              {canDelete ? <Table.HeaderCheckboxCell /> : null}
+              {headers.map((header) => (
+                <Table.HeaderCell key={header.name} {...header} />
+              ))}
+            </Table.Head>
+            <Table.Empty />
+            <Table.Loading />
+            <Table.Body>
+              {users.map((user) => (
+                <Table.Row
+                  key={user.id}
+                  onClick={handleRowClick(user.id)}
+                  cursor={canRead ? 'pointer' : 'default'}
+                >
+                  {canDelete ? <Table.CheckboxCell id={user.id} /> : null}
+                  {headers.map(({ cellFormatter, name, ...rest }) => {
+                    return (
+                      <Table.Cell key={name}>
+                        {typeof cellFormatter === 'function' ? (
+                          cellFormatter(user, { name, ...rest })
+                        ) : (
+                          // @ts-expect-error – name === "roles" has the data value of `AdminRole[]` but the header has a cellFormatter value so this shouldn't be called.
+                          <Typography textColor="neutral800">{user[name] || '-'}</Typography>
+                        )}
+                      </Table.Cell>
+                    );
+                  })}
+                  {canRead || canDelete ? (
+                    <Table.Cell onClick={(e) => e.stopPropagation()}>
+                      <Flex justifyContent="end">
+                        {canRead ? (
+                          <IconButton
+                            tag={NavLink}
+                            to={user.id.toString()}
+                            label={formatMessage(
+                              { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+                              { target: getDisplayName(user) }
+                            )}
+                            variant="ghost"
+                          >
+                            <Pencil />
+                          </IconButton>
+                        ) : null}
+                        {canDelete ? (
+                          <IconButton
+                            onClick={handleDeleteClick(user.id)}
+                            label={formatMessage(
+                              { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
+                              { target: getDisplayName(user) }
+                            )}
+                            variant="ghost"
+                          >
+                            <Trash />
+                          </IconButton>
+                        ) : null}
+                      </Flex>
+                    </Table.Cell>
+                  ) : null}
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table.Content>
+        </Table.Root>
+        <Pagination.Root {...pagination}>
+          <Pagination.PageSize />
+          <Pagination.Links />
+        </Pagination.Root>
+      </Layouts.Content>
       {isModalOpened && <ModalForm onToggle={handleToggle} />}
-    </Main>
+      <Dialog.Root open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <ConfirmDialog onConfirm={confirmDelete} />
+      </Dialog.Root>
+    </Page.Main>
   );
 };
 
-interface ListPageTableHeader extends Omit<TableHeader, 'metadatas' | 'name'> {
-  name: Extract<
-    keyof SanitizedAdminUser,
-    'firstname' | 'lastname' | 'email' | 'roles' | 'username' | 'isActive'
-  >;
-  cellFormatter?: (
-    data: SanitizedAdminUser,
-    meta: Omit<ListPageTableHeaderWithStringMetadataLabel, 'cellFormatter'> &
-      Pick<IntlShape, 'formatMessage'>
-  ) => React.ReactNode;
-  key: string;
-  metadatas: {
-    label: MessageDescriptor;
-  } & Omit<TableHeader['metadatas'], 'label'>;
-}
-
-interface ListPageTableHeaderWithStringMetadataLabel
-  extends Omit<ListPageTableHeader, 'metadatas'> {
-  metadatas: {
-    label: string;
-  } & Omit<ListPageTableHeader['metadatas'], 'label'>;
-}
-
-const TABLE_HEADERS = [
+const TABLE_HEADERS: Array<
+  Omit<Table.Header<SanitizedAdminUser, any>, 'label'> & { label: MessageDescriptor }
+> = [
   {
     name: 'firstname',
-    key: 'firstname',
-    metadatas: {
-      label: {
-        id: 'Settings.permissions.users.firstname',
-        defaultMessage: 'Firstname',
-      },
-      sortable: true,
+    label: {
+      id: 'Settings.permissions.users.firstname',
+      defaultMessage: 'Firstname',
     },
+    sortable: true,
   },
   {
     name: 'lastname',
-    key: 'lastname',
-    metadatas: {
-      label: {
-        id: 'Settings.permissions.users.lastname',
-        defaultMessage: 'Lastname',
-      },
-      sortable: true,
+    label: {
+      id: 'Settings.permissions.users.lastname',
+      defaultMessage: 'Lastname',
     },
+    sortable: true,
   },
   {
-    key: 'email',
     name: 'email',
-    metadatas: {
-      label: { id: 'Settings.permissions.users.email', defaultMessage: 'Email' },
-      sortable: true,
-    },
+    label: { id: 'Settings.permissions.users.email', defaultMessage: 'Email' },
+    sortable: true,
   },
   {
-    key: 'roles',
     name: 'roles',
-    metadatas: {
-      label: {
-        id: 'Settings.permissions.users.roles',
-        defaultMessage: 'Roles',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.permissions.users.roles',
+      defaultMessage: 'Roles',
     },
-    cellFormatter({ roles }, { formatMessage }) {
+    sortable: false,
+    cellFormatter({ roles }) {
       return (
-        <Typography textColor="neutral800">
-          {roles
-            .map((role) =>
-              formatMessage({
-                id: `Settings.permissions.users.${role.code}`,
-                defaultMessage: role.name,
-              })
-            )
-            .join(',\n')}
-        </Typography>
+        <Typography textColor="neutral800">{roles.map((role) => role.name).join(',\n')}</Typography>
       );
     },
   },
   {
-    key: 'username',
     name: 'username',
-    metadatas: {
-      label: {
-        id: 'Settings.permissions.users.username',
-        defaultMessage: 'Username',
-      },
-      sortable: true,
+    label: {
+      id: 'Settings.permissions.users.username',
+      defaultMessage: 'Username',
     },
+    sortable: true,
   },
   {
-    key: 'isActive',
     name: 'isActive',
-    metadatas: {
-      label: {
-        id: 'Settings.permissions.users.user-status',
-        defaultMessage: 'User status',
-      },
-      sortable: false,
+    label: {
+      id: 'Settings.permissions.users.user-status',
+      defaultMessage: 'User status',
     },
-    cellFormatter({ isActive }, { formatMessage }) {
+    sortable: false,
+    cellFormatter({ isActive }) {
       return (
         <Flex>
-          <Status variant={isActive ? 'success' : 'danger'} />
-          <Typography textColor="neutral800">
-            {formatMessage({
-              id: isActive
-                ? 'Settings.permissions.users.active'
-                : 'Settings.permissions.users.inactive',
-              defaultMessage: isActive ? 'Active' : 'Inactive',
-            })}
-          </Typography>
+          <Status
+            size="S"
+            borderWidth={0}
+            background="transparent"
+            color="neutral800"
+            variant={isActive ? 'success' : 'danger'}
+          >
+            <Typography>{isActive ? 'Active' : 'Inactive'}</Typography>
+          </Status>
         </Flex>
       );
     },
   },
-] satisfies ListPageTableHeader[];
+];
 
-const DISPLAYED_HEADERS = [
+const FILTERS = [
   {
     name: 'firstname',
-    metadatas: { label: 'Firstname' },
-    fieldSchema: { type: 'string' },
+    label: 'Firstname',
+    type: 'string',
   },
   {
     name: 'lastname',
-    metadatas: { label: 'Lastname' },
-    fieldSchema: { type: 'string' },
+    label: 'Lastname',
+    type: 'string',
   },
   {
     name: 'email',
-    metadatas: { label: 'Email' },
-    fieldSchema: { type: 'email' },
+    label: 'Email',
+    type: 'email',
   },
   {
     name: 'username',
-    metadatas: { label: 'Username' },
-    fieldSchema: { type: 'string' },
+    label: 'Username',
+    type: 'string',
   },
   {
     name: 'isActive',
-    metadatas: { label: 'Active user' },
-    fieldSchema: { type: 'boolean' },
+    label: 'Active user',
+    type: 'boolean',
   },
-];
+] satisfies Filters.Filter[];
 
 /* -------------------------------------------------------------------------------------------------
  * ListPage
@@ -350,14 +358,13 @@ const ListPage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListPage = () => {
-  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.users.main);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.users.read);
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 
 export { ProtectedListPage, ListPage, ListPageCE };
-export type { ListPageTableHeaderWithStringMetadataLabel as ListPageTableHeader };

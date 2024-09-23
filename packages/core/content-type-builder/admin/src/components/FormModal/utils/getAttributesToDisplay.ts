@@ -1,10 +1,14 @@
+import { MAX_COMPONENT_DEPTH } from '../../../constants';
+import { getComponentDepth } from '../../../utils/getMaxDepth';
+
 import type { IconByType } from '../../AttributeIcon';
-import type { UID } from '@strapi/types';
+import type { NestedComponent } from '../../DataManagerProvider/utils/retrieveNestedComponents';
+import type { Internal } from '@strapi/types';
 
 export const getAttributesToDisplay = (
   dataTarget = '',
-  targetUid: UID.Any,
-  nestedComponents: Array<UID.Any>
+  targetUid: Internal.UID.Schema,
+  nestedComponents: Array<NestedComponent>
 ): IconByType[][] => {
   const defaultAttributes: IconByType[] = [
     'text',
@@ -22,9 +26,6 @@ export const getAttributesToDisplay = (
   ];
 
   const isPickingAttributeForAContentType = dataTarget === 'contentType';
-  const isNestedInAnotherComponent = nestedComponents.includes(targetUid);
-  const canAddComponentInAnotherComponent =
-    !isPickingAttributeForAContentType && !isNestedInAnotherComponent;
 
   if (isPickingAttributeForAContentType) {
     return [
@@ -34,8 +35,15 @@ export const getAttributesToDisplay = (
     ];
   }
 
-  if (canAddComponentInAnotherComponent) {
-    return [defaultAttributes, ['component']];
+  // this will only run when adding attributes to components
+  if (dataTarget) {
+    const componentDepth = getComponentDepth(targetUid, nestedComponents);
+    const isNestedInAnotherComponent = componentDepth >= MAX_COMPONENT_DEPTH;
+    const canAddComponentInAnotherComponent =
+      !isPickingAttributeForAContentType && !isNestedInAnotherComponent;
+    if (canAddComponentInAnotherComponent) {
+      return [defaultAttributes, ['component']];
+    }
   }
 
   return [defaultAttributes];

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -15,21 +15,33 @@ import SearchAsset from '../index';
 const handleChange = jest.fn();
 
 const makeApp = (queryValue) => (
-  <ThemeProvider theme={lightTheme}>
+  <DesignSystemProvider>
     <IntlProvider locale="en">
       <SearchAsset onChangeSearch={handleChange} queryValue={queryValue} />
     </IntlProvider>
-  </ThemeProvider>
+  </DesignSystemProvider>
 );
 
-describe('<SearchURLQuery />', () => {
+describe('SearchAsset', () => {
   it('renders and matches the snapshot', () => {
     const { container } = render(makeApp(null));
 
     expect(container).toMatchInlineSnapshot(`
-      .c4 {
+      .c0 {
+        border-radius: 4px;
+        display: inline-flex;
+        cursor: pointer;
+      }
+
+      .c1 {
+        align-items: center;
+        justify-content: center;
+        flex-direction: row;
+        display: flex;
+      }
+
+      .c3 {
         border: 0;
-        -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
         height: 1px;
         margin: -1px;
@@ -39,138 +51,65 @@ describe('<SearchURLQuery />', () => {
         width: 1px;
       }
 
-      .c0 {
-        background: #ffffff;
-        padding: 8px;
-        border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
-        cursor: pointer;
-      }
-
-      .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
       .c2 {
-        position: relative;
-        outline: none;
+        text-decoration: none;
+        padding-block: 0.7rem;
+        padding-inline: 0.7rem;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+        color: #32324d;
+        color: #8e8ea9;
       }
 
-      .c2 > svg {
-        height: 12px;
-        width: 12px;
+      .c2:hover {
+        background-color: #f6f6f9;
+        color: #666687;
       }
 
-      .c2 > svg > g,
-      .c2 > svg path {
-        fill: #ffffff;
+      .c2:active {
+        background-color: #eaeaef;
       }
 
       .c2[aria-disabled='true'] {
-        pointer-events: none;
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+        color: #666687;
+        cursor: default;
       }
 
-      .c2:after {
-        -webkit-transition-property: all;
-        transition-property: all;
-        -webkit-transition-duration: 0.2s;
-        transition-duration: 0.2s;
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -4px;
-        bottom: -4px;
-        left: -4px;
-        right: -4px;
-        border: 2px solid transparent;
-      }
-
-      .c2:focus-visible {
-        outline: none;
-      }
-
-      .c2:focus-visible:after {
-        border-radius: 8px;
-        content: '';
-        position: absolute;
-        top: -5px;
-        bottom: -5px;
-        left: -5px;
-        right: -5px;
-        border: 2px solid #4945ff;
-      }
-
-      .c3 {
-        border-color: #dcdce4;
-        height: 2rem;
-        width: 2rem;
-      }
-
-      .c3 svg g,
-      .c3 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c3:hover svg g,
-      .c3:focus svg g,
-      .c3:hover svg path,
-      .c3:focus svg path {
-        fill: #666687;
-      }
-
-      .c3[aria-disabled='true'] svg path {
-        fill: #666687;
+      @media (prefers-reduced-motion: no-preference) {
+        .c2 {
+          transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
       }
 
       <div>
-        <span>
-          <button
-            aria-disabled="false"
-            aria-labelledby=":r0:"
-            class="c0 c1 c2 c3"
-            tabindex="0"
-            type="button"
+        <button
+          aria-disabled="false"
+          class="c0 c1 c2"
+          data-state="closed"
+        >
+          <svg
+            aria-hidden="true"
+            fill="currentColor"
+            focusable="false"
+            height="16"
+            viewBox="0 0 32 32"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <span
-              class="c4"
-            >
-              Search
-            </span>
-            <svg
-              aria-hidden="true"
-              fill="none"
-              focusable="false"
-              height="1rem"
-              viewBox="0 0 24 24"
-              width="1rem"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                clip-rule="evenodd"
-                d="m23.813 20.163-5.3-5.367a9.792 9.792 0 0 0 1.312-4.867C19.825 4.455 15.375 0 9.913 0 4.45 0 0 4.455 0 9.929c0 5.473 4.45 9.928 9.912 9.928a9.757 9.757 0 0 0 5.007-1.4l5.275 5.35a.634.634 0 0 0 .913 0l2.706-2.737a.641.641 0 0 0 0-.907ZM9.91 3.867c3.338 0 6.05 2.718 6.05 6.061s-2.712 6.061-6.05 6.061c-3.337 0-6.05-2.718-6.05-6.06 0-3.344 2.713-6.062 6.05-6.062Z"
-                fill="#32324D"
-                fill-rule="evenodd"
-              />
-            </svg>
-          </button>
-        </span>
-        <div
-          class="c4"
+            <path
+              d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
+            />
+          </svg>
+          <span
+            class="c3"
+          >
+            Search
+          </span>
+        </button>
+        <span
+          class="c3"
         >
           <p
             aria-live="polite"
@@ -190,7 +129,7 @@ describe('<SearchURLQuery />', () => {
             id="live-region-alert"
             role="alert"
           />
-        </div>
+        </span>
       </div>
     `);
   });
@@ -208,7 +147,7 @@ describe('<SearchURLQuery />', () => {
   it('should call handleChange when submitting search input', () => {
     const { container } = render(makeApp(null));
 
-    fireEvent.click(container.querySelector('button[type="button"]'));
+    fireEvent.click(container.querySelector('button'));
     const input = container.querySelector('input[name="search"]');
 
     fireEvent.change(input, { target: { value: 'michka' } });

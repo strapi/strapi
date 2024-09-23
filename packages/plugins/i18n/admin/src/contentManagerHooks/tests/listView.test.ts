@@ -1,42 +1,94 @@
 import { addColumnToTableHook } from '../listView';
 
-describe('addColumnToTableHook', () => {
-  it('does nothing when there s no i18n.localized key in the action', () => {
-    const displayedHeaders = ['one'];
-    const layout = {
-      components: {},
-      contentType: { pluginOptions: {} },
-    };
+import type { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
 
-    // @ts-expect-error – test purpose
-    const result = addColumnToTableHook({ displayedHeaders, layout });
+describe('addColumnToTableHook', () => {
+  const DEFAULT_FIELD: ListFieldLayout = {
+    attribute: {
+      type: 'string',
+    },
+    name: 'id',
+    label: 'ID',
+  };
+
+  const DEFAULT_LAYOUT: ListLayout = {
+    layout: [DEFAULT_FIELD],
+    settings: {
+      bulkable: true,
+      defaultSortBy: 'id',
+      defaultSortOrder: 'asc',
+      filterable: true,
+      searchable: true,
+      pageSize: 10,
+      mainField: 'name',
+    },
+    metadatas: {},
+    options: {
+      i18n: {
+        localized: false,
+      },
+    },
+  };
+
+  it('does nothing when there is no i18n.localized key in the action', () => {
+    const result = addColumnToTableHook({
+      displayedHeaders: [DEFAULT_FIELD],
+      layout: DEFAULT_LAYOUT,
+    });
 
     expect(result).toHaveProperty('displayedHeaders');
     expect(result).toHaveProperty('layout');
     expect(result.displayedHeaders).toHaveLength(1);
-    expect(result.displayedHeaders).toEqual(['one']);
+    expect(result.displayedHeaders).toMatchInlineSnapshot(`
+      [
+        {
+          "attribute": {
+            "type": "string",
+          },
+          "label": "ID",
+          "name": "id",
+        },
+      ]
+    `);
   });
 
   it('adds a header to the displayedHeaders array when the content type is localized', () => {
-    const displayedHeaders: unknown[] = [];
-    const layout = {
-      components: {},
-      contentType: {
-        pluginOptions: {
-          i18n: { localized: true },
+    const result = addColumnToTableHook({
+      displayedHeaders: [DEFAULT_FIELD],
+      layout: {
+        ...DEFAULT_LAYOUT,
+        options: {
+          i18n: {
+            localized: true,
+          },
         },
       },
-    };
+    });
 
-    // @ts-expect-error – test purpose
-    const result = addColumnToTableHook({ displayedHeaders, layout });
+    expect(result.displayedHeaders[0]).toMatchInlineSnapshot(`
+      {
+        "attribute": {
+          "type": "string",
+        },
+        "label": "ID",
+        "name": "id",
+      }
+    `);
 
-    // The anonymous function of cellFormatter creates problem, because it's anonymous
-    // In our scenario, it's even more tricky because we use a closure in order to pass
-    // the locales.
-    // Stringifying the action allows us to have a name inside the expectation for the "cellFormatter" key
-    expect(JSON.stringify(result.displayedHeaders)).toBe(
-      '[{"key":"__locale_key__","fieldSchema":{"type":"string"},"metadatas":{"label":"Content available in","searchable":false,"sortable":false},"name":"locales"}]'
-    );
+    expect(result.displayedHeaders[1]).toMatchInlineSnapshot(`
+      {
+        "attribute": {
+          "type": "string",
+        },
+        "cellFormatter": [Function],
+        "label": {
+          "defaultMessage": "Available in",
+          "id": "i18n.list-view.table.header.label",
+        },
+        "name": "locales",
+        "searchable": false,
+        "sortable": false,
+      }
+    `);
   });
 });

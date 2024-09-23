@@ -1,0 +1,11 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["./src/index.ts"],
+  "out": "./docs",
+  "theme": "github-wiki",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-github-wiki-theme"],
+  "includeVersion": true,
+  "cleanOutputDir": true,
+  "emit": "docs",
+  "name": "Strapi Type System"
+}

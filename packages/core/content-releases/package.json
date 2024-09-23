@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "4.19.0",
+  "version": "5.0.0",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -21,14 +21,14 @@
   ],
   "exports": {
     "./strapi-admin": {
-      "types": "./dist/admin/index.d.ts",
+      "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "types": "./dist/server/index.d.ts",
+      "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",
@@ -37,7 +37,7 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "./dist",
+    "dist/",
     "strapi-server.js"
   ],
   "scripts": {
@@ -55,51 +55,49 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "1.14.1",
-    "@strapi/helper-plugin": "4.19.0",
-    "@strapi/icons": "1.14.1",
+    "@strapi/database": "workspace:*",
+    "@strapi/design-system": "2.0.0-rc.11",
+    "@strapi/icons": "2.0.0-rc.11",
     "@strapi/types": "workspace:*",
-    "@strapi/utils": "4.19.0",
-    "axios": "1.6.0",
-    "formik": "2.4.0",
+    "@strapi/utils": "workspace:*",
+    "date-fns": "2.30.0",
+    "date-fns-tz": "2.0.1",
+    "formik": "2.4.5",
     "lodash": "4.17.21",
-    "react-intl": "6.4.1",
-    "react-redux": "8.1.1",
+    "node-schedule": "2.1.1",
+    "react-intl": "6.6.2",
+    "react-redux": "8.1.3",
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.19.0",
-    "@strapi/admin-test-utils": "4.19.0",
-    "@strapi/pack-up": "workspace:*",
-    "@strapi/strapi": "4.19.0",
-    "@testing-library/react": "14.0.0",
-    "@testing-library/user-event": "14.4.3",
+    "@strapi/admin": "workspace:*",
+    "@strapi/admin-test-utils": "workspace:*",
+    "@strapi/content-manager": "workspace:*",
+    "@strapi/pack-up": "5.0.0",
+    "@testing-library/dom": "10.1.0",
+    "@testing-library/react": "15.0.7",
+    "@testing-library/user-event": "14.5.2",
     "@types/koa": "2.13.4",
-    "@types/styled-components": "5.1.26",
-    "koa": "2.13.4",
+    "koa": "2.15.2",
     "msw": "1.3.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-query": "3.39.3",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8",
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@strapi/admin": "^4.19.0",
-    "@strapi/strapi": "^4.15.1",
+    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/content-manager": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "5.3.4",
-    "styled-components": "5.3.3"
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",
     "npm": ">=6.0.0"
-  },
-  "nx": {
-    "implicitDependencies": [
-      "!@strapi/strapi"
-    ]
   },
   "strapi": {
     "name": "content-releases",

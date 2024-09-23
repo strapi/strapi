@@ -134,6 +134,12 @@
       "type": "relation",
       "relation": "morphToMany"
     },
+    "morph_one": {
+      "type": "relation",
+      "relation": "morphOne",
+      "target": "api::tag.tag",
+      "morphBy": "taggable"
+    },
     "custom_field": {
       "type": "customField",
       "customField": "plugin::color-picker.color"
@@ -146,6 +152,10 @@
     "cats": {
       "type": "dynamiczone",
       "components": ["basic.relation", "basic.simple"]
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "short_text"
     }
   }
 }

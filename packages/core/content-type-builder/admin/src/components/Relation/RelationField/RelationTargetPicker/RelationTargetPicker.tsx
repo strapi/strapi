@@ -1,6 +1,6 @@
-import { Menu } from '@strapi/design-system/v2';
+import { Menu } from '@strapi/design-system';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../../../hooks/useDataManager';
 import { isAllowedContentTypesForRelations } from '../../../../utils';
@@ -59,7 +59,7 @@ export const RelationTargetPicker = ({
   return (
     <Menu.Root>
       <MenuTrigger>{`${displayName} ${plugin ? `(from: ${plugin})` : ''}`}</MenuTrigger>
-      <Menu.Content zIndex={5}>
+      <Menu.Content zIndex="popover">
         {allowedContentTypesForRelation.map(({ uid, title, restrictRelationsTo, plugin }) => (
           <Menu.Item key={uid} onSelect={handleSelect({ uid, plugin, title, restrictRelationsTo })}>
             {title}&nbsp;
@@ -71,12 +71,11 @@ export const RelationTargetPicker = ({
   );
 };
 
-/**
- * TODO: this needs to be solved in the Design-System
- */
 const MenuTrigger = styled(Menu.Trigger)`
-  svg {
-    width: ${6 / 16}rem;
-    height: ${4 / 16}rem;
+  max-width: 16.8rem;
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;

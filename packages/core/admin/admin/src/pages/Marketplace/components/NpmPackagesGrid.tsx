@@ -1,17 +1,11 @@
-import {
-  Box,
-  Flex,
-  Grid,
-  GridItem,
-  GridLayout,
-  Icon,
-  Loader,
-  Typography,
-} from '@strapi/design-system';
-import { AnErrorOccurred, AppInfoContextValue } from '@strapi/helper-plugin';
-import { EmptyDocuments } from '@strapi/icons';
+import { Box, BoxComponent, Flex, Grid, Typography } from '@strapi/design-system';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
+
+import { Layouts } from '../../../components/Layouts/Layout';
+import { Page } from '../../../components/PageHelpers';
+import { AppInfoContextValue } from '../../../features/AppInfo';
 
 import { NpmPackageCard, NpmPackageCardProps } from './NpmPackageCard';
 
@@ -39,19 +33,11 @@ const NpmPackagesGrid = ({
   const { formatMessage } = useIntl();
 
   if (status === 'error') {
-    return (
-      <Flex paddingTop={8}>
-        <AnErrorOccurred />
-      </Flex>
-    );
+    return <Page.Error />;
   }
 
   if (status === 'loading') {
-    return (
-      <Flex justifyContent="center" paddingTop={8}>
-        <Loader>Loading content...</Loader>
-      </Flex>
-    );
+    return <Page.Loading />;
   }
 
   const emptySearchMessage = formatMessage(
@@ -65,18 +51,18 @@ const NpmPackagesGrid = ({
   if (npmPackages.length === 0) {
     return (
       <Box position="relative">
-        <GridLayout>
+        <Layouts.Grid size="M">
           {Array(12)
             .fill(null)
             .map((_, idx) => (
               <EmptyPluginCard key={idx} height="234px" hasRadius />
             ))}
-        </GridLayout>
+        </Layouts.Grid>
         <Box position="absolute" top={11} width="100%">
           <Flex alignItems="center" justifyContent="center" direction="column">
-            <Icon as={EmptyDocuments} color={undefined} width="160px" height="88px" />
+            <EmptyDocuments width="160px" height="88px" />
             <Box paddingTop={6}>
-              <Typography variant="delta" as="p" textColor="neutral600">
+              <Typography variant="delta" tag="p" textColor="neutral600">
                 {emptySearchMessage}
               </Typography>
             </Box>
@@ -87,9 +73,17 @@ const NpmPackagesGrid = ({
   }
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {npmPackages.map((npmPackage) => (
-        <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
+        <Grid.Item
+          col={4}
+          s={6}
+          xs={12}
+          style={{ height: '100%' }}
+          key={npmPackage.id}
+          direction="column"
+          alignItems="stretch"
+        >
           <NpmPackageCard
             npmPackage={npmPackage}
             isInstalled={installedPackageNames.includes(npmPackage.attributes.npmPackageName)}
@@ -98,13 +92,13 @@ const NpmPackagesGrid = ({
             npmPackageType={npmPackageType}
             strapiAppVersion={strapiAppVersion}
           />
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 
-const EmptyPluginCard = styled(Box)`
+const EmptyPluginCard = styled<BoxComponent>(Box)`
   background: ${({ theme }) =>
     `linear-gradient(180deg, rgba(234, 234, 239, 0) 0%, ${theme.colors.neutral150} 100%)`};
   opacity: 0.33;

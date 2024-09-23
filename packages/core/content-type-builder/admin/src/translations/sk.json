@@ -45,8 +45,6 @@
   "contentType.collectionName.description": "Užitočné, ak má byť názov kolekcie (v dashboard) iný ako meno tabuľky",
   "contentType.collectionName.label": "Meno kolekcie",
   "contentType.displayName.label": "Názov kolekcie",
-  "contentType.draftAndPublish.description": "Pred zverejnením vytvárať verziu návrhu každej položky",
-  "contentType.draftAndPublish.label": "Draft/publish systém",
   "contentType.kind.change.warning": "Práve ste zmenili druh typu obsahu: API bude obnovené (routes, controllers a services budú prepísané)",
   "error.attributeName.reserved-name": "Tento názov je vyhradený a nemôže byť použitý (hrozí poškodenie iných funkcionalít systému)",
   "error.contentTypeName.reserved-name": "Tento názov je vyhradený a nemôže byť použitý (hrozí poškodenie iných funkcionalít systému)",

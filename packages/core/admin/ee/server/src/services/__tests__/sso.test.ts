@@ -1,14 +1,3 @@
-jest.mock('@strapi/strapi/dist/utils/ee', () => ({
-  features: {
-    isEnabled() {
-      return true;
-    },
-    list() {
-      return [{ name: 'sso' }];
-    },
-  },
-}));
-
 import {
   syncProviderRegistryWithConfig,
   getStrategyCallbackURL,
@@ -17,6 +6,21 @@ import {
 import createProviderRegistry from '../passport/provider-registry';
 
 describe('SSO', () => {
+  beforeEach(() => {
+    global.strapi = {
+      ee: {
+        features: {
+          isEnabled() {
+            return true;
+          },
+          list() {
+            return [{ name: 'sso' }];
+          },
+        },
+      },
+    } as any;
+  });
+
   afterEach(() => {
     providerRegistry.clear();
   });
@@ -27,6 +31,7 @@ describe('SSO', () => {
   describe('Sync Provider Registry with Config', () => {
     test('The provider registry should match the auth config', async () => {
       global.strapi = {
+        ...global.strapi,
         config: {
           get: () => ({
             providers: [{ uid: 'foo' }, { uid: 'bar' }],
@@ -58,7 +63,7 @@ describe('SSO', () => {
     const barProvider = { uid: 'bar', createStrategy: jest.fn() };
 
     beforeEach(() => {
-      global.strapi = { isLoaded: false } as any;
+      global.strapi = { ...global.strapi, isLoaded: false } as any;
     });
 
     afterEach(() => {
@@ -67,7 +72,7 @@ describe('SSO', () => {
     });
 
     test('Cannot register after bootstrap', () => {
-      global.strapi = { isLoaded: true } as any;
+      global.strapi = { ...global.strapi, isLoaded: true } as any;
 
       const fn = () => registry.register(fooProvider);
 

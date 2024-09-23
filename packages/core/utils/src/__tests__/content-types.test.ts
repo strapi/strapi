@@ -6,6 +6,7 @@ import {
   getNonWritableAttributes,
   getScalarAttributes,
   constants,
+  getDoesAttributeRequireValidation,
 } from '../content-types';
 
 const createModelWithPrivates = (privateAttributes = []) => ({
@@ -69,6 +70,7 @@ describe('Content types utils', () => {
 
       expect(getNonWritableAttributes(model)).toEqual([
         'id',
+        'documentId',
         'createdAt',
         'updatedAt',
         'non_writable_field',
@@ -106,6 +108,37 @@ describe('Content types utils', () => {
       });
 
       expect(getVisibleAttributes(model)).toEqual(['title']);
+    });
+  });
+
+  describe('getDoesAttributeRequireValidation', () => {
+    test('false for field without constraints', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string' })).toEqual(false);
+    });
+    test('true for required fields', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', required: true })).toEqual(true);
+    });
+    test('true for unique fields', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', unique: true })).toEqual(true);
+    });
+    test('true for numeric fields with a max', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'integer', max: 10 })).toEqual(true);
+    });
+    test('true for numeric fields with a min', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'integer', min: 10 })).toEqual(true);
+    });
+    test('true for fields with a max length', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', maxLength: 10 })).toEqual(true);
+    });
+    test('true for fields with a min length', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', minLength: 10 })).toEqual(true);
+    });
+    test('false for non-required fields', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', required: false })).toEqual(false);
+    });
+
+    test('false for non-unique fields', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', unique: false })).toEqual(false);
     });
   });
 

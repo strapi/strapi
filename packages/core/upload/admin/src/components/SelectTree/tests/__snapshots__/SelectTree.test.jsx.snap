@@ -3,9 +3,12 @@
 exports[`SelectTree renders 1`] = `
 {
   "asFragment": [Function],
-  "baseElement": .c3 {
+  "baseElement": .c0 {
+  padding-inline-end: 12px;
+}
+
+.c3 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,10 +16,6 @@ exports[`SelectTree renders 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c0 {
-  padding-right: 12px;
 }
 
 .c1 {
@@ -27,8 +26,8 @@ exports[`SelectTree renders 1`] = `
 }
 
 .c1 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
+  height: 1.1rem;
+  width: 1.1rem;
 }
 
 .c1 svg path {
@@ -36,16 +35,13 @@ exports[`SelectTree renders 1`] = `
 }
 
 .c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   background: none;
   border: none;
 }
 
 .c2 svg {
-  width: 0.5625rem;
+  width: 0.9rem;
 }
 
 <body>
@@ -62,9 +58,10 @@ exports[`SelectTree renders 1`] = `
           aria-live="polite"
           aria-relevant="additions text"
           class="css-1f43avz-a11yText-A11yText"
+          role="log"
         />
         <div
-          class=" css-1ioi85f-control"
+          class=" css-oe0cnm-control"
         >
           <div
             class=" css-onz4xi-ValueContainer"
@@ -73,6 +70,7 @@ exports[`SelectTree renders 1`] = `
               class=" css-1ryi7up-singleValue"
             />
             <input
+              aria-activedescendant=""
               aria-autocomplete="list"
               aria-expanded="false"
               aria-haspopup="true"
@@ -94,24 +92,21 @@ exports[`SelectTree renders 1`] = `
               class="c0 c1 c2"
             >
               <svg
-                fill="none"
-                height="1rem"
-                viewBox="0 0 14 8"
-                width="1rem"
+                fill="currentColor"
+                height="16"
+                viewBox="0 0 32 32"
+                width="16"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  clip-rule="evenodd"
-                  d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                  fill="#32324D"
-                  fill-rule="evenodd"
+                  d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
                 />
               </svg>
             </div>
           </div>
         </div>
       </div>
-      <div
+      <span
         class="c3"
       >
         <p
@@ -132,12 +127,15 @@ exports[`SelectTree renders 1`] = `
           id="live-region-alert"
           role="alert"
         />
-      </div>
+      </span>
     </div>
   </body>,
-  "container": .c3 {
+  "container": .c0 {
+  padding-inline-end: 12px;
+}
+
+.c3 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -145,10 +143,6 @@ exports[`SelectTree renders 1`] = `
   padding: 0;
   position: absolute;
   width: 1px;
-}
-
-.c0 {
-  padding-right: 12px;
 }
 
 .c1 {
@@ -159,8 +153,8 @@ exports[`SelectTree renders 1`] = `
 }
 
 .c1 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
+  height: 1.1rem;
+  width: 1.1rem;
 }
 
 .c1 svg path {
@@ -168,16 +162,13 @@ exports[`SelectTree renders 1`] = `
 }
 
 .c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   background: none;
   border: none;
 }
 
 .c2 svg {
-  width: 0.5625rem;
+  width: 0.9rem;
 }
 
 <div>
@@ -193,9 +184,10 @@ exports[`SelectTree renders 1`] = `
         aria-live="polite"
         aria-relevant="additions text"
         class="css-1f43avz-a11yText-A11yText"
+        role="log"
       />
       <div
-        class=" css-1ioi85f-control"
+        class=" css-oe0cnm-control"
       >
         <div
           class=" css-onz4xi-ValueContainer"
@@ -204,6 +196,7 @@ exports[`SelectTree renders 1`] = `
             class=" css-1ryi7up-singleValue"
           />
           <input
+            aria-activedescendant=""
             aria-autocomplete="list"
             aria-expanded="false"
             aria-haspopup="true"
@@ -225,24 +218,21 @@ exports[`SelectTree renders 1`] = `
             class="c0 c1 c2"
           >
             <svg
-              fill="none"
-              height="1rem"
-              viewBox="0 0 14 8"
-              width="1rem"
+              fill="currentColor"
+              height="16"
+              viewBox="0 0 32 32"
+              width="16"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                clip-rule="evenodd"
-                d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                fill="#32324D"
-                fill-rule="evenodd"
+                d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
               />
             </svg>
           </div>
         </div>
       </div>
     </div>
-    <div
+    <span
       class="c3"
     >
       <p
@@ -263,7 +253,7 @@ exports[`SelectTree renders 1`] = `
         id="live-region-alert"
         role="alert"
       />
-    </div>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

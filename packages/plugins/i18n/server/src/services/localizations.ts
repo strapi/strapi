@@ -1,90 +1,69 @@
-import { prop, isNil, isEmpty, isArray } from 'lodash/fp';
+import { cloneDeep, isEmpty } from 'lodash/fp';
 
-import { mapAsync } from '@strapi/utils';
+import { type Schema } from '@strapi/types';
+import { async } from '@strapi/utils';
 import { getService } from '../utils';
-
-const isDialectMySQL = () => strapi.db.dialect.client === 'mysql';
-
-/**
- * Adds the default locale to an object if it isn't defined yet
- * @param {Object} data a data object before being persisted into db
- */
-const assignDefaultLocaleToEntries = async (data: any) => {
-  const { getDefaultLocale } = getService('locales');
-
-  if (isArray(data) && data.some((entry) => !entry.locale)) {
-    const defaultLocale = await getDefaultLocale();
-    data.forEach((entry) => {
-      entry.locale = entry.locale || defaultLocale;
-    });
-  } else if (!isArray(data) && isNil(data.locale)) {
-    data.locale = await getDefaultLocale();
-  }
-};
-
-/**
- * Synchronize related localizations from a root one
- * @param {Object} entry entry to update
- * @param {Object} options
- * @param {Object} options.model corresponding model
- */
-const syncLocalizations = async (entry: any, { model }: any) => {
-  if (Array.isArray(entry?.localizations)) {
-    const newLocalizations = [entry.id, ...entry.localizations.map(prop('id'))];
-
-    const updateLocalization = (id: any) => {
-      const localizations = newLocalizations.filter((localizationId) => localizationId !== id);
-
-      return strapi.query(model.uid).update({ where: { id }, data: { localizations } });
-    };
-
-    // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-    // TODO: use a transaction to avoid deadlocks
-    await mapAsync(
-      entry.localizations,
-      (localization: any) => updateLocalization(localization.id),
-      {
-        concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
-      }
-    );
-  }
-};
 
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
- * @param {Object} entry entry to update
- * @param {Object} options
- * @param {Object} options.model corresponding model
  */
-const syncNonLocalizedAttributes = async (entry: any, { model }: any) => {
+const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.ContentType) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
-  if (Array.isArray(entry?.localizations)) {
-    const nonLocalizedAttributes = copyNonLocalizedAttributes(model, entry);
+  const nonLocalizedAttributes = copyNonLocalizedAttributes(model, sourceEntry);
+  if (isEmpty(nonLocalizedAttributes)) {
+    return;
+  }
 
-    if (isEmpty(nonLocalizedAttributes)) {
-      return;
-    }
+  const uid = model.uid;
+  const documentId = sourceEntry.documentId;
+  const locale = sourceEntry.locale;
+  const status = sourceEntry?.publishedAt ? 'published' : 'draft';
 
-    const updateLocalization = (id: any) => {
-      return strapi.entityService.update(model.uid, id, { data: nonLocalizedAttributes });
-    };
+  // Find all the entries that need to be updated
+  // this is every other entry of the document in the same status but a different locale
+  const localeEntriesToUpdate = await strapi.db.query(uid).findMany({
+    where: {
+      documentId,
+      publishedAt: status === 'published' ? { $ne: null } : null,
+      locale: { $ne: locale },
+    },
+    select: ['locale', 'id'],
+  });
 
-    // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-    // TODO: use a transaction to avoid deadlocks
-    await mapAsync(
-      entry.localizations,
-      (localization: any) => updateLocalization(localization.id),
+  const entryData = await strapi.documents(uid).omitComponentData(nonLocalizedAttributes);
+
+  await async.map(localeEntriesToUpdate, async (entry: any) => {
+    const transformedData = await strapi.documents.utils.transformData(
+      cloneDeep(nonLocalizedAttributes),
       {
-        concurrency: isDialectMySQL() && !strapi.db.inTransaction() ? 1 : Infinity,
+        uid,
+        status,
+        locale: entry.locale,
+        allowMissingId: true,
       }
     );
-  }
+
+    // Update or create non localized components for the entry
+    const componentData = await strapi
+      .documents(uid)
+      .updateComponents(entry, transformedData as any);
+
+    // Update every other locale entry of this documentId in the same status
+    await strapi.db.query(uid).update({
+      where: {
+        documentId,
+        publishedAt: status === 'published' ? { $ne: null } : null,
+        locale: { $eq: entry.locale },
+      },
+      // The data we send to the update function is the entry data merged with
+      // the updated component data
+      data: Object.assign(cloneDeep(entryData), componentData),
+    });
+  });
 };
 
 const localizations = () => ({
-  assignDefaultLocaleToEntries,
-  syncLocalizations,
   syncNonLocalizedAttributes,
 });
 

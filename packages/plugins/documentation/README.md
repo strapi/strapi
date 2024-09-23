@@ -59,7 +59,6 @@ It has the following structure
     ...
   },
   "x-strapi-config": {
-    "path": "/documentation", // Change this line to change to url of the doc
     "showGeneratedFiles": true // Do not change this line at the moment...
   },
   "servers": {}, // Your servers config (it will be automated)

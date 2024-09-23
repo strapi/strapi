@@ -1,29 +1,23 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { LocaleListCell } from '../components/LocaleListCell';
 import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
+import { getTranslation } from '../utils/getTranslation';
 
-import type { CMAdminConfiguration } from '../types';
+import type { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
  * addColumnToTableHook
  * -----------------------------------------------------------------------------------------------*/
-
 interface AddColumnToTableHookArgs {
-  layout: {
-    components: Record<string, CMAdminConfiguration>;
-    contentType: CMAdminConfiguration;
-  };
-  /**
-   * TODO: this should come from the admin package.
-   */
-  displayedHeaders: unknown[];
+  layout: ListLayout;
+  displayedHeaders: ListFieldLayout[];
 }
 
 const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
-  const { contentType } = layout;
+  const { options } = layout;
 
-  const isFieldLocalized = doesPluginOptionsHaveI18nLocalized(contentType.pluginOptions)
-    ? contentType.pluginOptions.i18n.localized
+  const isFieldLocalized = doesPluginOptionsHaveI18nLocalized(options)
+    ? options.i18n.localized
     : false;
 
   if (!isFieldLocalized) {
@@ -34,11 +28,16 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
     displayedHeaders: [
       ...displayedHeaders,
       {
-        key: '__locale_key__',
-        fieldSchema: { type: 'string' },
-        metadatas: { label: 'Content available in', searchable: false, sortable: false },
+        attribute: { type: 'string' },
+        label: {
+          id: getTranslation('list-view.table.header.label'),
+          defaultMessage: 'Available in',
+        },
+        searchable: false,
+        sortable: false,
         name: 'locales',
-        cellFormatter: (props: object) => <LocaleListCell {...props} />,
+        // @ts-expect-error – ID is seen as number | string; this will change when we move the type over.
+        cellFormatter: (props, _header, meta) => <LocaleListCell {...props} {...meta} />,
       },
     ],
     layout,

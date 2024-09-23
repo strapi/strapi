@@ -5,20 +5,21 @@ import {
   Button,
   Flex,
   Main,
-  Option,
-  Select,
+  SingleSelectOption,
+  SingleSelect,
   TextButton,
   TextInput,
   Typography,
+  Field,
 } from '@strapi/design-system';
-import { pxToRem, useNotification } from '@strapi/helper-plugin';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { useLocation, useNavigate } from 'react-router-dom';
 
+import { PrivateRoute } from '../components/PrivateRoute';
 import { Logo } from '../components/UnauthenticatedLogo';
 import { useAuth } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
 import { LayoutContent, UnauthenticatedLayout } from '../layouts/UnauthenticatedLayout';
 
 export const options = [
@@ -66,19 +67,16 @@ export const options = [
   },
 ];
 
-const TypographyCenter = styled(Typography)`
-  text-align: center;
-`;
-
-export const UseCasePage = () => {
-  const toggleNotification = useNotification();
-  const { push, location } = useHistory();
+const UseCasePage = () => {
+  const { toggleNotification } = useNotification();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const [role, setRole] = React.useState<string | number | null>(null);
   const [otherRole, setOtherRole] = React.useState('');
 
   const { firstname, email } = useAuth('UseCasePage', (state) => state.user) ?? {};
-  const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
+  const { hasAdmin } = parse(location.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
 
   const handleSubmit = async (event: React.FormEvent, skipPersona: boolean) => {
@@ -102,12 +100,12 @@ export const UseCasePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: 'Usecase.notification.success.project-created',
           defaultMessage: 'Project has been successfully created',
-        },
+        }),
       });
-      push('/');
+      navigate('/');
     } catch (err) {
       // Silent
     }
@@ -120,42 +118,38 @@ export const UseCasePage = () => {
           <form onSubmit={(e) => handleSubmit(e, false)}>
             <Flex direction="column" paddingBottom={7}>
               <Logo />
-              <Box paddingTop={6} paddingBottom={1} width={pxToRem(250)}>
-                <TypographyCenter variant="alpha" as="h1" id="usecase-title">
+              <Box paddingTop={6} paddingBottom={1} width={`25rem`}>
+                <Typography textAlign="center" variant="alpha" tag="h1" id="usecase-title">
                   {formatMessage({
                     id: 'Usecase.title',
                     defaultMessage: 'Tell us a bit more about yourself',
                   })}
-                </TypographyCenter>
+                </Typography>
               </Box>
             </Flex>
             <Flex direction="column" alignItems="stretch" gap={6}>
-              <Select
-                id="usecase"
-                data-testid="usecase"
-                label={formatMessage({
-                  id: 'Usecase.input.work-type',
-                  defaultMessage: 'What type of work do you do?',
-                })}
-                // onClear={() => setRole(null)}
-                // clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-                onChange={(value) => setRole(value)}
-                value={role}
-              >
-                {options.map(({ intlLabel, value }) => (
-                  <Option key={value} value={value}>
-                    {formatMessage(intlLabel)}
-                  </Option>
-                ))}
-              </Select>
+              <Field.Root name="usecase">
+                <Field.Label>
+                  {formatMessage({
+                    id: 'Usecase.input.work-type',
+                    defaultMessage: 'What type of work do you do?',
+                  })}
+                </Field.Label>
+                <SingleSelect onChange={(value) => setRole(value)} value={role}>
+                  {options.map(({ intlLabel, value }) => (
+                    <SingleSelectOption key={value} value={value}>
+                      {formatMessage(intlLabel)}
+                    </SingleSelectOption>
+                  ))}
+                </SingleSelect>
+              </Field.Root>
               {isOther && (
-                <TextInput
-                  name="other"
-                  label={formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
-                  value={otherRole}
-                  onChange={(e) => setOtherRole(e.target.value)}
-                  data-testid="other"
-                />
+                <Field.Root name="other">
+                  <Field.Label>
+                    {formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
+                  </Field.Label>
+                  <TextInput value={otherRole} onChange={(e) => setOtherRole(e.target.value)} />
+                </Field.Root>
               )}
               <Button type="submit" size="L" fullWidth disabled={!role}>
                 {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
@@ -165,7 +159,9 @@ export const UseCasePage = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <TextButton onClick={(event) => handleSubmit(event, true)}>
+            <TextButton
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleSubmit(event, true)}
+            >
               {formatMessage({
                 id: 'Usecase.button.skip',
                 defaultMessage: 'Skip this question',
@@ -177,3 +173,13 @@ export const UseCasePage = () => {
     </UnauthenticatedLayout>
   );
 };
+
+const PrivateUseCasePage = () => {
+  return (
+    <PrivateRoute>
+      <UseCasePage />
+    </PrivateRoute>
+  );
+};
+
+export { PrivateUseCasePage, UseCasePage };

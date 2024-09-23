@@ -1,7 +1,7 @@
-import { getJoinTableName } from '../../metadata';
-
+import { snakeCase } from 'lodash/fp';
 import type { Database } from '../..';
 import type { Relation } from '../../types';
+import { identifiers } from '../../utils/identifiers';
 
 type Link = {
   relation: Relation.Bidirectional & { inversedBy: string };
@@ -11,8 +11,8 @@ type Link = {
 const getLinksWithoutMappedBy = (db: Database): Array<Link> => {
   const relationsToUpdate: Record<string, Link> = {};
 
-  db.metadata.forEach((contentType) => {
-    const attributes = contentType.attributes;
+  db.metadata.forEach((modelMetadata) => {
+    const attributes = modelMetadata.attributes;
 
     // For each relation attribute, add the joinTable name to tablesToUpdate
     Object.values(attributes).forEach((attribute) => {
@@ -59,27 +59,33 @@ export const validateBidirectionalRelations = async (db: Database) => {
   const invalidLinks = getLinksWithoutMappedBy(db);
 
   for (const { relation, invRelation } of invalidLinks) {
-    const contentType = db.metadata.get(invRelation.target);
-    const invContentType = db.metadata.get(relation.target);
+    const modelMetadata = db.metadata.get(invRelation.target);
+    const invModelMetadata = db.metadata.get(relation.target);
 
     // Generate the join table name based on the relation target table and attribute name.
-    const joinTableName = getJoinTableName(contentType.tableName, invRelation.inversedBy);
-    const inverseJoinTableName = getJoinTableName(invContentType.tableName, relation.inversedBy);
+    const joinTableName = identifiers.getJoinTableName(
+      snakeCase(modelMetadata.tableName),
+      snakeCase(invRelation.inversedBy)
+    );
+    const inverseJoinTableName = identifiers.getJoinTableName(
+      snakeCase(invModelMetadata.tableName),
+      snakeCase(relation.inversedBy)
+    );
 
     const joinTableEmpty = await isLinkTableEmpty(db, joinTableName);
     const inverseJoinTableEmpty = await isLinkTableEmpty(db, inverseJoinTableName);
 
     if (joinTableEmpty) {
       process.emitWarning(
-        `Error on attribute "${invRelation.inversedBy}" in model "${contentType.singularName}" (${contentType.uid}).` +
-          ` Please modify your ${contentType.singularName} schema by renaming the key "inversedBy" to "mappedBy".` +
+        `Error on attribute "${invRelation.inversedBy}" in model "${modelMetadata.singularName}" (${modelMetadata.uid}).` +
+          ` Please modify your ${modelMetadata.singularName} schema by renaming the key "inversedBy" to "mappedBy".` +
           ` Ex: { "inversedBy": "${relation.inversedBy}" } -> { "mappedBy": "${relation.inversedBy}" }`
       );
     } else if (inverseJoinTableEmpty) {
       // Its safe to delete the inverse join table
       process.emitWarning(
-        `Error on attribute "${relation.inversedBy}" in model "${invContentType.singularName}" (${invContentType.uid}).` +
-          ` Please modify your ${invContentType.singularName} schema by renaming the key "inversedBy" to "mappedBy".` +
+        `Error on attribute "${relation.inversedBy}" in model "${invModelMetadata.singularName}" (${invModelMetadata.uid}).` +
+          ` Please modify your ${invModelMetadata.singularName} schema by renaming the key "inversedBy" to "mappedBy".` +
           ` Ex: { "inversedBy": "${invRelation.inversedBy}" } -> { "mappedBy": "${invRelation.inversedBy}" }`
       );
     } else {

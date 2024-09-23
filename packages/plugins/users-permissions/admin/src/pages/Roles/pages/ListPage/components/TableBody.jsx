@@ -1,24 +1,23 @@
 import React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
-import { CheckPermissions, onRowClick, pxToRem, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { useNavigate, NavLink } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 const EditLink = styled(Link)`
   align-items: center;
-  height: ${pxToRem(32)};
+  height: 3.2rem;
+  width: 3.2rem;
   display: flex;
   justify-content: center;
-  padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  width: ${pxToRem(32)};
+  padding: ${({ theme }) => `${theme.spaces[2]}`};
 
   svg {
-    height: ${pxToRem(12)};
-    width: ${pxToRem(12)};
+    height: 1.6rem;
+    width: 1.6rem;
 
     path {
       fill: ${({ theme }) => theme.colors.neutral500};
@@ -35,9 +34,9 @@ const EditLink = styled(Link)`
   }
 `;
 
-const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDelete }) => {
+const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelete }) => {
   const { formatMessage } = useIntl();
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [showConfirmDelete, setShowConfirmDelete] = onDelete;
 
   const checkCanDeleteRole = (role) =>
@@ -48,14 +47,10 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
     setShowConfirmDelete(!showConfirmDelete);
   };
 
-  const handleClickEdit = (id) => {
-    push(`/settings/users-permissions/roles/${id}`);
-  };
-
   return (
     <Tbody>
       {sortedRoles?.map((role) => (
-        <Tr key={role.name} {...onRowClick({ fn: () => handleClickEdit(role.id) })}>
+        <Tr key={role.name} onClick={() => navigate(role.id.toString())}>
           <Td width="20%">
             <Typography>{role.name}</Typography>
           </Td>
@@ -74,10 +69,11 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
             </Typography>
           </Td>
           <Td>
-            <Flex justifyContent="end" {...stopPropagation}>
-              <CheckPermissions permissions={permissions.updateRole}>
+            <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
+              {canUpdate ? (
                 <EditLink
-                  to={`/settings/users-permissions/roles/${role.id}`}
+                  tag={NavLink}
+                  to={role.id.toString()}
                   aria-label={formatMessage(
                     { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                     { target: `${role.name}` }
@@ -85,20 +81,19 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                 >
                   <Pencil />
                 </EditLink>
-              </CheckPermissions>
+              ) : null}
 
               {checkCanDeleteRole(role) && (
-                <CheckPermissions permissions={permissions.deleteRole}>
-                  <IconButton
-                    onClick={() => handleClickDelete(role.id)}
-                    noBorder
-                    icon={<Trash />}
-                    label={formatMessage(
-                      { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-                      { target: `${role.name}` }
-                    )}
-                  />
-                </CheckPermissions>
+                <IconButton
+                  onClick={() => handleClickDelete(role.id.toString())}
+                  variant="ghost"
+                  label={formatMessage(
+                    { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
+                    { target: `${role.name}` }
+                  )}
+                >
+                  <Trash />
+                </IconButton>
               )}
             </Flex>
           </Td>
@@ -112,12 +107,13 @@ export default TableBody;
 
 TableBody.defaultProps = {
   canDelete: false,
+  canUpdate: false,
 };
 
 TableBody.propTypes = {
   onDelete: PropTypes.array.isRequired,
-  permissions: PropTypes.object.isRequired,
   setRoleToDelete: PropTypes.func.isRequired,
   sortedRoles: PropTypes.array.isRequired,
   canDelete: PropTypes.bool,
+  canUpdate: PropTypes.bool,
 };

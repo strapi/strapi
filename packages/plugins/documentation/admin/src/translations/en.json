@@ -35,5 +35,8 @@
   "pages.SettingsPage.toggle.label": "Restricted Access",
   "plugin.description.long": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "plugin.description.short": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
-  "plugin.name": "Documentation"
+  "plugin.name": "Documentation",
+  "Input.error.contain.lowercase": "Password must contain at least one lowercase character",
+  "Input.error.contain.number": "Password must contain at least one number",
+  "Input.error.contain.uppercase": "Password must contain at least one uppercase character"
 }

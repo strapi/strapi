@@ -2,17 +2,11 @@ import * as React from 'react';
 
 import {
   useNotifyAT,
-  ActionLayout,
-  BaseCheckbox,
-  Box,
+  Checkbox,
   Button,
-  ContentLayout,
   EmptyStateLayout,
   Flex,
-  HeaderLayout,
   IconButton,
-  Layout,
-  Main,
   Switch,
   Table,
   Tbody,
@@ -23,24 +17,22 @@ import {
   Tr,
   Typography,
   VisuallyHidden,
+  LinkButton,
+  Dialog,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import {
-  CheckPagePermissions,
-  ConfirmDialog,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
-import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
+import { Pencil, Plus, Trash } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../hooks/useRBAC';
 
 import { useWebhooks } from './hooks/useWebhooks';
 
@@ -50,15 +42,12 @@ import { useWebhooks } from './hooks/useWebhooks';
 
 const ListPage = () => {
   const [showModal, setShowModal] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = React.useState<string[]>([]);
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.webhooks);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
-  useFocusWhenNavigate();
-  const { push } = useHistory();
-  const { pathname } = useLocation();
+  const { toggleNotification } = useNotification();
+  const navigate = useNavigate();
 
   const {
     isLoading: isRBACLoading,
@@ -77,7 +66,7 @@ const ListPage = () => {
   React.useEffect(() => {
     if (webhooksError) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(webhooksError),
       });
 
@@ -99,31 +88,57 @@ const ListPage = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
 
-  const confirmDelete = async () => {
+  const deleteWebhook = async (id: string) => {
     try {
-      setIsDeleting(true);
+      const res = await deleteManyWebhooks({
+        ids: [id],
+      });
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(res.error),
+        });
+
+        return;
+      }
+
+      setWebhooksToDelete((prev) => prev.filter((webhookId) => webhookId !== id));
+    } catch {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        }),
+      });
+    }
+  };
+
+  const confirmBulkDelete = async () => {
+    try {
       const res = await deleteManyWebhooks({
         ids: webhooksToDelete,
       });
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -133,14 +148,13 @@ const ListPage = () => {
       setWebhooksToDelete([]);
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     } finally {
-      setIsDeleting(false);
       setShowModal(false);
     }
   };
@@ -155,17 +169,26 @@ const ListPage = () => {
       ? setWebhooksToDelete((prev) => [...prev, id])
       : setWebhooksToDelete((prev) => prev.filter((webhookId) => webhookId !== id));
 
-  const goTo = (to: string) => () => push(`${pathname}/${to}`);
-
   const isLoading = isRBACLoading || isWebhooksLoading;
   const numberOfWebhooks = webhooks?.length ?? 0;
   const webhooksToDeleteLength = webhooksToDelete.length;
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
-    <Layout>
-      <SettingsPageTitle name="Webhooks" />
-      <Main aria-busy={isLoading}>
-        <HeaderLayout
+    <Layouts.Root>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Webhooks',
+          }
+        )}
+      </Page.Title>
+      <Page.Main aria-busy={isLoading}>
+        <Layouts.Header
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
             id: 'Settings.webhooks.list.description',
@@ -174,14 +197,7 @@ const ListPage = () => {
           primaryAction={
             canCreate &&
             !isLoading && (
-              <LinkButton
-                as={NavLink}
-                startIcon={<Plus />}
-                variant="default"
-                // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                to={`${pathname}/create`}
-                size="S"
-              >
+              <LinkButton tag={NavLink} startIcon={<Plus />} variant="default" to="create" size="S">
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',
@@ -191,7 +207,7 @@ const ListPage = () => {
           }
         />
         {webhooksToDeleteLength > 0 && canDelete && (
-          <ActionLayout
+          <Layouts.Action
             startActions={
               <>
                 <Typography variant="epsilon" textColor="neutral600">
@@ -219,17 +235,20 @@ const ListPage = () => {
             }
           />
         )}
-        <ContentLayout>
-          {isLoading ? (
-            <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-              <LoadingIndicatorPage />
-            </Box>
-          ) : numberOfWebhooks > 0 ? (
+        <Layouts.Content>
+          {numberOfWebhooks > 0 ? (
             <Table
               colCount={5}
               rowCount={numberOfWebhooks + 1}
               footer={
-                <TFooter onClick={canCreate ? goTo('create') : undefined} icon={<Plus />}>
+                <TFooter
+                  onClick={() => {
+                    if (canCreate) {
+                      navigate('create');
+                    }
+                  }}
+                  icon={<Plus />}
+                >
                   {formatMessage({
                     id: 'Settings.webhooks.list.button.add',
                     defaultMessage: 'Create new webhook',
@@ -240,16 +259,17 @@ const ListPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <BaseCheckbox
+                    <Checkbox
                       aria-label={formatMessage({
                         id: 'global.select-all-entries',
                         defaultMessage: 'Select all entries',
                       })}
-                      indeterminate={
+                      checked={
                         webhooksToDeleteLength > 0 && webhooksToDeleteLength < numberOfWebhooks
+                          ? 'indeterminate'
+                          : webhooksToDeleteLength === numberOfWebhooks
                       }
-                      value={webhooksToDeleteLength === numberOfWebhooks}
-                      onValueChange={selectAllCheckbox}
+                      onCheckedChange={selectAllCheckbox}
                     />
                   </Th>
                   <Th width="20%">
@@ -290,17 +310,21 @@ const ListPage = () => {
                 {webhooks?.map((webhook) => (
                   <Tr
                     key={webhook.id}
-                    onClick={canUpdate ? goTo(webhook.id) : undefined}
+                    onClick={() => {
+                      if (canUpdate) {
+                        navigate(webhook.id);
+                      }
+                    }}
                     style={{ cursor: canUpdate ? 'pointer' : 'default' }}
                   >
                     <Td onClick={(e) => e.stopPropagation()}>
-                      <BaseCheckbox
+                      <Checkbox
                         aria-label={`${formatMessage({
                           id: 'global.select',
                           defaultMessage: 'Select',
                         })} ${webhook.name}`}
-                        value={webhooksToDelete?.includes(webhook.id)}
-                        onValueChange={(selected) => selectOneCheckbox(selected, webhook.id)}
+                        checked={webhooksToDelete?.includes(webhook.id)}
+                        onCheckedChange={(selected) => selectOneCheckbox(!!selected, webhook.id)}
                         name="select"
                       />
                     </Td>
@@ -312,7 +336,7 @@ const ListPage = () => {
                     <Td>
                       <Typography textColor="neutral800">{webhook.url}</Typography>
                     </Td>
-                    <Td>
+                    <Td onClick={(e) => e.stopPropagation()}>
                       <Flex>
                         <Switch
                           onLabel={formatMessage({
@@ -323,16 +347,15 @@ const ListPage = () => {
                             id: 'global.disabled',
                             defaultMessage: 'Disabled',
                           })}
-                          label={`${webhook.name} ${formatMessage({
+                          aria-label={`${webhook.name} ${formatMessage({
                             id: 'Settings.webhooks.list.th.status',
                             defaultMessage: 'Status',
                           })}`}
-                          selected={webhook.isEnabled}
-                          onChange={(e) => {
-                            e.stopPropagation();
+                          checked={webhook.isEnabled}
+                          onCheckedChange={(enabled) => {
                             enableWebhook({
                               ...webhook,
-                              isEnabled: !webhook.isEnabled,
+                              isEnabled: enabled,
                             });
                           }}
                           visibleLabels
@@ -347,23 +370,16 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.update',
                               defaultMessage: 'Update',
                             })}
-                            icon={<Pencil />}
-                            noBorder
-                          />
+                            variant="ghost"
+                          >
+                            <Pencil />
+                          </IconButton>
                         )}
                         {canDelete && (
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setWebhooksToDelete([webhook.id]);
-                              setShowModal(true);
+                          <DeleteActionButton
+                            onDelete={() => {
+                              deleteWebhook(webhook.id);
                             }}
-                            label={formatMessage({
-                              id: 'Settings.webhooks.events.delete',
-                              defaultMessage: 'Delete webhook',
-                            })}
-                            icon={<Trash />}
-                            noBorder
                           />
                         )}
                       </Flex>
@@ -380,28 +396,63 @@ const ListPage = () => {
                 defaultMessage: 'No webhooks found',
               })}
               action={
-                <Button
-                  variant="secondary"
-                  startIcon={<Plus />}
-                  onClick={() => (canCreate ? goTo('create') : {})}
-                >
-                  {formatMessage({
-                    id: 'Settings.webhooks.list.button.add',
-                    defaultMessage: 'Create new webhook',
-                  })}
-                </Button>
+                canCreate ? (
+                  <LinkButton variant="secondary" startIcon={<Plus />} tag={NavLink} to="create">
+                    {formatMessage({
+                      id: 'Settings.webhooks.list.button.add',
+                      defaultMessage: 'Create new webhook',
+                    })}
+                  </LinkButton>
+                ) : null
               }
             />
           )}
-        </ContentLayout>
-      </Main>
-      <ConfirmDialog
-        isOpen={showModal}
-        onToggleDialog={() => setShowModal((prev) => !prev)}
-        onConfirm={confirmDelete}
-        isConfirmButtonLoading={isDeleting}
-      />
-    </Layout>
+        </Layouts.Content>
+      </Page.Main>
+      <Dialog.Root open={showModal} onOpenChange={setShowModal}>
+        <ConfirmDialog onConfirm={confirmBulkDelete} />
+      </Dialog.Root>
+    </Layouts.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DeleteActionButton
+ * -----------------------------------------------------------------------------------------------*/
+
+type DeleteActionButtonProps = {
+  onDelete: () => void;
+};
+
+const DeleteActionButton = ({ onDelete }: DeleteActionButtonProps) => {
+  const [showModal, setShowModal] = React.useState(false);
+  const { formatMessage } = useIntl();
+
+  return (
+    <>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowModal(true);
+        }}
+        label={formatMessage({
+          id: 'Settings.webhooks.events.delete',
+          defaultMessage: 'Delete webhook',
+        })}
+        variant="ghost"
+      >
+        <Trash />
+      </IconButton>
+
+      <Dialog.Root open={showModal} onOpenChange={setShowModal}>
+        <ConfirmDialog
+          onConfirm={(e) => {
+            e?.stopPropagation();
+            onDelete();
+          }}
+        />
+      </Dialog.Root>
+    </>
   );
 };
 
@@ -415,9 +466,9 @@ const ProtectedListPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

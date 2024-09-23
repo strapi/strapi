@@ -1,44 +1,54 @@
 import { Fragment } from 'react';
 
-import { Box, Icon, TextButton } from '@strapi/design-system';
 import {
+  Box,
+  TextButton,
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
-import { pxToRem } from '@strapi/helper-plugin';
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils/getTrad';
 
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
 
+const SubNavLinkCustom = styled(SubNavLink)`
+  div {
+    width: inherit;
+    span:nth-child(2) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: inherit;
+    }
+  }
+`;
+
 export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
 
+  const pluginName = formatMessage({
+    id: getTrad('plugin.name'),
+    defaultMessage: 'Content-Type Builder',
+  });
+
   return (
-    <SubNav
-      ariaLabel={formatMessage({
-        id: `${getTrad('plugin.name')}`,
-        defaultMessage: 'Content-Types Builder',
-      })}
-    >
+    <SubNav aria-label={pluginName}>
       <SubNavHeader
         searchable
         value={searchValue}
         onClear={() => onSearchChange('')}
         onChange={(e) => onSearchChange(e.target.value)}
-        label={formatMessage({
-          id: `${getTrad('plugin.name')}`,
-          defaultMessage: 'Content-Types Builder',
-        })}
+        label={pluginName}
         searchLabel={formatMessage({
           id: 'global.search',
           defaultMessage: 'Search',
@@ -53,7 +63,7 @@ export const ContentTypeBuilderNav = () => {
                 defaultMessage: section.title.defaultMessage,
               })}
               collapsable
-              badgeLabel={section.links.length.toString()}
+              badgeLabel={section.linksCount.toString()}
             >
               {section.links.map((link) => {
                 if (link.links) {
@@ -61,8 +71,7 @@ export const ContentTypeBuilderNav = () => {
                     <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
                       {link.links.map((subLink: any) => (
                         <SubNavLink
-                          as={NavLink}
-                          // @ts-expect-error verify if "to" is needed
+                          tag={NavLink}
                           to={subLink.to}
                           active={subLink.active}
                           key={subLink.name}
@@ -78,10 +87,15 @@ export const ContentTypeBuilderNav = () => {
                 }
 
                 return (
-                  // @ts-expect-error verify if "to" is needed
-                  <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
+                  <SubNavLinkCustom
+                    tag={NavLink}
+                    to={link.to}
+                    active={link.active}
+                    key={link.name}
+                    width="100%"
+                  >
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
-                  </SubNavLink>
+                  </SubNavLinkCustom>
                 );
               })}
             </SubNavSection>
@@ -89,8 +103,9 @@ export const ContentTypeBuilderNav = () => {
               <Box paddingLeft={7}>
                 <TextButton
                   onClick={section.customLink.onClick}
-                  startIcon={<Icon as={Plus} width={pxToRem(8)} height={pxToRem(8)} />}
+                  startIcon={<Plus width="0.8rem" height="0.8rem" />}
                   marginTop={2}
+                  cursor="pointer"
                 >
                   {formatMessage({
                     id: section.customLink.id,

@@ -4,18 +4,7 @@
  *
  */
 
-import {
-  Box,
-  Divider,
-  Flex,
-  ModalBody,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Typography,
-} from '@strapi/design-system';
+import { Divider, Flex, Modal, Tabs, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
@@ -40,36 +29,29 @@ export const AttributeOptions = ({ attributes, forTarget, kind }: AttributeOptio
   const titleId = getTrad(`modalForm.sub-header.chooseAttribute.${titleIdSuffix}`);
 
   return (
-    <ModalBody padding={7}>
-      <TabGroup
-        label={formatMessage({
-          id: getTrad('modalForm.tabs.label'),
-          defaultMessage: 'Default and Custom types tabs',
-        })}
-        id="attribute-type-tabs"
-        variant="simple"
-      >
+    <Modal.Body>
+      <Tabs.Root variant="simple" defaultValue="default">
         <Flex justifyContent="space-between">
-          <Typography variant="beta" as="h2">
+          <Typography variant="beta" tag="h2">
             {formatMessage({ id: titleId, defaultMessage: 'Select a field' })}
           </Typography>
-          <Tabs>
-            <Tab>{formatMessage({ id: defaultTabId, defaultMessage: 'Default' })}</Tab>
-            <Tab>{formatMessage({ id: customTabId, defaultMessage: 'Custom' })}</Tab>
-          </Tabs>
+          <Tabs.List>
+            <Tabs.Trigger value="default">
+              {formatMessage({ id: defaultTabId, defaultMessage: 'Default' })}
+            </Tabs.Trigger>
+            <Tabs.Trigger value="custom">
+              {formatMessage({ id: customTabId, defaultMessage: 'Custom' })}
+            </Tabs.Trigger>
+          </Tabs.List>
         </Flex>
-        <Box paddingBottom={6}>
-          <Divider />
-        </Box>
-        <TabPanels>
-          <TabPanel>
-            <AttributeList attributes={attributes} />
-          </TabPanel>
-          <TabPanel>
-            <CustomFieldsList />
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
-    </ModalBody>
+        <Divider marginBottom={6} />
+        <Tabs.Content value="default">
+          <AttributeList attributes={attributes} />
+        </Tabs.Content>
+        <Tabs.Content value="custom">
+          <CustomFieldsList />
+        </Tabs.Content>
+      </Tabs.Root>
+    </Modal.Body>
   );
 };

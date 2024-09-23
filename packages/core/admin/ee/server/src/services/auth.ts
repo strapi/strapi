@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { getAbsoluteAdminUrl } from '@strapi/utils';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { isSsoLocked } from '../utils/sso-lock';
@@ -13,7 +12,7 @@ const { ApplicationError } = errors;
  * @param {string} param.email user email for which to reset the password
  */
 const forgotPassword = async ({ email }: any = {}) => {
-  const user = await strapi.query('admin::user').findOne({ where: { email, isActive: true } });
+  const user = await strapi.db.query('admin::user').findOne({ where: { email, isActive: true } });
 
   if (!user || (await isSsoLocked(user))) {
     return;
@@ -23,8 +22,8 @@ const forgotPassword = async ({ email }: any = {}) => {
   await getService('user').updateById(user.id, { resetPasswordToken });
 
   // Send an email to the admin.
-  const url = `${getAbsoluteAdminUrl(
-    strapi.config
+  const url = `${strapi.config.get(
+    'admin.absoluteUrl'
   )}/auth/reset-password?code=${resetPasswordToken}`;
   return strapi
     .plugin('email')
@@ -54,7 +53,7 @@ const forgotPassword = async ({ email }: any = {}) => {
  * @param {string} param.password new user password
  */
 const resetPassword = async ({ resetPasswordToken, password }: any = {}) => {
-  const matchingUser = await strapi
+  const matchingUser = await strapi.db
     .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
 

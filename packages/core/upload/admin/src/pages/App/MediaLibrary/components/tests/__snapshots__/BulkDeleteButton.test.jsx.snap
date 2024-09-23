@@ -1,9 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BulkDeleteButton renders 1`] = `
-.c6 {
+.c0 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c1 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c3 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c5 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,185 +40,71 @@ exports[`BulkDeleteButton renders 1`] = `
   width: 1px;
 }
 
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c0 {
-  background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
-  border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
-  cursor: pointer;
-}
-
-.c1 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
 .c2 {
-  position: relative;
-  outline: none;
-}
-
-.c2 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c2 > svg > g,
-.c2 > svg path {
-  fill: #ffffff;
-}
-
-.c2[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c2:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c2:focus-visible {
-  outline: none;
-}
-
-.c2:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c3 {
-  height: 2rem;
+  height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #f5c0b8;
   background: #fcecea;
-}
-
-.c3 svg {
-  height: 0.75rem;
-  width: auto;
-}
-
-.c3[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c3[aria-disabled='true'] .c4 {
-  color: #666687;
-}
-
-.c3[aria-disabled='true'] svg > g,
-.c3[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c3[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c3[aria-disabled='true']:active .c4 {
-  color: #666687;
-}
-
-.c3[aria-disabled='true']:active svg > g,
-.c3[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c3:hover {
-  background-color: #ffffff;
-}
-
-.c3:active {
-  background-color: #ffffff;
-  border: 1px solid #d02b20;
-}
-
-.c3:active .c4 {
-  color: #d02b20;
-}
-
-.c3:active svg > g,
-.c3:active svg path {
-  fill: #d02b20;
-}
-
-.c3 .c4 {
   color: #b72b1a;
 }
 
-.c3 svg > g,
-.c3 svg path {
-  fill: #b72b1a;
+.c2:hover {
+  background-color: #ffffff;
+}
+
+.c2:active {
+  background-color: #ffffff;
+  border: 1px solid #d02b20;
+  color: #d02b20;
+}
+
+.c2[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c2 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
 <div>
   <button
+    aria-controls="radix-:r0:"
     aria-disabled="false"
-    class="c0 c1 c2 c3"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    class="c0 c1 c2"
+    data-state="closed"
     type="button"
   >
-    <div
+    <span
       aria-hidden="true"
-      class=""
+      class="c3"
     >
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
-          fill="#32324D"
+          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
         />
       </svg>
-    </div>
+    </span>
     <span
-      class="c4 c5"
+      class="c4"
     >
       Delete
     </span>
   </button>
-  <div
-    class="c6"
+  <span
+    class="c5"
   >
     <p
       aria-live="polite"
@@ -211,6 +124,6 @@ exports[`BulkDeleteButton renders 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

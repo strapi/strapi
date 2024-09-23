@@ -1,6 +1,6 @@
 import { get } from 'lodash/fp';
-import { sanitize, validate, pipeAsync, errors } from '@strapi/utils';
-import type { UID } from '@strapi/types';
+import { async, errors } from '@strapi/utils';
+import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
 
@@ -18,7 +18,7 @@ export default ({ strapi }: Context) => {
       contentTypeUID,
       attributeName,
     }: {
-      contentTypeUID: UID.ContentType;
+      contentTypeUID: Internal.UID.ContentType;
       attributeName: string;
     }) {
       const contentType = strapi.getModel(contentTypeUID);
@@ -46,19 +46,21 @@ export default ({ strapi }: Context) => {
           usePagination: true,
         });
 
-        await validate.contentAPI.query(transformedArgs, targetContentType, {
-          auth,
-        });
-        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, targetContentType, {
+        await strapi.contentAPI.validate.query(transformedArgs, targetContentType, {
           auth,
         });
 
-        const data = await strapi.entityService!.load(
-          contentTypeUID,
-          parent,
-          attributeName,
-          sanitizedQuery
+        const sanitizedQuery = await strapi.contentAPI.sanitize.query(
+          transformedArgs,
+          targetContentType,
+          {
+            auth,
+          }
         );
+
+        const data = await strapi.db
+          ?.query(contentTypeUID)
+          .load(parent, attributeName, sanitizedQuery);
 
         const info = {
           args: sanitizedQuery,
@@ -72,12 +74,12 @@ export default ({ strapi }: Context) => {
           // Helpers used for the data cleanup
           const wrapData = (dataToWrap: any) => ({ [attributeName]: dataToWrap });
           const sanitizeData = (dataToSanitize: any) => {
-            return sanitize.contentAPI.output(dataToSanitize, contentType, { auth });
+            return strapi.contentAPI.sanitize.output(dataToSanitize, contentType, { auth });
           };
           const unwrapData = get(attributeName);
 
           // Sanitizer definition
-          const sanitizeMorphAttribute = pipeAsync(wrapData, sanitizeData, unwrapData);
+          const sanitizeMorphAttribute = async.pipe(wrapData, sanitizeData, unwrapData);
 
           return sanitizeMorphAttribute(data);
         }

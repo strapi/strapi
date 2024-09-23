@@ -1,17 +1,7 @@
 import React, { useRef, useState } from 'react';
 
-import {
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  KeyboardNavigable,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Typography,
-} from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/admin/strapi-admin';
+import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -87,17 +77,17 @@ export const PendingAssetStep = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+    <>
+      <Modal.Header>
+        <Modal.Title>
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
             defaultMessage: 'Add new assets',
           })}
-        </Typography>
-      </ModalHeader>
+        </Modal.Title>
+      </Modal.Header>
 
-      <ModalBody>
+      <Modal.Body>
         <Flex direction="column" alignItems="stretch" gap={7}>
           <Flex justifyContent="space-between">
             <Flex direction="column" alignItems="stretch" gap={0}>
@@ -126,13 +116,13 @@ export const PendingAssetStep = ({
             </Button>
           </Flex>
           <KeyboardNavigable tagName="article">
-            <Grid gap={4}>
+            <Grid.Root gap={4}>
               {assets.map((asset) => {
                 const assetKey = asset.url;
 
                 if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
                   return (
-                    <GridItem col={4} key={assetKey}>
+                    <Grid.Item col={4} key={assetKey} direction="column" alignItems="stretch">
                       <UploadingAssetCard
                         // Props used to store the newly uploaded files
                         addUploadedFiles={addUploadedFiles}
@@ -143,12 +133,12 @@ export const PendingAssetStep = ({
                         size="S"
                         folderId={folderId}
                       />
-                    </GridItem>
+                    </Grid.Item>
                   );
                 }
 
                 return (
-                  <GridItem col={4} key={assetKey}>
+                  <Grid.Item col={4} key={assetKey} direction="column" alignItems="stretch">
                     <AssetCard
                       asset={asset}
                       size="S"
@@ -158,34 +148,29 @@ export const PendingAssetStep = ({
                       onEdit={onEditAsset}
                       onRemove={onRemoveAsset}
                     />
-                  </GridItem>
+                  </Grid.Item>
                 );
               })}
-            </Grid>
+            </Grid.Root>
           </KeyboardNavigable>
         </Flex>
-      </ModalBody>
-
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
-          </Button>
-        }
-        endActions={
-          <Button type="submit" loading={uploadStatus === Status.Uploading}>
-            {formatMessage(
-              {
-                id: getTrad('modal.upload-list.footer.button'),
-                defaultMessage:
-                  'Upload {number, plural, one {# asset} other {# assets}} to the library',
-              },
-              { number: assets.length }
-            )}
-          </Button>
-        }
-      />
-    </form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={onClose} variant="tertiary">
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
+        </Button>
+        <Button onClick={handleSubmit} loading={uploadStatus === Status.Uploading}>
+          {formatMessage(
+            {
+              id: getTrad('modal.upload-list.footer.button'),
+              defaultMessage:
+                'Upload {number, plural, one {# asset} other {# assets}} to the library',
+            },
+            { number: assets.length }
+          )}
+        </Button>
+      </Modal.Footer>
+    </>
   );
 };
 

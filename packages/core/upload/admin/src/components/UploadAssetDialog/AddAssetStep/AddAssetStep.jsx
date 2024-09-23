@@ -1,16 +1,6 @@
 import React from 'react';
 
-import {
-  Box,
-  Divider,
-  ModalHeader,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Divider, Modal, Tabs } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -24,57 +14,53 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
 
   return (
     <>
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+      <Modal.Header>
+        <Modal.Title>
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
             defaultMessage: 'Add new assets',
           })}
-        </Typography>
-      </ModalHeader>
-
-      <TabGroup
-        label={formatMessage({
-          id: getTrad('tabs.title'),
-          defaultMessage: 'How do you want to upload your assets?',
-        })}
-        variant="simple"
-      >
+        </Modal.Title>
+      </Modal.Header>
+      <Tabs.Root variant="simple" defaultValue="computer">
         <Box paddingLeft={8} paddingRight={8} paddingTop={6}>
-          <Tabs>
-            <Tab>
+          <Tabs.List
+            aria-label={formatMessage({
+              id: getTrad('tabs.title'),
+              defaultMessage: 'How do you want to upload your assets?',
+            })}
+          >
+            <Tabs.Trigger value="computer">
               {formatMessage({
                 id: getTrad('modal.nav.computer'),
                 defaultMessage: 'From computer',
               })}
-            </Tab>
-            <Tab>
+            </Tabs.Trigger>
+            <Tabs.Trigger value="url">
               {formatMessage({
                 id: getTrad('modal.nav.url'),
                 defaultMessage: 'From URL',
               })}
-            </Tab>
-          </Tabs>
+            </Tabs.Trigger>
+          </Tabs.List>
 
           <Divider />
         </Box>
-        <TabPanels>
-          <TabPanel>
-            <FromComputerForm
-              onClose={onClose}
-              onAddAssets={onAddAsset}
-              trackedLocation={trackedLocation}
-            />
-          </TabPanel>
-          <TabPanel>
-            <FromUrlForm
-              onClose={onClose}
-              onAddAsset={onAddAsset}
-              trackedLocation={trackedLocation}
-            />
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
+        <Tabs.Content value="computer">
+          <FromComputerForm
+            onClose={onClose}
+            onAddAssets={onAddAsset}
+            trackedLocation={trackedLocation}
+          />
+        </Tabs.Content>
+        <Tabs.Content value="url">
+          <FromUrlForm
+            onClose={onClose}
+            onAddAsset={onAddAsset}
+            trackedLocation={trackedLocation}
+          />
+        </Tabs.Content>
+      </Tabs.Root>
     </>
   );
 };

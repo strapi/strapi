@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { StrapiAppContextValue } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -7,8 +8,6 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { AttributeIcon, IconByType } from '../AttributeIcon';
 
 import { OptionBoxWrapper } from './OptionBoxWrapper';
-
-import type { CustomFieldUID } from '@strapi/helper-plugin';
 
 export type CustomFieldOption = {
   name: string;
@@ -25,8 +24,8 @@ export type CustomFieldOption = {
 };
 
 type CustomFieldOptionProps = {
-  customFieldUid: CustomFieldUID;
-  customField: CustomFieldOption;
+  customFieldUid: string;
+  customField: NonNullable<ReturnType<StrapiAppContextValue['customFields']['get']>>;
 };
 
 export const CustomFieldOption = ({ customFieldUid, customField }: CustomFieldOptionProps) => {
@@ -43,7 +42,7 @@ export const CustomFieldOption = ({ customFieldUid, customField }: CustomFieldOp
   };
 
   return (
-    <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
+    <OptionBoxWrapper padding={4} tag="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} customField={customFieldUid} />
         <Box paddingLeft={4}>

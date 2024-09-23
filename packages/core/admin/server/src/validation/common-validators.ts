@@ -41,7 +41,7 @@ export const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
   .test('is-an-array-of-conditions', 'is not a plugin name', function (value) {
-    const ids = strapi.admin.services.permission.conditionProvider.keys();
+    const ids = strapi.service('admin::permission').conditionProvider.keys();
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
@@ -118,7 +118,7 @@ export const permission = yup
           return isNil(subject);
         }
 
-        if (isArray(action.subjects)) {
+        if (isArray(action.subjects) && !isNil(subject)) {
           return action.subjects.includes(subject);
         }
 

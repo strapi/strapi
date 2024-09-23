@@ -1,9 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderGridList renders and match snapshots 1`] = `
+.c0 {
+  padding-block-end: 8px;
+}
+
+.c1 {
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  color: currentcolor;
+  font-weight: 500;
+}
+
 .c3 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,21 +24,9 @@ exports[`FolderGridList renders and match snapshots 1`] = `
   width: 1px;
 }
 
-.c1 {
-  font-weight: 500;
-  font-size: 1rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c0 {
-  padding-bottom: 8px;
-}
-
 .c2 {
   display: grid;
-  grid-template-columns: repeat(12,1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 16px;
 }
 
@@ -50,7 +49,7 @@ exports[`FolderGridList renders and match snapshots 1`] = `
       Folder grid list children
     </div>
   </div>
-  <div
+  <span
     class="c3"
   >
     <p
@@ -71,6 +70,6 @@ exports[`FolderGridList renders and match snapshots 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

@@ -1,21 +1,18 @@
-import React from 'react';
-
-import { useRBAC } from '@strapi/helper-plugin';
-import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, getByText, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
-import { render, waitFor, server } from '@tests/utils';
+import { render, waitFor, server, screen } from '@tests/utils';
 import { rest } from 'msw';
+import { useLocation } from 'react-router-dom';
 
 import { ListPage } from '../ListPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn().mockImplementation(() => ({
-    isLoading: false,
-    allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-  })),
-  useFocusWhenNavigate: jest.fn(),
-}));
+jest.mock('../../../../../hooks/useRBAC');
+
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <span data-testId="location">{location.pathname}</span>;
+};
 
 describe('Webhooks | ListPage', () => {
   beforeEach(() => {
@@ -37,12 +34,6 @@ describe('Webhooks | ListPage', () => {
   });
 
   it('should show a loader when permissions are loading', async () => {
-    // @ts-expect-error – mocking for test
-    useRBAC.mockImplementationOnce(() => ({
-      isLoading: true,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
     const { queryByText, getByText } = render(<ListPage />);
 
     expect(getByText('Loading content.')).toBeInTheDocument();
@@ -68,7 +59,7 @@ describe('Webhooks | ListPage', () => {
     fireEvent.click(getByRole('button', { name: 'Delete' }));
 
     await waitFor(async () => {
-      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
+      expect(await findByText('Are you sure?')).toBeInTheDocument();
     });
 
     server.use(
@@ -89,17 +80,14 @@ describe('Webhooks | ListPage', () => {
   });
 
   it('should delete a single webhook', async () => {
-    const { getByText, getByRole, findByText, getAllByRole, user } = render(<ListPage />);
-    await waitFor(() => {
-      getByText('http:://strapi.io');
-    });
+    const { findByText, user, findByRole, findAllByRole, queryByText } = render(<ListPage />);
 
-    const deleteButtons = getAllByRole('button', { name: /delete webhook/i });
+    await findByText('http:://strapi.io');
+
+    const deleteButtons = await findAllByRole('button', { name: /delete webhook/i });
     await user.click(deleteButtons[0]);
 
-    await waitFor(async () => {
-      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
-    });
+    await findByText('Are you sure?');
 
     server.use(
       rest.get('/admin/webhooks', (req, res, ctx) => {
@@ -111,11 +99,11 @@ describe('Webhooks | ListPage', () => {
       })
     );
 
-    await user.click(getByRole('button', { name: /confirm/i }));
+    const confirmButton = await findByRole('button', { name: /confirm/i });
+    await user.click(confirmButton);
+    await findByText('http://me.io');
 
-    await waitFor(async () => {
-      expect(await findByText('http://me.io')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(queryByText('http:://strapi.io')).not.toBeInTheDocument());
   });
 
   it('should disable a webhook', async () => {
@@ -147,5 +135,35 @@ describe('Webhooks | ListPage', () => {
     await waitFor(async () => {
       expect(enableSwitches[0]).toHaveAttribute('aria-checked', 'false');
     });
+  });
+
+  it('should allow to create a new webhook on empty state screen by clicking on the button', async () => {
+    server.use(
+      rest.get('/admin/webhooks', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: [],
+          })
+        );
+      })
+    );
+
+    const { getAllByRole, findByText, user } = render(<ListPage />, {
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <LocationDisplay />
+            </>
+          );
+        },
+      },
+    });
+
+    await findByText('No webhooks found');
+    expect(screen.getByTestId('location')).not.toHaveTextContent('/create');
+    await user.click(getAllByRole('link', { name: 'Create new webhook' })[1]);
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/create'));
   });
 });

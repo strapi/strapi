@@ -1,16 +1,13 @@
 import * as React from 'react';
 
-import { Box, Button, Checkbox, Flex, Main, TextInput, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { Form, translatedErrors, useQuery } from '@strapi/helper-plugin';
-import { Eye, EyeStriked } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
-import { NavLink, useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { Form } from '../../../components/Form';
+import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
 import {
@@ -18,8 +15,7 @@ import {
   Column,
   LayoutContent,
 } from '../../../layouts/UnauthenticatedLayout';
-
-import { FieldActionWrapper } from './FieldActionWrapper';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 import type { Login } from '../../../../../shared/contracts/authentication';
 
@@ -28,19 +24,26 @@ interface LoginProps {
 }
 
 const LOGIN_SCHEMA = yup.object().shape({
-  email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
-  password: yup.string().required(translatedErrors.required),
+  email: yup
+    .string()
+    .nullable()
+    .email({
+      id: translatedErrors.email.id,
+      defaultMessage: 'Not a valid email',
+    })
+    .required(translatedErrors.required),
+  password: yup.string().required(translatedErrors.required).nullable(),
   rememberMe: yup.bool().nullable(),
 });
 
 const Login = ({ children }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
-  const [passwordShown, setPasswordShown] = React.useState(false);
   const { formatMessage } = useIntl();
-  const query = useQuery();
-  const { push } = useHistory();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
+  const navigate = useNavigate();
 
-  const login = useAuth('Login', (state) => state.login);
+  const { login } = useAuth('Login', (auth) => auth);
 
   const handleLogin = async (body: Parameters<typeof login>[0]) => {
     setApiError(undefined);
@@ -51,7 +54,7 @@ const Login = ({ children }: LoginProps) => {
       const message = res.error.message ?? 'Something went wrong';
 
       if (camelCase(message).toLowerCase() === 'usernotactive') {
-        push('/auth/oops');
+        navigate('/auth/oops');
         return;
       }
 
@@ -60,7 +63,7 @@ const Login = ({ children }: LoginProps) => {
       const redirectTo = query.get('redirectTo');
       const redirectUrl = redirectTo ? decodeURIComponent(redirectTo) : '/';
 
-      push(redirectUrl);
+      navigate(redirectUrl);
     }
   };
 
@@ -71,7 +74,7 @@ const Login = ({ children }: LoginProps) => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={1}>
-              <Typography variant="alpha" as="h1">
+              <Typography variant="alpha" tag="h1">
                 {formatMessage({
                   id: 'Auth.form.welcome.title',
                   defaultMessage: 'Welcome!',
@@ -92,8 +95,8 @@ const Login = ({ children }: LoginProps) => {
               </Typography>
             ) : null}
           </Column>
-          <Formik
-            enableReinitialize
+          <Form
+            method="PUT"
             initialValues={{
               email: '',
               password: '',
@@ -103,96 +106,49 @@ const Login = ({ children }: LoginProps) => {
               handleLogin(values);
             }}
             validationSchema={LOGIN_SCHEMA}
-            validateOnChange={false}
           >
-            {({ values, errors, handleChange }) => (
-              <Form>
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  <TextInput
-                    error={
-                      errors.email
-                        ? formatMessage({
-                            id: errors.email,
-                            defaultMessage: 'This value is required.',
-                          })
-                        : ''
-                    }
-                    value={values.email}
-                    onChange={handleChange}
-                    label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
-                    placeholder={formatMessage({
-                      id: 'Auth.form.email.placeholder',
-                      defaultMessage: 'kai@doe.com',
-                    })}
-                    name="email"
-                    required
-                  />
-                  <PasswordInput
-                    error={
-                      errors.password
-                        ? formatMessage({
-                            id: errors.password,
-                            defaultMessage: 'This value is required.',
-                          })
-                        : ''
-                    }
-                    onChange={handleChange}
-                    value={values.password}
-                    label={formatMessage({
-                      id: 'global.password',
-                      defaultMessage: 'Password',
-                    })}
-                    name="password"
-                    type={passwordShown ? 'text' : 'password'}
-                    endAction={
-                      <FieldActionWrapper
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPasswordShown((prev) => !prev);
-                        }}
-                        label={formatMessage(
-                          passwordShown
-                            ? {
-                                id: 'Auth.form.password.show-password',
-                                defaultMessage: 'Show password',
-                              }
-                            : {
-                                id: 'Auth.form.password.hide-password',
-                                defaultMessage: 'Hide password',
-                              }
-                        )}
-                      >
-                        {passwordShown ? <Eye /> : <EyeStriked />}
-                      </FieldActionWrapper>
-                    }
-                    required
-                  />
-                  <Checkbox
-                    onValueChange={(checked) => {
-                      handleChange({ target: { value: checked, name: 'rememberMe' } });
-                    }}
-                    value={values.rememberMe}
-                    aria-label="rememberMe"
-                    name="rememberMe"
-                  >
-                    {formatMessage({
-                      id: 'Auth.form.rememberMe.label',
-                      defaultMessage: 'Remember me',
-                    })}
-                  </Checkbox>
-                  <Button fullWidth type="submit">
-                    {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
-                  </Button>
-                </Flex>
-              </Form>
-            )}
-          </Formik>
+            <Flex direction="column" alignItems="stretch" gap={6}>
+              {[
+                {
+                  label: formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' }),
+                  name: 'email',
+                  placeholder: formatMessage({
+                    id: 'Auth.form.email.placeholder',
+                    defaultMessage: 'kai@doe.com',
+                  }),
+                  required: true,
+                  type: 'string' as const,
+                },
+                {
+                  label: formatMessage({
+                    id: 'global.password',
+                    defaultMessage: 'Password',
+                  }),
+                  name: 'password',
+                  required: true,
+                  type: 'password' as const,
+                },
+                {
+                  label: formatMessage({
+                    id: 'Auth.form.rememberMe.label',
+                    defaultMessage: 'Remember me',
+                  }),
+                  name: 'rememberMe',
+                  type: 'checkbox' as const,
+                },
+              ].map((field) => (
+                <InputRenderer key={field.name} {...field} />
+              ))}
+              <Button fullWidth type="submit">
+                {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
+              </Button>
+            </Flex>
+          </Form>
           {children}
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
-            <Link as={NavLink} to="/auth/forgot-password">
+            <Link isExternal={false} tag={NavLink} to="/auth/forgot-password">
               {formatMessage({
                 id: 'Auth.link.forgot-password',
                 defaultMessage: 'Forgot your password?',
@@ -204,12 +160,6 @@ const Login = ({ children }: LoginProps) => {
     </UnauthenticatedLayout>
   );
 };
-
-const PasswordInput = styled(TextInput)`
-  ::-ms-reveal {
-    display: none;
-  }
-`;
 
 export { Login };
 export type { LoginProps };

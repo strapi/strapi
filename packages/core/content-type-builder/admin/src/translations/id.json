@@ -45,8 +45,6 @@
   "contentType.collectionName.description": "Berguna jika nama Jenis Konten dan nama tabel Anda berbeda",
   "contentType.collectionName.label": "Nama koleksi",
   "contentType.displayName.label": "Nama tampilan",
-  "contentType.draftAndPublish.description": "Tulis versi draf dari setiap entri sebelum menerbitkannya",
-  "contentType.draftAndPublish.label": "Draf / sistem terbitkan",
   "contentType.kind.change.warning": "Anda baru saja mengubah jenis tipe konten: API akan disetel ulang (rute, pengontrol, dan layanan akan ditimpa).",
   "error.attributeName.reserved-name": "Nama ini tidak dapat digunakan dalam tipe konten Anda karena dapat merusak fungsi lainnya",
   "error.contentTypeName.reserved-name": "Nama ini tidak dapat digunakan dalam proyek Anda karena dapat merusak fungsi lainnya",

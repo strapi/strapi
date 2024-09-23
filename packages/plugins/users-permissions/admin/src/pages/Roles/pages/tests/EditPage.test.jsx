@@ -1,27 +1,17 @@
 import React from 'react';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
-import {
-  fireEvent,
-  render as renderRTL,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { DesignSystemProvider } from '@strapi/design-system';
+import { fireEvent, render as renderRTL, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, Switch, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from '../EditPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-}));
-
 const render = () => ({
-  ...renderRTL(<Route path="/settings/users-permissions/roles/:id" component={EditPage} />, {
+  ...renderRTL(<Route path="/settings/users-permissions/roles/:id" element={<EditPage />} />, {
     wrapper({ children }) {
       const client = new QueryClient({
         defaultOptions: {
@@ -33,15 +23,15 @@ const render = () => ({
 
       return (
         <IntlProvider locale="en" messages={{}} textComponent="span">
-          <ThemeProvider theme={lightTheme}>
+          <DesignSystemProvider>
             <QueryClientProvider client={client}>
               <NotificationsProvider>
                 <MemoryRouter initialEntries={[`/settings/users-permissions/roles/1`]}>
-                  <Switch>{children}</Switch>
+                  <Routes>{children}</Routes>
                 </MemoryRouter>
               </NotificationsProvider>
             </QueryClientProvider>
-          </ThemeProvider>
+          </DesignSystemProvider>
         </IntlProvider>
       );
     },
@@ -53,9 +43,9 @@ describe('Roles – EditPage', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('renders correctly', async () => {
-    const { getByTestId, getByRole, user } = render();
+    const { getByText, getByRole, user } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     expect(getByRole('link', { name: 'Back' })).toBeInTheDocument();
 
@@ -66,80 +56,82 @@ describe('Roles – EditPage', () => {
 
     expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(getByRole('textbox', { name: 'Name *' })).toBeInTheDocument();
-    expect(getByRole('textbox', { name: 'Description *' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
 
-    await user.click(getByRole('button', { name: 'Address' }));
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
 
-    expect(getByRole('region', { name: 'Address' })).toBeInTheDocument();
+    expect(
+      getByRole('region', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    ).toBeInTheDocument();
 
     expect(getByRole('checkbox', { name: 'Select all' })).toBeInTheDocument();
     expect(getByRole('checkbox', { name: 'create' })).toBeInTheDocument();
   });
 
   it('will show an error if the user does not fill the name field', async () => {
-    const { getByRole, user, getByTestId } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.clear(getByRole('textbox', { name: 'Name *' }));
+    await user.clear(getByRole('textbox', { name: 'Name' }));
 
     await user.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('textbox', { name: 'Name *' })).toHaveAttribute('aria-invalid', 'true');
+    expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('will show an error if the user does not fill out the description field', async () => {
-    const { getByRole, user, getByTestId } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.clear(getByRole('textbox', { name: 'Description *' }));
+    await user.clear(getByRole('textbox', { name: 'Description' }));
 
     await user.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('textbox', { name: 'Description *' })).toHaveAttribute('aria-invalid', 'true');
+    expect(getByRole('textbox', { name: 'Description' })).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it("can update a role's name and description", async () => {
-    const { getByRole, user, getByTestId, getByText } = render();
+  it("can update a role's name, description and permissions", async () => {
+    const { getByRole, user, getByText, findByRole, findByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.type(getByRole('textbox', { name: 'Name *' }), 'test');
-    await user.type(getByRole('textbox', { name: 'Description *' }), 'testing');
-
-    /**
-     * @note user.click will not trigger the form.
-     */
-    fireEvent.click(getByRole('button', { name: 'Save' }));
-
-    await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
-  });
-
-  it("can update a role's permissions", async () => {
-    const { getByRole, user, getByText, getByTestId } = render();
-
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
-
-    await user.click(getByRole('button', { name: 'Address' }));
-
+    await user.type(getByRole('textbox', { name: 'Name' }), 'test');
+    await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
     await user.click(getByRole('checkbox', { name: 'create' }));
 
+    const button = await findByRole('button', { name: 'Save' });
     /**
      * @note user.click will not trigger the form.
      */
-    fireEvent.click(getByRole('button', { name: 'Save' }));
-
-    await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
+    fireEvent.click(button);
+    await findByText('Role edited');
+    await findByText('Authenticated');
   });
 
   it('will update the Advanced Settings panel when you click on the cog icon of a specific permission', async () => {
-    const { getByRole, user, getByText, getByTestId } = render();
+    const { getByRole, user, getByText } = render();
 
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.click(getByRole('button', { name: 'Address' }));
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
 
     await user.hover(getByRole('checkbox', { name: 'create' }));
 

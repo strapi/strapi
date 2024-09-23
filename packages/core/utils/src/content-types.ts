@@ -14,6 +14,8 @@ const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
+const DOC_ID_ATTRIBUTE = 'documentId';
+
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
 const CREATED_BY_ATTRIBUTE = 'createdBy';
 const UPDATED_BY_ATTRIBUTE = 'updatedBy';
@@ -21,26 +23,20 @@ const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 const CREATED_AT_ATTRIBUTE = 'createdAt';
 const UPDATED_AT_ATTRIBUTE = 'updatedAt';
 
-const DP_PUB_STATE_LIVE = 'live';
-const DP_PUB_STATE_PREVIEW = 'preview';
-const DP_PUB_STATES = [DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW];
-
 const constants = {
   ID_ATTRIBUTE,
+  DOC_ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
-  DP_PUB_STATES,
-  DP_PUB_STATE_LIVE,
-  DP_PUB_STATE_PREVIEW,
   SINGLE_TYPE,
   COLLECTION_TYPE,
 };
 
 const getTimestamps = (model: Model) => {
-  const attributes = [];
+  const attributes: string[] = [];
 
   if (has(CREATED_AT_ATTRIBUTE, model.attributes)) {
     attributes.push(CREATED_AT_ATTRIBUTE);
@@ -54,7 +50,7 @@ const getTimestamps = (model: Model) => {
 };
 
 const getCreatorFields = (model: Model) => {
-  const attributes = [];
+  const attributes: string[] = [];
 
   if (has(CREATED_BY_ATTRIBUTE, model.attributes)) {
     attributes.push(CREATED_BY_ATTRIBUTE);
@@ -76,7 +72,12 @@ const getNonWritableAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonWritableAttributes]);
+  return _.uniq([
+    ID_ATTRIBUTE,
+    DOC_ID_ATTRIBUTE,
+    ...getTimestamps(model),
+    ...nonWritableAttributes,
+  ]);
 };
 
 const getWritableAttributes = (model: Model) => {
@@ -96,7 +97,7 @@ const getNonVisibleAttributes = (model: Model) => {
     [] as string[]
   );
 
-  return _.uniq([ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
+  return _.uniq([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, ...getTimestamps(model), ...nonVisibleAttributes]);
 };
 
 const getVisibleAttributes = (model: Model) => {
@@ -115,6 +116,24 @@ const hasDraftAndPublish = (model: Model) =>
 
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
+
+const isSchema = (data: unknown): data is Model => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'modelType' in data &&
+    typeof data.modelType === 'string' &&
+    ['component', 'contentType'].includes(data.modelType)
+  );
+};
+
+const isComponentSchema = (data: unknown): data is Model & { modelType: 'component' } => {
+  return isSchema(data) && data.modelType === 'component';
+};
+
+const isContentTypeSchema = (data: unknown): data is Model & { modelType: 'contentType' } => {
+  return isSchema(data) && data.modelType === 'contentType';
+};
 
 const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
@@ -140,22 +159,39 @@ const isPrivateAttribute = (model: Model, attributeName: string) => {
   return getStoredPrivateAttributes(model).includes(attributeName);
 };
 
-const isScalarAttribute = (attribute: Attribute) => {
-  return !['media', 'component', 'relation', 'dynamiczone'].includes(attribute?.type);
+const isScalarAttribute = (attribute?: Attribute) => {
+  return attribute && !['media', 'component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
-const isMediaAttribute = (attribute: Attribute) => attribute?.type === 'media';
-const isRelationalAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
+
+const getDoesAttributeRequireValidation = (attribute: Attribute) => {
+  return (
+    attribute.required ||
+    attribute.unique ||
+    Object.prototype.hasOwnProperty.call(attribute, 'max') ||
+    Object.prototype.hasOwnProperty.call(attribute, 'min') ||
+    Object.prototype.hasOwnProperty.call(attribute, 'maxLength') ||
+    Object.prototype.hasOwnProperty.call(attribute, 'minLength')
+  );
+};
+const isMediaAttribute = (attribute?: Attribute) => attribute?.type === 'media';
+const isRelationalAttribute = (attribute?: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
+
+const HAS_RELATION_REORDERING = ['manyToMany', 'manyToOne', 'oneToMany'];
+const hasRelationReordering = (attribute?: Attribute) =>
+  isRelationalAttribute(attribute) && HAS_RELATION_REORDERING.includes(attribute.relation);
 
 const isComponentAttribute = (
   attribute: Attribute
 ): attribute is ComponentAttribute | DynamicZoneAttribute =>
   ['component', 'dynamiczone'].includes(attribute?.type);
 
-const isDynamicZoneAttribute = (attribute: Attribute): attribute is DynamicZoneAttribute =>
-  attribute?.type === 'dynamiczone';
-const isMorphToRelationalAttribute = (attribute: Attribute) => {
-  return isRelationalAttribute(attribute) && attribute?.relation?.startsWith?.('morphTo');
+const isDynamicZoneAttribute = (attribute?: Attribute): attribute is DynamicZoneAttribute =>
+  !!attribute && attribute.type === 'dynamiczone';
+const isMorphToRelationalAttribute = (attribute?: Attribute) => {
+  return (
+    !!attribute && isRelationalAttribute(attribute) && attribute.relation?.startsWith?.('morphTo')
+  );
 };
 
 const getComponentAttributes = (schema: Model) => {
@@ -174,6 +210,17 @@ const getScalarAttributes = (schema: Model) => {
     schema.attributes,
     (acc, attr, attrName) => {
       if (isScalarAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
+const getRelationalAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isRelationalAttribute(attr)) acc.push(attrName);
       return acc;
     },
     [] as string[]
@@ -201,9 +248,13 @@ const getContentTypeRoutePrefix = (contentType: WithRequired<Model, 'info'>) => 
 };
 
 export {
+  isSchema,
+  isContentTypeSchema,
+  isComponentSchema,
   isScalarAttribute,
   isMediaAttribute,
   isRelationalAttribute,
+  hasRelationReordering,
   isComponentAttribute,
   isDynamicZoneAttribute,
   isMorphToRelationalAttribute,
@@ -214,6 +265,7 @@ export {
   getNonWritableAttributes,
   getComponentAttributes,
   getScalarAttributes,
+  getRelationalAttributes,
   getWritableAttributes,
   isWritableAttribute,
   getNonVisibleAttributes,
@@ -221,11 +273,12 @@ export {
   getTimestamps,
   getCreatorFields,
   isVisibleAttribute,
-  hasDraftAndPublish,
   getOptions,
   isDraft,
+  hasDraftAndPublish,
   isSingleType,
   isCollectionType,
   isKind,
   getContentTypeRoutePrefix,
+  getDoesAttributeRequireValidation,
 };

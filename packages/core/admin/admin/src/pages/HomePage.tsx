@@ -1,34 +1,42 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
-import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
-  ContentBox,
-  LoadingIndicatorPage,
-  useAppInfo,
-  useGuidedTour,
-  useTracking,
-} from '@strapi/helper-plugin';
+  Box,
+  Button,
+  Flex,
+  Grid,
+  Main,
+  Typography,
+  Link,
+  LinkButton,
+  TypographyComponent,
+  BoxComponent,
+  FlexComponent,
+} from '@strapi/design-system';
+import { ArrowRight, ExternalLink } from '@strapi/icons';
 import {
-  ArrowRight,
   CodeSquare,
   Discord,
   Discourse,
-  ExternalLink,
   FeatherSquare,
-  Github,
+  GitHub,
   InformationSquare,
   PlaySquare,
   Reddit,
   Strapi,
-  Twitter,
-} from '@strapi/icons';
-import { Helmet } from 'react-helmet';
+  X as Twitter,
+} from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
 
+import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
+import { useGuidedTour } from '../components/GuidedTour/Provider';
+import { Layouts } from '../components/Layouts/Layout';
+import { Page } from '../components/PageHelpers';
+import { useAppInfo } from '../features/AppInfo';
+import { useTracking } from '../features/Tracking';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
 
@@ -44,53 +52,48 @@ const HomePageCE = () => {
   const { formatMessage } = useIntl();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
-  const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  const guidedTourState = useGuidedTour('HomePage', (state) => state.guidedTourState);
+  const isGuidedTourVisible = useGuidedTour('HomePage', (state) => state.isGuidedTourVisible);
+  const isSkipped = useGuidedTour('HomePage', (state) => state.isSkipped);
+
   const showGuidedTour =
     !Object.values(guidedTourState).every((section) =>
       Object.values(section).every((step) => step)
     ) &&
     isGuidedTourVisible &&
     !isSkipped;
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
 
-    push('/plugins/content-type-builder/content-types/create-content-type');
+    navigate('/plugins/content-type-builder/content-types/create-content-type');
   };
 
-  const hasAlreadyCreatedContentTypes = React.useMemo(() => {
-    /**
-     * TODO: this can be done with a `some` call.
-     */
-    return (
-      collectionTypes.filter((c) => c.isDisplayed).length > 1 ||
-      singleTypes.filter((c) => c.isDisplayed).length > 0
-    );
-  }, [collectionTypes, singleTypes]);
+  const hasAlreadyCreatedContentTypes = collectionTypes.length > 1 || singleTypes.length > 0;
 
   if (isLoadingForModels) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
-    <Layout>
-      <Helmet
-        title={formatMessage({
-          id: 'HomePage.helmet.title',
+    <Layouts.Root>
+      <Page.Title>
+        {formatMessage({
+          id: 'HomePage.head.title',
           defaultMessage: 'Homepage',
         })}
-      />
+      </Page.Title>
       <Main>
         <LogoContainer>
           <img alt="" aria-hidden src={cornerOrnamentPath} />
         </LogoContainer>
         <Box padding={10}>
-          <Grid>
-            <GridItem col={8} s={12}>
+          <Grid.Root>
+            <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
               <div>
                 <Box paddingLeft={6} paddingBottom={10}>
                   <Flex direction="column" alignItems="flex-start" gap={5}>
-                    <Typography as="h1" variant="alpha">
+                    <Typography tag="h1" variant="alpha">
                       {hasAlreadyCreatedContentTypes
                         ? formatMessage({
                             id: 'app.components.HomePage.welcome.again',
@@ -132,33 +135,33 @@ const HomePageCE = () => {
                   </Flex>
                 </Box>
               </div>
-            </GridItem>
-          </Grid>
-          <Grid gap={6}>
-            <GridItem col={8} s={12}>
+            </Grid.Item>
+          </Grid.Root>
+          <Grid.Root gap={6}>
+            <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
               {showGuidedTour ? <GuidedTourHomepage /> : <ContentBlocks />}
-            </GridItem>
-            <GridItem col={4} s={12}>
+            </Grid.Item>
+            <Grid.Item col={4} s={12} direction="column" alignItems="stretch">
               <SocialLinks />
-            </GridItem>
-          </Grid>
+            </Grid.Item>
+          </Grid.Root>
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 
-const LogoContainer = styled(Box)`
+const LogoContainer = styled<BoxComponent>(Box)`
   position: absolute;
   top: 0;
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
-const WordWrap = styled(Typography)`
+const WordWrap = styled<TypographyComponent>(Typography)`
   word-break: break-word;
 `;
 
@@ -190,8 +193,8 @@ const ContentBlocks = () => {
         >
           <CloudCustomWrapper hasRadius padding={3}>
             <CloudIconWrapper
-              width="2rem"
-              height="2rem"
+              width="3.2rem"
+              height="3.2rem"
               justifyContent="center"
               hasRadius
               alignItems="center"
@@ -207,7 +210,7 @@ const ContentBlocks = () => {
             </CloudIconWrapper>
           </CloudCustomWrapper>
           <Flex gap={1} direction="column" alignItems="start">
-            <Typography fontWeight="semiBold" variant="pi">
+            <Typography fontWeight="semiBold" variant="pi" textColor="neutral800">
               {formatMessage({
                 id: 'app.components.BlockLink.cloud',
                 defaultMessage: 'Strapi Cloud',
@@ -216,11 +219,10 @@ const ContentBlocks = () => {
             <Typography textColor="neutral600">
               {formatMessage({
                 id: 'app.components.BlockLink.cloud.content',
-                defaultMessage:
-                  'A fully composable, and collaborative platform to boost your team velocity.',
+                defaultMessage: 'Fully-managed cloud hosting for your Strapi project.',
               })}
             </Typography>
-            <Box src={cloudFlagsImage} position="absolute" top={0} right={0} as="img" />
+            <Box src={cloudFlagsImage} position="absolute" top={0} right={0} tag="img" />
           </Flex>
         </Flex>
       </BlockLink>
@@ -308,11 +310,11 @@ const BlockLink = styled.a`
   text-decoration: none;
 `;
 
-const CloudCustomWrapper = styled(Box)`
+const CloudCustomWrapper = styled<BoxComponent>(Box)`
   background-image: url(${cloudIconBackgroundImage});
 `;
 
-const CloudIconWrapper = styled(Flex)`
+const CloudIconWrapper = styled<FlexComponent>(Flex)`
   background: rgba(255, 255, 255, 0.3);
 `;
 
@@ -322,7 +324,7 @@ const CloudIconWrapper = styled(Flex)`
 
 const SocialLinks = () => {
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfo();
+  const communityEdition = useAppInfo('SocialLinks', (state) => state.communityEdition);
 
   const socialLinksExtended = [
     ...SOCIAL_LINKS,
@@ -340,7 +342,7 @@ const SocialLinks = () => {
 
   return (
     <Flex
-      as="aside"
+      tag="aside"
       direction="column"
       aria-labelledby="join-the-community"
       background="neutral0"
@@ -354,7 +356,7 @@ const SocialLinks = () => {
     >
       <Flex direction="column" alignItems="stretch" gap={5}>
         <Flex direction="column" alignItems="stretch" gap={3}>
-          <Typography variant="delta" as="h2" id="join-the-community">
+          <Typography variant="delta" tag="h2" id="join-the-community">
             {formatMessage({
               id: 'app.components.HomePage.community',
               defaultMessage: 'Join the community',
@@ -378,17 +380,23 @@ const SocialLinks = () => {
       <GridGap>
         {socialLinksExtended.map(({ icon, link, name }) => {
           return (
-            <GridItem col={6} s={12} key={name.id}>
+            <Grid.Item col={6} s={12} key={name.id} direction="column" alignItems="stretch">
               <LinkCustom size="L" startIcon={icon} variant="tertiary" href={link} isExternal>
                 {formatMessage(name)}
               </LinkCustom>
-            </GridItem>
+            </Grid.Item>
           );
         })}
       </GridGap>
     </Flex>
   );
 };
+
+const StyledGithub = styled(GitHub)`
+  path {
+    fill: ${(props) => props.theme.colors.neutral800} !important;
+  }
+`;
 
 const StyledDiscord = styled(Discord)`
   path {
@@ -399,6 +407,10 @@ const StyledDiscord = styled(Discord)`
 const StyledReddit = styled(Reddit)`
   > path:first-child {
     fill: #ff4500;
+  }
+
+  > path:nth-child(2) {
+    fill: #fff;
   }
 `;
 const StyledStrapi = styled(Strapi)`
@@ -414,8 +426,12 @@ const StyledStrapi = styled(Strapi)`
 `;
 
 const StyledTwitter = styled(Twitter)`
-  path {
-    fill: #1da1f2 !important;
+  path:first-child {
+    fill: #fff;
+  }
+
+  path:nth-child(2) {
+    fill: #000 !important;
   }
 `;
 
@@ -455,7 +471,7 @@ const LinkCustom = styled(LinkButton)`
   }
 `;
 
-const GridGap = styled(Grid)`
+const GridGap = styled(Grid.Root)`
   row-gap: ${({ theme }) => theme.spaces[2]};
   column-gap: ${({ theme }) => theme.spaces[4]};
 `;
@@ -464,7 +480,7 @@ const SOCIAL_LINKS = [
   {
     name: { id: 'app.components.HomePage.community.links.github', defaultMessage: 'Github' },
     link: 'https://github.com/strapi/strapi/',
-    icon: <Github fill="#7289DA" />,
+    icon: <StyledGithub />,
     alt: 'github',
   },
   {

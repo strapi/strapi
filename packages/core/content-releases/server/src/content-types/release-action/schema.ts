@@ -24,14 +24,12 @@ export default {
       enum: ['publish', 'unpublish'],
       required: true,
     },
-    entry: {
-      type: 'relation',
-      relation: 'morphToOne',
-      configurable: false,
-    },
     contentType: {
       type: 'string',
       required: true,
+    },
+    entryDocumentId: {
+      type: 'string',
     },
     locale: {
       type: 'string',
@@ -41,6 +39,9 @@ export default {
       relation: 'manyToOne',
       target: RELEASE_MODEL_UID,
       inversedBy: 'actions',
+    },
+    isEntryValid: {
+      type: 'boolean',
     },
   },
 };

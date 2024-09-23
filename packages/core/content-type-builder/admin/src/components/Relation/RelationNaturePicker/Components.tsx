@@ -1,7 +1,7 @@
-import { Box, Flex } from '@strapi/design-system';
-import styled from 'styled-components';
+import { Box, BoxComponent, Flex, FlexComponent } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
-const Wrapper = styled(Box)`
+const Wrapper = styled<BoxComponent>(Box)`
   position: relative;
   width: 100%;
   &::before {
@@ -15,17 +15,19 @@ const Wrapper = styled(Box)`
   }
 `;
 
-const IconWrapper = styled(Box)<{ isSelected: boolean }>`
-  background: ${({ theme, isSelected }) => theme.colors[isSelected ? 'primary100' : 'neutral0']};
+const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }>`
+  background: ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary100' : 'neutral0']};
   border: 1px solid
-    ${({ theme, isSelected }) => theme.colors[isSelected ? 'primary700' : 'neutral200']};
+    ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary700' : 'neutral200']};
   border-radius: ${({ theme }) => theme.borderRadius};
   z-index: 1;
+  flex: 0 0 2.4rem;
   svg {
-    width: 1.5rem;
-    height: 100%;
+    width: 2.4rem;
+    height: 2.4rem;
+    max-width: unset;
     path {
-      fill: ${({ theme, isSelected }) => theme.colors[isSelected ? 'primary700' : 'neutral500']};
+      fill: ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary700' : 'neutral500']};
     }
   }
   &:disabled {
@@ -33,7 +35,7 @@ const IconWrapper = styled(Box)<{ isSelected: boolean }>`
   }
 `;
 
-const InfosWrapper = styled(Flex)`
+const InfosWrapper = styled<FlexComponent>(Flex)`
   position: absolute;
   bottom: 0;
   left: 0;

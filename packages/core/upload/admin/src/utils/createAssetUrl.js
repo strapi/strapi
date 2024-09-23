@@ -1,4 +1,4 @@
-import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import prefixFileUrlWithBackendUrl from './prefixFileUrlWithBackendUrl';
 
 /**
  * Create image URL for asset

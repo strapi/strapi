@@ -1,8 +1,14 @@
-import type { Attribute, Common, Utils } from '../../../../types';
+import type * as Schema from '../../../../schema';
+
+import type { If } from '../../../../utils';
+import type * as UID from '../../../../uid';
+
 import type { ID } from './id';
 
 type ShortHand = ID;
-type LongHand = { id: ID };
+type LongHandEntity = { id: ID };
+type LongHandDocument = { documentId: ID; locale?: string };
+type LongHand = LongHandEntity | LongHandDocument;
 
 interface PositionalArguments {
   before?: ID;
@@ -11,7 +17,7 @@ interface PositionalArguments {
   end?: boolean;
 }
 
-type WithPositionArguments<T> = T & PositionalArguments;
+type WithPositionArguments<T> = T & { position?: PositionalArguments };
 
 type Set = { set: ShortHand[] | LongHand[] | null };
 type Connect = { connect: ShortHand[] | WithPositionArguments<LongHand>[] };
@@ -23,18 +29,18 @@ type PartialUpdate = Partial<Connect & Disconnect>;
 type XOneInput = ShortHand | LongHand | null;
 type XManyInput = ShortHand[] | LongHand[] | null | PartialUpdate | FullUpdate;
 
-type RelationInputValue<TRelationKind extends Attribute.RelationKind.Any> = Utils.Expression.If<
-  Attribute.IsManyRelation<TRelationKind>,
+type RelationInputValue<TRelationKind extends Schema.Attribute.RelationKind.Any> = If<
+  Schema.Attribute.IsManyRelation<TRelationKind>,
   XManyInput,
   XOneInput
 >;
 
-type RelationsKeysWithoutTarget<TSchemaUID extends Common.UID.Schema> = Exclude<
-  Attribute.GetKeysByType<TSchemaUID, 'relation'>,
-  Attribute.GetKeysWithTarget<TSchemaUID>
+type RelationsKeysWithoutTarget<TSchemaUID extends UID.Schema> = Exclude<
+  Schema.AttributeNamesByType<TSchemaUID, 'relation'>,
+  Schema.AttributeNamesWithTarget<TSchemaUID>
 >;
 
-type OmitRelationsWithoutTarget<TSchemaUID extends Common.UID.Schema, TValue> = Omit<
+type OmitRelationsWithoutTarget<TSchemaUID extends UID.Schema, TValue> = Omit<
   TValue,
   RelationsKeysWithoutTarget<TSchemaUID>
 >;

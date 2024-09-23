@@ -13,8 +13,6 @@
   "button.component.create": "Créer un composant",
   "button.model.create": "Créer un type de collection",
   "button.single-types.create": "Créer un single type",
-  "contentType.draftAndPublish.description": "Rédigez une version brouillon de chaque entrée avant de la publier",
-  "contentType.draftAndPublish.label": "Système brouillon/publier",
   "contentType.kind.change.warning": "Vous venez de changer le type de ce modèle: L'API va redémarrer (Les routes, controllers, et les services seront écrasés).",
   "form.attribute.item.customColumnName": "Nom de colonne personalisée",
   "form.attribute.item.customColumnName.description": "Pratique pour renommer la colonne de la db dans un format plus comprehensible pour les responses de l'API",

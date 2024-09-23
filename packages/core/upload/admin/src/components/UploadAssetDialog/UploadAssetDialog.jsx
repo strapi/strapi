@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
-import { ModalLayout } from '@strapi/design-system';
+import { Modal } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { AssetDefinition } from '../../constants';
-import { EditAssetDialog } from '../EditAssetDialog';
+import { EditAssetContent } from '../EditAssetDialog';
 
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
@@ -21,6 +21,7 @@ export const UploadAssetDialog = ({
   onClose,
   addUploadedFiles,
   trackedLocation,
+  open,
   validateAssetsTypes = (_, cb) => cb(),
 }) => {
   const { formatMessage } = useIntl();
@@ -91,42 +92,48 @@ export const UploadAssetDialog = ({
   };
 
   return (
-    <ModalLayout onClose={handleClose} labelledBy="title">
+    <Modal.Root open={open} onOpenChange={handleClose}>
       {step === Steps.AddAsset && (
-        <AddAssetStep
-          onClose={onClose}
-          onAddAsset={handleAddToPendingAssets}
-          trackedLocation={trackedLocation}
-        />
+        <Modal.Content>
+          <AddAssetStep
+            onClose={onClose}
+            onAddAsset={handleAddToPendingAssets}
+            trackedLocation={trackedLocation}
+          />
+        </Modal.Content>
       )}
 
       {step === Steps.PendingAsset && (
-        <PendingAssetStep
-          onClose={handleClose}
-          assets={assets}
-          onEditAsset={setAssetToEdit}
-          onRemoveAsset={handleRemoveAsset}
-          onClickAddAsset={moveToAddAsset}
-          onCancelUpload={handleCancelUpload}
-          onUploadSucceed={handleUploadSuccess}
-          initialAssetsToAdd={initialAssetsToAdd}
-          addUploadedFiles={addUploadedFiles}
-          folderId={folderId}
-          trackedLocation={trackedLocation}
-        />
+        <Modal.Content>
+          <PendingAssetStep
+            onClose={handleClose}
+            assets={assets}
+            onEditAsset={setAssetToEdit}
+            onRemoveAsset={handleRemoveAsset}
+            onClickAddAsset={moveToAddAsset}
+            onCancelUpload={handleCancelUpload}
+            onUploadSucceed={handleUploadSuccess}
+            initialAssetsToAdd={initialAssetsToAdd}
+            addUploadedFiles={addUploadedFiles}
+            folderId={folderId}
+            trackedLocation={trackedLocation}
+          />
+        </Modal.Content>
       )}
 
       {assetToEdit && (
-        <EditAssetDialog
-          onClose={handleAssetEditValidation}
-          asset={assetToEdit}
-          canUpdate
-          canCopyLink={false}
-          canDownload={false}
-          trackedLocation={trackedLocation}
-        />
+        <Modal.Content>
+          <EditAssetContent
+            onClose={handleAssetEditValidation}
+            asset={assetToEdit}
+            canUpdate
+            canCopyLink={false}
+            canDownload={false}
+            trackedLocation={trackedLocation}
+          />
+        </Modal.Content>
       )}
-    </ModalLayout>
+    </Modal.Root>
   );
 };
 
@@ -143,6 +150,7 @@ UploadAssetDialog.propTypes = {
   addUploadedFiles: PropTypes.func,
   folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
+  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
   trackedLocation: PropTypes.string,
   validateAssetsTypes: PropTypes.func,

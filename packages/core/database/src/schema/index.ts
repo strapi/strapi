@@ -5,6 +5,7 @@ import createSchemaDiff from './diff';
 import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
+import type { Schema } from './types';
 import type { Database } from '..';
 
 export type * from './types';
@@ -20,15 +21,25 @@ export interface SchemaProvider {
   reset(): Promise<void>;
   create(): Promise<void>;
   drop(): Promise<void>;
+  schema: Schema;
 }
 
-/**
- * @type {import('.').default}
- */
+interface State {
+  schema?: Schema;
+}
+
 export const createSchemaProvider = (db: Database): SchemaProvider => {
-  const schema = metadataToSchema(db.metadata);
+  const state: State = {};
 
   return {
+    get schema() {
+      if (!state.schema) {
+        debug('Converting metadata to database schema');
+        state.schema = metadataToSchema(db.metadata);
+      }
+
+      return state.schema;
+    },
     builder: createSchemaBuilder(db),
     schemaDiff: createSchemaDiff(db),
     schemaStorage: createSchemaStorage(db),
@@ -48,7 +59,7 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
      */
     async create() {
       debug('Created database schema');
-      await this.builder.createSchema(schema);
+      await this.builder.createSchema(this.schema);
     },
 
     /**
@@ -63,15 +74,30 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
     async syncSchema() {
       debug('Synchronizing database schema');
 
-      const DBSchema = await db.dialect.schemaInspector.getSchema();
+      const databaseSchema = await db.dialect.schemaInspector.getSchema();
+      const storedSchema = await this.schemaStorage.read();
 
-      const { status, diff } = await this.schemaDiff.diff(DBSchema, schema);
+      /*
+        3way diff - DB schema / previous metadataSchema / new metadataSchema
+
+        - When something doesn't exist in the previous metadataSchema -> It's not tracked by us and should be ignored
+        - If no previous metadataSchema => use new metadataSchema so we start tracking them and ignore everything else
+        - Apply this logic to Tables / Columns / Indexes / FKs ...
+        - Handle errors (indexes or fks on incompatible stuff ...)
+
+      */
+
+      const { status, diff } = await this.schemaDiff.diff({
+        previousSchema: storedSchema?.schema,
+        databaseSchema,
+        userSchema: this.schema,
+      });
 
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
       }
 
-      await this.schemaStorage.add(schema);
+      await this.schemaStorage.add(this.schema);
     },
 
     // TODO: support options to migrate softly or forcefully
@@ -93,7 +119,7 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       }
 
       const { hash: oldHash } = oldSchema;
-      const hash = await this.schemaStorage.hashSchema(schema);
+      const hash = await this.schemaStorage.hashSchema(this.schema);
 
       if (oldHash !== hash) {
         debug('Schema changed');
