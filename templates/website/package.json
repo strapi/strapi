@@ -9,10 +9,10 @@
     "deploy": "strapi deploy"
   },
   "dependencies": {
-    "@strapi/plugin-cloud": "^5.0.0-rc",
-    "@strapi/plugin-graphql": "^5.0.0-rc",
-    "@strapi/plugin-users-permissions": "^5.0.0-rc",
-    "@strapi/strapi": "^5.0.0-rc",
+    "@strapi/plugin-cloud": "^5.0.0",
+    "@strapi/plugin-graphql": "^5.0.0",
+    "@strapi/plugin-users-permissions": "^5.0.0",
+    "@strapi/strapi": "^5.0.0",
     "lodash.set": "^4.3.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

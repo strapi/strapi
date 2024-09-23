@@ -81,7 +81,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
-    "@babel/eslint-parser": "^7.19.1",
+    "@babel/eslint-parser": "^7.25.1",
     "@babel/preset-react": "7.18.6",
     "@commitlint/cli": "19.2.0",
     "@commitlint/config-conventional": "19.1.0",
@@ -100,7 +100,6 @@
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
-    "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
     "coffee": "5.5.1",
