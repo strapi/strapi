@@ -270,10 +270,9 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityValidator', entityValidator)
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
-      .add('db', async () => {
-        // fixme: sync resolveOutDir()
-        const outDir = tsUtils.resolveOutDir(this.dirs.app.root) as Promise<string>;
-        const root = outDir === undefined ? this.dirs.app.root : await outDir;
+      .add('db', () => {
+        const outDir = tsUtils.resolveOutDirSync(this.dirs.app.root) as string;
+        const root = outDir === undefined ? this.dirs.app.root : outDir;
         return new Database(
           _.merge(this.config.get('database'), {
             logger,

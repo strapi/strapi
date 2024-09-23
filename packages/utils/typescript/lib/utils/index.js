@@ -7,6 +7,7 @@ const reportDiagnostics = require('./report-diagnostics');
 const resolveConfigOptions = require('./resolve-config-options');
 const formatHost = require('./format-host');
 const resolveOutDir = require('./resolve-outdir');
+const resolveOutDirSync = require('./resolve-outdir-sync');
 
 module.exports = {
   isUsingTypeScript,
@@ -16,4 +17,5 @@ module.exports = {
   resolveConfigOptions,
   formatHost,
   resolveOutDir,
+  resolveOutDirSync,
 };
