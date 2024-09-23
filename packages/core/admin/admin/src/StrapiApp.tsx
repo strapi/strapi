@@ -328,11 +328,16 @@ class StrapiApp {
     const adminLocales = await Promise.all(
       this.configurations.locales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(`./translations/${locale}.js`);
 
           return { data, locale };
         } catch {
-          return { data: null, locale };
+          try {
+            const { default: data } = await import(`./translations/${locale}.json`);
+            return { data, locale };
+          } catch {
+            return { data: null, locale };
+          }
         }
       })
     );
