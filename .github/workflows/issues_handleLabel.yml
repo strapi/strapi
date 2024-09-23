@@ -70,6 +70,43 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           close-reason: 'not_planned'
 
+      # v4 Legacy Issues
+      - name: 'Comment: unsupported v4 issues'
+        if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            Thank you for reporting this potential bug report, please keep in mind that we are no longer accepting low/medium severity bug reports for Strapi v4.
+            We have confirmed that this issue is a low/medium severity bug and is not reproducable in Strapi 5. We advise upgrading to Strapi 5 to resolve this issue.
+
+            The recommended action we suggest for v4 users is to utilize the various migration resources to upgrade your package from Strapi 4 to Strapi 5:
+
+            - [Updating documentation](https://docs.strapi.io/dev-docs/migration/v4-to-v5/introduction-and-faq)
+            - [Step by Step Guide](https://docs.strapi.io/dev-docs/migration/v4-to-v5/step-by-step)
+            - [Upgrade Tool](https://docs.strapi.io/dev-docs/upgrade-tool)
+            - [Breaking Changes list](https://docs.strapi.io/dev-docs/migration/v4-to-v5/breaking-changes)
+            - [Specific Resources](https://docs.strapi.io/dev-docs/migration/v4-to-v5/additional-resources/introduction)
+
+            Please see our [Security file](https://github.com/strapi/strapi/security) for more information about supported versions.
+            For now this issue is marked as closed.
+
+            Thank You
+      - name: 'Close: unsupported v4 issues'
+        if: "${{ github.event.label.name == 'flag: v4-unsupported' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'not_planned'
+
       # Feature request redirections
       - name: 'Comment: redirect feature request to canny'
         if: "${{ github.event.label.name == 'issue: feature request' }}"
