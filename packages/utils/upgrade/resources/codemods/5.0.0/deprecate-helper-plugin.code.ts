@@ -18,11 +18,13 @@ const transform: Transform = (file, api) => {
     toChangeImportSpecifier: boolean;
     newDependency?: string;
     newName?: string;
+    newImport?: string;
   };
 
   const replacements: Replacement[] = [
     {
       oldName: 'AnErrorOccurred',
+      newImport: 'Page',
       newName: 'Page.Error',
       oldDependency: '@strapi/helper-plugin',
       newDependency: '@strapi/strapi/admin',
@@ -31,6 +33,7 @@ const transform: Transform = (file, api) => {
     },
     {
       oldName: 'CheckPagePermissions',
+      newImport: 'Page',
       newName: 'Page.Protect',
       oldDependency: '@strapi/helper-plugin',
       newDependency: '@strapi/strapi/admin',
@@ -60,6 +63,7 @@ const transform: Transform = (file, api) => {
     },
     {
       oldName: 'LoadingIndicatorPage',
+      newImport: 'Page',
       newName: 'Page.Loading',
       oldDependency: '@strapi/helper-plugin',
       newDependency: '@strapi/strapi/admin',
@@ -68,6 +72,7 @@ const transform: Transform = (file, api) => {
     },
     {
       oldName: 'NoContent',
+      newImport: 'EmptyStateLayout',
       newName: 'EmptyStateLayout',
       oldDependency: '@strapi/helper-plugin',
       newDependency: '@strapi/design-system',
@@ -76,6 +81,7 @@ const transform: Transform = (file, api) => {
     },
     {
       oldName: 'NoPermissions',
+      newImport: 'Page',
       newName: 'Page.NoPermissions',
       oldDependency: '@strapi/helper-plugin',
       newDependency: '@strapi/strapi/admin',
@@ -173,7 +179,7 @@ const transform: Transform = (file, api) => {
     if (replacement.toChangeImportSpecifier && replacement.newDependency) {
       changeImportSpecifier(root, j, {
         oldMethodName: replacement.oldName,
-        newMethodName: replacement.newName,
+        newMethodName: replacement.newImport,
         oldDependency: replacement.oldDependency,
         newDependency: replacement.newDependency,
       });
