@@ -37,7 +37,7 @@ jobs:
         with:
           build-script: 'build:size'
           pattern: '**/build/**/*.{js,css,html,svg}'
-          strip-hash: "\\.(?:(\\w{8})\\.chunk)|(?:\\.(\\w{8}))"
+          strip-hash: "-(\\w{8})(\\.\\w+)$"
           minimum-change-threshold: 10
 
           # FIXME: exclude unnamed webpack chunks - remove once webpack
