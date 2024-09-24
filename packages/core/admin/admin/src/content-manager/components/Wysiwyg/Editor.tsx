@@ -99,7 +99,7 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
           scrollInfo = editor.getScrollInfo();
         });
     
-        // Event listener for after content change
+        // Event listener for after content changes
         editor.on('change', () => {
           // Restore the scroll position after changes
           editor.scrollTo(scrollInfo.left, scrollInfo.top);
