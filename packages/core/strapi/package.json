@@ -108,7 +108,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
     "@strapi/admin": "workspace:*",
     "@strapi/cloud-cli": "workspace:*",
     "@strapi/content-manager": "workspace:*",
@@ -169,7 +169,7 @@
     "vite": "5.1.7",
     "webpack": "^5.90.3",
     "webpack-bundle-analyzer": "^4.10.1",
-    "webpack-dev-middleware": "6.1.1",
+    "webpack-dev-middleware": "6.1.2",
     "webpack-hot-middleware": "2.26.1",
     "yalc": "1.0.0-pre.53",
     "yup": "0.32.9"
