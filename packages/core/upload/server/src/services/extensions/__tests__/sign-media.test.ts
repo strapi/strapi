@@ -1,10 +1,11 @@
+import type { UID } from '@strapi/types';
 import { signEntityMedia } from '../utils';
 import { getService } from '../../../utils';
 
 jest.mock('../../../utils');
 
 describe('Upload | extensions | entity-manager', () => {
-  const modelUID = 'model';
+  const modelUID = 'model' as UID.Schema;
   const componentUID = 'component';
 
   const models = {
@@ -71,6 +72,18 @@ describe('Upload | extensions | entity-manager', () => {
       spySignFileUrls = jest.fn();
       jest.mocked(getService).mockImplementation(() => ({
         signFileUrls: spySignFileUrls,
+        getFolderPath: jest.fn(),
+        deleteByIds: jest.fn(),
+        computeMetrics: jest.fn().mockResolvedValue({
+          assetNumber: 0,
+          folderNumber: 0,
+          averageDepth: 0,
+          maxDepth: 0,
+          averageDeviationDepth: 0,
+        }),
+        sendMetrics: jest.fn().mockResolvedValue(undefined),
+        ensureWeeklyStoredCronSchedule: jest.fn().mockResolvedValue(undefined),
+        registerCron: jest.fn().mockResolvedValue(undefined),
       }));
 
       global.strapi = {
