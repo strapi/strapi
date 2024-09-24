@@ -10,11 +10,11 @@ describe('downloadFile', () => {
 
     documentSpy.mockReturnValue({
       click: clickSpy,
-      set href(val) {
+      set href(val: string) {
         hrefSpy(val);
       },
       setAttribute: setAttributeSpy,
-    });
+    } as unknown as HTMLAnchorElement);
 
     await downloadFile('/some/file', 'my-filename');
 
