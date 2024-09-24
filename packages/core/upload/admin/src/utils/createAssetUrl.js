@@ -1,4 +1,4 @@
-import prefixFileUrlWithBackendUrl from './prefixFileUrlWithBackendUrl';
+import { prefixFileUrlWithBackendUrl } from './prefixFileUrlWithBackendUrl';
 
 /**
  * Create image URL for asset
