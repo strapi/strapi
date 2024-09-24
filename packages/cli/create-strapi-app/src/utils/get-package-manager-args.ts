@@ -19,8 +19,8 @@ const installArgumentsMap: {
     '*': ['--legacy-peer-deps'],
   },
   yarn: {
-    '<=3.x': ['--network-timeout', '1000000'],
-    '*': [], // for all other versions
+    '<4': ['--network-timeout', '1000000'],
+    '*': [],
   },
   pnpm: {
     '*': [],
@@ -46,6 +46,7 @@ const installEnvMap: {
 async function getPackageManagerVersion(packageManager: string): Promise<string> {
   try {
     const { stdout } = await execa(packageManager, ['--version']);
+    console.log('version', stdout.trim());
     return stdout.trim();
   } catch (err) {
     throw new Error(`Error detecting ${packageManager} version: ${err}`);
