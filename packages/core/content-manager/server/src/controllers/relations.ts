@@ -460,15 +460,7 @@ export default {
 
     const relationsUnion = uniqBy(
       (res: any) => {
-        // return `${res.documentId}-${res.locale}`;
-
-        // if (sourceModelType === 'component') {
-        //   return res.id;
-        // }
-
-        return res.locale
-          ? `${res.documentId}-${res.locale}`
-          : `${res.documentId}-`;
+        return res.locale ? `${res.documentId}-${res.locale}` : `${res.documentId}`;
       },
 
       concat(sanitizedRes.results, res.results)
