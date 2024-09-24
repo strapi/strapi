@@ -10,27 +10,55 @@ import {
   skipCtbTour,
 } from '../../../utils/shared';
 
-// TODO: fix the test so that it doesn't fail on CI
-describeOnCondition(!process.env.CI)('Edit collection type', () => {
+test.describe('Edit collection type', () => {
+  // very long timeout for these tests because they restart the server multiple times
+  test.describe.configure({ timeout: 300000 });
+
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
-  test.beforeEach(async ({ page }) => {
-    await resetFiles();
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
+  let dependentTestsInitialized = false;
 
-    await login({ page });
+  test.beforeEach(async ({ page }) => {
+    // TODO: optimize and duplicate this logic in a standardized way other tests
+    // reduce each test run by having a fake `beforeAll` to create the content types only once
+    let loggedIn = false;
+    if (!dependentTestsInitialized) {
+      await resetFiles();
+      await resetDatabaseAndImportDataFromPath('with-admin.tar');
+
+      await page.goto('/admin');
+
+      await login({ page });
+      loggedIn = true;
+      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+
+      await skipCtbTour(page);
+
+      // create a collection type to be used
+      await createCollectionType(page, {
+        name: ctName,
+      });
+
+      await createCollectionType(page, {
+        name: 'dog',
+      });
+      await createCollectionType(page, {
+        name: 'owner',
+      });
+
+      dependentTestsInitialized = true;
+    }
+
+    if (!loggedIn) {
+      await page.goto('/admin');
+
+      await login({ page });
+      loggedIn = true;
+    }
 
     await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-
     await skipCtbTour(page);
-
-    // TODO: create a "saveFileState" mechanism to be used so we don't have to do a full server restart before each test
-    // create a collection type to be used
-    await createCollectionType(page, {
-      name: ctName,
-    });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
@@ -39,6 +67,33 @@ describeOnCondition(!process.env.CI)('Edit collection type', () => {
   // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
   test.afterAll(async () => {
     await resetFiles();
+  });
+
+  // Tests for GH#21398
+  test('Can update relation of type manyToOne to oneToOne', async ({ page }) => {
+    // Create dog owner relation in Content-Type Builder
+    await navToHeader(page, ['Content-Type Builder', 'Dog'], 'Dog');
+    await page.getByRole('button', { name: /add another field to this/i }).click();
+    await page.getByRole('button', { name: /relation/i }).click();
+    await page.getByLabel('Basic settings').getByRole('button').nth(3).click();
+    await page.getByRole('button', { name: /article/i }).click();
+    await page.getByRole('menuitem', { name: /owner/i }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await waitForRestart(page);
+
+    await expect(page.getByRole('cell', { name: 'owner', exact: true })).toBeVisible();
+
+    // update dog owner relation in Content-Type Builder to oneToOne
+    await page.getByRole('button', { name: /edit owner/i }).click();
+    await page.getByLabel('Basic settings').getByRole('button').nth(0).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await waitForRestart(page);
+
+    await expect(page.getByRole('cell', { name: 'owner', exact: true })).toBeVisible();
   });
 
   test('Can toggle internationalization', async ({ page }) => {
