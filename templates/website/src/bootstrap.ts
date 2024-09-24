@@ -1,5 +1,5 @@
 import fs from 'fs';
-import set from 'lodash.set';
+import { set } from 'lodash';
 
 import en from '../data/en.json';
 import fr from '../data/fr.json';
