@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 
 const TextAlignTypography = styled(Typography)`

@@ -6,7 +6,7 @@ import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { urlsToAssets } from '../../../utils/urlsToAssets';
 import { urlSchema } from '../../../utils/urlYupSchema';
 

@@ -1,4 +1,4 @@
-import getTrad from './getTrad';
+import { getTrad } from './getTrad';
 
 const getBreadcrumbDataML = (folder) => {
   let data = [

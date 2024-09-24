@@ -1,7 +1,7 @@
 import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
 import * as yup from 'yup';
 
-import getTrad from './getTrad';
+import { getTrad } from './getTrad';
 
 export const urlSchema = yup.object().shape({
   urls: yup.string().test({

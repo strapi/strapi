@@ -9,7 +9,7 @@ export { default as getBreadcrumbDataCM } from './getBreadcrumbDataCM';
 export { default as getBreadcrumbDataML } from './getBreadcrumbDataML';
 export { default as getFolderParents } from './getFolderParents';
 export { default as getFolderURL } from './getFolderURL';
-export { default as getTrad } from './getTrad';
+export { getTrad } from './getTrad';
 export { toSingularTypes } from './toSingularTypes';
 export { default as getFileExtension } from './getFileExtension';
 export { prefixFileUrlWithBackendUrl } from './prefixFileUrlWithBackendUrl';
