@@ -101,7 +101,7 @@
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
     "chalk": "4.1.2",
-    "chokidar": "3.5.3",
+    "chokidar": "3.6.0",
     "coffee": "5.5.1",
     "core-js": "3.36.0",
     "create-strapi-app": "workspace:*",
