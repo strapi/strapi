@@ -1,5 +1,5 @@
 export { appendSearchParamsToUrl } from './appendSearchParamsToUrl';
-export { default as containsAssetFilter } from './containsAssetFilter';
+export { containsAssetFilter } from './containsAssetFilter';
 export { default as createAssetUrl } from './createAssetUrl';
 export { default as findRecursiveFolderByValue } from './findRecursiveFolderByValue';
 export { default as findRecursiveFolderMetadatas } from './findRecursiveFolderMetadatas';
