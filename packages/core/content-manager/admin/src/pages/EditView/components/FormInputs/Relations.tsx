@@ -88,6 +88,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
       id: relation.id,
       apiData: {
         documentId: relation.documentId,
+        locale: relation.locale,
       },
     });
   };
