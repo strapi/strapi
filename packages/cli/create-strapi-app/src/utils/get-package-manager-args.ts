@@ -46,7 +46,6 @@ const installEnvMap: {
 async function getPackageManagerVersion(packageManager: string): Promise<string> {
   try {
     const { stdout } = await execa(packageManager, ['--version']);
-    console.log('version', stdout.trim());
     return stdout.trim();
   } catch (err) {
     throw new Error(`Error detecting ${packageManager} version: ${err}`);
