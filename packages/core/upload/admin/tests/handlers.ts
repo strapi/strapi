@@ -1,6 +1,13 @@
 import { rest } from 'msw';
 import qs from 'qs';
 
+// Define the expected structure of your query parameters
+interface CustomQuery extends qs.ParsedQs {
+  filters?: {
+    $and?: Array<{ parent: { id: string } }>;
+  };
+}
+
 const handlers = [
   rest.get('/upload/configuration', async (req, res, ctx) => {
     return res(
@@ -48,7 +55,7 @@ const handlers = [
     );
   }),
   rest.get('/upload/folders', async (req, res, ctx) => {
-    const query = qs.parse(req.url.search.slice(1));
+    const query: CustomQuery = qs.parse(req.url.search.slice(1));
 
     if (query._q) {
       return res(
@@ -183,13 +190,13 @@ const handlers = [
   }),
 
   rest.get('*/an-image.png', (req, res, ctx) =>
-    res(ctx.set('Content-Type', 'image/png'), ctx.body())
+    res(ctx.set('Content-Type', 'image/png'), ctx.body('Successful response'))
   ),
   rest.get('*/a-pdf.pdf', (req, res, ctx) =>
-    res(ctx.set('Content-Type', 'application/pdf'), ctx.body())
+    res(ctx.set('Content-Type', 'application/pdf'), ctx.body('Successful response'))
   ),
   rest.get('*/a-video.mp4', (req, res, ctx) =>
-    res(ctx.set('Content-Type', 'video/mp4'), ctx.body())
+    res(ctx.set('Content-Type', 'video/mp4'), ctx.body('Successful response'))
   ),
   rest.get('*/not-working-like-cors.lutin', (req, res, ctx) => res(ctx.json({}))),
   rest.get('*/some-where-not-existing.jpg', (req, res) => res.networkError('Failed to fetch')),

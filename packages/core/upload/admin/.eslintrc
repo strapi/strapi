@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "overrides": [
+    {
+      "files": ["**/*.js", "**/*.jsx"],
+      "extends": ["custom/front"],
+      "rules": {
+        "import/extensions": "off"
+      }
+    }
+  ]
+}
