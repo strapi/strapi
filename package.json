@@ -154,7 +154,7 @@
     "yalc": "1.0.0-pre.53",
     "yargs": "17.7.2"
   },
-  "packageManager": "yarn@4.3.1",
+  "packageManager": "yarn@4.5.0",
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
