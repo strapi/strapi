@@ -7,7 +7,7 @@ As of September 2024 (and until this document is updated), only the v4.x.x and v
 **Note**: The v4.x.x LTS version will only receive high/critical severity fixes until April 2026. Any Medium/Low severity issues will not be fixed unless specific exceptions are made.
 
 | Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes                          |
-|---------|-------------|----------------|----------------|------------------------|--------------------------------|
+| ------- | ----------- | -------------- | -------------- | ---------------------- | ------------------------------ |
 | 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS                            |
 | 5.x.x   | RC          | N/A            | September 2024 | N/A                    | Not Supported                  |
 | 5.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported                  |
