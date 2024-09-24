@@ -6,6 +6,10 @@ export const logger: Core.MiddlewareFactory = (_, { strapi }) => {
     await next();
     const delta = Math.ceil(Date.now() - start);
 
-    strapi.log.http(`${ctx.method} ${ctx.url} (${delta} ms) ${ctx.status}`);
+    if (process.env.LOG_HEALTH === 'false' && ctx.url === '/_health') {
+      return;
+    } else {
+      strapi.log.http(`${ctx.method} ${ctx.url} (${delta} ms) ${ctx.status}`);
+    }
   };
 };
