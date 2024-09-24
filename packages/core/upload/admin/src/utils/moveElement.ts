@@ -1,4 +1,4 @@
-const move = (array, oldIndex, newIndex) => {
+const move = (array: number[], oldIndex: number, newIndex: number) => {
   if (newIndex >= array.length) {
     newIndex = array.length - 1;
   }
@@ -7,7 +7,7 @@ const move = (array, oldIndex, newIndex) => {
   return array;
 };
 
-export const moveElement = (array, index, offset) => {
+export const moveElement = (array: number[], index: number, offset: number) => {
   const newIndex = index + offset;
 
   return move(array, index, newIndex);
