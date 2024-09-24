@@ -6,7 +6,7 @@ const { models } = require('../common');
 const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
 
 const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
- * The app doesn't have any component yet.
+ * The app doesn't have any components yet.
  */
 `;
 
