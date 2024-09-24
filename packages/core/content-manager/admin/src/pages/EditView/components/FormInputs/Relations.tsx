@@ -86,7 +86,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
 
     addFieldRow(`${fieldName}.disconnect`, {
       id: relation.id,
-      api_data: {
+      apiData: {
         documentId: relation.documentId,
       },
     });
@@ -150,10 +150,10 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
 
-    const { id: componentId, uid: componentUID } = useComponent(
-      'RelationsField',
-      ({ uid, id }) => ({ id, uid })
-    );
+    const { componentId, componentUID } = useComponent('RelationsField', ({ uid, id }) => ({
+      componentId: id,
+      componentUID: uid,
+    }));
 
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
@@ -267,7 +267,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
       const item = {
         id: relation.id,
-        api_data: {
+        apiData: {
           documentId: relation.documentId,
           locale: relation.locale,
         },

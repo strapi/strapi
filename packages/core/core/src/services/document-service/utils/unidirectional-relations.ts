@@ -1,18 +1,19 @@
 /* eslint-disable no-continue */
-import { keyBy } from 'lodash/fp';
+import { keyBy, omit } from 'lodash/fp';
 
 import { UID, Schema } from '@strapi/types';
+
+interface LoadContext {
+  publishedVersions: { id: string; locale: string }[];
+  draftVersions: { id: string; locale: string }[];
+}
 
 /**
  * Loads lingering relations that need to be updated when overriding a published or draft entry.
  * This is necessary because the relations are uni-directional and the target entry is not aware of the source entry.
  * This is not the case for bi-directional relations, where the target entry is also linked to the source entry.
- *
- * @param uid The content type uid
- * @param oldEntries The old entries that are being overridden
- * @returns An array of relations that need to be updated with the join table reference.
  */
-const load = async (uid: UID.ContentType, oldEntries: { id: string; locale: string }[]) => {
+const load = async (uid: UID.ContentType, { publishedVersions, draftVersions }: LoadContext) => {
   const updates = [] as any;
 
   // Iterate all components and content types to find relations that need to be updated
@@ -27,29 +28,61 @@ const load = async (uid: UID.ContentType, oldEntries: { id: string; locale: stri
         /**
          * Only consider unidirectional relations
          */
-        if (attribute.type !== 'relation') continue;
-        if (attribute.target !== uid) continue;
-        if (attribute.inversedBy || attribute.mappedBy) continue;
-        const joinTable = attribute.joinTable;
+        if (
+          attribute.type !== 'relation' ||
+          attribute.target !== uid ||
+          attribute.inversedBy ||
+          attribute.mappedBy
+        ) {
+          continue;
+        }
+
         // TODO: joinColumn relations
-        if (!joinTable) continue;
+        const joinTable = attribute.joinTable;
+        if (!joinTable) {
+          continue;
+        }
 
         const { name } = joinTable.inverseJoinColumn;
 
         /**
          * Load all relations that need to be updated
          */
-        const oldEntriesIds = oldEntries.map((entry) => entry.id);
-        const relations = await strapi.db
+
+        const oldPublishedByLocale = keyBy('locale', publishedVersions);
+
+        // NOTE: when the model has draft and publish, we can assume relation are only draft to draft & published to published
+        const oldEntriesIds = publishedVersions.map((entry) => entry.id);
+
+        const oldPublishedRelations = await strapi.db
           .getConnection()
           .select('*')
           .from(joinTable.name)
           .whereIn(name, oldEntriesIds)
           .transacting(trx);
 
-        if (relations.length === 0) continue;
+        if (oldPublishedRelations.length > 0) {
+          updates.push({ joinTable, relations: oldPublishedRelations });
+        }
 
-        updates.push({ joinTable, relations });
+        if (!model.options?.draftAndPublish) {
+          const oldEntriesIds = draftVersions
+            .filter((entry) => {
+              return !oldPublishedByLocale[entry.locale];
+            })
+            .map((entry) => entry.id);
+
+          const draftRelations = await strapi.db
+            .getConnection()
+            .select('*')
+            .from(joinTable.name)
+            .whereIn(name, oldEntriesIds)
+            .transacting(trx);
+
+          if (draftRelations.length > 0) {
+            updates.push({ joinTable, relations: draftRelations.map(omit('id')) });
+          }
+        }
       }
     }
   });
@@ -67,7 +100,7 @@ const load = async (uid: UID.ContentType, oldEntries: { id: string; locale: stri
 const sync = async (
   oldEntries: { id: string; locale: string }[],
   newEntries: { id: string; locale: string }[],
-  oldRelations: { joinTable: any; relations: any[] }[]
+  oldRelations: { joinTable: any; relations: any[]; replace?: boolean }[]
 ) => {
   /**
    * Create a map of old entry ids to new entry ids
@@ -89,8 +122,9 @@ const sync = async (
     // Iterate old relations that are deleted and insert the new ones
     for (const { joinTable, relations } of oldRelations) {
       // Update old ids with the new ones
+      const column = joinTable.inverseJoinColumn.name;
+
       const newRelations = relations.map((relation) => {
-        const column = joinTable.inverseJoinColumn.name;
         const newId = oldEntriesMap[relation[column]];
         return { ...relation, [column]: newId };
       });

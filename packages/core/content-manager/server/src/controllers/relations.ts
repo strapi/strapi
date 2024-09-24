@@ -458,7 +458,10 @@ export default {
       ordering: 'desc',
     });
 
-    const relationsUnion = uniqBy('documentId', concat(sanitizedRes.results, res.results));
+    const relationsUnion = uniqBy(
+      (res: any) => `${res.documentId}-${res.locale}`,
+      concat(sanitizedRes.results, res.results)
+    );
 
     ctx.body = {
       pagination: res.pagination || {

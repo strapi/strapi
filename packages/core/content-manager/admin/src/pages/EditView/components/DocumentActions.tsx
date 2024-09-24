@@ -501,8 +501,8 @@ const transformData = (data: Record<string, any>): any => {
   }
 
   if (typeof data === 'object' && data !== null) {
-    if ('api_data' in data) {
-      return data.api_data;
+    if ('apiData' in data) {
+      return data.apiData;
     }
 
     return mapValues(transformData)(data);
