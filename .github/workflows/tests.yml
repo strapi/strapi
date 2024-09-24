@@ -49,8 +49,6 @@ jobs:
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Output Prettier Version
-        run: yarn prettier:version
       - name: Run lint
         run: yarn prettier:check
 
