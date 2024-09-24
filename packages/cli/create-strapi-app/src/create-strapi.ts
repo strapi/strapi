@@ -241,7 +241,14 @@ async function createApp(scope: Scope) {
 }
 
 async function runInstall({ rootPath, packageManager }: Scope) {
-  const { envArgs, cmdArgs } = await getInstallArgs(packageManager);
+  // include same cwd and env to ensure version check returns same version we use below
+  const { envArgs, cmdArgs } = await getInstallArgs(packageManager, {
+    cwd: rootPath,
+    env: {
+      ...process.env,
+      NODE_ENV: 'development',
+    },
+  });
 
   const options: execa.Options = {
     cwd: rootPath,
