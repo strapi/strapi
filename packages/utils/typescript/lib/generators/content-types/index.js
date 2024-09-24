@@ -6,7 +6,7 @@ const { models } = require('../common');
 const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
 
 const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
- * The app doesn't have any content-type yet.
+ * The app doesn't have any content-types yet.
  */
 `;
 
