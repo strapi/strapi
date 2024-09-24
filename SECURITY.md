@@ -2,18 +2,20 @@
 
 ## Supported Versions
 
-As of April 2024 (and until this document is updated), only the v4.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
+As of September 2024 (and until this document is updated), only the v4.x.x and v5.x.x _GA_ or _STABLE_ releases of Strapi are supported for updates and bug fixes. Any previous versions are currently not supported and users are advised to use them "at their own risk".
 
-| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes                |
-| ------- | ----------- | -------------- | -------------- | ---------------------- | -------------------- |
-| 5.x.x   | GA          | October 2024   | Further Notice | Further Notice         | LTS (Future)         |
-| 5.x.x   | RC          | N/A            | October 2024   | N/A                    | Non-Production Usage |
-| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported        |
-| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported        |
-| 4.x.x   | GA          | November 2021  | October 2025   | April 2026             | LTS                  |
-| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported        |
-| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported        |
-| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life          |
+**Note**: The v4.x.x LTS version will only receive high/critical severity fixes until April 2026. Any Medium/Low severity issues will not be fixed unless specific exceptions are made.
+
+| Version | Release Tag | Support Starts | Support Ends   | Security Updates Until | Notes                          |
+|---------|-------------|----------------|----------------|------------------------|--------------------------------|
+| 5.x.x   | GA / Stable | September 2024 | Further Notice | Further Notice         | LTS                            |
+| 5.x.x   | RC          | N/A            | September 2024 | N/A                    | Not Supported                  |
+| 5.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported                  |
+| 5.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported                  |
+| 4.x.x   | GA / Stable | November 2021  | October 2025   | April 2026             | LTS (High/Critical fixes only) |
+| 4.x.x   | Beta        | N/A            | N/A            | N/A                    | Not Supported                  |
+| 4.x.x   | Alpha       | N/A            | N/A            | N/A                    | Not Supported                  |
+| 3.x.x   | N/A         | N/A            | N/A            | N/A                    | End Of Life                    |
 
 ## Reporting a Vulnerability
 
