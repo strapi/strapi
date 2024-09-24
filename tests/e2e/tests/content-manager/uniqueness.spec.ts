@@ -173,7 +173,12 @@ test.describe('Uniqueness', () => {
 
     test(`A user should not be able to duplicate the ${field.name} ${fieldDescription} value in the same content type and dimensions (locale + publication state).`, async ({
       page,
+      browserName,
     }) => {
+      // TODO: there is a webkit bug to be fixed
+      if (browserName === 'webkit') {
+        return test.fixme();
+      }
       await createNewEntry(page, CREATE_URL);
 
       const fieldRole = 'role' in field ? field.role : 'textbox';

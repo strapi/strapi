@@ -500,7 +500,7 @@ const initProviders = ({ baseURL, purest }) => ({
         });
     },
   },
-  keycloack: {
+  keycloak: {
     enabled: false,
     icon: '',
     grantConfig: {
