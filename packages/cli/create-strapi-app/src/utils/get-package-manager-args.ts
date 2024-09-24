@@ -32,7 +32,7 @@ const installEnvMap: {
   [key: string]: VersionedEnvMap;
 } = {
   yarn: {
-    '>=4': { YARN_NETWORK_TIMEOUT: '1000000' },
+    '>=4': { YARN_HTTP_TIMEOUT: '1000000' },
     '*': {},
   },
   npm: {
