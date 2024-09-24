@@ -120,7 +120,9 @@ const PopoverImpl = () => {
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : encodeURIComponent(data.value as string);
+    const value = FILTERS_WITH_NO_VALUE.includes(data.filter)
+      ? 'true'
+      : encodeURIComponent(data.value as string);
 
     if (!value) {
       return;
