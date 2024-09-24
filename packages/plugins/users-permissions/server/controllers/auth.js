@@ -237,7 +237,7 @@ module.exports = {
       .findOne({ where: { email: email.toLowerCase() } });
 
     if (!user || user.blocked) {
-      return ctx.send({ ok: true });
+      return ctx.throw(404, 'User not found or access blocked');
     }
 
     // Generate random token.
