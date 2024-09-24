@@ -140,5 +140,5 @@ export const getInstallArgs = async (packageManager: string, options?: execa.Opt
     ? mergeMatchingVersionRanges(packageManagerVersion, argsMap, mergeArguments)
     : argsMap['*'];
 
-  return { envArgs, cmdArgs: [...installArguments, ...cmdArgs] };
+  return { envArgs, cmdArgs: [...installArguments, ...cmdArgs], version: packageManagerVersion };
 };
