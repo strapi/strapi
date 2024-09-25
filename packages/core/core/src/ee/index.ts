@@ -205,7 +205,13 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   if (!shouldStayOffline) {
     await onlineUpdate({ strapi });
-    strapi.cron.add({ [shiftCronExpression('0 0 */12 * * *')]: onlineUpdate });
+
+    strapi.cron.add({
+      onlineUpdate: {
+        task: () => onlineUpdate({ strapi }),
+        options: shiftCronExpression('0 0 */12 * * *'),
+      },
+    });
   } else {
     if (!ee.licenseInfo.expireAt) {
       return disable('Your license does not have offline support.');

@@ -14,6 +14,7 @@ import { isStderrError } from './types';
 import type { Scope } from './types';
 import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
+import { getInstallArgs } from './utils/get-package-manager-args';
 
 async function createStrapi(scope: Scope) {
   const { rootPath } = scope;
@@ -239,29 +240,27 @@ async function createApp(scope: Scope) {
   }
 }
 
-const installArguments = ['install'];
+async function runInstall({ rootPath, packageManager }: Scope) {
+  // include same cwd and env to ensure version check returns same version we use below
+  const { envArgs, cmdArgs } = await getInstallArgs(packageManager, {
+    cwd: rootPath,
+    env: {
+      ...process.env,
+      NODE_ENV: 'development',
+    },
+  });
 
-const installArgumentsMap = {
-  npm: ['--legacy-peer-deps'],
-  yarn: ['--network-timeout 1000000'],
-  pnpm: [],
-};
-
-function runInstall({ rootPath, packageManager }: Scope) {
   const options: execa.Options = {
     cwd: rootPath,
     stdio: 'inherit',
     env: {
       ...process.env,
+      ...envArgs,
       NODE_ENV: 'development',
     },
   };
 
-  if (packageManager in installArgumentsMap) {
-    installArguments.push(...(installArgumentsMap[packageManager] ?? []));
-  }
-
-  const proc = execa(packageManager, installArguments, options);
+  const proc = execa(packageManager, cmdArgs, options);
 
   return proc;
 }

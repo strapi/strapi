@@ -25,6 +25,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       config &&
       Object.keys(defaultValue).every((key) => Object.prototype.hasOwnProperty.call(config, key))
     ) {
+      // eslint-disable-next-line no-continue
       continue;
     }
 

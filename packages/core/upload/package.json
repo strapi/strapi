@@ -17,10 +17,18 @@
   ],
   "exports": {
     "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.js",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
+    },
+    "./_internal/shared": {
+      "types": "./dist/shared/index.d.ts",
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.js"
     },
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
@@ -41,6 +49,9 @@
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:unit": "run -T jest",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watch",
     "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
