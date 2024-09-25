@@ -109,6 +109,8 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 | PostgreSQL | 14.0        | 11.0    |
 | SQLite     | 3           | 3       |
 
+Note: For Node 22, the better-sqlite3 package used by your SQLite project should be `>=11.1`
+
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 
 ## Features

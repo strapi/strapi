@@ -30,8 +30,7 @@ const transform: modules.runner.json.JSONTransform = (file, params) => {
   });
 
   if (removed && !j.has('dependencies.better-sqlite3')) {
-    // TODO check this version when releasing V5
-    j.set('dependencies.better-sqlite3', '9.4.3');
+    j.set('dependencies.better-sqlite3', '11.3.0');
   }
 
   return j.root();
