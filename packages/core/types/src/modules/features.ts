@@ -1,6 +1,6 @@
 export interface FeaturesConfig {
   future?: {
-    contentReleases?: boolean;
+    preview?: boolean;
   };
 }
 
