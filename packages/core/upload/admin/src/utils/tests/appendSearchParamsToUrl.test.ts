@@ -1,4 +1,4 @@
-import { appendSearchParamsToUrl } from '..';
+import { appendSearchParamsToUrl } from '../appendSearchParamsToUrl';
 
 describe('appendSearchParamsToUrl', () => {
   const updateTime = '2023-07-19T03:00:00.000Z';
@@ -47,7 +47,7 @@ describe('appendSearchParamsToUrl', () => {
   });
 
   describe('relativeURL', () => {
-    let originalBackendURL;
+    let originalBackendURL: string;
 
     beforeAll(() => {
       /**
