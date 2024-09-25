@@ -49,17 +49,39 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
-const addStatusToRelations = async (uid: UID.ContentType, relations: RelationEntity[]) => {
-  if (!contentTypes.hasDraftAndPublish(strapi.contentTypes[uid])) {
+/**
+ *
+ * All relations sent to this function should have the same status or no status
+ */
+const addStatusToRelations = async (targetUid: UID.Schema, relations: RelationEntity[]) => {
+  if (!contentTypes.hasDraftAndPublish(strapi.getModel(targetUid))) {
     return relations;
   }
 
   const documentMetadata = getService('document-metadata');
-  const documentsAvailableStatus = await documentMetadata.getManyAvailableStatus(uid, relations);
+
+  if (!relations.length) {
+    return relations;
+  }
+
+  const firstRelation = relations[0];
+
+  const filters: any = {
+    documentId: { $in: relations.map((r) => r.documentId) },
+    // NOTE: find the "opposite" status
+    publishedAt: firstRelation.publishedAt !== null ? { $null: true } : { $notNull: true },
+  };
+
+  const availableStatus = await strapi.query(targetUid).findMany({
+    select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+    filters,
+  });
 
   return relations.map((relation: RelationEntity) => {
-    const availableStatuses = documentsAvailableStatus.filter(
-      (availableDocument: RelationEntity) => availableDocument.documentId === relation.documentId
+    const availableStatuses = availableStatus.filter(
+      (availableDocument: RelationEntity) =>
+        availableDocument.documentId === relation.documentId &&
+        (relation.locale ? availableDocument.locale === relation.locale : true)
     );
 
     return {
@@ -396,13 +418,13 @@ export default {
       attribute,
       targetField,
       fieldsToSelect,
-      source: {
-        schema: { uid: sourceUid },
-      },
-      target: {
-        schema: { uid: targetUid },
-      },
+      status,
+      source: { schema: sourceSchema },
+      target: { schema: targetSchema },
     } = await this.extractAndValidateRequestInfo(ctx, id);
+
+    const { uid: sourceUid } = sourceSchema;
+    const { uid: targetUid } = targetSchema;
 
     const permissionQuery = await getService('permission-checker')
       .create({ userAbility, model: targetUid })
@@ -424,6 +446,23 @@ export default {
             // Ensure response is an array
             .then((res) => ({ results: res ? [res] : [] }));
 
+    const filters: {
+      publishedAt?: Record<string, any>;
+    } = {};
+
+    if (sourceSchema?.options?.draftAndPublish) {
+      if (targetSchema?.options?.draftAndPublish) {
+        if (status === 'published') {
+          filters.publishedAt = { $notNull: true };
+        } else {
+          filters.publishedAt = { $null: true };
+        }
+      }
+    } else if (targetSchema?.options?.draftAndPublish) {
+      // NOTE: we must return the drafts as some targets might not have a published version yet
+      filters.publishedAt = { $null: true };
+    }
+
     /**
      * If user does not have access to specific relations (custom conditions),
      * only the ids of the relations are returned.
@@ -434,10 +473,11 @@ export default {
      * The response contains the union of the two queries.
      */
     const res = await loadRelations({ id: entryId }, targetField, {
-      select: ['id', 'documentId', 'locale', 'publishedAt'],
+      select: ['id', 'documentId', 'locale', 'publishedAt', 'updatedAt'],
       ordering: 'desc',
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,
+      filters,
     });
 
     /**
@@ -458,13 +498,8 @@ export default {
       ordering: 'desc',
     });
 
-    const relationsUnion = uniqBy(
-      (res: any) => {
-        return res.locale ? `${res.documentId}-${res.locale}` : `${res.documentId}`;
-      },
-
-      concat(sanitizedRes.results, res.results)
-    );
+    // NOTE: the order is very import to make sure sanitized relations are kept in priority
+    const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
     ctx.body = {
       pagination: res.pagination || {

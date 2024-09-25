@@ -100,7 +100,7 @@ const load = async (uid: UID.ContentType, { publishedVersions, draftVersions }: 
 const sync = async (
   oldEntries: { id: string; locale: string }[],
   newEntries: { id: string; locale: string }[],
-  oldRelations: { joinTable: any; relations: any[]; replace?: boolean }[]
+  oldRelations: { joinTable: any; relations: any[] }[]
 ) => {
   /**
    * Create a map of old entry ids to new entry ids

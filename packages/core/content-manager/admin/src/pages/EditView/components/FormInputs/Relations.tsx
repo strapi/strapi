@@ -208,6 +208,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const realServerRelationsCount =
       'pagination' in data && data.pagination ? data.pagination.total : 0;
+
     /**
      * Items that are already connected, but reordered would be in
      * this list, so to get an accurate figure, we remove them.
