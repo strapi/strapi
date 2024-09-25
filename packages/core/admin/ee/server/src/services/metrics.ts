@@ -49,7 +49,10 @@ const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
 
 const startCron = (strapi: Core.Strapi) => {
   strapi.cron.add({
-    '0 0 0 * * *': () => sendUpdateProjectInformation(strapi),
+    sendProjectInformation: {
+      task: () => sendUpdateProjectInformation(strapi),
+      options: '0 0 0 * * *',
+    },
   });
 };
 
