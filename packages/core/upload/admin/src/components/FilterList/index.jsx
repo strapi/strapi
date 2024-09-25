@@ -29,7 +29,16 @@ const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }) => {
 
     const filterObj = filter[attributeName];
     const operator = Object.keys(filterObj)[0];
-    let value = decodeURIComponent(filterObj[operator]);
+    let value = filterObj[operator];
+
+    if (Array.isArray(value)) {
+      value = value.join(', ');
+    } else if (typeof value === 'object') {
+      value = Object.values(value).join(', ');
+    } else {
+      value = decodeURIComponent(value);
+    }
+
     let displayedOperator = operator;
 
     if (attribute.name === 'mime') {
