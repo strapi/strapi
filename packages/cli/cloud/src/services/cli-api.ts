@@ -86,7 +86,7 @@ export interface CloudApiService {
 
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
 
-  listEnvironments(project: { name: string }): Promise<AxiosResponse<ListEnvironmentsResponse>>
+  listEnvironments(project: { name: string }): Promise<AxiosResponse<ListEnvironmentsResponse>>;
 
   getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 

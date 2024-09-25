@@ -17,7 +17,7 @@ export const cli = {
   logout,
   createProject,
   listProjects,
-  listEnvironments
+  listEnvironments,
 };
 
 const cloudCommands = [deployProject, link, login, logout, listProjects, listEnvironments];

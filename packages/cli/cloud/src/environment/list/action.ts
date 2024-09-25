@@ -6,10 +6,12 @@ import { promptLogin } from '../../login/action';
 async function getProject(ctx: CLIContext) {
   const { project } = await local.retrieve();
   if (!project) {
-      ctx.logger.warn(`\nWe couldn't find a valid local project config.\nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
-    'link'
-  )} command`);
-      process.exit(1);
+    ctx.logger.warn(
+      `\nWe couldn't find a valid local project config.\nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+        'link'
+      )} command`
+    );
+    process.exit(1);
   }
   return project;
 }
@@ -40,13 +42,14 @@ export default async (ctx: CLIContext) => {
   } catch (e: any) {
     if (e.response && e.response.status === 404) {
       spinner.succeed();
-      logger.warn(`\nThe project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
-        'link'
-      )} command`);
-
+      logger.warn(
+        `\nThe project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
+          'link'
+        )} command`
+      );
     } else {
-    ctx.logger.debug('Failed to list environments', e);
-    spinner.fail('An error occurred while fetching environments data from Strapi Cloud.');
+      ctx.logger.debug('Failed to list environments', e);
+      spinner.fail('An error occurred while fetching environments data from Strapi Cloud.');
     }
   }
 };

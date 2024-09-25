@@ -4,7 +4,6 @@ import action from './action';
 import { defineCloudNamespace } from '../../cloud/command';
 
 const command: StrapiCloudCommand = ({ command, ctx }) => {
-
   const cloud = defineCloudNamespace(command);
 
   cloud
@@ -12,7 +11,9 @@ const command: StrapiCloudCommand = ({ command, ctx }) => {
     .description('Alias for cloud environment list')
     .action(() => runAction('list', action)(ctx));
 
-  const environment = cloud.command("environment").description('Manage environments for a Strapi Cloud project');
+  const environment = cloud
+    .command('environment')
+    .description('Manage environments for a Strapi Cloud project');
   environment
     .command('list')
     .description('List Strapi Cloud project environments')
