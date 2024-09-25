@@ -55,6 +55,7 @@ const BoxWithHeight = styled(Box)`
   height: 3.2rem;
   display: flex;
   align-items: center;
+  cursor: pointer
 `;
 
 const TypographyMaxWidth = styled(Typography)`
@@ -235,7 +236,7 @@ export const MediaLibrary = () => {
                   paddingRight={2}
                   background="neutral0"
                   hasRadius
-                  borderColor="neutral200"
+                  borderColor="neutral200"                  
                 >
                   <Checkbox
                     aria-label={formatMessage({
@@ -249,6 +250,7 @@ export const MediaLibrary = () => {
                           selected.length === assetCount + folderCount
                     }
                     onCheckedChange={(e) => handleBulkSelect(e, [...assets, ...folders])}
+                    style={{cursor: 'pointer'}}
                   />
                 </BoxWithHeight>
               )}
