@@ -2,7 +2,7 @@ export { appendSearchParamsToUrl } from './appendSearchParamsToUrl';
 export { containsAssetFilter } from './containsAssetFilter';
 export { default as createAssetUrl } from './createAssetUrl';
 export { default as findRecursiveFolderByValue } from './findRecursiveFolderByValue';
-export { default as formatBytes } from './formatBytes';
+export { formatBytes } from './formatBytes';
 export * from './formatDuration';
 export { default as getBreadcrumbDataCM } from './getBreadcrumbDataCM';
 export { default as getBreadcrumbDataML } from './getBreadcrumbDataML';
