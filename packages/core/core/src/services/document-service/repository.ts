@@ -292,8 +292,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     // Load any unidirectional relation targetting the old published entries
     const relationsToSync = await unidirectionalRelations.load(uid, {
-      draftVersions: draftsToPublish,
-      publishedVersions: oldPublishedVersions,
+      newVersions: draftsToPublish,
+      oldVersions: oldPublishedVersions,
     });
 
     // Delete old published versions
@@ -366,8 +366,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     // Load any unidirectional relation targeting the old drafts
     const relationsToSync = await unidirectionalRelations.load(uid, {
-      draftVersions: [],
-      publishedVersions: oldDrafts,
+      newVersions: versionsToDraft,
+      oldVersions: oldDrafts,
     });
 
     // Delete old drafts
@@ -379,7 +379,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     );
 
     // Sync unidirectional relations with the new draft entries
-    await unidirectionalRelations.sync(oldDrafts, draftEntries, relationsToSync);
+    await unidirectionalRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      relationsToSync
+    );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };

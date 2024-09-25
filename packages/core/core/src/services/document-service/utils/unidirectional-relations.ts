@@ -4,8 +4,8 @@ import { keyBy, omit } from 'lodash/fp';
 import { UID, Schema } from '@strapi/types';
 
 interface LoadContext {
-  publishedVersions: { id: string; locale: string }[];
-  draftVersions: { id: string; locale: string }[];
+  oldVersions: { id: string; locale: string }[];
+  newVersions: { id: string; locale: string }[];
 }
 
 /**
@@ -13,7 +13,7 @@ interface LoadContext {
  * This is necessary because the relations are uni-directional and the target entry is not aware of the source entry.
  * This is not the case for bi-directional relations, where the target entry is also linked to the source entry.
  */
-const load = async (uid: UID.ContentType, { publishedVersions, draftVersions }: LoadContext) => {
+const load = async (uid: UID.ContentType, { oldVersions, newVersions }: LoadContext) => {
   const updates = [] as any;
 
   // Iterate all components and content types to find relations that need to be updated
@@ -43,44 +43,63 @@ const load = async (uid: UID.ContentType, { publishedVersions, draftVersions }: 
           continue;
         }
 
-        const { name } = joinTable.inverseJoinColumn;
+        const { name: sourceColumnName } = joinTable.joinColumn;
+        const { name: targetColumnName } = joinTable.inverseJoinColumn;
 
         /**
          * Load all relations that need to be updated
          */
-
-        const oldPublishedByLocale = keyBy('locale', publishedVersions);
-
         // NOTE: when the model has draft and publish, we can assume relation are only draft to draft & published to published
-        const oldEntriesIds = publishedVersions.map((entry) => entry.id);
+        const ids = oldVersions.map((entry) => entry.id);
 
-        const oldPublishedRelations = await strapi.db
+        const oldVersionsRelations = await strapi.db
           .getConnection()
           .select('*')
           .from(joinTable.name)
-          .whereIn(name, oldEntriesIds)
+          .whereIn(targetColumnName, ids)
           .transacting(trx);
 
-        if (oldPublishedRelations.length > 0) {
-          updates.push({ joinTable, relations: oldPublishedRelations });
+        if (oldVersionsRelations.length > 0) {
+          updates.push({ joinTable, relations: oldVersionsRelations });
         }
 
-        if (!model.options?.draftAndPublish) {
-          const oldEntriesIds = draftVersions
-            .filter((entry) => {
-              return !oldPublishedByLocale[entry.locale];
-            })
-            .map((entry) => entry.id);
+        /**
+         * if publishing
+         *  if published version exists
+         *    updated published versions links
+         *  else
+         *    create link to newly published version
+         *
+         * if discarding
+         *    if published version link exists & not draft version link
+         *       create link to new draft version
+         */
 
-          const draftRelations = await strapi.db
+        if (!model.options?.draftAndPublish) {
+          const ids = newVersions.map((entry) => entry.id);
+
+          const newVersionsRelations = await strapi.db
             .getConnection()
             .select('*')
             .from(joinTable.name)
-            .whereIn(name, oldEntriesIds)
+            .whereIn(targetColumnName, ids)
             .transacting(trx);
 
-          if (draftRelations.length > 0) {
-            updates.push({ joinTable, relations: draftRelations.map(omit('id')) });
+          if (newVersionsRelations.length > 0) {
+            // when publishing a draft that doesn't have a published version yet,
+            // copy the links to the draft over to the published version
+            // when discarding a published version, if no drafts exists
+            const discardToAdd = newVersionsRelations
+              .filter((relation) => {
+                const matchingOldVerion = oldVersionsRelations.find((oldRelation) => {
+                  return oldRelation[sourceColumnName] === relation[sourceColumnName];
+                });
+
+                return !matchingOldVerion;
+              })
+              .map(omit('id'));
+
+            updates.push({ joinTable, relations: discardToAdd });
           }
         }
       }
