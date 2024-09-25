@@ -42,7 +42,7 @@ export const ContentTypeBuilderNav = () => {
   });
 
   return (
-    <SubNav aria-label={pluginName}>
+    <SubNav aria-label={pluginName} paddingBottom={4}>
       <SubNavHeader
         searchable
         value={searchValue}
