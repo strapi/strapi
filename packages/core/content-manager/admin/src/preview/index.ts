@@ -5,7 +5,7 @@ import { FEATURE_ID } from './constants';
 import type { PluginDefinition } from '@strapi/admin/strapi-admin';
 
 const previewAdmin = {
-  bootstrap() {
+  bootstrap(app) {
     // TODO: Add license registry check when it's available
     if (!window.strapi.future.isEnabled(FEATURE_ID)) {
       return {};
