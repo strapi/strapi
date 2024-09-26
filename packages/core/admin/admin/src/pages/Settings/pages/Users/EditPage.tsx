@@ -191,7 +191,6 @@ const EditPage = () => {
                     startIcon={<Check />}
                     loading={isSubmitting}
                     type="submit"
-                    size="L"
                   >
                     {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
                   </Button>

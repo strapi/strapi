@@ -15,7 +15,7 @@ const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }) => {
     const nextFilters = appliedFilters.filter((prevFilter) => {
       const name = Object.keys(filter)[0];
       const filterType = Object.keys(filter[name])[0];
-      const value = filter[name][filterType];
+      const value = decodeURIComponent(filter[name][filterType]);
 
       return prevFilter[name]?.[filterType] !== value;
     });
@@ -30,6 +30,18 @@ const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }) => {
     const filterObj = filter[attributeName];
     const operator = Object.keys(filterObj)[0];
     let value = filterObj[operator];
+
+    if (Array.isArray(value)) {
+      value = value.join(', ');
+    } else if (typeof value === 'object') {
+      value = Object.values(value).join(', ');
+    } else {
+      value =
+        Array.isArray(value) || typeof value === 'object'
+          ? Object.values(value).join(', ')
+          : decodeURIComponent(value);
+    }
+
     let displayedOperator = operator;
 
     if (attribute.name === 'mime') {
