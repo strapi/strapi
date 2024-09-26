@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22] # Matrix for Node.js versions
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
