@@ -7,7 +7,7 @@ import { navToHeader, skipCtbTour } from './shared';
 
 export type SharedSetupOptions = {
   login?: boolean; // Whether to log in to the application
-  clearTour?: boolean; // Whether to skip the CTB tour or not
+  skipTour?: boolean; // Whether to skip the CTB tour or not
   resetFiles?: boolean; // Whether to reset files before tests
   importData?: string; // Path to the data to be imported into the database (null if no import is needed)
   afterSetup?: ({ page }: { page: Page }) => Promise<void>; // An async function for custom setup logic that runs after the main setup
@@ -28,6 +28,7 @@ const setupRegistry: Record<string, boolean> = {};
  *   - resetFiles: Whether to reset files before tests.
  *   - importData: Path to the data to be imported into the database.
  *   - afterSetup: A custom function that runs once after the setup is complete.
+ *   - skipTour: A custom function that runs once after the setup is complete.
  *
  * WARNING:
  * Using `sharedSetup` in this way introduces a risk of tests becoming dependent
@@ -41,7 +42,7 @@ const setupRegistry: Record<string, boolean> = {};
 export const sharedSetup = async (
   id: string,
   page: Page,
-  { login, resetFiles, importData, afterSetup, clearTour }: SharedSetupOptions
+  { login, resetFiles, importData, afterSetup, skipTour }: SharedSetupOptions
 ) => {
   let run = !setupRegistry[id];
 
@@ -63,7 +64,7 @@ export const sharedSetup = async (
     await loginFunc({ page });
   }
 
-  if (clearTour) {
+  if (skipTour) {
     // Go to CTB first to skip the tour
     await navToHeader(page, ['Content-Type Builder'], 'Content-Type Builder');
     await skipCtbTour(page);

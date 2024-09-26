@@ -25,7 +25,7 @@ test.describe('Edit collection type', () => {
       resetFiles: true,
       importData: 'with-admin.tar',
       login: true,
-      clearTour: true,
+      skipTour: true,
       afterSetup: async () => {
         await page.getByRole('link', { name: 'Content-Type Builder' }).click();
 

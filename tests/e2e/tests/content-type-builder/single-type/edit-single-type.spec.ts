@@ -21,7 +21,7 @@ test.describe('Edit single type', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {
       login: true,
-      clearTour: true,
+      skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
       afterSetup: async () => {
