@@ -25,10 +25,6 @@ test.describe('Edit single type', () => {
       resetFiles: true,
       importData: 'with-admin.tar',
       afterSetup: async () => {
-        await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-
-        await skipCtbTour(page);
-
         await createSingleType(page, {
           name: ctName,
         });

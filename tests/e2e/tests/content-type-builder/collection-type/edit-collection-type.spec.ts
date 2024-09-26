@@ -27,10 +27,6 @@ test.describe('Edit collection type', () => {
       login: true,
       skipTour: true,
       afterSetup: async () => {
-        await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-
-        await skipCtbTour(page);
-
         // create a collection type to be used
         await createCollectionType(page, {
           name: ctName,

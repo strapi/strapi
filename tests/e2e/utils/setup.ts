@@ -28,7 +28,7 @@ const setupRegistry: Record<string, boolean> = {};
  *   - resetFiles: Whether to reset files before tests.
  *   - importData: Path to the data to be imported into the database.
  *   - afterSetup: A custom function that runs once after the setup is complete.
- *   - skipTour: A custom function that runs once after the setup is complete.
+ *   - skipTour: navigate to CTB and click 'skip tour'. This will fail if a login is not performed first.
  *
  * WARNING:
  * Using `sharedSetup` in this way introduces a risk of tests becoming dependent
