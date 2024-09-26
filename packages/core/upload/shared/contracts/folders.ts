@@ -22,7 +22,7 @@ export interface Folder {
   files?: File[];
 }
 
-type FolderNode = Partial<Folder> & {
+export type FolderNode = Partial<Omit<Folder, 'children'>> & {
   children: FolderNode[];
 };
 

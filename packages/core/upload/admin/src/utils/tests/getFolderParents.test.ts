@@ -1,4 +1,4 @@
-import getFolderParents from '../getFolderParents';
+import { getFolderParents } from '../getFolderParents';
 
 const FIXTURE_FOLDER_STRUCTURE = [
   {
