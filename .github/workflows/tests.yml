@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20, 22] # Matrix for Node.js versions
+        node: [20, 22] # Matrix for Node.js versions
     steps:
       - uses: actions/checkout@v4
         with:
@@ -127,7 +127,7 @@ jobs:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -149,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -260,7 +260,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -286,7 +286,7 @@ jobs:
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
@@ -328,7 +328,7 @@ jobs:
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -367,7 +367,7 @@ jobs:
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
@@ -393,7 +393,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
@@ -438,7 +438,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -480,7 +480,7 @@ jobs:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
