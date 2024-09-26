@@ -1,6 +1,9 @@
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetSource } from '../newConstants';
 import { typeFromMime } from './typeFromMime';
+import type { RawFile } from '../../../shared/contracts/files';
 
-export const rawFileToAsset = (rawFile, assetSource) => {
+export const rawFileToAsset = (rawFile: RawFile, assetSource: AssetSource) => {
   return {
     size: rawFile.size / 1000,
     createdAt: new Date(rawFile.lastModified).toISOString(),
