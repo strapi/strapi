@@ -164,7 +164,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "vite": "5.1.7",
+    "vite": "5.2.14",
     "vite-plugin-dts": "3.7.3"
   },
   "peerDependencies": {
