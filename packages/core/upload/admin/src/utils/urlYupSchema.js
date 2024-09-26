@@ -6,6 +6,7 @@ import getTrad from './getTrad';
 export const urlSchema = yup.object().shape({
   urls: yup.string().test({
     name: 'isUrlValid',
+    // eslint-disable-next-line no-template-curly-in-string
     message: '${path}',
     test(values = '') {
       const urls = values.split(/\r?\n/);

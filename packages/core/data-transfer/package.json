@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -54,7 +54,7 @@
     "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
-    "tar": "6.1.13",
+    "tar": "6.2.1",
     "tar-stream": "2.2.0",
     "ws": "8.17.1"
   },

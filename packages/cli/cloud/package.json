@@ -1,6 +1,6 @@
 {
   "name": "@strapi/cloud-cli",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
     "strapi",
@@ -61,7 +61,7 @@
     "open": "8.4.0",
     "ora": "5.4.1",
     "pkg-up": "3.1.0",
-    "tar": "6.1.13",
+    "tar": "6.2.1",
     "xdg-app-paths": "8.3.0",
     "yup": "0.32.9"
   },
