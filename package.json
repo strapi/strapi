@@ -156,7 +156,7 @@
   },
   "packageManager": "yarn@4.5.0",
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   },
   "isStrapiMonorepo": true
