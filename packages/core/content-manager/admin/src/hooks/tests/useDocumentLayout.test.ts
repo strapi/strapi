@@ -75,6 +75,32 @@ describe('useDocumentLayout', () => {
           [
             {
               "attribute": {
+                "components": [
+                  "blog.test-como",
+                ],
+                "type": "dynamiczone",
+              },
+              "disabled": false,
+              "hint": "",
+              "label": "dz",
+              "mainField": {
+                "name": "name",
+                "type": "string",
+              },
+              "name": "dz",
+              "placeholder": "",
+              "required": false,
+              "size": 12,
+              "type": "dynamiczone",
+              "unique": false,
+              "visible": true,
+            },
+          ],
+        ],
+        [
+          [
+            {
+              "attribute": {
                 "type": "uid",
               },
               "disabled": false,
@@ -90,6 +116,8 @@ describe('useDocumentLayout', () => {
               "visible": true,
             },
           ],
+        ],
+        [
           [
             {
               "attribute": {

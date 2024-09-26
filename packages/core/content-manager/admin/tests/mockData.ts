@@ -398,6 +398,10 @@ const CM_CONTENT_TYPE_MOCK_DATA = [
         allowedTypes: ['images'],
         pluginOptions: {},
       },
+      dz: {
+        type: 'dynamiczone',
+        components: ['blog.test-como'],
+      },
       city: {
         type: 'string',
         required: true,
@@ -718,6 +722,22 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
           mainField: 'name',
         },
       },
+      dz: {
+        edit: {
+          label: 'dz',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+          mainField: 'name',
+        },
+        list: {
+          label: 'dz',
+          searchable: false,
+          sortable: false,
+          mainField: 'name',
+        },
+      },
       cover: {
         edit: {
           label: 'cover',
@@ -894,6 +914,7 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
     layouts: {
       list: ['id', 'categories', 'cover', 'postal_code'],
       edit: [
+        [{ name: 'dz', size: 12 }],
         [
           {
             name: 'slug',
