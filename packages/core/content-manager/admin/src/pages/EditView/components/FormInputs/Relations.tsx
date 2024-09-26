@@ -156,6 +156,12 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       componentUID: uid,
     }));
 
+    const isSubmitting = useForm('RelationsList', (state) => state.isSubmitting);
+
+    React.useEffect(() => {
+      setCurrentPage(1);
+    }, [isSubmitting]);
+
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
@@ -717,9 +723,7 @@ const RelationsList = ({
      */
     const connectedRelations = newData
       .reduce<Relation[]>((acc, relation, currentIndex, array) => {
-        const relationOnServer = serverData.find(
-          (oldRelation) => oldRelation.documentId === relation.documentId
-        );
+        const relationOnServer = serverData.find((oldRelation) => oldRelation.id === relation.id);
 
         const relationInFront = array[currentIndex + 1];
 
@@ -728,11 +732,23 @@ const RelationsList = ({
             ? {
                 before: relationInFront.documentId,
                 locale: relationInFront.locale,
-                status: relationInFront.status,
+                status:
+                  'publishedAt' in relationInFront && relationInFront.publishedAt
+                    ? 'published'
+                    : 'draft',
               }
             : { end: true };
 
-          const relationWithPosition: Relation = { ...relation, position };
+          const relationWithPosition: Relation = {
+            ...relation,
+            ...{
+              apiData: {
+                documentId: relation.documentId,
+                locale: relation.locale,
+                position,
+              },
+            },
+          };
 
           return [...acc, relationWithPosition];
         }
@@ -915,7 +931,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   } = data;
   const { formatMessage } = useIntl();
 
-  const { href, documentId, label, status } = relations[index];
+  const { href, id, label, status } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -926,7 +942,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
         item: {
           displayedValue: label,
           status,
-          id: documentId,
+          id: id,
           index,
         },
         onMoveItem: handleMoveItem,
