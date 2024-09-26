@@ -87,7 +87,7 @@
     "storybook": "7.5.3",
     "styled-components": "5.3.3",
     "typescript": "5.2.2",
-    "vite": "5.0.13",
+    "vite": "5.1.8",
     "yup": "0.32.9"
   },
   "peerDependencies": {
