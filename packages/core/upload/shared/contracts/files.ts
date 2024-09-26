@@ -23,6 +23,19 @@ export type Query = {
   filters?: Record<string, unknown>;
 };
 
+type FileFormat = {
+  name: string;
+  hash: string;
+  ext: string;
+  mime: string;
+  path: null | string;
+  width: number;
+  height: number;
+  size: number;
+  sizeInBytes: number;
+  url: string;
+};
+
 export interface File {
   id: number;
   name: string;
@@ -30,7 +43,7 @@ export interface File {
   caption?: string | null;
   width?: number;
   height?: number;
-  formats?: Record<string, unknown>;
+  formats?: Record<string, FileFormat>;
   hash: string;
   ext?: string;
   mime?: string;
@@ -53,6 +66,7 @@ export interface File {
   updatedAt?: string;
   createdBy?: number;
   updatedBy?: number;
+  isLocal?: boolean;
 }
 
 export interface RawFile extends Blob {
