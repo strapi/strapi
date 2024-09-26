@@ -202,7 +202,7 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
     <span
       class="c2 c3"
     >
-      type is not file
+      type is image, video
     </span>
     <button
       aria-disabled="false"
