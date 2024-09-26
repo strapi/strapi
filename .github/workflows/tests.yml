@@ -148,6 +148,7 @@ jobs:
     needs: [changes, lint, pretty, build]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false # remove once tests aren't flaky
       matrix:
         node: [20, 22]
     steps:
@@ -172,7 +173,7 @@ jobs:
     name: '[CE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false # we don't want to have to re-run everything because of a flaky test
+      fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
@@ -216,7 +217,7 @@ jobs:
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
-      fail-fast: false # we don't want to have to re-run everything because of a flaky test
+      fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
@@ -290,9 +291,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -397,9 +396,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
