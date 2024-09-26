@@ -149,9 +149,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@apollo/server@npm:4.10.0":
-  version: 4.10.0
-  resolution: "@apollo/server@npm:4.10.0"
+"@apollo/server@npm:4.11.0":
+  version: 4.11.0
+  resolution: "@apollo/server@npm:4.11.0"
   dependencies:
     "@apollo/cache-control-types": "npm:^1.0.3"
     "@apollo/server-gateway-interface": "npm:^1.1.1"
@@ -164,7 +164,6 @@ __metadata:
     "@apollo/utils.usagereporting": "npm:^2.1.0"
     "@apollo/utils.withrequired": "npm:^2.0.0"
     "@graphql-tools/schema": "npm:^9.0.0"
-    "@josephg/resolvable": "npm:^1.0.0"
     "@types/express": "npm:^4.17.13"
     "@types/express-serve-static-core": "npm:^4.17.30"
     "@types/node-fetch": "npm:^2.6.1"
@@ -180,7 +179,7 @@ __metadata:
     whatwg-mimetype: "npm:^3.0.0"
   peerDependencies:
     graphql: ^16.6.0
-  checksum: 10c0/e9462bb5713bab2b0a7e3b5f35de8e89718536282e8546a3e4f4a2f7e2d5ba1ac75425bb16d3dc6c81d808b388c67acb8e4836790c373c03666f5c299f606d4e
+  checksum: 10c0/5c07f818ba2a943c176a3e3d50115c6fba2dc1b6e818635202cf22f0dacc6e2b39e0c53315399d1e46357072db438bbcd4ebc13afeb0f18bb5378134c100f8f5
   languageName: node
   linkType: hard
 
@@ -3595,13 +3594,6 @@ __metadata:
     "@types/yargs": "npm:^17.0.8"
     chalk: "npm:^4.0.0"
   checksum: 10c0/ea4e493dd3fb47933b8ccab201ae573dcc451f951dc44ed2a86123cd8541b82aa9d2b1031caf9b1080d6673c517e2dcc25a44b2dc4f3fbc37bfc965d444888c0
-  languageName: node
-  linkType: hard
-
-"@josephg/resolvable@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "@josephg/resolvable@npm:1.0.1"
-  checksum: 10c0/94f4ff9170728b35b56bd942473ae2fed55b41a9ef6bd6a004219c59bd246afeee43214b825558eb6ba4047c38001548197cf669025443731e09c256e88519e5
   languageName: node
   linkType: hard
 
@@ -7240,11 +7232,11 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    "@strapi/content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/admin": ^5.0.0
+    "@strapi/content-manager": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7370,7 +7362,7 @@ __metadata:
     statuses: "npm:2.0.1"
     supertest: "npm:6.3.3"
     tsconfig: "workspace:*"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
     undici: "npm:6.19.2"
     yup: "npm:0.32.9"
   languageName: unknown
@@ -7741,7 +7733,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
     tsconfig: "workspace:*"
-    typescript: "npm:5.2.2"
+    typescript: "npm:5.3.2"
   peerDependencies:
     "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
@@ -7832,7 +7824,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
   dependencies:
-    "@apollo/server": "npm:4.10.0"
+    "@apollo/server": "npm:4.11.0"
     "@as-integrations/koa": "npm:1.1.1"
     "@graphql-tools/schema": "npm:10.0.3"
     "@graphql-tools/utils": "npm:^10.1.3"
