@@ -88,7 +88,7 @@
     "@commitlint/prompt-cli": "19.2.0",
     "@playwright/test": "1.42.1",
     "@strapi/admin-test-utils": "workspace:*",
-    "@strapi/eslint-config": "0.2.0",
+    "@strapi/eslint-config": "0.3.0",
     "@swc/cli": "0.3.10",
     "@swc/core": "1.4.8",
     "@swc/helpers": "0.5.7",
