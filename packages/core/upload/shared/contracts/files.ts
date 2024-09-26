@@ -4,6 +4,25 @@ type SortOrder = 'ASC' | 'DESC';
 
 type SortKey = 'createdAt' | 'name';
 
+export type Query = {
+  _q?: string;
+  folderPath?: string;
+  folder?:
+    | number
+    | {
+        id: number;
+      };
+  page?:
+    | string
+    | number
+    | {
+        id: string | number;
+      };
+  pageSize?: string | number;
+  sort?: `${SortKey}:${SortOrder}`;
+  filters?: Record<string, unknown>;
+};
+
 export interface File {
   id: number;
   name: string;
@@ -36,9 +55,6 @@ export interface File {
   updatedBy?: number;
 }
 
-/**
- * GET /upload/files - Get files
- */
 export interface RawFile extends Blob {
   size: number;
   lastModified: number;
@@ -53,6 +69,9 @@ export interface Pagination {
   total: number;
 }
 
+/**
+ * GET /upload/files - Get files
+ */
 export declare namespace GetFiles {
   export interface Request {
     body: {};

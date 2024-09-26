@@ -1,16 +1,12 @@
-/**
- * @param {string} pathname
- * @param {object} currentQuery
- * @param {string} query._q Search value of the query
- * @param {object} newQuery
- * @param {string} newQuery.folder
- * @param {string} newQuery.folderPath
- * @returns {string}
- */
+import type { Query } from '../../../shared/contracts/files';
 
 import { stringify } from 'qs';
 
-const getFolderURL = (pathname, currentQuery, { folder, folderPath } = {}) => {
+export const getFolderURL = (
+  pathname: string,
+  currentQuery: Query,
+  { folder, folderPath }: { folder?: string; folderPath?: string } = {}
+) => {
   const { _q, ...queryParamsWithoutQ } = currentQuery;
   const queryParamsString = stringify(
     {
@@ -25,5 +21,3 @@ const getFolderURL = (pathname, currentQuery, { folder, folderPath } = {}) => {
   // we remove it here to allow navigating in a folder and see the result of this navigation
   return `${pathname}${queryParamsString ? `?${queryParamsString}` : ''}`;
 };
-
-export default getFolderURL;

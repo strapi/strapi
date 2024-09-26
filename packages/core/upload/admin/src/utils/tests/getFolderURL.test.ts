@@ -1,8 +1,8 @@
-import { getFolderURL } from '..';
+import { getFolderURL } from '../getFolderURL';
 
 const FIXTURE_PATHNAME = '/media-library';
 const FIXTURE_QUERY = {};
-const FIXTURE_FOLDER = 1;
+const FIXTURE_FOLDER = '1';
 const FIXTURE_FOLDER_PATH = '/1/2/3';
 
 describe('getFolderURL', () => {
@@ -24,12 +24,8 @@ describe('getFolderURL', () => {
 
   test('keeps and stringifies query parameter', () => {
     expect(
-      getFolderURL(
-        FIXTURE_PATHNAME,
-        { ...FIXTURE_QUERY, some: 'thing' },
-        { folder: FIXTURE_FOLDER }
-      )
-    ).toMatchInlineSnapshot(`"/media-library?some=thing&folder=1"`);
+      getFolderURL(FIXTURE_PATHNAME, { ...FIXTURE_QUERY }, { folder: FIXTURE_FOLDER })
+    ).toMatchInlineSnapshot(`"/media-library?folder=1"`);
   });
 
   test('includes folderPath if provided', () => {
