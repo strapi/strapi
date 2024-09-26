@@ -36,7 +36,10 @@ const FilterList = ({ appliedFilters, filtersSchema, onRemoveFilter }) => {
     } else if (typeof value === 'object') {
       value = Object.values(value).join(', ');
     } else {
-      value = decodeURIComponent(value);
+      value =
+        Array.isArray(value) || typeof value === 'object'
+          ? Object.values(value).join(', ')
+          : decodeURIComponent(value);
     }
 
     let displayedOperator = operator;
