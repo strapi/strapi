@@ -115,8 +115,10 @@ module.exports = ({ strapi }) => ({
     }
 
     const validations = strapi.config.get('plugin::users-permissions.validationRules');
-    
-    const { currentPassword, password } = await validateChangePasswordBody(validations)(ctx.request.body);
+
+    const { currentPassword, password } = await validateChangePasswordBody(validations)(
+      ctx.request.body
+    );
 
     const user = await strapi.db
       .query('plugin::users-permissions.user')
@@ -321,7 +323,7 @@ module.exports = ({ strapi }) => ({
 
     const validations = strapi.config.get('plugin::users-permissions.validationRules');
 
-    await validateRegisterBody(validations)(params)
+    await validateRegisterBody(validations)(params);
 
     const role = await strapi.db
       .query('plugin::users-permissions.role')

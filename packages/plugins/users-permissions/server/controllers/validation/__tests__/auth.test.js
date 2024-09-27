@@ -91,7 +91,7 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-      const authorization = auth({ strapi: global.strapi })
+      const authorization = auth({ strapi: global.strapi });
       await authorization.register(ctx);
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
@@ -124,7 +124,7 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-      const authorization = auth({ strapi: global.strapi })
+      const authorization = auth({ strapi: global.strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
@@ -157,7 +157,7 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-      const authorization = auth({ strapi: global.strapi })
+      const authorization = auth({ strapi: global.strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
@@ -190,7 +190,7 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-      const authorization = auth({ strapi: global.strapi })
+      const authorization = auth({ strapi: global.strapi });
       await authorization.register(ctx);
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
@@ -222,7 +222,7 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-      const authorization = auth({ strapi: global.strapi })
+      const authorization = auth({ strapi: global.strapi });
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
@@ -232,12 +232,12 @@ describe('user-permissions auth', () => {
         ...mockStrapi,
         config: {
           get: jest.fn((path) => {
-            if (path === 'plugin::users-permissions.validationRules'){
+            if (path === 'plugin::users-permissions.validationRules') {
               return {
-                password:{
-                  min:1,
-                }
-              }
+                password: {
+                  min: 1,
+                },
+              };
             }
             return {
               register: {
@@ -261,8 +261,8 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-      const authorization = auth({ strapi: global.strapi })
-      await authorization.register(ctx)
+      const authorization = auth({ strapi: global.strapi });
+      await authorization.register(ctx);
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
   });
