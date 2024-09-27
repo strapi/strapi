@@ -18,7 +18,7 @@ const registerSchema = (config) =>
         is: () => !!config?.validatePassword,
         then: yup
           .string()
-          .test('password-validation', 'Password invalid', (value) =>
+          .test('password-validation', 'Password invalid', async (value) =>
             config.validatePassword(value)
           ),
       }),
@@ -48,7 +48,7 @@ const resetPasswordSchema = (config) =>
           is: () => !!config?.validatePassword,
           then: yup
             .string()
-            .test('password-validation', 'Password invalid', (value) =>
+            .test('password-validation', 'Password invalid', async (value) =>
               config.validatePassword(value)
             ),
         }),
@@ -72,7 +72,7 @@ const changePasswordSchema = (config) =>
           is: () => !!config?.validatePassword,
           then: yup
             .string()
-            .test('password-validation', 'Password invalid', (value) =>
+            .test('password-validation', 'Password invalid', async (value) =>
               config.validatePassword(value)
             ),
         }),
