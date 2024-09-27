@@ -271,7 +271,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   color: #666687;
 }
 
-.c25 {
+.c26 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
