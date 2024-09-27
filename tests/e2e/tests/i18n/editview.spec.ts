@@ -431,7 +431,7 @@ test.describe('Edit view', () => {
      * Open the bulk locale publish modal
      */
     await page.getByText('More document actions').click();
-    await page.getByRole('menuitem', { name: 'Publish Multiple Locales', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Publish multiple locales', exact: true }).click();
 
     // Select all locales, assert there are 2 drafts ready to publish and publish them
     await page
@@ -441,7 +441,7 @@ test.describe('Edit view', () => {
 
     await expect(page.getByText('2 entries ready to publish')).toBeVisible();
     await page
-      .getByLabel('Publish Multiple Locales')
+      .getByLabel('Publish multiple locales')
       .getByRole('button', { name: 'Publish' })
       .click();
 
@@ -449,7 +449,7 @@ test.describe('Edit view', () => {
     await expect(page.getByRole('gridcell', { name: 'Already Published' })).toHaveCount(2);
 
     await expect(
-      page.getByLabel('Publish Multiple Locales').getByRole('button', { name: 'Publish' })
+      page.getByLabel('Publish multiple locales').getByRole('button', { name: 'Publish' })
     ).toBeDisabled();
   });
 
@@ -535,7 +535,7 @@ test.describe('Edit view', () => {
      * Open the bulk locale unpublish modal
      */
     await page.getByText('More document actions').click();
-    await page.getByRole('menuitem', { name: 'Unpublish Multiple Locales', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Unpublish multiple locales', exact: true }).click();
 
     // Select all locales, assert there are 2 entries ready to unpublish and unpublish them
     await page
@@ -548,7 +548,7 @@ test.describe('Edit view', () => {
      */
     await expect(page.getByText('2 entries ready to unpublish')).toBeVisible();
     await page
-      .getByLabel('Unpublish Multiple Locales')
+      .getByLabel('Unpublish multiple locales')
       .getByRole('button', { name: 'Unpublish' })
       .click();
 
@@ -556,7 +556,7 @@ test.describe('Edit view', () => {
     await expect(page.getByRole('gridcell', { name: 'Draft' })).toHaveCount(2);
 
     await expect(
-      page.getByLabel('Unpublish Multiple Locales').getByRole('button', { name: 'Unpublish' })
+      page.getByLabel('Unpublish multiple locales').getByRole('button', { name: 'Unpublish' })
     ).toBeDisabled();
   });
 
@@ -721,11 +721,11 @@ test.describe('Edit view', () => {
         );
 
         /**
-         * Attempt to publish through the 'Publish Multiple Locales' button
+         * Attempt to publish through the 'Publish multiple locales' button
          */
         await page.getByText('why-i-prefer-football-over-').click();
         await page.getByRole('button', { name: 'More document actions' }).click();
-        await page.getByText('Publish Multiple Locales').click();
+        await page.getByText('Publish multiple locales').click();
 
         /**
          * We have modified the content and then modifed the schema in a way that
@@ -734,7 +734,7 @@ test.describe('Edit view', () => {
          */
         await expect(page.getByText('1 entry waiting for action')).toBeVisible();
         await expect(
-          page.getByLabel('Publish Multiple Locales').getByText(`${field}: ${expectedError}`)
+          page.getByLabel('Publish multiple locales').getByText(`${field}: ${expectedError}`)
         ).toBeVisible();
       }
     );
