@@ -123,14 +123,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   right: 16px;
 }
 
-.c62 {
-  padding-block-start: 16px;
-}
-
-.c65 {
-  padding-inline-start: 8px;
-}
-
 .c1 {
   gap: 8px;
   align-items: stretch;
@@ -220,20 +212,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   display: flex;
 }
 
-.c63 {
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: row;
-  display: flex;
-}
-
-.c67 {
-  gap: 4px;
-  align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
 .c10 {
   font-size: 1.4rem;
   line-height: 1.43;
@@ -290,22 +268,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c64 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c66 {
-  font-size: 1.4rem;
-  line-height: 1.43;
   color: #666687;
 }
 
@@ -490,108 +452,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 .c52:focus {
   outline: 2px solid #4945ff;
   outline-offset: -2px;
-}
-
-.c72 {
-  line-height: revert;
-}
-
-.c68 {
-  padding: 12px;
-  border-radius: 4px;
-  text-decoration: none;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c68:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c68:focus-visible {
-  outline: none;
-}
-
-.c68:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c70 {
-  padding: 12px;
-  border-radius: 4px;
-  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-  text-decoration: none;
-  display: flex;
-  position: relative;
-  outline: none;
-}
-
-.c70:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c70:focus-visible {
-  outline: none;
-}
-
-.c70:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c71 {
-  color: #271fe0;
-  background: #ffffff;
-}
-
-.c71:hover {
-  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-}
-
-.c69 {
-  font-size: 1.1rem;
-  pointer-events: none;
-}
-
-.c69 svg path {
-  fill: #c0c0cf;
-}
-
-.c69:focus svg path,
-.c69:hover svg path {
-  fill: #c0c0cf;
 }
 
 .c56 {
@@ -971,148 +831,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="c62 c63"
-    >
-      <div
-        class="c17"
-      >
-        <div
-          aria-autocomplete="none"
-          aria-controls="radix-:r6:"
-          aria-expanded="false"
-          aria-label="Entries per page"
-          class="c5 c6 c7"
-          data-state="closed"
-          dir="ltr"
-          role="combobox"
-          tabindex="0"
-        >
-          <span
-            class="c8 c9"
-          >
-            <span
-              class="c64 c11"
-            >
-              <span
-                class="c12"
-              >
-                10
-              </span>
-            </span>
-          </span>
-          <span
-            class="c9"
-          >
-            <span
-              aria-hidden="true"
-              class="c13"
-            >
-              <svg
-                fill="currentColor"
-                height="16"
-                viewBox="0 0 32 32"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
-                />
-              </svg>
-            </span>
-          </span>
-        </div>
-        <div
-          class="c65"
-        >
-          <label
-            class="c66"
-            for="page-size"
-          >
-            Entries per page
-          </label>
-        </div>
-      </div>
-      <nav
-        aria-label="pagination"
-        class=""
-      >
-        <ul
-          class="c67"
-        >
-          <li>
-            <button
-              aria-disabled="true"
-              class="c68 c69"
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                class="c25"
-              >
-                Go to previous page
-              </span>
-              <svg
-                aria-hidden="true"
-                fill="currentColor"
-                height="16"
-                viewBox="0 0 32 32"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21.061 24.939a1.503 1.503 0 0 1-2.125 2.125l-10-10a1.5 1.5 0 0 1 0-2.125l10-10a1.503 1.503 0 0 1 2.125 2.125L12.125 16z"
-                />
-              </svg>
-            </button>
-          </li>
-          <li>
-            <button
-              class="c70 c71"
-              type="button"
-            >
-              <span
-                class="c25"
-              >
-                Go to page 1
-              </span>
-              <span
-                aria-hidden="true"
-                class="c18 c72"
-              >
-                1
-              </span>
-            </button>
-          </li>
-          <li>
-            <button
-              aria-disabled="true"
-              class="c68 c69"
-              tabindex="-1"
-              type="button"
-            >
-              <span
-                class="c25"
-              >
-                Go to next page
-              </span>
-              <svg
-                aria-hidden="true"
-                fill="currentColor"
-                height="16"
-                viewBox="0 0 32 32"
-                width="16"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="m23.061 17.061-10 10a1.503 1.503 0 0 1-2.125-2.125L19.875 16l-8.936-8.939a1.502 1.502 0 1 1 2.125-2.125l10 10a1.5 1.5 0 0 1-.003 2.125"
-                />
-              </svg>
-            </button>
-          </li>
-        </ul>
-      </nav>
     </div>
   </div>
   <span

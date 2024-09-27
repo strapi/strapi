@@ -95,7 +95,12 @@ const setup = (props) =>
       onEditFolder={jest.fn()}
       onSelectAllAsset={jest.fn()}
       onSelectAsset={jest.fn()}
-      pagination={{ pageCount: 1 }}
+      pagination={{
+        page: 1,
+        pageSize: 10,
+        pageCount: 1,
+        total: 4,
+      }}
       queryObject={{ page: 1, pageSize: 10, filters: { $and: [] } }}
       selectedAssets={[]}
       {...props}
