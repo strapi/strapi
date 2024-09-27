@@ -202,13 +202,13 @@ describe('user-permissions auth', () => {
           get: jest.fn((path) => {
             if (path === 'plugin::users-permissions.validationRules') {
               return {
-                  validatePassword(value) {
-                    // Custom validation logic: at least 1 uppercase, 1 lowercase, and 1 number
-                    const hasUpperCase = /[A-Z]/.test(value);
-                    const hasLowerCase = /[a-z]/.test(value);
-                    const hasNumber = /[0-9]/.test(value);
-                    return hasUpperCase && hasLowerCase && hasNumber && value.length >= 6;
-                  },
+                validatePassword(value) {
+                  // Custom validation logic: at least 1 uppercase, 1 lowercase, and 1 number
+                  const hasUpperCase = /[A-Z]/.test(value);
+                  const hasLowerCase = /[a-z]/.test(value);
+                  const hasNumber = /[0-9]/.test(value);
+                  return hasUpperCase && hasLowerCase && hasNumber && value.length >= 6;
+                },
               };
             }
             return {
@@ -234,7 +234,7 @@ describe('user-permissions auth', () => {
         send: jest.fn(),
       };
       const authorization = auth({ strapi: global.strapi });
-      await expect(authorization.register(ctx)).rejects.toThrow((errors.ValidationError));
+      await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
 
@@ -245,13 +245,13 @@ describe('user-permissions auth', () => {
           get: jest.fn((path) => {
             if (path === 'plugin::users-permissions.validationRules') {
               return {
-                  validatePassword(value) {
-                    // Custom validation logic: at least 1 uppercase, 1 lowercase, and 1 number
-                    const hasUpperCase = /[A-Z]/.test(value);
-                    const hasLowerCase = /[a-z]/.test(value);
-                    const hasNumber = /[0-9]/.test(value);
-                    return hasUpperCase && hasLowerCase && hasNumber && value.length >= 6;
-                  },
+                validatePassword(value) {
+                  // Custom validation logic: at least 1 uppercase, 1 lowercase, and 1 number
+                  const hasUpperCase = /[A-Z]/.test(value);
+                  const hasLowerCase = /[a-z]/.test(value);
+                  const hasNumber = /[0-9]/.test(value);
+                  return hasUpperCase && hasLowerCase && hasNumber && value.length >= 6;
+                },
               };
             }
             return {
