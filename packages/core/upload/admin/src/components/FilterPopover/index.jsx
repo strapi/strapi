@@ -58,7 +58,9 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (modifiedData.value) {
+    const encodedValue = encodeURIComponent(modifiedData.value);
+
+    if (encodedValue) {
       if (modifiedData.name === 'mime') {
         const alreadyAppliedFilters = filters.filter((filter) => {
           return Object.keys(filter)[0] === 'mime';
@@ -177,12 +179,12 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
         filters.find((filter) => {
           return (
             filter[modifiedData.name] &&
-            filter[modifiedData.name]?.[modifiedData.filter] === modifiedData.value
+            filter[modifiedData.name]?.[modifiedData.filter] === encodedValue
           );
         }) !== undefined;
 
       if (!hasFilter) {
-        let filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } };
+        let filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: encodedValue } };
 
         const nextFilters = [...filters, filterToAdd];
 
