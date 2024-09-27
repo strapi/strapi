@@ -35,4 +35,15 @@ module.exports = () => ({
     enabled: false,
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
   },
+
+  "users-permissions": {
+    config:{
+      validations:{
+        password:{
+          min:3,
+          max:8
+        }
+      }
+    }
+  }
 });

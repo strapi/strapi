@@ -7,11 +7,16 @@ const callbackSchema = yup.object({
   password: yup.string().required(),
 });
 
-const registerSchema = yup.object({
-  email: yup.string().email().required(),
-  username: yup.string().required(),
-  password: yup.string().required(),
-});
+const registerSchema = (config) =>
+  yup.object({
+    email: yup.string().email().required(),
+    username: yup.string().required(),
+    password: yup
+      .string()
+      .required()
+      .min(config?.password?.min || 6)
+      .max(config?.password?.max || 255),
+  });
 
 const sendEmailConfirmationSchema = yup.object({
   email: yup.string().email().required(),
@@ -27,31 +32,46 @@ const forgotPasswordSchema = yup
   })
   .noUnknown();
 
-const resetPasswordSchema = yup
-  .object({
-    password: yup.string().required(),
-    passwordConfirmation: yup.string().required(),
-    code: yup.string().required(),
-  })
-  .noUnknown();
+const resetPasswordSchema = (config) =>
+  yup
+    .object({
+      password: yup
+        .string()
+        .required()
+        .min(config?.password?.min || 6)
+        .max(config?.password?.max || 255),
 
-const changePasswordSchema = yup
-  .object({
-    password: yup.string().required(),
-    passwordConfirmation: yup
-      .string()
-      .required()
-      .oneOf([yup.ref('password')], 'Passwords do not match'),
-    currentPassword: yup.string().required(),
-  })
-  .noUnknown();
+      passwordConfirmation: yup
+        .string()
+        .required()
+        .oneOf([yup.ref('password')], 'Passwords do not match'),
+
+      code: yup.string().required(),
+    })
+    .noUnknown();
+
+const changePasswordSchema = (config) =>
+  yup
+    .object({
+      password: yup
+        .string()
+        .required()
+        .min(config?.password?.min || 6)
+        .max(config?.password?.max || 255),
+      passwordConfirmation: yup
+        .string()
+        .required()
+        .oneOf([yup.ref('password')], 'Passwords do not match'),
+      currentPassword: yup.string().required(),
+    })
+    .noUnknown();
 
 module.exports = {
   validateCallbackBody: validateYupSchema(callbackSchema),
-  validateRegisterBody: validateYupSchema(registerSchema),
+  validateRegisterBody: (config) => validateYupSchema(registerSchema(config)),
   validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationSchema),
   validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
   validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
-  validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
-  validateChangePasswordBody: validateYupSchema(changePasswordSchema),
+  validateResetPasswordBody: (config) => validateYupSchema(resetPasswordSchema(config)),
+  validateChangePasswordBody: (config) => validateYupSchema(changePasswordSchema(config)),
 };

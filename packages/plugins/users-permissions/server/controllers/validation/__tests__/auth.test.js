@@ -91,8 +91,8 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-
-      await auth.register(ctx);
+      const authorization = auth({ strapi: global.strapi })
+      await authorization.register(ctx);
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
 
@@ -124,8 +124,8 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-
-      await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
+      const authorization = auth({ strapi: global.strapi })
+      await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
 
@@ -157,8 +157,8 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
-
-      await expect(auth.register(ctx)).rejects.toThrow(errors.ValidationError);
+      const authorization = auth({ strapi: global.strapi })
+      await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
 
@@ -190,8 +190,79 @@ describe('user-permissions auth', () => {
         },
         send: jest.fn(),
       };
+      const authorization = auth({ strapi: global.strapi })
+      await authorization.register(ctx);
+      expect(ctx.send).toHaveBeenCalledTimes(1);
+    });
 
-      await auth.register(ctx);
+    test('Throws error when passed a password with less than the minimum value', async () => {
+      global.strapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn(() => {
+            return {
+              register: {
+                allowedFields: [],
+              },
+            };
+          }),
+        },
+      };
+
+      const ctx = {
+        state: {
+          auth: {},
+        },
+        request: {
+          body: {
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'Test',
+          },
+        },
+        send: jest.fn(),
+      };
+      const authorization = auth({ strapi: global.strapi })
+      await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
+      expect(ctx.send).toHaveBeenCalledTimes(0);
+    });
+
+    test('Configure password validation rules', async () => {
+      global.strapi = {
+        ...mockStrapi,
+        config: {
+          get: jest.fn((path) => {
+            if (path === 'plugin::users-permissions.validationRules'){
+              return {
+                password:{
+                  min:1,
+                }
+              }
+            }
+            return {
+              register: {
+                allowedFields: [],
+              },
+            };
+          }),
+        },
+      };
+
+      const ctx = {
+        state: {
+          auth: {},
+        },
+        request: {
+          body: {
+            username: 'testuser',
+            email: 'test@example.com',
+            password: 'Test',
+          },
+        },
+        send: jest.fn(),
+      };
+      const authorization = auth({ strapi: global.strapi })
+      await authorization.register(ctx)
       expect(ctx.send).toHaveBeenCalledTimes(1);
     });
   });
