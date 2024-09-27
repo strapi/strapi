@@ -1,4 +1,4 @@
-import findRecursiveFolderByValue from '../findRecursiveFolderByValue';
+import { findRecursiveFolderByValue } from '../findRecursiveFolderByValue';
 
 const FIXTURE = [
   {
