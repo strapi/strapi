@@ -346,34 +346,6 @@ describe('Test Graphql API End to End', () => {
       });
     });
 
-    test.skip('List posts with `createdBy` and `updatedBy`', async () => {
-      const res = await graphqlQuery({
-        query: /* GraphQL */ `
-          {
-            posts_connection(start: 1) {
-              data {
-                documentId
-                attributes {
-                  name
-                  bigint
-                  nullable
-                  category
-                }
-              }
-            }
-          }
-        `,
-      });
-
-      expect(res.statusCode).toBe(200);
-
-      // no errors should be present in the response
-      expect(res.body.error).toBeUndefined();
-
-      // since the posts are created without AdminUser, it should return null
-      expect(res.body.data.posts_connection[0].createdBy).toBeNull();
-    });
-
     test.each([
       [
         {
