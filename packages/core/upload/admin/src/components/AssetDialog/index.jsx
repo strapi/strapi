@@ -13,7 +13,7 @@ import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissio
 import useModalQueryParams from '../../hooks/useModalQueryParams';
 import { useSelectionState } from '../../hooks/useSelectionState';
 import { containsAssetFilter, getTrad } from '../../utils';
-import getAllowedFiles from '../../utils/getAllowedFiles';
+import { getAllowedFiles } from '../../utils/getAllowedFiles';
 import { moveElement } from '../../utils/moveElement';
 import { EditAssetContent } from '../EditAssetDialog';
 import { EditFolderContent } from '../EditFolderDialog';
