@@ -14,8 +14,14 @@ const registerSchema = (config) =>
     password: yup
       .string()
       .required()
-      .min(config?.password?.min || 6)
-      .max(config?.password?.max || 255),
+      .when([], {
+        is: () => !!config?.validatePassword,
+        then: yup
+          .string()
+          .test('password-validation', 'Password invalid', (value) =>
+            config.validatePassword(value)
+          ),
+      }),
   });
 
 const sendEmailConfirmationSchema = yup.object({
@@ -38,8 +44,14 @@ const resetPasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .min(config?.password?.min || 6)
-        .max(config?.password?.max || 255),
+        .when([], {
+          is: () => !!config?.validatePassword,
+          then: yup
+            .string()
+            .test('password-validation', 'Password invalid', (value) =>
+              config.validatePassword(value)
+            ),
+        }),
 
       passwordConfirmation: yup
         .string()
@@ -56,8 +68,14 @@ const changePasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .min(config?.password?.min || 6)
-        .max(config?.password?.max || 255),
+        .when([], {
+          is: () => !!config?.validatePassword,
+          then: yup
+            .string()
+            .test('password-validation', 'Password invalid', (value) =>
+              config.validatePassword(value)
+            ),
+        }),
       passwordConfirmation: yup
         .string()
         .required()
