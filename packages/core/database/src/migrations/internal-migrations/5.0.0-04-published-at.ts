@@ -11,7 +11,7 @@ import type { Migration } from '../common';
  */
 const createPublishedAtColumn = async (db: Knex, tableName: string) => {
   await db.schema.alterTable(tableName, (table) => {
-    table.string('published_at').defaultTo(new Date());
+    table.string('published_at').defaultTo(new Date().getTime());
   });
 };
 
