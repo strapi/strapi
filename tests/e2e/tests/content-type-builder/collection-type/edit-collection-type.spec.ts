@@ -9,6 +9,7 @@ import {
   navToHeader,
   skipCtbTour,
 } from '../../../utils/shared';
+import { sharedSetup } from '../../../utils/setup';
 
 test.describe('Edit collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -20,45 +21,25 @@ test.describe('Edit collection type', () => {
   let dependentTestsInitialized = false;
 
   test.beforeEach(async ({ page }) => {
-    // TODO: optimize and duplicate this logic in a standardized way other tests
-    // reduce each test run by having a fake `beforeAll` to create the content types only once
-    let loggedIn = false;
-    if (!dependentTestsInitialized) {
-      await resetFiles();
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await sharedSetup('ctb-edit-ct', page, {
+      resetFiles: true,
+      importData: 'with-admin.tar',
+      login: true,
+      skipTour: true,
+      afterSetup: async () => {
+        // create a collection type to be used
+        await createCollectionType(page, {
+          name: ctName,
+        });
 
-      await page.goto('/admin');
-
-      await login({ page });
-      loggedIn = true;
-      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-
-      await skipCtbTour(page);
-
-      // create a collection type to be used
-      await createCollectionType(page, {
-        name: ctName,
-      });
-
-      await createCollectionType(page, {
-        name: 'dog',
-      });
-      await createCollectionType(page, {
-        name: 'owner',
-      });
-
-      dependentTestsInitialized = true;
-    }
-
-    if (!loggedIn) {
-      await page.goto('/admin');
-
-      await login({ page });
-      loggedIn = true;
-    }
-
-    await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-    await skipCtbTour(page);
+        await createCollectionType(page, {
+          name: 'dog',
+        });
+        await createCollectionType(page, {
+          name: 'owner',
+        });
+      },
+    });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
@@ -135,6 +116,11 @@ test.describe('Edit collection type', () => {
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 
+  /**
+   * TODO: This test is flaky likely due to an actual display bug
+   * where specific circumstances (demonstrated here) cause a modal to close/reopen on the first click
+   * instead of triggering the submit
+   * */
   test('Can configure advanced settings for multiple fields sequentially', async ({ page }) => {
     const fieldsToAdd = [
       {
