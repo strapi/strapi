@@ -234,7 +234,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       return _.groupBy(groupName)(formattedData);
     },
 
-    getContentTypeModelsFromActions(actions: ReleaseAction[]) {
+    async getContentTypeModelsFromActions(actions: ReleaseAction[]) {
       const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
         if (!acc.includes(action.contentType)) {
           acc.push(action.contentType);
@@ -243,16 +243,32 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         return acc;
       }, []);
 
-      const contentTypeModelsMap = contentTypeUids.reduce(
-        (
-          acc: { [key: ReleaseAction['contentType']]: Struct.ContentTypeSchema },
+      const workflowsService = strapi.plugin('review-workflows').service('workflows');
+
+      const contentTypeModelsMap = await contentTypeUids.reduce(
+        async (
+          accPromise: Promise<{
+            [key: ReleaseAction['contentType']]: Struct.ContentTypeSchema & {
+              requiredStageToPublish?: number;
+            };
+          }>,
           contentTypeUid: ReleaseAction['contentType']
         ) => {
-          acc[contentTypeUid] = strapi.getModel(contentTypeUid);
+          const acc = await accPromise;
+          const contentTypeModel = strapi.getModel(contentTypeUid);
+
+          const workflow = await workflowsService.getAssignedWorkflow(contentTypeUid, {
+            populate: 'stageRequiredToPublish',
+          });
+
+          acc[contentTypeUid] = {
+            ...contentTypeModel,
+            requiredStageToPublish: workflow?.stageRequiredToPublish,
+          };
 
           return acc;
         },
-        {}
+        Promise.resolve({})
       );
 
       return contentTypeModelsMap;
