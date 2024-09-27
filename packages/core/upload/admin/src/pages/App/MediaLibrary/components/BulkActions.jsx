@@ -12,9 +12,9 @@ import { BulkMoveButton } from './BulkMoveButton';
 
 export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
   const { formatMessage } = useIntl();
-  const numberAssets = selected.reduce(function(_this, val) {
+  const numberAssets = selected.reduce(function (_this, val) {
     return val?.type === 'folder' ? _this + val.files.count : _this + 1;
-}, 0);
+  }, 0);
   return (
     <Flex gap={2} paddingBottom={5}>
       <Typography variant="epsilon" textColor="neutral600">
