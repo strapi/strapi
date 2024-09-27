@@ -9,11 +9,11 @@ import type { File } from './files';
 export interface Folder {
   id: number;
   name: string;
-  pathId: number;
+  pathId?: number;
   /**
    * parent id
    */
-  parent?: number;
+  parent?: number | null;
   /**
    * children ids
    */
