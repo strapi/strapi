@@ -1,4 +1,31 @@
-function getPrefixedId(message, callback) {
+import type { errors } from '@strapi/utils';
+import type { FetchError } from '@strapi/admin/strapi-admin';
+
+type ApiError =
+  | errors.ApplicationError
+  | errors.ForbiddenError
+  | errors.NotFoundError
+  | errors.NotImplementedError
+  | errors.PaginationError
+  | errors.PayloadTooLargeError
+  | errors.PolicyError
+  | errors.RateLimitError
+  | errors.UnauthorizedError
+  | errors.ValidationError
+  | errors.YupValidationError;
+
+interface YupFormattedError {
+  path: string[];
+  message: string;
+  name: string;
+}
+
+interface NormalizeErrorOptions {
+  name?: string;
+  intlMessagePrefixCallback?: (id: string) => string;
+}
+
+function getPrefixedId(message: string, callback?: (prefixedMessage: string) => string) {
   const prefixedMessage = `apiError.${message}`;
 
   // if a prefix function has been passed in it is used to
@@ -11,7 +38,10 @@ function getPrefixedId(message, callback) {
   return prefixedMessage;
 }
 
-function normalizeError(error, { name, intlMessagePrefixCallback }) {
+function normalizeError(
+  error: ApiError | YupFormattedError,
+  { name, intlMessagePrefixCallback }: NormalizeErrorOptions
+) {
   const { message } = error;
 
   const normalizedError = {
@@ -28,19 +58,23 @@ function normalizeError(error, { name, intlMessagePrefixCallback }) {
   return normalizedError;
 }
 
-const validateErrorIsYupValidationError = (err) =>
+const validateErrorIsYupValidationError = (err: ApiError) =>
   typeof err.details === 'object' && err.details !== null && 'errors' in err.details;
 
-export function normalizeAPIError(apiError, intlMessagePrefixCallback) {
+export function normalizeAPIError(
+  apiError: FetchError,
+  intlMessagePrefixCallback?: NormalizeErrorOptions['intlMessagePrefixCallback']
+) {
   const error = apiError.response?.data.error;
 
   if (error) {
     // some errors carry multiple errors (such as ValidationError)
     if (validateErrorIsYupValidationError(error)) {
+      const details = error.details as { errors: YupFormattedError[] };
       return {
         name: error.name,
         message: error?.message || null,
-        errors: error.details.errors.map((err) =>
+        errors: details.errors.map((err) =>
           normalizeError(err, { name: error.name, intlMessagePrefixCallback })
         ),
       };
