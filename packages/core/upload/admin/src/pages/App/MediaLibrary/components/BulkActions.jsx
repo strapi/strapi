@@ -12,6 +12,9 @@ import { BulkMoveButton } from './BulkMoveButton';
 
 export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
   const { formatMessage } = useIntl();
+  const numberAssets = selected.reduce(function (_this, val) {
+    return val?.type === 'folder' ? _this + val.files.count : _this + 1;
+  }, 0);
 
   return (
     <Flex gap={2} paddingBottom={5}>
@@ -24,7 +27,7 @@ export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
           },
           {
             numberFolders: selected.filter(({ type }) => type === 'folder').length,
-            numberAssets: selected.filter(({ type }) => type === 'asset').length,
+            numberAssets,
           }
         )}
       </Typography>
