@@ -14,15 +14,22 @@ type ApiError =
   | errors.ValidationError
   | errors.YupValidationError;
 
+interface NormalizeErrorOptions {
+  name?: string;
+  intlMessagePrefixCallback?: (id: string) => string;
+}
+
+interface NormalizeErrorReturn {
+  id: string;
+  defaultMessage: string;
+  name?: string;
+  values: Record<'path', string> | Record<string, never>;
+}
+
 interface YupFormattedError {
   path: string[];
   message: string;
   name: string;
-}
-
-interface NormalizeErrorOptions {
-  name?: string;
-  intlMessagePrefixCallback?: (id: string) => string;
 }
 
 function getPrefixedId(message: string, callback?: (prefixedMessage: string) => string) {
@@ -41,7 +48,7 @@ function getPrefixedId(message: string, callback?: (prefixedMessage: string) => 
 function normalizeError(
   error: ApiError | YupFormattedError,
   { name, intlMessagePrefixCallback }: NormalizeErrorOptions
-) {
+): NormalizeErrorReturn {
   const { message } = error;
 
   const normalizedError = {
@@ -58,23 +65,32 @@ function normalizeError(
   return normalizedError;
 }
 
-const validateErrorIsYupValidationError = (err: ApiError) =>
+const validateErrorIsYupValidationError = (
+  err: ApiError
+): err is errors.YupValidationError & { details: { errors: YupFormattedError[] } } =>
   typeof err.details === 'object' && err.details !== null && 'errors' in err.details;
 
+/**
+ * Normalize the format of `ResponseError`
+ * in places where the hook `useAPIErrorHandler` can not called
+ * (e.g. outside of a React component).
+ */
 export function normalizeAPIError(
   apiError: FetchError,
   intlMessagePrefixCallback?: NormalizeErrorOptions['intlMessagePrefixCallback']
-) {
+):
+  | NormalizeErrorReturn
+  | { name: string; message: string | null; errors: NormalizeErrorReturn[] }
+  | null {
   const error = apiError.response?.data.error;
 
   if (error) {
     // some errors carry multiple errors (such as ValidationError)
     if (validateErrorIsYupValidationError(error)) {
-      const details = error.details as { errors: YupFormattedError[] };
       return {
         name: error.name,
         message: error?.message || null,
-        errors: details.errors.map((err) =>
+        errors: error.details.errors.map((err) =>
           normalizeError(err, { name: error.name, intlMessagePrefixCallback })
         ),
       };
