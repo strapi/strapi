@@ -346,6 +346,52 @@ describe('Test Graphql API End to End', () => {
       });
     });
 
+    test('`updatedBy` is not available', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            posts_connection(start: 1) {
+              data {
+                documentId
+                attributes {
+                  name
+                  bigint
+                  nullable
+                  category
+                  updatedBy
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('`createdBy` is not available', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            posts_connection(start: 1) {
+              data {
+                documentId
+                attributes {
+                  name
+                  bigint
+                  nullable
+                  category
+                  createdBy
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
     test.each([
       [
         {
