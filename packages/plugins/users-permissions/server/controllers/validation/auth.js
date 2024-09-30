@@ -15,7 +15,6 @@ const registerSchema = (config) =>
       .string()
       .required()
       .test(async function (value) {
-        console.log(value, config);
         if (typeof config?.validatePassword === 'function') {
           try {
             const isValid = await config.validatePassword(value);
@@ -51,7 +50,6 @@ const resetPasswordSchema = (config) =>
         .string()
         .required()
         .test(async function (value) {
-          console.log(value, config);
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);
@@ -81,7 +79,6 @@ const changePasswordSchema = (config) =>
         .string()
         .required()
         .test(async function (value) {
-          console.log(value, config);
           if (typeof config?.validatePassword === 'function') {
             try {
               const isValid = await config.validatePassword(value);
