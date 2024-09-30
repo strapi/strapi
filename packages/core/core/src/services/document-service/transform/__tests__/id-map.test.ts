@@ -27,6 +27,9 @@ describe('Extract document ids from relation data', () => {
       db: {
         query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
       },
+      getModel: () => ({
+        options: { draftAndPublish: true },
+      }),
     } as unknown as Core.Strapi;
   });
 
