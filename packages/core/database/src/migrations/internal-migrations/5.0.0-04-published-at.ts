@@ -11,8 +11,11 @@ import type { Migration } from '../common';
  */
 const createPublishedAtColumn = async (db: Knex, tableName: string) => {
   await db.schema.alterTable(tableName, (table) => {
-    table.string('published_at').defaultTo(db.fn.now());
+    table.string('published_at');
   });
+
+  // Non DP content types should have their `published_at` column set to a date
+  await db(tableName).update({ published_at: new Date() });
 };
 
 export const createdPublishedAt: Migration = {
