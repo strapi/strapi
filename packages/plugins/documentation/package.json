@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "5.0.1",
+  "version": "5.0.2-beta.0",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -66,7 +66,7 @@
     "immer": "9.0.21",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
-    "path-to-regexp": "6.2.1",
+    "path-to-regexp": "6.3.0",
     "react-intl": "6.6.2",
     "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",
