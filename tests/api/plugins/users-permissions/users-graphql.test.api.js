@@ -335,7 +335,12 @@ describe('Advanced Test GraphQL Users API End to End', () => {
     await restart();
   });
 
-  describe('Test register and login with component', () => {
+  /**
+   * This is no longer allowed for security reasons
+   * We only have register.allowedFields to allow fields to be submitted on registration
+   * TODO: add update.allowedFields feature and re-enable
+   *  */
+  describe.skip('Test register and login with component', () => {
     test('Register a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
@@ -415,12 +420,7 @@ describe('Advanced Test GraphQL Users API End to End', () => {
       data.user = res.body.data.login.user;
     });
 
-    /**
-     * This is no longer allowed for security reasons
-     * We only have register.allowedFields to allow fields to be submitted on registration
-     * TODO: add update.allowedFields feature and re-enable
-     *  */
-    test.skip('Update a user', async () => {
+    test('Update a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation updateUser($id: ID!, $data: UsersPermissionsUserInput!) {
@@ -468,8 +468,7 @@ describe('Advanced Test GraphQL Users API End to End', () => {
       });
     });
 
-    // See comment for update
-    test.skip('Delete a user', async () => {
+    test('Delete a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           mutation deleteUser($id: ID!) {
