@@ -11,7 +11,10 @@ type GetAPIInnerErrorsReturn = {
  * Returns a normalized error message
  *
  */
-function getAPIInnerErrors(error: FetchError, { getTrad }: { getTrad: (key: string) => string }) {
+export function getAPIInnerErrors(
+  error: FetchError,
+  { getTrad }: { getTrad: (key: string) => string }
+) {
   const normalizedError = normalizeAPIError(error, getTrad);
 
   if (normalizedError && 'errors' in normalizedError) {
@@ -29,5 +32,3 @@ function getAPIInnerErrors(error: FetchError, { getTrad }: { getTrad: (key: stri
 
   return normalizedError?.defaultMessage;
 }
-
-export default getAPIInnerErrors;

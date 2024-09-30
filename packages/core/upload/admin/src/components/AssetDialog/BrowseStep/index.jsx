@@ -24,9 +24,8 @@ import {
 } from '../../../constants';
 import { useFolder } from '../../../hooks/useFolder';
 import { usePersistentState } from '../../../hooks/usePersistentState';
-import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
+import { getBreadcrumbDataCM, toSingularTypes, getTrad } from '../../../utils';
 import { getAllowedFiles } from '../../../utils/getAllowedFiles';
-import { getTrad } from '../../../utils/getTrad';
 import { AssetGridList } from '../../AssetGridList';
 import { Breadcrumbs } from '../../Breadcrumbs';
 import { EmptyAssets } from '../../EmptyAssets';

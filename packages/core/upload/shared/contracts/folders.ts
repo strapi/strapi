@@ -13,12 +13,12 @@ export interface Folder {
   /**
    * parent id
    */
-  parent?: number | null;
+  parent?: number | null | Folder;
   /**
    * children ids
    */
   children?: number[];
-  path: string;
+  path?: string;
   files?: File[];
 }
 

@@ -6,7 +6,7 @@ import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput';
 import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
-import { getTrad } from './utils/getTrad';
+import { getTrad } from './utils';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = pluginPkg.strapi.name;

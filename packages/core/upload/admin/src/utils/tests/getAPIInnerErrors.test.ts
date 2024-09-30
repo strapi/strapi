@@ -1,6 +1,6 @@
 import { FetchError } from '@strapi/admin/strapi-admin';
 
-import getAPIInnerErrors from '../getAPIInnerErrors';
+import { getAPIInnerErrors } from '../getAPIInnerErrors';
 
 const API_VALIDATION_ERROR_FIXTURE = new FetchError('ValidationError', {
   data: {

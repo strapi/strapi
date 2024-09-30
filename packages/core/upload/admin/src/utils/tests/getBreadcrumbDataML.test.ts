@@ -1,4 +1,4 @@
-import { getBreadcrumbDataML } from '..';
+import { getBreadcrumbDataML } from '../getBreadcrumbDataML';
 
 const FIXTURE_PATHNAME = '/media-library';
 const FIXTURE_QUERY = {
