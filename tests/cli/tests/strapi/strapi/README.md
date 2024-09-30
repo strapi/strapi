@@ -10,6 +10,6 @@ To update the \*:list command snapshots:
 - run `yarn install` to add project to workspace; do not commit any changes to yarn.lock
 - run the command this test is for
 - if output looks as expected, copy and paste it to this string
-- you may need to run test:clean before tests can run again
+- you may need to run `yarn test:clean` before tests can run again
 
 For rows that have backslashes (\\) in the output, you must manually escape them with another backslash (\\)
