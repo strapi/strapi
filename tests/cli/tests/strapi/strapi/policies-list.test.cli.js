@@ -4,7 +4,6 @@ const coffee = require('coffee');
 
 const utils = require('../../../utils');
 
-// TODO: Fix expected outputs
 describe('policies:list', () => {
   let appPath;
 
