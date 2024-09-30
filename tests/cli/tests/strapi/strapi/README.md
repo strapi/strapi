@@ -6,7 +6,7 @@ These are the CLI tests for the simple strapi commands that aren't covered by an
 
 To update the \*:list command snapshots:
 
-- go to `/cli/test-apps/{the-test-app}`
+- go to `/cli/test-apps/test-app-0`
 - run `yarn install` to add project to workspace; do not commit any changes to yarn.lock
 - run the command this test is for
 - if output looks as expected, copy and paste it to this string
