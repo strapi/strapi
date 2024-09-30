@@ -14,13 +14,19 @@ const registerSchema = (config) =>
     password: yup
       .string()
       .required()
-      .when([], {
-        is: () => !!config?.validatePassword,
-        then: yup
-          .string()
-          .test('password-validation', 'Password invalid', async (value) =>
-            config.validatePassword(value)
-          ),
+      .test(async function (value) {
+        console.log(value, config);
+        if (typeof config?.validatePassword === 'function') {
+          try {
+            const isValid = await config.validatePassword(value);
+            if (!isValid) {
+              return this.createError({ message: 'Password validation failed.' });
+            }
+          } catch (error) {
+            return this.createError({ message: error.message || 'An error occurred.' });
+          }
+        }
+        return true;
       }),
   });
 
@@ -44,13 +50,19 @@ const resetPasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .when([], {
-          is: () => !!config?.validatePassword,
-          then: yup
-            .string()
-            .test('password-validation', 'Password invalid', async (value) =>
-              config.validatePassword(value)
-            ),
+        .test(async function (value) {
+          console.log(value, config);
+          if (typeof config?.validatePassword === 'function') {
+            try {
+              const isValid = await config.validatePassword(value);
+              if (!isValid) {
+                return this.createError({ message: 'Password validation failed.' });
+              }
+            } catch (error) {
+              return this.createError({ message: error.message || 'An error occurred.' });
+            }
+          }
+          return true;
         }),
 
       passwordConfirmation: yup
@@ -68,13 +80,19 @@ const changePasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .when([], {
-          is: () => !!config?.validatePassword,
-          then: yup
-            .string()
-            .test('password-validation', 'Password invalid', async (value) =>
-              config.validatePassword(value)
-            ),
+        .test(async function (value) {
+          console.log(value, config);
+          if (typeof config?.validatePassword === 'function') {
+            try {
+              const isValid = await config.validatePassword(value);
+              if (!isValid) {
+                return this.createError({ message: 'Password validation failed.' });
+              }
+            } catch (error) {
+              return this.createError({ message: error.message || 'An error occurred.' });
+            }
+          }
+          return true;
         }),
       passwordConfirmation: yup
         .string()
