@@ -64,9 +64,15 @@ import { getFormInputNames } from './utils/getFormInputNames';
 import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
 import type { AttributeType } from '../../types';
 import type { Internal } from '@strapi/types';
+import { styled } from 'styled-components';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
+
+const FormComponent = styled.form`
+  overflow: auto;
+`;
+
 export const FormModal = () => {
   const {
     onCloseModal,
@@ -1008,7 +1014,7 @@ export const FormModal = () => {
           />
         )}
         {!isPickingAttribute && (
-          <form onSubmit={handleSubmit} style={{ overflow: 'auto' }}>
+          <FormComponent onSubmit={handleSubmit}>
             <Modal.Body>
               <Tabs.Root
                 variant="simple"
@@ -1112,7 +1118,7 @@ export const FormModal = () => {
                 onClickFinish={handleClickFinish}
               />
             </Modal.Footer>
-          </form>
+          </FormComponent>
         )}
       </Modal.Content>
     </Modal.Root>
