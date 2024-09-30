@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "5.0.1",
+  "version": "5.0.2-beta.0",
   "description": "Adds GraphQL endpoint with default API methods.",
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "watch": "strapi-plugin watch"
   },
   "dependencies": {
-    "@apollo/server": "4.10.0",
+    "@apollo/server": "4.11.0",
     "@as-integrations/koa": "1.1.1",
     "@graphql-tools/schema": "10.0.3",
     "@graphql-tools/utils": "^10.1.3",

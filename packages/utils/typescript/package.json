@@ -1,6 +1,6 @@
 {
   "name": "@strapi/typescript-utils",
-  "version": "5.0.1",
+  "version": "5.0.2-beta.0",
   "description": "Typescript support for Strapi",
   "keywords": [
     "strapi",
@@ -39,7 +39,7 @@
     "cli-table3": "0.6.5",
     "fs-extra": "11.2.0",
     "lodash": "4.17.21",
-    "prettier": "3.2.5",
+    "prettier": "3.3.3",
     "typescript": "5.3.2"
   },
   "devDependencies": {
