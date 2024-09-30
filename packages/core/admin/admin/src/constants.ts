@@ -180,6 +180,16 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
           },
         ]
       : []),
+    ...(!window.strapi.features.isEnabled('cms-content-history') && window.strapi?.flags?.promoteEE
+      ? [
+          {
+            intlLabel: { id: 'Settings.content-history.title', defaultMessage: 'Content History' },
+            to: '/settings/purchase-content-history',
+            id: 'content-history-purchase-page',
+            licenseOnly: true,
+          },
+        ]
+      : []),
   ],
 
   admin: [

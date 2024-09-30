@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
 
-const PurchaseSingleSignOn = () => {
+const PurchaseContentHistory = () => {
   const { formatMessage } = useIntl();
 
   return (
@@ -13,27 +13,27 @@ const PurchaseSingleSignOn = () => {
       <Main>
         <Layouts.Header
           title={formatMessage({
-            id: 'Settings.sso.title',
-            defaultMessage: 'Single Sign-On',
+            id: 'Settings.content-history.title',
+            defaultMessage: 'Content History',
           })}
           subtitle={formatMessage({
-            id: 'Settings.sso.subTitle',
-            defaultMessage: 'Configure the settings for the Single Sign-On feature.',
+            id: 'Settings.content-history.description',
+            defaultMessage: 'Get more control over every step of your content’s lifecycle.',
           })}
         />
         <Box paddingLeft={10} paddingRight={10}>
           <EmptyStateLayout
             icon={<EmptyPermissions width="16rem" />}
             content={formatMessage({
-              id: 'Settings.sso.not-available',
+              id: 'Settings.content-history.not-available',
               defaultMessage:
-                'SSO is only available as part of a paid plan. Upgrade to configure additional sign-in & sign-up methods for your administration panel.',
+                "Content History is only available as part of a paid plan. Upgrade to get full control over your content's lifecycle.",
             })}
             action={
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://bit.ly/3B3AODY"
+                href="https://bit.ly/3Bbv1w4"
                 isExternal
                 target="_blank"
               >
@@ -50,4 +50,4 @@ const PurchaseSingleSignOn = () => {
   );
 };
 
-export { PurchaseSingleSignOn };
+export { PurchaseContentHistory };

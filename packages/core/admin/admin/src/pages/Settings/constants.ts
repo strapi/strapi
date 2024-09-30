@@ -182,4 +182,14 @@ export const ROUTES_CE: RouteObject[] = [
     },
     path: 'purchase-single-sign-on',
   },
+  {
+    lazy: async () => {
+      const { PurchaseContentHistory } = await import('./pages/PurchaseContentHistory');
+
+      return {
+        Component: PurchaseContentHistory,
+      };
+    },
+    path: 'purchase-content-history',
+  },
 ];
