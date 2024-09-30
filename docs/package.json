@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "1.1.0",
-    "@docusaurus/core": "3.1.1",
-    "@docusaurus/preset-classic": "3.1.1",
-    "@docusaurus/theme-mermaid": "3.1.1",
+    "@docusaurus/core": "3.5.2",
+    "@docusaurus/preset-classic": "3.5.2",
+    "@docusaurus/theme-mermaid": "3.5.2",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^1.1.1",
     "prism-react-renderer": "^2.1.0",
@@ -37,7 +37,7 @@
     "react-dom": "18.3.0"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "3.1.1",
+    "@docusaurus/module-type-aliases": "3.5.2",
     "docusaurus-plugin-typedoc": "0.22.0",
     "typedoc": "0.25.9",
     "typedoc-plugin-markdown": "3.17.1",

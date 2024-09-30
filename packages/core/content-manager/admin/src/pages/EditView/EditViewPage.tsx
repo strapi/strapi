@@ -120,6 +120,7 @@ const EditViewPage = () => {
 
     return transformDocument(schema, components)(form);
   }, [document, isCreatingDocument, isSingleType, schema, components]);
+
   if (hasError) {
     return <Page.Error />;
   }
