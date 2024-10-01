@@ -10,6 +10,7 @@ import toLower from 'lodash/toLower';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../hooks/useDataManager';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
@@ -64,7 +65,6 @@ import { getFormInputNames } from './utils/getFormInputNames';
 import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
 import type { AttributeType } from '../../types';
 import type { Internal } from '@strapi/types';
-import { styled } from 'styled-components';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
