@@ -30,13 +30,18 @@ const MenuContent = styled(Menu.Content)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const MenuItem = styled(Menu.Item)`
+const MenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
   & > span {
     width: 100%;
     display: flex;
     align-items: center;
     gap: ${({ theme }) => theme.spaces[3]};
     justify-content: space-between;
+  }
+
+  &:hover {
+    background: ${({ theme, $variant = 'neutral' }) =>
+      $variant === 'danger' ? theme.colors[`${$variant}100`] : 'neutral'};
   }
 `;
 
@@ -67,7 +72,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
             })}
           </MenuItem>
 
-          <MenuItem onSelect={handleLogout} color="danger600">
+          <MenuItem onSelect={handleLogout} color="danger600" $variant="danger">
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
               defaultMessage: 'Logout',
