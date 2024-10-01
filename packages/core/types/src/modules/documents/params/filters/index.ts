@@ -10,6 +10,7 @@ import type * as Params from '..';
 export { Operator };
 
 type IDKey = 'id';
+type DocumentIDKey = 'documentId';
 
 /**
  * Filter representation for nested attributes
@@ -29,12 +30,13 @@ type NestedAttributeCondition<
  */
 type AttributeCondition<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends IDKey | Schema.AttributeNames<TSchemaUID>,
+  TAttributeName extends IDKey | DocumentIDKey | Schema.AttributeNames<TSchemaUID>,
 > =
   MatchFirst<
     [
       // Special catch for manually added ID attributes
       [StrictEqual<TAttributeName, IDKey>, Params.Attribute.ID],
+      [StrictEqual<TAttributeName, DocumentIDKey>, Params.Attribute.DocumentID],
       [
         IsNotNever<TAttributeName>,
         // Get the filter attribute value for the given attribute
@@ -83,7 +85,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = {
         And<IsNotNever<TScalarKeys>, IsNotNever<TNestedKeys>>,
         // Strongly typed representation of the filter object tree
         {
-          [TIter in IDKey | TScalarKeys]?: AttributeCondition<TSchemaUID, TIter>;
+          [TIter in IDKey | DocumentIDKey | TScalarKeys]?: AttributeCondition<TSchemaUID, TIter>;
         } & {
           [TIter in TNestedKeys]?: NestedAttributeCondition<TSchemaUID, TIter>;
         },

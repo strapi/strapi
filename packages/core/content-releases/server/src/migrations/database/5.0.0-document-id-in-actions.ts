@@ -13,6 +13,13 @@ type Knex = Parameters<Migration['up']>[0];
 export const addEntryDocumentToReleaseActions: Migration = {
   name: 'content-releases::5.0.0-add-entry-document-id-to-release-actions',
   async up(trx: Knex, db: Database) {
+    // Check if the table exists
+    const hasTable = await trx.schema.hasTable('strapi_release_actions');
+
+    if (!hasTable) {
+      return;
+    }
+
     const hasPolymorphicColumn = await trx.schema.hasColumn('strapi_release_actions', 'target_id');
 
     // If user has PolymorphicColumn means that is coming from v4
