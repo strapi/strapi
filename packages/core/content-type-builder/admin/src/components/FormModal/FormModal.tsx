@@ -10,6 +10,7 @@ import toLower from 'lodash/toLower';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../hooks/useDataManager';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
@@ -67,6 +68,11 @@ import type { Internal } from '@strapi/types';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
+
+const FormComponent = styled.form`
+  overflow: auto;
+`;
+
 export const FormModal = () => {
   const {
     onCloseModal,
@@ -1008,7 +1014,7 @@ export const FormModal = () => {
           />
         )}
         {!isPickingAttribute && (
-          <form onSubmit={handleSubmit}>
+          <FormComponent onSubmit={handleSubmit}>
             <Modal.Body>
               <Tabs.Root
                 variant="simple"
@@ -1112,7 +1118,7 @@ export const FormModal = () => {
                 onClickFinish={handleClickFinish}
               />
             </Modal.Footer>
-          </form>
+          </FormComponent>
         )}
       </Modal.Content>
     </Modal.Root>
