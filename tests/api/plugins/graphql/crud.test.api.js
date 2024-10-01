@@ -346,7 +346,10 @@ describe('Test Graphql API End to End', () => {
       });
     });
 
-    test.skip('List posts with `createdBy` and `updatedBy`', async () => {
+    // This has not been enabled because it does not seem to work and the v5 docs says the feature is missing, but it should be added
+    test.todo(`updatedBy and createdBy are available with populateCreatorFields`);
+
+    test('`updatedBy` is not available', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
@@ -358,6 +361,7 @@ describe('Test Graphql API End to End', () => {
                   bigint
                   nullable
                   category
+                  updatedBy
                 }
               }
             }
@@ -365,13 +369,30 @@ describe('Test Graphql API End to End', () => {
         `,
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(400);
+    });
 
-      // no errors should be present in the response
-      expect(res.body.error).toBeUndefined();
+    test('`createdBy` is not available', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            posts_connection(start: 1) {
+              data {
+                documentId
+                attributes {
+                  name
+                  bigint
+                  nullable
+                  category
+                  createdBy
+                }
+              }
+            }
+          }
+        `,
+      });
 
-      // since the posts are created without AdminUser, it should return null
-      expect(res.body.data.posts_connection[0].createdBy).toBeNull();
+      expect(res.statusCode).toBe(400);
     });
 
     test.each([
