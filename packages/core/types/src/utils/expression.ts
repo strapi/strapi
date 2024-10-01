@@ -1,4 +1,4 @@
-import type { Array, Constants } from '.';
+import type { Array, Constants, Pretty } from '.';
 
 /**
  * The `IsNever` type checks if a given type {@link TValue} strictly equals to `never`.
@@ -535,5 +535,5 @@ export type Intersect<TValues extends unknown[]> = TValues extends [
   infer THead,
   ...infer TTail extends unknown[],
 ]
-  ? THead & If<Array.IsNotEmpty<TTail>, Intersect<TTail>, unknown>
+  ? Pretty<THead & If<Array.IsNotEmpty<TTail>, Intersect<TTail>, unknown>>
   : never;
