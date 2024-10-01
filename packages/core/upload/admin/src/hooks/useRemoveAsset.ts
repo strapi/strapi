@@ -6,7 +6,6 @@ import type { DeleteFile } from '../../../shared/contracts/files';
 import pluginId from '../pluginId';
 
 export const useRemoveAsset = (onSuccess: () => void) => {
-  console.log('useRemoveAsset onSuccess', onSuccess);
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();

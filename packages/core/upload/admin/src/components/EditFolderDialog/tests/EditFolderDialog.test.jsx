@@ -68,6 +68,13 @@ describe('EditFolderDialog', () => {
     jest.clearAllMocks();
   });
 
+  beforeEach(() => {
+    useEditFolder.mockReturnValue({
+      isLoading: false,
+      editFolder: jest.fn(),
+    });
+  });
+
   test('renders and matches the snapshot', () => {
     const { baseElement } = setup();
     expect(baseElement).toMatchSnapshot();
