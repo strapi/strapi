@@ -346,6 +346,9 @@ describe('Test Graphql API End to End', () => {
       });
     });
 
+    // This has not been enabled because it does not seem to work and the v5 docs says the feature is missing, but it should be added
+    test.todo(`updatedBy and createdBy are available with populateCreatorFields`);
+
     test('`updatedBy` is not available', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
