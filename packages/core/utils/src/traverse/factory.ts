@@ -15,9 +15,17 @@ export interface Path {
   attribute: string | null;
 }
 
-export interface TraverseOptions {
-  path?: Path;
+export interface Parent {
+  attribute?: Attribute;
+  key: string | null;
+  path: Path;
   schema: Model;
+}
+
+export interface TraverseOptions {
+  schema: Model;
+  path?: Path;
+  parent?: Parent;
   getModel(uid: string): Model;
 }
 
@@ -28,6 +36,7 @@ export interface VisitorOptions {
   key: string;
   attribute?: AnyAttribute;
   path: Path;
+  parent?: Parent;
   getModel(uid: string): Model;
 }
 
@@ -91,8 +100,10 @@ interface Context<AttributeType = Attribute> {
   path: Path;
   data: unknown;
   visitor: Visitor;
+  parent?: Parent;
   getModel(uid: string): Model;
 }
+
 interface State {
   parsers: Parser[];
   interceptors: Interceptor[];
@@ -103,7 +114,7 @@ interface State {
   };
 }
 
-const DEFAULT_PATH = { raw: null, attribute: null };
+const DEFAULT_PATH = { raw: null, attribute: null } satisfies Path;
 
 export default () => {
   const state: State = {
@@ -117,7 +128,7 @@ export default () => {
   };
 
   const traverse: Traverse = async (visitor, options, data) => {
-    const { path = DEFAULT_PATH, schema, getModel } = options ?? {};
+    const { path = DEFAULT_PATH, parent, schema, getModel } = options ?? {};
 
     // interceptors
     for (const { predicate, handler } of state.interceptors) {
@@ -159,6 +170,7 @@ export default () => {
         path: newPath,
         data: out,
         getModel,
+        parent,
       };
 
       const transformUtils: TransformUtils = {
@@ -184,6 +196,7 @@ export default () => {
         data: out,
         visitor,
         getModel,
+        parent,
       });
 
       // ignore
