@@ -35,8 +35,8 @@ export type Media<
 
 export type MediaValue<TMultiple extends Constants.BooleanValue = Constants.False> = If<
   TMultiple,
-  ContentType<'plugin::upload.file'>[],
-  ContentType<'plugin::upload.file'>
+  any[],
+  any
 >;
 
 export type GetMediaValue<TAttribute extends Attribute.Attribute> =
