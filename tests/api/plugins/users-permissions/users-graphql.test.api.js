@@ -5,7 +5,7 @@ const { createRequest, createAuthRequest } = require('api-tests/request');
 const { createTestBuilder } = require('api-tests/builder');
 
 // Test a simple default API with no relations
-describe.skip('Simple Test GraphQL Users API End to End', () => {
+describe('Simple Test GraphQL Users API End to End', () => {
   let strapi;
   let rq;
   let graphqlQuery;
@@ -189,7 +189,7 @@ describe.skip('Simple Test GraphQL Users API End to End', () => {
 });
 
 // Test with attributes such as components, relations..
-describe.skip('Advanced Test GraphQL Users API End to End', () => {
+describe('Advanced Test GraphQL Users API End to End', () => {
   const builder = createTestBuilder();
 
   let strapi;
@@ -335,7 +335,12 @@ describe.skip('Advanced Test GraphQL Users API End to End', () => {
     await restart();
   });
 
-  describe('Test register and login with component', () => {
+  /**
+   * This is no longer allowed for security reasons
+   * We only have register.allowedFields to allow fields to be submitted on registration
+   * TODO: add update.allowedFields feature and re-enable
+   *  */
+  describe.skip('Test register and login with component', () => {
     test('Register a user', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `

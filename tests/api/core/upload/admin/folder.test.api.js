@@ -39,7 +39,7 @@ const createAFile = async (parent = null) => {
   return res.body[0];
 };
 
-describe.skip('Folder', () => {
+describe('Folder', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -274,7 +274,7 @@ describe.skip('Folder', () => {
       });
 
       expect(res.body.data).toMatchObject({
-        name: 'new name',
+        name: 'new name folder',
         path: folder.path,
       });
       data.folders.push(res.body.data);

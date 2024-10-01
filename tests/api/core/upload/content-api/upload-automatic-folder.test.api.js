@@ -165,13 +165,13 @@ describe('Uploads folder', () => {
     });
   });
 
-  describe.skip('Attach to an entity', () => {
+  describe('Attach to an entity', () => {
     beforeAll(async () => {
-      const res = await rq({
+      const res = await rqAdmin({
+        url: '/content-manager/collection-types/api::dog.dog',
         method: 'POST',
-        url: '/dogs',
-        formData: {
-          data: '{}',
+        body: {
+          name: 'dog',
         },
       });
       data.dogs.push(res.body.data);
@@ -190,7 +190,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
 
       const { body: file } = await rqAdmin({
         method: 'GET',
@@ -199,7 +199,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'API Uploads (2)',
+          name: 'API Uploads (1)',
           pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
@@ -229,7 +229,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
 
       const { body: file } = await rqAdmin({
         method: 'GET',
@@ -238,7 +238,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'API Uploads (2)',
+          name: 'API Uploads (1)',
           pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
@@ -252,7 +252,7 @@ describe('Uploads folder', () => {
         method: 'POST',
         url: '/upload/actions/bulk-delete',
         body: {
-          folderIds: [uploadFolder.id],
+          folderIds: [uploadFolder.documentId],
         },
       });
 
@@ -260,7 +260,7 @@ describe('Uploads folder', () => {
         method: 'POST',
         url: '/upload/folders',
         body: {
-          name: 'API Uploads (2)',
+          name: 'API Uploads (1)',
           parent: null,
         },
       });
@@ -276,7 +276,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
 
       const { body: file } = await rqAdmin({
         method: 'GET',
@@ -285,7 +285,7 @@ describe('Uploads folder', () => {
 
       expect(file).toMatchObject({
         folder: {
-          name: 'API Uploads (3)',
+          name: 'API Uploads (1)',
           pathId: expect.any(Number),
         },
         folderPath: `/${file.folder.pathId}`,
