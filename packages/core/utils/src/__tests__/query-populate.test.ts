@@ -144,11 +144,6 @@ describe('traverseQueryPopulate', () => {
           relation: 'oneToOne',
           target: 'api::address.address',
         },
-        some: {
-          type: 'relation',
-          relation: 'ManyToMany',
-          target: 'api::some.some',
-        },
       },
     } as const;
 
