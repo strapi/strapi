@@ -100,7 +100,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                       aria-label={labelValue}
                     >
                       <NavLink.Icon label={labelValue}>
-                        <LinkIcon width="20px" height="20px" fill="neutral500" />
+                        <LinkIcon width="20" height="20" fill="neutral500" />
                       </NavLink.Icon>
                       {badgeContentLock ? (
                         <NavLinkBadgeLock
