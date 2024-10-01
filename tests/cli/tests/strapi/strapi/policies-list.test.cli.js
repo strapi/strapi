@@ -4,8 +4,7 @@ const coffee = require('coffee');
 
 const utils = require('../../../utils');
 
-// TODO: Fix expected outputs
-describe.skip('policies:list', () => {
+describe('policies:list', () => {
   let appPath;
 
   beforeAll(async () => {
@@ -23,19 +22,17 @@ describe.skip('policies:list', () => {
     const output = stdout.trim();
 
     const expected = `
-      ┌───────────────────────────────────────────────┐
-      │ Name                                          │
-      ├───────────────────────────────────────────────┤
-      │ admin::isAuthenticatedAdmin                   │
-      ├───────────────────────────────────────────────┤
-      │ admin::hasPermissions                         │
-      ├───────────────────────────────────────────────┤
-      │ admin::isTelemetryEnabled                     │
-      ├───────────────────────────────────────────────┤
-      │ plugin::content-manager.has-draft-and-publish │
-      ├───────────────────────────────────────────────┤
-      │ plugin::content-manager.hasPermissions        │
-      └───────────────────────────────────────────────┘
+┌────────────────────────────────────────┐
+│ Name                                   │
+├────────────────────────────────────────┤
+│ plugin::content-manager.hasPermissions │
+├────────────────────────────────────────┤
+│ admin::isAuthenticatedAdmin            │
+├────────────────────────────────────────┤
+│ admin::hasPermissions                  │
+├────────────────────────────────────────┤
+│ admin::isTelemetryEnabled              │
+└────────────────────────────────────────┘
     `;
 
     utils.helpers.expectConsoleLinesToInclude(output, expected);
