@@ -97,7 +97,7 @@ type CountClause = { count?: boolean };
 // TODO: Remove support in v6
 type DeprecatedSharedPopulateClauseForPolymorphicLinks = {
   /**
-   * Allows the population of all first level links in a polymorphic link by using a wildcard.
+   * Enables the population of all first-level links using a wildcard.
    *
    * @deprecated The support is going to be dropped in Strapi v6
    */
