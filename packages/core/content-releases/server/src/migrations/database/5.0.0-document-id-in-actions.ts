@@ -14,19 +14,10 @@ export const addEntryDocumentToReleaseActions: Migration = {
   name: 'content-releases::5.0.0-add-entry-document-id-to-release-actions',
   async up(trx: Knex, db: Database) {
     // Check if the table exists
-    const tableExists = await trx.schema.hasTable('strapi_release_actions');
+    const hasTable = await trx.schema.hasTable('strapi_release_actions');
 
-    if (!tableExists) {
-      // Create the table if it doesn't exist
-      await trx.schema.createTable('strapi_release_actions', (table) => {
-        table.increments('id').primary();
-        table.string('type');
-        table.string('content_type');
-        table.string('entry_document_id');
-        table.string('locale');
-        table.boolean('is_entry_valid');
-        table.integer('release_id').unsigned();
-      });
+    if (!hasTable) {
+      return;
     }
 
     const hasPolymorphicColumn = await trx.schema.hasColumn('strapi_release_actions', 'target_id');
