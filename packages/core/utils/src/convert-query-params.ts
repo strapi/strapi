@@ -398,7 +398,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          * TODO: This approach should be marked as deprecated and replaced with a more robust solution in future versions.
          *       e.g. Using glob patterns in the fragment API.
          */
-        if ('populate' in subPopulate && subPopulate['populate'] !== '*') {
+        if ('populate' in subPopulate && subPopulate.populate !== '*') {
           throw new Error(
             `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
               `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +

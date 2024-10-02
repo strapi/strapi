@@ -1,4 +1,3 @@
-import type { ContentType } from '../../../data';
 import type { Constants, If, Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
