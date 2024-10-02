@@ -129,7 +129,7 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = [
       >,
       // Populatable keys with a target
       | If<IsNotNever<TKeysWithTarget>, PopulateClause<TSchemaUID, TKeysWithTarget>>
-      // Populatable keys with either zero or multiple target
+      // Populatable keys with either zero or multiple targets
       | If<
           IsNotNever<TKeysWithoutTarget>,
           {
