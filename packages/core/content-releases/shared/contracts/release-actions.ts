@@ -116,7 +116,7 @@ export declare namespace GetReleaseActions {
       pagination: Pagination;
       contentTypes: Record<
         Struct.ContentTypeSchema['uid'],
-        Struct.ContentTypeSchema & { requiredStageToPublish?: Stage }
+        Struct.ContentTypeSchema & { stageRequiredToPublish?: Stage }
       >;
       components: Record<Struct.ComponentSchema['uid'], Struct.ComponentSchema>;
     };

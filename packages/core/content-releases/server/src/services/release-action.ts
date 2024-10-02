@@ -1,6 +1,6 @@
 import { errors, async } from '@strapi/utils';
 
-import type { Core, Internal, Struct, Modules } from '@strapi/types';
+import type { Core, Internal, Modules } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
@@ -245,13 +245,9 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const workflowsService = strapi.plugin('review-workflows').service('workflows');
 
-      const contentTypeModelsMap = await contentTypeUids.reduce(
+      const contentTypeModelsMap = await async.reduce(contentTypeUids)(
         async (
-          accPromise: Promise<{
-            [key: ReleaseAction['contentType']]: Struct.ContentTypeSchema & {
-              requiredStageToPublish?: number;
-            };
-          }>,
+          accPromise: Promise<GetReleaseActions.Response['meta']['contentTypes']>,
           contentTypeUid: ReleaseAction['contentType']
         ) => {
           const acc = await accPromise;
@@ -263,12 +259,12 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           acc[contentTypeUid] = {
             ...contentTypeModel,
-            requiredStageToPublish: workflow?.stageRequiredToPublish,
+            stageRequiredToPublish: workflow?.stageRequiredToPublish,
           };
 
           return acc;
         },
-        Promise.resolve({})
+        {}
       );
 
       return contentTypeModelsMap;

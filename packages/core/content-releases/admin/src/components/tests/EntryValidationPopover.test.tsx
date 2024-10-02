@@ -17,7 +17,7 @@ describe('EntryValidationPopover', () => {
       kind: 'collectionType',
       uid: 'api::article.article',
       options: { reviewWorkflows: true },
-      requiredStageToPublish: { id: 'stage1', name: 'Ready' },
+      stageRequiredToPublish: { id: 'stage1', name: 'Ready' },
     },
     entry: {
       documentId: '1',

@@ -31,7 +31,7 @@ const StyledPopoverFlex = styled(Flex)`
 
 interface EntryValidationPopoverProps {
   action: ReleaseAction['type'];
-  schema?: Struct.ContentTypeSchema & { requiredStageToPublish?: Stage };
+  schema?: Struct.ContentTypeSchema & { stageRequiredToPublish?: Stage };
   entry: ReleaseActionEntry;
   status: ReleaseAction['status'];
 }
@@ -44,105 +44,104 @@ interface ValidationStatusProps {
   entryStage?: Stage;
 }
 
-const EntryStatusTrigger = React.forwardRef<HTMLButtonElement, ValidationStatusProps>(
-  ({ action, status, hasErrors, requiredStage, entryStage }, ref) => {
-    const { formatMessage } = useIntl();
+const EntryStatusTrigger = ({
+  action,
+  status,
+  hasErrors,
+  requiredStage,
+  entryStage,
+}: ValidationStatusProps) => {
+  const { formatMessage } = useIntl();
 
-    if (action === 'publish') {
-      if (hasErrors || (requiredStage && requiredStage.id !== entryStage?.id)) {
-        return (
-          <Popover.Trigger>
-            <Button
-              variant="ghost"
-              startIcon={<CrossCircle fill="danger600" />}
-              endIcon={<CaretDown />}
-              ref={ref}
-            >
-              <Typography textColor="danger600" variant="omega" fontWeight="bold">
-                {formatMessage({
-                  id: 'content-releases.pages.ReleaseDetails.entry-validation.not-ready',
-                  defaultMessage: 'Not ready to publish',
-                })}
-              </Typography>
-            </Button>
-          </Popover.Trigger>
-        );
-      } else if (status === 'draft') {
-        return (
-          <Popover.Trigger>
-            <Button
-              variant="ghost"
-              startIcon={<CheckCircle fill="success600" />}
-              endIcon={<CaretDown />}
-              ref={ref}
-            >
-              <Typography textColor="success600" variant="omega" fontWeight="bold">
-                {formatMessage({
-                  id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
-                  defaultMessage: 'Ready to publish',
-                })}
-              </Typography>
-            </Button>
-          </Popover.Trigger>
-        );
-      } else if (status === 'modified') {
-        return (
-          <Popover.Trigger>
-            <Button
-              variant="ghost"
-              startIcon={<ArrowsCounterClockwise fill="alternative600" />}
-              endIcon={<CaretDown />}
-              ref={ref}
-            >
-              <Typography variant="omega" fontWeight="bold" textColor="alternative600">
-                {formatMessage({
-                  id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
-                  defaultMessage: 'Ready to publish changes',
-                })}
-              </Typography>
-            </Button>
-          </Popover.Trigger>
-        );
-      } else {
-        return (
-          <Popover.Trigger>
-            <Button
-              variant="ghost"
-              startIcon={<CheckCircle fill="success600" />}
-              endIcon={<CaretDown />}
-              ref={ref}
-            >
-              <Typography textColor="success600" variant="omega" fontWeight="bold">
-                {formatMessage({
-                  id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
-                  defaultMessage: 'Already published',
-                })}
-              </Typography>
-            </Button>
-          </Popover.Trigger>
-        );
-      }
-    } else {
+  if (action === 'publish') {
+    if (hasErrors || (requiredStage && requiredStage.id !== entryStage?.id)) {
       return (
         <Popover.Trigger>
           <Button
             variant="ghost"
-            startIcon={<CheckCircle fill="success600" />}
+            startIcon={<CrossCircle fill="danger600" />}
             endIcon={<CaretDown />}
-            ref={ref}
           >
-            <Typography textColor="success600" variant="omega" fontWeight="bold">
+            <Typography textColor="danger600" variant="omega" fontWeight="bold">
               {formatMessage({
-                id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
-                defaultMessage: 'Already unpublished',
+                id: 'content-releases.pages.ReleaseDetails.entry-validation.not-ready',
+                defaultMessage: 'Not ready to publish',
               })}
             </Typography>
           </Button>
         </Popover.Trigger>
       );
     }
+
+    if (status === 'draft') {
+      return (
+        <Popover.Trigger>
+          <Button
+            variant="ghost"
+            startIcon={<CheckCircle fill="success600" />}
+            endIcon={<CaretDown />}
+          >
+            <Typography textColor="success600" variant="omega" fontWeight="bold">
+              {formatMessage({
+                id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
+                defaultMessage: 'Ready to publish',
+              })}
+            </Typography>
+          </Button>
+        </Popover.Trigger>
+      );
+    }
+
+    if (status === 'modified') {
+      return (
+        <Popover.Trigger>
+          <Button
+            variant="ghost"
+            startIcon={<ArrowsCounterClockwise fill="alternative600" />}
+            endIcon={<CaretDown />}
+          >
+            <Typography variant="omega" fontWeight="bold" textColor="alternative600">
+              {formatMessage({
+                id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
+                defaultMessage: 'Ready to publish changes',
+              })}
+            </Typography>
+          </Button>
+        </Popover.Trigger>
+      );
+    }
+
+    return (
+      <Popover.Trigger>
+        <Button
+          variant="ghost"
+          startIcon={<CheckCircle fill="success600" />}
+          endIcon={<CaretDown />}
+        >
+          <Typography textColor="success600" variant="omega" fontWeight="bold">
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
+              defaultMessage: 'Already published',
+            })}
+          </Typography>
+        </Button>
+      </Popover.Trigger>
+    );
   }
-);
+
+  return (
+    <Popover.Trigger>
+      <Button variant="ghost" startIcon={<CheckCircle fill="success600" />} endIcon={<CaretDown />}>
+        <Typography textColor="success600" variant="omega" fontWeight="bold">
+          {formatMessage({
+            id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
+            defaultMessage: 'Already unpublished',
+          })}
+        </Typography>
+      </Button>
+    </Popover.Trigger>
+  );
+};
 
 interface FieldsValidationProps {
   hasErrors: boolean;
@@ -174,7 +173,7 @@ const FieldsValidation = ({
         </Typography>
         {hasErrors ? <CrossCircle fill="danger600" /> : <CheckCircle fill="success600" />}
       </Flex>
-      <Typography width="100%">
+      <Typography width="100%" textColor="neutral600">
         {hasErrors
           ? formatMessage(
               {
@@ -264,15 +263,23 @@ const getReviewStageMessage = ({
       }
     );
   }
-  return formatMessage(
-    {
-      id: 'content-releases.pages.ReleaseDetails.entry-validation.review-stage.ready',
-      defaultMessage: 'This entry is at the required stage for publishing. ({stageName})',
-    },
-    {
-      stageName: requiredStage?.name ?? '',
-    }
-  );
+
+  if (requiredStage && requiredStage.id === entryStage?.id) {
+    return formatMessage(
+      {
+        id: 'content-releases.pages.ReleaseDetails.entry-validation.review-stage.ready',
+        defaultMessage: 'This entry is at the required stage for publishing. ({stageName})',
+      },
+      {
+        stageName: requiredStage?.name ?? '',
+      }
+    );
+  }
+
+  return formatMessage({
+    id: 'content-releases.pages.ReleaseDetails.entry-validation.review-stage.stage-not-required',
+    defaultMessage: 'No required stage for publication',
+  });
 };
 
 const ReviewStageValidation = ({
@@ -303,7 +310,7 @@ const ReviewStageValidation = ({
         </Typography>
         {Icon}
       </Flex>
-      <Typography>
+      <Typography textColor="neutral600">
         {getReviewStageMessage({
           contentTypeHasReviewWorkflow,
           requiredStage,
@@ -338,7 +345,7 @@ export const EntryValidationPopover = ({
 
   // Entry stage
   const contentTypeHasReviewWorkflow = schema?.options?.reviewWorkflows ?? false;
-  const requiredStage = schema?.requiredStageToPublish;
+  const requiredStage = schema?.stageRequiredToPublish;
   const entryStage = entry.strapi_stage;
 
   if (isLoading) {
