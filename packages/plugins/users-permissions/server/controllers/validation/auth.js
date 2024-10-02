@@ -7,7 +7,7 @@ const callbackSchema = yup.object({
   password: yup.string().required(),
 });
 
-const registerSchema = (config) =>
+const createRegisterSchema = (config) =>
   yup.object({
     email: yup.string().email().required(),
     username: yup.string().required(),
@@ -43,7 +43,7 @@ const forgotPasswordSchema = yup
   })
   .noUnknown();
 
-const resetPasswordSchema = (config) =>
+const createResetPasswordSchema = (config) =>
   yup
     .object({
       password: yup
@@ -72,7 +72,7 @@ const resetPasswordSchema = (config) =>
     })
     .noUnknown();
 
-const changePasswordSchema = (config) =>
+const createChangePasswordSchema = (config) =>
   yup
     .object({
       password: yup
@@ -101,10 +101,13 @@ const changePasswordSchema = (config) =>
 
 module.exports = {
   validateCallbackBody: validateYupSchema(callbackSchema),
-  validateRegisterBody: (config) => validateYupSchema(registerSchema(config)),
+  validateRegisterBody: (payload, config) =>
+    validateYupSchema(createRegisterSchema(config))(payload),
   validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationSchema),
   validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
   validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
-  validateResetPasswordBody: (config) => validateYupSchema(resetPasswordSchema(config)),
-  validateChangePasswordBody: (config) => validateYupSchema(changePasswordSchema(config)),
+  validateResetPasswordBody: (payload, config) =>
+    validateYupSchema(createResetPasswordSchema(config))(payload),
+  validateChangePasswordBody: (payload, config) =>
+    validateYupSchema(createChangePasswordSchema(config))(payload),
 };

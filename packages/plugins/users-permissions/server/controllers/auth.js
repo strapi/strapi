@@ -116,8 +116,9 @@ module.exports = ({ strapi }) => ({
 
     const validations = strapi.config.get('plugin::users-permissions.validationRules');
 
-    const { currentPassword, password } = await validateChangePasswordBody(validations)(
-      ctx.request.body
+    const { currentPassword, password } = await validateChangePasswordBody(
+      ctx.request.body,
+      validations
     );
 
     const user = await strapi.db
@@ -145,8 +146,9 @@ module.exports = ({ strapi }) => ({
   async resetPassword(ctx) {
     const validations = strapi.config.get('plugin::users-permissions.validationRules');
 
-    const { password, passwordConfirmation, code } = await validateResetPasswordBody(validations)(
-      ctx.request.body
+    const { password, passwordConfirmation, code } = await validateResetPasswordBody(
+      ctx.request.body,
+      validations
     );
 
     if (password !== passwordConfirmation) {
@@ -323,7 +325,7 @@ module.exports = ({ strapi }) => ({
 
     const validations = strapi.config.get('plugin::users-permissions.validationRules');
 
-    await validateRegisterBody(validations)(params);
+    await validateRegisterBody(params, validations);
 
     const role = await strapi.db
       .query('plugin::users-permissions.role')
