@@ -20,17 +20,12 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   //   return {};
   // }
 
-  const config = getService(strapi, 'preview-config');
-
-  if (!config.isEnabled()) {
-    return {};
-  }
-
   return {
     bootstrap() {
       // eslint-disable-next-line no-console -- TODO remove when we have real functionality
       console.log('Bootstrapping preview server');
 
+      const config = getService(strapi, 'preview-config');
       config.validate();
     },
     routes,
