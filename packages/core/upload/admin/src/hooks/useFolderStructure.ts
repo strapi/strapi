@@ -3,11 +3,14 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getTrad } from '../utils';
+// TODO: replace this import with the import from the index file of the utils folder when it will be migrated to TS
+import getTrad from '../utils/getTrad';
 
 import { recursiveRenameKeys } from './utils/rename-keys';
 
-const FIELD_MAPPING = {
+import { GetFolderStructure, FolderNode } from '../../../shared/contracts/folders';
+
+const FIELD_MAPPING: Record<string, string> = {
   name: 'label',
   id: 'value',
 };
@@ -19,9 +22,11 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
   const fetchFolderStructure = async () => {
     const {
       data: { data },
-    } = await get('/upload/folder-structure');
+    }: GetFolderStructure.Response = await get('/upload/folder-structure');
 
-    const children = data.map((f) => recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key));
+    const children = data.map((f: FolderNode) =>
+      recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key)
+    );
 
     return [
       {

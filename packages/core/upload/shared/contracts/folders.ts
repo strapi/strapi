@@ -22,7 +22,7 @@ export interface Folder {
   files?: File[];
 }
 
-type FolderNode = Partial<Folder> & {
+export type FolderNode = Partial<Folder> & {
   children: FolderNode[];
 };
 
@@ -98,7 +98,7 @@ export declare namespace UpdateFolder {
  *
  * Return the structure of a folder.
  */
-export declare namespace FolderStructureNamespace {
+export declare namespace GetFolderStructure {
   export interface Request {
     query?: {};
   }
