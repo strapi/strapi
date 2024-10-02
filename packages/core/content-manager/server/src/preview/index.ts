@@ -4,6 +4,7 @@ import { FEATURE_ID } from './constants';
 import { routes } from './routes';
 import { controllers } from './controllers';
 import { services } from './services';
+import { getService } from './utils';
 
 /**
  * Check once if the feature is enabled before loading it,
@@ -19,16 +20,17 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   //   return {};
   // }
 
+  const config = getService(strapi, 'preview-config');
+
+  if (!config.isEnabled()) {
+    return {};
+  }
+
   return {
     bootstrap() {
       // eslint-disable-next-line no-console -- TODO remove when we have real functionality
       console.log('Bootstrapping preview server');
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- TODO: Remove when implemented
-      const config = strapi.config.get('admin.preview');
-
-      // TODO: Validation
-      // TODO: Disable feature if config is not valid
+      config.validate();
     },
     routes,
     controllers,
