@@ -659,6 +659,7 @@
   "global.enabled": "Включено",
   "global.finish": "Готово",
   "global.fullname": "{firstname} {lastname}",
+  "global.localeToggle.label": "Выбор языка интерфейса",
   "global.marketplace": "Маркет",
   "global.name": "Имя",
   "global.none": "Нет",
