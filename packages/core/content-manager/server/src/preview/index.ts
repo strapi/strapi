@@ -30,6 +30,7 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
     bootstrap() {
       // eslint-disable-next-line no-console -- TODO remove when we have real functionality
       console.log('Bootstrapping preview server');
+
       config.validate();
     },
     routes,

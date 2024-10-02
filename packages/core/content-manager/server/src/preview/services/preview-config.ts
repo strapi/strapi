@@ -56,7 +56,8 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
      */
     getPreviewHandler() {
       const config = strapi.config.get('admin.preview') as PreviewConfig;
-      return config?.config?.handler;
+      const emptyHandler = () => {};
+      return config?.config?.handler || emptyHandler;
     },
   };
 };
