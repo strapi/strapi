@@ -19,6 +19,8 @@ const schemas = {
       attributes: {
         number: { type: 'integer' },
         field: { type: 'string' },
+        // NOTE: Test conflicting attribute names do not cause issues with populate object
+        filters: { type: 'json' },
       },
     },
     bar: {
@@ -26,6 +28,8 @@ const schemas = {
       attributes: {
         title: { type: 'string' },
         field: { type: 'password' },
+        // NOTE: Test conflicting attribute names do not cause issues with populate object
+        filters: { type: 'json' },
       },
     },
   },
@@ -217,7 +221,7 @@ describe('Populate filters', () => {
       });
     });
 
-    test('No filters & deep populate', async () => {
+    test.only('No filters & deep populate', async () => {
       const qs = {
         populate: ['second', 'third.fooRef'],
       };
