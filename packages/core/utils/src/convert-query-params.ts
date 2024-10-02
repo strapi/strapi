@@ -394,9 +394,6 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
          * Validate nested population queries in the context of a polymorphic attribute (dynamic zone, morph relation).
          *
          * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
-         *
-         * TODO: This approach should be marked as deprecated and replaced with a more robust solution in future versions.
-         *       e.g. Using glob patterns in the fragment API.
          */
         if ('populate' in subPopulate && subPopulate.populate !== '*') {
           throw new Error(
