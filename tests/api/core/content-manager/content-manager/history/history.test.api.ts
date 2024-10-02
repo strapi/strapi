@@ -689,7 +689,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(restoredDocument['images']).toHaveLength(1);
     });
 
-    test.only('Restores a version with deleted components', async () => {
+    test('Restores a version with deleted components', async () => {
       // Create a document that contains components, then delete the components and make an update
       const currentDocument = await createEntry({
         uid: collectionTypeUid,
