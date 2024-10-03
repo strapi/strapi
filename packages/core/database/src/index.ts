@@ -52,7 +52,7 @@ const afterCreate =
   };
 
 class Database {
-  connection: Knex;
+  #connection?: Knex;
 
   dialect: Dialect;
 
@@ -85,9 +85,11 @@ class Database {
 
     this.metadata = createMetadata([]);
 
-    this.connection = createConnection(this.config.connection, {
-      pool: { afterCreate: afterCreate(this) },
-    });
+    // for object connections, create Knex connection synchronously
+    if (typeof this.config.connection.connection !== 'function') {
+      debug('Creating knex connection');
+      this.#connection = this.#createConnection(this.config.connection);
+    }
 
     this.schema = createSchemaProvider(this);
 
@@ -99,24 +101,21 @@ class Database {
     this.logger = config.logger ?? console;
   }
 
-  async init({ models }: { models: Model[] }) {
-    /**
-     * TODO v6: implement a cleaner solution that will involve breaking changes to db constructor
-     *
-     * if the user passed in a connection function, we need to resolve it first
-     * and recreate the connection, otherwise accessing this.connection.anyProperty will not work
-     *
-     * Note that even if it was already created in the constructor, the connection method will
-     * not be called at this point by Strapi or Knex, so it shouldn't have any effects to do this
-     *  */
-    if (typeof this.config.connection.connection === 'function') {
-      debug('User config.connection is a function; resolving and recreating knex connection');
-      this.config.connection.connection = await this.config.connection.connection();
+  #createConnection(connection: Knex.Config) {
+    return createConnection(connection, {
+      pool: { afterCreate: afterCreate(this) },
+    });
+  }
 
-      await this.connection.destroy();
-      this.connection = createConnection(this.config.connection, {
-        pool: { afterCreate: afterCreate(this) },
-      });
+  async init({ models }: { models: Model[] }) {
+    // for function connections, create Knex connection asynchronously
+    if (typeof this.config.connection.connection === 'function') {
+      debug('Creating knex connection from function');
+      const conn = {
+        ...this.config.connection,
+        connection: await this.config.connection.connection(),
+      };
+      this.#connection = this.#createConnection(conn);
     }
 
     this.metadata.loadModels(models);
@@ -125,6 +124,14 @@ class Database {
     debug('Database initialized');
 
     return this;
+  }
+
+  get connection() {
+    if (this.#connection === undefined) {
+      throw new Error('Database connection has not yet been initialized');
+    }
+
+    return this.#connection;
   }
 
   query(uid: string) {
