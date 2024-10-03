@@ -145,22 +145,6 @@ describe('i18n - Content API', () => {
       expect(body.data).toHaveLength(1);
       expect(body.data[0]).toMatchObject(transformToRESTResource(data.categories[1]));
     });
-
-    test.skip('Can filter on all locale', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/categories?locale=all',
-      });
-
-      const { statusCode, body } = res;
-
-      expect(statusCode).toBe(200);
-      expect(Array.isArray(body.data)).toBe(true);
-      expect(body.data).toHaveLength(2);
-      expect(body.data).toEqual(
-        expect.arrayContaining(data.categories.map((category) => transformToRESTResource(category)))
-      );
-    });
   });
 
   describe('Test single type', () => {
@@ -186,19 +170,6 @@ describe('i18n - Content API', () => {
 
       expect(statusCode).toBe(200);
       expect(body.data).toMatchObject(transformToRESTResource(data.homepages[1]));
-    });
-
-    // TODO V5: Decide if we want to support locale=all
-    test.skip('Can filter on all locale', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/homepage?locale=all',
-      });
-
-      const { statusCode, body } = res;
-
-      expect(statusCode).toBe(200);
-      expect(body.data).toMatchObject(transformToRESTResource(data.homepages));
     });
   });
 });

@@ -112,7 +112,7 @@ const Onboarding = () => {
                   width={6}
                   height={6}
                 >
-                  <Play fill="buttonNeutral0" width="1.2rem" height="1.2rem" />
+                  <Play fill="buttonNeutral0" width="12" height="12" />
                 </IconWrapper>
               </Box>
               <Flex direction="column" alignItems="start" paddingLeft={4}>
