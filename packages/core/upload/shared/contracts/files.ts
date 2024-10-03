@@ -11,7 +11,7 @@ type ComparisonOperators<T = string> = {
 
 // Abstract type for filter conditions with dynamic field names
 export type FilterCondition<T = string> = {
-  [field: string]: ComparisonOperators<T>; // Field names are dynamic and values are comparison operators
+  [field: string]: T | ComparisonOperators<T>; // Field names are dynamic and values are comparison operators
 };
 
 // Abstract type for filters where the logical operator (like $and) is a generic string
