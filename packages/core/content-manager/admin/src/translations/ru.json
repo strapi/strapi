@@ -223,5 +223,6 @@
   "content-manager.success.record.publishing": "Публикуем...",
   "content-manager.success.record.save": "Сохранено",
   "content-manager.success.record.unpublish": "Не опубликовано",
-  "content-manager.utils.data-loaded": "{number, plural, =0{# записей} one{# запись} few{# записи} many {# записей}} успешно загружено"
+  "content-manager.utils.data-loaded": "{number, plural, =0{# записей} one{# запись} few{# записи} many {# записей}} успешно загружено",
+  "plugin.name": "Редактор контента"
 }
