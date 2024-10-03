@@ -6,7 +6,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
-import { useBulkRemove } from '../../../../../hooks/useBulkRemove';
 import { BulkActions } from '../BulkActions';
 
 jest.mock('../../../../../hooks/useBulkRemove');
@@ -41,13 +40,6 @@ const setup = (
 };
 
 describe('BulkActions', () => {
-  beforeEach(() => {
-    useBulkRemove.mockReturnValue({
-      isLoading: false,
-      error: null,
-      remove: jest.fn(),
-    });
-  });
   afterEach(() => {
     jest.clearAllMocks();
   });

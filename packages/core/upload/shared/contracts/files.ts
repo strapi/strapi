@@ -2,12 +2,28 @@ import { errors } from '@strapi/utils';
 
 type SortOrder = 'ASC' | 'DESC';
 
-type SortKey = 'createdAt' | 'name';
+type SortKey = 'createdAt' | 'name' | 'updatedAt';
+
+// Abstract type for comparison operators where the keys are generic strings
+type ComparisonOperators<T = string> = {
+  [operator: string]: T; // Any string can be used as an operator key
+};
+
+// Abstract type for filter conditions with dynamic field names
+export type FilterCondition<T = string> = {
+  [field: string]: ComparisonOperators<T>; // Field names are dynamic and values are comparison operators
+};
+
+// Abstract type for filters where the logical operator (like $and) is a generic string
+type Filters<T = string> = {
+  [logicOperator: string]: FilterCondition<T>[]; // Logical operator key is a generic string
+};
 
 export type Query = {
   _q?: string;
   folderPath?: string;
   folder?:
+    | null
     | number
     | {
         id: number;
@@ -20,7 +36,8 @@ export type Query = {
       };
   pageSize?: string | number;
   sort?: `${SortKey}:${SortOrder}`;
-  filters?: Record<string, unknown>;
+  filters?: Filters;
+  state?: boolean;
 };
 
 export interface File {
