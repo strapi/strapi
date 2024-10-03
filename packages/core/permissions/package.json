@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "5.0.2-beta.0",
+  "version": "5.0.2",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
