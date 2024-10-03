@@ -650,6 +650,7 @@
   "components.popUpWarning.button.confirm": "Да, подтвердить",
   "components.popUpWarning.message": "Вы уверены, что хотите удалить это?",
   "components.popUpWarning.title": "Пожалуйста, подтвердите",
+  "containers.list.displayedFields": "Отображаемые поля",
   "dark": "Тёмная",
   "form.button.continue": "Продолжить",
   "form.button.done": "Выполнено",
