@@ -36,13 +36,6 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const handler = this.getPreviewHandler();
 
-      // If feature is enabled, handler must be provided
-      if (!handler) {
-        throw new errors.ValidationError(
-          'Static Preview configuration is invalid. You must provide a handler function'
-        );
-      }
-
       // Handler must be a function
       if (typeof handler !== 'function') {
         throw new errors.ValidationError(
