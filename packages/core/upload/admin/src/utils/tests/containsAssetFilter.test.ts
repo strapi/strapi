@@ -14,7 +14,7 @@ describe('containsAssetFilter', () => {
         filters: {
           $and: [
             {
-              mime: { $eq: 'image' },
+              mime: 'image',
             },
           ],
         },
@@ -26,10 +26,10 @@ describe('containsAssetFilter', () => {
         filters: {
           $and: [
             {
-              some: { $eq: 'filter' },
+              some: 'filter',
             },
             {
-              mime: { $eq: 'image' },
+              mime: 'image',
             },
           ],
         },

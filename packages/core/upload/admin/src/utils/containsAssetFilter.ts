@@ -1,6 +1,6 @@
-import { Filters } from '@strapi/admin/strapi-admin';
+import type { Query } from '../../../shared/contracts/files';
 
-const containsMimeTypeFilter = (query: Filters.Query | null) => {
+const containsMimeTypeFilter = (query: Query | null) => {
   const filters = query?.filters?.$and;
 
   if (!filters) {
@@ -14,6 +14,6 @@ const containsMimeTypeFilter = (query: Filters.Query | null) => {
   return !!result;
 };
 
-export const containsAssetFilter = (query: Filters.Query | null) => {
+export const containsAssetFilter = (query: Query | null) => {
   return containsMimeTypeFilter(query);
 };
