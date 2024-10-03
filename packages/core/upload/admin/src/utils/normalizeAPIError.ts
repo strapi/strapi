@@ -1,18 +1,7 @@
 import type { errors } from '@strapi/utils';
 import type { FetchError } from '@strapi/admin/strapi-admin';
 
-type ApiError =
-  | errors.ApplicationError
-  | errors.ForbiddenError
-  | errors.NotFoundError
-  | errors.NotImplementedError
-  | errors.PaginationError
-  | errors.PayloadTooLargeError
-  | errors.PolicyError
-  | errors.RateLimitError
-  | errors.UnauthorizedError
-  | errors.ValidationError
-  | errors.YupValidationError;
+type ApiError = InstanceType<(typeof errors)[keyof typeof errors]>;
 
 interface NormalizeErrorOptions {
   name?: string;
