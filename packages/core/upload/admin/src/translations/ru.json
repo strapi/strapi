@@ -29,7 +29,7 @@
   "header.actions.upload-assets": "Добавить ресурсы",
   "header.actions.upload-new-asset": "Загрузить новый ресурс",
   "header.content.assets-empty": "Нет ресурсов",
-"header.content.assets": "{numberFolders, plural, one {1 папка} other {# паплк}} - {numberAssets, plural, one {1 ресурс} other {# ресурсов}}",
+  "header.content.assets": "{numberFolders, plural, one {1 папка} other {# паплк}} - {numberAssets, plural, one {1 ресурс} other {# ресурсов}}",
   "input.button.label": "Обзор файлов",
   "input.label": "Перетащите сюда или",
   "input.label-bold": "Перетащите",
