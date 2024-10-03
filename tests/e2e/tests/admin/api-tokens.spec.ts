@@ -2,25 +2,16 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { navToHeader } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { Admin } from '../../pageHelpers/Admin';
 
-const createAPIToken = async (page, tokenName, duration, type) => {
-  await navToHeader(page, ['Settings', 'API Tokens', 'Create new API Token'], 'Create API Token');
-
-  await page.getByLabel('Name*').click();
-  await page.getByLabel('Name*').fill(tokenName);
-
-  await page.getByLabel('Token duration').click();
-  await page.getByRole('option', { name: duration }).click();
-
-  await page.getByLabel('Token type').click();
-  await page.getByRole('option', { name: type }).click();
-
-  await page.getByRole('button', { name: 'Save' }).click();
-
-  await expect(page.getByText('Make sure to copy this token')).toBeVisible();
-  await expect(page.getByText('Expiration date:')).toBeVisible();
+const createAPIToken = async (admin: Admin, tokenName: string, duration: string, type: string) => {
+  await admin.navToAPISection();
+  await admin.fillName(tokenName);
+  await admin.selectTokenDuration(duration);
+  await admin.selectTokenType(type);
+  await admin.saveToken();
+  await admin.validateTokenCreation();
 };
-
 test.describe('API Tokens', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
@@ -28,7 +19,6 @@ test.describe('API Tokens', () => {
     await login({ page });
   });
 
-  // Test token creation
   const testCases = [
     ['30-day Read-only token', '30 days', 'Read-only'],
     ['30-day full-access token', '30 days', 'Full access'],
@@ -36,17 +26,18 @@ test.describe('API Tokens', () => {
     ['90-day token', '90 days', 'Full access'],
     ['unlimited token', 'Unlimited', 'Full access'],
   ];
+
   for (const [name, duration, type] of testCases) {
     test(`A user should be able to create a ${name}`, async ({ page }) => {
-      await createAPIToken(page, name, duration, type);
+      const admin = new Admin(page);
+      await createAPIToken(admin, name, duration, type);
     });
   }
 
   test('Created tokens list page should be correct', async ({ page }) => {
-    await createAPIToken(page, 'my test token', 'unlimited', 'Full access');
-    await navToHeader(page, ['Settings', 'API Tokens'], 'API Tokens');
-
-    const row = page.getByRole('gridcell', { name: 'my test token', exact: true });
-    await expect(row).toBeVisible();
+    const admin = new Admin(page);
+    await createAPIToken(admin, 'my test token', 'unlimited', 'Full access');
+    await admin.navToAPISection();
+    await admin.validateTokenInList('my test token');
   });
 });
