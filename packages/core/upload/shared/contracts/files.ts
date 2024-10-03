@@ -5,17 +5,17 @@ type SortOrder = 'ASC' | 'DESC';
 type SortKey = 'createdAt' | 'name' | 'updatedAt';
 
 // Abstract type for comparison operators where the keys are generic strings
-type ComparisonOperators<T = string> = {
-  [operator: string]: T; // Any string can be used as an operator key
+type ComparisonOperators<T> = {
+  [operator: string]: T | T[] | boolean; // Any string can be used as an operator key
 };
 
 // Abstract type for filter conditions with dynamic field names
-export type FilterCondition<T = string> = {
-  [field: string]: T | ComparisonOperators<T>; // Field names are dynamic and values are comparison operators
+export type FilterCondition<T> = {
+  [field: string]: T | ComparisonOperators<T> | FilterCondition<T>; // Field names are dynamic and values are comparison operators
 };
 
 // Abstract type for filters where the logical operator (like $and) is a generic string
-type Filters<T = string> = {
+type Filters<T> = {
   [logicOperator: string]: FilterCondition<T>[]; // Logical operator key is a generic string
 };
 
@@ -35,8 +35,11 @@ export type Query = {
         id: string | number;
       };
   pageSize?: string | number;
+  pagination?: {
+    pageSize: number;
+  };
   sort?: `${SortKey}:${SortOrder}`;
-  filters?: Filters;
+  filters?: Filters<string | number | boolean>;
   state?: boolean;
 };
 

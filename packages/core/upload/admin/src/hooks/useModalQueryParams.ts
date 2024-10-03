@@ -32,7 +32,7 @@ const useModalQueryParams = (initialState?: Partial<Query>) => {
     }
   }, [config]);
 
-  const handleChangeFilters = (nextFilters: FilterCondition[]) => {
+  const handleChangeFilters = (nextFilters: FilterCondition<string>[]) => {
     if (nextFilters) {
       trackUsage('didFilterMediaLibraryElements', {
         location: 'content-manager',
