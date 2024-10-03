@@ -1,13 +1,24 @@
-import { useState } from 'react';
+import * as React from 'react';
 
-import { useFetchClient } from '@strapi/admin/strapi-admin';
+import { useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
+import { File, RawFile, CreateFile } from '../../../shared/contracts/files';
 
 import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-const uploadAsset = (asset, folderId, signal, onProgress, post) => {
+interface Asset extends File {
+  rawFile: RawFile;
+}
+
+const uploadAsset = (
+  asset: Asset,
+  folderId: number,
+  signal: AbortSignal,
+  onProgress: (progress: number) => void,
+  post: FetchClient['post']
+) => {
   const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
@@ -34,13 +45,17 @@ const uploadAsset = (asset, folderId, signal, onProgress, post) => {
 };
 
 export const useUpload = () => {
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = React.useState(0);
   const queryClient = useQueryClient();
   const abortController = new AbortController();
   const signal = abortController.signal;
   const { post } = useFetchClient();
 
-  const mutation = useMutation(
+  const mutation = useMutation<
+    CreateFile.Response['data'],
+    CreateFile.Response['error'],
+    { asset: Asset; folderId: number }
+  >(
     ({ asset, folderId }) => {
       return uploadAsset(asset, folderId, signal, setProgress, post);
     },
@@ -52,7 +67,7 @@ export const useUpload = () => {
     }
   );
 
-  const upload = (asset, folderId) => mutation.mutateAsync({ asset, folderId });
+  const upload = (asset: Asset, folderId: number) => mutation.mutateAsync({ asset, folderId });
 
   const cancel = () => abortController.abort();
 
