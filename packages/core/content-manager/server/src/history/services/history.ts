@@ -1,5 +1,5 @@
 import type { Core, Data, Schema, Struct } from '@strapi/types';
-import { async, errors, traverseEntity } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 import { omit } from 'lodash/fp';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
@@ -236,25 +236,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         structuredClone(dataWithoutAddedAttributes)
       );
 
-      /**
-       * Force Strapi to re-create the components when restoring by removing the previous ID.
-       * This is necessary because the previous component row in the database may have been deleted,
-       * which would cause an error when referencing its ID.
-       */
-      const dataWithoutComponentIds = await traverseEntity(
-        ({ parent }, { remove }) => {
-          if (['dynamiczone', 'component'].includes(parent?.attribute?.type ?? '')) {
-            remove('id');
-          }
-        },
-        {
-          schema: strapi.getModel(version.contentType),
-          getModel: strapi.getModel.bind(strapi),
-        },
-        dataWithoutMissingRelations
-      );
-
-      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutComponentIds);
+      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
         locale: version.locale,
