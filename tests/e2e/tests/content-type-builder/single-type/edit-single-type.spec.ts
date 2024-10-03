@@ -9,29 +9,29 @@ import {
   navToHeader,
   skipCtbTour,
 } from '../../../utils/shared';
+import { sharedSetup } from '../../../utils/setup';
 
-// TODO: fix the test so that it doesn't fail on CI
-describeOnCondition(!process.env.CI)('Edit single type', () => {
+test.describe('Edit single type', () => {
+  // very long timeout for these tests because they restart the server multiple times
+  test.describe.configure({ timeout: 300000 });
+
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
   test.beforeEach(async ({ page }) => {
-    await resetFiles();
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
-
-    await login({ page });
-
-    await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-
-    await skipCtbTour(page);
-
-    // TODO: create a "saveFileState" mechanism to be used so we don't have to do a full server restart before each test
-    // create a collection type to be used
-    await createSingleType(page, {
-      name: ctName,
+    await sharedSetup('ctb-edit-st', page, {
+      login: true,
+      skipTour: true,
+      resetFiles: true,
+      importData: 'with-admin.tar',
+      afterSetup: async () => {
+        await createSingleType(page, {
+          name: ctName,
+        });
+      },
     });
 
+    // Then go to our content type
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
