@@ -89,11 +89,8 @@ export default (db: Database) => {
   const diffIndexes = (oldIndex: Index, index: Index): IndexDiff => {
     const changes: string[] = [];
 
-    // Sort columns before comparing
-    const sortedOldColumns = [...oldIndex.columns].sort();
-    const sortedNewColumns = [...index.columns].sort();
-
-    if (!_.isEqual(sortedOldColumns, sortedNewColumns)) {
+    // use xor to avoid differences in order
+    if (_.xor(oldIndex.columns, index.columns).length > 0) {
       changes.push('columns');
     }
 
