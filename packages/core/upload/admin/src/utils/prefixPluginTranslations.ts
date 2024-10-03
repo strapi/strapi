@@ -2,7 +2,7 @@ type Translations = {
   [key: string]: string;
 };
 
-const prefixPluginTranslations = (trad: Translations, pluginId?: string) => {
+export const prefixPluginTranslations = (trad: Translations, pluginId?: string) => {
   if (!pluginId) {
     throw new TypeError("pluginId can't be empty");
   }
@@ -13,5 +13,3 @@ const prefixPluginTranslations = (trad: Translations, pluginId?: string) => {
     return acc;
   }, {});
 };
-
-export { prefixPluginTranslations };

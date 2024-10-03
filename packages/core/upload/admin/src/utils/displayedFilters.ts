@@ -1,4 +1,4 @@
-const displayedFilters = [
+export const displayedFilters = [
   {
     name: 'createdAt',
     fieldSchema: {
@@ -27,5 +27,3 @@ const displayedFilters = [
     metadatas: { label: 'type' },
   },
 ];
-
-export default displayedFilters;

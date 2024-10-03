@@ -8,7 +8,6 @@ import type { File } from '../../../shared/contracts/files';
  */
 
 interface AllowedFiles extends File {
-  // documentId, isSelectable, locale, type
   documentId: string;
   isSelectable: boolean;
   locale: string | null;

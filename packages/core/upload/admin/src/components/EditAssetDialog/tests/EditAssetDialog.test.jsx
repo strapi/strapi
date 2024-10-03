@@ -7,7 +7,7 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
-import { downloadFile } from '../../../utils/downloadFile';
+import { downloadFile } from '../../../utils';
 import { EditAssetDialog } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');
