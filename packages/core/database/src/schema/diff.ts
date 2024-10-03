@@ -89,7 +89,11 @@ export default (db: Database) => {
   const diffIndexes = (oldIndex: Index, index: Index): IndexDiff => {
     const changes: string[] = [];
 
-    if (!_.isEqual(oldIndex.columns, index.columns)) {
+    // Sort columns before comparing
+    const sortedOldColumns = [...oldIndex.columns].sort();
+    const sortedNewColumns = [...index.columns].sort();
+
+    if (!_.isEqual(sortedOldColumns, sortedNewColumns)) {
       changes.push('columns');
     }
 
@@ -272,7 +276,8 @@ export default (db: Database) => {
         const { status, diff } = diffIndexes(databaseIndex, userSchemaIndex);
 
         if (status === statuses.CHANGED) {
-          updatedIndexes.push(diff);
+          console.log('CHANGED INDEX', diff, databaseIndex, userSchemaIndex);
+          process.exit();
         } else {
           unchangedIndexes.push(databaseIndex);
         }
