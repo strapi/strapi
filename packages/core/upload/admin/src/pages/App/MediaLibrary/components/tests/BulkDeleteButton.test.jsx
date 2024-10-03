@@ -43,6 +43,13 @@ const setup = (
 const user = userEvent.setup();
 
 describe('BulkDeleteButton', () => {
+  beforeEach(() => {
+    useBulkRemove.mockReturnValue({
+      isLoading: false,
+      error: null,
+      remove: jest.fn(),
+    });
+  });
   afterEach(() => {
     jest.clearAllMocks();
   });

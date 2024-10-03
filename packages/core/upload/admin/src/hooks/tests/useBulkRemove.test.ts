@@ -2,16 +2,27 @@ import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, screen } from '@tests/utils';
 
 import { useBulkRemove } from '../useBulkRemove';
+import { BulkDeleteFiles } from '../../../../shared/contracts/files';
+import { BulkDeleteFolders } from '../../../../shared/contracts/folders';
+import { has } from 'lodash';
 
 const FIXTURE_ASSETS = [
   {
     id: 1,
     type: 'asset',
+    name: 'asset1',
+    path: 'path/to/asset1',
+    pathId: 1,
+    hash: 'hash1',
   },
 
   {
     id: 2,
     type: 'asset',
+    name: 'asset2',
+    path: 'path/to/asset2',
+    pathId: 2,
+    hash: 'hash2',
   },
 ];
 
@@ -19,11 +30,17 @@ const FIXTURE_FOLDERS = [
   {
     id: 11,
     type: 'folder',
+    name: 'folder1',
+    path: 'path/to/folder1',
+    pathId: 11,
   },
 
   {
     id: 12,
     type: 'folder',
+    name: 'folder2',
+    path: 'path/to/folder2',
+    pathId: 12,
   },
 ];
 
@@ -31,7 +48,14 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     post: jest.fn((url, payload) => {
-      const res = { data: { data: {} } };
+      const res: BulkDeleteFiles.Response | BulkDeleteFolders.Response = {
+        data: {
+          data: {
+            files: [],
+            folders: [],
+          },
+        },
+      };
 
       if (payload?.fileIds) {
         res.data.data.files = FIXTURE_ASSETS;
@@ -46,7 +70,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   }),
 }));
 
-function setup(...args) {
+function setup(...args: Parameters<typeof useBulkRemove>) {
   return renderHook(() => useBulkRemove(...args));
 }
 

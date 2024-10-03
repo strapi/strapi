@@ -4,6 +4,25 @@ type SortOrder = 'ASC' | 'DESC';
 
 type SortKey = 'createdAt' | 'name';
 
+export type Query = {
+  _q?: string;
+  folderPath?: string;
+  folder?:
+    | number
+    | {
+        id: number;
+      };
+  page?:
+    | string
+    | number
+    | {
+        id: string | number;
+      };
+  pageSize?: string | number;
+  sort?: `${SortKey}:${SortOrder}`;
+  filters?: Record<string, unknown>;
+};
+
 export interface File {
   id: number;
   name: string;
