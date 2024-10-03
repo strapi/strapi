@@ -1,5 +1,6 @@
 import type { Knex } from 'knex';
 
+import createDebugger from 'debug';
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
@@ -15,6 +16,8 @@ import type { Migration } from './migrations';
 import { type Identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
+
+const debug = createDebugger('strapi::database');
 
 interface Settings {
   forceMigration?: boolean;
@@ -97,8 +100,30 @@ class Database {
   }
 
   async init({ models }: { models: Model[] }) {
+    /**
+     * TODO v6: implement a cleaner solution that will involve breaking changes to db constructor
+     *
+     * if the user passed in a connection function, we need to resolve it first
+     * and recreate the connection, otherwise accessing this.connection.anyProperty will not work
+     *
+     * Note that even if it was already created in the constructor, the connection method will
+     * not be called at this point by Strapi or Knex, so it shouldn't have any effects to do this
+     *  */
+    if (typeof this.config.connection.connection === 'function') {
+      debug('User config.connection is a function; resolving and recreating knex connection');
+      this.config.connection.connection = await this.config.connection.connection();
+
+      await this.connection.destroy();
+      this.connection = createConnection(this.config.connection, {
+        pool: { afterCreate: afterCreate(this) },
+      });
+    }
+
     this.metadata.loadModels(models);
     await validateDatabase(this);
+
+    debug('Database initialized');
+
     return this;
   }
 
