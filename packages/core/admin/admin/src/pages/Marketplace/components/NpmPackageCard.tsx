@@ -66,7 +66,10 @@ const NpmPackageCard = ({
   }`;
 
   const versionRange = semver.validRange(attributes.strapiVersion);
-  const isCompatible = semver.satisfies(strapiAppVersion ?? '', versionRange ?? '');
+
+  const isCompatible = versionRange
+    ? semver.satisfies(strapiAppVersion ?? '', versionRange)
+    : false;
 
   return (
     <Flex
