@@ -1,13 +1,16 @@
 import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
+export type HandlerParams = {
+  documentId: string;
+  locale: string;
+  status: 'published' | 'draft';
+};
+
 export interface PreviewConfig {
   enabled: boolean;
   config: {
-    handler: (
-      uid: UID.Schema,
-      params: { documentId: string; locale: string; status: 'published' | 'draft' }
-    ) => string | undefined;
+    handler: (uid: UID.Schema, params: HandlerParams) => string | undefined;
   };
 }
 
@@ -47,9 +50,12 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Utility to get the preview handler from the configuration
      */
-    getPreviewHandler() {
+    getPreviewHandler(): PreviewConfig['config']['handler'] {
       const config = strapi.config.get('admin.preview') as PreviewConfig;
-      const emptyHandler = () => {};
+
+      const emptyHandler = () => {
+        return undefined;
+      };
 
       if (!this.isEnabled()) {
         return emptyHandler;
