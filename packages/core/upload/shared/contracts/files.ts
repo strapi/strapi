@@ -59,7 +59,7 @@ export interface File {
   provider?: string;
   provider_metadata?: Record<string, unknown>;
   isUrlSigned?: boolean;
-  folder?: number;
+  folder?: number | null;
   folderPath?: string;
   related?: {
     id: string | number;

@@ -1,29 +1,54 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, screen } from '@tests/utils';
 
-import { useBulkMove } from '../useBulkMove';
+import { useBulkMove, FileWithType, FolderWithType } from '../useBulkMove';
 
-const FIXTURE_ASSETS = [
+const FIXTURE_ASSETS: FileWithType[] = [
   {
     id: 1,
     type: 'asset',
+    size: 100,
+    createdAt: '2023-08-01T00:00:00.000Z',
+    mime: 'image/png',
+    name: 'Asset 1',
+    updatedAt: '2023-08-01T00:00:00.000Z',
+    url: '/assets/1',
+    folder: null,
+    folderPath: '/',
+    hash: 'hash1',
+    provider: 'local',
   },
-
   {
     id: 2,
     type: 'asset',
+    size: 200,
+    createdAt: '2023-08-01T00:00:00.000Z',
+    mime: 'image/png',
+    name: 'Asset 2',
+    updatedAt: '2023-08-01T00:00:00.000Z',
+    url: '/assets/2',
+    folder: null,
+    folderPath: '/',
+    hash: 'hash2',
+    provider: 'local',
   },
 ];
 
-const FIXTURE_FOLDERS = [
+const FIXTURE_FOLDERS: FolderWithType[] = [
   {
     id: 11,
     type: 'folder',
+    name: 'Folder 1',
+    path: '/11',
+    pathId: 11,
   },
 
   {
     id: 12,
     type: 'folder',
+    name: 'Folder 2',
+    path: '/12',
+    pathId: 12,
   },
 ];
 
@@ -33,7 +58,14 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     post: jest.fn((url, payload) => {
-      const res = { data: { data: {} } };
+      const res: { data: { data: { files: FileWithType[]; folders: FolderWithType[] } } } = {
+        data: {
+          data: {
+            files: [],
+            folders: [],
+          },
+        },
+      };
 
       if (payload?.fileIds) {
         res.data.data.files = FIXTURE_ASSETS;
@@ -48,7 +80,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   }),
 }));
 
-function setup(...args) {
+function setup(...args: Parameters<typeof useBulkMove>) {
   return renderHook(() => useBulkMove(...args));
 }
 

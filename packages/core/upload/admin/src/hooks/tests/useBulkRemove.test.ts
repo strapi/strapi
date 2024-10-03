@@ -4,7 +4,6 @@ import { act, renderHook, screen } from '@tests/utils';
 import { useBulkRemove } from '../useBulkRemove';
 import { BulkDeleteFiles } from '../../../../shared/contracts/files';
 import { BulkDeleteFolders } from '../../../../shared/contracts/folders';
-import { has } from 'lodash';
 
 const FIXTURE_ASSETS = [
   {
