@@ -7,7 +7,8 @@ export type JSON = Attribute.OfType<'json'> &
   Attribute.PrivateOption &
   Attribute.WritableOption &
   Attribute.VisibleOption &
-  Attribute.DefaultOption<JSONValue>;
+  Attribute.DefaultOption<JSONValue> &
+  Attribute.ColumnOption;
 
 type JSONValue = string | number | boolean | null;
 

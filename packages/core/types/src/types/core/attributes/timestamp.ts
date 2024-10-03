@@ -8,7 +8,8 @@ export type Timestamp = Attribute.OfType<'timestamp'> &
   Attribute.RequiredOption &
   Attribute.UniqueOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.ColumnOption;
 
 export type TimestampValue = globalThis.Date | number | string;
 

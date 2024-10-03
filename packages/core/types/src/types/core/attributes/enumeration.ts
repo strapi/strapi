@@ -14,7 +14,8 @@ export type Enumeration<TValues extends string[] = []> = Attribute.OfType<'enume
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.ColumnOption;
 
 export type EnumerationValue<TValues extends string[]> = Utils.Array.Values<TValues>;
 

@@ -8,7 +8,8 @@ export type Password = Attribute.OfType<'password'> &
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.ColumnOption;
 
 export type PasswordValue = string;
 

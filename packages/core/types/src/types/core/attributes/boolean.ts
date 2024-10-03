@@ -7,7 +7,8 @@ type BooleanAttribute = Attribute.OfType<'boolean'> &
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.ColumnOption;
 
 export type BooleanValue = boolean;
 

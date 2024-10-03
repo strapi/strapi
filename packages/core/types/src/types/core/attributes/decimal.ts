@@ -9,7 +9,8 @@ export type Decimal = Attribute.OfType<'decimal'> &
   Attribute.RequiredOption &
   Attribute.WritableOption &
   Attribute.VisibleOption &
-  Attribute.UniqueOption;
+  Attribute.UniqueOption &
+  Attribute.ColumnOption;
 
 export type DecimalValue = number;
 

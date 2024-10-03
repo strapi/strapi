@@ -21,7 +21,8 @@ export type Component<
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption;
+  Attribute.VisibleOption &
+  Attribute.ColumnOption;
 
 export type ComponentValue<
   TComponentUID extends Common.UID.Component,
