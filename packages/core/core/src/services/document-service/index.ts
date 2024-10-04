@@ -4,6 +4,8 @@ import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares
 import { createContentTypeRepository } from './repository';
 import { transformData } from './transform/data';
 
+import entityValidator from '../entity-validator';
+
 /**
  * Repository to :
  * - Access documents via actions (findMany, findOne, create, update, delete, ...)
@@ -11,6 +13,7 @@ import { transformData } from './transform/data';
  * - Apply default parameters to document actions
  *
  * @param strapi
+ * @param validator - validator for database entries
  * @returns DocumentService
  *
  * @example Access documents
@@ -18,7 +21,10 @@ import { transformData } from './transform/data';
  * const allArticles = strapi.documents('api::article.article').findMany(params)
  *
  */
-export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Service => {
+export const createDocumentService = (
+  strapi: Core.Strapi,
+  validator: Modules.EntityValidator.EntityValidator = entityValidator
+): Modules.Documents.Service => {
   // Cache the repositories (one per content type)
   const repositories = new Map<string, Modules.Documents.ServiceInstance>();
 
@@ -32,7 +38,7 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
     }
 
     const contentType = strapi.contentType(uid);
-    const repository = createContentTypeRepository(uid);
+    const repository = createContentTypeRepository(uid, validator);
 
     const instance = middlewares.wrapObject(
       repository,
