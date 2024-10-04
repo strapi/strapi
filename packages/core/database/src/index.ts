@@ -80,16 +80,26 @@ class Database {
       },
     };
 
+    this.logger = config.logger ?? console;
+
     this.dialect = getDialect(this);
-    this.dialect.configure();
+    // for object connections, we can configure the dialect synchronously
+    if (typeof this.config.connection.connection !== 'function') {
+      this.dialect.configure();
+    } else {
+      this.logger.warn(
+        'You are using a Knex connection function which is currently flagged as experimental.'
+      );
+      this.logger.warn(
+        'Attempting to access the connection object before database initialization could result in errors'
+      );
+    }
 
     this.metadata = createMetadata([]);
 
-    // for object connections, create Knex connection synchronously
-    if (typeof this.config.connection.connection !== 'function') {
-      debug('Creating knex connection');
-      this.#connection = this.#createConnection(this.config.connection);
-    }
+    this.#connection = createConnection(this.config.connection, {
+      pool: { afterCreate: afterCreate(this) },
+    });
 
     this.schema = createSchemaProvider(this);
 
@@ -97,32 +107,19 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
-
-    this.logger = config.logger ?? console;
-  }
-
-  #createConnection(connection: Knex.Config) {
-    return createConnection(connection, {
-      pool: { afterCreate: afterCreate(this) },
-    });
   }
 
   async init({ models }: { models: Model[] }) {
-    // for function connections, create Knex connection asynchronously
-    // this is necessary to fully support Knex async functions, allowing for async authorization methods
     if (typeof this.config.connection.connection === 'function') {
-      debug('Creating knex connection from function');
-      const conn = {
-        ...this.config.connection,
-        // We await the function so it resolves to an object config
-        // That way we don't have to resolve it every time the connection getter is called
-        // In the future we could make a breaking change to disallow accessing connection
-        // directly and pass it directly to Knex as a function
-        // Note that this means we do not support Knex `expirationChecker` because
-        // we would have to implement it ourselves
-        connection: await this.config.connection.connection(),
-      };
-      this.#connection = this.#createConnection(conn);
+      // for function connections, we must configure the dialect in init
+      // Note: due to a bug in Knex, sqlite will warn about a missing filename for function connections because
+      // it checks in the constructor rather than on connect
+      const conn = await this.config.connection.connection();
+      this.dialect.configure(conn);
+
+      // We also need to force knex to resolve  the connection from a function to a cached object
+      // so our code can access it directly as if it were an object
+      await this.connection.select(this.connection.raw('1'));
     }
 
     this.metadata.loadModels(models);
