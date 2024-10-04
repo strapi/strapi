@@ -1,20 +1,16 @@
-/**
- *
- * PageSize
- *
- */
-
-import React from 'react';
-
 import { Box, Flex, SingleSelectOption, SingleSelect, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const PageSize = ({ onChangePageSize, pageSize }) => {
+interface PageSizeProps {
+  onChangePageSize: (value: number) => void;
+  pageSize: number;
+}
+
+const PageSize = ({ onChangePageSize, pageSize }: PageSizeProps) => {
   const { formatMessage } = useIntl();
 
-  const handleChange = (value) => {
-    onChangePageSize(value);
+  const handleChange = (value: string | number) => {
+    onChangePageSize(Number(value));
   };
 
   return (
@@ -43,11 +39,6 @@ const PageSize = ({ onChangePageSize, pageSize }) => {
       </Box>
     </Flex>
   );
-};
-
-PageSize.propTypes = {
-  onChangePageSize: PropTypes.func.isRequired,
-  pageSize: PropTypes.number.isRequired,
 };
 
 export default PageSize;
