@@ -87,6 +87,7 @@
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
+    "@types/byte-size": "8.1.2",
     "@types/fs-extra": "11.0.4",
     "@types/koa": "2.13.4",
     "@types/koa-range": "0.3.5",

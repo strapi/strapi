@@ -9,20 +9,20 @@ import type { File } from './files';
 export interface Folder {
   id: number;
   name: string;
-  pathId: number;
+  pathId?: number;
   /**
    * parent id
    */
-  parent?: number;
+  parent?: number | null | Folder;
   /**
    * children ids
    */
   children?: number[];
-  path: string;
+  path?: string;
   files?: File[];
 }
 
-type FolderNode = Partial<Folder> & {
+export type FolderNode = Partial<Omit<Folder, 'children'>> & {
   children: FolderNode[];
 };
 
