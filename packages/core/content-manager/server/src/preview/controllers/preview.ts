@@ -21,7 +21,7 @@ const createPreviewController = () => {
       // TODO: Permissions to preview content
 
       // Get the preview URL by using the user-defined config handler
-      const previewService = getService(ctx.strapi, 'preview');
+      const previewService = getService(strapi, 'preview');
       const url = await previewService.getPreviewUrl(uid, params);
 
       // If no url is found, set status to 204

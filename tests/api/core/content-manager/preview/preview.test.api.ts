@@ -1,9 +1,7 @@
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
-import { createUtils, describeOnCondition } from 'api-tests/utils';
+import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
-import fs from 'fs';
-import path from 'path';
 
 const collectionTypeUid = 'api::product.product';
 const collectionTypeModel = {
@@ -45,10 +43,12 @@ const singleTypeModel = {
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-describeOnCondition(edition === 'EE')('Preview', () => {
+// TODO: Remove skip when future flag is removed
+describeOnCondition(edition === 'EE').skip('Preview', () => {
   const builder = createTestBuilder();
   let strapi;
   let rq;
+  let singleTypeEntry;
 
   const updateEntry = async ({ uid, documentId, data, locale }) => {
     const type = documentId ? 'collection-types' : 'single-types';
@@ -61,7 +61,7 @@ describeOnCondition(edition === 'EE')('Preview', () => {
       qs: { locale },
     });
 
-    return body;
+    return body.data;
   };
 
   const getPreviewUrl = async ({ uid, documentId, locale, status }) => {
@@ -79,12 +79,22 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     rq = await createAuthRequest({ strapi });
 
     // Update the single type to create an initial history version
-    const singleTypeEntry = await updateEntry({
+    singleTypeEntry = await updateEntry({
       uid: singleTypeUid,
       documentId: undefined,
       locale: 'en',
       data: {
         title: 'Welcome',
+      },
+    });
+
+    // Configure the preview URL handler
+    strapi.config.set('admin.preview', {
+      enabled: true,
+      config: {
+        handler: (uid, { documentId, locale, status }) => {
+          return `/preview/${uid}/${documentId}?locale=${locale}&status=${status}`;
+        },
       },
     });
   });
@@ -95,13 +105,6 @@ describeOnCondition(edition === 'EE')('Preview', () => {
   });
 
   test('Get preview URL for collection type', async () => {
-    strapi.config.set('admin.preview', {
-      enabled: true,
-      handler: (uid, { documentId, locale, status }) => {
-        return `/preview/${uid}/${documentId}?locale=${locale}&status=${status}`;
-      },
-    });
-
     const { body, statusCode } = await getPreviewUrl({
       uid: collectionTypeUid,
       documentId: '1',
@@ -111,5 +114,19 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     expect(statusCode).toBe(200);
     expect(body.data.url).toEqual(`/preview/${collectionTypeUid}/1?locale=en&status=draft`);
+  });
+
+  test('Get preview URL for single type', async () => {
+    const { body, statusCode } = await getPreviewUrl({
+      uid: singleTypeUid,
+      documentId: undefined,
+      locale: 'en',
+      status: 'draft',
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data.url).toEqual(
+      `/preview/${singleTypeUid}/${singleTypeEntry.documentId}?locale=en&status=draft`
+    );
   });
 });
