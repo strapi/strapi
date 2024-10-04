@@ -5,8 +5,7 @@ import { File, BulkMoveFiles } from '../../../shared/contracts/files';
 import { Folder, BulkMoveFolders } from '../../../shared/contracts/folders';
 
 import pluginId from '../pluginId';
-// TODO: replace this import with the import from the index file of the utils folder when it will be migrated to TS
-import getTrad from '../utils/getTrad';
+import { getTrad } from '../utils';
 
 export interface FolderWithType extends Folder {
   type: string;

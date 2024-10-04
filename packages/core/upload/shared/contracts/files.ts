@@ -43,6 +43,19 @@ export type Query = {
   state?: boolean;
 };
 
+type FileFormat = {
+  name: string;
+  hash: string;
+  ext: string;
+  mime: string;
+  path: null | string;
+  width: number;
+  height: number;
+  size: number;
+  sizeInBytes: number;
+  url: string;
+};
+
 export interface File {
   id: number;
   name: string;
@@ -50,7 +63,7 @@ export interface File {
   caption?: string | null;
   width?: number;
   height?: number;
-  formats?: Record<string, unknown>;
+  formats?: Record<string, FileFormat>;
   hash: string;
   ext?: string;
   mime?: string;
@@ -72,12 +85,11 @@ export interface File {
   createdAt?: string;
   updatedAt?: string;
   createdBy?: number;
+  publishedAt?: string;
   updatedBy?: number;
+  isLocal?: boolean;
 }
 
-/**
- * GET /upload/files - Get files
- */
 export interface RawFile extends Blob {
   size: number;
   lastModified: number;
@@ -92,6 +104,9 @@ export interface Pagination {
   total: number;
 }
 
+/**
+ * GET /upload/files - Get files
+ */
 export declare namespace GetFiles {
   export interface Request {
     body: {};

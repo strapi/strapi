@@ -3,8 +3,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-// TODO: replace this import with the import from the index file of the utils folder when it will be migrated to TS
-import getTrad from '../utils/getTrad';
+import { getTrad } from '../utils';
 
 import { recursiveRenameKeys } from './utils/rename-keys';
 

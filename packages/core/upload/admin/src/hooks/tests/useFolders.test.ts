@@ -110,7 +110,7 @@ describe('useFolders', () => {
        * any folders returned should include the current folder's ID
        * in it's path because this get's the children of current.
        */
-      expect(folder.path.includes('1')).toBe(true);
+      expect(folder.path?.includes('1')).toBe(true);
     });
   });
 
