@@ -1,9 +1,10 @@
-import React from 'react';
-
 import { Box, Flex, Grid, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
-export const ContextInfo = ({ blocks }) => {
+interface ContextInfoProps {
+  blocks: { label: string; value: string | number }[];
+}
+
+export const ContextInfo = ({ blocks }: ContextInfoProps) => {
   return (
     <Box
       hasRadius
@@ -29,13 +30,4 @@ export const ContextInfo = ({ blocks }) => {
       </Grid.Root>
     </Box>
   );
-};
-
-ContextInfo.propTypes = {
-  blocks: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string,
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    })
-  ).isRequired,
 };
