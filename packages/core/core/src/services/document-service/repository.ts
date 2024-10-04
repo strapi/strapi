@@ -291,7 +291,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     ]);
 
     // Load any unidirectional relation targetting the old published entries
-    const relationsToSync = await unidirectionalRelations.load(uid, oldPublishedVersions);
+    const relationsToSync = await unidirectionalRelations.load(uid, {
+      newVersions: draftsToPublish,
+      oldVersions: oldPublishedVersions,
+    });
 
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
@@ -302,7 +305,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     );
 
     // Sync unidirectional relations with the new published entries
-    await unidirectionalRelations.sync(oldPublishedVersions, publishedEntries, relationsToSync);
+    await unidirectionalRelations.sync(
+      [...oldPublishedVersions, ...draftsToPublish],
+      publishedEntries,
+      relationsToSync
+    );
 
     publishedEntries.forEach(emitEvent('entry.publish'));
 
@@ -358,7 +365,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     ]);
 
     // Load any unidirectional relation targeting the old drafts
-    const relationsToSync = await unidirectionalRelations.load(uid, oldDrafts);
+    const relationsToSync = await unidirectionalRelations.load(uid, {
+      newVersions: versionsToDraft,
+      oldVersions: oldDrafts,
+    });
 
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
@@ -369,7 +379,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     );
 
     // Sync unidirectional relations with the new draft entries
-    await unidirectionalRelations.sync(oldDrafts, draftEntries, relationsToSync);
+    await unidirectionalRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      relationsToSync
+    );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };

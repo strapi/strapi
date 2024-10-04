@@ -1,8 +1,18 @@
-import type * as Schema from '../../../schema';
-import type * as Data from '../../../data';
+import type * as Schema from '../../../../schema';
 
-import type * as UID from '../../../uid';
-import type { Array, Constants, Object, If, Extends, MatchFirst, IsNotNever } from '../../../utils';
+import type * as UID from '../../../../uid';
+import type {
+  Array,
+  Constants,
+  Object,
+  If,
+  Extends,
+  MatchFirst,
+  IsNotNever,
+} from '../../../../utils';
+
+import type { ID, DocumentID } from './id';
+import type { OmitRelationsWithoutTarget, RelationInputValue } from './relations';
 
 export type NonFilterableKind = Extract<Schema.Attribute.Kind, 'password' | 'dynamiczone'>;
 export type FilterableKind = Exclude<Schema.Attribute.Kind, NonFilterableKind>;
@@ -22,8 +32,6 @@ export type GetNestedKeys<TSchemaUID extends UID.Schema> = Exclude<
   Schema.AttributeNamesWithTarget<TSchemaUID>,
   GetNonFilterableKeys<TSchemaUID>
 >;
-
-export type ID = Data.ID;
 
 export type BooleanValue = boolean | 'true' | 'false' | 't' | 'f' | '1' | '0' | 1 | 0;
 
@@ -69,7 +77,8 @@ export type ScalarValues = GetValue<
  */
 export type GetValues<TSchemaUID extends UID.Schema> = {
   id?: ID;
-} & OmitRelationWithoutTarget<
+  documentId?: TSchemaUID;
+} & OmitRelationsWithoutTarget<
   TSchemaUID,
   {
     [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: GetValue<
@@ -80,14 +89,6 @@ export type GetValues<TSchemaUID extends UID.Schema> = {
       Schema.AttributeByName<TSchemaUID, TKey>
     >;
   }
->;
-
-export type OmitRelationWithoutTarget<TSchemaUID extends UID.Schema, TValue> = Omit<
-  TValue,
-  Exclude<
-    Schema.AttributeNamesByType<TSchemaUID, 'relation'>,
-    Schema.AttributeNamesWithTarget<TSchemaUID>
-  >
 >;
 
 /**
@@ -102,8 +103,8 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
       // Relation
       [
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
-        TAttribute extends Schema.Attribute.Relation<infer TRelationKind, infer TTarget>
-          ? If<IsNotNever<TTarget>, Schema.Attribute.RelationPluralityModifier<TRelationKind, ID>>
+        TAttribute extends Schema.Attribute.RelationWithTarget
+          ? RelationInputValue<TAttribute['relation']>
           : never,
       ],
       // DynamicZone
@@ -156,3 +157,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute> = If<
   >,
   unknown
 >;
+
+// Re-export useful types
+
+export type { ID, DocumentID };

@@ -19,9 +19,10 @@ import {
   ButtonProps,
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
+import mapValues from 'lodash/fp/mapValues';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import { styled, DefaultTheme } from 'styled-components';
+import { DefaultTheme } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
@@ -35,6 +36,7 @@ import { getTranslation } from '../../../utils/translations';
 
 import type { RelationsFormValue } from './FormInputs/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
+
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -493,6 +495,22 @@ const DocumentActionModal = ({
   );
 };
 
+const transformData = (data: Record<string, any>): any => {
+  if (Array.isArray(data)) {
+    return data.map(transformData);
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    if ('apiData' in data) {
+      return data.apiData;
+    }
+
+    return mapValues(transformData)(data);
+  }
+
+  return data;
+};
+
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionComponents
  * -----------------------------------------------------------------------------------------------*/
@@ -643,7 +661,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params,
         },
-        formValues
+        transformData(formValues)
       );
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
@@ -797,7 +815,7 @@ const UpdateAction: DocumentActionComponent = ({
               documentId: cloneMatch.params.origin!,
               params,
             },
-            document
+            transformData(document)
           );
 
           if ('data' in res) {
@@ -823,7 +841,7 @@ const UpdateAction: DocumentActionComponent = ({
               documentId,
               params,
             },
-            document
+            transformData(document)
           );
 
           if (
@@ -841,7 +859,7 @@ const UpdateAction: DocumentActionComponent = ({
               model,
               params,
             },
-            document
+            transformData(document)
           );
 
           if ('data' in res && collectionType !== SINGLE_TYPES) {

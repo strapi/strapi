@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -85,11 +85,11 @@
     "react-query": "3.39.3",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   },
   "peerDependencies": {
-    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
-    "@strapi/content-manager": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/admin": "^5.0.0",
+    "@strapi/content-manager": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

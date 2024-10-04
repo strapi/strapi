@@ -84,7 +84,13 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
       }
     }
 
-    addFieldRow(`${fieldName}.disconnect`, { id: relation.id });
+    addFieldRow(`${fieldName}.disconnect`, {
+      id: relation.id,
+      apiData: {
+        documentId: relation.documentId,
+        locale: relation.locale,
+      },
+    });
   };
 
   return handleDisconnect;
@@ -145,14 +151,23 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
 
-    const { id: componentId, uid } = useComponent('RelationsField', ({ uid, id }) => ({ id, uid }));
+    const { componentId, componentUID } = useComponent('RelationsField', ({ uid, id }) => ({
+      componentId: id,
+      componentUID: uid,
+    }));
+
+    const isSubmitting = useForm('RelationsList', (state) => state.isSubmitting);
+
+    React.useEffect(() => {
+      setCurrentPage(1);
+    }, [isSubmitting]);
 
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = uid ?? documentModel;
+    const model = componentUID ?? documentModel;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -199,6 +214,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const realServerRelationsCount =
       'pagination' in data && data.pagination ? data.pagination.total : 0;
+
     /**
      * Items that are already connected, but reordered would be in
      * this list, so to get an accurate figure, we remove them.
@@ -259,6 +275,10 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
       const item = {
         id: relation.id,
+        apiData: {
+          documentId: relation.documentId,
+          locale: relation.locale,
+        },
         status: relation.status,
         /**
          * If there's a last item, that's the first key we use to generate out next one.
@@ -268,7 +288,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, props.mainField),
         // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
-        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}`,
+        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
       };
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
@@ -294,7 +314,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
           <RelationsInput
             disabled={isDisabled}
-            id={id}
+            // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
+            id={componentUID ? (componentId ? `${componentId}` : '') : documentId}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
             onChange={handleConnect}
@@ -389,7 +410,7 @@ const addLabelAndHref =
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
         [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, mainField),
-        href: `${href}/${relation.documentId}`,
+        href: `${href}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
       };
     });
 
@@ -454,6 +475,7 @@ const RelationsInput = ({
      * individual components. Therefore we split the string and take the last item.
      */
     const [targetField] = name.split('.').slice(-1);
+
     searchForTrigger({
       model,
       targetField,
@@ -701,9 +723,7 @@ const RelationsList = ({
      */
     const connectedRelations = newData
       .reduce<Relation[]>((acc, relation, currentIndex, array) => {
-        const relationOnServer = serverData.find(
-          (oldRelation) => oldRelation.documentId === relation.documentId
-        );
+        const relationOnServer = serverData.find((oldRelation) => oldRelation.id === relation.id);
 
         const relationInFront = array[currentIndex + 1];
 
@@ -712,11 +732,23 @@ const RelationsList = ({
             ? {
                 before: relationInFront.documentId,
                 locale: relationInFront.locale,
-                status: relationInFront.status,
+                status:
+                  'publishedAt' in relationInFront && relationInFront.publishedAt
+                    ? 'published'
+                    : 'draft',
               }
             : { end: true };
 
-          const relationWithPosition: Relation = { ...relation, position };
+          const relationWithPosition: Relation = {
+            ...relation,
+            ...{
+              apiData: {
+                documentId: relation.documentId,
+                locale: relation.locale,
+                position,
+              },
+            },
+          };
 
           return [...acc, relationWithPosition];
         }
@@ -899,7 +931,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   } = data;
   const { formatMessage } = useIntl();
 
-  const { href, documentId, label, status } = relations[index];
+  const { href, id, label, status } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -910,7 +942,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
         item: {
           displayedValue: label,
           status,
-          id: documentId,
+          id: id,
           index,
         },
         onMoveItem: handleMoveItem,

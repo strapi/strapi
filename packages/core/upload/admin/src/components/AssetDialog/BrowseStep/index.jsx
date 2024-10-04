@@ -154,7 +154,7 @@ export const BrowseStep = ({
             )}
 
             {(assetCount > 0 || folderCount > 0 || isSearching) && (
-              <Flex marginLeft="auto" shrink={0}>
+              <Flex marginLeft="auto" shrink={0} gap={2}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     label={
