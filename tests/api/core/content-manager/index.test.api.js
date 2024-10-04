@@ -23,7 +23,7 @@ const getRelations = async (modelName, field, id) => {
     url: `/content-manager/relations/api::${modelName}.${modelName}/${id}/${field}`,
   });
 
-  return res.body.data;
+  return res.body;
 };
 
 const deleteFixtures = async () => {
@@ -48,8 +48,7 @@ const deleteFixtures = async () => {
   }
 };
 
-// TODO: Fix relations
-describe.skip('Relations', () => {
+describe('Relations', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes(
@@ -329,7 +328,8 @@ describe.skip('Relations', () => {
       expect(tags.length).toBe(0);
     });
 
-    test('Delete all articles should remove the association in each tags related to them', async () => {
+    test('Delete all articles should remove the association from all tags related to them', async () => {
+      // Create a tag
       const {
         body: { data: createdTag },
       } = await rq({
@@ -340,6 +340,7 @@ describe.skip('Relations', () => {
         },
       });
 
+      // Create the first article associated with the created tag
       const {
         body: { data: article12 },
       } = await rq({
@@ -352,6 +353,7 @@ describe.skip('Relations', () => {
         },
       });
 
+      // Retrieve the updated tag to ensure it has the association
       const {
         body: { data: updatedTag },
       } = await rq({
@@ -359,6 +361,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
+      // Create a second article associated with the same tag
       const {
         body: { data: article13 },
       } = await rq({
@@ -371,6 +374,7 @@ describe.skip('Relations', () => {
         },
       });
 
+      // Retrieve the tag again to validate that it is associated with both articles
       const {
         body: { data: foundTag },
       } = await rq({
@@ -378,38 +382,75 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
+      // Assert that the tag is linked to both articles
       expect(foundTag.articles.count).toBe(2);
 
-      await rq({
+      // Bulk delete both articles using their document IDs
+      const bulkDelete = await rq({
         url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
         method: 'POST',
         body: {
-          ids: [article12.documentId, article13.documentId],
+          documentIds: [article12.documentId, article13.documentId],
         },
       });
 
+      expect(bulkDelete.status).toBe(200);
+
+      // Retrieve the tag again to check that no articles are associated with it
       const {
         body: { data: foundTag2 },
       } = await rq({
-        url: `/content-manager/collection-types/api::tag.tag/${createdTag.documentId}`,
+        url: `/content-manager/collection-types/api::tag.tag/${createdTag.documentId}?populate=articles`,
         method: 'GET',
       });
 
+      // Expect that the tag has no associated articles after the bulk delete
       expect(foundTag2.articles.count).toBe(0);
     });
 
-    test('Bulk delete of unknown or already deleted entries should succeed', async () => {
-      const res = await rq({
-        url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
+    test('Bulk delete with some known and some unknown should delete and return SUCCESS', async () => {
+      const {
+        body: { data: article12 },
+      } = await rq({
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: {
-          ids: [9999999],
+          title: 'article12',
+          content: 'Content',
+          tags: [],
         },
       });
 
-      expect(res.body).toEqual({
-        count: 0,
+      const bulkDelete = await rq({
+        url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
+        method: 'POST',
+        body: {
+          documentIds: [article12.documentId, 9999999],
+        },
       });
+
+      expect(bulkDelete.status).toBe(200);
+      expect(bulkDelete.body.count).toBe(1);
+
+      // article has been deleted
+      const article = await rq({
+        url: `/content-manager/collection-types/api::article.article/${article12.documentId}`,
+        method: 'GET',
+      });
+
+      expect(article.status).toBe(404);
+    });
+
+    test('Bulk delete of entirely unknown entries should return a NOT FOUND', async () => {
+      const bulkDelete = await rq({
+        url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
+        method: 'POST',
+        body: {
+          documentIds: [9999999],
+        },
+      });
+
+      expect(bulkDelete.status).toBe(404);
     });
   });
 
@@ -562,8 +603,9 @@ describe.skip('Relations', () => {
       const tags = (await getRelations('article', 'tags', body.data.documentId)).results;
       expect(tags.length).toBe(0);
 
-      const category = (await getRelations('article', 'category', body.data.documentId)).data;
-      expect(category.name).toBe(data.categories[0].name);
+      const categories = (await getRelations('article', 'category', body.data.documentId)).results;
+      expect(categories.length).toBe(1);
+      expect(categories[0].name).toBe(data.categories[0].name);
     });
 
     test('Update article1 with cat2', async () => {
@@ -592,8 +634,9 @@ describe.skip('Relations', () => {
       const tags = (await getRelations('article', 'tags', body.data.documentId)).results;
       expect(tags.length).toBe(0);
 
-      const category = (await getRelations('article', 'category', body.data.documentId)).data;
-      expect(category.name).toBe(data.categories[1].name);
+      const categories = (await getRelations('article', 'category', body.data.documentId)).results;
+      expect(categories.length).toBe(1);
+      expect(categories[0].name).toBe(data.categories[1].name);
     });
 
     test('Create article2', async () => {
@@ -652,8 +695,9 @@ describe.skip('Relations', () => {
       const tags = (await getRelations('article', 'tags', body.data.documentId)).results;
       expect(tags.length).toBe(0);
 
-      const category = (await getRelations('article', 'category', body.data.documentId)).data;
-      expect(category.name).toBe(data.categories[1].name);
+      const categories = (await getRelations('article', 'category', body.data.documentId)).results;
+      expect(categories.length).toBe(1);
+      expect(categories[0].name).toBe(data.categories[1].name);
     });
 
     test('Update cat1 with article1', async () => {
@@ -717,7 +761,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body.data).toMatchObject({ data: { name: 'cat3' } });
+      expect(body).toMatchObject({ results: [{ name: 'cat3' }] });
     });
 
     test('Get article2 with cat2', async () => {
@@ -726,7 +770,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body.data).toMatchObject({ data: { name: 'cat2' } });
+      expect(body).toMatchObject({ results: [{ name: 'cat2' }] });
     });
 
     test('Get cat1 without relations', async () => {
@@ -735,7 +779,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body.data).toMatchObject({
+      expect(body).toMatchObject({
         results: [],
         pagination: {
           total: 0,
@@ -752,7 +796,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body.data).toMatchObject({
+      expect(body).toMatchObject({
         pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
         results: [{ title: 'Article 2' }],
       });
@@ -764,7 +808,7 @@ describe.skip('Relations', () => {
         method: 'GET',
       });
 
-      expect(body.data).toMatchObject({
+      expect(body).toMatchObject({
         pagination: { page: 1, pageCount: 1, pageSize: 10, total: 1 },
         results: [{ title: 'Article 1' }],
       });
@@ -857,8 +901,8 @@ describe.skip('Relations', () => {
         username: null,
       });
 
-      const reference = (await getRelations('article', 'reference', body.data.documentId)).data;
-      expect(reference.documentId).toBe(data.references[0].documentId);
+      const references = await getRelations('article', 'reference', body.data.documentId);
+      expect(references.results[0].documentId).toBe(data.references[0].documentId);
     });
 
     test('Create article2 with ref1', async () => {
@@ -887,14 +931,16 @@ describe.skip('Relations', () => {
         id: 1,
         username: null,
       });
-      const reference = (await getRelations('article', 'reference', body.data.documentId)).data;
-      expect(reference.documentId).toBe(data.references[0].documentId);
+      const references = await getRelations('article', 'reference', body.data.documentId);
+      expect(references.results[0].documentId).toBe(data.references[0].documentId);
     });
   });
 
   describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     test('Attach Tag to a Reference', async () => {
-      const { body: createdTag } = await rq({
+      const {
+        body: { data: createdTag },
+      } = await rq({
         url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
@@ -902,7 +948,9 @@ describe.skip('Relations', () => {
         },
       });
 
-      const { body: createdReference } = await rq({
+      const {
+        body: { data: createdReference },
+      } = await rq({
         url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
@@ -913,8 +961,8 @@ describe.skip('Relations', () => {
 
       expect(createdReference.documentId).toBeDefined();
 
-      const tag = (await getRelations('reference', 'tag', createdReference.documentId)).data;
-      expect(tag.documentId).toBe(createdTag.documentId);
+      const tags = await getRelations('reference', 'tag', createdReference.documentId);
+      expect(tags.results[0].documentId).toBe(createdTag.documentId);
     });
 
     test('Detach Tag to a Reference', async () => {
@@ -939,8 +987,8 @@ describe.skip('Relations', () => {
         },
       });
 
-      let tag = (await getRelations('reference', 'tag', createdReference.documentId)).data;
-      expect(tag.documentId).toBe(createdTag.documentId);
+      let tags = await getRelations('reference', 'tag', createdReference.documentId);
+      expect(tags.results[0].documentId).toBe(createdTag.documentId);
 
       const {
         body: { data: referenceToUpdate },
@@ -952,8 +1000,8 @@ describe.skip('Relations', () => {
         },
       });
 
-      tag = (await getRelations('reference', 'tag', referenceToUpdate.documentId)).results;
-      expect(isEmpty(tag)).toBe(true);
+      tags = await getRelations('reference', 'tag', referenceToUpdate.documentId);
+      expect(isEmpty(tags.results)).toBe(true);
     });
 
     test('Delete Tag so the relation in the Reference side should be removed', async () => {

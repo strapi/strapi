@@ -24,9 +24,7 @@ import {
 } from '../../../constants';
 import { useFolder } from '../../../hooks/useFolder';
 import { usePersistentState } from '../../../hooks/usePersistentState';
-import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
-import getAllowedFiles from '../../../utils/getAllowedFiles';
-import getTrad from '../../../utils/getTrad';
+import { getBreadcrumbDataCM, toSingularTypes, getTrad, getAllowedFiles } from '../../../utils';
 import { AssetGridList } from '../../AssetGridList';
 import { Breadcrumbs } from '../../Breadcrumbs';
 import { EmptyAssets } from '../../EmptyAssets';
@@ -156,7 +154,7 @@ export const BrowseStep = ({
             )}
 
             {(assetCount > 0 || folderCount > 0 || isSearching) && (
-              <Flex marginLeft="auto" shrink={0}>
+              <Flex marginLeft="auto" shrink={0} gap={2}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     label={

@@ -1,6 +1,7 @@
 import { getService } from './utils';
 import { ALLOWED_WEBHOOK_EVENTS } from './constants';
 import history from './history';
+import preview from './preview';
 
 export default async () => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
@@ -13,4 +14,5 @@ export default async () => {
   await getService('permission').registerPermissions();
 
   await history.bootstrap?.({ strapi });
+  await preview.bootstrap?.({ strapi });
 };

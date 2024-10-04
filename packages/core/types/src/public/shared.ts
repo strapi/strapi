@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 /**
  * The `DocumentServicePluginParams` interface represents the various document-service's plugin parameters where the key is the parameter, and the value is the related type.
  *

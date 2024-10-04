@@ -335,7 +335,6 @@ const EditPage = () => {
                   <Button
                     startIcon={<Check />}
                     type="submit"
-                    size="M"
                     disabled={!modified || isSubmitting || values.stages.length === 0}
                     // if the confirm dialog is open the loading state is on
                     // the confirm button already

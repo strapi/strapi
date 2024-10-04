@@ -259,11 +259,6 @@ const createHelpers = (db: Database) => {
         dropForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
-      for (const removedColumn of table.columns.removed) {
-        debug(`Dropping column ${removedColumn.name} on ${table.name}`);
-        dropColumn(tableBuilder, removedColumn);
-      }
-
       // for mysql only, dropForeignKey also removes the index, so don't drop it twice
       const isMySQL = db.config.connection.client === 'mysql';
       const ignoreForeignKeyNames = isMySQL
@@ -287,7 +282,13 @@ const createHelpers = (db: Database) => {
         }
       }
 
-      // Update existing columns / foreign keys / indexes
+      // We drop columns after indexes to ensure that it doesn't cascade delete any indexes we expect to exist
+      for (const removedColumn of table.columns.removed) {
+        debug(`Dropping column ${removedColumn.name} on ${table.name}`);
+        dropColumn(tableBuilder, removedColumn);
+      }
+
+      // Update existing columns
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name} on ${table.name}`);
 
@@ -300,16 +301,7 @@ const createHelpers = (db: Database) => {
         }
       }
 
-      for (const updatedForeignKey of table.foreignKeys.updated) {
-        debug(`Recreating updated foreign key ${updatedForeignKey.name} on ${table.name}`);
-        createForeignKey(tableBuilder, updatedForeignKey.object);
-      }
-
-      for (const updatedIndex of table.indexes.updated) {
-        debug(`Recreating updated index ${updatedIndex.name} on ${table.name}`);
-        createIndex(tableBuilder, updatedIndex.object);
-      }
-
+      // Add any new columns
       for (const addedColumn of table.columns.added) {
         debug(`Creating column ${addedColumn.name} on ${table.name}`);
 
@@ -319,6 +311,17 @@ const createHelpers = (db: Database) => {
         } else {
           createColumn(tableBuilder, addedColumn);
         }
+      }
+
+      // once the columns have all been updated, we can create indexes again
+      for (const updatedForeignKey of table.foreignKeys.updated) {
+        debug(`Recreating updated foreign key ${updatedForeignKey.name} on ${table.name}`);
+        createForeignKey(tableBuilder, updatedForeignKey.object);
+      }
+
+      for (const updatedIndex of table.indexes.updated) {
+        debug(`Recreating updated index ${updatedIndex.name} on ${table.name}`);
+        createIndex(tableBuilder, updatedIndex.object);
       }
 
       for (const addedForeignKey of table.foreignKeys.added) {

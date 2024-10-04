@@ -98,7 +98,6 @@ const WebhookForm = ({
                   variant="tertiary"
                   startIcon={<Publish />}
                   disabled={isCreating || isTriggering}
-                  size="L"
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.trigger',
@@ -108,7 +107,6 @@ const WebhookForm = ({
                 <Button
                   startIcon={<Check />}
                   type="submit"
-                  size="L"
                   disabled={!modified}
                   loading={isSubmitting}
                 >

@@ -5,6 +5,9 @@ import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 
 test.describe('Create collection type', () => {
+  // very long timeout for these tests because they restart the server multiple times
+  test.describe.configure({ timeout: 300000 });
+
   test.beforeEach(async ({ page }) => {
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin.tar');

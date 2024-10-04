@@ -16,13 +16,17 @@ import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
+import entityValidator from '../entity-validator';
 
 const { validators } = validate;
 
 // we have to typecast to reconcile the differences between validator and database getModel
 const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
 
-export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
+export const createContentTypeRepository: RepositoryFactoryMethod = (
+  uid,
+  validator = entityValidator
+) => {
   const contentType = strapi.contentType(uid);
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
@@ -49,7 +53,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return params;
   };
 
-  const entries = createEntriesService(uid);
+  const entries = createEntriesService(uid, validator);
 
   const eventManager = createEventManager(strapi, uid);
   const emitEvent = curry(eventManager.emitEvent);
@@ -291,7 +295,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     ]);
 
     // Load any unidirectional relation targetting the old published entries
-    const relationsToSync = await unidirectionalRelations.load(uid, oldPublishedVersions);
+    const relationsToSync = await unidirectionalRelations.load(uid, {
+      newVersions: draftsToPublish,
+      oldVersions: oldPublishedVersions,
+    });
 
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
@@ -302,7 +309,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     );
 
     // Sync unidirectional relations with the new published entries
-    await unidirectionalRelations.sync(oldPublishedVersions, publishedEntries, relationsToSync);
+    await unidirectionalRelations.sync(
+      [...oldPublishedVersions, ...draftsToPublish],
+      publishedEntries,
+      relationsToSync
+    );
 
     publishedEntries.forEach(emitEvent('entry.publish'));
 
@@ -358,7 +369,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     ]);
 
     // Load any unidirectional relation targeting the old drafts
-    const relationsToSync = await unidirectionalRelations.load(uid, oldDrafts);
+    const relationsToSync = await unidirectionalRelations.load(uid, {
+      newVersions: versionsToDraft,
+      oldVersions: oldDrafts,
+    });
 
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
@@ -369,7 +383,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     );
 
     // Sync unidirectional relations with the new draft entries
-    await unidirectionalRelations.sync(oldDrafts, draftEntries, relationsToSync);
+    await unidirectionalRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      relationsToSync
+    );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
     return { documentId, entries: draftEntries };
