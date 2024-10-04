@@ -53,7 +53,7 @@ describe('useModalQueryParams', () => {
     await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1]?.onChangeFilters?.([{ some: { $eq: 'thing' } }]);
+      result.current[1]?.onChangeFilters?.([{ some: 'thing' }]);
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -63,7 +63,7 @@ describe('useModalQueryParams', () => {
         ...FIXTURE_QUERY.filters,
         $and: [
           {
-            some: { $eq: 'thing' },
+            some: 'thing',
           },
         ],
       },

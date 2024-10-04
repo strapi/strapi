@@ -225,6 +225,6 @@ describe('useAssets', () => {
 
     const { result } = setup({});
 
-    await waitFor(() => expect(result.current.data?.results ?? []).toMatchInlineSnapshot(`[]`));
+    await waitFor(() => expect(result.current.data?.results ?? []).toHaveLength(0));
   });
 });

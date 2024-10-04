@@ -40,7 +40,7 @@ export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {
       },
       filters: {
         $and: [
-          // ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
+          ...(paramsExceptFolderAndQ?.filters?.$and ?? []),
           {
             parent: {
               id: folder ?? {
