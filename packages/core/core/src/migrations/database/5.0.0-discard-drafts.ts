@@ -178,7 +178,10 @@ const migrateUp = async (trx: Knex, db: Database) => {
     async validateEntityCreation(_, data) {
       return data;
     },
-    async validateEntityUpdate(_, data, options, entity) {
+    async validateEntityUpdate(_, data) {
+      // Data can be partially empty on partial updates
+      // This migration doesn't trigger any update (or partial update),
+      // so it's safe to return the data as is.
       return data as any;
     },
   });
