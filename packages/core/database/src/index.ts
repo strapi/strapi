@@ -109,10 +109,15 @@ class Database {
 
   async init({ models }: { models: Model[] }) {
     // for function connections, create Knex connection asynchronously
+    // this is necessary to fully support Knex async functions, allowing for async authorization methods
     if (typeof this.config.connection.connection === 'function') {
       debug('Creating knex connection from function');
       const conn = {
         ...this.config.connection,
+        // We await the function so it resolves to an object config
+        // That way we don't have to resolve it every time the connection getter is called
+        // In the future we could make a breaking change to disallow accessing connection
+        // directly and pass it directly to Knex as a function
         connection: await this.config.connection.connection(),
       };
       this.#connection = this.#createConnection(conn);
