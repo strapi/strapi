@@ -175,13 +175,11 @@ const migrateUp = async (trx: Knex, db: Database) => {
    *       E.g. @see https://github.com/strapi/strapi/issues/21583
    */
   const documentService = createDocumentService(strapi, {
-    // @ts-expect-error - fix this
-    validateEntityCreation(contentType: string, data: any) {
+    async validateEntityCreation(_, data) {
       return data;
     },
-    // @ts-expect-error - fix this
-    validateEntityUpdate(contentType: string, data: any) {
-      return data;
+    async validateEntityUpdate(_, data, options, entity) {
+      return data as any;
     },
   });
 

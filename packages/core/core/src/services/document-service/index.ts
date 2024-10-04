@@ -13,6 +13,7 @@ import entityValidator from '../entity-validator';
  * - Apply default parameters to document actions
  *
  * @param strapi
+ * @param validator - validator for database entries
  * @returns DocumentService
  *
  * @example Access documents

@@ -16,13 +16,17 @@ import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
+import entityValidator from '../entity-validator';
 
 const { validators } = validate;
 
 // we have to typecast to reconcile the differences between validator and database getModel
 const getModel = ((schema: UID.Schema) => strapi.getModel(schema)) as (schema: string) => any;
 
-export const createContentTypeRepository: RepositoryFactoryMethod = (uid, validator) => {
+export const createContentTypeRepository: RepositoryFactoryMethod = (
+  uid,
+  validator = entityValidator
+) => {
   const contentType = strapi.contentType(uid);
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
