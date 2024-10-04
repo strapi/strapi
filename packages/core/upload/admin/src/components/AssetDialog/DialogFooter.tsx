@@ -1,10 +1,12 @@
-import * as React from 'react';
-
 import { Button, Modal } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-export const DialogFooter = ({ onClose, onValidate }) => {
+interface DialogFooterProps {
+  onClose: () => void;
+  onValidate?: () => void;
+}
+
+export const DialogFooter = ({ onClose, onValidate }: DialogFooterProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -19,13 +21,4 @@ export const DialogFooter = ({ onClose, onValidate }) => {
       )}
     </Modal.Footer>
   );
-};
-
-DialogFooter.defaultProps = {
-  onValidate: undefined,
-};
-
-DialogFooter.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  onValidate: PropTypes.func,
 };
