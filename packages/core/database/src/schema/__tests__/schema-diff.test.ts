@@ -120,6 +120,55 @@ describe('diffSchemas', () => {
     });
   });
 
+  test('Table order ignored', async () => {
+    const databaseSchema: Schema = {
+      tables: [
+        {
+          name: 'table_a',
+          columns: [],
+          indexes: [],
+          foreignKeys: [],
+        },
+        {
+          name: 'table_b',
+          columns: [],
+          indexes: [],
+          foreignKeys: [],
+        },
+      ],
+    };
+
+    const userSchema: Schema = {
+      tables: [
+        {
+          name: 'table_b',
+          columns: [],
+          indexes: [],
+          foreignKeys: [],
+        },
+        {
+          name: 'table_a',
+          columns: [],
+          indexes: [],
+          foreignKeys: [],
+        },
+      ],
+    };
+
+    const result = await diffSchemas({ databaseSchema, userSchema, previousSchema: userSchema });
+
+    expect(result.status).toBe('UNCHANGED');
+    expect(result.diff.tables.added).toHaveLength(0);
+    expect(result.diff.tables.updated).toHaveLength(0);
+    expect(result.diff.tables.removed).toHaveLength(0);
+    expect(result.diff.tables.unchanged).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'table_a' }),
+        expect.objectContaining({ name: 'table_b' }),
+      ])
+    );
+  });
+
   test('UnTracked Table', async () => {
     const testTable = {
       name: 'my_table',
@@ -225,6 +274,7 @@ describe('diffSchemas', () => {
         },
       });
     });
+
     test('Column order ignored', async () => {
       const databaseSchema: Schema = {
         tables: [
