@@ -118,6 +118,8 @@ class Database {
         // That way we don't have to resolve it every time the connection getter is called
         // In the future we could make a breaking change to disallow accessing connection
         // directly and pass it directly to Knex as a function
+        // Note that this means we do not support Knex `expirationChecker` because
+        // we would have to implement it ourselves
         connection: await this.config.connection.connection(),
       };
       this.#connection = this.#createConnection(conn);
