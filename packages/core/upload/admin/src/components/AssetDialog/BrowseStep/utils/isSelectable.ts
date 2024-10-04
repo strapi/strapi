@@ -1,10 +1,4 @@
-/**
- * @param {string[]} allowedTypes
- * @param {string} mime
- * @returns {boolean}
- */
-
-export const isSelectable = (allowedTypes, mime = '') => {
+export const isSelectable = (allowedTypes: string[], mime = '') => {
   if (!mime) return false;
 
   const fileType = mime.split('/')[0];
