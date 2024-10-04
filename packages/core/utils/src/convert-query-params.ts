@@ -403,6 +403,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
           );
         }
 
+        // TODO: Remove the possibility to have multiple properties at the same time (on/count/populate)
         const newSubPopulate = {};
 
         // case: { populate: '*' }
