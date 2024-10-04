@@ -1,9 +1,6 @@
-import React from 'react';
-
 import { Typography, VisuallyHidden } from '@strapi/design-system';
 import { ChevronLeft, ChevronRight } from '@strapi/icons';
-import PropTypes from 'prop-types';
-import { styled } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { usePagination } from './PaginationContext';
 
@@ -11,7 +8,7 @@ const PaginationText = styled(Typography)`
   line-height: revert;
 `;
 
-const LinkWrapper = styled.button`
+const linkWrapperStyles = css<{ $active?: boolean }>`
   padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => theme.borderRadius};
   box-shadow: ${({ $active, theme }) => ($active ? theme.shadows.filterShadow : undefined)};
@@ -49,9 +46,17 @@ const LinkWrapper = styled.button`
   }
 `;
 
-LinkWrapper.defaultProps = { type: 'button' };
+const LinkWrapperButton = styled.button<{ $active?: boolean }>`
+  ${linkWrapperStyles}
+`;
 
-const PageLinkWrapper = styled(LinkWrapper)`
+const LinkWrapperDiv = styled.div<{ $active?: boolean }>`
+  ${linkWrapperStyles}
+`;
+
+LinkWrapperButton.defaultProps = { type: 'button' };
+
+const PageLinkWrapper = styled(LinkWrapperButton)`
   color: ${({ theme, $active }) => ($active ? theme.colors.primary700 : theme.colors.neutral800)};
   background: ${({ theme, $active }) => ($active ? theme.colors.neutral0 : undefined)};
 
@@ -60,7 +65,7 @@ const PageLinkWrapper = styled(LinkWrapper)`
   }
 `;
 
-const ActionLinkWrapper = styled(LinkWrapper)`
+const ActionLinkWrapper = styled(LinkWrapperButton)`
   font-size: 1.1rem;
   svg path {
     fill: ${(p) => (p['aria-disabled'] ? p.theme.colors.neutral300 : p.theme.colors.neutral600)};
@@ -81,11 +86,19 @@ const ActionLinkWrapper = styled(LinkWrapper)`
       : undefined}
 `;
 
-const DotsWrapper = styled(LinkWrapper)`
+const DotsWrapper = styled(LinkWrapperDiv)`
   color: ${({ theme }) => theme.colors.neutral800};
 `;
 
-export const PreviousLink = ({ children, ...props }) => {
+interface PaginationLinkProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+}
+
+interface PageLinkProps extends PaginationLinkProps {
+  number: number;
+}
+
+export const PreviousLink = ({ children, ...props }: PaginationLinkProps) => {
   const { activePage } = usePagination();
 
   const disabled = activePage === 1;
@@ -100,7 +113,7 @@ export const PreviousLink = ({ children, ...props }) => {
   );
 };
 
-export const NextLink = ({ children, ...props }) => {
+export const NextLink = ({ children, ...props }: PaginationLinkProps) => {
   const { activePage, pageCount } = usePagination();
 
   const disabled = activePage === pageCount;
@@ -115,7 +128,7 @@ export const NextLink = ({ children, ...props }) => {
   );
 };
 
-export const PageLink = ({ number, children, ...props }) => {
+export const PageLink = ({ number, children, ...props }: PageLinkProps) => {
   const { activePage } = usePagination();
 
   const isActive = activePage === number;
@@ -132,9 +145,13 @@ export const PageLink = ({ number, children, ...props }) => {
   );
 };
 
-export const Dots = ({ children, ...props }) => (
+interface DotsProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export const Dots = ({ children, ...props }: DotsProps) => (
   <li>
-    <DotsWrapper {...props} tag="div">
+    <DotsWrapper {...props} as="div">
       <VisuallyHidden>{children}</VisuallyHidden>
       <PaginationText aria-hidden small>
         …
@@ -142,19 +159,3 @@ export const Dots = ({ children, ...props }) => (
     </DotsWrapper>
   </li>
 );
-
-PageLink.propTypes = {
-  children: PropTypes.node.isRequired,
-  number: PropTypes.number.isRequired,
-};
-
-const sharedPropTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-NextLink.propTypes = sharedPropTypes;
-PreviousLink.propTypes = sharedPropTypes;
-
-Dots.propTypes = {
-  children: PropTypes.node.isRequired,
-};
