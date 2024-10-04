@@ -186,7 +186,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    * So we never store component IDs to ensure they're re-created while restoring a version.
    */
   const getComponentFields = (componentUID: UID.Component): string[] => {
-    return Object.entries(strapi.getModel(componentUID).attributes).reduce(
+    return Object.entries(strapi.getModel(componentUID).attributes).reduce<string[]>(
       (fieldsAcc, [key, attribute]) => {
         if (!['relation', 'media', 'component', 'dynamiczone'].includes(attribute.type)) {
           fieldsAcc.push(key);
