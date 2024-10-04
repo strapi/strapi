@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 import createSchemaDiff from '../diff';
-import type { Schema, Table } from '..';
+import type { Index, Schema, Table } from '..';
 
 describe('diffSchemas', () => {
   let diffSchemas: ReturnType<typeof createSchemaDiff>['diff'];
@@ -604,7 +604,7 @@ describe('diffSchemas', () => {
     });
 
     test('unchanged index', async () => {
-      const testIndex = {
+      const testIndex: Index = {
         name: 'test_index',
         columns: ['column1'],
         type: 'unique',
@@ -655,7 +655,7 @@ describe('diffSchemas', () => {
     });
 
     test('removed index', async () => {
-      const testIndex = {
+      const testIndex: Index = {
         name: 'test_index',
         columns: ['column1'],
         type: 'unique',
