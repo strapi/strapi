@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.0.2-beta.0",
+  "version": "5.0.2",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
