@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
