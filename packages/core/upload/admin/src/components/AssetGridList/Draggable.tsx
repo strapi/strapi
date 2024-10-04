@@ -1,14 +1,20 @@
-import React, { useRef } from 'react';
+import * as React from 'react';
 
-import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 
-export const Draggable = ({ children, id, index, moveItem }) => {
-  const ref = useRef(null);
+interface DraggableProps {
+  id: string | number;
+  index: number;
+  children: React.ReactNode;
+  moveItem: (fromIndex: number, toIndex: number) => void;
+}
+
+export const Draggable = ({ children, id, index, moveItem }: DraggableProps) => {
+  const ref = React.useRef(null);
 
   const [, drop] = useDrop({
     accept: 'draggable',
-    hover(hoveredOverItem) {
+    hover(hoveredOverItem: { id: number; index: number }) {
       if (!ref.current) {
         return;
       }
@@ -40,11 +46,4 @@ export const Draggable = ({ children, id, index, moveItem }) => {
       {children}
     </div>
   );
-};
-
-Draggable.propTypes = {
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-  index: PropTypes.number.isRequired,
-  children: PropTypes.node.isRequired,
-  moveItem: PropTypes.func.isRequired,
 };
