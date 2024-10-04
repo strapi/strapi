@@ -1,8 +1,5 @@
-import React from 'react';
-
 import { Layouts } from '@strapi/admin/strapi-admin';
 import { Box } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
 const EmptyAssetCard = styled(Box)`
@@ -19,7 +16,12 @@ const PlaceholderSize = {
   M: 234,
 };
 
-export const EmptyAssetGrid = ({ count, size }) => {
+interface EmptyAssetGridProps {
+  count: number;
+  size: 'S' | 'M';
+}
+
+export const EmptyAssetGrid = ({ count, size }: EmptyAssetGridProps) => {
   return (
     <Layouts.Grid size={size}>
       {Array(count)
@@ -34,9 +36,4 @@ export const EmptyAssetGrid = ({ count, size }) => {
         ))}
     </Layouts.Grid>
   );
-};
-
-EmptyAssetGrid.propTypes = {
-  count: PropTypes.number.isRequired,
-  size: PropTypes.string.isRequired,
 };
