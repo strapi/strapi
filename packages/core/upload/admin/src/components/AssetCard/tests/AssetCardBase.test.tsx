@@ -1,15 +1,13 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
-import { AssetCardBase } from '../AssetCardBase';
+import { AssetCardBase, AssetCardBaseProps } from '../AssetCardBase';
 
-const render = (props) => ({
+const render = (props: AssetCardBaseProps) => ({
   user: userEvent.setup(),
-  ...renderRTL(<AssetCardBase name="Card" extension="png" {...props} />, {
+  ...renderRTL(<AssetCardBase {...props} />, {
     wrapper: ({ children }) => (
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
         <DesignSystemProvider>{children}</DesignSystemProvider>
@@ -24,6 +22,9 @@ describe('AssetCardBase', () => {
       const onSelect = jest.fn();
       const { getByRole, user } = render({
         onSelect,
+        extension: 'png',
+        name: 'Card',
+        variant: 'Image',
       });
 
       await user.click(getByRole('checkbox'));
@@ -39,6 +40,9 @@ describe('AssetCardBase', () => {
 
       const { getByRole, user } = render({
         onEdit,
+        extension: 'png',
+        name: 'Card',
+        variant: 'Image',
       });
 
       const editButton = getByRole('button', {
@@ -55,6 +59,9 @@ describe('AssetCardBase', () => {
 
       const { getByRole, user } = render({
         onRemove,
+        extension: 'png',
+        name: 'Card',
+        variant: 'Image',
       });
 
       const removeButton = getByRole('button', {
@@ -71,6 +78,9 @@ describe('AssetCardBase', () => {
 
       const { getAllByRole, user } = render({
         onEdit,
+        extension: 'png',
+        name: 'Card',
+        variant: 'Image',
       });
 
       const card = getAllByRole('button')[0];
@@ -87,6 +97,9 @@ describe('AssetCardBase', () => {
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
+        name: 'Card',
+        extension: 'png',
+        variant: 'Image',
       });
 
       await user.tab();
@@ -99,6 +112,9 @@ describe('AssetCardBase', () => {
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
+        name: 'Card',
+        extension: 'png',
+        variant: 'Image',
       });
 
       // checkbox
@@ -118,6 +134,9 @@ describe('AssetCardBase', () => {
         onSelect: jest.fn(),
         onEdit: jest.fn(),
         onRemove: jest.fn(),
+        name: 'Card',
+        extension: 'png',
+        variant: 'Image',
       });
 
       // checkbox
