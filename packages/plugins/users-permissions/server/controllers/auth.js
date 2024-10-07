@@ -31,7 +31,7 @@ const sanitizeUser = (user, ctx) => {
   return strapi.contentAPI.sanitize.output(user, userSchema, { auth });
 };
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   async callback(ctx) {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
@@ -114,7 +114,12 @@ module.exports = {
       throw new ApplicationError('You must be authenticated to reset your password');
     }
 
-    const { currentPassword, password } = await validateChangePasswordBody(ctx.request.body);
+    const validations = strapi.config.get('plugin::users-permissions.validationRules');
+
+    const { currentPassword, password } = await validateChangePasswordBody(
+      ctx.request.body,
+      validations
+    );
 
     const user = await strapi.db
       .query('plugin::users-permissions.user')
@@ -139,8 +144,11 @@ module.exports = {
   },
 
   async resetPassword(ctx) {
+    const validations = strapi.config.get('plugin::users-permissions.validationRules');
+
     const { password, passwordConfirmation, code } = await validateResetPasswordBody(
-      ctx.request.body
+      ctx.request.body,
+      validations
     );
 
     if (password !== passwordConfirmation) {
@@ -315,7 +323,9 @@ module.exports = {
       provider: 'local',
     };
 
-    await validateRegisterBody(params);
+    const validations = strapi.config.get('plugin::users-permissions.validationRules');
+
+    await validateRegisterBody(params, validations);
 
     const role = await strapi.db
       .query('plugin::users-permissions.role')
@@ -439,4 +449,4 @@ module.exports = {
       sent: true,
     });
   },
-};
+});

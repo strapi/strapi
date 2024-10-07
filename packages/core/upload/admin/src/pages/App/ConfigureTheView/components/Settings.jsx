@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { pageSizes, sortOptions } from '../../../../constants';
-import getTrad from '../../../../utils/getTrad';
+import { getTrad } from '../../../../utils';
 
 const Settings = ({ sort = '', pageSize = 10, onChange }) => {
   const { formatMessage } = useIntl();

@@ -1,7 +1,8 @@
 import type { UID, Modules } from '@strapi/types';
 
 export type RepositoryFactoryMethod = <TContentTypeUID extends UID.ContentType>(
-  uid: TContentTypeUID
+  uid: TContentTypeUID,
+  entityValidator: Modules.EntityValidator.EntityValidator
 ) => Modules.Documents.ServiceInstance<TContentTypeUID>;
 
 export const wrapInTransaction = (fn: (...args: any) => any) => {

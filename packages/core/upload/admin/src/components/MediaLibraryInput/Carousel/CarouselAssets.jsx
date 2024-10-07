@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { AssetDefinition } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils/getTrad';
 import { EditAssetDialog } from '../../EditAssetDialog';
 
 import { CarouselAsset } from './CarouselAsset';

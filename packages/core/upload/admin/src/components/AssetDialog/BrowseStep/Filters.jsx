@@ -5,7 +5,7 @@ import { Filter } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import displayedFilters from '../../../utils/displayedFilters';
+import { displayedFilters } from '../../../utils';
 import FilterList from '../../FilterList';
 import FilterPopover from '../../FilterPopover';
 

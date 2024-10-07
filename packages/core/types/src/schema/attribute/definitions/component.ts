@@ -47,4 +47,4 @@ export type GetComponentValue<TAttribute extends Attribute.Attribute> =
     : never;
 
 export type ComponentTarget<TAttribute extends Attribute.Attribute> =
-  TAttribute extends Component<infer TComponentUID> ? TComponentUID : never;
+  TAttribute extends Component<infer TComponentUID, Constants.BooleanValue> ? TComponentUID : never;

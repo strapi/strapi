@@ -101,7 +101,7 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
 
     validatePluginName(packageInfo.strapi.name);
     internalPlugins[packageInfo.strapi.name] = {
-      ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
+      ...toDetailedDeclaration({ enabled: true, resolve: packageModulePath, isModule: client }),
       info: packageInfo.strapi,
       packageInfo,
     };

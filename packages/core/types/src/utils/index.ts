@@ -205,3 +205,32 @@ export type PartialWithThis<T> = Partial<T> & ThisType<T>;
  *
  */
 export type OneOf<T, U> = (T & { [K in keyof U]?: never }) | (U & { [K in keyof T]?: never });
+
+/**
+ * Enhances a given type by creating a new type from its properties using an intersection with an untyped object.
+ *
+ * This results in a cleaner and more readable type when inspected, as properties are flattened.
+ *
+ * @template T - The type to be beautified.
+ *
+ * @example
+ * Applying `Pretty` to a more complex type:
+ * ```typescript
+ * interface A {
+ *   foo: string;
+ *   bar: number;
+ * }
+ *
+ * interface B {
+ *   baz: boolean;
+ * }
+ *
+ * type C = A & B;
+ * ^ {
+ *     foo: string;
+ *     bar: number;
+ *     baz: boolean;
+ *   }
+ * ```
+ */
+export type Pretty<T> = { [K in keyof T]: T[K] } & unknown;

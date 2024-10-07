@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { AssetDefinition } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 

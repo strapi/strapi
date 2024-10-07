@@ -4,7 +4,7 @@ import { Box, Divider, Modal, Tabs } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 
 import { FromComputerForm } from './FromComputerForm';
 import { FromUrlForm } from './FromUrlForm';

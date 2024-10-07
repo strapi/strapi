@@ -16,7 +16,7 @@ import { NavLink } from 'react-router-dom';
 
 import { useConfig } from '../../../hooks/useConfig';
 import pluginID from '../../../pluginId';
-import getTrad from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 
 import { Settings } from './components/Settings';
 import { onChange, setLoaded } from './state/actions';

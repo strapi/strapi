@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useClipboard } from '../../hooks/useClipboard';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 export const CopyLinkButton = ({ url }) => {
   const { toggleNotification } = useNotification();

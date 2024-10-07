@@ -32,7 +32,6 @@ export type Media<
   ]
 >;
 
-// TODO: [TS2] Introduce a real type for the media values, remove any
 export type MediaValue<TMultiple extends Constants.BooleanValue = Constants.False> = If<
   TMultiple,
   any[],
@@ -49,6 +48,5 @@ export type GetMediaValue<TAttribute extends Attribute.Attribute> =
     ? MediaValue<TMultiple>
     : never;
 
-export type MediaTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Media
-  ? MediaTargetUID
-  : never;
+export type MediaTarget<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Media<MediaKind | undefined, Constants.BooleanValue> ? MediaTargetUID : never;

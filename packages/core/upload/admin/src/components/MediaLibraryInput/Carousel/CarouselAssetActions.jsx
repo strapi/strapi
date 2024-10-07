@@ -6,8 +6,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { AssetDefinition } from '../../../constants';
-import { prefixFileUrlWithBackendUrl } from '../../../utils';
-import getTrad from '../../../utils/getTrad';
+import { getTrad, prefixFileUrlWithBackendUrl } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton';
 
 export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditAsset }) => {
