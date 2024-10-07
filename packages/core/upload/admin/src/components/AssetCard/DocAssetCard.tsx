@@ -1,11 +1,8 @@
-import React from 'react';
-
 import { Flex } from '@strapi/design-system';
 import { File, FilePdf } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
-import { AssetCardBase } from './AssetCardBase';
+import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 
 const IconWrapper = styled.span`
   svg {
@@ -18,9 +15,26 @@ const CardAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
 
-export const DocAssetCard = ({ name, extension, size, ...restProps }) => {
+interface DocAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children'> {
+  size?: 'S' | 'M';
+  extension: string;
+}
+
+export const DocAssetCard = ({
+  name,
+  extension,
+  size,
+  selected = false,
+  ...restProps
+}: DocAssetCardProps) => {
   return (
-    <AssetCardBase name={name} extension={extension} {...restProps} variant="Doc">
+    <AssetCardBase
+      name={name}
+      extension={extension}
+      selected={selected}
+      {...restProps}
+      variant="Doc"
+    >
       <CardAsset width="100%" height={size === 'S' ? `8.8rem` : `16.4rem`} justifyContent="center">
         <IconWrapper>
           {extension === 'pdf' ? <FilePdf aria-label={name} /> : <File aria-label={name} />}
@@ -28,22 +42,4 @@ export const DocAssetCard = ({ name, extension, size, ...restProps }) => {
       </CardAsset>
     </AssetCardBase>
   );
-};
-
-DocAssetCard.defaultProps = {
-  selected: false,
-  onEdit: undefined,
-  onSelect: undefined,
-  onRemove: undefined,
-  size: 'M',
-};
-
-DocAssetCard.propTypes = {
-  extension: PropTypes.string.isRequired,
-  onEdit: PropTypes.func,
-  onSelect: PropTypes.func,
-  onRemove: PropTypes.func,
-  selected: PropTypes.bool,
-  name: PropTypes.string.isRequired,
-  size: PropTypes.oneOf(['S', 'M']),
 };
