@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Box, CardAsset, CardTimer } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
 import { formatDuration } from '../../utils';
@@ -19,13 +18,39 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-export const VideoAssetCard = ({ name, url, mime, size, ...props }) => {
-  const [duration, setDuration] = useState();
+interface VideoAssetCardProps {
+  mime: string;
+  name: string;
+  onSelect?: () => void;
+  onEdit?: (
+    event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => void;
+  onRemove?: () => void;
+  url: string;
+  selected?: boolean;
+  size?: 'S' | 'M';
+  extension: string;
+  isSelectable?: boolean;
+  subtitle?: string;
+  variant: 'Image' | 'Video' | 'Audio' | 'Doc';
+}
+
+export const VideoAssetCard = ({
+  name,
+  url,
+  mime,
+  size = 'M',
+  selected = false,
+  ...props
+}: VideoAssetCardProps) => {
+  const [duration, setDuration] = React.useState<number>();
 
   const formattedDuration = duration && formatDuration(duration);
 
   return (
-    <AssetCardBase name={name} {...props} variant="Video">
+    <AssetCardBase selected={selected} name={name} {...props} variant="Video">
       <CardAsset size={size}>
         <VideoPreviewWrapper size={size}>
           <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} alt={name} />
@@ -34,24 +59,4 @@ export const VideoAssetCard = ({ name, url, mime, size, ...props }) => {
       <CardTimer>{formattedDuration || '...'}</CardTimer>
     </AssetCardBase>
   );
-};
-
-VideoAssetCard.defaultProps = {
-  onSelect: undefined,
-  onEdit: undefined,
-  onRemove: undefined,
-  selected: false,
-  size: 'M',
-};
-
-VideoAssetCard.propTypes = {
-  extension: PropTypes.string.isRequired,
-  mime: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  onSelect: PropTypes.func,
-  onEdit: PropTypes.func,
-  onRemove: PropTypes.func,
-  url: PropTypes.string.isRequired,
-  selected: PropTypes.bool,
-  size: PropTypes.oneOf(['S', 'M']),
 };
