@@ -17,12 +17,11 @@ interface Options {
  */
 const convertComponentName = (component: string, isRef = false): string => {
   const cleanComponentName = `${pascalCase(component)}Component`;
-  
+
   if (isRef) {
     return `#/components/schemas/${cleanComponentName}`;
-  } 
-    return cleanComponentName;
-  
+  }
+  return cleanComponentName;
 };
 
 /**
@@ -166,15 +165,18 @@ const cleanSchemaAttributes = (
           return finalComponentSchema;
         });
         let discriminator: OpenAPIV3.DiscriminatorObject | undefined;
-        if (components.every(component => Object.hasOwn(component, '$ref'))) {
+        if (components.every((component) => Object.hasOwn(component, '$ref'))) {
           discriminator = {
             propertyName: '__component',
-            mapping: attribute.components.reduce((acc, component) => {
-              acc[component] = convertComponentName(component, true);
-              return acc;
-            }, {} as {
-              [value: string]: string;
-            })
+            mapping: attribute.components.reduce(
+              (acc, component) => {
+                acc[component] = convertComponentName(component, true);
+                return acc;
+              },
+              {} as {
+                [value: string]: string;
+              }
+            ),
           };
         }
 
@@ -183,7 +185,7 @@ const cleanSchemaAttributes = (
           items: {
             anyOf: components,
           },
-          discriminator
+          discriminator,
         };
         break;
       }
