@@ -1,20 +1,13 @@
-/**
- *
- * Tests for SearchAsset
- *
- */
-
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
+import type { Query } from '../../../../../../../shared/contracts/files';
 
 import SearchAsset from '../index';
 
 const handleChange = jest.fn();
 
-const makeApp = (queryValue) => (
+const makeApp = (queryValue: Query['_q'] | null) => (
   <DesignSystemProvider>
     <IntlProvider locale="en">
       <SearchAsset onChangeSearch={handleChange} queryValue={queryValue} />
@@ -138,20 +131,26 @@ describe('SearchAsset', () => {
     const queryValue = 'michka';
     const { container } = render(makeApp(queryValue));
 
-    const input = container.querySelector('input[name="search"]');
+    const input: HTMLInputElement | null = container.querySelector('input[name="search"]');
 
     expect(input).toBeInTheDocument();
-    expect(input.value).toEqual(queryValue);
+    expect(input?.value).toEqual(queryValue);
   });
 
   it('should call handleChange when submitting search input', () => {
     const { container } = render(makeApp(null));
 
-    fireEvent.click(container.querySelector('button'));
-    const input = container.querySelector('input[name="search"]');
+    const button = container.querySelector('button');
 
-    fireEvent.change(input, { target: { value: 'michka' } });
-    fireEvent.submit(input);
+    if (button) {
+      fireEvent.click(button);
+    }
+    const input: HTMLInputElement | null = container.querySelector('input[name="search"]');
+
+    if (input) {
+      fireEvent.change(input, { target: { value: 'michka' } });
+      fireEvent.submit(input);
+    }
 
     expect(handleChange.mock.calls.length).toBe(1);
   });

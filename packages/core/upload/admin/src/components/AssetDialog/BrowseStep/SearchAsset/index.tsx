@@ -1,24 +1,29 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { IconButton, Searchbar, SearchForm } from '@strapi/design-system';
 import { Search } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../../utils';
+import type { Query } from '../../../../../../shared/contracts/files';
 
-const SearchAsset = ({ onChangeSearch, queryValue }) => {
+interface SearchAssetProps {
+  onChangeSearch: (_q: Query['_q'] | null) => void;
+  queryValue?: Query['_q'] | null;
+}
+
+const SearchAsset = ({ onChangeSearch, queryValue = null }: SearchAssetProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [isOpen, setIsOpen] = useState(!!queryValue);
-  const [value, setValue] = useState(queryValue || '');
-  const wrapperRef = useRef(null);
+  const [isOpen, setIsOpen] = React.useState(!!queryValue);
+  const [value, setValue] = React.useState(queryValue || '');
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
+  React.useLayoutEffect(() => {
     if (isOpen) {
       setTimeout(() => {
-        wrapperRef.current.querySelector('input').focus();
+        wrapperRef.current?.querySelector('input')?.focus();
       }, 0);
     }
   }, [isOpen]);
@@ -32,7 +37,7 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
     onChangeSearch(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -71,15 +76,6 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
       <Search />
     </IconButton>
   );
-};
-
-SearchAsset.defaultProps = {
-  queryValue: null,
-};
-
-SearchAsset.propTypes = {
-  onChangeSearch: PropTypes.func.isRequired,
-  queryValue: PropTypes.string,
 };
 
 export default SearchAsset;
