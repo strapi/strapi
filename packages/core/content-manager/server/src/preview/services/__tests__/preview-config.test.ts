@@ -10,7 +10,7 @@ const getConfig = (enabled: boolean, handler: () => void) => {
 };
 
 describe('Preview Config', () => {
-  test('Is not enabled by default', async () => {
+  test('Is not enabled by default', () => {
     const strapi = {
       config: {
         get: () => undefined,
@@ -20,7 +20,7 @@ describe('Preview Config', () => {
     expect(createPreviewConfigService({ strapi }).isEnabled()).toBe(false);
   });
 
-  test('Is enabled when configuration is set', async () => {
+  test('Is enabled when configuration is set', () => {
     const strapi = {
       config: {
         get: () => getConfig(true, () => {}),
@@ -31,7 +31,7 @@ describe('Preview Config', () => {
   });
 
   describe('Validation', () => {
-    test('Passes on valid configuration', async () => {
+    test('Passes on valid configuration', () => {
       const strapi = {
         config: {
           get: () => getConfig(true, () => {}),
@@ -41,7 +41,7 @@ describe('Preview Config', () => {
       createPreviewConfigService({ strapi }).validate();
     });
 
-    test('Fails on missing handler', async () => {
+    test('Fails on missing handler', () => {
       const strapi = {
         config: {
           // @ts-expect-error - invalid handler
