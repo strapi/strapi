@@ -61,7 +61,9 @@ describe('useFolders', () => {
       ]
     `);
 
-    expect(result.current.data[0].name).toBe('something');
+    if (result.current.data) {
+      expect(result.current.data[0].name).toBe('something');
+    }
   });
 
   test('fetches data from the right URL if a query param was set', async () => {
@@ -102,13 +104,13 @@ describe('useFolders', () => {
       ]
     `);
 
-    result.current.data.forEach((folder) => {
+    result.current.data?.forEach((folder) => {
       /**
        * We're passing a "current folder" in the query, which means
        * any folders returned should include the current folder's ID
        * in it's path because this get's the children of current.
        */
-      expect(folder.path.includes('1')).toBe(true);
+      expect(folder.path?.includes('1')).toBe(true);
     });
   });
 
