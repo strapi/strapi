@@ -6,11 +6,7 @@ import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
 import { getTrad, urlsToAssets, urlSchema } from '../../../utils';
-import type { RawFile, File } from '../../../../../shared/contracts/files';
-
-interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
-  rawFile: RawFile;
-}
+import type { FileWithRawFile } from './AddAssetStep';
 
 interface FromUrlFormProps {
   onClose: () => void;

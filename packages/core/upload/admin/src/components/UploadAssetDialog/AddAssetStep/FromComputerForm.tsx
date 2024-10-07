@@ -9,7 +9,7 @@ import { styled } from 'styled-components';
 // TODO: replace this import with the import from constants file when it will be migrated to TS
 import { AssetSource } from '../../../newConstants';
 import { getTrad, rawFileToAsset } from '../../../utils';
-import type { RawFile, File } from '../../../../../shared/contracts/files';
+import type { FileWithRawFile } from './AddAssetStep';
 
 const Wrapper = styled(Flex)`
   flex-direction: column;
@@ -31,10 +31,6 @@ const OpaqueBox = styled(Box)`
   opacity: 0;
   cursor: pointer;
 `;
-
-interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
-  rawFile: RawFile;
-}
 
 interface FromComputerFormProps {
   onClose: () => void;

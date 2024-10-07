@@ -1,15 +1,23 @@
-import React from 'react';
-
 import { Box, Divider, Modal, Tabs } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 
 import { FromComputerForm } from './FromComputerForm';
 import { FromUrlForm } from './FromUrlForm';
+import type { RawFile, File } from '../../../../../shared/contracts/files';
 
-export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
+export interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
+  rawFile: RawFile;
+}
+
+interface AddAssetStepProps {
+  onClose: () => void;
+  onAddAsset: (assets: FileWithRawFile[]) => void;
+  trackedLocation?: string;
+}
+
+export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetStepProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -63,14 +71,4 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
       </Tabs.Root>
     </>
   );
-};
-
-AddAssetStep.defaultProps = {
-  trackedLocation: undefined,
-};
-
-AddAssetStep.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };
