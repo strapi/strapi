@@ -210,6 +210,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const entity = await strapi.documents(model).update({
         documentId,
         locale,
+        // Stage doesn't have DP or i18n enabled, connecting it through the `id`
+        // will be safer than relying on the `documentId` + `locale` + `status`
         data: { [ENTITY_STAGE_ATTRIBUTE]: pick(['id'], stage) },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
