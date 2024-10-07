@@ -7,7 +7,9 @@ import { getTrad } from '../utils';
 
 import { recursiveRenameKeys } from './utils/rename-keys';
 
-const FIELD_MAPPING = {
+import { FolderNode, GetFolderStructure } from '../../../shared/contracts/folders';
+
+const FIELD_MAPPING: Record<string, string> = {
   name: 'label',
   id: 'value',
 };
@@ -19,9 +21,11 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
   const fetchFolderStructure = async () => {
     const {
       data: { data },
-    } = await get('/upload/folder-structure');
+    } = await get<GetFolderStructure.Response['data']>('/upload/folder-structure');
 
-    const children = data.map((f) => recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key));
+    const children = data.map((f: FolderNode) =>
+      recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key)
+    );
 
     return [
       {
