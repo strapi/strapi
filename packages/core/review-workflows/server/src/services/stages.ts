@@ -210,7 +210,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const entity = await strapi.documents(model).update({
         documentId,
         locale,
-        data: { [ENTITY_STAGE_ATTRIBUTE]: stage },
+        data: { [ENTITY_STAGE_ATTRIBUTE]: pick(['id'], stage) },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
 
