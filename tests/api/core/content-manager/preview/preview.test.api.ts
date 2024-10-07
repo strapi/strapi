@@ -44,7 +44,8 @@ const singleTypeModel = {
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 // TODO: Remove skip when future flag is removed
-describeOnCondition(edition === 'EE').skip('Preview', () => {
+// describeOnCondition(edition === 'EE')('Preview', () => {
+describeOnCondition(false)('Preview', () => {
   const builder = createTestBuilder();
   let strapi;
   let rq;
