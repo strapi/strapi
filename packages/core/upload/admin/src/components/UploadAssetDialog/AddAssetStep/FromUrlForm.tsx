@@ -1,24 +1,34 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, Field, Modal, Textarea } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad, urlsToAssets, urlSchema } from '../../../utils';
+import type { RawFile, File } from '../../../../../shared/contracts/files';
 
-export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(undefined);
+interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
+  rawFile: RawFile;
+}
+
+interface FromUrlFormProps {
+  onClose: () => void;
+  onAddAsset: (assets: FileWithRawFile[]) => void;
+  trackedLocation?: string;
+}
+
+export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }: FromUrlFormProps) => {
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<Error | undefined>(undefined);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const handleSubmit = async ({ urls }) => {
+  const handleSubmit = async ({ urls }: { urls: string }) => {
     setLoading(true);
     const urlArray = urls.split(/\r?\n/);
     try {
-      const assets = await urlsToAssets(urlArray);
+      const assets: FileWithRawFile[] = await urlsToAssets(urlArray);
 
       if (trackedLocation) {
         trackUsage('didSelectFile', { source: 'url', location: trackedLocation });
@@ -26,8 +36,8 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
 
       // no need to set the loading to false since the component unmounts
       onAddAsset(assets);
-    } catch (e) {
-      setError(e);
+    } catch (e: unknown) {
+      setError(e as Error);
       setLoading(false);
     }
   };
@@ -81,14 +91,4 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
       )}
     </Formik>
   );
-};
-
-FromUrlForm.defaultProps = {
-  trackedLocation: undefined,
-};
-
-FromUrlForm.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };
