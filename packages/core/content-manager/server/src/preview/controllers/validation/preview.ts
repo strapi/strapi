@@ -10,6 +10,7 @@ import type { HandlerParams } from '../../services/preview-config';
 const getPreviewUrlSchema = yup
   .object()
   .shape({
+    // Will be undefined for single types
     documentId: yup.string(),
     locale: yup.string().nullable(),
     status: yup.string(),
