@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { useConfig } from '../useConfig';
 
@@ -20,12 +20,10 @@ describe('useConfig', () => {
 
     test('should still return an object even if the server returns a falsey value', async () => {
       server.use(
-        rest.get('/upload/configuration', (req, res, ctx) => {
-          return res(
-            ctx.json({
-              data: null,
-            })
-          );
+        http.get('/upload/configuration', () => {
+          return HttpResponse.json({
+            data: null,
+          });
         })
       );
 
@@ -40,8 +38,8 @@ describe('useConfig', () => {
       const originalConsoleError = console.error;
       console.error = jest.fn();
       server.use(
-        rest.get('/upload/configuration', (req, res, ctx) => {
-          return res(ctx.status(500));
+        http.get('/upload/configuration', () => {
+          return new HttpResponse(null, { status: 500 });
         })
       );
 

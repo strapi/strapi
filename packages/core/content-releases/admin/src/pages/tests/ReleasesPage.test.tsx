@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { ReleasesPage } from '../ReleasesPage';
 
@@ -38,9 +38,7 @@ describe('Releases home page', () => {
 
   it('renders the tab content correctly when there are no releases', async () => {
     server.use(
-      rest.get('/content-releases', (req, res, ctx) =>
-        res(ctx.json(mockReleasesPageData.emptyEntries))
-      )
+      http.get('/content-releases', () => HttpResponse.json(mockReleasesPageData.emptyEntries))
     );
 
     render(<ReleasesPage />);
@@ -59,9 +57,7 @@ describe('Releases home page', () => {
 
   it('renders the tab content correctly when there are releases', async () => {
     server.use(
-      rest.get('/content-releases', (req, res, ctx) =>
-        res(ctx.json(mockReleasesPageData.pendingEntries))
-      )
+      http.get('/content-releases', () => HttpResponse.json(mockReleasesPageData.pendingEntries))
     );
 
     const { user } = render(<ReleasesPage />);

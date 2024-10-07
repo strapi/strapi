@@ -1,6 +1,6 @@
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { AssigneeSelect } from '../AssigneeSelect';
@@ -53,15 +53,17 @@ describe('AssigneeSelect', () => {
 
   it('renders a disabled select when there are no users to select', async () => {
     server.use(
-      rest.get('/admin/users', (req, res, ctx) => {
-        return res.once(
-          ctx.json({
+      http.get(
+        '/admin/users',
+        () => {
+          return HttpResponse.json({
             data: {
               results: [],
             },
-          })
-        );
-      })
+          });
+        },
+        { once: true }
+      )
     );
 
     const { queryByRole } = render();
@@ -75,18 +77,19 @@ describe('AssigneeSelect', () => {
     console.error = jest.fn();
 
     server.use(
-      rest.get('/admin/users', (req, res, ctx) => {
-        return res.once(
-          ctx.status(500),
-          ctx.json({
+      http.get(
+        '/admin/users',
+        () => {
+          return HttpResponse.json({
             data: {
               error: {
                 message: 'Error message',
               },
             },
-          })
-        );
-      })
+          });
+        },
+        { once: true }
+      )
     );
 
     const { findByText } = render();
@@ -113,18 +116,16 @@ describe('AssigneeSelect', () => {
     console.error = jest.fn();
 
     server.use(
-      rest.put(
+      http.put(
         '/review-workflows/content-manager/collection-types/:contentType/:id/assignee',
-        (req, res, ctx) => {
-          return res.once(
-            ctx.status(500),
-            ctx.json({
-              error: {
-                message: 'Server side error message',
-              },
-            })
-          );
-        }
+        () => {
+          return HttpResponse.json({
+            error: {
+              message: 'Server side error message',
+            },
+          });
+        },
+        { once: true }
       )
     );
 

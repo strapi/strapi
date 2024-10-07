@@ -1,6 +1,6 @@
 import { Form } from '@strapi/admin/strapi-admin';
 import { render, screen, server, waitFor } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { Stage } from '../../../../../../shared/contracts/review-workflows';
 import { STAGE_COLOR_DEFAULT } from '../../../../constants';
@@ -234,12 +234,10 @@ describe('Stages', () => {
 
   it('should render a no permissions fallback, if no roles are available', async () => {
     server.use(
-      rest.get('/admin/roles', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            data: [],
-          })
-        );
+      http.get('/admin/roles', () => {
+        return HttpResponse.json({
+          data: [],
+        });
       })
     );
 

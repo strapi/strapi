@@ -1,10 +1,10 @@
-import { type RequestHandler, rest } from 'msw';
+import { type RequestHandler, http, HttpResponse } from 'msw';
 
 import { mockHistoryVersionsData } from './mockData';
 
 const historyHandlers: RequestHandler[] = [
-  rest.get('/content-manager/history-versions', (req, res, ctx) => {
-    return res(ctx.json(mockHistoryVersionsData.historyVersions));
+  http.get('/content-manager/history-versions', () => {
+    return HttpResponse.json(mockHistoryVersionsData.historyVersions);
   }),
 ];
 
