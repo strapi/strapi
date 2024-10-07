@@ -211,7 +211,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         documentId,
         locale,
         // Stage doesn't have DP or i18n enabled, connecting it through the `id`
-        // will be safer than relying on the `documentId` + `locale` + `status`
+        // will be safer than relying on the `documentId` + `locale` + `status` transformation
         data: { [ENTITY_STAGE_ATTRIBUTE]: pick(['id'], stage) },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
