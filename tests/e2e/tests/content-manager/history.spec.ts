@@ -193,15 +193,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       }
     );
 
-    test('A user should see the relations and whether some are missing', async ({
-      page,
-      browserName,
-    }) => {
-      // TODO: there is a webkit bug to be fixed
-      if (browserName === 'webkit') {
-        return test.fixme();
-      }
-
+    test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create new author
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: 'Author' }).click();
@@ -414,15 +406,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       }
     );
 
-    test('A user should see the relations and whether some are missing', async ({
-      page,
-      browserName,
-    }) => {
-      // TODO: there is a webkit bug to be fixed
-      if (browserName === 'webkit') {
-        return test.fixme();
-      }
-
+    test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create relation in Content-Type Builder
       await page.getByRole('link', { name: 'Content-Type Builder' }).click();
       await page.getByRole('link', { name: 'Homepage' }).click();

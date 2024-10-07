@@ -48,11 +48,6 @@ test.describe('Create collection type', () => {
 
     await expect(page.getByText('Select a field for your collection type')).toBeVisible();
 
-    // TODO: fix the bug that causes webkit location to be off
-    if (browserName === 'webkit') {
-      return test.fixme();
-    }
-
     await page.getByText('Small or long text').click();
 
     await page.getByLabel('Name', { exact: true }).fill('myattribute');
