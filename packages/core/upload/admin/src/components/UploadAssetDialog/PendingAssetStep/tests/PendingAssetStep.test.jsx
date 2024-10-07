@@ -7,7 +7,10 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { PendingAssetStep } from '../PendingAssetStep';
 
-jest.mock('../../../../utils/getTrad', () => (x) => x);
+jest.mock('../../../../utils', () => ({
+  ...jest.requireActual('../../../../utils'),
+  getTrad: (x) => x,
+}));
 
 const queryClient = new QueryClient({
   defaultOptions: {

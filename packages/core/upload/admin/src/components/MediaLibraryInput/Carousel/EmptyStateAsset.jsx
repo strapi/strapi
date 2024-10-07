@@ -7,8 +7,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
-import getTrad from '../../../utils/getTrad';
-import { rawFileToAsset } from '../../../utils/rawFileToAsset';
+import { getTrad, rawFileToAsset } from '../../../utils';
 
 const TextAlignTypography = styled(Typography)`
   align-items: center;
