@@ -4,6 +4,19 @@ import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
 import { getTrad } from '../utils';
+import { BulkDeleteFiles, File } from '../../../shared/contracts/files';
+import type { BulkDeleteFolders, Folder } from '../../../shared/contracts/folders';
+
+export interface FileWithType extends File {
+  type: string;
+}
+
+export interface FolderWithType extends Folder {
+  type: string;
+}
+
+type BulkRemovePayload = Partial<BulkDeleteFiles.Request['body']> &
+  Partial<BulkDeleteFolders.Request['body']>;
 
 export const useBulkRemove = () => {
   const { toggleNotification } = useNotification();
@@ -11,8 +24,8 @@ export const useBulkRemove = () => {
   const queryClient = useQueryClient();
   const { post } = useFetchClient();
 
-  const bulkRemoveQuery = (filesAndFolders) => {
-    const payload = filesAndFolders.reduce((acc, selected) => {
+  const bulkRemoveQuery = (filesAndFolders: Array<FileWithType | FolderWithType>) => {
+    const payload = filesAndFolders.reduce<BulkRemovePayload>((acc, selected) => {
       const { id, type } = selected;
       const key = type === 'asset' ? 'fileIds' : 'folderIds';
 
@@ -20,7 +33,7 @@ export const useBulkRemove = () => {
         acc[key] = [];
       }
 
-      acc[key].push(id);
+      acc[key]!.push(id);
 
       return acc;
     }, {});
@@ -28,7 +41,11 @@ export const useBulkRemove = () => {
     return post('/upload/actions/bulk-delete', payload);
   };
 
-  const mutation = useMutation(bulkRemoveQuery, {
+  const mutation = useMutation<
+    BulkDeleteFiles.Response | BulkDeleteFolders.Response,
+    BulkDeleteFiles.Response['error'] | BulkDeleteFolders.Response['error'],
+    Array<FileWithType | FolderWithType>
+  >(bulkRemoveQuery, {
     onSuccess(res) {
       const {
         data: { data },
@@ -52,11 +69,12 @@ export const useBulkRemove = () => {
       });
     },
     onError(error) {
-      toggleNotification({ type: 'danger', message: error.message });
+      toggleNotification({ type: 'danger', message: error?.message });
     },
   });
 
-  const remove = (...args) => mutation.mutateAsync(...args);
+  const remove = (...args: Parameters<typeof mutation.mutateAsync>) =>
+    mutation.mutateAsync(...args);
 
   return { ...mutation, remove };
 };

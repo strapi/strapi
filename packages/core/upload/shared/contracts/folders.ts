@@ -98,7 +98,7 @@ export declare namespace UpdateFolder {
  *
  * Return the structure of a folder.
  */
-export declare namespace FolderStructureNamespace {
+export declare namespace GetFolderStructure {
   export interface Request {
     query?: {};
   }

@@ -62,25 +62,17 @@ describe('Marketplace page - layout', () => {
     expect(button).not.toBeInTheDocument();
   });
 
-  it('shows compatibility tooltip message when no version provided', async () => {
-    const { findByTestId, findAllByTestId, user } = render();
+  it('Does not show (copy install command) button', async () => {
+    const { findAllByTestId } = render();
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Config Sync')
     )!;
 
-    const button = within(alreadyInstalledCard)
-      .getByText(/copy install command/i)
-      .closest('button')!;
+    const button = within(alreadyInstalledCard).queryByText(/copy install command/i);
 
-    await user.hover(button);
-    const tooltip = await findByTestId(`tooltip-Config Sync`);
-
-    expect(button).toBeEnabled();
-    expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveTextContent(
-      'Unable to verify compatibility with your Strapi version: "4.1.0"'
-    );
+    // Assert that the button does not show
+    expect(button).not.toBeInTheDocument();
   });
 
   it('handles production environment', async () => {

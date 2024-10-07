@@ -66,7 +66,10 @@ const NpmPackageCard = ({
   }`;
 
   const versionRange = semver.validRange(attributes.strapiVersion);
-  const isCompatible = semver.satisfies(strapiAppVersion ?? '', versionRange ?? '');
+
+  const isCompatible = versionRange
+    ? semver.satisfies(strapiAppVersion ?? '', versionRange)
+    : false;
 
   return (
     <Flex
@@ -272,28 +275,17 @@ const CardButton = ({
       return (
         <Tooltip
           data-testid={`tooltip-${pluginName}`}
-          label={
-            !versionRange
-              ? formatMessage(
-                  {
-                    id: 'admin.pages.MarketPlacePage.plugin.version.null',
-                    defaultMessage:
-                      'Unable to verify compatibility with your Strapi version: "{strapiAppVersion}"',
-                  },
-                  { strapiAppVersion }
-                )
-              : formatMessage(
-                  {
-                    id: 'admin.pages.MarketPlacePage.plugin.version',
-                    defaultMessage:
-                      'Update your Strapi version: "{strapiAppVersion}" to: "{versionRange}"',
-                  },
-                  {
-                    strapiAppVersion,
-                    versionRange,
-                  }
-                )
-          }
+          label={formatMessage(
+            {
+              id: 'admin.pages.MarketPlacePage.plugin.version',
+              defaultMessage:
+                'Update your Strapi version: "{strapiAppVersion}" to: "{versionRange}"',
+            },
+            {
+              strapiAppVersion,
+              versionRange,
+            }
+          )}
         >
           <span>
             <Button

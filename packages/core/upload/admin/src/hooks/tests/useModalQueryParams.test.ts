@@ -33,7 +33,7 @@ describe('useModalQueryParams', () => {
       onChangeSearch: expect.any(Function),
     });
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
   });
 
   test('handles initial state', async () => {
@@ -44,16 +44,16 @@ describe('useModalQueryParams', () => {
       state: true,
     });
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
   });
 
   test('onChangeFilters', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangeFilters([{ some: 'thing' }]);
+      result.current[1]?.onChangeFilters?.([{ some: 'thing' }]);
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -73,10 +73,10 @@ describe('useModalQueryParams', () => {
   test('onChangeFolder', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangeFolder({ id: 1 }, '/1');
+      result.current[1]?.onChangeFolder?.({ id: 1 }, '/1');
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -92,10 +92,10 @@ describe('useModalQueryParams', () => {
   test('onChangePage', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangePage({ id: 1 });
+      result.current[1]?.onChangePage?.({ id: 1 });
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -110,10 +110,10 @@ describe('useModalQueryParams', () => {
   test('onChangePageSize', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangePageSize(5);
+      result.current[1]?.onChangePageSize?.(5);
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -125,10 +125,10 @@ describe('useModalQueryParams', () => {
   test('onChangePageSize - converts string to numbers', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangePageSize('5');
+      result.current[1]?.onChangePageSize?.('5');
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -140,26 +140,26 @@ describe('useModalQueryParams', () => {
   test('onChangeSort', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangeSort('something:else');
+      result.current[1]?.onChangeSort?.('name:DESC');
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
       ...FIXTURE_QUERY,
       pageSize: 20,
-      sort: 'something:else',
+      sort: 'name:DESC',
     });
   });
 
   test('onChangeSearch', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangeSearch('something');
+      result.current[1]?.onChangeSearch?.('something');
     });
 
     expect(result.current[0].queryObject).toStrictEqual({
@@ -172,18 +172,18 @@ describe('useModalQueryParams', () => {
   test('onChangeSearch - empty string resets all values and removes _q and page', async () => {
     const { result } = renderHook(() => useModalQueryParams());
 
-    await waitFor(() => expect(result.current[0].queryObject.pageSize).toBe(20));
+    await waitFor(() => expect(result.current[0]?.queryObject?.pageSize).toBe(20));
 
     act(() => {
-      result.current[1].onChangePage({ id: 1 });
+      result.current[1]?.onChangePage?.({ id: 1 });
     });
 
     act(() => {
-      result.current[1].onChangeSearch('something');
+      result.current[1]?.onChangeSearch?.('something');
     });
 
     act(() => {
-      result.current[1].onChangeSearch('');
+      result.current[1]?.onChangeSearch?.('');
     });
 
     expect(result.current[0].queryObject).toStrictEqual({

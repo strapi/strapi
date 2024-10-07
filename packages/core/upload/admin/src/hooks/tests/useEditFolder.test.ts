@@ -22,7 +22,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   }),
 }));
 
-function setup(...args) {
+function setup(...args: Parameters<typeof useEditFolder>) {
   return renderHook(() => useEditFolder(...args));
 }
 

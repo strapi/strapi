@@ -19,6 +19,8 @@ export type ProjectInfos = {
   url?: string;
 };
 
+export type EnvironmentInfo = Record<string, unknown>;
+
 export type ProjectInput = Omit<ProjectInfos, 'id'>;
 
 export type DeployResponse = {
@@ -29,6 +31,12 @@ export type DeployResponse = {
 export type ListProjectsResponse = {
   data: {
     data: string;
+  };
+};
+
+export type ListEnvironmentsResponse = {
+  data: {
+    data: EnvironmentInfo[] | Record<string, never>;
   };
 };
 
@@ -77,6 +85,8 @@ export interface CloudApiService {
   listProjects(): Promise<AxiosResponse<ListProjectsResponse>>;
 
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
+
+  listEnvironments(project: { name: string }): Promise<AxiosResponse<ListEnvironmentsResponse>>;
 
   getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
@@ -192,6 +202,23 @@ export async function cloudApiFactory(
       } catch (error) {
         logger.debug(
           "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async listEnvironments({ name }): Promise<AxiosResponse<ListEnvironmentsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}/environments`);
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud environments from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's environments from the server. Please try again."
         );
         throw error;
       }
