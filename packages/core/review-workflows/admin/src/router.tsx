@@ -7,7 +7,7 @@ const ProtectedListPage = lazy(() =>
   import('./routes/settings').then((mod) => ({ default: mod.ProtectedListPage }))
 );
 const ProtectedEditPage = lazy(() =>
-  import('./routes/settings/:id').then((mod) => ({ default: mod.ProtectedEditPage }))
+  import('./routes/settings/id').then((mod) => ({ default: mod.ProtectedEditPage }))
 );
 
 const routes: PathRouteProps[] = [

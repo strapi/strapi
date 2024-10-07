@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { AssetDefinition, FolderDefinition } from '../../../../constants';
-import getTrad from '../../../../utils/getTrad';
+import { getTrad } from '../../../../utils';
 
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
