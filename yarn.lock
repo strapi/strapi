@@ -8378,6 +8378,7 @@ __metadata:
     "@testing-library/dom": "npm:10.1.0"
     "@testing-library/react": "npm:15.0.7"
     "@testing-library/user-event": "npm:14.5.2"
+    "@types/byte-size": "npm:8.1.2"
     "@types/fs-extra": "npm:11.0.4"
     "@types/koa": "npm:2.13.4"
     "@types/koa-range": "npm:0.3.5"
@@ -8865,6 +8866,13 @@ __metadata:
     "@types/connect": "npm:*"
     "@types/node": "npm:*"
   checksum: 10c0/c2dd533e1d4af958d656bdba7f376df68437d8dfb7e4522c88b6f3e6f827549e4be5bf0be68a5f1878accf5752ea37fba7e8a4b6dda53d0d122d77e27b69c750
+  languageName: node
+  linkType: hard
+
+"@types/byte-size@npm:8.1.2":
+  version: 8.1.2
+  resolution: "@types/byte-size@npm:8.1.2"
+  checksum: 10c0/2a251414d925e02a4b36629c2ea0519efb5006baa82241ae85fdfebb65f43d3679c486e247ff6b82e4fbbac556b9d55adf7c0f254e16d6b1d972ffb96d47b8f2
   languageName: node
   linkType: hard
 
