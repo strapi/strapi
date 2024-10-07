@@ -1,10 +1,8 @@
-import React from 'react';
-
 import { Flex, ProgressBar, Typography } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
+import { UpdateFile } from '../../../../shared/contracts/files';
 
 const BoxWrapper = styled(Flex)`
   border-radius: ${({ theme }) => `${theme.borderRadius} ${theme.borderRadius} 0 0`};
@@ -39,7 +37,13 @@ const CancelButton = styled.button`
   }
 `;
 
-export const UploadProgress = ({ onCancel, progress, error }) => {
+export interface UploadProgressProps {
+  error?: UpdateFile.Response['error'] | Error;
+  onCancel: () => void;
+  progress?: number;
+}
+
+export const UploadProgress = ({ onCancel, progress = 0, error }: UploadProgressProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -48,7 +52,8 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
         <Cross aria-label={error?.message} />
       ) : (
         <Flex direction="column" alignItems="center" gap={2} width="100%">
-          <ProgressBar value={progress}>{`${progress}/100%`}</ProgressBar>
+          <ProgressBar value={progress} />
+          <Typography>{`${progress}/100%`}</Typography>
 
           <CancelButton type="button" onClick={onCancel}>
             <Flex gap={2}>
@@ -66,15 +71,4 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
       )}
     </BoxWrapper>
   );
-};
-
-UploadProgress.defaultProps = {
-  error: undefined,
-  progress: 0,
-};
-
-UploadProgress.propTypes = {
-  error: PropTypes.instanceOf(Error),
-  onCancel: PropTypes.func.isRequired,
-  progress: PropTypes.number,
 };

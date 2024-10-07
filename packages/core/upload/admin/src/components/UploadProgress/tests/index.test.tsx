@@ -1,24 +1,22 @@
-/**
- *
- * Tests for EditAssetDialog
- *
- */
-
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { UploadProgress } from '..';
+import { UploadProgress, UploadProgressProps } from '..';
 import en from '../../../translations/en.json';
 
-const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
-  acc[curr] = `upload.${en[curr]}`;
+type MessageKeys = keyof typeof en;
 
-  return acc;
-}, {});
+const enKeys = Object.keys(en) as MessageKeys[];
+
+const messageForPlugin = enKeys.reduce(
+  (acc: { [key in MessageKeys]: string }, curr: MessageKeys) => {
+    acc[curr] = `upload.${en[curr]}`;
+    return acc;
+  },
+  {} as { [key in MessageKeys]: string }
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +26,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = (props) => {
+const renderCompo = (props: UploadProgressProps) => {
   const target = document.createElement('div');
   document.body.appendChild(target);
 
@@ -36,7 +34,7 @@ const renderCompo = (props) => {
     <QueryClientProvider client={queryClient}>
       <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-          <UploadProgress onCancel={jest.fn()} error={undefined} {...props} />
+          <UploadProgress error={undefined} {...props} />
         </IntlProvider>
       </DesignSystemProvider>
     </QueryClientProvider>,
@@ -48,7 +46,9 @@ describe('<UploadProgress />', () => {
   it('renders with no error', () => {
     const {
       container: { firstChild },
-    } = renderCompo();
+    } = renderCompo({
+      onCancel: jest.fn(),
+    });
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
@@ -72,14 +72,20 @@ describe('<UploadProgress />', () => {
         display: flex;
       }
 
-      .c8 {
+      .c9 {
         gap: 8px;
         align-items: center;
         flex-direction: row;
         display: flex;
       }
 
-      .c9 {
+      .c7 {
+        font-size: 1.4rem;
+        line-height: 1.43;
+        color: currentcolor;
+      }
+
+      .c10 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: inherit;
@@ -108,24 +114,24 @@ describe('<UploadProgress />', () => {
         height: 100%;
       }
 
-      .c7 {
+      .c8 {
         border: none;
         background: none;
         width: min-content;
         color: #666687;
       }
 
-      .c7:hover,
-      .c7:focus {
+      .c8:hover,
+      .c8:focus {
         color: #4a4a6a;
       }
 
-      .c7 svg {
+      .c8 svg {
         height: 10px;
         width: 10px;
       }
 
-      .c7 svg path {
+      .c8 svg path {
         fill: currentColor;
       }
 
@@ -156,15 +162,20 @@ describe('<UploadProgress />', () => {
               style="transform: translate3D(-100%, 0, 0);"
             />
           </div>
-          <button
+          <span
             class="c7"
+          >
+            0/100%
+          </span>
+          <button
+            class="c8"
             type="button"
           >
             <div
-              class="c8"
+              class="c9"
             >
               <span
-                class="c9"
+                class="c10"
               >
                 Cancel
               </span>
@@ -190,7 +201,7 @@ describe('<UploadProgress />', () => {
   it('renders with an error', () => {
     const {
       container: { firstChild },
-    } = renderCompo({ error: new Error('Something went wrong') });
+    } = renderCompo({ error: new Error('Something went wrong'), onCancel: jest.fn() });
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
