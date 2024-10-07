@@ -43,7 +43,7 @@ const CardContainer = styled(Card)`
   }
 `;
 
-interface AssetCardBaseProps {
+export interface AssetCardBaseProps {
   children?: React.ReactNode;
   extension: string;
   isSelectable?: boolean;
