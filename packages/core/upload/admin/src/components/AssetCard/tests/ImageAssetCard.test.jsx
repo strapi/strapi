@@ -66,12 +66,12 @@ describe('ImageAssetCard', () => {
         padding-block-start: 4px;
       }
 
-      .c23 {
+      .c24 {
         padding-block-start: 4px;
         flex-grow: 1;
       }
 
-      .c26 {
+      .c27 {
         padding-inline-start: 8px;
         padding-inline-end: 8px;
         min-width: 20px;
@@ -98,13 +98,13 @@ describe('ImageAssetCard', () => {
         display: flex;
       }
 
-      .c24 {
+      .c25 {
         align-items: center;
         flex-direction: row;
         display: flex;
       }
 
-      .c27 {
+      .c28 {
         align-items: center;
         justify-content: center;
         flex-direction: row;
@@ -112,19 +112,25 @@ describe('ImageAssetCard', () => {
       }
 
       .c20 {
+        font-size: 1.4rem;
+        line-height: 1.43;
+        color: currentcolor;
+      }
+
+      .c21 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: #32324d;
         font-weight: 600;
       }
 
-      .c21 {
+      .c22 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c30 {
+      .c31 {
         font-weight: 600;
         font-size: 1.1rem;
         line-height: 1.45;
@@ -144,7 +150,7 @@ describe('ImageAssetCard', () => {
         width: 1px;
       }
 
-      .c28 {
+      .c29 {
         border-radius: 4px;
         padding-block: 0.7rem;
       }
@@ -205,12 +211,12 @@ describe('ImageAssetCard', () => {
         border-top-right-radius: 4px;
       }
 
-      .c25 {
+      .c26 {
         margin-left: auto;
         flex-shrink: 0;
       }
 
-      .c29 {
+      .c30 {
         margin-left: 4px;
       }
 
@@ -258,7 +264,7 @@ describe('ImageAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c22 {
+      .c23 {
         text-transform: uppercase;
       }
 
@@ -362,16 +368,20 @@ describe('ImageAssetCard', () => {
                 >
                   <h2
                     class="c20"
-                    id=":r0:-title"
                   >
-                    hello.png
+                    <span
+                      class="c21"
+                      id=":r0:-title"
+                    >
+                      hello.png
+                    </span>
                   </h2>
                 </div>
                 <div
-                  class="c21"
+                  class="c22"
                 >
                   <span
-                    class="c22"
+                    class="c23"
                   >
                     png
                   </span>
@@ -379,16 +389,16 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c23 c24"
+                class="c24 c25"
               >
                 <div
-                  class="c25"
+                  class="c26"
                 >
                   <div
-                    class="c26 c27 c28 c29"
+                    class="c27 c28 c29 c30"
                   >
                     <span
-                      class="c30"
+                      class="c31"
                     >
                       Image
                     </span>

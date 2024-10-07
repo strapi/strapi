@@ -13,9 +13,9 @@ import {
   CardTitle,
   Flex,
   IconButton,
+  Typography,
 } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -43,35 +43,49 @@ const CardContainer = styled(Card)`
   }
 `;
 
+interface AssetCardBaseProps {
+  children?: React.ReactNode;
+  extension: string;
+  isSelectable?: boolean;
+  name: string;
+  onSelect?: () => void;
+  onRemove?: () => void;
+  onEdit?: (
+    event:
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => void;
+  selected?: boolean;
+  subtitle?: string;
+  variant: 'Image' | 'Video' | 'Audio' | 'Doc';
+}
+
 export const AssetCardBase = ({
   children,
   extension,
-  isSelectable,
+  isSelectable = true,
   name,
   onSelect,
   onRemove,
   onEdit,
-  selected,
-  subtitle,
-  variant,
-}) => {
+  selected = false,
+  subtitle = '',
+  variant = 'Image',
+}: AssetCardBaseProps) => {
   const { formatMessage } = useIntl();
 
-  /** @type {import("react").MouseEventHandler<HTMLDivElement> } */
-  const handleClick = (e) => {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (onEdit) {
       onEdit(e);
     }
   };
 
   /**
-   * @type {import("react").MouseEventHandler<HTMLDivElement> }
-   *
    * This is required because we need to stop the propagation of the event
    * bubbling to the `CardContainer`, however the `CardCheckbox` only returns
    * the `boolean` value as opposed to the event itself.
    */
-  const handlePropagationClick = (e) => {
+  const handlePropagationClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
   };
 
@@ -79,7 +93,6 @@ export const AssetCardBase = ({
     <CardContainer role="button" height="100%" tabIndex={-1} onClick={handleClick}>
       <CardHeader>
         {isSelectable && (
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
           <div onClick={handlePropagationClick}>
             <CardCheckbox checked={selected} onCheckedChange={onSelect} />
           </div>
@@ -113,7 +126,9 @@ export const AssetCardBase = ({
       <CardBody>
         <CardContent>
           <Box paddingTop={1}>
-            <CardTitle tag="h2">{name}</CardTitle>
+            <Typography tag="h2">
+              <CardTitle tag="span">{name}</CardTitle>
+            </Typography>
           </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
@@ -131,28 +146,4 @@ export const AssetCardBase = ({
       </CardBody>
     </CardContainer>
   );
-};
-
-AssetCardBase.defaultProps = {
-  children: undefined,
-  isSelectable: true,
-  onEdit: undefined,
-  onSelect: undefined,
-  onRemove: undefined,
-  selected: false,
-  subtitle: '',
-  variant: 'Image',
-};
-
-AssetCardBase.propTypes = {
-  children: PropTypes.node,
-  extension: PropTypes.string.isRequired,
-  isSelectable: PropTypes.bool,
-  name: PropTypes.string.isRequired,
-  onEdit: PropTypes.func,
-  onSelect: PropTypes.func,
-  onRemove: PropTypes.func,
-  selected: PropTypes.bool,
-  subtitle: PropTypes.string,
-  variant: PropTypes.oneOf(['Image', 'Video', 'Audio', 'Doc']),
 };

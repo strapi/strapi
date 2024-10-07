@@ -67,12 +67,12 @@ describe('DocAssetCard', () => {
         padding-block-start: 4px;
       }
 
-      .c24 {
+      .c25 {
         padding-block-start: 4px;
         flex-grow: 1;
       }
 
-      .c27 {
+      .c28 {
         padding-inline-start: 8px;
         padding-inline-end: 8px;
         min-width: 20px;
@@ -99,13 +99,13 @@ describe('DocAssetCard', () => {
         display: flex;
       }
 
-      .c25 {
+      .c26 {
         align-items: center;
         flex-direction: row;
         display: flex;
       }
 
-      .c28 {
+      .c29 {
         align-items: center;
         justify-content: center;
         flex-direction: row;
@@ -113,19 +113,25 @@ describe('DocAssetCard', () => {
       }
 
       .c21 {
+        font-size: 1.4rem;
+        line-height: 1.43;
+        color: currentcolor;
+      }
+
+      .c22 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: #32324d;
         font-weight: 600;
       }
 
-      .c22 {
+      .c23 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c31 {
+      .c32 {
         font-weight: 600;
         font-size: 1.1rem;
         line-height: 1.45;
@@ -145,7 +151,7 @@ describe('DocAssetCard', () => {
         width: 1px;
       }
 
-      .c29 {
+      .c30 {
         border-radius: 4px;
         padding-block: 0.7rem;
       }
@@ -188,12 +194,12 @@ describe('DocAssetCard', () => {
         right: 12px;
       }
 
-      .c26 {
+      .c27 {
         margin-left: auto;
         flex-shrink: 0;
       }
 
-      .c30 {
+      .c31 {
         margin-left: 4px;
       }
 
@@ -241,7 +247,7 @@ describe('DocAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c23 {
+      .c24 {
         text-transform: uppercase;
       }
 
@@ -364,32 +370,36 @@ describe('DocAssetCard', () => {
                 >
                   <h2
                     class="c21"
-                    id=":r0:-title"
                   >
-                    hello.png
+                    <span
+                      class="c22"
+                      id=":r0:-title"
+                    >
+                      hello.png
+                    </span>
                   </h2>
                 </div>
                 <div
-                  class="c22"
+                  class="c23"
                 >
                   <span
-                    class="c23"
+                    class="c24"
                   >
                     png
                   </span>
                 </div>
               </div>
               <div
-                class="c24 c25"
+                class="c25 c26"
               >
                 <div
-                  class="c26"
+                  class="c27"
                 >
                   <div
-                    class="c27 c28 c29 c30"
+                    class="c28 c29 c30 c31"
                   >
                     <span
-                      class="c31"
+                      class="c32"
                     >
                       Doc
                     </span>
