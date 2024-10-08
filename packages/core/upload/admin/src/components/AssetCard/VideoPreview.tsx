@@ -10,7 +10,7 @@ interface VideoPreviewProps {
   alt: string;
   url: string;
   mime: string;
-  onLoadDuration: (duration: number) => void;
+  onLoadDuration?: (duration: number) => void;
   size?: 'S' | 'M';
 }
 
@@ -25,7 +25,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }: Video
       canvas.getContext('2d')?.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
       video.replaceWith(canvas);
-      onLoadDuration(video.duration);
+      onLoadDuration && onLoadDuration(video.duration);
     }
   };
 

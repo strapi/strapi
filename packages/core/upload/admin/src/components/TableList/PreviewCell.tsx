@@ -1,13 +1,12 @@
-import React from 'react';
-
 import { Avatar, Box, Flex } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetType } from '../../newConstants';
 import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
+import type { File } from '../../../../shared/contracts/files';
 
 const VideoPreviewWrapper = styled(Box)`
   figure {
@@ -24,7 +23,12 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-export const PreviewCell = ({ type, content }) => {
+interface PreviewCellProps {
+  content: File;
+  type: string;
+}
+
+export const PreviewCell = ({ type, content }: PreviewCellProps) => {
   if (type === 'folder') {
     return (
       <Flex
@@ -41,18 +45,25 @@ export const PreviewCell = ({ type, content }) => {
 
   const { alternativeText, ext, formats, mime, name, url } = content;
 
-  if (mime.includes(AssetType.Image)) {
+  if (mime?.includes(AssetType.Image)) {
     const mediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
 
-    return <Avatar.Item src={mediaURL} alt={alternativeText} preview />;
+    return (
+      <Avatar.Item
+        src={mediaURL}
+        alt={alternativeText || undefined}
+        preview
+        fallback={alternativeText}
+      />
+    );
   }
 
-  if (mime.includes(AssetType.Video)) {
+  if (mime?.includes(AssetType.Video)) {
     return (
       <VideoPreviewWrapper>
         <VideoPreview
-          url={createAssetUrl(content, true)}
+          url={createAssetUrl(content, true) || ''}
           mime={mime}
           alt={alternativeText ?? name}
         />
@@ -65,20 +76,4 @@ export const PreviewCell = ({ type, content }) => {
       {getFileExtension(ext)}
     </Box>
   );
-};
-
-PreviewCell.propTypes = {
-  content: PropTypes.shape({
-    alternativeText: PropTypes.string,
-    ext: PropTypes.string,
-    formats: PropTypes.shape({
-      thumbnail: PropTypes.shape({
-        url: PropTypes.string,
-      }),
-    }),
-    mime: PropTypes.string,
-    name: PropTypes.string,
-    url: PropTypes.string,
-  }).isRequired,
-  type: PropTypes.string.isRequired,
 };
