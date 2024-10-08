@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { RawTable } from '@strapi/design-system';
 import { render } from '@tests/utils';
 
@@ -40,10 +38,10 @@ const PROPS_FIXTURE = {
   selected: [],
 };
 
-const setup = (props) =>
+const setup = (props?: any) =>
   render(<TableRows {...PROPS_FIXTURE} {...props} />, {
     renderOptions: {
-      wrapper: ({ children }) => <RawTable>{children}</RawTable>,
+      wrapper: ({ children }) => <RawTable colCount={4} rowCount={2}>{children}</RawTable>,
     },
   });
 

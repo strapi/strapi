@@ -9,7 +9,7 @@ import type { File } from '../../../../shared/contracts/files';
 
 export interface CellContentProps {
   cellType: string;
-  contentType: string;
+  contentType?: string;
   content: File;
   name: string;
 }

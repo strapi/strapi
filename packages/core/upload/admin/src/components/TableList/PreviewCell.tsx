@@ -25,7 +25,7 @@ const VideoPreviewWrapper = styled(Box)`
 
 interface PreviewCellProps {
   content: File;
-  type: string;
+  type?: string;
 }
 
 export const PreviewCell = ({ type, content }: PreviewCellProps) => {
