@@ -1,13 +1,13 @@
-import React from 'react';
-
 import { Box, Flex } from '@strapi/design-system';
 import { File, FilePdf } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-import { AssetDefinition, AssetType } from '../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetType } from '../../../newConstants';
 import { createAssetUrl } from '../../../utils';
 import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
+import type { File as FileAsset } from '../../../../../shared/contracts/files';
 
 const DocAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
@@ -28,12 +28,12 @@ const AudioPreviewWrapper = styled(Box)`
   }
 `;
 
-export const CarouselAsset = ({ asset }) => {
-  if (asset.mime.includes(AssetType.Video)) {
+export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
+  if (asset.mime?.includes(AssetType.Video)) {
     return (
       <VideoPreviewWrapper height="100%">
         <VideoPreview
-          url={createAssetUrl(asset, true)}
+          url={createAssetUrl(asset, true)!}
           mime={asset.mime}
           alt={asset.alternativeText || asset.name}
         />
@@ -41,15 +41,18 @@ export const CarouselAsset = ({ asset }) => {
     );
   }
 
-  if (asset.mime.includes(AssetType.Audio)) {
+  if (asset.mime?.includes(AssetType.Audio)) {
     return (
       <AudioPreviewWrapper>
-        <AudioPreview url={createAssetUrl(asset, true)} alt={asset.alternativeText || asset.name} />
+        <AudioPreview
+          url={createAssetUrl(asset, true)!}
+          alt={asset.alternativeText || asset.name}
+        />
       </AudioPreviewWrapper>
     );
   }
 
-  if (asset.mime.includes(AssetType.Image)) {
+  if (asset.mime?.includes(AssetType.Image)) {
     return (
       <Box
         tag="img"
@@ -63,15 +66,11 @@ export const CarouselAsset = ({ asset }) => {
 
   return (
     <DocAsset width="100%" height="100%" justifyContent="center" hasRadius>
-      {asset.ext.includes('pdf') ? (
+      {asset.ext?.includes('pdf') ? (
         <FilePdf aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
       ) : (
         <File aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
       )}
     </DocAsset>
   );
-};
-
-CarouselAsset.propTypes = {
-  asset: AssetDefinition.isRequired,
 };

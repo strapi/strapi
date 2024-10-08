@@ -1,49 +1,64 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
 import { PlusCircle as PicturePlus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetSource } from '../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetSource } from '../../../newConstants';
 import { getTrad, rawFileToAsset } from '../../../utils';
+import type { File, RawFile } from '../../../../../shared/contracts/files';
 
 const TextAlignTypography = styled(Typography)`
   align-items: center;
 `;
 
-export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
-  const { formatMessage } = useIntl();
-  const [dragOver, setDragOver] = useState(false);
+type FileWithoutIdHash = Omit<File, 'id' | 'hash'>;
 
-  const handleDragEnter = (e) => {
+interface EmptyStateAssetProps {
+  disabled?: boolean;
+  onClick: () => void;
+  onDropAsset: (assets: FileWithoutIdHash[]) => void;
+}
+
+export const EmptyStateAsset = ({
+  disabled = false,
+  onClick,
+  onDropAsset,
+}: EmptyStateAssetProps) => {
+  const { formatMessage } = useIntl();
+  const [dragOver, setDragOver] = React.useState(false);
+
+  const handleDragEnter = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setDragOver(true);
   };
 
-  const handleDragLeave = (e) => {
-    if (!e.currentTarget.contains(e.relatedTarget)) {
+  const handleDragLeave = (e: React.DragEvent<HTMLButtonElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setDragOver(false);
     }
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {
       const files = e.dataTransfer.files;
-      const assets = [];
+      const assets: FileWithoutIdHash[] = [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files.item(i);
-        const asset = rawFileToAsset(file, AssetSource.Computer);
+        if (file) {
+          const asset = rawFileToAsset(file, AssetSource.Computer);
 
-        assets.push(asset);
+          assets.push(asset);
+        }
       }
 
       onDropAsset(assets);
@@ -93,15 +108,4 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       </TextAlignTypography>
     </Flex>
   );
-};
-
-EmptyStateAsset.defaultProps = {
-  disabled: false,
-  onDropAsset: undefined,
-};
-
-EmptyStateAsset.propTypes = {
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func.isRequired,
-  onDropAsset: PropTypes.func,
 };
