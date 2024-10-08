@@ -181,8 +181,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           .deleteMany({
             where: {
               created_at: {
-                // Only keep YYYY-MM-DD from the string because mysql doesn't support ISO 8601
-                $lt: expirationDate.toISOString().split('T').at(0),
+                $lt: expirationDate,
               },
             },
           })
