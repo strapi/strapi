@@ -49,7 +49,7 @@
   "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
   "components.TableEmpty.withSearch": "Aucun {contentType} n'a été trouvé avec cette recherche ({search})...",
   "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
-  "components.empty-repeatable": "Il n'a pas encore d'entrée. Cliquez sur le bouton pour en ajouter une.",
+  "components.empty-repeatable": "Il n'a pas encore d'entrée. Cliquez pour en ajouter une.",
   "components.notification.info.maximum-requirement": "Le nombre maximal de champs est atteint",
   "components.notification.info.minimum-requirement": "Un champ a été rajouté pour remplir les conditions minimales",
   "components.repeatable.reorder.error": "Une erreur s'est produite lors de la réorganisation du champ de votre composant, veuillez réessayer",
