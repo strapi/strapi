@@ -186,8 +186,7 @@ export const RolesListPage = () => {
                 })}
               </LinkButton>
             ) : null
-          }
-          navigationAction={<BackButton />}
+          }          
         />
 
         <Layouts.Action
