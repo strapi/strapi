@@ -1,7 +1,4 @@
-import React from 'react';
-
-import { Box } from '@strapi/design-system';
-import PropTypes from 'prop-types';
+import { Box, BoxProps } from '@strapi/design-system';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -16,7 +13,11 @@ const BoxTextDecoration = styled(BoxOutline)`
   text-decoration: none;
 `;
 
-export const FolderCardBodyAction = ({ to, ...props }) => {
+interface FolderCardBodyActionProps extends BoxProps {
+  to?: string;
+}
+
+export const FolderCardBodyAction = ({ to, ...props }: FolderCardBodyActionProps) => {
   if (to) {
     return (
       <BoxTextDecoration
@@ -32,12 +33,4 @@ export const FolderCardBodyAction = ({ to, ...props }) => {
   }
 
   return <BoxOutline padding={1} tag="button" type="button" maxWidth="100%" {...props} />;
-};
-
-FolderCardBodyAction.defaultProps = {
-  to: undefined,
-};
-
-FolderCardBodyAction.propTypes = {
-  to: PropTypes.string,
 };
