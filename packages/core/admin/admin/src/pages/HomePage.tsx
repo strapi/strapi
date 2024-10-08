@@ -460,7 +460,7 @@ const LinkCustom = styled(LinkButton)`
   display: flex;
   align-items: center;
   border: none;
-
+  justify-content: left;
   svg {
     width: ${({ theme }) => theme.spaces[6]};
     height: ${({ theme }) => theme.spaces[6]};

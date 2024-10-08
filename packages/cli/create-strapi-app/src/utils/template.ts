@@ -75,12 +75,23 @@ export async function copyTemplate(scope: Scope, rootPath: string) {
     }
 
     if (scope.templateBranch) {
-      await downloadGithubRepo(rootPath, {
-        owner,
-        repo,
-        branch: scope.templateBranch,
-        subPath: scope.templatePath,
-      });
+      await retry(
+        () =>
+          downloadGithubRepo(rootPath, {
+            owner,
+            repo,
+            branch: scope.templateBranch,
+            subPath: scope.templatePath,
+          }),
+        {
+          retries: 3,
+          onRetry(err, attempt) {
+            console.log(`Retrying to download the template. Attempt ${attempt}. Error: ${err}`);
+          },
+        }
+      );
+
+      return;
     }
 
     await retry(

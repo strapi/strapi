@@ -4,6 +4,7 @@ import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
 import { historyAdmin } from './history';
 import { reducer } from './modules/reducers';
+import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
@@ -44,6 +45,9 @@ export default {
   bootstrap(app: any) {
     if (typeof historyAdmin.bootstrap === 'function') {
       historyAdmin.bootstrap(app);
+    }
+    if (typeof previewAdmin.bootstrap === 'function') {
+      previewAdmin.bootstrap(app);
     }
   },
   async registerTrads({ locales }: { locales: string[] }) {

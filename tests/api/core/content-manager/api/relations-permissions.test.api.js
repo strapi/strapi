@@ -138,7 +138,7 @@ describe('Relation permissions', () => {
 
     const shopEntry = await createEntry(
       'api::shop.shop',
-      { name: 'Shop', products: [product.id] },
+      { name: 'Shop', products: [product.documentId] },
       populateShop
     );
     shop = shopEntry.data;

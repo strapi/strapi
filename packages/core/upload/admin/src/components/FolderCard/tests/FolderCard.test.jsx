@@ -19,7 +19,7 @@ const ComponentFixture = ({ to, ...props }) => {
         <FolderCard
           id={ID_FIXTURE}
           ariaLabel="Folder 1"
-          startAction={<></>}
+          startAction={null}
           onClick={() => {}}
           to={to}
           {...props}

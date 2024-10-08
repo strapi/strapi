@@ -5,6 +5,11 @@ const { factory } = require('typescript');
 const { models } = require('../common');
 const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
 
+const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
+ * The app doesn't have any components yet.
+ */
+`;
+
 /**
  * Generate type definitions for Strapi Components
  *
@@ -22,6 +27,12 @@ const generateComponentsDefinitions = async (options = {}) => {
     uid: contentType.uid,
     definition: models.schema.generateSchemaDefinition(contentType),
   }));
+
+  options.logger.debug(`Found ${componentsDefinitions.length} components.`);
+
+  if (componentsDefinitions.length === 0) {
+    return { output: NO_COMPONENT_PLACEHOLDER_COMMENT, stats: {} };
+  }
 
   const formattedSchemasDefinitions = componentsDefinitions.reduce((acc, def) => {
     acc.push(

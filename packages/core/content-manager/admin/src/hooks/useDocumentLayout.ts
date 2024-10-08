@@ -250,9 +250,10 @@ const formatEditLayout = (
       currentPanelIndex += 2;
     } else {
       if (!panels[currentPanelIndex]) {
-        panels.push([]);
+        panels.push([row]);
+      } else {
+        panels[currentPanelIndex].push(row);
       }
-      panels[currentPanelIndex].push(row);
     }
 
     return panels;

@@ -7,11 +7,11 @@ import type { DocumentMetadata } from '../../../shared/contracts/collection-type
 import { getValidatableFieldsPopulate } from './utils/populate';
 
 export interface DocumentVersion {
-  id: number;
+  id: string | number;
   documentId: Modules.Documents.ID;
-  locale: string;
-  updatedAt: string | null | Date;
-  publishedAt: string | null | Date;
+  locale?: string;
+  updatedAt?: string | null | Date;
+  publishedAt?: string | null | Date;
 }
 
 const AVAILABLE_STATUS_FIELDS = [
@@ -86,7 +86,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const versionsByLocale = groupBy('locale', allVersions);
 
     // Delete the current locale
-    delete versionsByLocale[version.locale];
+    if (version.locale) {
+      delete versionsByLocale[version.locale];
+    }
 
     // For each locale, get the ones with the same status
     // There will not be a draft and a version counterpart if the content
