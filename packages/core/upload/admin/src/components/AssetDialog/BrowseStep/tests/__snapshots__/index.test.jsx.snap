@@ -399,6 +399,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 .c61 {
   position: absolute;
   top: 12px;
+  right: 12px;
 }
 
 .c7 {
@@ -885,7 +886,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               aria-label="Folder 1"
               class="c44"
               tabindex="-1"
-              tag="button"
               type="button"
             />
             <div

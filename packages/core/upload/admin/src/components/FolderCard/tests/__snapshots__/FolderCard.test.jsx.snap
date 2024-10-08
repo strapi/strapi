@@ -86,6 +86,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 .c16 {
   position: absolute;
   top: 12px;
+  right: 12px;
 }
 
 .c5 {
@@ -165,7 +166,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       aria-label="Folder 1"
       class="c1"
       tabindex="-1"
-      tag="button"
       type="button"
     />
     <div
@@ -334,6 +334,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 .c14 {
   position: absolute;
   top: 12px;
+  right: 12px;
 }
 
 .c1 {
@@ -377,7 +378,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       aria-label="Folder 1"
       class="c1"
       tabindex="-1"
-      tag="button"
       type="button"
     />
     <div

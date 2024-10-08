@@ -1,8 +1,7 @@
-import React, { forwardRef, useMemo } from 'react';
+import * as React from 'react';
 
-import { Box, CardAction, Flex } from '@strapi/design-system';
+import { Box, CardAction, Flex, BoxProps } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -42,17 +41,39 @@ const Card = styled(Box)`
   }
 `;
 
-export const FolderCard = forwardRef(
-  ({ children, id, startAction, cardActions, ariaLabel, onClick, to, ...props }, ref) => {
-    const generatedId = useId(id);
-    const fodlerCtxValue = useMemo(() => ({ id: generatedId }), [generatedId]);
+interface FolderCardProps extends Omit<BoxProps, 'id'> {
+  ariaLabel: string;
+  children: React.ReactNode;
+  id?: string;
+  startAction?: React.ReactNode;
+  cardActions?: React.ReactNode;
+  onClick?: () => void;
+  to?: string;
+}
+
+export const FolderCard = React.forwardRef(
+  (
+    {
+      children,
+      id,
+      startAction = null,
+      cardActions = null,
+      ariaLabel,
+      onClick,
+      to,
+      ...props
+    }: FolderCardProps,
+    ref
+  ) => {
+    const generatedId = useId(id!);
+    const fodlerCtxValue = React.useMemo(() => ({ id: generatedId }), [generatedId]);
 
     return (
       <FolderCardContext.Provider value={fodlerCtxValue}>
         <Card position="relative" tabIndex={0} $isCardActions={!!cardActions} ref={ref} {...props}>
           <FauxClickWrapper
             to={to || undefined}
-            tag={to ? NavLink : 'button'}
+            as={to ? NavLink : 'button'}
             type={to ? undefined : 'button'}
             onClick={onClick}
             tabIndex={-1}
@@ -88,7 +109,9 @@ export const FolderCard = forwardRef(
             {children}
 
             <CardActionDisplay>
-              <CardAction right={4}>{cardActions}</CardAction>
+              <CardAction right={4} position="end">
+                {cardActions}
+              </CardAction>
             </CardActionDisplay>
           </Flex>
         </Card>
@@ -96,21 +119,3 @@ export const FolderCard = forwardRef(
     );
   }
 );
-
-FolderCard.defaultProps = {
-  id: undefined,
-  cardActions: null,
-  startAction: null,
-  to: undefined,
-  onClick: undefined,
-};
-
-FolderCard.propTypes = {
-  ariaLabel: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
-  id: PropTypes.string,
-  onClick: PropTypes.func,
-  startAction: PropTypes.element,
-  cardActions: PropTypes.element,
-  to: PropTypes.string,
-};

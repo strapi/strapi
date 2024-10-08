@@ -2,9 +2,9 @@ import { renderHook } from '@testing-library/react';
 
 import useId from '../useId';
 
-function setup(...args) {
+function setup(arg: string) {
   const { result } = renderHook((...props) => useId(...props), {
-    initialProps: args,
+    initialProps: arg,
   });
 
   return result.current;
