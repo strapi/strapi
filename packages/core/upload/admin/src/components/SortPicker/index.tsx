@@ -1,20 +1,23 @@
-import React from 'react';
-
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { sortOptions } from '../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { sortOptions } from '../../newConstants';
 import { getTrad } from '../../utils';
 
-const SortPicker = ({ onChangeSort, value }) => {
+interface SortPickerProps {
+  onChangeSort: (value: string) => void;
+  value?: string;
+}
+
+const SortPicker = ({ onChangeSort, value }: SortPickerProps) => {
   const { formatMessage } = useIntl();
 
   return (
     <SingleSelect
       size="S"
       value={value}
-      onChange={(value) => onChangeSort(value)}
+      onChange={(value) => onChangeSort(value.toString())}
       aria-label={formatMessage({
         id: getTrad('sort.label'),
         defaultMessage: 'Sort by',
@@ -31,15 +34,6 @@ const SortPicker = ({ onChangeSort, value }) => {
       ))}
     </SingleSelect>
   );
-};
-
-SortPicker.defaultProps = {
-  value: undefined,
-};
-
-SortPicker.propTypes = {
-  onChangeSort: PropTypes.func.isRequired,
-  value: PropTypes.string,
 };
 
 export default SortPicker;
