@@ -1,5 +1,14 @@
-function getOpenValues(options, defaultValue = {}) {
-  let values = [];
+interface Option {
+  value: number | string | null;
+  parent?: number | string | null;
+}
+
+interface DefaultValue {
+  value?: number | string | null;
+}
+
+function getOpenValues(options: Option[], defaultValue: DefaultValue = {}) {
+  let values: Option['value'][] = [];
   const { value } = defaultValue;
   const option = options.find((option) => option.value === value);
 
@@ -12,8 +21,11 @@ function getOpenValues(options, defaultValue = {}) {
   let { parent } = option;
 
   while (parent !== undefined) {
-    // eslint-disable-next-line no-loop-func
     const option = options.find(({ value }) => value === parent);
+
+    if (!option) {
+      break;
+    }
 
     values.push(option.value);
     parent = option.parent;
