@@ -1,11 +1,9 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { TableList } from '..';
+import { TableList, TableListProps } from '../index';
 
 const PROPS_FIXTURE = {
   canUpdate: true,
@@ -36,8 +34,8 @@ const PROPS_FIXTURE = {
   selected: [],
 };
 
-const ComponentFixture = (props) => {
-  const customProps = {
+const ComponentFixture = (props: Partial<TableListProps> = {}) => {
+  const customProps: TableListProps = {
     ...PROPS_FIXTURE,
     ...props,
   };
@@ -53,7 +51,7 @@ const ComponentFixture = (props) => {
   );
 };
 
-const setup = (props) => render(<ComponentFixture {...props} />);
+const setup = (props?: TableListProps) => render(<ComponentFixture {...props} />);
 
 describe('TableList', () => {
   it('should render a visually hidden edit table headers label', () => {
@@ -67,6 +65,8 @@ describe('TableList', () => {
     const { findByRole } = setup({
       sortQuery: 'updatedAt:ASC',
       onChangeSort: onChangeSortSpy,
+      onSelectAll: jest.fn(),
+      onSelectOne: jest.fn(),
     });
 
     const sortButton = await findByRole('button', { name: 'Sort on last update' });
@@ -79,7 +79,12 @@ describe('TableList', () => {
 
   it('should call onChangeSort callback when changing sort by', async () => {
     const onChangeSortSpy = jest.fn();
-    const { getByText } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
+    const { getByText } = setup({
+      sortQuery: 'updatedAt:ASC',
+      onChangeSort: onChangeSortSpy,
+      onSelectAll: jest.fn(),
+      onSelectOne: jest.fn(),
+    });
 
     expect(getByText('name')).toBeInTheDocument();
 
@@ -89,13 +94,22 @@ describe('TableList', () => {
   });
 
   it('should display indeterminate state of bulk select checkbox', () => {
-    const { getByRole } = setup({ indeterminate: true });
+    const { getByRole } = setup({
+      indeterminate: true,
+      onSelectAll: jest.fn(),
+      onSelectOne: jest.fn(),
+    });
 
     expect(getByRole('checkbox', { name: 'Select all folders & assets' })).toBePartiallyChecked();
   });
 
   it('should not display indeterminate state of bulk select checkbox if checkbox is disabled', () => {
-    const { getByRole } = setup({ indeterminate: true, shouldDisableBulkSelect: true });
+    const { getByRole } = setup({
+      indeterminate: true,
+      shouldDisableBulkSelect: true,
+      onSelectAll: jest.fn(),
+      onSelectOne: jest.fn(),
+    });
 
     expect(
       getByRole('checkbox', { name: 'Select all folders & assets' })
@@ -103,7 +117,11 @@ describe('TableList', () => {
   });
 
   it('should disable bulk select when users do not have update permissions', () => {
-    const { getByRole } = setup({ shouldDisableBulkSelect: true });
+    const { getByRole } = setup({
+      shouldDisableBulkSelect: true,
+      onSelectAll: jest.fn(),
+      onSelectOne: jest.fn(),
+    });
 
     expect(getByRole('checkbox', { name: 'Select all folders & assets' })).toBeDisabled();
   });
@@ -124,8 +142,11 @@ describe('TableList', () => {
           name: 'folder 1',
           type: 'folder',
           updatedAt: '2022-11-17T10:40:06.022Z',
+          hash: 'folder-1',
         },
       ],
+      onSelectAll: jest.fn(),
+      onSelectOne: jest.fn(),
     });
 
     expect(getByText('folder 1')).toBeInTheDocument();

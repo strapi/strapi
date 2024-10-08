@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   Checkbox,
   IconButton,
@@ -12,37 +10,67 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { CaretDown, CaretUp } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import type { File } from '../../../../shared/contracts/files';
+import type { Folder } from '../../../../shared/contracts/folders';
 
-import { AssetDefinition, FolderDefinition, tableHeaders } from '../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { tableHeaders } from '../../newConstants';
 import { getTrad } from '../../utils';
 
 import { TableRows } from './TableRows';
 
+interface FileRow extends File {
+  folderURL?: string;
+  isSelectable?: boolean;
+  type?: string;
+}
+
+interface FolderRow extends Folder {
+  folderURL?: string;
+  isSelectable?: boolean;
+  type?: string;
+}
+
+export interface TableListProps {
+  assetCount?: number;
+  folderCount?: number;
+  indeterminate?: boolean;
+  onChangeSort?: ((sortQuery: string) => void) | null;
+  onChangeFolder?: ((folderId: number, folderPath?: string) => void) | null;
+  onEditAsset?: ((asset: FileRow) => void) | null;
+  onEditFolder?: ((folder: FolderRow) => void) | null;
+  onSelectAll: (checked: boolean | string, rows: FolderRow[] | FileRow[]) => void;
+  onSelectOne: (element: FileRow | FolderRow) => void;
+  rows?: FileRow[] | FolderRow[];
+  selected?: FileRow[] | FolderRow[];
+  shouldDisableBulkSelect?: boolean;
+  sortQuery?: string;
+}
+
 export const TableList = ({
-  assetCount,
-  folderCount,
-  indeterminate,
-  onChangeSort,
-  onChangeFolder,
-  onEditAsset,
-  onEditFolder,
+  assetCount = 0,
+  folderCount = 0,
+  indeterminate = false,
+  onChangeSort = null,
+  onChangeFolder = null,
+  onEditAsset = null,
+  onEditFolder = null,
   onSelectAll,
   onSelectOne,
-  rows,
-  selected,
-  shouldDisableBulkSelect,
-  sortQuery,
-}) => {
+  rows = [],
+  selected = [],
+  shouldDisableBulkSelect = false,
+  sortQuery = '',
+}: TableListProps) => {
   const { formatMessage } = useIntl();
   const [sortBy, sortOrder] = sortQuery.split(':');
 
-  const handleClickSort = (isSorted, name) => {
+  const handleClickSort = (isSorted: boolean, name: string) => {
     const nextSortOrder = isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC';
     const nextSort = `${name}:${nextSortOrder}`;
 
-    onChangeSort(nextSort);
+    onChangeSort && onChangeSort(nextSort);
   };
 
   return (
@@ -94,7 +122,6 @@ export const TableList = ({
                     <Typography
                       onClick={() => handleClickSort(isSorted, name)}
                       tag={isSorted ? 'span' : 'button'}
-                      label={!isSorted ? sortLabel : ''}
                       textColor="neutral600"
                       variant="sigma"
                     >
@@ -121,42 +148,12 @@ export const TableList = ({
       </Thead>
       <TableRows
         onChangeFolder={onChangeFolder}
-        onEditAsset={onEditAsset}
-        onEditFolder={onEditFolder}
+        onEditAsset={onEditAsset!}
+        onEditFolder={onEditFolder!}
         rows={rows}
         onSelectOne={onSelectOne}
         selected={selected}
       />
     </Table>
   );
-};
-
-TableList.defaultProps = {
-  assetCount: 0,
-  folderCount: 0,
-  indeterminate: false,
-  onChangeSort: null,
-  onChangeFolder: null,
-  onEditAsset: null,
-  onEditFolder: null,
-  rows: [],
-  selected: [],
-  shouldDisableBulkSelect: false,
-  sortQuery: '',
-};
-
-TableList.propTypes = {
-  assetCount: PropTypes.number,
-  folderCount: PropTypes.number,
-  indeterminate: PropTypes.bool,
-  onChangeSort: PropTypes.func,
-  onChangeFolder: PropTypes.func,
-  onEditAsset: PropTypes.func,
-  onEditFolder: PropTypes.func,
-  onSelectAll: PropTypes.func.isRequired,
-  onSelectOne: PropTypes.func.isRequired,
-  rows: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
-  shouldDisableBulkSelect: PropTypes.bool,
-  sortQuery: PropTypes.string,
 };

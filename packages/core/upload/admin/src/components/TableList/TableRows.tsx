@@ -28,8 +28,8 @@ export interface TableRowsProps {
   onEditAsset: (asset: FileRow) => void;
   onEditFolder: (folder: FolderRow) => void;
   onSelectOne: (element: FileRow | FolderRow) => void;
-  rows: Array<FileRow | FolderRow>;
-  selected: Array<FileRow | FolderRow>;
+  rows: FileRow[] | FolderRow[];
+  selected: FileRow[] | FolderRow[];
 }
 
 export const TableRows = ({

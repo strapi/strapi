@@ -41,7 +41,11 @@ const PROPS_FIXTURE = {
 const setup = (props?: any) =>
   render(<TableRows {...PROPS_FIXTURE} {...props} />, {
     renderOptions: {
-      wrapper: ({ children }) => <RawTable colCount={4} rowCount={2}>{children}</RawTable>,
+      wrapper: ({ children }) => (
+        <RawTable colCount={4} rowCount={2}>
+          {children}
+        </RawTable>
+      ),
     },
   });
 
