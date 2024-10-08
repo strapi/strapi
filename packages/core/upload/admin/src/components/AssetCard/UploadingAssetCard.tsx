@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -12,14 +12,15 @@ import {
   Flex,
   Typography,
 } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetType } from '../../newConstants';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
 import { UploadProgress } from '../UploadProgress';
+import type { RawFile, File } from '../../../../shared/contracts/files';
 
 const UploadProgressWrapper = styled.div`
   height: 8.8rem;
@@ -30,13 +31,26 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
+interface UploadingAssetCardProps {
+  onCancel: (rawFile: RawFile) => void;
+  onStatusChange: (status: string) => void;
+  addUploadedFiles: (files: File[]) => void;
+  folderId?: string | number | null;
+  asset: Asset;
+}
+
+interface Asset extends File {
+  rawFile: RawFile;
+  type?: AssetType;
+}
+
 export const UploadingAssetCard = ({
   asset,
   onCancel,
   onStatusChange,
   addUploadedFiles,
-  folderId,
-}) => {
+  folderId = null,
+}: UploadingAssetCardProps) => {
   const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
@@ -62,12 +76,14 @@ export const UploadingAssetCard = ({
     });
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     const uploadFile = async () => {
-      const files = await upload(asset, folderId);
+      if (folderId && typeof folderId === 'number') {
+        const files = await upload(asset, folderId);
 
-      if (addUploadedFiles) {
-        addUploadedFiles(files);
+        if (addUploadedFiles) {
+          addUploadedFiles(files);
+        }
       }
     };
 
@@ -75,7 +91,7 @@ export const UploadingAssetCard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     onStatusChange(status);
   }, [status, onStatusChange]);
 
@@ -89,13 +105,19 @@ export const UploadingAssetCard = ({
       <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
-            <UploadProgress error={error} onCancel={handleCancel} progress={progress} />
+            <UploadProgress
+              error={error || undefined}
+              onCancel={handleCancel}
+              progress={progress}
+            />
           </UploadProgressWrapper>
         </CardHeader>
         <CardBody>
           <CardContent>
             <Box paddingTop={1}>
-              <CardTitle tag="h2">{asset.name}</CardTitle>
+              <Typography tag="h2">
+                <CardTitle tag="span">{asset.name}</CardTitle>
+              </Typography>
             </Box>
             <CardSubtitle>
               <Extension>{asset.ext}</Extension>
@@ -109,10 +131,10 @@ export const UploadingAssetCard = ({
       {error ? (
         <Typography variant="pi" fontWeight="bold" textColor="danger600">
           {formatMessage(
-            error?.response?.data?.error?.message
+            error?.message
               ? {
-                  id: getTrad(`apiError.${error.response.data.error.message}`),
-                  defaultMessage: error.response.data.error.message,
+                  id: getTrad(`apiError.${error.message}`),
+                  defaultMessage: error.message,
                   /* See issue: https://github.com/strapi/strapi/issues/13867
              A proxy might return an error, before the request reaches Strapi
              and therefore we need to handle errors gracefully.
@@ -127,22 +149,4 @@ export const UploadingAssetCard = ({
       ) : undefined}
     </Flex>
   );
-};
-
-UploadingAssetCard.defaultProps = {
-  addUploadedFiles: undefined,
-  folderId: null,
-};
-
-UploadingAssetCard.propTypes = {
-  addUploadedFiles: PropTypes.func,
-  asset: PropTypes.shape({
-    name: PropTypes.string,
-    ext: PropTypes.string,
-    rawFile: PropTypes.instanceOf(File),
-    type: PropTypes.oneOf(Object.values(AssetType)),
-  }).isRequired,
-  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  onCancel: PropTypes.func.isRequired,
-  onStatusChange: PropTypes.func.isRequired,
 };
