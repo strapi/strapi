@@ -1,9 +1,13 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
-export const FolderGridList = ({ title, children }) => {
+interface FolderGridListProps {
+  children: React.ReactNode;
+  title?: string | null;
+}
+
+export const FolderGridList = ({ title = null, children }: FolderGridListProps) => {
   return (
     <KeyboardNavigable tagName="article">
       {title && (
@@ -17,13 +21,4 @@ export const FolderGridList = ({ title, children }) => {
       <Grid.Root gap={4}>{children}</Grid.Root>
     </KeyboardNavigable>
   );
-};
-
-FolderGridList.defaultProps = {
-  title: null,
-};
-
-FolderGridList.propTypes = {
-  children: PropTypes.node.isRequired,
-  title: PropTypes.string,
 };
