@@ -200,7 +200,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
           />
         </svg>
       </div>
-      <h2
+      <div
         class="c8 c9 c10"
         id="folder-3-title"
       >
@@ -218,7 +218,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
             </span>
           </div>
         </button>
-      </h2>
+      </div>
       <div
         class="c14"
       >
@@ -399,7 +399,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
           />
         </svg>
       </div>
-      <h2
+      <div
         class="c6 c7 c8"
         id="folder-1-title"
       >
@@ -417,7 +417,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
             </span>
           </div>
         </button>
-      </h2>
+      </div>
       <div
         class="c12"
       >

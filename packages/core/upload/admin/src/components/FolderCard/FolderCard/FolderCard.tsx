@@ -41,7 +41,7 @@ const Card = styled(Box)`
   }
 `;
 
-interface FolderCardProps extends Omit<BoxProps, 'id'> {
+export interface FolderCardProps extends Omit<BoxProps, 'id'> {
   ariaLabel: string;
   children: React.ReactNode;
   id?: string;
