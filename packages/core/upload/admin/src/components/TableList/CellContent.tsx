@@ -1,23 +1,31 @@
-import React from 'react';
-
 import { Typography } from '@strapi/design-system';
 import parseISO from 'date-fns/parseISO';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { formatBytes, getFileExtension } from '../../utils';
 
 import { PreviewCell } from './PreviewCell';
+import type { File } from '../../../../shared/contracts/files';
 
-export const CellContent = ({ cellType, contentType, content, name }) => {
+export interface CellContentProps {
+  cellType: string;
+  contentType: string;
+  content: File;
+  name: string;
+}
+
+export const CellContent = ({ cellType, contentType, content, name }: CellContentProps) => {
   const { formatDate, formatMessage } = useIntl();
+  const contentValue = content[name as Extract<keyof File, string>];
 
   switch (cellType) {
     case 'image':
       return <PreviewCell type={contentType} content={content} />;
 
     case 'date':
-      return <Typography>{formatDate(parseISO(content[name]), { dateStyle: 'full' })}</Typography>;
+      if (typeof contentValue === 'string') {
+        return <Typography>{formatDate(parseISO(contentValue), { dateStyle: 'full' })}</Typography>;
+      }
 
     case 'size':
       if (contentType === 'folder')
@@ -31,8 +39,9 @@ export const CellContent = ({ cellType, contentType, content, name }) => {
             -
           </Typography>
         );
-
-      return <Typography>{formatBytes(content[name])}</Typography>;
+      if (typeof contentValue === 'string' || typeof contentValue === 'number') {
+        return <Typography>{formatBytes(contentValue)}</Typography>;
+      }
 
     case 'ext':
       if (contentType === 'folder')
@@ -47,10 +56,13 @@ export const CellContent = ({ cellType, contentType, content, name }) => {
           </Typography>
         );
 
-      return <Typography>{getFileExtension(content[name]).toUpperCase()}</Typography>;
-
+      if (typeof contentValue === 'string') {
+        return <Typography>{getFileExtension(contentValue)?.toUpperCase()}</Typography>;
+      }
     case 'text':
-      return <Typography>{content[name]}</Typography>;
+      if (typeof contentValue === 'string') {
+        return <Typography>{contentValue}</Typography>;
+      }
 
     default:
       return (
@@ -64,21 +76,4 @@ export const CellContent = ({ cellType, contentType, content, name }) => {
         </Typography>
       );
   }
-};
-
-CellContent.propTypes = {
-  cellType: PropTypes.string.isRequired,
-  contentType: PropTypes.string.isRequired,
-  content: PropTypes.shape({
-    alternativeText: PropTypes.string,
-    ext: PropTypes.string,
-    formats: PropTypes.shape({
-      thumbnail: PropTypes.shape({
-        url: PropTypes.string,
-      }),
-    }),
-    mime: PropTypes.string,
-    url: PropTypes.string,
-  }).isRequired,
-  name: PropTypes.string.isRequired,
 };

@@ -63,7 +63,13 @@ export interface File {
   caption?: string | null;
   width?: number;
   height?: number;
-  formats?: Record<string, FileFormat>;
+  formats?:
+    | Record<string, FileFormat>
+    | {
+        thumbnail: {
+          url: string;
+        };
+      };
   hash: string;
   ext?: string;
   mime?: string;

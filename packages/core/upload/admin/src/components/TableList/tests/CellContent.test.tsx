@@ -1,15 +1,16 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import { CellContent } from '../CellContent';
+import { CellContent, CellContentProps } from '../CellContent';
 
 const PROPS_FIXTURE = {
   cellType: 'image',
   contentType: 'asset',
   content: {
+    id: 1,
+    name: 'michka-picture-name',
+    hash: 'michka-picture-hash',
     alternativeText: 'alternative alt',
     ext: 'jpeg',
     formats: {
@@ -23,7 +24,7 @@ const PROPS_FIXTURE = {
   name: 'preview',
 };
 
-const ComponentFixture = (props) => {
+const ComponentFixture = (props: Partial<CellContentProps>) => {
   const customProps = {
     ...PROPS_FIXTURE,
     ...props,
@@ -38,12 +39,12 @@ const ComponentFixture = (props) => {
   );
 };
 
-const setup = (props) => render(<ComponentFixture {...props} />);
+const setup = (props: Partial<CellContentProps>) => render(<ComponentFixture {...props} />);
 
 describe('TableList | CellContent', () => {
   it('should render image cell type when element type is asset and mime does not include image', () => {
     const { container, getByText } = setup({
-      content: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },
+      content: { ...PROPS_FIXTURE.content, mime: 'application/pdf', ext: 'pdf' },
     });
 
     expect(getByText('pdf')).toBeInTheDocument();
@@ -89,7 +90,7 @@ describe('TableList | CellContent', () => {
   it('should render size cell type when element type is asset', () => {
     const { container, getByText } = setup({
       cellType: 'size',
-      content: { ...PROPS_FIXTURE.content, size: '20.5435' },
+      content: { ...PROPS_FIXTURE.content, size: Number('20.5435') },
       name: 'size',
     });
 
