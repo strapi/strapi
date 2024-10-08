@@ -42,7 +42,7 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Handler must be a function
       if (typeof handler !== 'function') {
         throw new errors.ValidationError(
-          'Static Preview configuration is invalid. Handler must be a function'
+          'Preview configuration is invalid. Handler must be a function'
         );
       }
     },

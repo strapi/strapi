@@ -6,9 +6,7 @@ import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import getTrad from '../../../utils/getTrad';
-import { urlsToAssets } from '../../../utils/urlsToAssets';
-import { urlSchema } from '../../../utils/urlYupSchema';
+import { getTrad, urlsToAssets, urlSchema } from '../../../utils';
 
 export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
   const [loading, setLoading] = useState(false);

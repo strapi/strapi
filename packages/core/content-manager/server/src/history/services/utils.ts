@@ -180,6 +180,25 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   /**
+   * Lists all the fields of a component, excepts those that will be populated.
+   * The goal is to exclude the ID, because when restoring a component,
+   * referencing an ID for a component db row that was deleted creates an error.
+   * So we never store component IDs to ensure they're re-created while restoring a version.
+   */
+  const getComponentFields = (componentUID: UID.Component): string[] => {
+    return Object.entries(strapi.getModel(componentUID).attributes).reduce<string[]>(
+      (fieldsAcc, [key, attribute]) => {
+        if (!['relation', 'media', 'component', 'dynamiczone'].includes(attribute.type)) {
+          fieldsAcc.push(key);
+        }
+
+        return fieldsAcc;
+      },
+      []
+    );
+  };
+
+  /**
    * @description
    * Creates a populate object that looks for all the relations that need
    * to be saved in history, and populates only the fields needed to later retrieve the content.
@@ -215,7 +234,10 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
         case 'component': {
           const populate = getDeepPopulate(attribute.component);
-          acc[attributeName] = { populate };
+          acc[attributeName] = {
+            populate,
+            [fieldSelector]: getComponentFields(attribute.component),
+          };
           break;
         }
 
@@ -223,7 +245,10 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
           // Use fragments to populate the dynamic zone components
           const populatedComponents = (attribute.components || []).reduce(
             (acc: any, componentUID: UID.Component) => {
-              acc[componentUID] = { populate: getDeepPopulate(componentUID) };
+              acc[componentUID] = {
+                populate: getDeepPopulate(componentUID),
+                [fieldSelector]: getComponentFields(componentUID),
+              };
               return acc;
             },
             {}

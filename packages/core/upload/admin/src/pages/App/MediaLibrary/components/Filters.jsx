@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 
 import FilterList from '../../../../components/FilterList';
 import FilterPopover from '../../../../components/FilterPopover';
-import displayedFilters from '../../../../utils/displayedFilters';
+import { displayedFilters } from '../../../../utils';
 
 export const Filters = () => {
   const [open, setOpen] = React.useState(false);

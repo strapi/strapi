@@ -27,8 +27,7 @@ import * as yup from 'yup';
 import { AssetDefinition } from '../../constants';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { findRecursiveFolderByValue, getTrad, getFileExtension } from '../../utils';
-import formatBytes from '../../utils/formatBytes';
+import { findRecursiveFolderByValue, getTrad, getFileExtension, formatBytes } from '../../utils';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 

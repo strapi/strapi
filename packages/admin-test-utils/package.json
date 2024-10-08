@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin-test-utils",
-  "version": "5.0.2-beta.0",
+  "version": "5.0.2",
   "private": true,
   "description": "Test utilities for the Strapi administration panel",
   "license": "MIT",
