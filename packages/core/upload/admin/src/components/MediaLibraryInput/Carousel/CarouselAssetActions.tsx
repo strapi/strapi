@@ -1,15 +1,24 @@
-import React from 'react';
-
 import { CarouselActions, IconButton } from '@strapi/design-system';
 import { Pencil, Plus, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition } from '../../../constants';
 import { getTrad, prefixFileUrlWithBackendUrl } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton';
+import type { File } from '../../../../../shared/contracts/files';
 
-export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditAsset }) => {
+interface CarouselAssetActionsProps {
+  asset: File;
+  onDeleteAsset?: (asset: File) => void;
+  onAddAsset?: (asset: File) => void;
+  onEditAsset?: () => void;
+}
+
+export const CarouselAssetActions = ({
+  asset,
+  onDeleteAsset,
+  onAddAsset,
+  onEditAsset,
+}: CarouselAssetActionsProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -26,7 +35,7 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
         </IconButton>
       )}
 
-      <CopyLinkButton url={prefixFileUrlWithBackendUrl(asset.url)} />
+      <CopyLinkButton url={prefixFileUrlWithBackendUrl(asset.url)!} />
 
       {onDeleteAsset && (
         <IconButton
@@ -53,17 +62,4 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
       )}
     </CarouselActions>
   );
-};
-
-CarouselAssetActions.defaultProps = {
-  onAddAsset: undefined,
-  onDeleteAsset: undefined,
-  onEditAsset: undefined,
-};
-
-CarouselAssetActions.propTypes = {
-  asset: AssetDefinition.isRequired,
-  onAddAsset: PropTypes.func,
-  onEditAsset: PropTypes.func,
-  onDeleteAsset: PropTypes.func,
 };
