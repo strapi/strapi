@@ -20,7 +20,6 @@ import {
   useTracking,
   Page,
   SearchInput,
-  BackButton,
   useNotification,
   useQueryParams,
   useFetchClient,
