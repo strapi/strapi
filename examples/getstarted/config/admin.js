@@ -18,4 +18,12 @@ module.exports = ({ env }) => ({
     nps: env.bool('FLAG_NPS', true),
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),
   },
+  preview: {
+    enabled: env.bool('PREVIEW_ENABLED', true),
+    config: {
+      handler: (uid, { documentId, locale, status }) => {
+        return `/preview/${uid}/${documentId}/${locale}/${status}`;
+      },
+    },
+  },
 });
