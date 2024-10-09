@@ -1,8 +1,5 @@
-import React from 'react';
-
 import { Flex, FocusTrap, IconButton, Menu } from '@strapi/design-system';
 import { Check, Cross } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
@@ -10,7 +7,13 @@ import { getTrad } from '../../../utils';
 
 import { CroppingActionRow } from './components';
 
-export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
+interface CroppingActionsProps {
+  onCancel: () => void;
+  onValidate: () => void;
+  onDuplicate?: () => void;
+}
+
+export const CroppingActions = ({ onCancel, onValidate, onDuplicate }: CroppingActionsProps) => {
   const { formatMessage } = useIntl();
   const theme = useTheme();
 
@@ -96,13 +99,3 @@ const Trigger = styled(Menu.Trigger)`
     }
   }
 `;
-
-CroppingActions.defaultProps = {
-  onDuplicate: undefined,
-};
-
-CroppingActions.propTypes = {
-  onCancel: PropTypes.func.isRequired,
-  onDuplicate: PropTypes.func,
-  onValidate: PropTypes.func.isRequired,
-};
