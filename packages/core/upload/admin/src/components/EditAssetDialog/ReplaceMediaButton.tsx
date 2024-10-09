@@ -1,29 +1,39 @@
-import React, { useRef } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { Button, VisuallyHidden } from '@strapi/design-system';
-import PropTypes from 'prop-types';
+import { Button, VisuallyHidden, ButtonProps } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
 
-export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, trackedLocation, ...props }) => {
+interface ReplaceMediaButtonProps extends ButtonProps {
+  acceptedMime: string;
+  onSelectMedia: (file?: File) => void;
+  trackedLocation?: string;
+}
+
+export const ReplaceMediaButton = ({
+  onSelectMedia,
+  acceptedMime,
+  trackedLocation,
+  ...props
+}: ReplaceMediaButtonProps) => {
   const { formatMessage } = useIntl();
-  const inputRef = useRef(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const { trackUsage } = useTracking();
 
-  const handleClick = (e) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (trackedLocation) {
       trackUsage('didReplaceMedia', { location: trackedLocation });
     }
 
-    inputRef.current.click();
+    inputRef.current?.click();
   };
 
   const handleChange = () => {
-    const file = inputRef.current.files[0];
+    const file = inputRef.current?.files?.[0];
 
     onSelectMedia(file);
   };
@@ -49,14 +59,4 @@ export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, trackedLocatio
       </VisuallyHidden>
     </>
   );
-};
-
-ReplaceMediaButton.defaultProps = {
-  trackedLocation: undefined,
-};
-
-ReplaceMediaButton.propTypes = {
-  acceptedMime: PropTypes.string.isRequired,
-  onSelectMedia: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };
