@@ -97,6 +97,6 @@ describe('history lifecycles service', () => {
     await lifecyclesService.bootstrap();
 
     expect(mockScheduleJob).toHaveBeenCalledTimes(1);
-    expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
+    expect(mockScheduleJob).toHaveBeenCalledWith('historyDaily', '0 0 * * *', expect.any(Function));
   });
 });
