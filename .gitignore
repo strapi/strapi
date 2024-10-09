@@ -123,7 +123,7 @@ dist
 ############################
 
 .vscode/
-!.vscode/settings.json
+.vscode/settings.json
 front-workspace.code-workspace
 .yarnrc
 
