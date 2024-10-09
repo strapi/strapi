@@ -1,12 +1,13 @@
-import React from 'react';
-
 import { Modal } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 
-export const EditFolderModalHeader = ({ isEditing }) => {
+interface EditFolderModalHeaderProps {
+  isEditing?: boolean;
+}
+
+export const EditFolderModalHeader = ({ isEditing = false }: EditFolderModalHeaderProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -26,12 +27,4 @@ export const EditFolderModalHeader = ({ isEditing }) => {
       </Modal.Title>
     </Modal.Header>
   );
-};
-
-EditFolderModalHeader.defaultProps = {
-  isEditing: false,
-};
-
-EditFolderModalHeader.propTypes = {
-  isEditing: PropTypes.bool,
 };
