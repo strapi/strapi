@@ -39,6 +39,10 @@ export type StrapiCloudCommand = (params: {
   ctx: CLIContext;
 }) => void | Command | Promise<Command | void>;
 
+export type StrapiCloudNamespaceCommand = (params: {
+  command: Command;
+}) => void | Command | Promise<Command | void>;
+
 export type StrapiCloudCommandInfo = {
   name: string;
   description: string;
