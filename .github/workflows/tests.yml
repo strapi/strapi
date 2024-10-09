@@ -171,13 +171,13 @@ jobs:
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     timeout-minutes: 60
     needs: [changes, build]
-    name: '[CE] e2e (browser: ${{ matrix.project }})'
+    name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -213,7 +213,7 @@ jobs:
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     timeout-minutes: 60
     needs: [changes, build]
-    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -221,7 +221,7 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
         with:
