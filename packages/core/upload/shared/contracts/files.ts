@@ -61,15 +61,16 @@ export interface File {
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
-  width?: number;
-  height?: number;
+  width?: number | null;
+  height?: number | null;
   formats?:
     | Record<string, FileFormat>
     | {
         thumbnail: {
           url: string;
         };
-      };
+      }
+    | null;
   hash: string;
   ext?: string;
   mime?: string;

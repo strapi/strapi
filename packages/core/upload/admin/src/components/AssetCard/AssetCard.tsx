@@ -19,6 +19,7 @@ interface AssetCardProps {
   onRemove?: (asset: FileSelectable) => void;
   isSelected?: boolean;
   size?: 'S' | 'M';
+  allowedTypes?: string[];
 }
 
 export const AssetCard = ({
@@ -54,9 +55,9 @@ export const AssetCard = ({
     return (
       <ImageAssetCard
         alt={asset.alternativeText || asset.name}
-        height={asset.height}
+        height={asset.height!}
         thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)!}
-        width={asset.width}
+        width={asset.width!}
         updatedAt={asset.updatedAt}
         isUrlSigned={asset?.isUrlSigned || false}
         {...commonAssetCardProps}
