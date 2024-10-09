@@ -71,6 +71,12 @@ export const register = (program: Command) => {
       });
   };
 
+  // upgrade latest
+  addReleaseUpgradeCommand(
+    Version.ReleaseType.Latest,
+    'Upgrade to the latest available version of Strapi'
+  );
+
   // upgrade major
   addReleaseUpgradeCommand(
     Version.ReleaseType.Major,
