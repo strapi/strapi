@@ -109,6 +109,16 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 | PostgreSQL | 14.0        | 11.0    |
 | SQLite     | 3           | 3       |
 
+**Minimum Database Driver:**
+
+Database driver packages often have their own minimum versions for each version of Node, so here you can find the minimum required versions
+
+| Node Version | PostgreSQL (pg) | MySQL (mysql2) | SQLite (better-sqlite3) |
+| ------------ | --------------- | -------------- | ----------------------- |
+| 18           | pg@8.x          | mysql2@2.x     | better-sqlite3@7.6.2    |
+| 20           | pg@8.x          | mysql2@3.x     | better-sqlite3@9.4.x    |
+| 22           | pg@8.x          | mysql2@3.x     | better-sqlite3@11.x     |
+
 **We recommend always using the latest version of Strapi stable to start your new projects**.
 
 ## Features
