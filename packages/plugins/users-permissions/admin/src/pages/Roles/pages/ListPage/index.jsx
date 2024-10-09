@@ -185,7 +185,7 @@ export const RolesListPage = () => {
                 })}
               </LinkButton>
             ) : null
-          }          
+          }
         />
 
         <Layouts.Action
