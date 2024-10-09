@@ -20,6 +20,7 @@ interface AssetCardProps {
   isSelected?: boolean;
   size?: 'S' | 'M';
   allowedTypes?: string[];
+  alt?: string;
 }
 
 export const AssetCard = ({

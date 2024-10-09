@@ -9,7 +9,7 @@ import pluginId from '../pluginId';
 const endpoint = `/${pluginId}`;
 
 interface Asset extends File {
-  rawFile: RawFile;
+  rawFile?: RawFile;
 }
 
 const uploadAsset = (
@@ -22,7 +22,7 @@ const uploadAsset = (
   const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
-  formData.append('files', rawFile);
+  formData.append('files', rawFile!);
 
   formData.append(
     'fileInfo',

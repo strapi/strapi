@@ -37,10 +37,12 @@ interface UploadingAssetCardProps {
   addUploadedFiles: (files: File[]) => void;
   folderId?: string | number | null;
   asset: Asset;
+  id?: string;
+  size?: 'S' | 'M';
 }
 
 interface Asset extends File {
-  rawFile: RawFile;
+  rawFile?: RawFile;
   type?: AssetType;
 }
 
@@ -97,7 +99,7 @@ export const UploadingAssetCard = ({
 
   const handleCancel = () => {
     cancel();
-    onCancel(asset.rawFile);
+    onCancel(asset.rawFile!);
   };
 
   return (

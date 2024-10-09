@@ -1,15 +1,15 @@
-import React from 'react';
-
 import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { PendingAssetStep } from '../PendingAssetStep';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetType } from '../../../../newConstants';
 
 jest.mock('../../../../utils', () => ({
   ...jest.requireActual('../../../../utils'),
-  getTrad: (x) => x,
+  getTrad: (x: string) => x,
 }));
 
 const queryClient = new QueryClient({
@@ -32,29 +32,35 @@ describe('PendingAssetStep', () => {
     const assets = [
       {
         source: 'url',
-        type: 'image',
+        type: AssetType.Image,
         url: 'http://localhost:5000/CPAM.jpg',
         ext: 'jpg',
         mime: 'image/jpeg',
         alt: '',
         name: 'something.jpg',
+        id: 1,
+        hash: 'hash_1',
       },
       {
         source: 'url',
-        type: 'doc',
+        type: AssetType.Document,
         url: 'http://localhost:5000/MARIAGE%20FRACHET%204.pdf',
         ext: 'pdf',
         mime: 'application/pdf',
         name: 'something.pdf',
+        id: 2,
+        hash: 'hash_2',
       },
       {
         source: 'url',
-        type: 'video',
+        type: AssetType.Video,
         url: 'http://localhost:5000/mov_bbb.mp4',
         ext: 'mp4',
         mime: 'video/mp4',
         alt: '',
         name: 'something.mp4',
+        id: 3,
+        hash: 'hash_3',
       },
     ];
 

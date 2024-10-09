@@ -1,20 +1,40 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition } from '../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetType } from '../../../newConstants';
 import { getTrad } from '../../../utils';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
+import type { File, RawFile } from '../../../../../shared/contracts/files';
 
 const Status = {
   Idle: 'IDLE',
   Uploading: 'UPLOADING',
   Intermediate: 'INTERMEDIATE',
 };
+
+interface Asset extends File {
+  rawFile?: RawFile;
+  type?: AssetType;
+}
+
+interface PendingAssetStepProps {
+  addUploadedFiles?: (files: File[]) => void;
+  folderId?: string | number | null;
+  onClose: () => void;
+  onEditAsset: (asset: File) => void;
+  onRemoveAsset: (asset: File) => void;
+  onAddAsset?: (asset: File) => void;
+  assets: Asset[];
+  onClickAddAsset: () => void;
+  onCancelUpload: (rawFile: RawFile) => void;
+  onUploadSucceed: (file: RawFile) => void;
+  trackedLocation?: string;
+}
 
 export const PendingAssetStep = ({
   addUploadedFiles,
@@ -27,38 +47,44 @@ export const PendingAssetStep = ({
   onCancelUpload,
   onUploadSucceed,
   trackedLocation,
-}) => {
-  const assetCountRef = useRef(0);
+}: PendingAssetStepProps) => {
+  const assetCountRef = React.useRef(0);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [uploadStatus, setUploadStatus] = useState(Status.Idle);
+  const [uploadStatus, setUploadStatus] = React.useState(Status.Idle);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const assetsCountByType = assets.reduce((acc, asset) => {
-      const { type } = asset;
+    const assetsCountByType = assets.reduce(
+      (acc: Record<AssetType, string | number>, asset) => {
+        const { type } = asset;
 
-      if (!acc[type]) {
-        acc[type] = 0;
-      }
+        if (type !== undefined && !acc[type]) {
+          acc[type] = 0;
+        }
 
-      // values need to be stringified because Amplitude ignores number values
-      acc[type] = `${parseInt(acc[type], 10) + 1}`;
+        if (type !== undefined) {
+          const accType = acc[type];
+          const currentCount = typeof accType === 'string' ? accType : accType.toString();
+          acc[type] = `${parseInt(currentCount, 10) + 1}`;
+        }
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {} as Record<AssetType, string | number>
+    );
 
     trackUsage('willAddMediaLibraryAssets', {
-      location: trackedLocation,
+      location: trackedLocation!,
       ...assetsCountByType,
     });
 
     setUploadStatus(Status.Uploading);
   };
 
-  const handleStatusChange = (status, file) => {
+  const handleStatusChange = (status: string, file: RawFile) => {
     if (status === 'success' || status === 'error') {
       assetCountRef.current++;
 
@@ -125,11 +151,11 @@ export const PendingAssetStep = ({
                     <Grid.Item col={4} key={assetKey} direction="column" alignItems="stretch">
                       <UploadingAssetCard
                         // Props used to store the newly uploaded files
-                        addUploadedFiles={addUploadedFiles}
+                        addUploadedFiles={addUploadedFiles!}
                         asset={asset}
                         id={assetKey}
                         onCancel={onCancelUpload}
-                        onStatusChange={(status) => handleStatusChange(status, asset.rawFile)}
+                        onStatusChange={(status) => handleStatusChange(status, asset.rawFile!)}
                         size="S"
                         folderId={folderId}
                       />
@@ -172,23 +198,4 @@ export const PendingAssetStep = ({
       </Modal.Footer>
     </>
   );
-};
-
-PendingAssetStep.defaultProps = {
-  addUploadedFiles: undefined,
-  folderId: null,
-  trackedLocation: undefined,
-};
-
-PendingAssetStep.propTypes = {
-  addUploadedFiles: PropTypes.func,
-  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
-  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  onClose: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func.isRequired,
-  onRemoveAsset: PropTypes.func.isRequired,
-  onClickAddAsset: PropTypes.func.isRequired,
-  onUploadSucceed: PropTypes.func.isRequired,
-  onCancelUpload: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };
