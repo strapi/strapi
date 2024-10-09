@@ -1,12 +1,12 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { forwardRef } from 'react';
+import * as React from 'react';
 
 import { Flex } from '@strapi/design-system';
 import { File, FilePdf } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetType } from '../../../newConstants';
 import { usePersistentState } from '../../../hooks/usePersistentState';
 
 const CardAsset = styled(Flex)`
@@ -14,16 +14,27 @@ const CardAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
 
-export const AssetPreview = forwardRef(({ mime, url, name, ...props }, ref) => {
+interface AssetPreviewProps {
+  mime: string;
+  name: string;
+  url: string;
+}
+
+export const AssetPreview = React.forwardRef<
+  HTMLImageElement | HTMLVideoElement | HTMLAudioElement,
+  AssetPreviewProps
+>(({ mime, url, name, ...props }, ref) => {
   const [lang] = usePersistentState('strapi-admin-language', 'en');
 
   if (mime.includes(AssetType.Image)) {
-    return <img ref={ref} src={url} alt={name} {...props} />;
+    return (
+      <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />
+    );
   }
 
   if (mime.includes(AssetType.Video)) {
     return (
-      <video controls src={url} ref={ref} {...props}>
+      <video controls src={url} ref={ref as React.ForwardedRef<HTMLVideoElement>} {...props}>
         <track label={name} default kind="captions" srcLang={lang} src="" />
       </video>
     );
@@ -31,7 +42,7 @@ export const AssetPreview = forwardRef(({ mime, url, name, ...props }, ref) => {
 
   if (mime.includes(AssetType.Audio)) {
     return (
-      <audio controls src={url} ref={ref} {...props}>
+      <audio controls src={url} ref={ref as React.ForwardedRef<HTMLAudioElement>} {...props}>
         {name}
       </audio>
     );
@@ -53,9 +64,3 @@ export const AssetPreview = forwardRef(({ mime, url, name, ...props }, ref) => {
 });
 
 AssetPreview.displayName = 'AssetPreview';
-
-AssetPreview.propTypes = {
-  mime: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  url: PropTypes.string.isRequired,
-};
