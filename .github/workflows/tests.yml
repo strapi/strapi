@@ -177,7 +177,7 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 7/7]
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -221,7 +221,7 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 7/7]
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
         with:
