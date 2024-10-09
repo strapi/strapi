@@ -200,7 +200,7 @@
   "history.content.no-relations": "Aucune relation.",
   "history.restore.confirm.button": "Restaurer",
   "history.restore.confirm.title": "Êtes-vous sûr de vouloir restaurer cette version ?",
-  "history.restore.confirm.message": "{isDraft, select, true {The restored content will override your draft.} other {Le contenu restauré ne sera pas publié, il écrasera le brouillon et sera sauvegardé en tant que changement en attente de publication. Vous pourrez publier les changements à tout moment.}}",
+  "history.restore.confirm.message": "{isDraft, select, true {Le contenu restauré écrasera votre brouillon.} other {Le contenu restauré ne sera pas publié, il écrasera le brouillon et sera sauvegardé en tant que changement en attente de publication. Vous pourrez publier les changements à tout moment.}}",
   "history.restore.success.title": "Version restaurée.",
   "history.restore.success.message": "Le contenu de la version restaurée n'a pas encore été publié."
 }
