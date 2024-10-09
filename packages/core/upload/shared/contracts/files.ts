@@ -76,10 +76,10 @@ export interface File {
   size?: number;
   sizeInBytes?: number;
   url?: string;
-  previewUrl?: string;
+  previewUrl?: string | null;
   path?: string | null;
   provider?: string;
-  provider_metadata?: Record<string, unknown>;
+  provider_metadata?: Record<string, unknown> | null;
   isUrlSigned?: boolean;
   folder?: number | null;
   folderPath?: string;

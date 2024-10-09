@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render, screen } from '@testing-library/react';
@@ -10,11 +8,19 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import en from '../../../translations/en.json';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
-const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
-  acc[curr] = `upload.${en[curr]}`;
+type Messages = typeof en;
+type MessageKeys = keyof Messages;
 
-  return acc;
-}, {});
+const enKeys = Object.keys(en) as MessageKeys[];
+
+const messageForPlugin = enKeys.reduce(
+  (acc: { [key in MessageKeys]: string }, curr: MessageKeys) => {
+    acc[curr] = `upload.${en[curr]}`;
+
+    return acc;
+  },
+  {} as { [key in MessageKeys]: string }
+);
 
 const asset = {
   id: 8,
@@ -100,7 +106,7 @@ const renderCompo = (handleCloseSpy = jest.fn()) => {
         </IntlProvider>
       </DesignSystemProvider>
     </QueryClientProvider>,
-    { container: document.getElementById('app') }
+    { container: document.getElementById('app') as HTMLElement }
   );
 };
 
