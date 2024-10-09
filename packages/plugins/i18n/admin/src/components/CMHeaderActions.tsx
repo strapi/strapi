@@ -279,7 +279,7 @@ const FillFromAnotherLocaleAction = ({
     onClose();
   };
 
-  if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
+  if (!hasI18n) {
     return null;
   }
 
