@@ -1,41 +1,28 @@
 import { Tag } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import type { FilterStructure } from './index';
 
 type FilterTagAttribute = {
-  fieldSchema: {
-    type: string; // "date" | "enumeration"
+  fieldSchema?: {
+    type?: string; // "date" | "enumeration"
     options?: {
       label: string; // "audio" | "video" | "image" | "file"
       value: string; // "audio" | "video" | "image" | "file"
     }[];
   };
-  metadatas: {
-    label: string; // "createdAt" | "updatedAt" | "type"
+  metadatas?: {
+    label?: string; // "createdAt" | "updatedAt" | "type"
   };
   name: string; // "createdAt" | "updatedAt" | "mime"
-};
-
-type NumberKeyedObject = Record<number, string>;
-
-type StringFilter = {
-  [key: string]: string;
-};
-
-type MimeFilter = {
-  [key: string]: string | NumberKeyedObject | Record<string, string | NumberKeyedObject>;
-};
-
-type FilterTagFilter = {
-  [key: string]: MimeFilter | StringFilter;
 };
 
 interface FilterTagProps {
   attribute: FilterTagAttribute;
   operator: string;
   value: string;
-  filter: FilterTagFilter;
-  onClick: (filter: FilterTagFilter) => void;
+  filter: FilterStructure;
+  onClick: (filter: FilterStructure) => void;
 }
 
 const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagProps) => {
@@ -47,7 +34,7 @@ const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagPro
 
   const { fieldSchema } = attribute;
 
-  const type = fieldSchema.type;
+  const type = fieldSchema?.type;
 
   let formattedValue = value;
 
@@ -71,7 +58,7 @@ const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagPro
     });
   }
 
-  const content = `${attribute.metadatas.label} ${formatMessage({
+  const content = `${attribute.metadatas?.label} ${formatMessage({
     id: `components.FilterOptions.FILTER_TYPES.${operator}`,
     defaultMessage: operator,
   })} ${formattedValue}`;
