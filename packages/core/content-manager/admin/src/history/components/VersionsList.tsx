@@ -17,7 +17,9 @@ import type { HistoryVersions } from '../../../../shared/contracts';
  * -----------------------------------------------------------------------------------------------*/
 
 const BlueText = (children: React.ReactNode) => (
-  <Typography textColor="primary600" variant='pi'>{children}</Typography>
+  <Typography textColor="primary600" variant="pi">
+    {children}
+  </Typography>
 );
 
 /* -------------------------------------------------------------------------------------------------
@@ -223,13 +225,7 @@ const VersionsList = () => {
             </PaginationButton>
           </Box>
         )}
-        <Flex
-          direction="column"
-          gap={3}
-          padding={4}
-          tag="ul"
-          alignItems="stretch"
-        >
+        <Flex direction="column" gap={3} padding={4} tag="ul" alignItems="stretch">
           {versions.data.map((version, index) => (
             <li
               key={version.id}
