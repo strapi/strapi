@@ -17,12 +17,13 @@ const createUserBodySchema = yup.object().shape({
           .shape({
             connect: yup
               .array()
-              .of(yup.object().shape({ id: yup.strapiID().required() }))
+              // NOTE: Content Manager uses document ID to connect relation
+              .of(yup.object().shape({ documentId: yup.string().required() }))
               .min(1, 'Users must have a role')
               .required(),
           })
           .required()
-      : yup.strapiID().required()
+      : yup.string().required()
   ),
 });
 
