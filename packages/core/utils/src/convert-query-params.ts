@@ -5,29 +5,29 @@
  * You can read more here: https://docs.strapi.io/developer-docs/latest/developer-resources/database-apis-reference/rest-api.html#filters
  */
 
+import _ from 'lodash';
 import {
-  isNil,
-  toNumber,
-  isInteger,
-  isEmpty,
-  isObject,
   cloneDeep,
   get,
   isArray,
+  isEmpty,
+  isInteger,
+  isNil,
+  isObject,
   isString,
+  toNumber,
 } from 'lodash/fp';
-import _ from 'lodash';
-
-import parseType from './parse-type';
-import { PaginationError } from './errors';
 import {
-  isDynamicZoneAttribute,
-  isMorphToRelationalAttribute,
   constants,
   hasDraftAndPublish,
+  isDynamicZoneAttribute,
+  isMorphToRelationalAttribute,
 } from './content-types';
-import { Model } from './types';
+import { PaginationError } from './errors';
 import { isOperator } from './operators';
+
+import parseType from './parse-type';
+import { Model } from './types';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
 
@@ -40,6 +40,7 @@ export interface SortMap {
 export interface SortParamsObject {
   [key: string]: SortOrder | SortParamsObject;
 }
+
 type SortParams = string | string[] | SortParamsObject | SortParamsObject[];
 type FieldsParams = string | string[];
 
@@ -48,6 +49,7 @@ type FiltersParams = unknown;
 export interface PopulateAttributesParams {
   [key: string]: boolean | PopulateObjectParams;
 }
+
 export interface PopulateObjectParams {
   sort?: SortParams;
   fields?: FieldsParams;
@@ -83,6 +85,7 @@ export interface Params {
 type FiltersQuery = (options: { meta: Model }) => WhereQuery | undefined;
 type OrderByQuery = SortMap | SortMap[];
 type SelectQuery = string | string[];
+
 export interface WhereQuery {
   [key: string]: any;
 }
@@ -116,6 +119,7 @@ class InvalidOrderError extends Error {
     this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
   }
 }
+
 class InvalidSortError extends Error {
   constructor() {
     super();
@@ -220,7 +224,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
    * Start query parser
    */
   const convertStartQueryParams = (startQuery: unknown): number => {
-    const startAsANumber = _.toNumber(startQuery);
+    const startAsANumber = toNumber(startQuery);
 
     if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
       throw new Error(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
@@ -233,7 +237,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
    * Limit query parser
    */
   const convertLimitQueryParams = (limitQuery: unknown): number | undefined => {
-    const limitAsANumber = _.toNumber(limitQuery);
+    const limitAsANumber = toNumber(limitQuery);
 
     if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
       throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
@@ -354,7 +358,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
         try {
           const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
           // Only true is accepted as a boolean populate value
-          return subPopulateAsBoolean === true ? { ...acc, [key]: true } : acc;
+          return subPopulateAsBoolean ? { ...acc, [key]: true } : acc;
         } catch {
           // ignore
         }
@@ -377,7 +381,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       if (isMorphLikeRelationalAttribute) {
         const hasInvalidProperties = Object.keys(subPopulate).some(
-          (key) => !['on', 'count'].includes(key)
+          (key) => !['populate', 'on', 'count'].includes(key)
         );
 
         if (hasInvalidProperties) {
@@ -386,11 +390,31 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
           );
         }
 
+        /**
+         * Validate nested population queries in the context of a polymorphic attribute (dynamic zone, morph relation).
+         *
+         * If 'populate' exists in subPopulate, its value should be constrained to a wildcard ('*').
+         */
+        if ('populate' in subPopulate && subPopulate.populate !== '*') {
+          throw new Error(
+            `Invalid nested population query detected. When using 'populate' within polymorphic structures, ` +
+              `its value must be '*' to indicate all second level links. Specific field targeting is not supported here. ` +
+              `Consider using the fragment API for more granular population control.`
+          );
+        }
+
+        // TODO: Remove the possibility to have multiple properties at the same time (on/count/populate)
         const newSubPopulate = {};
 
-        // { on: { ... } }
+        // case: { populate: '*' }
+        if ('populate' in subPopulate) {
+          Object.assign(newSubPopulate, { populate: true });
+        }
+
+        // case: { on: { <clauses> } }
         if (hasPopulateFragmentDefined(subPopulate)) {
-          // transform the fragment and assign it to the new sub-populate object
+          // If the fragment API is used, it applies the transformation to every
+          // sub-populate, then assign the result to the new sub-populate
           Object.assign(newSubPopulate, {
             on: Object.entries(subPopulate.on).reduce(
               (acc, [type, typeSubPopulate]) => ({
@@ -402,7 +426,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
           });
         }
 
-        // { count: true | false }
+        // case: { count: true | false }
         if (hasCountDefined(subPopulate)) {
           Object.assign(newSubPopulate, { count: subPopulate.count });
         }

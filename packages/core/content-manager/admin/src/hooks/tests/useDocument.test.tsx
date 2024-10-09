@@ -202,6 +202,12 @@ describe('useDocument', () => {
             "visible": false,
             "writable": false,
           },
+          "dz": {
+            "components": [
+              "blog.test-como",
+            ],
+            "type": "dynamiczone",
+          },
           "id": {
             "type": "string",
           },

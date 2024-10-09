@@ -58,7 +58,11 @@ describe('BulkActions', () => {
       onSuccess: jest.fn(),
       selected: [
         ...[...Array(ASSET_COUNT).keys()].map((index) => ({ id: index, type: 'asset' })),
-        ...[...Array(FOLDER_COUNT).keys()].map((index) => ({ id: index, type: 'folder' })),
+        ...[...Array(FOLDER_COUNT).keys()].map((index) => ({
+          id: index,
+          type: 'folder',
+          files: { count: 0 },
+        })),
       ],
     });
 
