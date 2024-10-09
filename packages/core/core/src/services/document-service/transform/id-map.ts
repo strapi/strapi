@@ -1,5 +1,10 @@
-import { Core, Data } from '@strapi/types';
-import { async } from '@strapi/utils';
+import { Core, Data, UID } from '@strapi/types';
+import { async, contentTypes } from '@strapi/utils';
+
+const hasDraftAndPublish = (uid: UID.CollectionType) => {
+  const model = strapi.getModel(uid);
+  return contentTypes.hasDraftAndPublish(model);
+};
 
 /**
  * TODO: Find a better way to encode keys than this
@@ -12,6 +17,11 @@ import { async } from '@strapi/utils';
  *      ^ "a:::1&&b:::2"
  */
 const encodeKey = (obj: any) => {
+  // Ignore status field for models without draft and publish
+  if (!hasDraftAndPublish(obj.uid)) {
+    delete obj.status;
+  }
+
   // Sort keys to always keep the same order when encoding
   const keys = Object.keys(obj).sort();
   return keys.map((key) => `${key}:::${obj[key]}`).join('&&');
@@ -84,9 +94,12 @@ const createIdMap = ({ strapi }: { strapi: Core.Strapi }): IdMap => {
             where: {
               documentId: { $in: documentIds },
               locale: locale || null,
-              publishedAt: status === 'draft' ? null : { $ne: null },
             },
           } as any;
+
+          if (hasDraftAndPublish(uid)) {
+            findParams.where.publishedAt = status === 'draft' ? null : { $ne: null };
+          }
 
           const result = await strapi?.db?.query(uid).findMany(findParams);
 

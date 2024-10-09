@@ -172,17 +172,24 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       // Schedule a job to delete expired history versions every day at midnight
-      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
+      state.deleteExpiredJob = scheduleJob('historyDaily', '0 0 * * *', () => {
         const retentionDaysInMilliseconds = serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
         const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
 
-        strapi.db.query(HISTORY_VERSION_UID).deleteMany({
-          where: {
-            created_at: {
-              $lt: expirationDate.toISOString(),
+        strapi.db
+          .query(HISTORY_VERSION_UID)
+          .deleteMany({
+            where: {
+              created_at: {
+                $lt: expirationDate,
+              },
             },
-          },
-        });
+          })
+          .catch((error) => {
+            if (error instanceof Error) {
+              strapi.log.error('Error deleting expired history versions', error.message);
+            }
+          });
       });
 
       state.isInitialized = true;

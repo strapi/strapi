@@ -93,6 +93,7 @@ export class Project {
       silent: true,
       verbose: 0,
     });
+
     const jsonRunner = jsonRunnerFactory(jsonFiles, { dry, cwd: this.cwd });
 
     return [codeRunner, jsonRunner] as const;

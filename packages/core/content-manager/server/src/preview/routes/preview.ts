@@ -9,7 +9,7 @@ const previewRouter: Plugin.LoadedPlugin['routes'][string] = {
       method: 'GET',
       info,
       path: '/preview/url/:contentType',
-      handler: 'preview.getPreviewURL',
+      handler: 'preview.getPreviewUrl',
       config: {
         policies: ['admin::isAuthenticatedAdmin'],
       },

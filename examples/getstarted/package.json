@@ -23,7 +23,7 @@
     "@strapi/provider-upload-aws-s3": "workspace:*",
     "@strapi/provider-upload-cloudinary": "workspace:*",
     "@strapi/strapi": "workspace:*",
-    "better-sqlite3": "9.4.3",
+    "better-sqlite3": "11.3.0",
     "lodash": "4.17.21",
     "mysql2": "3.9.4",
     "passport-google-oauth2": "0.2.0",
@@ -36,7 +36,7 @@
     "styled-components": "6.1.8"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {
