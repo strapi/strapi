@@ -1,17 +1,28 @@
-import React from 'react';
-
 import { DateTimePicker, SingleSelectOption, SingleSelect } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const FilterValueInput = ({ label, onChange, options, type, value }) => {
+interface FilterValueInputProps {
+  label?: string;
+  onChange: (value: string) => void;
+  options?: { label: string; value: string }[];
+  type: string;
+  value?: string;
+}
+
+const FilterValueInput = ({
+  label = '',
+  onChange,
+  options = [],
+  type,
+  value = '',
+}: FilterValueInputProps) => {
   const { formatMessage } = useIntl();
 
   if (type === 'date') {
     return (
       <DateTimePicker
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        ariaLabel={label}
+        aria-label={label}
         name="datetimepicker"
         onChange={(date) => {
           const formattedDate = date ? new Date(date).toISOString() : '';
@@ -20,15 +31,17 @@ const FilterValueInput = ({ label, onChange, options, type, value }) => {
         }}
         onClear={() => onChange('')}
         value={value ? new Date(value) : undefined}
-        selectedDateLabel={(formattedDate) => `Date picker, current is ${formattedDate}`}
-        selectButtonTitle={formatMessage({ id: 'selectButtonTitle', defaultMessage: 'Select' })}
       />
     );
   }
 
   return (
-    <SingleSelect aria-label={label} onChange={onChange} value={value}>
-      {options.map((option) => {
+    <SingleSelect
+      aria-label={label}
+      onChange={(value: string | number) => onChange(value.toString())}
+      value={value}
+    >
+      {options?.map((option) => {
         return (
           <SingleSelectOption key={option.value} value={option.value}>
             {option.label}
@@ -37,22 +50,6 @@ const FilterValueInput = ({ label, onChange, options, type, value }) => {
       })}
     </SingleSelect>
   );
-};
-
-FilterValueInput.defaultProps = {
-  label: '',
-  options: [],
-  value: '',
-};
-
-FilterValueInput.propTypes = {
-  label: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({ label: PropTypes.string.isRequired, value: PropTypes.string.isRequired })
-  ),
-  type: PropTypes.string.isRequired,
-  value: PropTypes.any,
 };
 
 export default FilterValueInput;
