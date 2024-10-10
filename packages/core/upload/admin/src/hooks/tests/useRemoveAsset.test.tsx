@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -40,8 +38,7 @@ const client = new QueryClient({
   },
 });
 
-// eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }) {
+function ComponentFixture({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={client}>
       <DesignSystemProvider>
@@ -55,7 +52,7 @@ function ComponentFixture({ children }) {
   );
 }
 
-function setup(...args) {
+function setup(...args: Parameters<typeof useRemoveAsset>) {
   return new Promise((resolve) => {
     act(() => {
       resolve(renderHook(() => useRemoveAsset(...args), { wrapper: ComponentFixture }));
@@ -72,7 +69,7 @@ describe('useRemoveAsset', () => {
     const { toggleNotification } = useNotification();
     const {
       result: { current },
-    } = await setup(jest.fn);
+    } = (await setup(jest.fn)) as { result: { current: any } };
     const { removeAsset } = current;
 
     try {
@@ -92,7 +89,7 @@ describe('useRemoveAsset', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
-    } = await setup(jest.fn);
+    } = (await setup(jest.fn)) as { result: { current: any } };
     const { removeAsset } = current;
 
     await act(async () => {
@@ -118,7 +115,8 @@ describe('useRemoveAsset', () => {
     const { toggleNotification } = useNotification();
     const {
       result: { current },
-    } = await setup();
+      // @ts-expect-error We are checking the error case
+    } = (await setup()) as { result: { current: any } };
     const { removeAsset } = current;
 
     try {

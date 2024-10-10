@@ -37,15 +37,18 @@ jobs:
           filters: .github/filters.yaml
 
   pretty:
-    name: 'pretty (node: 20)'
+    name: 'pretty (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
@@ -53,16 +56,18 @@ jobs:
         run: yarn prettier:check
 
   lint:
-    name: 'lint (node: 20)'
-    needs: [build]
+    name: 'lint (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
@@ -72,29 +77,35 @@ jobs:
         run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
   build:
-    name: 'build (node: 20)'
+    name: 'build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
   typescript:
-    name: 'typescript'
-    needs: [build]
+    name: 'typescript (node: ${{ matrix.node }})'
+    needs: [changes, lint, pretty, build]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
@@ -108,14 +119,15 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
+    if: needs.changes.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [changes, build]
+    needs: [changes, lint, pretty, build]
     runs-on: ubuntu-latest
     env:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -133,9 +145,10 @@ jobs:
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, build]
+    needs: [changes, lint, pretty, build]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false # remove once tests aren't flaky
       matrix:
         node: [20]
     steps:
@@ -150,16 +163,17 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
-      - name: Run test
+      - name: Run tests
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     timeout-minutes: 60
-    needs: [changes, build]
+    needs: [changes, lint, pretty, build]
     name: '[CE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
@@ -195,14 +209,15 @@ jobs:
           retention-days: 1
 
   e2e_ee:
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     timeout-minutes: 60
-    needs: [changes, build]
+    needs: [changes, lint, pretty, build]
     name: '[EE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
-      fail-fast: false
+      fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
@@ -239,10 +254,14 @@ jobs:
           retention-days: 1
 
   cli:
+    if: needs.changes.outputs.backend == 'true'
     timeout-minutes: 60
-    needs: [changes, build, typescript]
-    name: 'CLI Tests'
+    needs: [changes, lint, pretty, build]
+    name: 'CLI Tests (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -250,7 +269,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ matrix.node }}
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
@@ -264,17 +283,15 @@ jobs:
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [changes, lint, pretty, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -306,11 +323,11 @@ jobs:
   api_ce_mysql:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, lint, pretty, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -345,11 +362,11 @@ jobs:
   api_ce_sqlite:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, lint, pretty, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
@@ -368,20 +385,18 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [changes, lint, pretty, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
-        # Docker Hub image
         image: postgres
-        # Provide the password for postgres
         env:
           POSTGRES_USER: strapi
           POSTGRES_PASSWORD: strapi
@@ -413,14 +428,14 @@ jobs:
 
   api_ee_mysql:
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, lint, pretty, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
@@ -455,14 +470,14 @@ jobs:
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [changes, build, typescript, unit_back, unit_front]
+    needs: [changes, lint, pretty, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4

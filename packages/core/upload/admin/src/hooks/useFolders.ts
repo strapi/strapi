@@ -5,17 +5,24 @@ import { useNotifyAT } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
+import { GetFolders } from '../../../shared/contracts/folders';
+import type { Query } from '../../../shared/contracts/files';
 
 import pluginId from '../pluginId';
 
-export const useFolders = ({ enabled = true, query = {} } = {}) => {
+interface UseFoldersOptions {
+  enabled?: boolean;
+  query?: Query;
+}
+
+export const useFolders = ({ enabled = true, query = {} }: UseFoldersOptions = {}) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const { folder, _q, ...paramsExceptFolderAndQ } = query;
   const { get } = useFetchClient();
 
-  let params;
+  let params: Query;
 
   if (_q) {
     params = {
@@ -46,12 +53,15 @@ export const useFolders = ({ enabled = true, query = {} } = {}) => {
     };
   }
 
-  const { data, error, isLoading } = useQuery(
+  const { data, error, isLoading } = useQuery<
+    GetFolders.Response['data'],
+    GetFolders.Response['error']
+  >(
     [pluginId, 'folders', stringify(params)],
     async () => {
       const {
         data: { data },
-      } = await get('/upload/folders', { params });
+      } = await get<GetFolders.Response>('/upload/folders', { params });
 
       return data;
     },
