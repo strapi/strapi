@@ -104,4 +104,75 @@ describe('traverseQueryPopulate', () => {
 
     expect(query).toEqual('address');
   });
+
+  test('should work with filters attribute', async () => {
+    // Expect should be called 4 times
+    expect.assertions(3);
+
+    const strapi = {
+      getModel: jest.fn((uid) => {
+        return {
+          uid,
+          attributes: {
+            filters: {
+              type: 'string',
+            },
+          },
+        };
+      }),
+      db: {
+        metadata: {
+          get: jest.fn(() => ({
+            columnToAttribute: {
+              address: 'address',
+            },
+          })),
+        },
+      },
+    } as any;
+
+    global.strapi = strapi;
+
+    const schema = {
+      kind: 'collectionType',
+      attributes: {
+        title: {
+          type: 'string',
+        },
+        address: {
+          type: 'relation',
+          relation: 'oneToOne',
+          target: 'api::address.address',
+        },
+      },
+    } as const;
+
+    const ctx = {
+      schema,
+      getModel: strapi.getModel,
+    } as const;
+
+    await traverseQueryPopulate(({ key, schema, path, parent, attribute }) => {
+      switch (key) {
+        case 'address':
+          // top level populate should not have parent
+          expect(parent).toBeUndefined();
+          break;
+
+        case 'filters':
+          // Parent information should be available
+          expect(parent.key).toBe('address');
+          expect(parent.attribute).not.toBeUndefined();
+          break;
+        default:
+          break;
+      }
+    }, ctx)({
+      address: {
+        filters: {
+          name: 'test',
+        },
+      },
+    });
+  });
 });

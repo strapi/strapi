@@ -14,7 +14,7 @@ import {
   first,
 } from 'lodash/fp';
 
-import traverseFactory from './factory';
+import traverseFactory, { type Parent } from './factory';
 import { Attribute } from '../types';
 import { isMorphToRelationalAttribute } from '../content-types';
 
@@ -139,34 +139,45 @@ const populate = traverseFactory()
   .on(
     // Handle recursion on populate."populate"
     isKeyword('populate'),
-    async ({ key, visitor, path, value, schema, getModel }, { set, recurse }) => {
-      const newValue = await recurse(visitor, { schema, path, getModel }, value);
+    async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
+      const parent: Parent = { key, path, schema, attribute };
+
+      const newValue = await recurse(visitor, { schema, path, getModel, parent }, value);
 
       set(key, newValue);
     }
   )
-  .on(isKeyword('on'), async ({ key, visitor, path, value, getModel }, { set, recurse }) => {
-    const newOn: Record<string, unknown> = {};
+  .on(
+    isKeyword('on'),
+    async ({ key, visitor, path, value, getModel, parent }, { set, recurse }) => {
+      const newOn: Record<string, unknown> = {};
 
-    if (!isObj(value)) {
-      return;
+      if (!isObj(value)) {
+        return;
+      }
+
+      for (const [uid, subPopulate] of Object.entries(value)) {
+        const model = getModel(uid);
+        const newPath = { ...path, raw: `${path.raw}[${uid}]` };
+
+        newOn[uid] = await recurse(
+          visitor,
+          { schema: model, path: newPath, getModel, parent },
+          subPopulate
+        );
+      }
+
+      set(key, newOn);
     }
-
-    for (const [uid, subPopulate] of Object.entries(value)) {
-      const model = getModel(uid);
-      const newPath = { ...path, raw: `${path.raw}[${uid}]` };
-
-      newOn[uid] = await recurse(visitor, { schema: model, path: newPath, getModel }, subPopulate);
-    }
-
-    set(key, newOn);
-  })
+  )
   // Handle populate on relation
   .onRelation(
     async ({ key, value, attribute, visitor, path, schema, getModel }, { set, recurse }) => {
       if (isNil(value)) {
         return;
       }
+
+      const parent: Parent = { key, path, schema, attribute };
 
       if (isMorphToRelationalAttribute(attribute)) {
         // Don't traverse values that cannot be parsed
@@ -175,7 +186,11 @@ const populate = traverseFactory()
         }
 
         // If there is a populate fragment defined, traverse it
-        const newValue = await recurse(visitor, { schema, path, getModel }, { on: value?.on });
+        const newValue = await recurse(
+          visitor,
+          { schema, path, getModel, parent },
+          { on: value?.on }
+        );
 
         set(key, newValue);
 
@@ -185,48 +200,70 @@ const populate = traverseFactory()
       const targetSchemaUID = attribute.target;
       const targetSchema = getModel(targetSchemaUID!);
 
-      const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
+      const newValue = await recurse(
+        visitor,
+        { schema: targetSchema, path, getModel, parent },
+        value
+      );
 
       set(key, newValue);
     }
   )
   // Handle populate on media
-  .onMedia(async ({ key, path, visitor, value, getModel }, { recurse, set }) => {
+  .onMedia(async ({ key, path, schema, attribute, visitor, value, getModel }, { recurse, set }) => {
     if (isNil(value)) {
       return;
     }
+
+    const parent: Parent = { key, path, schema, attribute };
 
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = getModel(targetSchemaUID);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
+    const newValue = await recurse(
+      visitor,
+      { schema: targetSchema, path, getModel, parent },
+      value
+    );
 
     set(key, newValue);
   })
   // Handle populate on components
-  .onComponent(async ({ key, value, visitor, path, attribute, getModel }, { recurse, set }) => {
-    if (isNil(value)) {
-      return;
+  .onComponent(
+    async ({ key, value, schema, visitor, path, attribute, getModel }, { recurse, set }) => {
+      if (isNil(value)) {
+        return;
+      }
+
+      const parent: Parent = { key, path, schema, attribute };
+
+      const targetSchema = getModel(attribute.component);
+
+      const newValue = await recurse(
+        visitor,
+        { schema: targetSchema, path, getModel, parent },
+        value
+      );
+
+      set(key, newValue);
     }
-
-    const targetSchema = getModel(attribute.component);
-
-    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
-
-    set(key, newValue);
-  })
+  )
   // Handle populate on dynamic zones
-  .onDynamicZone(async ({ key, value, schema, visitor, path, getModel }, { set, recurse }) => {
-    if (isNil(value) || !isObject(value)) {
-      return;
-    }
+  .onDynamicZone(
+    async ({ key, value, schema, visitor, path, attribute, getModel }, { set, recurse }) => {
+      if (isNil(value) || !isObject(value)) {
+        return;
+      }
 
-    // Handle fragment syntax
-    if ('on' in value && value.on) {
-      const newOn = await recurse(visitor, { schema, path, getModel }, { on: value.on });
+      const parent: Parent = { key, path, schema, attribute };
 
-      set(key, newOn);
+      // Handle fragment syntax
+      if ('on' in value && value.on) {
+        const newOn = await recurse(visitor, { schema, path, getModel, parent }, { on: value.on });
+
+        set(key, newOn);
+      }
     }
-  });
+  );
 
 export default curry(populate.traverse);

@@ -1,6 +1,6 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
 
-import type { AnyAttribute, Model, Data } from './types';
+import type { Attribute, AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
 export type VisitorUtils = ReturnType<typeof createVisitorUtils>;
@@ -31,10 +31,10 @@ export interface TraverseOptions {
 }
 
 export interface Parent {
+  attribute?: Attribute;
+  key: string | null;
   path: Path;
-  schema?: Model;
-  key?: string;
-  attribute?: AnyAttribute;
+  schema: Model;
 }
 
 const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {

@@ -1,7 +1,6 @@
 import { isEmpty, isNil, isObject } from 'lodash/fp';
 
 import { pipe as pipeAsync } from '../async';
-import traverseEntity from '../traverse-entity';
 import { isScalarAttribute, constants } from '../content-types';
 import {
   traverseQueryFilters,
@@ -12,7 +11,7 @@ import {
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
-import type { Model, Data } from '../types';
+import type { Model } from '../types';
 import parseType from '../parse-type';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
@@ -21,14 +20,6 @@ interface Context {
   schema: Model;
   getModel: (model: string) => Model;
 }
-
-export const throwPasswords = (ctx: Context) => async (entity: Data) => {
-  if (!ctx.schema) {
-    throw new Error('Missing schema in throwPasswords');
-  }
-
-  return traverseEntity(throwPassword, ctx, entity);
-};
 
 type AnyFunc = (...args: any[]) => any;
 
@@ -254,136 +245,142 @@ export const validatePopulate = asyncCurry(
 
     // Always include the main traversal function
     functionsToApply.push(
-      traverseQueryPopulate(async ({ key, path, value, schema, attribute, getModel }, { set }) => {
-        if (attribute) {
-          const isPopulatableAttribute = ['relation', 'dynamiczone', 'component', 'media'].includes(
-            attribute.type
-          );
+      traverseQueryPopulate(
+        async ({ key, path, value, schema, attribute, getModel, parent }, { set }) => {
+          if (!parent?.attribute && attribute) {
+            const isPopulatableAttribute = [
+              'relation',
+              'dynamiczone',
+              'component',
+              'media',
+            ].includes(attribute.type);
 
-          // Throw on non-populate attributes
-          if (!isPopulatableAttribute) {
-            throwInvalidKey({ key, path: path.raw });
+            // Throw on non-populate attributes
+            if (!isPopulatableAttribute) {
+              throwInvalidKey({ key, path: path.raw });
+            }
+
+            // Valid populatable attribute, so return
+            return;
           }
 
-          // Valid populatable attribute, so return
-          return;
-        }
+          // If we're looking at a populate fragment, ensure its target is valid
+          if (key === 'on') {
+            // Populate fragment should always be an object
+            if (!isObject(value)) {
+              return throwInvalidKey({ key, path: path.raw });
+            }
 
-        // If we're looking at a populate fragment, ensure its target is valid
-        if (key === 'on') {
-          // Populate fragment should always be an object
-          if (!isObject(value)) {
-            return throwInvalidKey({ key, path: path.raw });
+            const targets = Object.keys(value);
+
+            for (const target of targets) {
+              const model = getModel(target);
+
+              // If a target is invalid (no matching model), then raise an error
+              if (!model) {
+                throwInvalidKey({ key: target, path: `${path.raw}.${target}` });
+              }
+            }
+
+            // If the fragment's target is fine, then let it pass
+            return;
           }
 
-          const targets = Object.keys(value);
+          // Ignore plain wildcards
+          if (key === '' && value === '*') {
+            return;
+          }
 
-          for (const target of targets) {
-            const model = getModel(target);
-
-            // If a target is invalid (no matching model), then raise an error
-            if (!model) {
-              throwInvalidKey({ key: target, path: `${path.raw}.${target}` });
+          // Ensure count is a boolean
+          if (key === 'count') {
+            try {
+              parseType({ type: 'boolean', value });
+              return;
+            } catch {
+              throwInvalidKey({ key, path: path.attribute });
             }
           }
 
-          // If the fragment's target is fine, then let it pass
-          return;
-        }
-
-        // Ignore plain wildcards
-        if (key === '' && value === '*') {
-          return;
-        }
-
-        // Ensure count is a boolean
-        if (key === 'count') {
+          // Allowed boolean-like keywords should be ignored
           try {
-            parseType({ type: 'boolean', value });
+            parseType({ type: 'boolean', value: key });
+            // Key is an allowed boolean-like keyword, skipping validation...
             return;
           } catch {
+            // Continue, because it's not a boolean-like
+          }
+
+          // Handle nested `sort` validation with custom or default traversals
+          if (key === 'sort') {
+            set(
+              key,
+              await validateSort(
+                {
+                  schema,
+                  getModel,
+                },
+                value, // pass the sort value
+                includes?.sort || SORT_TRAVERSALS
+              )
+            );
+            return;
+          }
+
+          // Handle nested `filters` validation with custom or default traversals
+          if (key === 'filters') {
+            set(
+              key,
+              await validateFilters(
+                {
+                  schema,
+                  getModel,
+                },
+                value, // pass the filters value
+                includes?.filters || FILTER_TRAVERSALS
+              )
+            );
+            return;
+          }
+
+          // Handle nested `fields` validation with custom or default traversals
+          if (key === 'fields') {
+            set(
+              key,
+              await validateFields(
+                {
+                  schema,
+                  getModel,
+                },
+                value, // pass the fields value
+                includes?.fields || FIELDS_TRAVERSALS
+              )
+            );
+            return;
+          }
+
+          // Handle recursive nested `populate` validation with the same include object
+          if (key === 'populate') {
+            set(
+              key,
+              await validatePopulate(
+                {
+                  schema,
+                  getModel,
+                },
+                value, // pass the nested populate value
+                includes // pass down the same includes object
+              )
+            );
+            return;
+          }
+
+          // Throw an error if non-attribute operators are included in the populate array
+          if (includes?.populate?.includes('nonAttributesOperators')) {
             throwInvalidKey({ key, path: path.attribute });
           }
-        }
-
-        // Allowed boolean-like keywords should be ignored
-        try {
-          parseType({ type: 'boolean', value: key });
-          // Key is an allowed boolean-like keyword, skipping validation...
-          return;
-        } catch {
-          // Continue, because it's not a boolean-like
-        }
-
-        // Handle nested `sort` validation with custom or default traversals
-        if (key === 'sort') {
-          set(
-            key,
-            await validateSort(
-              {
-                schema,
-                getModel,
-              },
-              value, // pass the sort value
-              includes?.sort || SORT_TRAVERSALS
-            )
-          );
-          return;
-        }
-
-        // Handle nested `filters` validation with custom or default traversals
-        if (key === 'filters') {
-          set(
-            key,
-            await validateFilters(
-              {
-                schema,
-                getModel,
-              },
-              value, // pass the filters value
-              includes?.filters || FILTER_TRAVERSALS
-            )
-          );
-          return;
-        }
-
-        // Handle nested `fields` validation with custom or default traversals
-        if (key === 'fields') {
-          set(
-            key,
-            await validateFields(
-              {
-                schema,
-                getModel,
-              },
-              value, // pass the fields value
-              includes?.fields || FIELDS_TRAVERSALS
-            )
-          );
-          return;
-        }
-
-        // Handle recursive nested `populate` validation with the same include object
-        if (key === 'populate') {
-          set(
-            key,
-            await validatePopulate(
-              {
-                schema,
-                getModel,
-              },
-              value, // pass the nested populate value
-              includes // pass down the same includes object
-            )
-          );
-          return;
-        }
-
-        // Throw an error if non-attribute operators are included in the populate array
-        if (includes?.populate?.includes('nonAttributesOperators')) {
-          throwInvalidKey({ key, path: path.attribute });
-        }
-      }, ctx)
+        },
+        ctx
+      )
     );
 
     // Conditionally traverse for private fields only if 'private' is included
