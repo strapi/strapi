@@ -39,47 +39,7 @@ jobs:
         with:
           filters: .github/filters.yaml
 
-  pretty:
-    name: 'pretty (node: ${{ matrix.node }})'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20, 22]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Run lint
-        run: yarn prettier:check
-
-  lint:
-    name: 'lint (node: ${{ matrix.node }})'
-    needs: [build]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20, 22]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
-      - name: Run lint
-        run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
-
+  # build runs first so that it caches the build for everything after it to use
   build:
     name: 'build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
@@ -87,14 +47,42 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+
+  pretty:
+    name: 'pretty (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Run lint
+        run: yarn prettier:check
+
+  lint:
+    name: 'lint (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    needs: [changes, build]
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
+        with:
+          node-version: ${{ matrix.node }}
+          condition: ${{ needs.changes.outputs.backend == 'true' }}
+
+      - name: Run lint
+        run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
 
   typescript:
     name: 'typescript (node: ${{ matrix.node }})'
@@ -104,21 +92,12 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' }}
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' }}
+
       - name: TSC for packages
         run: yarn nx affected --target=test:ts --nx-ignore-cycles
       - name: TSC for back
@@ -136,21 +115,12 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ needs.changes.outputs.backend == 'true' }}
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ needs.changes.outputs.backend == 'true' }}
+
       - name: Run tests
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
@@ -163,21 +133,12 @@ jobs:
       matrix:
         node: [20]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ needs.changes.outputs.frontend == 'true' }}
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ needs.changes.outputs.frontend == 'true' }}
+
       - name: Run tests
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
@@ -191,27 +152,16 @@ jobs:
       matrix:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
+        node: [20]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
+          node-version: ${{ matrix.node }}
           condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true' }}
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
         run: npx playwright@1.42.1 install --with-deps
-
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
 
       - name: Run [CE] E2E tests
         uses: ./.github/actions/run-e2e-tests
@@ -238,27 +188,16 @@ jobs:
       matrix:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
+        node: [20]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
+          node-version: ${{ matrix.node }}
           condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true' }}
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
         run: npx playwright@1.42.1 install --with-deps
-
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
 
       - name: Run [EE] E2E tests
         uses: ./.github/actions/run-e2e-tests
@@ -283,24 +222,11 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true' }}
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true' }}
 
       - name: Run CLI tests
         run: yarn test:cli
@@ -331,18 +257,12 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
+
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -373,18 +293,12 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
+
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -399,18 +313,12 @@ jobs:
         node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
+
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
@@ -445,18 +353,11 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -490,18 +391,12 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
+
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
@@ -519,18 +414,12 @@ jobs:
         node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
-      - name: Check if Job Should Run
-        uses: ./.github/actions/skip-check
-        with:
-          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Run Default Setup
+        uses: ./.github/actions/setup-checks
         with:
           node-version: ${{ matrix.node }}
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
+          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
+
       - uses: ./.github/actions/run-api-tests
         with:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'

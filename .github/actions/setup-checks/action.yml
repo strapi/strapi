@@ -1,0 +1,32 @@
+# .github/actions/setup-checks/action.yml
+name: 'Setup Checks'
+description: 'Common setup steps for the workflow checks'
+inputs:
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+  condition:
+    description: 'Optional condition to check if the job should be skipped'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check if Job Should Run
+      if: ${{ inputs.condition != '' }}
+      uses: ./.github/actions/skip-check
+      with:
+        condition: ${{ inputs.condition }}
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+    - uses: nrwl/nx-set-shas@v4
+    - name: Monorepo install
+      uses: ./.github/actions/yarn-nm-install
+    - name: Monorepo build
+      uses: ./.github/actions/run-build
