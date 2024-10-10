@@ -370,11 +370,6 @@ test.describe('Edit view', () => {
   });
 
   test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {
-    if (browser.browserType().name() === 'webkit') {
-      // See DX-1550
-      return test.fixme();
-    }
-
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
     const EDIT_URL =
       /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
@@ -461,11 +456,6 @@ test.describe('Edit view', () => {
     page,
     browser,
   }) => {
-    if (browser.browserType().name() === 'webkit') {
-      // See DX-1550
-      return test.fixme();
-    }
-
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
     const EDIT_URL =
       /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
