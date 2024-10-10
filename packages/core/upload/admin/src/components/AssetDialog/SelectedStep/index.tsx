@@ -1,13 +1,22 @@
-import React from 'react';
-
 import { Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils';
 import { AssetGridList } from '../../AssetGridList';
 
-export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) => {
+import type { File } from '../../../../../shared/contracts/files';
+
+interface SelectedStepProps {
+  onSelectAsset: (asset: File) => void;
+  selectedAssets: File[];
+  onReorderAsset?: (fromIndex: number, toIndex: number) => void;
+}
+
+export const SelectedStep = ({
+  selectedAssets,
+  onSelectAsset,
+  onReorderAsset,
+}: SelectedStepProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -40,14 +49,4 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
       />
     </Flex>
   );
-};
-
-SelectedStep.defaultProps = {
-  onReorderAsset: undefined,
-};
-
-SelectedStep.propTypes = {
-  onSelectAsset: PropTypes.func.isRequired,
-  selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  onReorderAsset: PropTypes.func,
 };
