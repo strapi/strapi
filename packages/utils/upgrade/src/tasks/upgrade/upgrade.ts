@@ -4,7 +4,7 @@ import * as f from '../../modules/format';
 import { npmPackageFactory } from '../../modules/npm';
 import { isApplicationProject, projectFactory } from '../../modules/project';
 import { timerFactory } from '../../modules/timer';
-import {constants as upgraderConstants, upgraderFactory } from '../../modules/upgrader';
+import { constants as upgraderConstants, upgraderFactory } from '../../modules/upgrader';
 import { Version } from '../../modules/version';
 
 import * as requirements from './requirements';
