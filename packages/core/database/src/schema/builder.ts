@@ -244,11 +244,91 @@ const createHelpers = (db: Database) => {
     });
   };
 
-  const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff['diff']) => {
-    await schemaBuilder.alterTable(table.name, (tableBuilder) => {
-      // Delete indexes / fks / columns
+  // TODO: this would be added to each dialect instead of being here all in one function
+  const doesIndexExist = async (tableName: string, indexName: string) => {
+    const knex = db.connection;
+    const client = knex.client.config.client;
 
-      // Drop foreign keys first to avoid foreign key errors in the following steps
+    if (client === 'mysql' || client === 'mysql2' || client === 'mariadb') {
+      // For MySQL/MariaDB, check `information_schema.statistics`
+      const result = await knex.raw(
+        `
+        SELECT COUNT(*) AS count
+        FROM information_schema.statistics
+        WHERE table_schema = DATABASE()
+        AND table_name = ?
+        AND index_name = ?;
+      `,
+        [tableName, indexName]
+      );
+
+      return result[0].count > 0;
+    }
+    if (client === 'postgres') {
+      // For PostgreSQL, check `pg_indexes`
+      const result = await knex.raw(
+        `
+        SELECT EXISTS (
+          SELECT 1
+          FROM pg_indexes
+          WHERE tablename = ? AND indexname = ?
+        ) AS exists;
+      `,
+        [tableName, indexName]
+      );
+
+      return result.rows[0].exists;
+    }
+    if (client === 'sqlite3') {
+      // For SQLite, use `PRAGMA index_list` to list indexes on a table
+      const result = await knex.raw(`PRAGMA index_list(?)`, [tableName]);
+
+      return result.some((row: any) => row.name === indexName);
+    }
+
+    throw new Error(`Unsupported client: ${client}`);
+  };
+
+  const warnIndexMissing = (index: Index, table: TableDiff['diff']) => {
+    console.warn('Missing index', index.name, 'in table', table.name);
+  };
+
+  const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff['diff']) => {
+    // Sequentially check for removed indexes existence to avoid opening multiple connections
+    const indexExistenceChecks: boolean[] = [];
+    for (const removedIndex of table.indexes.removed) {
+      const exists = await doesIndexExist(table.name, removedIndex.name);
+      indexExistenceChecks.push(exists);
+    }
+
+    // Sequentially check for updated indexes existence to avoid opening multiple connections
+    const updatedIndexExistenceChecks: boolean[] = [];
+    for (const updatedIndex of table.indexes.updated) {
+      const exists = await doesIndexExist(table.name, updatedIndex.object.name);
+      updatedIndexExistenceChecks.push(exists);
+    }
+
+    await schemaBuilder.alterTable(table.name, (tableBuilder) => {
+      // Always safe to drop regular indexes, and must be dropped before fks for mysql
+      table.indexes.removed.forEach((removedIndex, index) => {
+        if (indexExistenceChecks[index]) {
+          debug(`Dropping index ${removedIndex.name} on ${table.name}`);
+          dropIndex(tableBuilder, removedIndex);
+        } else {
+          warnIndexMissing(removedIndex, table);
+        }
+      });
+
+      table.indexes.updated.forEach((updatedIndex, index) => {
+        if (updatedIndexExistenceChecks[index]) {
+          debug(`Dropping updated index ${updatedIndex.object.name} on ${table.name}`);
+          dropIndex(tableBuilder, updatedIndex.object);
+        } else {
+          warnIndexMissing(updatedIndex.object, table);
+        }
+      });
+
+      // Drop foreign keys next to avoid foreign key errors when dropping columns
       for (const removedForeignKey of table.foreignKeys.removed) {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, removedForeignKey);
@@ -259,30 +339,7 @@ const createHelpers = (db: Database) => {
         dropForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
-      // for mysql only, dropForeignKey also removes the index, so don't drop it twice
-      const isMySQL = db.config.connection.client === 'mysql';
-      const ignoreForeignKeyNames = isMySQL
-        ? [
-            ...table.foreignKeys.removed.map((fk) => fk.name),
-            ...table.foreignKeys.updated.map((fk) => fk.name),
-          ]
-        : [];
-
-      for (const removedIndex of table.indexes.removed) {
-        if (!ignoreForeignKeyNames.includes(removedIndex.name)) {
-          debug(`Dropping index ${removedIndex.name} on ${table.name}`);
-          dropIndex(tableBuilder, removedIndex);
-        }
-      }
-
-      for (const updatedIndex of table.indexes.updated) {
-        if (!ignoreForeignKeyNames.includes(updatedIndex.name)) {
-          debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
-          dropIndex(tableBuilder, updatedIndex.object);
-        }
-      }
-
-      // We drop columns after indexes to ensure that it doesn't cascade delete any indexes we expect to exist
+      // drop columns after indexes to ensure that it doesn't cascade delete any indexes we expect to exist
       for (const removedColumn of table.columns.removed) {
         debug(`Dropping column ${removedColumn.name} on ${table.name}`);
         dropColumn(tableBuilder, removedColumn);
