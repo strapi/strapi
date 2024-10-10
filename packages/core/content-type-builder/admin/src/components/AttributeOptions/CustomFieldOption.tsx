@@ -47,7 +47,9 @@ export const CustomFieldOption = ({ customFieldUid, customField }: CustomFieldOp
         <AttributeIcon type={type} customField={customFieldUid} />
         <Box paddingLeft={4}>
           <Flex>
-            <Typography fontWeight="bold">{formatMessage(intlLabel)}</Typography>
+            <Typography fontWeight="bold" textColor="neutral800">
+              {formatMessage(intlLabel)}
+            </Typography>
           </Flex>
           <Flex>
             <Typography variant="pi" textColor="neutral600">
