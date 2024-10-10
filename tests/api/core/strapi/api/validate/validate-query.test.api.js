@@ -776,7 +776,6 @@ describe('Core API - Validate', () => {
       // TODO: Sanitize id field
       'id',
       'documentId',
-      'locale',
       'name',
       'name_non_searchable',
       'name_hidden',
