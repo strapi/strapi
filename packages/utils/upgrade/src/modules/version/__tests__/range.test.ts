@@ -19,7 +19,7 @@ describe('Version Utilities', () => {
 
       const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Major);
       expect(range).toBeInstanceOf(semver.Range);
-      expect(range.raw).toBe('>1.0.0 <=2.0.0');
+      expect(range.raw).toBe('>1.0.0 <=2');
     });
 
     it('should throw for unsupported release types', () => {
@@ -41,7 +41,7 @@ describe('Version Utilities', () => {
       expect(range.raw).toBe(`>${currentVersion.raw} <=${targetVersion.raw}`);
     });
 
-    it.each([[Version.ReleaseType.Major, '>1.0.0 <=2.0.0']])(
+    it.each([[Version.ReleaseType.Major, '>1.0.0 <=2']])(
       'should create a range when target is %s',
       (releaseType, expectedRange) => {
         const currentVersion = new semver.SemVer('1.0.0');

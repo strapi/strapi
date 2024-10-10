@@ -78,7 +78,7 @@ export const codemodList = (codemods: Codemod.List) => {
     const fName = chalk.blue(codemod.format());
     const fUID = codemodUID(codemod.uid);
 
-    return [fIndex, fVersion, fKind, fName, fUID];
+    return [fIndex, fVersion, fKind, fName, fUID] satisfies Row;
   });
 
   const table = new CliTable3({

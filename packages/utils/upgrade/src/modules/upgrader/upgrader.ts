@@ -11,7 +11,7 @@ import {
   rangeFromVersions,
   semVerFactory,
 } from '../version';
-import { unknownToError } from '../error';
+import { NPMCandidateNotFoundError, unknownToError } from '../error';
 import * as f from '../format';
 import { codemodRunnerFactory } from '../codemod-runner';
 
@@ -280,7 +280,7 @@ export class Upgrader implements UpgraderInterface {
     this.logger?.debug?.(`Using ${f.highlight(packageManagerName)} as package manager`);
 
     if (this.isDry) {
-      this.logger?.debug?.(`Skipping dependencies installation (${chalk.italic('dry mode')}`);
+      this.logger?.debug?.(`Skipping dependencies installation (${chalk.italic('dry mode')})`);
       return;
     }
 
@@ -309,10 +309,16 @@ const resolveNPMTarget = (
   project: AppProject,
   target: Version.ReleaseType | Version.SemVer,
   npmPackage: NPM.Package
-): NPM.NPMPackageVersion | undefined => {
+): NPM.NPMPackageVersion => {
   // Semver
   if (isSemverInstance(target)) {
-    return npmPackage.findVersion(target);
+    const version = npmPackage.findVersion(target);
+
+    if (!version) {
+      throw new NPMCandidateNotFoundError(target);
+    }
+
+    return version;
   }
 
   // Release Types
@@ -321,10 +327,16 @@ const resolveNPMTarget = (
     const npmVersionsMatches = npmPackage.findVersionsInRange(range);
 
     // The targeted version is the latest one that matches the given range
-    return npmVersionsMatches.at(-1);
+    const version = npmVersionsMatches.at(-1);
+
+    if (!version) {
+      throw new NPMCandidateNotFoundError(range, `The project is already up-to-date (${target})`);
+    }
+
+    return version;
   }
 
-  return undefined;
+  throw new NPMCandidateNotFoundError(target);
 };
 
 export const upgraderFactory = (
@@ -332,15 +344,11 @@ export const upgraderFactory = (
   target: Version.ReleaseType | Version.SemVer,
   npmPackage: NPM.Package
 ) => {
-  const targetedNPMVersion = resolveNPMTarget(project, target, npmPackage);
-  if (!targetedNPMVersion) {
-    throw new Error(`Couldn't find a matching version in the NPM registry for "${target}"`);
-  }
-
-  const semverTarget = semVerFactory(targetedNPMVersion.version);
+  const npmTarget = resolveNPMTarget(project, target, npmPackage);
+  const semverTarget = semVerFactory(npmTarget.version);
 
   if (semver.eq(semverTarget, project.strapiVersion)) {
-    throw new Error(`The project is already on ${f.version(semverTarget)}`);
+    throw new Error(`The project is already using v${semverTarget}`);
   }
 
   return new Upgrader(project, semverTarget, npmPackage);

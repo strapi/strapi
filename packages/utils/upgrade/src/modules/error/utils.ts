@@ -1,6 +1,21 @@
+import type { Version } from '../version';
+
 export class UnexpectedError extends Error {
   constructor() {
     super('Unexpected Error');
+  }
+}
+
+export class NPMCandidateNotFoundError extends Error {
+  target: Version.SemVer | Version.Range | Version.ReleaseType;
+
+  constructor(
+    target: Version.SemVer | Version.Range | Version.ReleaseType,
+    message: string = `Couldn't find a valid NPM candidate for "${target}"`
+  ) {
+    super(message);
+
+    this.target = target;
   }
 }
 
