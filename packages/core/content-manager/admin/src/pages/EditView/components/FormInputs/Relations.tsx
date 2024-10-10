@@ -87,6 +87,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
     addFieldRow(`${fieldName}.disconnect`, {
       id: relation.id,
       apiData: {
+        id: relation.id,
         documentId: relation.documentId,
         locale: relation.locale,
       },
@@ -276,6 +277,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       const item = {
         id: relation.id,
         apiData: {
+          id: relation.id,
           documentId: relation.documentId,
           locale: relation.locale,
         },
@@ -743,6 +745,7 @@ const RelationsList = ({
             ...relation,
             ...{
               apiData: {
+                id: relation.id,
                 documentId: relation.documentId,
                 locale: relation.locale,
                 position,
