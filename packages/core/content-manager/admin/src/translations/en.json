@@ -231,6 +231,8 @@
   "popUpWarning.warning.unpublish-question": "Are you sure you don't want to publish it?",
   "popUpWarning.warning.updateAllSettings": "This will modify all your settings",
   "popover.display-relations.label": "Display relations",
+  "preview.panel.title": "Preview",
+  "preview.panel.button": "Open preview",
   "relation.add": "Add relation",
   "relation.disconnect": "Remove",
   "relation.error-adding-relation": "An error occurred while trying to add the relation.",
