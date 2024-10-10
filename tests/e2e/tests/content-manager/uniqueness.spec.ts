@@ -176,7 +176,7 @@ test.describe('Uniqueness', () => {
       browserName,
     }) => {
       // TODO: there is a webkit bug to be fixed
-      if (browserName === 'webkit') {
+      if (browserName === 'webkit' && isRepeatableComponentField) {
         return test.fixme();
       }
       await createNewEntry(page, CREATE_URL);
