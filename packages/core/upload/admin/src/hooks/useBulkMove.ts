@@ -1,9 +1,30 @@
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
+import { File, BulkMoveFiles } from '../../../shared/contracts/files';
+import { Folder, BulkMoveFolders } from '../../../shared/contracts/folders';
 
 import pluginId from '../pluginId';
 import { getTrad } from '../utils';
+
+export interface FolderWithType extends Folder {
+  type: string;
+}
+
+export interface FileWithType extends File {
+  type: string;
+}
+
+interface BulkMoveParams {
+  destinationFolderId: number;
+  filesAndFolders: Array<FolderWithType | FileWithType>;
+}
+
+// Define the shape of the accumulator object
+type Payload = {
+  fileIds?: number[];
+  folderIds?: number[];
+};
 
 export const useBulkMove = () => {
   const { formatMessage } = useIntl();
@@ -11,8 +32,8 @@ export const useBulkMove = () => {
   const queryClient = useQueryClient();
   const { post } = useFetchClient();
 
-  const bulkMoveQuery = ({ destinationFolderId, filesAndFolders }) => {
-    const payload = filesAndFolders.reduce((acc, selected) => {
+  const bulkMoveQuery = ({ destinationFolderId, filesAndFolders }: BulkMoveParams) => {
+    const payload = filesAndFolders.reduce<Payload>((acc, selected) => {
       const { id, type } = selected;
       const key = type === 'asset' ? 'fileIds' : 'folderIds';
 
@@ -20,7 +41,7 @@ export const useBulkMove = () => {
         acc[key] = [];
       }
 
-      acc[key].push(id);
+      acc[key]!.push(id);
 
       return acc;
     }, {});
@@ -28,7 +49,11 @@ export const useBulkMove = () => {
     return post('/upload/actions/bulk-move', { ...payload, destinationFolderId });
   };
 
-  const mutation = useMutation(bulkMoveQuery, {
+  const mutation = useMutation<
+    BulkMoveFolders.Response | BulkMoveFiles.Response,
+    BulkMoveFolders.Response['error'] | BulkMoveFiles.Response['error'],
+    BulkMoveParams
+  >(bulkMoveQuery, {
     onSuccess(res) {
       const {
         data: { data },
@@ -53,8 +78,10 @@ export const useBulkMove = () => {
     },
   });
 
-  const move = (destinationFolderId, filesAndFolders) =>
-    mutation.mutateAsync({ destinationFolderId, filesAndFolders });
+  const move = (
+    destinationFolderId: number,
+    filesAndFolders: Array<FolderWithType | FileWithType>
+  ) => mutation.mutateAsync({ destinationFolderId, filesAndFolders });
 
   return { ...mutation, move };
 };

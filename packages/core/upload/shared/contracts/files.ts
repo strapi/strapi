@@ -2,7 +2,7 @@ import { errors } from '@strapi/utils';
 
 type SortOrder = 'ASC' | 'DESC';
 
-type SortKey = 'createdAt' | 'name';
+type SortKey = 'createdAt' | 'name' | 'updatedAt';
 
 // Abstract type for comparison operators where the keys are generic strings
 type ComparisonOperators<T> = {
