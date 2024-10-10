@@ -1,29 +1,61 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
 import { Cross, CaretDown } from '@strapi/icons';
-import PropTypes from 'prop-types';
-import ReactSelect, { components } from 'react-select';
-import { styled, useTheme } from 'styled-components';
+import ReactSelect, {
+  components,
+  GroupBase,
+  StylesConfig,
+  ClearIndicatorProps,
+} from 'react-select';
+import { styled, useTheme, DefaultTheme } from 'styled-components';
 
 import Option from './Option';
-import flattenTree from './utils/flattenTree';
+import flattenTree, { FlattenedNode } from './utils/flattenTree';
 import getOpenValues from './utils/getOpenValues';
 import getValuesToClose from './utils/getValuesToClose';
 
-const hasParent = (option) => !option.parent;
+const hasParent = (option: FlattenedNode<string | number | null>) => !option.parent;
 
-const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ...props }) => {
-  const flatDefaultOptions = useMemo(() => flattenTree(defaultOptions), [defaultOptions]);
-  const optionsFiltered = useMemo(() => flatDefaultOptions.filter(hasParent), [flatDefaultOptions]);
-  const [options, setOptions] = useState(optionsFiltered);
-  const [openValues, setOpenValues] = useState(getOpenValues(flatDefaultOptions, defaultValue));
+type OptionSelectTree = {
+  value: string | number | null;
+  label?: string;
+  children?: OptionSelectTree[];
+};
 
-  useEffect(() => {
+interface SelectTreeProps<
+  Option = unknown,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>,
+> {
+  maxDisplayDepth?: number;
+  defaultValue?: {
+    value: string | number | null;
+  };
+  options: OptionSelectTree[];
+}
+
+const SelectTree = ({
+  options: defaultOptions,
+  maxDisplayDepth = 5,
+  defaultValue,
+  ...props
+}: SelectTreeProps) => {
+  const flatDefaultOptions = React.useMemo(() => flattenTree(defaultOptions), [defaultOptions]);
+  const optionsFiltered = React.useMemo(
+    () => flatDefaultOptions.filter(hasParent),
+    [flatDefaultOptions]
+  );
+  const [options, setOptions] = React.useState(optionsFiltered);
+  const [openValues, setOpenValues] = React.useState(
+    getOpenValues(flatDefaultOptions, defaultValue)
+  );
+
+  React.useEffect(() => {
     if (openValues.length === 0) {
       setOptions(flatDefaultOptions.filter((option) => option.parent === undefined));
     } else {
-      const allOpenValues = openValues.reduce((acc, value) => {
+      const allOpenValues = openValues.reduce<(string | number | null)[]>((acc, value) => {
         const options = flatDefaultOptions.filter(
           (option) => option.value === value || option.parent === value
         );
@@ -44,7 +76,7 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
     }
   }, [openValues, flatDefaultOptions, optionsFiltered]);
 
-  const handleToggle = (value) => {
+  const handleToggle = (value: string | number | null) => {
     if (openValues.includes(value)) {
       const valuesToClose = getValuesToClose(flatDefaultOptions, value);
       setOpenValues((prev) => prev.filter((prevData) => !valuesToClose.includes(prevData)));
@@ -69,7 +101,34 @@ const SelectTree = ({ options: defaultOptions, maxDisplayDepth, defaultValue, ..
   );
 };
 
-const Select = ({ components, styles, error, ariaErrorMessage, ...props }) => {
+type SelectOption = { value: string | number | null; label?: string };
+
+interface SelectProps<
+  Option = SelectOption,
+  IsMulti extends boolean = false,
+  Group extends GroupBase<Option> = GroupBase<Option>,
+> {
+  components?: object;
+  styles?: StylesConfig<Option, IsMulti, Group>;
+  error?: string;
+  ariaErrorMessage?: string;
+  options: OptionSelectTree[];
+  defaultValue?: {
+    value: string | number | null;
+  };
+  isSearchable?: boolean;
+  maxDisplayDepth?: number;
+  openValues?: (string | number | null)[];
+  onOptionToggle?: (value: string | number | null) => void;
+}
+
+const Select = ({
+  components = {},
+  styles = {},
+  error,
+  ariaErrorMessage,
+  ...props
+}: SelectProps) => {
   const theme = useTheme();
   const customStyles = getSelectStyles(theme, error);
 
@@ -77,32 +136,20 @@ const Select = ({ components, styles, error, ariaErrorMessage, ...props }) => {
     <ReactSelect
       menuPosition="fixed"
       components={{
+        ...components,
         ClearIndicator,
         DropdownIndicator,
         IndicatorSeparator: () => null,
         LoadingIndicator: () => null,
-        ...components,
       }}
       aria-errormessage={error && ariaErrorMessage}
       aria-invalid={!!error}
-      styles={{ ...customStyles, ...styles }}
+      styles={
+        { ...customStyles, ...styles } as StylesConfig<SelectOption, false, GroupBase<SelectOption>>
+      }
       {...props}
     />
   );
-};
-
-Select.defaultProps = {
-  ariaErrorMessage: '',
-  components: {},
-  error: undefined,
-  styles: {},
-};
-
-Select.propTypes = {
-  components: PropTypes.object,
-  styles: PropTypes.object,
-  error: PropTypes.string,
-  ariaErrorMessage: PropTypes.string,
 };
 
 const IconBox = styled(Box)`
@@ -121,7 +168,9 @@ const IconBox = styled(Box)`
   }
 `;
 
-const ClearIndicator = (props) => {
+const ClearIndicator = (
+  props: ClearIndicatorProps<SelectOption, false, GroupBase<SelectOption>>
+) => {
   const Component = components.ClearIndicator;
 
   return (
@@ -143,31 +192,29 @@ const CarretBox = styled(IconBox)`
   }
 `;
 
-const DropdownIndicator = ({ innerProps }) => {
+const DropdownIndicator = ({ innerProps }: { innerProps: any }) => {
   return (
-    // @ts-expect-error – issue with the ref attached to `innerProps`
     <CarretBox paddingRight={3} {...innerProps}>
       <CaretDown />
     </CarretBox>
   );
 };
 
-DropdownIndicator.propTypes = {
-  innerProps: PropTypes.object.isRequired,
-};
-
-const getSelectStyles = (theme, error) => {
+const getSelectStyles = (
+  theme: DefaultTheme,
+  error?: string
+): StylesConfig<SelectOption, false, GroupBase<SelectOption>> => {
   return {
-    clearIndicator: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
-    container: (base) => ({
+    clearIndicator: (base: object) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
+    container: (base: object) => ({
       ...base,
       background: theme.colors.neutral0,
       lineHeight: 'normal',
     }),
-    control(base, state) {
+    control(base: object, state: { isFocused: boolean; isDisabled: boolean }) {
       let borderColor = theme.colors.neutral200;
-      let boxShadowColor;
-      let backgroundColor;
+      let boxShadowColor: string | undefined = undefined;
+      let backgroundColor: string | undefined = undefined;
 
       if (state.isFocused) {
         borderColor = theme.colors.primary600;
@@ -191,20 +238,20 @@ const getSelectStyles = (theme, error) => {
         boxShadow: boxShadowColor ? `${boxShadowColor} 0px 0px 0px 2px` : '',
       };
     },
-    indicatorsContainer: (base) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
-    input: (base) => ({
+    indicatorsContainer: (base: object) => ({ ...base, padding: 0, paddingRight: theme.spaces[3] }),
+    input: (base: object) => ({
       ...base,
       margin: 0,
       padding: 0,
       color: theme.colors.neutral800,
       gridTemplateColumns: '0 100%',
     }),
-    menuPortal: (base) => ({
+    menuPortal: (base: object) => ({
       ...base,
       zIndex: theme.zIndices.dialog,
       pointerEvents: 'auto',
     }),
-    menu(base) {
+    menu(base: object) {
       return {
         ...base,
         width: '100%',
@@ -218,15 +265,15 @@ const getSelectStyles = (theme, error) => {
         zIndex: 2,
       };
     },
-    menuList: (base) => ({
+    menuList: (base: object) => ({
       ...base,
       paddingLeft: theme.spaces[1],
       paddingTop: theme.spaces[1],
       paddingRight: theme.spaces[1],
       paddingBottom: theme.spaces[1],
     }),
-    option(base, state) {
-      let backgroundColor = base.backgroundColor;
+    option(base: any, state: { isFocused: boolean; isSelected: boolean }) {
+      let backgroundColor = base?.backgroundColor as string;
 
       if (state.isFocused || state.isSelected) {
         backgroundColor = theme.colors.primary100;
@@ -243,7 +290,7 @@ const getSelectStyles = (theme, error) => {
         },
       };
     },
-    placeholder: (base) => ({
+    placeholder: (base: object) => ({
       ...base,
       color: theme.colors.neutral600,
       marginLeft: 0,
@@ -252,7 +299,7 @@ const getSelectStyles = (theme, error) => {
       whiteSpace: 'nowrap',
       maxWidth: '80%',
     }),
-    singleValue(base, state) {
+    singleValue(base: object, state: { isDisabled: any }) {
       let color = theme.colors.neutral800;
 
       if (state.isDisabled) {
@@ -261,7 +308,7 @@ const getSelectStyles = (theme, error) => {
 
       return { ...base, marginLeft: 0, color };
     },
-    valueContainer: (base) => ({
+    valueContainer: (base: object) => ({
       ...base,
       cursor: 'pointer',
       padding: 0,
@@ -270,31 +317,6 @@ const getSelectStyles = (theme, error) => {
       marginRight: 0,
     }),
   };
-};
-
-const OptionShape = PropTypes.shape({
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  label: PropTypes.string.isRequired,
-  children: PropTypes.array,
-});
-
-OptionShape.children = PropTypes.arrayOf(PropTypes.shape(OptionShape));
-
-OptionShape.defaultProps = {
-  children: undefined,
-};
-
-SelectTree.defaultProps = {
-  defaultValue: undefined,
-  maxDisplayDepth: 5,
-};
-
-SelectTree.propTypes = {
-  defaultValue: PropTypes.shape({
-    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  }),
-  maxDisplayDepth: PropTypes.number,
-  options: PropTypes.arrayOf(OptionShape).isRequired,
 };
 
 export default SelectTree;
