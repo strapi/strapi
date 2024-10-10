@@ -31,6 +31,9 @@ jobs:
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: dorny/paths-filter@v3
         id: filter
         with:
