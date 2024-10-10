@@ -23,7 +23,7 @@ type OptionSelectTree = {
   children?: OptionSelectTree[];
 };
 
-interface SelectTreeProps<
+export interface SelectTreeProps<
   Option = unknown,
   IsMulti extends boolean = false,
   Group extends GroupBase<Option> = GroupBase<Option>,

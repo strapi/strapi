@@ -1,10 +1,9 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { act, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
 import SelectTree from '../index';
+import type { SelectTreeProps } from '../SelectTree';
 
 const FIXTURE_OPTIONS = [
   {
@@ -35,7 +34,7 @@ const FIXTURE_OPTIONS = [
   },
 ];
 
-const ComponentFixture = (props) => (
+const ComponentFixture = (props: SelectTreeProps) => (
   <IntlProvider locale="en" messages={{}}>
     <DesignSystemProvider>
       <SelectTree defaultValue={{ value: 'f1' }} {...props} />
@@ -43,10 +42,10 @@ const ComponentFixture = (props) => (
   </IntlProvider>
 );
 
-const setup = (props) => {
+const setup = (props?: SelectTreeProps) => {
   return new Promise((resolve) => {
     act(() => {
-      resolve(render(<ComponentFixture options={FIXTURE_OPTIONS} {...props} />));
+      resolve(render(<ComponentFixture {...props} options={FIXTURE_OPTIONS} />));
     });
   });
 };
