@@ -1,12 +1,10 @@
-import React from 'react';
-
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { BulkMoveDialog } from '..';
+import { BulkMoveDialog, BulkMoveDialogProps } from '../BulkMoveDialog';
 
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../hooks/useBulkMove');
@@ -19,12 +17,12 @@ const client = new QueryClient({
   },
 });
 
-function ComponentFixture(props) {
+function ComponentFixture(props: BulkMoveDialogProps) {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
         <DesignSystemProvider>
-          <NotificationsProvider toggleNotification={() => {}}>
+          <NotificationsProvider>
             <Modal.Root open>
               <BulkMoveDialog {...props} />
             </Modal.Root>
@@ -36,7 +34,10 @@ function ComponentFixture(props) {
 }
 
 function setup(props = { onClose: jest.fn(), selected: [] }) {
-  return render(<ComponentFixture {...props} />, { container: document.getElementById('app') });
+  const container = document.getElementById('app');
+  if (container) {
+    return render(<ComponentFixture {...props} />, { container });
+  }
 }
 
 describe('BulkMoveDialog', () => {

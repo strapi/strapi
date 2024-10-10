@@ -17,7 +17,7 @@ import getValuesToClose from './utils/getValuesToClose';
 
 const hasParent = (option: FlattenedNode<string | number | null>) => !option.parent;
 
-type OptionSelectTree = {
+export type OptionSelectTree = {
   value: string | number | null;
   label?: string;
   children?: OptionSelectTree[];
@@ -33,6 +33,12 @@ export interface SelectTreeProps<
     value: string | number | null;
   };
   options: OptionSelectTree[];
+  onChange?: (value: any) => void;
+  name?: string;
+  menuPortalTarget?: HTMLElement | null;
+  inputId?: string;
+  error?: string;
+  ariaErrorMessage?: string;
 }
 
 const SelectTree = ({

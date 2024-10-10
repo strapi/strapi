@@ -1,18 +1,41 @@
-import React from 'react';
-
 import { Button, Flex, Grid, Field, Loader, Modal, Typography } from '@strapi/design-system';
-import { Form, Formik } from 'formik';
+import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition, FolderDefinition } from '../../constants';
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getTrad, normalizeAPIError } from '../../utils';
 import SelectTree from '../SelectTree';
+import type { OptionSelectTree } from '../SelectTree/SelectTree';
+import { File } from '../../../../shared/contracts/files';
+import type { Folder } from '../../../../shared/contracts/folders';
+import type { FetchError } from '@strapi/admin/strapi-admin';
 
-export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
+type InitialFormData = {
+  destination:
+    | {
+        value: string | number;
+        label: string;
+      }
+    | string;
+};
+
+interface FolderWithType extends Folder {
+  type: string;
+}
+
+interface FileWithType extends File {
+  type: string;
+}
+
+export interface BulkMoveDialogProps {
+  onClose: () => void;
+  selected?: Array<FolderWithType | FileWithType>;
+  currentFolder?: FolderWithType;
+}
+
+export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMoveDialogProps) => {
   const { formatMessage } = useIntl();
   const { data: folderStructure, isLoading } = useFolderStructure();
   const { move } = useBulkMove();
@@ -21,21 +44,32 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
     return null;
   }
 
-  const handleSubmit = async (values, { setErrors }) => {
+  const handleSubmit = async (
+    values: InitialFormData,
+    { setErrors }: { setErrors: (errors: FormikErrors<InitialFormData>) => void }
+  ) => {
     try {
-      await move(values.destination.value, selected);
-      onClose();
+      if (typeof values.destination !== 'string') {
+        const destinationValue = values.destination.value;
+        await move(destinationValue, selected);
+        onClose();
+      }
     } catch (error) {
-      const normalizedError = normalizeAPIError(error);
+      const normalizedError = normalizeAPIError(error as FetchError)!;
 
-      const formikErrors = normalizedError.errors.reduce((acc, error) => {
-        acc[error.values?.path?.length || 'destination'] = error.defaultMessage;
+      if (normalizedError && 'errors' in normalizedError) {
+        const formikErrors = normalizedError.errors?.reduce<Record<string, string>>(
+          (acc, error) => {
+            acc[error.values?.path?.length || 'destination'] = error.defaultMessage;
 
-        return acc;
-      }, {});
+            return acc;
+          },
+          {}
+        );
 
-      if (!isEmpty(formikErrors)) {
-        setErrors(formikErrors);
+        if (!isEmpty(formikErrors)) {
+          setErrors(formikErrors);
+        }
       }
     }
   };
@@ -57,7 +91,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
     );
   }
 
-  const initialFormData = {
+  const initialFormData: InitialFormData = {
     destination: {
       value: currentFolder?.id || '',
       label: currentFolder?.name || folderStructure[0].label,
@@ -90,11 +124,13 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                     </Field.Label>
 
                     <SelectTree
-                      options={folderStructure}
-                      onChange={(value) => {
+                      options={folderStructure as OptionSelectTree[]}
+                      onChange={(value: InitialFormData['destination']) => {
                         setFieldValue('destination', value);
                       }}
-                      defaultValue={values.destination}
+                      defaultValue={
+                        typeof values.destination !== 'string' ? values.destination : undefined
+                      }
                       name="destination"
                       menuPortalTarget={document.querySelector('body')}
                       inputId="folder-destination"
@@ -127,15 +163,4 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
       </Formik>
     </Modal.Content>
   );
-};
-
-BulkMoveDialog.defaultProps = {
-  currentFolder: undefined,
-  selected: [],
-};
-
-BulkMoveDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  currentFolder: FolderDefinition,
-  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition),
 };
