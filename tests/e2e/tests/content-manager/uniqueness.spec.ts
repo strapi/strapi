@@ -114,13 +114,13 @@ test.describe('Uniqueness', () => {
       // testing against
 
       if (isSingle) {
-        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
-        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+        await page.getByRole('button', { name: 'No entry yet. Click' }).first().click();
+        await page.getByRole('button', { name: 'No entry yet. Click' }).first().click();
       } else {
-        await page.getByRole('button', { name: 'No entry yet. Click on the' }).nth(1).click();
+        await page.getByRole('button', { name: 'No entry yet. Click' }).nth(1).click();
         await page
           .getByLabel('', { exact: true })
-          .getByRole('button', { name: 'No entry yet. Click on the' })
+          .getByRole('button', { name: 'No entry yet. Click' })
           .click();
       }
     }
@@ -188,10 +188,7 @@ test.describe('Uniqueness', () => {
         // If the field is a repeatable component field, we add an entry and fill
         // it with the same value to test uniqueness within the same entity.
         await page.getByRole('button', { name: 'Add an entry' }).click();
-        await page
-          .getByRole('region')
-          .getByRole('button', { name: 'No entry yet. Click on the' })
-          .click();
+        await page.getByRole('region').getByRole('button', { name: 'No entry yet. Click' }).click();
         await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
         await clickSave(page);

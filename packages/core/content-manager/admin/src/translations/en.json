@@ -71,7 +71,7 @@
   "components.TableEmpty.withFilters": "There are no {contentType} with the applied filters...",
   "components.TableEmpty.withSearch": "There are no {contentType} corresponding to the search ({search})...",
   "components.TableEmpty.withoutFilter": "There are no {contentType}...",
-  "components.empty-repeatable": "No entry yet. Click on the button below to add one.",
+  "components.empty-repeatable": "No entry yet. Click to add one.",
   "components.notification.info.maximum-requirement": "You have already reached the maximum number of fields",
   "components.notification.info.minimum-requirement": "A field has been added to match the minimum requirement",
   "components.repeatable.reorder.error": "An error occurred while reordering your component's field, please try again",
