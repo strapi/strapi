@@ -163,7 +163,7 @@ export default {
         }),
         form: {
           advanced({ contentTypeSchema, forTarget, type, step }: any) {
-            if (forTarget !== 'contentType') {
+            if (!['contentType', 'component'].includes(forTarget)) {
               return [];
             }
 
@@ -173,7 +173,7 @@ export default {
               false
             );
 
-            if (!hasI18nEnabled) {
+            if (!hasI18nEnabled && forTarget === 'contentType') {
               return [];
             }
 
