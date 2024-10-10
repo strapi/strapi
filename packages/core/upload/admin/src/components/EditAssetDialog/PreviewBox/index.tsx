@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
 import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition, AssetType } from '../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { AssetType } from '../../../newConstants';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
@@ -14,6 +14,8 @@ import { createAssetUrl, getTrad, downloadFile } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
+
+import type { File as FileDefinition, RawFile } from '../../../../../shared/contracts/files';
 
 import { AssetPreview } from './AssetPreview';
 import {
@@ -27,6 +29,25 @@ import { CroppingActions } from './CroppingActions';
 
 import 'cropperjs/dist/cropper.css';
 
+interface Asset extends Omit<FileDefinition, 'folder'> {
+  isLocal?: boolean;
+  rawFile?: RawFile;
+  folder?: FileDefinition['folder'] & { id: number };
+}
+
+interface PreviewBoxProps {
+  asset: Asset;
+  canUpdate: boolean;
+  canCopyLink: boolean;
+  canDownload: boolean;
+  replacementFile?: File;
+  onDelete: (asset: Asset | null) => void;
+  onCropFinish: () => void;
+  onCropStart: () => void;
+  onCropCancel: () => void;
+  trackedLocation?: string;
+}
+
 export const PreviewBox = ({
   asset,
   canUpdate,
@@ -38,15 +59,15 @@ export const PreviewBox = ({
   onCropCancel,
   replacementFile,
   trackedLocation,
-}) => {
+}: PreviewBoxProps) => {
   const { trackUsage } = useTracking();
-  const previewRef = useRef(null);
-  const [isCropImageReady, setIsCropImageReady] = useState(false);
-  const [hasCropIntent, setHasCropIntent] = useState(null);
-  const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
-  const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
+  const previewRef = React.useRef(null);
+  const [isCropImageReady, setIsCropImageReady] = React.useState(false);
+  const [hasCropIntent, setHasCropIntent] = React.useState<boolean | null>(null);
+  const [assetUrl, setAssetUrl] = React.useState(createAssetUrl(asset, false));
+  const [thumbnailUrl, setThumbnailUrl] = React.useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
     useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
@@ -59,7 +80,7 @@ export const PreviewBox = ({
     progress: progressUpload,
   } = useUpload();
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Whenever a replacementUrl is set, make sure to permutate the real asset.url by
     // the locally generated one
     if (replacementFile) {
@@ -74,23 +95,23 @@ export const PreviewBox = ({
     }
   }, [replacementFile, asset]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (hasCropIntent === false) {
       stopCropping();
       onCropCancel();
     }
   }, [hasCropIntent, stopCropping, onCropCancel, onCropFinish]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (hasCropIntent && isCropImageReady) {
-      crop(previewRef.current);
+      crop(previewRef.current!);
       onCropStart();
     }
   }, [isCropImageReady, hasCropIntent, onCropStart, crop]);
 
   const handleCropping = async () => {
     const nextAsset = { ...asset, width, height, folder: asset.folder?.id };
-    const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
+    const file = (await produceFile(nextAsset.name, nextAsset.mime!, nextAsset.updatedAt!)) as File;
 
     // Making sure that when persisting the new asset, the URL changes with width and height
     // So that the browser makes a request and handle the image caching correctly at the good size
@@ -103,13 +124,13 @@ export const PreviewBox = ({
       asset.url = optimizedCachingImage;
       asset.rawFile = file;
 
-      trackUsage('didCropFile', { duplicatedFile: null, location: trackedLocation });
+      trackUsage('didCropFile', { duplicatedFile: null, location: trackedLocation! });
     } else {
       const updatedAsset = await editAsset(nextAsset, file);
       optimizedCachingImage = createAssetUrl(updatedAsset, false);
       optimizedCachingThumbnailImage = createAssetUrl(updatedAsset, true);
 
-      trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation });
+      trackUsage('didCropFile', { duplicatedFile: false, location: trackedLocation! });
     }
 
     setAssetUrl(optimizedCachingImage);
@@ -121,11 +142,15 @@ export const PreviewBox = ({
 
   const handleDuplication = async () => {
     const nextAsset = { ...asset, width, height };
-    const file = await produceFile(nextAsset.name, nextAsset.mime, nextAsset.updatedAt);
+    const file = (await produceFile(
+      nextAsset.name,
+      nextAsset.mime!,
+      nextAsset.updatedAt!
+    )) as RawFile;
 
-    await upload({ name: file.name, rawFile: file }, asset.folder?.id);
+    await upload({ name: file.name, rawFile: file }, asset.folder?.id!);
 
-    trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation });
+    trackUsage('didCropFile', { duplicatedFile: true, location: trackedLocation! });
 
     setHasCropIntent(false);
     onCropFinish();
@@ -170,15 +195,15 @@ export const PreviewBox = ({
                   id: getTrad('control-card.download'),
                   defaultMessage: 'Download',
                 })}
-                onClick={() => downloadFile(assetUrl, asset.name)}
+                onClick={() => downloadFile(assetUrl!, asset.name)}
               >
                 <DownloadIcon />
               </IconButton>
             )}
 
-            {canCopyLink && <CopyLinkButton url={assetUrl} />}
+            {canCopyLink && <CopyLinkButton url={assetUrl!} />}
 
-            {canUpdate && asset.mime.includes(AssetType.Image) && (
+            {canUpdate && asset.mime?.includes(AssetType.Image) && (
               <IconButton
                 label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
                 onClick={handleCropStart}
@@ -210,9 +235,9 @@ export const PreviewBox = ({
 
           <AssetPreview
             ref={previewRef}
-            mime={asset.mime}
+            mime={asset.mime!}
             name={asset.name}
-            url={hasCropIntent ? assetUrl : thumbnailUrl}
+            url={hasCropIntent ? assetUrl! : thumbnailUrl!}
             onLoad={() => {
               if (asset.isLocal || hasCropIntent) {
                 setIsCropImageReady(true);
@@ -245,22 +270,4 @@ export const PreviewBox = ({
       />
     </>
   );
-};
-
-PreviewBox.defaultProps = {
-  replacementFile: undefined,
-  trackedLocation: undefined,
-};
-
-PreviewBox.propTypes = {
-  canUpdate: PropTypes.bool.isRequired,
-  canCopyLink: PropTypes.bool.isRequired,
-  canDownload: PropTypes.bool.isRequired,
-  replacementFile: PropTypes.instanceOf(File),
-  asset: AssetDefinition.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onCropFinish: PropTypes.func.isRequired,
-  onCropStart: PropTypes.func.isRequired,
-  onCropCancel: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };

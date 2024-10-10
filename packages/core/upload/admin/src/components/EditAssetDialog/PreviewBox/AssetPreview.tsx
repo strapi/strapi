@@ -18,6 +18,7 @@ interface AssetPreviewProps {
   mime: string;
   name: string;
   url: string;
+  onLoad?: () => void;
 }
 
 export const AssetPreview = React.forwardRef<
