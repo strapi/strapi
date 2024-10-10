@@ -31,9 +31,6 @@ jobs:
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -63,6 +60,9 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -79,6 +79,9 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -96,6 +99,9 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -119,6 +125,9 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -137,6 +146,9 @@ jobs:
       matrix:
         node: [20]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -158,6 +170,9 @@ jobs:
         shard: [1/2, 2/2]
         node: [20]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -194,6 +209,9 @@ jobs:
         shard: [1/2, 2/2]
         node: [20]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -226,6 +244,9 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -261,6 +282,9 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -297,6 +321,9 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -317,6 +344,9 @@ jobs:
         node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -357,6 +387,9 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -395,6 +428,9 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
@@ -418,6 +454,9 @@ jobs:
         node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
