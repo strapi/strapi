@@ -57,6 +57,7 @@ jobs:
 
   lint:
     name: 'lint (node: ${{ matrix.node }})'
+    needs: [build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -94,7 +95,7 @@ jobs:
 
   typescript:
     name: 'typescript (node: ${{ matrix.node }})'
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -121,7 +122,7 @@ jobs:
   unit_back:
     if: needs.changes.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     env:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
@@ -145,7 +146,7 @@ jobs:
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -169,8 +170,8 @@ jobs:
   e2e_ce:
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
-    name: '[CE] e2e (browser: ${{ matrix.project }})'
+    needs: [changes, build]
+    name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -211,8 +212,8 @@ jobs:
   e2e_ee:
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
-    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    needs: [changes, build]
+    name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -256,7 +257,7 @@ jobs:
   cli:
     if: needs.changes.outputs.backend == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:
@@ -283,7 +284,7 @@ jobs:
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -323,7 +324,7 @@ jobs:
   api_ce_mysql:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -362,7 +363,7 @@ jobs:
   api_ce_sqlite:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -385,7 +386,7 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
@@ -428,7 +429,7 @@ jobs:
 
   api_ee_mysql:
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
@@ -470,7 +471,7 @@ jobs:
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
