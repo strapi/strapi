@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 // eslint-disable-next-line import/extensions
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
+import { Admin } from '../../pageHelpers/Admin';
 
 test.describe('Log Out', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,9 +12,11 @@ test.describe('Log Out', () => {
   });
 
   test('a user should be able to logout', async ({ page }) => {
-    await page.getByText('test testing').click();
-    await page.getByText('Logout').click();
+    const admin = new Admin(page);
 
-    await expect(page.getByText('Log in to your Strapi account')).toBeVisible();
+    await admin.clickUser('test testing');
+    await admin.clickLogout();
+
+    await admin.assertLoginHeader();
   });
 });
