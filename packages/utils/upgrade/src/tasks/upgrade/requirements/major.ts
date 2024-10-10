@@ -30,7 +30,7 @@ export const REQUIRE_LATEST_FOR_CURRENT_MAJOR = requirementFactory(
       const invalidVersionsCount = invalidVersions.length;
 
       throw new Error(
-        `Doing a major upgrade requires to be on the latest v${currentMajor} version, but found ${invalidVersionsCount} versions between the current one and ${target}: ${invalidVersions}`
+        `Doing a major upgrade requires to be on the latest v${currentMajor} version, but found ${invalidVersionsCount} versions between the current one and ${target}. Please upgrade to ${invalidVersions.at(-1)} and try again.`
       );
     }
   }
