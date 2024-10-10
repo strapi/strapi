@@ -104,6 +104,10 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -123,7 +127,6 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
-    if: needs.changes.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [changes, build]
     runs-on: ubuntu-latest
@@ -133,6 +136,10 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -148,7 +155,6 @@ jobs:
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
-    if: needs.changes.outputs.frontend == 'true'
     name: 'unit_front (node: ${{ matrix.node }})'
     needs: [changes, build]
     runs-on: ubuntu-latest
@@ -157,6 +163,10 @@ jobs:
       matrix:
         node: [20]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.frontend == 'true' }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -172,7 +182,6 @@ jobs:
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
     timeout-minutes: 60
     needs: [changes, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -183,6 +192,10 @@ jobs:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true' }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -214,7 +227,6 @@ jobs:
           retention-days: 1
 
   e2e_ee:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
     timeout-minutes: 60
     needs: [changes, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -227,6 +239,10 @@ jobs:
         project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true' }}
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -259,7 +275,6 @@ jobs:
           retention-days: 1
 
   cli:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true'
     timeout-minutes: 60
     needs: [changes, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
@@ -268,6 +283,11 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true' }}
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -286,7 +306,6 @@ jobs:
         run: yarn test:cli
 
   api_ce_pg:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -312,6 +331,10 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -326,7 +349,6 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -351,6 +373,10 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -361,11 +387,10 @@ jobs:
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [changes, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -374,6 +399,10 @@ jobs:
         node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true' }}
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -392,7 +421,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changes, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -417,6 +445,10 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -435,7 +467,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changes, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -459,6 +490,10 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 3306:3306
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -477,7 +512,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changes, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -485,6 +519,10 @@ jobs:
         node: [20, 22]
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
+      - name: Check if Job Should Run
+        uses: ./.github/actions/skip-check
+        with:
+          condition: ${{ (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:

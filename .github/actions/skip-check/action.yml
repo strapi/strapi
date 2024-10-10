@@ -1,0 +1,26 @@
+name: 'Skip Check'
+description: 'Skip the current job based on a condition and set outputs.'
+
+inputs:
+  condition:
+    description: "Condition to evaluate (must be a boolean-like string such as 'true' or 'false')."
+    required: true
+    default: 'false'
+
+outputs:
+  result:
+    description: "The result of the skip check (either 'skipped' or '')."
+    value: ${{ steps.set_result.outputs.result }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check if Job Should Run
+      id: set_result
+      shell: bash
+      run: |
+        if [[ "${{ inputs.condition }}" != "true" ]]; then
+          echo "Job not needed, skipping..."
+          echo "::set-output name=result::skipped"
+          exit 0
+        fi
