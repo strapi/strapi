@@ -1,5 +1,6 @@
 import type { Knex } from 'knex';
 
+import createDebugger from 'debug';
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
@@ -15,6 +16,8 @@ import type { Migration } from './migrations';
 import { type Identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
+
+const debug = createDebugger('strapi::database');
 
 interface Settings {
   forceMigration?: boolean;
@@ -49,7 +52,7 @@ const afterCreate =
   };
 
 class Database {
-  connection: Knex;
+  #connection?: Knex;
 
   dialect: Dialect;
 
@@ -77,12 +80,24 @@ class Database {
       },
     };
 
+    this.logger = config.logger ?? console;
+
     this.dialect = getDialect(this);
-    this.dialect.configure();
+    // for object connections, we can configure the dialect synchronously
+    if (typeof this.config.connection.connection !== 'function') {
+      this.dialect.configure();
+    } else {
+      this.logger.warn(
+        'You are using a Knex connection function which is currently flagged as experimental.'
+      );
+      this.logger.warn(
+        'Attempting to access the connection object before database initialization could result in errors'
+      );
+    }
 
     this.metadata = createMetadata([]);
 
-    this.connection = createConnection(this.config.connection, {
+    this.#connection = createConnection(this.config.connection, {
       pool: { afterCreate: afterCreate(this) },
     });
 
@@ -92,14 +107,35 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
-
-    this.logger = config.logger ?? console;
   }
 
   async init({ models }: { models: Model[] }) {
+    if (typeof this.config.connection.connection === 'function') {
+      // for function connections, we must configure the dialect in init
+      // Note: due to a bug in Knex, sqlite will warn about a missing filename for function connections because
+      // it checks in the constructor rather than on connect
+      const conn = await this.config.connection.connection();
+      this.dialect.configure(conn);
+
+      // We also need to force knex to resolve  the connection from a function to a cached object
+      // so our code can access it directly as if it were an object
+      await this.connection.select(this.connection.raw('1'));
+    }
+
     this.metadata.loadModels(models);
     await validateDatabase(this);
+
+    debug('Database initialized');
+
     return this;
+  }
+
+  get connection() {
+    if (this.#connection === undefined) {
+      throw new Error('Database connection has not yet been initialized');
+    }
+
+    return this.#connection;
   }
 
   query(uid: string) {
