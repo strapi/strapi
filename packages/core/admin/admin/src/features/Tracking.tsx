@@ -362,7 +362,8 @@ type EventsWithProperties =
   | UpdateEntryEvents
   | WillModifyTokenEvent
   | WillNavigateEvent
-  | DidPublishRelease;
+  | DidPublishRelease
+  | MediaEvents;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

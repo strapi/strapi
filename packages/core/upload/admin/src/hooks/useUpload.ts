@@ -8,8 +8,10 @@ import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-interface Asset extends File {
-  rawFile: RawFile;
+interface Asset extends Omit<File, 'id' | 'hash'> {
+  rawFile?: RawFile;
+  id?: File['id'];
+  hash?: File['hash'];
 }
 
 const uploadAsset = (
@@ -22,7 +24,7 @@ const uploadAsset = (
   const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
-  formData.append('files', rawFile);
+  formData.append('files', rawFile!);
 
   formData.append(
     'fileInfo',
@@ -73,6 +75,7 @@ export const useUpload = () => {
 
   return {
     upload,
+    isLoading: mutation.isLoading,
     cancel,
     error: mutation.error,
     progress,
