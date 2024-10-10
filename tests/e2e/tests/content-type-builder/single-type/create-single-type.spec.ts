@@ -30,7 +30,7 @@ test.describe('Create collection type', () => {
     await resetFiles();
   });
 
-  test('Can create a single type', async ({ page, browserName }) => {
+  test('Can create a single type', async ({ page }) => {
     await page.getByRole('button', { name: 'Create new single type' }).click();
 
     await expect(page.getByRole('heading', { name: 'Create a single type' })).toBeVisible();
@@ -47,11 +47,6 @@ test.describe('Create collection type', () => {
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await expect(page.getByText('Select a field for your single type')).toBeVisible();
-
-    // TODO: fix the bug that causes webkit location to be off
-    if (browserName === 'webkit') {
-      return test.fixme();
-    }
 
     await page.getByText('Small or long text').click();
 
