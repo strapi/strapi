@@ -184,28 +184,3 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - run: echo "Skipped"
-
-  test_result:
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    name: aggregate_test_result
-    needs:
-      [
-        pretty,
-        lint,
-        build,
-        typescript,
-        unit_back,
-        unit_front,
-        e2e_ce,
-        e2e_ee,
-        cli,
-        api_ce_pg,
-        api_ce_mysql,
-        api_ce_sqlite,
-        api_ee_pg,
-        api_ee_mysql,
-        api_ee_sqlite,
-      ]
-    steps:
-      - run: echo "Skipped"
