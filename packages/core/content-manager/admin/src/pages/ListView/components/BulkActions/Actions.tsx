@@ -68,11 +68,7 @@ const BulkActionsRenderer = () => {
       >
         {(actions) =>
           actions.map((action) => {
-            return list.settings.bulkable && action?.label === 'Publish' ? (
-              <DocumentActionButton key={action.id} {...action} />
-            ) : action?.label === 'Delete' || action?.label === 'Unpublish' ? (
-              <DocumentActionButton key={action.id} {...action} />
-            ) : null;
+            return list.settings.bulkable && <DocumentActionButton key={action.id} {...action} />;
           })
         }
       </DescriptionComponentRenderer>
