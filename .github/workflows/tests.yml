@@ -47,6 +47,9 @@ jobs:
       matrix:
         node: [20, 22]
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Run Default Setup
         uses: ./.github/actions/setup-checks
         with:
