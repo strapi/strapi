@@ -22,9 +22,9 @@ runs:
         if [[ "${{ inputs.condition }}" != "true" ]]; then
           echo "Job not needed, marking as skipped..."
           echo "result=skipped" >> $GITHUB_ENV
-          # Mark this step as failed gracefully
           echo "::error::This job is intentionally skipped"
-          exit 78  # Use exit code 78 to indicate a job is skipped (conventionally used for controlled skips)
+          exit 78
         else
           echo "Job needed, proceeding..."
           echo "result=proceed" >> $GITHUB_ENV
+        fi
