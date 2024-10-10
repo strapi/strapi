@@ -1,6 +1,4 @@
 backend:
-  - '.github/actions/yarn-nm-install/*.yml'
-  - '.github/workflows/**'
   - 'packages/**/package.json'
   - 'packages/**/server/**/*.(js|ts)'
   - 'packages/**/strapi-server.js'
@@ -8,8 +6,6 @@ backend:
   - 'packages/core/*/{lib,bin,ee,src}/**'
   - 'packages/core/database/**'
 frontend:
-  - '.github/actions/yarn-nm-install/*.yml'
-  - '.github/workflows/**'
   - 'packages/**/package.json'
   - 'packages/**/admin/src/**'
   - 'packages/**/admin/ee/admin/**'
