@@ -20,7 +20,6 @@ import {
   useTracking,
   Page,
   SearchInput,
-  BackButton,
   useNotification,
   useQueryParams,
   useFetchClient,
@@ -187,7 +186,6 @@ export const RolesListPage = () => {
               </LinkButton>
             ) : null
           }
-          navigationAction={<BackButton />}
         />
 
         <Layouts.Action
