@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generators",
-  "version": "5.0.5",
+  "version": "5.0.6",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",
