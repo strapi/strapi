@@ -23,7 +23,7 @@ runs:
           echo "Job not needed, marking as skipped..."
           echo "result=skipped" >> $GITHUB_ENV
           echo "::error::This job is intentionally skipped"
-          exit 78
+          exit 0
         else
           echo "Job needed, proceeding..."
           echo "result=proceed" >> $GITHUB_ENV
