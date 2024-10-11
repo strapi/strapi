@@ -83,21 +83,32 @@ class Database {
     this.logger = config.logger ?? console;
 
     this.dialect = getDialect(this);
+
+    let knexConfig: Knex.Config = this.config.connection;
+
     // for object connections, we can configure the dialect synchronously
     if (typeof this.config.connection.connection !== 'function') {
       this.dialect.configure();
     } else {
       this.logger.warn(
-        'You are using a Knex connection function which is currently flagged as experimental.'
+        'Knex connection functions are currently experimental. Attempting to access the connection object before database initialization will result in errors.'
       );
-      this.logger.warn(
-        'Attempting to access the connection object before database initialization could result in errors'
-      );
+
+      // if user provided a connection function, we wrap it so that we can modify it with dialect configure before it reaches knex
+      knexConfig = {
+        ...this.config.connection,
+        connection: async () => {
+          // @ts-expect-error TODO fix types
+          const conn = await this.config.connection.connection();
+          this.dialect.configure(conn);
+          return conn;
+        },
+      };
     }
 
     this.metadata = createMetadata([]);
 
-    this.#connection = createConnection(this.config.connection, {
+    this.#connection = createConnection(knexConfig, {
       pool: { afterCreate: afterCreate(this) },
     });
 
@@ -111,14 +122,20 @@ class Database {
 
   async init({ models }: { models: Model[] }) {
     if (typeof this.config.connection.connection === 'function') {
-      // for function connections, we must configure the dialect in init
-      // Note: due to a bug in Knex, sqlite will warn about a missing filename for function connections because
-      // it checks in the constructor rather than on connect
-      const conn = await this.config.connection.connection();
-      this.dialect.configure(conn);
-
-      // We also need to force knex to resolve  the connection from a function to a cached object
-      // so our code can access it directly as if it were an object
+      /*
+       * User code needs to be able to access `connection.connection` directly as if
+       * it were always an object. Running a query forces Knex to resolve the
+       * function into an object if it hasn't yet.
+       *
+       * Note that this works in practice, but Knex doesn't guarantee it, so it could
+       * break in the future.
+       *
+       * TODO: In the next major version, we need to replace all internal code that
+       * references `connection.connection` directly and list it as a breaking
+       * change. Instead, we can provide a `resolvedConnection` method that can be
+       * relied on to be an object.
+       */
+      this.logger.debug('Forcing Knex to resolve connection function to object in db init');
       await this.connection.select(this.connection.raw('1'));
     }
 
