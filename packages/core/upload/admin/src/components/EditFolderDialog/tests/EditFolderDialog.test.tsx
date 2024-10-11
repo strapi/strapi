@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { within } from '@testing-library/dom';
@@ -9,12 +7,12 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { useEditFolder } from '../../../hooks/useEditFolder';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import { EditFolderDialog } from '../EditFolderDialog';
+import { EditFolderDialog, EditFolderDialogProps } from '../EditFolderDialog';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
-    put: jest.fn().mockImplementation({}),
+    put: jest.fn().mockImplementation(() => {}),
   }),
 }));
 
@@ -32,7 +30,15 @@ const client = new QueryClient({
   },
 });
 
-function ComponentFixture(props) {
+function ComponentFixture(
+  props: Omit<EditFolderDialogProps, 'open' | 'onClose'> & {
+    folderStructure?: {
+      value?: number;
+      label?: string;
+      name?: string;
+    }[];
+  }
+) {
   const nextProps = {
     canUpdate: true,
     ...props,
@@ -42,7 +48,7 @@ function ComponentFixture(props) {
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
         <DesignSystemProvider>
-          <NotificationsProvider toggleNotification={() => {}}>
+          <NotificationsProvider>
             <EditFolderDialog open onClose={() => {}} {...nextProps} />
           </NotificationsProvider>
         </DesignSystemProvider>
@@ -51,15 +57,23 @@ function ComponentFixture(props) {
   );
 }
 
-function setup(props = { onClose: jest.fn() }) {
+function setup(
+  props?: Partial<EditFolderDialogProps> & {
+    folderStructure?: {
+      value?: number;
+      label?: string;
+      name?: string;
+    }[];
+  }
+) {
   return render(<ComponentFixture {...props} />);
 }
 
-function getInput(container, name) {
+function getInput(container: HTMLElement, name: string) {
   return container.querySelector(`input[name="${name}"]`);
 }
 
-function getButton(container, name) {
+function getButton(container: HTMLElement, name: string) {
   return container.querySelector(`button[name="${name}"]`);
 }
 
@@ -78,7 +92,7 @@ describe('EditFolderDialog', () => {
     const { baseElement } = setup({ onClose: spy });
 
     act(() => {
-      fireEvent.click(getButton(baseElement, 'cancel'));
+      fireEvent.click(getButton(baseElement, 'cancel')!);
     });
 
     expect(spy).toBeCalledTimes(1);
@@ -90,17 +104,17 @@ describe('EditFolderDialog', () => {
     const name = getInput(baseElement, 'name');
 
     act(() => {
-      fireEvent.click(getButton(baseElement, 'submit'));
+      fireEvent.click(getButton(baseElement, 'submit')!);
     });
 
     expect(spy).toBeCalledTimes(0);
 
     act(() => {
-      fireEvent.change(name, { target: { value: 'folder name' } });
+      fireEvent.change(name!, { target: { value: 'folder name' } });
     });
 
     act(() => {
-      fireEvent.click(getButton(baseElement, 'submit'));
+      fireEvent.click(getButton(baseElement, 'submit')!);
     });
 
     await waitFor(() => expect(spy).toBeCalledTimes(1));
@@ -118,10 +132,11 @@ describe('EditFolderDialog', () => {
       pathId: 2,
       path: '2',
       parent: null,
+      type: 'folder',
     };
     const { baseElement, queryByText } = setup({ folder, onClose: spy });
 
-    expect(getInput(baseElement, 'name').value).toBe(folder.name);
+    expect((getInput(baseElement, 'name')! as HTMLInputElement).value).toBe(folder.name);
     expect(queryByText('Media Library')).toBeInTheDocument();
   });
 
@@ -149,12 +164,13 @@ describe('EditFolderDialog', () => {
       },
       pathId: 2,
       path: '2',
+      type: 'folder',
     };
     const folderStructure = [{ value: 1, label: 'Some parent' }];
     const { baseElement, queryByText } = setup({ folder, folderStructure });
 
     act(() => {
-      fireEvent.click(getButton(baseElement, 'delete'));
+      fireEvent.click(getButton(baseElement, 'delete')!);
     });
 
     expect(queryByText('Are you sure?')).toBeInTheDocument();
@@ -180,7 +196,7 @@ describe('EditFolderDialog', () => {
         },
       },
     });
-    useEditFolder.mockReturnValueOnce({
+    (useEditFolder as jest.Mock).mockReturnValueOnce({
       isLoading: false,
       editFolder: moveSpy,
     });
@@ -201,6 +217,7 @@ describe('EditFolderDialog', () => {
       },
       pathId: 2,
       path: '2',
+      type: 'folder',
     };
     const folderStructure = [{ value: 1, name: 'Some parent' }];
 
@@ -220,7 +237,7 @@ describe('EditFolderDialog', () => {
   });
 
   test('disables inputs and submit action if users do not have permissions to update', () => {
-    useMediaLibraryPermissions.mockReturnValueOnce({ canUpdate: false });
+    (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({ canUpdate: false });
     const { getByRole } = setup();
 
     expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-disabled', 'true');

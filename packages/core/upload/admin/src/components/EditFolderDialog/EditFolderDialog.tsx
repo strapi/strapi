@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
@@ -11,13 +11,11 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { Form, Formik } from 'formik';
+import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
-import { FolderDefinition } from '../../constants';
 import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
@@ -28,6 +26,8 @@ import SelectTree from '../SelectTree';
 
 import { EditFolderModalHeader } from './ModalHeader';
 import RemoveFolderDialog from './RemoveFolderDialog';
+import type { FolderDefinition } from '../../../../shared/contracts/folders';
+import type { FetchError } from '@strapi/admin/strapi-admin';
 
 const folderSchema = yup.object({
   name: yup.string().required(),
@@ -39,12 +39,30 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderContent = ({ onClose, folder, location, parentFolderId }) => {
+interface ValuesSubmit {
+  name: string;
+  parent: null | { label?: string; value?: number };
+}
+
+export interface EditFolderDialogProps {
+  parentFolderId?: string | number | null;
+  location?: string;
+  folder?: FolderDefinition;
+  open: boolean;
+  onClose: (arg?: any) => void;
+}
+
+export const EditFolderContent = ({
+  onClose,
+  folder,
+  location,
+  parentFolderId,
+}: EditFolderDialogProps) => {
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
     enabled: true,
   });
   const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
@@ -53,24 +71,34 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
   const isLoading = isLoadingPermissions || folderStructureIsLoading;
   const isEditing = !!folder;
   const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);
-  const initialFormData = !folderStructureIsLoading && {
-    name: folder?.name ?? '',
-    parent: {
-      /* ideally we would use folderStructure[0].value, but since it is null
+  const initialFormData: ValuesSubmit = !folderStructureIsLoading
+    ? {
+        name: folder?.name ?? '',
+        parent: {
+          /* ideally we would use folderStructure[0].value, but since it is null
          react complains about rendering null as field value */
-      value: parentFolderId ? parseInt(parentFolderId, 10) : undefined,
-      label: parentFolderId
-        ? findRecursiveFolderByValue(folderStructure, parseInt(parentFolderId, 10))?.label
-        : folderStructure[0].label,
-    },
-  };
+          value: parentFolderId ? parseInt(parentFolderId.toString(), 10) : undefined,
+          label: parentFolderId
+            ? folderStructure &&
+              findRecursiveFolderByValue(folderStructure, parseInt(parentFolderId.toString(), 10))
+                ?.label
+            : folderStructure?.[0].label,
+        },
+      }
+    : {
+        name: '',
+        parent: null,
+      };
 
-  const handleSubmit = async (values, { setErrors }) => {
+  const handleSubmit = async (
+    values: ValuesSubmit,
+    { setErrors }: { setErrors: (errors: FormikErrors<ValuesSubmit>) => void }
+  ) => {
     try {
       await editFolder(
         {
           ...values,
-          parent: values.parent.value ?? null,
+          parent: values.parent?.value ?? null,
         },
         folder?.id
       );
@@ -90,26 +118,28 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
 
       if (isEditing) {
         const didChangeLocation = parentFolderId
-          ? parseInt(parentFolderId, 10) !== values.parent.value
-          : parentFolderId === null && !!values.parent.value;
-
+          ? parseInt(parentFolderId.toString(), 10) !== values.parent?.value
+          : parentFolderId === null && !!values.parent?.value;
         trackUsage('didEditMediaLibraryElements', {
           location,
           type: 'folder',
           changeLocation: didChangeLocation,
         });
       } else {
-        trackUsage('didAddMediaLibraryFolders', { location });
+        trackUsage('didAddMediaLibraryFolders', { location: location! });
       }
 
       onClose({ created: true });
     } catch (err) {
-      const errors = getAPIInnerErrors(err, { getTrad });
-      const formikErrors = Object.entries(errors).reduce((acc, [key, error]) => {
-        acc[key] = error.defaultMessage;
+      const errors = getAPIInnerErrors(err as FetchError, { getTrad });
+      const formikErrors = Object.entries(errors!).reduce(
+        (acc: Record<string, string>, [key, error]) => {
+          acc[key] = error.defaultMessage;
 
-        return acc;
-      }, {});
+          return acc;
+        },
+        {}
+      );
 
       if (!isEmpty(formikErrors)) {
         setErrors(formikErrors);
@@ -118,7 +148,9 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
   };
 
   const handleDelete = async () => {
-    await remove([folder]);
+    if (folder) {
+      await remove([folder]);
+    }
 
     setShowConfirmDialog(false);
     onClose();
@@ -181,7 +213,7 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
                             id: getTrad('modal.folder.create.creation-date'),
                             defaultMessage: 'Creation Date',
                           }),
-                          value: formatDate(new Date(folder.createdAt)),
+                          value: formatDate(new Date(folder.createdAt!)),
                         },
                       ]}
                     />
@@ -189,7 +221,10 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
                 )}
 
                 <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
-                  <Field.Root name="name" error={errors.name}>
+                  <Field.Root
+                    name="name"
+                    error={typeof errors.name === 'string' ? errors.name : undefined}
+                  >
                     <Field.Label>
                       {formatMessage({
                         id: getTrad('form.input.label.folder-name'),
@@ -215,17 +250,17 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
                     </Field.Label>
 
                     <SelectTree
-                      options={folderStructure}
+                      options={folderStructure!}
                       onChange={(value) => {
                         setFieldValue('parent', value);
                       }}
                       isDisabled={formDisabled}
-                      defaultValue={values.parent}
+                      defaultValue={values.parent!}
                       name="parent"
                       menuPortalTarget={document.querySelector('body')}
                       inputId="folder-parent"
                       disabled={formDisabled}
-                      error={errors?.parent}
+                      error={typeof errors.parent === 'string' ? errors.parent : undefined}
                       ariaErrorMessage="folder-parent-error"
                     />
 
@@ -236,7 +271,7 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
                         id="folder-parent-error"
                         textColor="danger600"
                       >
-                        {errors.parent}
+                        {typeof errors.parent === 'string' ? errors.parent : undefined}
                       </Typography>
                     )}
                   </Field.Root>
@@ -289,39 +324,12 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
   );
 };
 
-EditFolderContent.defaultProps = {
-  folder: undefined,
-  location: undefined,
-  parentFolderId: null,
-};
-
-EditFolderContent.propTypes = {
-  folder: FolderDefinition,
-  location: PropTypes.string,
-  onClose: PropTypes.func.isRequired,
-  parentFolderId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-};
-
-export const EditFolderDialog = ({ open, onClose, ...restProps }) => {
+export const EditFolderDialog = ({ open, onClose, ...restProps }: EditFolderDialogProps) => {
   return (
     <Modal.Root open={open} onOpenChange={onClose}>
       <Modal.Content>
-        <EditFolderContent {...restProps} onClose={onClose} />
+        <EditFolderContent {...restProps} onClose={onClose} open={open} />
       </Modal.Content>
     </Modal.Root>
   );
-};
-
-EditFolderDialog.defaultProps = {
-  folder: undefined,
-  location: undefined,
-  parentFolderId: null,
-};
-
-EditFolderDialog.propTypes = {
-  folder: FolderDefinition,
-  location: PropTypes.string,
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  parentFolderId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };

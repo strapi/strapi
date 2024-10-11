@@ -30,7 +30,7 @@ export interface SelectTreeProps<
 > {
   maxDisplayDepth?: number;
   defaultValue?: {
-    value: string | number | null;
+    value?: string | number | null;
   };
   options: OptionSelectTree[];
   onChange?: (value: any) => void;
@@ -39,6 +39,8 @@ export interface SelectTreeProps<
   inputId?: string;
   error?: string;
   ariaErrorMessage?: string;
+  isDisabled?: boolean;
+  disabled?: boolean;
 }
 
 const SelectTree = ({
@@ -107,7 +109,7 @@ const SelectTree = ({
   );
 };
 
-type SelectOption = { value: string | number | null; label?: string };
+type SelectOption = { value?: string | number | null; label?: string };
 
 interface SelectProps<
   Option = SelectOption,
@@ -120,7 +122,7 @@ interface SelectProps<
   ariaErrorMessage?: string;
   options: OptionSelectTree[];
   defaultValue?: {
-    value: string | number | null;
+    value?: string | number | null;
   };
   isSearchable?: boolean;
   maxDisplayDepth?: number;

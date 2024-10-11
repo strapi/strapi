@@ -223,7 +223,7 @@ interface DidEditMediaLibraryElementsEvent {
   name: 'didEditMediaLibraryElements';
   properties: MediaEvents['properties'] & {
     type: string;
-    changeLocation: string;
+    changeLocation: string | boolean;
   };
 }
 
