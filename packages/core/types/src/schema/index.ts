@@ -189,7 +189,11 @@ export type AttributeNamesWithTarget<TSchemaUID extends UID.Schema> = Extract<
 export type RequiredAttributeNames<TSchemaUID extends UID.Schema> = Object.KeysBy<
   Attributes<TSchemaUID>,
   Attribute.Required,
-  AttributeNames<TSchemaUID>
+  Object.KeysExcept<
+    Attributes<TSchemaUID>,
+    Attribute.DefaultTo<any>,
+    AttributeNames<TSchemaUID>
+  >
 >;
 
 /**
@@ -203,5 +207,9 @@ export type RequiredAttributeNames<TSchemaUID extends UID.Schema> = Object.KeysB
 export type OptionalAttributeNames<TSchemaUID extends UID.Schema> = Object.KeysExcept<
   Attributes<TSchemaUID>,
   Attribute.Required,
+  AttributeNames<TSchemaUID>
+> | Object.KeysBy<
+  Attributes<TSchemaUID>,
+  Attribute.DefaultTo<any>,
   AttributeNames<TSchemaUID>
 >;
