@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upload",
-  "version": "5.0.2",
+  "version": "5.0.6",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -87,6 +87,7 @@
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
+    "@types/byte-size": "8.1.2",
     "@types/fs-extra": "11.0.4",
     "@types/koa": "2.13.4",
     "@types/koa-range": "0.3.5",
@@ -108,7 +109,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

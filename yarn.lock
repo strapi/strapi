@@ -8378,6 +8378,7 @@ __metadata:
     "@testing-library/dom": "npm:10.1.0"
     "@testing-library/react": "npm:15.0.7"
     "@testing-library/user-event": "npm:14.5.2"
+    "@types/byte-size": "npm:8.1.2"
     "@types/fs-extra": "npm:11.0.4"
     "@types/koa": "npm:2.13.4"
     "@types/koa-range": "npm:0.3.5"
@@ -8865,6 +8866,13 @@ __metadata:
     "@types/connect": "npm:*"
     "@types/node": "npm:*"
   checksum: 10c0/c2dd533e1d4af958d656bdba7f376df68437d8dfb7e4522c88b6f3e6f827549e4be5bf0be68a5f1878accf5752ea37fba7e8a4b6dda53d0d122d77e27b69c750
+  languageName: node
+  linkType: hard
+
+"@types/byte-size@npm:8.1.2":
+  version: 8.1.2
+  resolution: "@types/byte-size@npm:8.1.2"
+  checksum: 10c0/2a251414d925e02a4b36629c2ea0519efb5006baa82241ae85fdfebb65f43d3679c486e247ff6b82e4fbbac556b9d55adf7c0f254e16d6b1d972ffb96d47b8f2
   languageName: node
   linkType: hard
 
@@ -11785,14 +11793,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:9.4.3":
-  version: 9.4.3
-  resolution: "better-sqlite3@npm:9.4.3"
+"better-sqlite3@npm:11.3.0":
+  version: 11.3.0
+  resolution: "better-sqlite3@npm:11.3.0"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 10c0/efc8b1440388ff0ada7bd1d41021dd5a5a9cfa440d3e66a661e3f89c8d72229de939887aa0a9b24695843f88710ff79b34c5990aaf951b55a00858801a3b134c
+  checksum: 10c0/9adc99683300699581da5d7288e4a261b7d4381fd99c762fc6a0e9b1e1e226009c1333b46b10c1c453c356b20cb8be037a4616b1e717b3d1a00bd8493bec506e
   languageName: node
   linkType: hard
 
@@ -16343,7 +16351,7 @@ __metadata:
     "@strapi/strapi": "workspace:*"
     "@vitejs/plugin-react": "npm:4.2.1"
     babel-plugin-react-compiler: "npm:0.0.0-experimental-c23de8d-20240515"
-    better-sqlite3: "npm:9.4.3"
+    better-sqlite3: "npm:11.3.0"
     react: "npm:rc"
     react-dom: "npm:rc"
     react-router-dom: "npm:6.22.3"
@@ -17427,7 +17435,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:9.4.3"
+    better-sqlite3: "npm:11.3.0"
     lodash: "npm:4.17.21"
     mysql2: "npm:3.9.4"
     passport-google-oauth2: "npm:0.2.0"
@@ -20789,7 +20797,7 @@ __metadata:
   dependencies:
     "@strapi/plugin-users-permissions": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:9.4.3"
+    better-sqlite3: "npm:11.3.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-router-dom: "npm:6.22.3"
@@ -20805,7 +20813,7 @@ __metadata:
     "@strapi/provider-upload-aws-s3": "workspace:*"
     "@strapi/provider-upload-cloudinary": "workspace:*"
     "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:9.4.3"
+    better-sqlite3: "npm:11.3.0"
     lodash: "npm:4.17.21"
     mysql2: "npm:3.9.4"
     passport-google-oauth2: "npm:0.2.0"

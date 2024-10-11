@@ -9,8 +9,7 @@ import { useIntl } from 'react-intl';
 import { AssetDefinition, FolderDefinition } from '../../constants';
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { getTrad } from '../../utils';
-import { normalizeAPIError } from '../../utils/normalizeAPIError';
+import { getTrad, normalizeAPIError } from '../../utils';
 import SelectTree from '../SelectTree';
 
 export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {

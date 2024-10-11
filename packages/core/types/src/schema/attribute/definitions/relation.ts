@@ -34,7 +34,7 @@ export type RelationWithTarget<
   morphMany: MorphMany<TTargetUID>;
 }[TRelationKind];
 
-type RelationWithoutTarget<
+export type RelationWithoutTarget<
   TRelationKind extends RelationKind.WithoutTarget = RelationKind.WithoutTarget,
 > = {
   // Morph Owner (morphToOne, morphToMany)

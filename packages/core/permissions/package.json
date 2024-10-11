@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "5.0.2",
+  "version": "5.0.6",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "tsconfig": "workspace:*"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   }
 }

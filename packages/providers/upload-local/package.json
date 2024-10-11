@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-local",
-  "version": "5.0.2",
+  "version": "5.0.6",
   "description": "Local provider for strapi upload",
   "keywords": [
     "upload",
@@ -56,7 +56,7 @@
     "tsconfig": "workspace:*"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   }
 }

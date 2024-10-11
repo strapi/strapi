@@ -1,6 +1,6 @@
 {
   "name": "@strapi/cloud-cli",
-  "version": "5.0.2",
+  "version": "5.0.6",
   "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
     "strapi",
@@ -74,7 +74,7 @@
     "tsconfig": "workspace:*"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   }
 }
