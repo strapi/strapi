@@ -89,12 +89,13 @@ class Database {
     // for object connections, we can configure the dialect synchronously
     if (typeof this.config.connection.connection !== 'function') {
       this.dialect.configure();
-    } else {
+    }
+    // for connection functions, we wrap it so that we can modify it with dialect configure before it reaches knex
+    else {
       this.logger.warn(
         'Knex connection functions are currently experimental. Attempting to access the connection object before database initialization will result in errors.'
       );
 
-      // if user provided a connection function, we wrap it so that we can modify it with dialect configure before it reaches knex
       knexConfig = {
         ...this.config.connection,
         connection: async () => {
