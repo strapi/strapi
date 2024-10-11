@@ -29,7 +29,7 @@ module.exports = {
   globalSetup: '@strapi/admin-test-utils/global-setup',
   setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
-  testEnvironment: '@strapi/admin-test-utils/environment',
+  testEnvironment: 'jest-fixed-jsdom',
   prettierPath: require.resolve('prettier-2'),
   transform: {
     '^.+\\.js(x)?$': [
@@ -80,6 +80,7 @@ module.exports = {
   testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {
     url: 'http://localhost:1337/admin',
+    customExportConditions: [''],
   },
   // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
   // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0

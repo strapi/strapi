@@ -20096,6 +20096,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jest-fixed-jsdom@npm:0.0.4":
+  version: 0.0.4
+  resolution: "jest-fixed-jsdom@npm:0.0.4"
+  peerDependencies:
+    jest-environment-jsdom: ">=28.0.0"
+  checksum: 10c0/31bde19df1feb9e6ac28fdaedb27026a5962cc17e135b300770b627e29d6a12797e5d1880456647894fb62d0ee67dcf4fcd3ef86d8f298cee7f9d5cc567fdcf1
+  languageName: node
+  linkType: hard
+
 "jest-get-type@npm:^29.4.3, jest-get-type@npm:^29.6.3":
   version: 29.6.3
   resolution: "jest-get-type@npm:29.6.3"
@@ -24598,7 +24607,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:6.3.0, path-to-regexp@npm:^6.2.1, path-to-regexp@npm:^6.3.0":
+"path-to-regexp@npm:6.3.0, path-to-regexp@npm:^6.3.0":
   version: 6.3.0
   resolution: "path-to-regexp@npm:6.3.0"
   checksum: 10c0/73b67f4638b41cde56254e6354e46ae3a2ebc08279583f6af3d96fe4664fc75788f74ed0d18ca44fa4a98491b69434f9eee73b97bb5314bd1b5adb700f5c18d6
@@ -27966,6 +27975,7 @@ __metadata:
     jest-circus: "npm:29.6.0"
     jest-cli: "npm:29.6.0"
     jest-environment-jsdom: "npm:29.6.1"
+    jest-fixed-jsdom: "npm:0.0.4"
     jest-watch-typeahead: "npm:2.2.2"
     lerna: "npm:8.1.2"
     lint-staged: "npm:15.2.10"
