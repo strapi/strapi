@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { describeOnCondition, findAndClose } from '../../utils/shared';
+import { describeOnCondition, findAndClose, skipCtbTour } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
 
@@ -35,6 +35,11 @@ const goToHistoryPage = async (page: Page) => {
     await page.reload();
     await goToHistoryPage(page);
   }
+};
+
+const goToContentTypeBuilder = async (page: Page) => {
+  await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+  await skipCtbTour(page);
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
@@ -252,9 +257,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-      await page.waitForURL('**/content-type-builder');
-      await page.getByRole('link', { name: 'Article' }).click();
+      await goToContentTypeBuilder(page);
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::article.article'
       );
@@ -408,7 +411,8 @@ describeOnCondition(edition === 'EE')('History', () => {
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create relation in Content-Type Builder
-      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+      await goToContentTypeBuilder(page);
+
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
@@ -476,8 +480,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Rename field in content-type builder
        */
-      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-      await page.waitForURL('**/content-type-builder');
+      await goToContentTypeBuilder(page);
 
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.waitForURL(
