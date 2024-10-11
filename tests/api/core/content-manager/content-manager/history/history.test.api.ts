@@ -7,6 +7,16 @@ import path from 'path';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
+const componentModel = {
+  displayName: 'review',
+  category: 'default',
+  attributes: {
+    feedback: {
+      type: 'string',
+    },
+  },
+};
+
 const relationUid = 'api::tag.tag';
 const relationModel = {
   draftAndPublish: true,
@@ -105,6 +115,11 @@ const collectionTypeModel = {
           localized: true,
         },
       },
+    },
+    reviews: {
+      type: 'component',
+      repeatable: true,
+      component: 'default.review',
     },
   },
 };
@@ -227,7 +242,10 @@ describeOnCondition(edition === 'EE')('History API', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([relationModel, collectionTypeModel, singleTypeModel]).build();
+    await builder
+      .addComponent(componentModel)
+      .addContentTypes([relationModel, collectionTypeModel, singleTypeModel])
+      .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -296,7 +314,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
           description: 'Hello',
         },
       }),
-      await updateEntry({
+      updateEntry({
         documentId: collectionTypeDocumentId,
         uid: collectionTypeUid,
         locale: 'fr',
@@ -669,6 +687,38 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(currentDocument['images']).toHaveLength(2);
       expect(restoredDocument['image']).toBe(null);
       expect(restoredDocument['images']).toHaveLength(1);
+    });
+
+    test('Restores a version with deleted components', async () => {
+      // Create a document that contains components, then delete the components and make an update
+      const currentDocument = await createEntry({
+        uid: collectionTypeUid,
+        data: { name: 'Product with reviews', reviews: [{ feedback: 'Great!' }] },
+      });
+      await updateEntry({
+        uid: collectionTypeUid,
+        documentId: currentDocument.data.documentId,
+        data: { reviews: [] },
+      });
+      await updateEntry({
+        uid: collectionTypeUid,
+        documentId: currentDocument.data.documentId,
+        data: { name: 'Product with no more reviews' },
+      });
+
+      // Find and restore the initial version that had the components data
+      const versions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${currentDocument.data.documentId}&page=1&pageSize=3&locale=en`,
+      });
+      const res = await rq({
+        method: 'PUT',
+        url: `/content-manager/history-versions/${versions.body.data.at(2).id}/restore`,
+        body: {
+          contentType: collectionTypeUid,
+        },
+      });
+      expect(res.statusCode).toBe(200);
     });
   });
 
