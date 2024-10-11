@@ -17437,7 +17437,7 @@ __metadata:
     "@strapi/strapi": "workspace:*"
     better-sqlite3: "npm:11.3.0"
     lodash: "npm:4.17.21"
-    mysql2: "npm:3.9.4"
+    mysql2: "npm:3.9.8"
     passport-google-oauth2: "npm:0.2.0"
     pg: "npm:8.11.1"
     react: "npm:18.3.1"
@@ -20815,7 +20815,7 @@ __metadata:
     "@strapi/strapi": "workspace:*"
     better-sqlite3: "npm:11.3.0"
     lodash: "npm:4.17.21"
-    mysql2: "npm:3.9.4"
+    mysql2: "npm:3.9.8"
     passport-google-oauth2: "npm:0.2.0"
     pg: "npm:8.11.1"
     react: "npm:18.3.1"
@@ -22685,9 +22685,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mysql2@npm:3.9.4":
-  version: 3.9.4
-  resolution: "mysql2@npm:3.9.4"
+"mysql2@npm:3.9.8":
+  version: 3.9.8
+  resolution: "mysql2@npm:3.9.8"
   dependencies:
     denque: "npm:^2.1.0"
     generate-function: "npm:^2.3.1"
@@ -22697,7 +22697,7 @@ __metadata:
     named-placeholders: "npm:^1.1.3"
     seq-queue: "npm:^0.0.5"
     sqlstring: "npm:^2.3.2"
-  checksum: 10c0/bdb3c3da705b7e7a20fbdfe982a38acff133dda571d05b35bcc8a2b39e0535f91e448d6afd4cda24aa87fda2dbe5ff1b6165186c4b6c2f1037b73ca1b0af09fb
+  checksum: 10c0/c97043a122ce34a0a73ac7f6ce4c44312e4dd51fd347a763e3a28aab51a45dad151404a1c5f97bf0fa40e4437915e8c5b20cbf602cd99931ac1b4ef9b4ffb0b8
   languageName: node
   linkType: hard
 
