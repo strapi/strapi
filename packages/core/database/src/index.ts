@@ -1,6 +1,5 @@
 import type { Knex } from 'knex';
 
-import createDebugger from 'debug';
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
@@ -16,9 +15,6 @@ import type { Migration } from './migrations';
 import { type Identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
-
-const debug = createDebugger('strapi::database');
-
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
@@ -143,7 +139,7 @@ class Database {
     this.metadata.loadModels(models);
     await validateDatabase(this);
 
-    debug('Database initialized');
+    this.logger.debug('Database initialization completed');
 
     return this;
   }
