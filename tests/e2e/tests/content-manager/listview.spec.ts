@@ -19,6 +19,33 @@ test.describe('List View', () => {
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
 
+  test('Entries should be paginated', async ({ page }) => {
+    // Go to the authors list view, all three entries should be visible
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await page.getByRole('link', { name: 'Author' }).click();
+    await expect(page.getByRole('gridcell', { name: 'Draft' })).toHaveCount(3);
+    await expect(page.getByRole('link', { name: 'Next page' })).not.toBeVisible();
+
+    // Lower the page size to 2 to force pagination since there are 3 entries
+    const currentUrl = page.url();
+    const newUrl = new URL(currentUrl);
+    newUrl.searchParams.set('pageSize', '2');
+    await page.goto(newUrl.toString());
+
+    // Check that that the first page has the right content
+    await expect(page.getByRole('gridcell', { name: 'Draft' })).toHaveCount(2);
+    await expect(page.getByRole('gridcell', { name: 'Coach Beard' })).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Ted Lasso' })).not.toBeVisible();
+    await expect(page.getByRole('link', { name: 'Previous page' })).toBeDisabled();
+    await page.getByRole('link', { name: 'Next page' }).click();
+
+    // Check that the second page has the right content
+    await expect(page.getByRole('gridcell', { name: 'Draft' })).toHaveCount(1);
+    await expect(page.getByRole('gridcell', { name: 'Ted Lasso' })).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Coach Beard' })).not.toBeVisible();
+    await expect(page.getByRole('link', { name: 'Next page' })).toBeDisabled();
+  });
+
   // Should be enabled once bulk publish is in action
   test.fixme('A user should be able to perform bulk actions on entries', async ({ page }) => {
     await test.step('bulk publish', async () => {
