@@ -49,7 +49,7 @@
   "components.TableEmpty.withFilters": "適用されたフィルタには{contentType}はありません...",
   "components.TableEmpty.withSearch": "検索に対応する{contentType}はありません（{search}）...",
   "components.TableEmpty.withoutFilter": "{contentType}はありません...",
-  "components.empty-repeatable": "No entry yet. Click on the button below to add one.",
+  "components.empty-repeatable": "No entry yet. Click to add one.",
   "components.notification.info.maximum-requirement": "You have already reached the maximum number of fields",
   "components.notification.info.minimum-requirement": "A field has been added to match the minimum requirement",
   "components.repeatable.reorder.error": "An error occurred while reordering your component's field, please try again",
