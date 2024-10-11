@@ -96,7 +96,7 @@ class Database {
       knexConfig = {
         ...this.config.connection,
         connection: async () => {
-          // @ts-expect-error TODO fix types
+          // @ts-expect-error confirmed it was a function above
           const conn = await this.config.connection.connection();
           this.dialect.configure(conn);
           return conn;
