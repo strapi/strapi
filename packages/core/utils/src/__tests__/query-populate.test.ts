@@ -152,7 +152,7 @@ describe('traverseQueryPopulate', () => {
       getModel: strapi.getModel,
     } as const;
 
-    await traverseQueryPopulate(({ key, schema, path, parent, attribute }) => {
+    await traverseQueryPopulate(({ key, parent }) => {
       switch (key) {
         case 'address':
           // top level populate should not have parent
