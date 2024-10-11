@@ -15,6 +15,7 @@ import type { Migration } from './migrations';
 import { type Identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
+
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
@@ -48,7 +49,7 @@ const afterCreate =
   };
 
 class Database {
-  #connection?: Knex;
+  connection: Knex;
 
   dialect: Dialect;
 
@@ -105,7 +106,7 @@ class Database {
 
     this.metadata = createMetadata([]);
 
-    this.#connection = createConnection(knexConfig, {
+    this.connection = createConnection(knexConfig, {
       pool: { afterCreate: afterCreate(this) },
     });
 
@@ -138,18 +139,7 @@ class Database {
 
     this.metadata.loadModels(models);
     await validateDatabase(this);
-
-    this.logger.debug('Database initialization completed');
-
     return this;
-  }
-
-  get connection() {
-    if (this.#connection === undefined) {
-      throw new Error('Database connection has not yet been initialized');
-    }
-
-    return this.#connection;
   }
 
   query(uid: string) {
