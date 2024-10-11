@@ -1,7 +1,7 @@
 import semver from 'semver';
 
 import * as Version from './types';
-import { isSemverInstance, isSemVerReleaseType } from './semver';
+import { isSemverInstance, isSemVerReleaseType, semVerFactory } from './semver';
 
 export const rangeFactory = (range: string): Version.Range => {
   return new semver.Range(range);
@@ -10,22 +10,43 @@ export const rangeFactory = (range: string): Version.Range => {
 export const rangeFromReleaseType = (current: Version.SemVer, identifier: Version.ReleaseType) => {
   switch (identifier) {
     case Version.ReleaseType.Major: {
-      // semver.inc(_, 'major') will target <major + 1>.0.0 which is what we want
-      // e.g. for 4.15.4, it'll return 5.0.0
-      const nextMajor = semver.inc(current, 'major') as Version.LiteralSemVer;
-      return rangeFactory(`>${current.raw} <=${nextMajor}`);
-    }
-    case Version.ReleaseType.Patch: {
-      // This will return the minor for the next minor
-      // e.g. for 4.15.4, it'll return 4.16.0
-      const minor = semver.inc(current, 'minor') as Version.LiteralSemVer;
-      return rangeFactory(`>${current.raw} <${minor}`);
+      // For example, 4.15.4 returns 5.0.0
+      const nextMajor = semVerFactory(current.raw).inc('major');
+
+      // Using only the major version as upper limit allows any minor,
+      // patch or build version to be taken in the range.
+      //
+      // For example, if the current version is "4.15.4", incrementing the
+      // major version would result in "5.0.0".
+      // The generated rule is ">4.15.4 <=5", allowing any version
+      // greater than "4.15.4" but less than "6.0.0-0".
+      return rangeFactory(`>${current.raw} <=${nextMajor.major}`);
     }
     case Version.ReleaseType.Minor: {
-      // This will return the major for the next major
-      // e.g. for 4.15.4, it'll return 5.0.0
-      const major = semver.inc(current, 'major') as Version.LiteralSemVer;
-      return rangeFactory(`>${current.raw} <${major}`);
+      // For example, 4.15.4 returns 5.0.0
+      const nextMajor = semVerFactory(current.raw).inc('major');
+
+      // Using the <major>.<minor>.<patch> version as the upper limit allows any minor,
+      // patch, or build versions to be taken in the range.
+      //
+      // For example, if the current version is "4.15.4", incrementing the
+      // major version would result in "5.0.0".
+      // The generated rule is ">4.15.4 <5.0.0", allowing any version
+      // greater than "4.15.4" but less than "5.0.0".
+      return rangeFactory(`>${current.raw} <${nextMajor.raw}`);
+    }
+    case Version.ReleaseType.Patch: {
+      // For example, 4.15.4 returns 4.16.0
+      const nextMinor = semVerFactory(current.raw).inc('minor');
+
+      // Using only the minor version as the upper limit allows any patch
+      // or build versions to be taken in the range.
+      //
+      // For example, if the current version is "4.15.4", incrementing the
+      // minor version would result in "4.16.0".
+      // The generated rule is ">4.15.4 <4.16.0", allowing any version
+      // greater than "4.15.4" but less than "4.16.0".
+      return rangeFactory(`>${current.raw} <${nextMinor.raw}`);
     }
     default: {
       throw new Error('Not implemented');
