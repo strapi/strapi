@@ -24,53 +24,63 @@ const isKeyword = (keyword: string) => {
   };
 };
 
+const isWildcard = (value: unknown): value is '*' => value === '*';
+
+const isPopulateString = (value: unknown): value is string => {
+  return isString(value) && !isWildcard(value);
+};
+
 const isStringArray = (value: unknown): value is string[] =>
   isArray(value) && value.every(isString);
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
 const populate = traverseFactory()
-  // Array of strings ['foo', 'foo.bar'] => map(recurse), then filter out empty items
+  .intercept(isPopulateString, async (visitor, options, populate, { recurse }) => {
+    const populateObject = pathsToObjectPopulate([populate]);
+    const traversedPopulate = (await recurse(visitor, options, populateObject)) as PopulateObject;
+    const [result] = objectPopulateToPaths(traversedPopulate);
+
+    return result;
+  })
+  // Array of strings ['foo', 'bar.baz'] => map(recurse), then filter out empty items
   .intercept(isStringArray, async (visitor, options, populate, { recurse }) => {
-    const visitedPopulate = await Promise.all(
-      populate.map((nestedPopulate) => recurse(visitor, options, nestedPopulate))
+    const paths = await Promise.all(
+      populate.map((subClause) => recurse(visitor, options, subClause))
     );
 
-    return visitedPopulate.filter((item) => !isNil(item));
+    return paths.filter((item) => !isNil(item));
   })
   // for wildcard, generate custom utilities to modify the values
-  .parse(
-    (value): value is '*' => value === '*',
-    () => ({
-      /**
-       * Since value is '*', we don't need to transform it
-       */
-      transform: identity,
+  .parse(isWildcard, () => ({
+    /**
+     * Since value is '*', we don't need to transform it
+     */
+    transform: identity,
 
-      /**
-       * '*' isn't a key/value structure, so regardless
-       *  of the given key, it returns the data ('*')
-       */
-      get: (_key, data) => data,
+    /**
+     * '*' isn't a key/value structure, so regardless
+     *  of the given key, it returns the data ('*')
+     */
+    get: (_key, data) => data,
 
-      /**
-       * '*' isn't a key/value structure, so regardless
-       * of the given `key`, use `value` as the new `data`
-       */
-      set: (_key, value) => value,
+    /**
+     * '*' isn't a key/value structure, so regardless
+     * of the given `key`, use `value` as the new `data`
+     */
+    set: (_key, value) => value,
 
-      /**
-       * '*' isn't a key/value structure, but we need to simulate at least one to enable
-       * the data traversal. We're using '' since it represents a falsy string value
-       */
-      keys: constant(['']),
+    /**
+     * '*' isn't a key/value structure, but we need to simulate at least one to enable
+     * the data traversal. We're using '' since it represents a falsy string value
+     */
+    keys: constant(['']),
 
-      /**
-       * Removing '*' means setting it to undefined, regardless of the given key
-       */
-      remove: constant(undefined),
-    })
-  )
+    /**
+     * Removing '*' means setting it to undefined, regardless of the given key
+     */
+    remove: constant(undefined),
+  }))
 
   // Parse string values
   .parse(isString, () => {
@@ -267,3 +277,46 @@ const populate = traverseFactory()
   );
 
 export default curry(populate.traverse);
+
+type PopulateObject = {
+  [key: string]: true | { populate: PopulateObject };
+};
+
+const objectPopulateToPaths = (input: PopulateObject): string[] => {
+  const paths: string[] = [];
+
+  function traverse(currentObj: PopulateObject, parentPath: string) {
+    for (const [key, value] of Object.entries(currentObj)) {
+      const currentPath = parentPath ? `${parentPath}.${key}` : key;
+      if (value === true) {
+        paths.push(currentPath);
+      } else {
+        traverse((value as { populate: PopulateObject }).populate, currentPath);
+      }
+    }
+  }
+
+  traverse(input, '');
+
+  return paths;
+};
+
+const pathsToObjectPopulate = (input: string[]): PopulateObject => {
+  const result: PopulateObject = {};
+
+  function traverse(object: PopulateObject, keys: string[]): void {
+    const [first, ...rest] = keys;
+    if (rest.length === 0) {
+      object[first] = true;
+    } else {
+      if (!object[first] || typeof object[first] === 'boolean') {
+        object[first] = { populate: {} };
+      }
+      traverse((object[first] as { populate: PopulateObject }).populate, rest);
+    }
+  }
+
+  input.forEach((clause) => traverse(result, clause.split('.')));
+
+  return result;
+};

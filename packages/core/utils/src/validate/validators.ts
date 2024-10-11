@@ -13,12 +13,18 @@ import { isOperator } from '../operators';
 import { asyncCurry, throwInvalidKey } from './utils';
 import type { Model } from '../types';
 import parseType from '../parse-type';
+import type { Parent, Path } from '../traverse/factory';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
 interface Context {
   schema: Model;
   getModel: (model: string) => Model;
+}
+
+interface PopulateContext extends Context {
+  path?: Path;
+  parent?: Parent;
 }
 
 type AnyFunc = (...args: any[]) => any;
@@ -228,7 +234,7 @@ export const POPULATE_TRAVERSALS = ['nonAttributesOperators', 'private'];
 
 export const validatePopulate = asyncCurry(
   async (
-    ctx: Context,
+    ctx: PopulateContext,
     populate: unknown,
     includes: {
       fields?: (typeof FIELDS_TRAVERSALS)[number][];
@@ -366,6 +372,8 @@ export const validatePopulate = asyncCurry(
                 {
                   schema,
                   getModel,
+                  parent: { key, path, schema, attribute },
+                  path,
                 },
                 value, // pass the nested populate value
                 includes // pass down the same includes object

@@ -44,6 +44,8 @@ const schemas = {
         pass: { type: 'password' },
         fooRef: { type: 'component', component: 'default.foo', repeatable: false },
         barRefs: { type: 'component', component: 'default.bar', repeatable: true },
+        // NOTE: Test conflicting attribute names do not cause issues with populate object
+        filters: { type: 'relation', relation: 'oneToOne', target: 'api::a.a' },
       },
     },
     b: {
@@ -221,9 +223,9 @@ describe('Populate filters', () => {
       });
     });
 
-    test.only('No filters & deep populate', async () => {
+    test('No filters & deep populate', async () => {
       const qs = {
-        populate: ['second', 'third.fooRef'],
+        populate: ['second', 'third.fooRef', 'third.filters'],
       };
       const { status, body } = await rq.get(`/${schemas.contentTypes.c.pluralName}`, { qs });
 
