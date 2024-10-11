@@ -253,6 +253,12 @@ export const validatePopulate = asyncCurry(
     functionsToApply.push(
       traverseQueryPopulate(
         async ({ key, path, value, schema, attribute, getModel, parent }, { set }) => {
+          /**
+           * NOTE: The parent check is done to support "filters" (and the rest of keys) as valid attribute names.
+           *
+           * The parent will not be an attribute when its a "populate" / "filters" / "sort" ... key.
+           * Only in those scenarios the node will be an attribute.
+           */
           if (!parent?.attribute && attribute) {
             const isPopulatableAttribute = [
               'relation',
