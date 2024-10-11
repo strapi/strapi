@@ -361,7 +361,7 @@ jobs:
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
