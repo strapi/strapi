@@ -56,6 +56,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
+    "@mux/mux-player-react": "3.1.0",
     "@strapi/design-system": "2.0.0-rc.13",
     "@strapi/icons": "2.0.0-rc.13",
     "@strapi/provider-upload-local": "5.4.1",
