@@ -81,11 +81,24 @@ export type GetValues<TSchemaUID extends UID.Schema> = {
 } & OmitRelationsWithoutTarget<
   TSchemaUID,
   {
-    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: GetValue<
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID> &
+      Schema.DefaultableAttributeNames<TSchemaUID>]?:
+      | GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
+      | null
+      | undefined;
+  } & {
+    [TKey in Schema.RequiredAttributeNames<TSchemaUID> &
+      Schema.DefaultableAttributeNames<TSchemaUID>]?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>
     >;
   } & {
-    [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID> &
+      Schema.NoDefaultAttributeNames<TSchemaUID>]-?: GetValue<
+      Schema.AttributeByName<TSchemaUID, TKey>
+    > | null;
+  } & {
+    [TKey in Schema.RequiredAttributeNames<TSchemaUID> &
+      Schema.NoDefaultAttributeNames<TSchemaUID>]-?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>
     >;
   }
