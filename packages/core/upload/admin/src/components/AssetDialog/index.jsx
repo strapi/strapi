@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Page } from '@strapi/admin/strapi-admin';
 import { Badge, Button, Divider, Flex, Loader, Modal, Tabs } from '@strapi/design-system';
@@ -37,8 +37,8 @@ export const AssetContent = ({
   initiallySelectedAssets,
   trackedLocation,
 }) => {
-  const [assetToEdit, setAssetToEdit] = useState(undefined);
-  const [folderToEdit, setFolderToEdit] = useState(undefined);
+  const [assetToEdit, setAssetToEdit] = React.useState(undefined);
+  const [folderToEdit, setFolderToEdit] = React.useState(undefined);
   const { formatMessage } = useIntl();
   const {
     canRead,

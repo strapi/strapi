@@ -1,26 +1,38 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { CrumbSimpleMenu, Loader, MenuItem } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 
-export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeFolder }) => {
-  const [shouldFetch, setShouldFetch] = useState(false);
+interface CrumbSimpleMenuAsyncProps {
+  parentsToOmit?: number[];
+  currentFolderId?: number;
+  onChangeFolder?: (id: number, path?: string) => void;
+}
+
+export const CrumbSimpleMenuAsync = ({
+  parentsToOmit = [],
+  currentFolderId,
+  onChangeFolder,
+}: CrumbSimpleMenuAsyncProps) => {
+  const [shouldFetch, setShouldFetch] = React.useState(false);
   const { data, isLoading } = useFolderStructure({ enabled: shouldFetch });
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
 
-  const allAscendants = data && getFolderParents(data, currentFolderId);
+  const allAscendants = data && getFolderParents(data, currentFolderId!);
   const filteredAscendants =
     allAscendants &&
     allAscendants.filter(
-      (ascendant) => !parentsToOmit.includes(ascendant.id) && ascendant.id !== null
+      (ascendant) =>
+        typeof ascendant.id === 'number' &&
+        !parentsToOmit.includes(ascendant.id) &&
+        ascendant.id !== null
     );
 
   return (
@@ -50,7 +62,7 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
               <MenuItem
                 tag="button"
                 type="button"
-                onClick={() => onChangeFolder(ascendant.id, ascendant.path)}
+                onClick={() => onChangeFolder(Number(ascendant.id), ascendant.path)}
                 key={ascendant.id}
               >
                 {ascendant.label}
@@ -59,28 +71,16 @@ export const CrumbSimpleMenuAsync = ({ parentsToOmit, currentFolderId, onChangeF
           }
 
           const url = getFolderURL(pathname, query, {
-            folder: ascendant?.id,
+            folder: typeof ascendant?.id === 'string' ? ascendant.id : undefined,
             folderPath: ascendant?.path,
           });
 
           return (
-            <MenuItem isLink tag={NavLink} to={url} key={ascendant.id}>
+            <MenuItem isLink href={url} key={ascendant.id}>
               {ascendant.label}
             </MenuItem>
           );
         })}
     </CrumbSimpleMenu>
   );
-};
-
-CrumbSimpleMenuAsync.defaultProps = {
-  currentFolderId: undefined,
-  onChangeFolder: undefined,
-  parentsToOmit: [],
-};
-
-CrumbSimpleMenuAsync.propTypes = {
-  currentFolderId: PropTypes.number,
-  onChangeFolder: PropTypes.func,
-  parentsToOmit: PropTypes.arrayOf(PropTypes.number),
 };
