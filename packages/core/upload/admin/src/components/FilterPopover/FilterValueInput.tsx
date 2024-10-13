@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 interface FilterValueInputProps {
   label?: string;
   onChange: (value: string) => void;
-  options?: { label: string; value: string }[];
-  type: string;
+  options?: { label?: string; value: string }[];
+  type?: string;
   value?: string;
 }
 

@@ -1,6 +1,7 @@
 interface GetFilterListProps {
   fieldSchema: {
     type: string;
+    options?: { value: string }[];
     mainField?: {
       schema: {
         type: string;

@@ -3,8 +3,7 @@
  * FilterPopover
  *
  */
-
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -15,46 +14,82 @@ import {
   SingleSelect,
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
 
-const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
+type Filter = {
+  [key in 'mime' | 'createdAt' | 'updatedAt']?:
+    | {
+        [key in '$contains' | '$notContains' | '$eq' | '$not']?:
+          | string[]
+          | string
+          | { $contains: string[] };
+      }
+    | undefined;
+};
+
+interface FilterPopoverProps {
+  displayedFilters: {
+    name: string;
+    metadatas?: {
+      label?: string;
+    };
+    fieldSchema: {
+      type: string;
+      options?: {
+        value: string;
+      }[];
+      mainField?: {
+        schema: {
+          type: string;
+        };
+      };
+    };
+  }[];
+  filters: Filter[];
+  onSubmit: (filters: Filter[]) => void;
+  onToggle: () => void;
+}
+
+const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }: FilterPopoverProps) => {
   const { formatMessage } = useIntl();
 
-  const [modifiedData, setModifiedData] = useState({
+  const [modifiedData, setModifiedData] = React.useState({
     name: 'createdAt',
     filter: '$eq',
     value: '',
   });
 
-  const handleChangeFilterField = (value) => {
+  const handleChangeFilterField = (value: string | number) => {
     const nextField = displayedFilters.find((f) => f.name === value);
+    if (!nextField) {
+      return;
+    }
     const {
       fieldSchema: { type, options },
     } = nextField;
     let filterValue = '';
 
     if (type === 'enumeration') {
-      filterValue = options[0].value;
+      filterValue = options?.[0].value || '';
     }
 
     const filter = getFilterList(nextField)[0].value;
 
-    setModifiedData({ name: value, filter, value: filterValue });
+    setModifiedData({ name: value.toString(), filter, value: filterValue });
   };
 
-  const handleChangeOperator = (operator) => {
+  const handleChangeOperator = (operator: string | number) => {
     if (modifiedData.name === 'mime') {
-      setModifiedData((prev) => ({ ...prev, filter: operator, value: 'image' }));
+      setModifiedData((prev) => ({ ...prev, filter: operator.toString(), value: 'image' }));
     } else {
-      setModifiedData((prev) => ({ ...prev, filter: operator, value: '' }));
+      setModifiedData((prev) => ({ ...prev, filter: operator.toString(), value: '' }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -73,12 +108,14 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
 
           let hasCurrentFilter = false;
 
-          let filterToAdd;
+          let filterToAdd: Filter;
 
           if (modifiedData.filter === '$contains') {
             hasCurrentFilter =
               alreadyAppliedFilters.find((filter) => {
-                return filter.mime?.$not?.$contains !== undefined;
+                if (typeof filter.mime?.$not !== 'string' && !Array.isArray(filter.mime?.$not)) {
+                  return filter.mime?.$not?.$contains !== undefined;
+                }
               }) !== undefined;
 
             filterToAdd = {
@@ -117,7 +154,11 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
 
         const hasFilter =
           alreadyAppliedFilters.find((filter) => {
-            return filter.mime[modifiedData.filter] === modifiedData.value;
+            const modifiedDataFilter = modifiedData.filter;
+            return (
+              filter.mime &&
+              filter.mime[modifiedDataFilter as keyof typeof filter.mime] === modifiedData.value
+            );
           }) !== undefined;
 
         // Don't apply the same filter twice
@@ -134,7 +175,11 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
             return true;
           }
 
-          if (filter.mime?.$not?.$contains !== undefined) {
+          if (
+            typeof filter.mime?.$not !== 'string' &&
+            !Array.isArray(filter.mime?.$not) &&
+            filter.mime?.$not?.$contains !== undefined
+          ) {
             return false;
           }
 
@@ -177,9 +222,19 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
 
       const hasFilter =
         filters.find((filter) => {
+          const modifiedDataName = modifiedData.name as
+            | 'mime'
+            | 'createdAt'
+            | 'updatedAt'
+            | '$contains'
+            | '$notContains'
+            | '$eq'
+            | '$not';
           return (
-            filter[modifiedData.name] &&
-            filter[modifiedData.name]?.[modifiedData.filter] === encodedValue
+            filter[modifiedDataName as 'mime' | 'createdAt' | 'updatedAt'] &&
+            filter[modifiedDataName as 'mime' | 'createdAt' | 'updatedAt']?.[
+              modifiedDataName as '$contains' | '$notContains' | '$eq' | '$not'
+            ] === encodedValue
           );
         }) !== undefined;
 
@@ -215,7 +270,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
               {displayedFilters.map((filter) => {
                 return (
                   <SingleSelectOption key={filter.name} value={filter.name}>
-                    {filter.metadatas.label}
+                    {filter.metadatas?.label}
                   </SingleSelectOption>
                 );
               })}
@@ -232,7 +287,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
               value={modifiedData.filter}
               onChange={handleChangeOperator}
             >
-              {getFilterList(appliedFilter).map((option) => {
+              {getFilterList(appliedFilter!).map((option) => {
                 return (
                   <SingleSelectOption key={option.value} value={option.value}>
                     {formatMessage(option.intlLabel)}
@@ -243,8 +298,8 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
           </Box>
           <Box>
             <FilterValueInput
-              {...appliedFilter.metadatas}
-              {...appliedFilter.fieldSchema}
+              {...appliedFilter?.metadatas}
+              {...appliedFilter?.fieldSchema}
               value={modifiedData.value}
               onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
             />
@@ -258,19 +313,6 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
       </form>
     </Popover.Content>
   );
-};
-
-FilterPopover.propTypes = {
-  displayedFilters: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      metadatas: PropTypes.shape({ label: PropTypes.string }),
-      fieldSchema: PropTypes.shape({ type: PropTypes.string }),
-    })
-  ).isRequired,
-  filters: PropTypes.array.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  onToggle: PropTypes.func.isRequired,
 };
 
 export default FilterPopover;
