@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -31,7 +29,7 @@ const defaultBreadcrumbs = [
   { id: 22, label: 'current folder' },
 ];
 
-const setup = (props) => ({
+const setup = (props: any) => ({
   user: userEvent.setup(),
   ...renderRTL(
     <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" tag="nav" {...props} />,
