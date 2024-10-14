@@ -27,6 +27,9 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      api: ${{ steps.filter.outputs.api }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      cli: ${{ steps.filter.outputs.cli }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,6 +60,7 @@ jobs:
 
   lint:
     name: 'lint (node: ${{ matrix.node }})'
+    needs: [build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -94,7 +98,7 @@ jobs:
 
   typescript:
     name: 'typescript (node: ${{ matrix.node }})'
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -119,10 +123,10 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   e2e_ce:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
-    name: '[CE] e2e (browser: ${{ matrix.project }})'
+    needs: [changes, build]
+    name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -161,10 +165,10 @@ jobs:
           retention-days: 1
 
   e2e_ee:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
-    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    needs: [changes, build]
+    name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -206,9 +210,9 @@ jobs:
           retention-days: 1
 
   cli:
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:

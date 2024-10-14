@@ -2,6 +2,7 @@ import prompts from 'prompts';
 import { InvalidArgumentError, Option } from 'commander';
 
 import type { Command } from 'commander';
+
 import { loggerFactory } from '../../modules/logger';
 import { Version, isLiteralSemVer, isValidSemVer, semVerFactory } from '../../modules/version';
 import { handleError } from '../errors';
@@ -70,6 +71,12 @@ export const register = (program: Command) => {
         return upgrade({ ...options, target: releaseType });
       });
   };
+
+  // upgrade latest
+  addReleaseUpgradeCommand(
+    Version.ReleaseType.Latest,
+    'Upgrade to the latest available version of Strapi'
+  );
 
   // upgrade major
   addReleaseUpgradeCommand(
