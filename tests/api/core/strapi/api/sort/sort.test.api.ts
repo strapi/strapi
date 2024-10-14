@@ -26,7 +26,6 @@ const expectArticle = (letter: string) => {
   return {
     id,
     title,
-    locale: 'en',
     documentId: expect.any(String),
     publishedAt: expect.anything(),
     updatedAt: expect.anything(),
@@ -108,24 +107,20 @@ const fixtures = {
   category: (fixtures) => [
     {
       name: 'Category A',
-      locale: 'en',
       tags: fixtures.tag.filter((tag) => tag.name.endsWith('B')).map((cat) => cat.id),
     },
     {
       name: 'Category C',
-      locale: 'en',
       tags: fixtures.tag
         .filter((tag) => tag.name.endsWith('D') || tag.name.endsWith('A'))
         .map((cat) => cat.id),
     },
     {
       name: 'Category B',
-      locale: 'en',
       tags: fixtures.tag.filter((tag) => tag.name.endsWith('C')).map((cat) => cat.id),
     },
     {
       name: 'Category D',
-      locale: 'en',
       tags: fixtures.tag.filter((tag) => tag.name.endsWith('A')).map((cat) => cat.id),
     },
   ],
@@ -134,24 +129,20 @@ const fixtures = {
     return [
       {
         title: 'Article A',
-        locale: 'en',
         categories: fixtures.category.filter((cat) => cat.name.endsWith('B')).map((cat) => cat.id),
       },
       {
         title: 'Article C',
-        locale: 'en',
         categories: fixtures.category.filter((cat) => cat.name.endsWith('D')).map((cat) => cat.id),
       },
       {
         title: 'Article D',
-        locale: 'en',
         categories: fixtures.category
           .filter((cat) => cat.name.endsWith('A') || cat.name.endsWith('D'))
           .map((cat) => cat.id),
       },
       {
         title: 'Article B',
-        locale: 'en',
         categories: fixtures.category
           .filter((cat) => cat.name.endsWith('C') || cat.name.endsWith('D'))
           .map((cat) => cat.id),
