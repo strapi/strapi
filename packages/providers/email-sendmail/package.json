@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendmail",
-  "version": "4.25.4",
+  "version": "4.25.13",
   "description": "Sendmail provider for strapi email",
   "keywords": [
     "email",
@@ -41,14 +41,14 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.25.4",
+    "@strapi/utils": "4.25.13",
     "sendmail": "^1.6.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
     "@types/sendmail": "1.4.4",
-    "eslint-config-custom": "4.25.4",
-    "tsconfig": "4.25.4"
+    "eslint-config-custom": "4.25.13",
+    "tsconfig": "4.25.13"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

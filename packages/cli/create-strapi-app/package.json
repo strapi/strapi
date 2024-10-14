@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-app",
-  "version": "4.25.4",
+  "version": "4.25.13",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-app",
@@ -43,16 +43,16 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/cloud-cli": "4.25.4",
-    "@strapi/generate-new": "4.25.4",
+    "@strapi/cloud-cli": "4.25.13",
+    "@strapi/generate-new": "4.25.13",
     "chalk": "4.1.2",
     "commander": "8.3.0",
     "inquirer": "8.2.5"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
-    "eslint-config-custom": "4.25.4",
-    "tsconfig": "4.25.4"
+    "eslint-config-custom": "4.25.13",
+    "tsconfig": "4.25.13"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

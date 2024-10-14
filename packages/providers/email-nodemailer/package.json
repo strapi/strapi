@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-nodemailer",
-  "version": "4.25.4",
+  "version": "4.25.13",
   "description": "Nodemailer provider for Strapi 3",
   "keywords": [
     "strapi",
@@ -61,8 +61,8 @@
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
     "@types/nodemailer": "6.4.7",
-    "eslint-config-custom": "4.25.4",
-    "tsconfig": "4.25.4"
+    "eslint-config-custom": "4.25.13",
+    "tsconfig": "4.25.13"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

@@ -20,7 +20,7 @@ yargs
      * This lets us pass any other arguments to the test runner
      * e.g. the name of a specific test or the project we want to run
      */
-    'unknown-options-as-args': true,
+    'unknown-options-as-args': false,
   })
   .command({
     command: '*',
@@ -228,6 +228,7 @@ yargs
                     '--color',
                     '--verbose',
                     '--runInBand', // tests must not run concurrently
+                    ...argv._,
                   ],
                   {
                     stdio: 'inherit',

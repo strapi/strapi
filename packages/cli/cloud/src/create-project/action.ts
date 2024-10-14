@@ -1,11 +1,15 @@
 import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
-import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
-import { tokenServiceFactory, cloudApiFactory, local } from '../services';
+import type { CLIContext, CloudApiService, ProjectAnswers, ProjectInput } from '../types';
+import { cloudApiFactory, local, tokenServiceFactory } from '../services';
 import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
-import { applyDefaultName } from './utils/apply-default-name';
 import { promptLogin } from '../login/action';
+import {
+  getDefaultsFromQuestions,
+  getProjectNodeVersionDefault,
+  questionDefaultValuesMapper,
+} from './utils/project-questions.utils';
 
 async function handleError(ctx: CLIContext, error: Error) {
   const { logger } = ctx;
@@ -40,7 +44,11 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-async function createProject(ctx: CLIContext, cloudApi: any, projectInput: ProjectInput) {
+async function createProject(
+  ctx: CLIContext,
+  cloudApi: CloudApiService,
+  projectInput: ProjectInput
+): Promise<ProjectInput> {
   const { logger } = ctx;
   const spinner = logger.spinner('Setting up your project...').start();
   try {
@@ -54,7 +62,7 @@ async function createProject(ctx: CLIContext, cloudApi: any, projectInput: Proje
   }
 }
 
-export default async (ctx: CLIContext) => {
+export default async (ctx: CLIContext): Promise<ProjectInput | undefined> => {
   const { logger } = ctx;
   const { getValidToken, eraseToken } = await tokenServiceFactory(ctx);
 
@@ -65,13 +73,17 @@ export default async (ctx: CLIContext) => {
 
   const cloudApi = await cloudApiFactory(ctx, token);
   const { data: config } = await cloudApi.config();
+  const projectName = await getProjectNameFromPackageJson(ctx);
 
-  // We retrieve the questions and default values from the config, and apply the default name immediately
-  const { newQuestions: questions, newDefaultValues: defaultValues } = applyDefaultName(
-    await getProjectNameFromPackageJson(ctx),
-    config.projectCreation.questions,
-    config.projectCreation.defaults
-  );
+  const defaultAnswersMapper = questionDefaultValuesMapper({
+    name: projectName,
+    nodeVersion: getProjectNodeVersionDefault,
+  });
+  const questions = defaultAnswersMapper(config.projectCreation.questions);
+  const defaultValues = {
+    ...config.projectCreation.defaults,
+    ...getDefaultsFromQuestions(questions),
+  };
 
   const projectAnswersDefaulted = defaults(defaultValues);
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);

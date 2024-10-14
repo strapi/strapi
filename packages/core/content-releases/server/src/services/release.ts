@@ -424,7 +424,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
     async createAction(
       releaseId: CreateReleaseAction.Request['params']['releaseId'],
-      action: Pick<CreateReleaseAction.Request['body'], 'type' | 'entry'>
+      action: Pick<CreateReleaseAction.Request['body'], 'type' | 'entry'>,
+      { disableUpdateReleaseStatus = false }: { disableUpdateReleaseStatus?: boolean } = {}
     ) {
       const { validateEntryContentType, validateUniqueEntry } = getService('release-validation', {
         strapi,
@@ -466,7 +467,9 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         populate: { release: { fields: ['id'] }, entry: { fields: ['id'] } },
       });
 
-      this.updateReleaseStatus(releaseId);
+      if (!disableUpdateReleaseStatus) {
+        this.updateReleaseStatus(releaseId);
+      }
 
       return releaseAction;
     },
