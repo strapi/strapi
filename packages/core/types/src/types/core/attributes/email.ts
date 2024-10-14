@@ -9,8 +9,7 @@ export type Email = Attribute.OfType<'email'> &
   Attribute.RequiredOption &
   Attribute.UniqueOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 export type EmailValue = string;
 

@@ -34,8 +34,7 @@ export type UID<
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 export type UIDValue = string;
 

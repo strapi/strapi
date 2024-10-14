@@ -23,8 +23,7 @@ export type Media<
   Attribute.RequiredOption &
   Attribute.PrivateOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 // TODO: Introduce a real type for the media values
 export type MediaValue<TMultiple extends Utils.Expression.BooleanValue = Utils.Expression.False> =

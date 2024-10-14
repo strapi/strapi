@@ -8,8 +8,7 @@ export type DateTime = Attribute.OfType<'datetime'> &
   Attribute.RequiredOption &
   Attribute.UniqueOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 // TODO: Use string templates for date formats
 export type DateTimeValue = globalThis.Date | string;

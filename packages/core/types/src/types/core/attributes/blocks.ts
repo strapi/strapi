@@ -84,8 +84,7 @@ export type Blocks = Attribute.OfType<'blocks'> &
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 export type BlocksValue = RootNode[];
 

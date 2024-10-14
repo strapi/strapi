@@ -8,8 +8,7 @@ export type RichText = Attribute.OfType<'richtext'> &
   Attribute.PrivateOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 export type RichTextValue = string;
 

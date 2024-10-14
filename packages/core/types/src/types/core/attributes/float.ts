@@ -9,8 +9,7 @@ export type Float = Attribute.OfType<'float'> &
   Attribute.RequiredOption &
   Attribute.WritableOption &
   Attribute.VisibleOption &
-  Attribute.UniqueOption &
-  Attribute.ColumnOption;
+  Attribute.UniqueOption;
 
 export type FloatValue = number;
 

@@ -1,15 +1,3 @@
-// TODO: Import it from @strapi/database but is not exported
-export interface Column {
-  type: string;
-  name: string;
-  args?: unknown[];
-  defaultTo?: any;
-  notNullable?: boolean | null;
-  unsigned?: boolean;
-  unique?: boolean;
-  primary?: boolean;
-}
-
 /**
  * List of all the Strapi attribute types
  */
@@ -51,6 +39,25 @@ export interface Attribute<TKind extends Kind = Kind> {
    */
   pluginOptions?: object;
   useJoinTable?: boolean;
+
+  /**
+   * Database validations and settings
+   * https://docs-v4.strapi.io/dev-docs/backend-customization/models#database-validations-and-settings
+   * @deprecated The column property is experimental and can be deprecated/changed at any time in the future.
+   */
+  column?: Partial<Column>;
+}
+
+// NOTE: Copied directly from @strapi/database package
+export interface Column {
+  type: string;
+  name: string;
+  args: unknown[];
+  defaultTo: unknown;
+  notNullable: boolean;
+  unsigned: boolean;
+  unique: boolean;
+  primary: boolean;
 }
 
 /**
@@ -96,8 +103,4 @@ export interface WritableOption {
 
 export interface VisibleOption {
   visible?: boolean;
-}
-
-export interface ColumnOption {
-  column?: Partial<Column>;
 }

@@ -15,8 +15,7 @@ type StringAttribute = Attribute.OfType<'string'> &
   Attribute.UniqueOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 export type StringValue = string;
 

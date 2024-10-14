@@ -15,8 +15,7 @@ export type Text = Attribute.OfType<'text'> &
   Attribute.UniqueOption &
   Attribute.RequiredOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 export type TextValue = string;
 

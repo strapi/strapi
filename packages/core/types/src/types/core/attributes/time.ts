@@ -8,8 +8,7 @@ export type Time = Attribute.OfType<'time'> &
   Attribute.RequiredOption &
   Attribute.UniqueOption &
   Attribute.WritableOption &
-  Attribute.VisibleOption &
-  Attribute.ColumnOption;
+  Attribute.VisibleOption;
 
 export type TimeValue = globalThis.Date | string;
 

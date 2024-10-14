@@ -19,8 +19,7 @@ export type Relation<
   Attribute.PrivateOption &
   Attribute.WritableOption &
   Attribute.VisibleOption &
-  Attribute.RequiredOption &
-  Attribute.ColumnOption;
+  Attribute.RequiredOption;
 
 export type RelationProperties<
   TRelationKind extends RelationKind.Any,
