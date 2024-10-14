@@ -25,7 +25,7 @@
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "11.3.0",
     "lodash": "4.17.21",
-    "mysql2": "3.9.4",
+    "mysql2": "3.9.8",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.11.1",
     "react": "18.3.1",
