@@ -6,5 +6,5 @@ else
 fi
 
 jestOptions=($JEST_OPTIONS)
-
-yarn test:e2e --setup --concurrency=1 -- "${jestOptions[@]}"
+# TODO: this is a temp measure to test the e2e CI failures on webkit
+yarn test:e2e --setup --domains=content-manager -- tests/e2e/tests/content-manager/history.spec.ts
