@@ -24,7 +24,9 @@ export const generate = async <T extends Record<string, any>>(
 ) => {
   const { default: nodePlop } = await import('node-plop');
 
-  const plop: NodePlopAPI = await nodePlop(join(__dirname, plopFile), {
+  const plopFilePath = join(__dirname, plopFile);
+
+  const plop: NodePlopAPI = await nodePlop(plopFilePath, {
     destBasePath: join(dir, 'src'),
     force: false,
   });
