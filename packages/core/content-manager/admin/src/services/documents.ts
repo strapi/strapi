@@ -166,7 +166,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       }
     >({
       query: ({ model, params }) => ({
-        url: `/content-manager/collection-types/${model}${params ? `?${params}` : ''}`,
+        url: `/content-manager/collection-types/${model}`,
         method: 'GET',
         config: {
           params,
