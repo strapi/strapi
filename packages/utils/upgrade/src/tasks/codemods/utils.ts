@@ -18,6 +18,8 @@ export const getRangeFromTarget = (
   const { major, minor, patch } = currentVersion;
 
   switch (target) {
+    case Version.ReleaseType.Latest:
+      throw new Error("Can't use <latest> to create a codemods range: not implemented");
     case Version.ReleaseType.Major:
       return rangeFactory(`${major}`);
     case Version.ReleaseType.Minor:

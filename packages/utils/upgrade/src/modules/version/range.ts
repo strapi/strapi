@@ -9,12 +9,16 @@ export const rangeFactory = (range: string): Version.Range => {
 
 export const rangeFromReleaseType = (current: Version.SemVer, identifier: Version.ReleaseType) => {
   switch (identifier) {
+    case Version.ReleaseType.Latest: {
+      // Match anything greater than the current version
+      return rangeFactory(`>${current.raw}`);
+    }
     case Version.ReleaseType.Major: {
       // For example, 4.15.4 returns 5.0.0
       const nextMajor = semVerFactory(current.raw).inc('major');
 
-      // Using only the major version as upper limit allows any minor,
-      // patch or build version to be taken in the range.
+      // Using only the major version as the upper limit allows any minor,
+      // patch, or build version to be taken in the range.
       //
       // For example, if the current version is "4.15.4", incrementing the
       // major version would result in "5.0.0".
