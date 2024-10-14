@@ -65,13 +65,13 @@ const getAttributesPrompts: DynamicPromptsFunction = async (inquirer) => {
         }),
       },
       {
-        when: (answers: any) => answers.attributeType === 'enumeration',
+        when: (answers) => answers.attributeType === 'enumeration',
         type: 'input',
         name: 'enum',
         message: 'Add values separated by a comma',
       },
       {
-        when: (answers: any) => answers.attributeType === 'media',
+        when: (answers) => answers.attributeType === 'media',
         type: 'list',
         name: 'multiple',
         message: 'Choose media type',
