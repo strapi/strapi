@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import type { NodePlopAPI } from 'node-plop';
+import nodePlop from 'node-plop';
 
 // Starts the Plop CLI programmatically
 export const runCLI = async () => {
@@ -22,11 +22,7 @@ export const generate = async <T extends Record<string, any>>(
   options: T,
   { dir = process.cwd(), plopFile = 'plopfile.js' } = {}
 ) => {
-  const { default: nodePlop } = await import('node-plop');
-
-  const plopFilePath = join(__dirname, plopFile);
-
-  const plop: NodePlopAPI = await nodePlop(plopFilePath, {
+  const plop = nodePlop(join(__dirname, plopFile), {
     destBasePath: join(dir, 'src'),
     force: false,
   });
