@@ -41,7 +41,7 @@ interface PreviewBoxProps {
   canCopyLink: boolean;
   canDownload: boolean;
   replacementFile?: File;
-  onDelete: (asset: Asset | null) => void;
+  onDelete: (asset?: Asset | null) => void;
   onCropFinish: () => void;
   onCropStart: () => void;
   onCropCancel: () => void;

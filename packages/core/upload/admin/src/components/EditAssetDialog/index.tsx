@@ -3,8 +3,7 @@
  * EditAssetDialog
  *
  */
-
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import {
@@ -19,12 +18,10 @@ import {
 } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import isEqual from 'lodash/isEqual';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
 
-import { AssetDefinition } from '../../constants';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { findRecursiveFolderByValue, getTrad, getFileExtension, formatBytes } from '../../utils';
@@ -34,6 +31,7 @@ import SelectTree from '../SelectTree';
 import { DialogHeader } from './DialogHeader';
 import { PreviewBox } from './PreviewBox';
 import { ReplaceMediaButton } from './ReplaceMediaButton';
+import type { File as FileDefinition, RawFile } from '../../../../shared/contracts/files';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
@@ -47,39 +45,64 @@ const fileInfoSchema = yup.object({
   folder: yup.number(),
 });
 
+export interface Asset extends Omit<FileDefinition, 'folder'> {
+  isLocal?: boolean;
+  rawFile?: RawFile;
+  folder?: FileDefinition['folder'] & { id: number };
+}
+
+interface EditAssetContentProps {
+  asset?: Asset;
+  canUpdate?: boolean;
+  canCopyLink?: boolean;
+  canDownload?: boolean;
+  trackedLocation?: string;
+  onClose: (arg?: Asset | null | boolean) => void;
+}
+
+interface FormInitialData {
+  name?: string;
+  alternativeText?: string;
+  caption?: string;
+  parent?: {
+    value?: number;
+    label: string;
+  };
+}
+
 export const EditAssetContent = ({
   onClose,
   asset,
-  canUpdate,
-  canCopyLink,
-  canDownload,
+  canUpdate = false,
+  canCopyLink = false,
+  canDownload = false,
   trackedLocation,
-}) => {
+}: EditAssetContentProps) => {
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();
-  const submitButtonRef = useRef(null);
-  const [isCropping, setIsCropping] = useState(false);
-  const [replacementFile, setReplacementFile] = useState();
+  const submitButtonRef = React.useRef<HTMLButtonElement>(null);
+  const [isCropping, setIsCropping] = React.useState(false);
+  const [replacementFile, setReplacementFile] = React.useState<File | undefined>();
   const { editAsset, isLoading } = useEditAsset();
 
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
     enabled: true,
   });
 
-  const handleSubmit = async (values) => {
-    const nextAsset = { ...asset, ...values, folder: values.parent.value };
+  const handleSubmit = async (values: FormInitialData) => {
+    const nextAsset = { ...asset, ...values, folder: values.parent?.value } as Asset;
 
-    if (asset.isLocal) {
+    if (asset?.isLocal) {
       onClose(nextAsset);
     } else {
-      const editedAsset = await editAsset(nextAsset, replacementFile);
+      const editedAsset = (await editAsset(nextAsset, replacementFile!)) as Asset;
 
-      const assetType = asset?.mime.split('/')[0];
+      const assetType = asset?.mime?.split('/')[0];
       // if the folder parent was the root of Media Library, its id is null
       // we know it changed location if the new parent value exists
       const didChangeLocation = asset?.folder?.id
-        ? asset.folder.id !== values.parent.value
-        : asset.folder === null && !!values.parent.value;
+        ? asset.folder.id !== values.parent?.value
+        : asset?.folder === null && !!values.parent?.value;
 
       trackUsage('didEditMediaLibraryElements', {
         location: trackedLocation,
@@ -122,18 +145,18 @@ export const EditAssetContent = ({
 
   const activeFolderId = asset?.folder?.id;
   const initialFormData = !folderStructureIsLoading && {
-    name: asset.name,
-    alternativeText: asset.alternativeText ?? undefined,
-    caption: asset.caption ?? undefined,
+    name: asset?.name,
+    alternativeText: asset?.alternativeText ?? undefined,
+    caption: asset?.caption ?? undefined,
     parent: {
       value: activeFolderId ?? undefined,
       label:
-        findRecursiveFolderByValue(folderStructure, activeFolderId)?.label ??
-        folderStructure[0].label,
+        findRecursiveFolderByValue(folderStructure!, activeFolderId!)?.label ??
+        folderStructure![0].label,
     },
   };
 
-  const handleClose = (values) => {
+  const handleClose = (values?: any) => {
     if (!isEqual(initialFormData, values)) {
       handleConfirmClose();
     } else {
@@ -176,7 +199,7 @@ export const EditAssetContent = ({
             <Grid.Root gap={4}>
               <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <PreviewBox
-                  asset={asset}
+                  asset={asset!}
                   canUpdate={canUpdate}
                   canCopyLink={canCopyLink}
                   canDownload={canDownload}
@@ -198,7 +221,7 @@ export const EditAssetContent = ({
                             id: getTrad('modal.file-details.size'),
                             defaultMessage: 'Size',
                           }),
-                          value: formatBytes(asset.size),
+                          value: formatBytes(asset?.size!),
                         },
 
                         {
@@ -207,7 +230,7 @@ export const EditAssetContent = ({
                             defaultMessage: 'Dimensions',
                           }),
                           value:
-                            asset.height && asset.width ? `${asset.width}✕${asset.height}` : null,
+                            asset?.height && asset.width ? `${asset.width}✕${asset.height}` : null,
                         },
 
                         {
@@ -215,7 +238,7 @@ export const EditAssetContent = ({
                             id: getTrad('modal.file-details.date'),
                             defaultMessage: 'Date',
                           }),
-                          value: formatDate(new Date(asset.createdAt)),
+                          value: formatDate(new Date(asset?.createdAt!)),
                         },
 
                         {
@@ -223,7 +246,7 @@ export const EditAssetContent = ({
                             id: getTrad('modal.file-details.extension'),
                             defaultMessage: 'Extension',
                           }),
-                          value: getFileExtension(asset.ext),
+                          value: getFileExtension(asset?.ext)!,
                         },
 
                         {
@@ -231,7 +254,7 @@ export const EditAssetContent = ({
                             id: getTrad('modal.file-details.id'),
                             defaultMessage: 'Asset ID',
                           }),
-                          value: asset.id,
+                          value: asset?.id!,
                         },
                       ]}
                     />
@@ -299,7 +322,7 @@ export const EditAssetContent = ({
                         <SelectTree
                           name="parent"
                           defaultValue={values.parent}
-                          options={folderStructure}
+                          options={folderStructure!}
                           onChange={(value) => {
                             setFieldValue('parent', value);
                           }}
@@ -334,13 +357,13 @@ export const EditAssetContent = ({
             <Flex gap={2}>
               <ReplaceMediaButton
                 onSelectMedia={setReplacementFile}
-                acceptedMime={asset.mime}
+                acceptedMime={asset?.mime!}
                 disabled={formDisabled}
                 trackedLocation={trackedLocation}
               />
 
               <Button
-                onClick={() => submitButtonRef.current.click()}
+                onClick={() => submitButtonRef.current?.click()}
                 loading={isLoading}
                 disabled={formDisabled}
               >
@@ -354,47 +377,35 @@ export const EditAssetContent = ({
   );
 };
 
-EditAssetContent.defaultProps = {
-  asset: {},
-  trackedLocation: undefined,
-  canUpdate: false,
-  canCopyLink: false,
-  canDownload: false,
-};
+interface EditAssetDialogProps {
+  asset: Asset;
+  canUpdate?: boolean;
+  canCopyLink?: boolean;
+  canDownload?: boolean;
+  trackedLocation?: string;
+  open: boolean;
+  onClose: (arg?: Asset | null | boolean) => void;
+}
 
-EditAssetContent.propTypes = {
-  asset: AssetDefinition,
-  canUpdate: PropTypes.bool,
-  canCopyLink: PropTypes.bool,
-  canDownload: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
-};
-
-export const EditAssetDialog = ({ open, onClose, ...restProps }) => {
+export const EditAssetDialog = ({
+  open,
+  onClose,
+  canUpdate = false,
+  canCopyLink = false,
+  canDownload = false,
+  ...restProps
+}: EditAssetDialogProps) => {
   return (
     <Modal.Root open={open} onOpenChange={onClose}>
       <Modal.Content>
-        <EditAssetContent onClose={onClose} {...restProps} />
+        <EditAssetContent
+          onClose={onClose}
+          canUpdate={canUpdate}
+          canCopyLink={canCopyLink}
+          canDownload={canDownload}
+          {...restProps}
+        />
       </Modal.Content>
     </Modal.Root>
   );
-};
-
-EditAssetDialog.defaultProps = {
-  asset: {},
-  trackedLocation: undefined,
-  canUpdate: false,
-  canCopyLink: false,
-  canDownload: false,
-};
-
-EditAssetDialog.propTypes = {
-  asset: AssetDefinition,
-  canUpdate: PropTypes.bool,
-  canCopyLink: PropTypes.bool,
-  canDownload: PropTypes.bool,
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };

@@ -3,9 +3,6 @@
  * Tests for EditAssetDialog
  *
  */
-
-import React from 'react';
-
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -14,18 +11,19 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils';
-import { EditAssetDialog } from '../index';
+import { EditAssetDialog, Asset } from '../index';
+
+type Messages = typeof en;
 
 jest.mock('../../../utils/downloadFile');
 jest.mock('../../../hooks/useFolderStructure');
-
-const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
-  acc[curr] = `upload.${en[curr]}`;
+const messageForPlugin = Object.keys(en).reduce<Record<string, string>>((acc, curr) => {
+  acc[curr] = `upload.${en[curr as keyof Messages]}`;
 
   return acc;
 }, {});
 
-const asset = {
+const asset: Asset = {
   id: 8,
   name: 'Screenshot 2.png',
   alternativeText: null,
@@ -41,6 +39,7 @@ const asset = {
       width: 245,
       height: 129,
       size: 10.7,
+      sizeInBytes: 10700,
       path: null,
       url: '/uploads/thumbnail_Screenshot_2_5d4a574d61.png',
     },
@@ -52,6 +51,7 @@ const asset = {
       width: 1000,
       height: 528,
       size: 97.1,
+      sizeInBytes: 97100,
       path: null,
       url: '/uploads/large_Screenshot_2_5d4a574d61.png',
     },
@@ -63,6 +63,7 @@ const asset = {
       width: 750,
       height: 396,
       size: 58.7,
+      sizeInBytes: 58700,
       path: null,
       url: '/uploads/medium_Screenshot_2_5d4a574d61.png',
     },
@@ -74,6 +75,7 @@ const asset = {
       width: 500,
       height: 264,
       size: 31.06,
+      sizeInBytes: 31060,
       path: null,
       url: '/uploads/small_Screenshot_2_5d4a574d61.png',
     },
@@ -116,7 +118,7 @@ const renderCompo = () =>
         </IntlProvider>
       </DesignSystemProvider>
     </QueryClientProvider>,
-    { container: document.getElementById('app') }
+    { container: document.getElementById('app')! }
   );
 
 describe('<EditAssetDialog />', () => {

@@ -1,7 +1,7 @@
 import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 
 interface ContextInfoProps {
-  blocks: { label: string; value: string | number }[];
+  blocks: { label: string; value: string | number | null }[];
 }
 
 export const ContextInfo = ({ blocks }: ContextInfoProps) => {

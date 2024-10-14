@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -8,18 +6,20 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils';
-import { EditAssetDialog } from '../index';
+import { EditAssetDialog, Asset } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
 
-const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
-  acc[curr] = `upload.${en[curr]}`;
+type Messages = typeof en;
+
+const messageForPlugin = Object.keys(en).reduce<Record<string, string>>((acc, curr) => {
+  acc[curr] = `upload.${en[curr as keyof Messages]}`;
 
   return acc;
 }, {});
 
-const asset = {
+const asset: Asset = {
   id: 8,
   name: 'Screenshot 2.png',
   alternativeText: '',
@@ -35,6 +35,7 @@ const asset = {
       width: 245,
       height: 129,
       size: 10.7,
+      sizeInBytes: 10700,
       path: null,
       url: '/uploads/thumbnail_Screenshot_2_5d4a574d61.png',
     },
@@ -46,6 +47,7 @@ const asset = {
       width: 1000,
       height: 528,
       size: 97.1,
+      sizeInBytes: 97100,
       path: null,
       url: '/uploads/large_Screenshot_2_5d4a574d61.png',
     },
@@ -57,6 +59,7 @@ const asset = {
       width: 750,
       height: 396,
       size: 58.7,
+      sizeInBytes: 58700,
       path: null,
       url: '/uploads/medium_Screenshot_2_5d4a574d61.png',
     },
@@ -68,6 +71,7 @@ const asset = {
       width: 500,
       height: 264,
       size: 31.06,
+      sizeInBytes: 31060,
       path: null,
       url: '/uploads/small_Screenshot_2_5d4a574d61.png',
     },
@@ -103,12 +107,12 @@ const renderCompo = (props = { canUpdate: true, canCopyLink: true, canDownload: 
         </IntlProvider>
       </DesignSystemProvider>
     </QueryClientProvider>,
-    { container: document.getElementById('app') }
+    { container: document.getElementById('app')! }
   );
 
 describe('<EditAssetDialog />', () => {
   const RealNow = Date.now;
-  let confirmSpy;
+  let confirmSpy: jest.SpyInstance;
 
   beforeAll(() => {
     confirmSpy = jest.spyOn(window, 'confirm');
@@ -240,8 +244,8 @@ describe('<EditAssetDialog />', () => {
     it('replaces the media when pressing the replace media button', async () => {
       const file = new File(['Replacement media'], 'test.png', { type: 'image/png' });
 
-      const fileList = [file];
-      fileList.item = (i) => fileList[i];
+      const fileList = [file] as any;
+      fileList.item = (i: number) => fileList[i];
 
       renderCompo({
         canUpdate: true,
@@ -249,7 +253,7 @@ describe('<EditAssetDialog />', () => {
         canDownload: false,
       });
 
-      fireEvent.change(document.querySelector('[type="file"]'), { target: { files: fileList } });
+      fireEvent.change(document.querySelector('[type="file"]')!, { target: { files: fileList } });
       const img = document.querySelector('img');
 
       expect(img).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
