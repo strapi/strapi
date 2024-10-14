@@ -2,14 +2,47 @@ import * as React from 'react';
 
 import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { displayedFilters } from '../../../utils';
 import FilterList from '../../FilterList';
 import FilterPopover from '../../FilterPopover';
 
-export const Filters = ({ appliedFilters, onChangeFilters }) => {
+type NumberKeyedObject = Record<number, string>;
+
+type StringFilter = {
+  [key: string]: string;
+};
+
+type MimeFilter = {
+  [key: string]:
+    | string
+    | NumberKeyedObject
+    | Record<string, string | NumberKeyedObject>
+    | undefined;
+};
+
+export type FilterStructure = {
+  [key: string]: MimeFilter | StringFilter | undefined;
+};
+
+type Filter = {
+  [key in 'mime' | 'createdAt' | 'updatedAt']?:
+    | {
+        [key in '$contains' | '$notContains' | '$eq' | '$not']?:
+          | string[]
+          | string
+          | { $contains: string[] };
+      }
+    | undefined;
+};
+
+interface FiltersProps {
+  appliedFilters: FilterStructure[];
+  onChangeFilters: (filters: Filter[]) => void;
+}
+
+export const Filters = ({ appliedFilters, onChangeFilters }: FiltersProps) => {
   const [open, setOpen] = React.useState(false);
   const { formatMessage } = useIntl();
 
@@ -21,7 +54,7 @@ export const Filters = ({ appliedFilters, onChangeFilters }) => {
         </Button>
       </Popover.Trigger>
       <FilterPopover
-        onToggle={setOpen}
+        onToggle={() => setOpen((prev) => !prev)}
         displayedFilters={displayedFilters}
         filters={appliedFilters}
         onSubmit={onChangeFilters}
@@ -36,9 +69,4 @@ export const Filters = ({ appliedFilters, onChangeFilters }) => {
       )}
     </Popover.Root>
   );
-};
-
-Filters.propTypes = {
-  appliedFilters: PropTypes.array.isRequired,
-  onChangeFilters: PropTypes.func.isRequired,
 };
