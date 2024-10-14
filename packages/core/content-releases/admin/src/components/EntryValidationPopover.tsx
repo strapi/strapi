@@ -31,7 +31,10 @@ const StyledPopoverFlex = styled(Flex)`
 
 interface EntryValidationPopoverProps {
   action: ReleaseAction['type'];
-  schema?: Struct.ContentTypeSchema & { stageRequiredToPublish?: Stage };
+  schema?: Struct.ContentTypeSchema & {
+    hasReviewWorkflow: boolean;
+    stageRequiredToPublish?: Stage;
+  };
   entry: ReleaseActionEntry;
   status: ReleaseAction['status'];
 }
@@ -323,10 +326,10 @@ const ReviewStageValidation = ({
 };
 
 export const EntryValidationPopover = ({
-  action,
   schema,
   entry,
   status,
+  action,
 }: EntryValidationPopoverProps) => {
   const { validate, isLoading } = unstable_useDocument(
     {
@@ -344,7 +347,7 @@ export const EntryValidationPopover = ({
   const hasErrors = errors ? Object.keys(errors).length > 0 : false;
 
   // Entry stage
-  const contentTypeHasReviewWorkflow = schema?.options?.reviewWorkflows ?? false;
+  const contentTypeHasReviewWorkflow = schema?.hasReviewWorkflow ?? false;
   const requiredStage = schema?.stageRequiredToPublish;
   const entryStage = entry.strapi_stage;
 

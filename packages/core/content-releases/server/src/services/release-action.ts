@@ -259,6 +259,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           acc[contentTypeUid] = {
             ...contentTypeModel,
+            hasReviewWorkflow: !!workflow,
             stageRequiredToPublish: workflow?.stageRequiredToPublish,
           };
 

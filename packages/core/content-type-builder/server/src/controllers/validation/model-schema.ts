@@ -26,7 +26,6 @@ export const createSchema = (
     pluginOptions: yup.object(),
     collectionName: yup.string().nullable().test(isValidCollectionName),
     attributes: createAttributesValidator({ types, relations, modelType }),
-    reviewWorkflows: yup.boolean(),
     draftAndPublish: yup.boolean(),
   } as any;
 
