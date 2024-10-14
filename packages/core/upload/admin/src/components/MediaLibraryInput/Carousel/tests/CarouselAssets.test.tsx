@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { render, waitFor } from '@tests/utils';
 
 import { CarouselAssets } from '../CarouselAssets';
@@ -23,7 +21,7 @@ const ASSET_FIXTURES = [
   },
 ];
 
-const setup = (props) =>
+const setup = (props?: any) =>
   render(
     <CarouselAssets
       assets={ASSET_FIXTURES}

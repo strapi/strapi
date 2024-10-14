@@ -1,10 +1,8 @@
-import React, { forwardRef, useState } from 'react';
+import * as React from 'react';
 
 import { CarouselInput, CarouselSlide } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition } from '../../../constants';
 import { getTrad } from '../../../utils/getTrad';
 import { EditAssetDialog } from '../../EditAssetDialog';
 
@@ -12,11 +10,40 @@ import { CarouselAsset } from './CarouselAsset';
 import { CarouselAssetActions } from './CarouselAssetActions';
 import { EmptyStateAsset } from './EmptyStateAsset';
 
-export const CarouselAssets = forwardRef(
+import type { File as FileAsset, RawFile } from '../../../../../shared/contracts/files';
+
+type FileWithoutIdHash = Omit<FileAsset, 'id' | 'hash'>;
+
+interface Asset extends Omit<FileAsset, 'folder'> {
+  isLocal?: boolean;
+  rawFile?: RawFile;
+  folder?: FileAsset['folder'] & { id: number };
+}
+
+interface CarouselAssetsProps {
+  assets: FileAsset[];
+  disabled?: boolean;
+  error?: string;
+  hint?: string;
+  label: string;
+  labelAction?: React.ReactNode;
+  onAddAsset: (asset?: FileAsset, event?: React.MouseEventHandler<HTMLButtonElement>) => void;
+  onDeleteAsset: (asset: FileAsset) => void;
+  onDeleteAssetFromMediaLibrary: () => void;
+  onDropAsset?: (assets: FileWithoutIdHash[]) => void;
+  onEditAsset?: (asset: FileAsset) => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  required?: boolean;
+  selectedAssetIndex: number;
+  trackedLocation?: string;
+}
+
+export const CarouselAssets = React.forwardRef(
   (
     {
       assets,
-      disabled,
+      disabled = false,
       error,
       hint,
       label,
@@ -28,21 +55,21 @@ export const CarouselAssets = forwardRef(
       onEditAsset,
       onNext,
       onPrevious,
-      required,
+      required = false,
       selectedAssetIndex,
       trackedLocation,
-    },
+    }: CarouselAssetsProps,
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
-    const [isEditingAsset, setIsEditingAsset] = useState(false);
+    const [isEditingAsset, setIsEditingAsset] = React.useState(false);
 
     const currentAsset = assets[selectedAssetIndex];
 
     return (
       <>
         <CarouselInput
-          ref={forwardedRef}
+          ref={forwardedRef as React.LegacyRef<HTMLDivElement>}
           label={label}
           labelAction={labelAction}
           secondaryLabel={currentAsset?.name}
@@ -81,7 +108,11 @@ export const CarouselAssets = forwardRef(
                 { n: 1, m: 1 }
               )}
             >
-              <EmptyStateAsset disabled={disabled} onClick={onAddAsset} onDropAsset={onDropAsset} />
+              <EmptyStateAsset
+                disabled={disabled}
+                onClick={onAddAsset}
+                onDropAsset={onDropAsset!}
+              />
             </CarouselSlide>
           ) : (
             assets.map((asset, index) => (
@@ -109,12 +140,11 @@ export const CarouselAssets = forwardRef(
             if (editedAsset === null) {
               onDeleteAssetFromMediaLibrary();
             }
-
-            if (editedAsset) {
-              onEditAsset(editedAsset);
+            if (editedAsset && typeof editedAsset !== 'boolean') {
+              onEditAsset?.(editedAsset);
             }
           }}
-          asset={currentAsset}
+          asset={currentAsset as Asset}
           canUpdate
           canCopyLink
           canDownload
@@ -124,32 +154,3 @@ export const CarouselAssets = forwardRef(
     );
   }
 );
-
-CarouselAssets.defaultProps = {
-  disabled: false,
-  error: undefined,
-  hint: undefined,
-  labelAction: undefined,
-  onDropAsset: undefined,
-  required: false,
-  trackedLocation: undefined,
-};
-
-CarouselAssets.propTypes = {
-  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
-  disabled: PropTypes.bool,
-  error: PropTypes.string,
-  hint: PropTypes.string,
-  label: PropTypes.string.isRequired,
-  labelAction: PropTypes.node,
-  onAddAsset: PropTypes.func.isRequired,
-  onDeleteAsset: PropTypes.func.isRequired,
-  onDeleteAssetFromMediaLibrary: PropTypes.func.isRequired,
-  onDropAsset: PropTypes.func,
-  onEditAsset: PropTypes.func.isRequired,
-  onNext: PropTypes.func.isRequired,
-  onPrevious: PropTypes.func.isRequired,
-  required: PropTypes.bool,
-  selectedAssetIndex: PropTypes.number.isRequired,
-  trackedLocation: PropTypes.string,
-};

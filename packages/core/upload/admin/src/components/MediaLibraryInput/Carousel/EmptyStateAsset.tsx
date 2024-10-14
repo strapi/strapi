@@ -18,7 +18,7 @@ type FileWithoutIdHash = Omit<File, 'id' | 'hash'>;
 
 interface EmptyStateAssetProps {
   disabled?: boolean;
-  onClick: () => void;
+  onClick: (asset?: File, event?: React.MouseEventHandler<HTMLButtonElement>) => void;
   onDropAsset: (assets: FileWithoutIdHash[]) => void;
 }
 
@@ -80,7 +80,7 @@ export const EmptyStateAsset = ({
       tag="button"
       type="button"
       disabled={disabled}
-      onClick={onClick}
+      onClick={onClick as unknown as React.MouseEventHandler<HTMLButtonElement>}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
