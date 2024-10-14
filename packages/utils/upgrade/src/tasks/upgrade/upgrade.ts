@@ -8,14 +8,16 @@ import { constants as upgraderConstants, upgraderFactory } from '../../modules/u
 import { Version } from '../../modules/version';
 
 import * as requirements from './requirements';
+import * as prompts from './prompts';
 
 import type { UpgradeOptions } from './types';
+import type { Upgrader } from '../../modules/upgrader';
 
 export const upgrade = async (options: UpgradeOptions) => {
   const timer = timerFactory();
   const { logger, codemodsTarget } = options;
 
-  // Make sure we're resolving the correct working directory based on the given input
+  // Resolves the correct working directory based on the given input
   const cwd = path.resolve(options.cwd ?? process.cwd());
 
   const project = projectFactory(cwd);
@@ -49,17 +51,11 @@ export const upgrade = async (options: UpgradeOptions) => {
     upgrader.overrideCodemodsTarget(codemodsTarget);
   }
 
-  // Don't add the same requirements when manually targeting a major upgrade
-  // using a semver as it's implied that the users know what they're doing
-  if (options.target === Version.ReleaseType.Major) {
-    upgrader
-      .addRequirement(requirements.major.REQUIRE_AVAILABLE_NEXT_MAJOR)
-      .addRequirement(requirements.major.REQUIRE_LATEST_FOR_CURRENT_MAJOR);
-  }
+  // Prompt user for confirmation details before upgrading
+  await runUpgradePrompts(upgrader, options);
 
-  // Make sure the git repository is in an optimal state before running the upgrade
-  // Mainly used to ease rollbacks in case the upgrade is corrupted
-  upgrader.addRequirement(requirements.common.REQUIRE_GIT.asOptional());
+  // Add specific requirements before upgrading
+  addUpgradeRequirements(upgrader, options);
 
   // Actually run the upgrade process once configured,
   // The response contains information about the final status: success/error
@@ -72,4 +68,24 @@ export const upgrade = async (options: UpgradeOptions) => {
   timer.stop();
 
   logger.info(`Completed in ${f.durationMs(timer.elapsedMs)}ms`);
+};
+
+const runUpgradePrompts = async (upgrader: Upgrader, options: UpgradeOptions) => {
+  if (options.target === Version.ReleaseType.Latest) {
+    await prompts.latest(upgrader, options);
+  }
+};
+
+const addUpgradeRequirements = (upgrader: Upgrader, options: UpgradeOptions): void => {
+  // Don't add the same requirements when manually targeting a major upgrade
+  // using a semver as it's implied that the users know what they're doing
+  if (options.target === Version.ReleaseType.Major) {
+    upgrader
+      .addRequirement(requirements.major.REQUIRE_AVAILABLE_NEXT_MAJOR)
+      .addRequirement(requirements.major.REQUIRE_LATEST_FOR_CURRENT_MAJOR);
+  }
+
+  // Make sure the git repository is in an optimal state before running the upgrade
+  // Mainly used to ease rollbacks in case the upgrade is corrupted
+  upgrader.addRequirement(requirements.common.REQUIRE_GIT.asOptional());
 };
