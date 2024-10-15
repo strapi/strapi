@@ -118,3 +118,13 @@ export const sortOptions = [
   { key: 'sort.updated_at_desc', value: 'updatedAt:DESC' },
   { key: 'sort.updated_at_asc', value: 'updatedAt:ASC' },
 ];
+
+export const localStorageKeys = {
+  modalView: `STRAPI_UPLOAD_MODAL_VIEW`,
+  view: `STRAPI_UPLOAD_LIBRARY_VIEW`,
+};
+
+export const viewOptions = {
+  GRID: 0,
+  LIST: 1,
+};

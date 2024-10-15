@@ -20,19 +20,21 @@ import { getTrad } from '../../utils';
 
 import { TableRows } from './TableRows';
 
-interface FileRow extends File {
+export interface FileRow extends File {
   folderURL?: string;
   isSelectable?: boolean;
   type?: string;
 }
 
-interface FolderRow extends Folder {
+export interface FolderRow extends Folder {
   folderURL?: string;
   isSelectable?: boolean;
   type?: string;
 }
 
 export interface TableListProps {
+  isFolderSelectionAllowed?: boolean;
+  allowedTypes?: string[];
   assetCount?: number;
   folderCount?: number;
   indeterminate?: boolean;
@@ -40,7 +42,7 @@ export interface TableListProps {
   onChangeFolder?: ((folderId: number, folderPath?: string) => void) | null;
   onEditAsset?: ((asset: FileRow) => void) | null;
   onEditFolder?: ((folder: FolderRow) => void) | null;
-  onSelectAll: (checked: boolean | string, rows: FolderRow[] | FileRow[]) => void;
+  onSelectAll: (checked: boolean | string, rows?: FolderRow[] | FileRow[]) => void;
   onSelectOne: (element: FileRow | FolderRow) => void;
   rows?: FileRow[] | FolderRow[];
   selected?: FileRow[] | FolderRow[];

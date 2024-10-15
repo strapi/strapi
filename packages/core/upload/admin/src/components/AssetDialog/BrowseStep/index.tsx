@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   Checkbox,
   Box,
@@ -12,32 +10,36 @@ import {
   Grid,
 } from '@strapi/design-system';
 import { GridFour as GridIcon, List, Pencil, Plus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import {
-  AssetDefinition,
-  FolderDefinition,
-  localStorageKeys,
-  viewOptions,
-} from '../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { localStorageKeys, viewOptions } from '../../../newConstants';
 import { useFolder } from '../../../hooks/useFolder';
 import { usePersistentState } from '../../../hooks/usePersistentState';
-import { getBreadcrumbDataCM, toSingularTypes, getTrad, getAllowedFiles } from '../../../utils';
+import {
+  getBreadcrumbDataCM,
+  toSingularTypes,
+  getTrad,
+  getAllowedFiles,
+  BreadcrumbDataFolder,
+  AllowedFiles,
+} from '../../../utils';
 import { AssetGridList } from '../../AssetGridList';
 import { Breadcrumbs } from '../../Breadcrumbs';
 import { EmptyAssets } from '../../EmptyAssets';
 import { FolderCard, FolderCardBody, FolderCardBodyAction } from '../../FolderCard';
 import { FolderGridList } from '../../FolderGridList';
 import SortPicker from '../../SortPicker';
-import { TableList } from '../../TableList';
+import { TableList, FolderRow, FileRow } from '../../TableList';
 
-import { Filters } from './Filters';
+import { Filters, FilterStructure as ImportedFilterStructure } from './Filters';
 import PageSize from './PageSize';
 import PaginationFooter from './PaginationFooter';
 import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
+import type { File, Query } from '../../../../../shared/contracts/files';
+import type { Folder } from '../../../../../shared/contracts/folders';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
@@ -51,13 +53,83 @@ const ActionContainer = styled(Box)`
   }
 `;
 
+type NumberKeyedObject = Record<number, string>;
+
+type StringFilter = {
+  [key: string]: string;
+};
+
+type MimeFilter = {
+  [key: string]:
+    | string
+    | NumberKeyedObject
+    | Record<string, string | NumberKeyedObject>
+    | undefined;
+};
+
+export type FilterStructure = {
+  [key: string]: MimeFilter | StringFilter | undefined;
+};
+
+type Filter = {
+  [key in 'mime' | 'createdAt' | 'updatedAt']?:
+    | {
+        [key in '$contains' | '$notContains' | '$eq' | '$not']?:
+          | string[]
+          | string
+          | { $contains: string[] };
+      }
+    | undefined;
+};
+
+interface FolderWithType extends Omit<Folder, 'children' | 'files'> {
+  folderURL?: string;
+  isSelectable?: boolean;
+  type?: string;
+  children?: Folder['children'] & {
+    count: number;
+  };
+  files?: Folder['files'] & {
+    count: number;
+  };
+}
+
+interface FileWithType extends File {
+  folderURL?: string;
+  isSelectable?: boolean;
+  type?: string;
+}
+
+interface BrowseStepProps {
+  allowedTypes?: string[];
+  assets: File[];
+  canCreate: boolean;
+  canRead: boolean;
+  folders?: FolderWithType[];
+  multiple?: boolean;
+  onAddAsset: () => void;
+  onChangeFilters: (filters: Filter[]) => void;
+  onChangeFolder: (id: number, path?: string) => void;
+  onChangePage: (page: number) => void;
+  onChangePageSize: (value: number) => void;
+  onChangeSort: (value: string) => void;
+  onChangeSearch: (_q: Query['_q'] | null) => void;
+  onEditAsset: ((asset: FileWithType) => void) | null;
+  onEditFolder: ((folder: FolderRow) => void) | null;
+  onSelectAsset: (element: FileRow | FolderRow) => void;
+  onSelectAllAsset?: (checked: boolean | string, rows?: FolderRow[] | FileRow[]) => void;
+  queryObject: Query;
+  pagination: { pageCount: number };
+  selectedAssets: FileWithType[] | FolderWithType[];
+}
+
 export const BrowseStep = ({
-  allowedTypes,
+  allowedTypes = [],
   assets: rawAssets,
   canCreate,
   canRead,
-  folders,
-  multiple,
+  folders = [],
+  multiple = false,
   onAddAsset,
   onChangeFilters,
   onChangePage,
@@ -72,13 +144,13 @@ export const BrowseStep = ({
   pagination,
   queryObject,
   selectedAssets,
-}) => {
+}: BrowseStepProps) => {
   const { formatMessage } = useIntl();
   const [view, setView] = usePersistentState(localStorageKeys.modalView, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
 
   const { data: currentFolder, isLoading: isCurrentFolderLoading } = useFolder(
-    queryObject?.folder,
+    queryObject?.folder as number,
     {
       enabled: canRead && !!queryObject?.folder,
     }
@@ -91,9 +163,11 @@ export const BrowseStep = ({
     type: 'asset',
   }));
 
-  const breadcrumbs = !isCurrentFolderLoading && getBreadcrumbDataCM(currentFolder);
+  const breadcrumbs = !isCurrentFolderLoading
+    ? getBreadcrumbDataCM(currentFolder as BreadcrumbDataFolder)
+    : undefined;
 
-  const allAllowedAsset = getAllowedFiles(allowedTypes, assets);
+  const allAllowedAsset = getAllowedFiles(allowedTypes, assets as AllowedFiles[]);
   const areAllAssetSelected =
     allAllowedAsset.length > 0 &&
     selectedAssets.length > 0 &&
@@ -104,11 +178,11 @@ export const BrowseStep = ({
     (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
   );
   const isSearching = !!queryObject?._q;
-  const isFiltering = queryObject?.filters?.$and?.length > 0;
+  const isFiltering = queryObject?.filters?.$and?.length! > 0;
   const isSearchingOrFiltering = isSearching || isFiltering;
   const assetCount = assets.length;
   const folderCount = folders.length;
-  const handleClickFolderCard = (...args) => {
+  const handleClickFolderCard = (...args: Parameters<typeof onChangeFolder>) => {
     // Search query will always fetch the same results
     // we remove it here to allow navigating in a folder and see the result of this navigation
     onChangeSearch('');
@@ -147,7 +221,7 @@ export const BrowseStep = ({
                 )}
                 {isGridView && <SortPicker onChangeSort={onChangeSort} value={queryObject?.sort} />}
                 <Filters
-                  appliedFilters={queryObject?.filters?.$and}
+                  appliedFilters={queryObject?.filters?.$and as ImportedFilterStructure[]}
                   onChangeFilters={onChangeFilters}
                 />
               </Flex>
@@ -180,17 +254,18 @@ export const BrowseStep = ({
         </Box>
       )}
 
-      {canRead && breadcrumbs?.length > 0 && currentFolder && (
+      {canRead && breadcrumbs?.length! > 0 && currentFolder && (
         <Box paddingTop={3}>
           <Breadcrumbs
             onChangeFolder={onChangeFolder}
+            // @ts-ignore
             tag="nav"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',
             })}
-            breadcrumbs={breadcrumbs}
-            currentFolderId={queryObject?.folder}
+            breadcrumbs={breadcrumbs as BreadcrumbDataFolder[]}
+            currentFolderId={queryObject?.folder as number | undefined}
           />
         </Box>
       )}
@@ -245,8 +320,12 @@ export const BrowseStep = ({
           onEditAsset={onEditAsset}
           onEditFolder={onEditFolder}
           onSelectOne={onSelectAsset}
-          onSelectAll={onSelectAllAsset}
-          rows={[...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets]}
+          onSelectAll={onSelectAllAsset!}
+          rows={
+            [...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets] as
+              | FolderRow[]
+              | FileRow[]
+          }
           selected={selectedAssets}
           shouldDisableBulkSelect={!multiple}
           sortQuery={queryObject?.sort ?? ''}
@@ -324,8 +403,8 @@ export const BrowseStep = ({
                                     '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
                                 },
                                 {
-                                  folderCount: folder.children.count,
-                                  filesCount: folder.files.count,
+                                  folderCount: folder.children?.count,
+                                  filesCount: folder.files?.count,
                                 }
                               )}
                             </TypographyMaxWidth>
@@ -352,8 +431,8 @@ export const BrowseStep = ({
                 size="S"
                 assets={assets}
                 onSelectAsset={onSelectAsset}
-                selectedAssets={selectedAssets}
-                onEditAsset={onEditAsset}
+                selectedAssets={selectedAssets as FileWithType[]}
+                onEditAsset={onEditAsset!}
                 title={
                   ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
                     queryObject.page === 1 &&
@@ -374,9 +453,12 @@ export const BrowseStep = ({
 
       {pagination.pageCount > 0 && (
         <Flex justifyContent="space-between" paddingTop={4}>
-          <PageSize pageSize={queryObject.pageSize} onChangePageSize={onChangePageSize} />
+          <PageSize
+            pageSize={queryObject.pageSize! as number}
+            onChangePageSize={onChangePageSize}
+          />
           <PaginationFooter
-            activePage={queryObject.page}
+            activePage={queryObject.page as number}
             onChangePage={onChangePage}
             pagination={pagination}
           />
@@ -384,40 +466,4 @@ export const BrowseStep = ({
       )}
     </Box>
   );
-};
-
-BrowseStep.defaultProps = {
-  allowedTypes: [],
-  folders: [],
-  multiple: false,
-  onSelectAllAsset: undefined,
-};
-BrowseStep.propTypes = {
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
-  canCreate: PropTypes.bool.isRequired,
-  canRead: PropTypes.bool.isRequired,
-  folders: PropTypes.arrayOf(FolderDefinition),
-  multiple: PropTypes.bool,
-  onAddAsset: PropTypes.func.isRequired,
-  onChangeFilters: PropTypes.func.isRequired,
-  onChangeFolder: PropTypes.func.isRequired,
-  onChangePage: PropTypes.func.isRequired,
-  onChangePageSize: PropTypes.func.isRequired,
-  onChangeSort: PropTypes.func.isRequired,
-  onChangeSearch: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func.isRequired,
-  onEditFolder: PropTypes.func.isRequired,
-  onSelectAsset: PropTypes.func.isRequired,
-  onSelectAllAsset: PropTypes.func,
-  queryObject: PropTypes.shape({
-    filters: PropTypes.object,
-    page: PropTypes.number.isRequired,
-    pageSize: PropTypes.number.isRequired,
-    _q: PropTypes.string,
-    sort: PropTypes.string,
-    folder: PropTypes.number,
-  }).isRequired,
-  pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
-  selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };

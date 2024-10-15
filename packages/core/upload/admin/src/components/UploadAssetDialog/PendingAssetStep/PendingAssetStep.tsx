@@ -34,6 +34,7 @@ interface PendingAssetStepProps {
   onCancelUpload: (rawFile: RawFile) => void;
   onUploadSucceed: (file: RawFile) => void;
   trackedLocation?: string;
+  initialAssetsToAdd?: File[];
 }
 
 export const PendingAssetStep = ({

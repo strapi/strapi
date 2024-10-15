@@ -1,35 +1,56 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Modal } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition } from '../../constants';
 import { EditAssetContent } from '../EditAssetDialog';
 
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
+import type { File, RawFile } from '../../../../shared/contracts/files';
 
 const Steps = {
   AddAsset: 'AddAsset',
   PendingAsset: 'PendingAsset',
 };
 
+interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
+  id?: string;
+  hash?: string;
+  rawFile: RawFile;
+}
+
+interface Asset extends Omit<File, 'folder'> {
+  isLocal?: boolean;
+  rawFile?: RawFile;
+  folder?: File['folder'] & { id: number };
+}
+
+interface UploadAssetDialogProps {
+  addUploadedFiles?: (files: Asset[] | File[]) => void;
+  folderId?: string | number | null;
+  initialAssetsToAdd?: Asset[];
+  onClose: () => void;
+  open: boolean;
+  trackedLocation?: string;
+  validateAssetsTypes?: (assets: Asset[], cb: (error?: string) => void) => void;
+}
+
 export const UploadAssetDialog = ({
   initialAssetsToAdd,
-  folderId,
-  onClose,
+  folderId = null,
+  onClose = () => {},
   addUploadedFiles,
   trackedLocation,
   open,
   validateAssetsTypes = (_, cb) => cb(),
-}) => {
+}: UploadAssetDialogProps) => {
   const { formatMessage } = useIntl();
-  const [step, setStep] = useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
-  const [assets, setAssets] = useState(initialAssetsToAdd || []);
-  const [assetToEdit, setAssetToEdit] = useState(undefined);
+  const [step, setStep] = React.useState(initialAssetsToAdd ? Steps.PendingAsset : Steps.AddAsset);
+  const [assets, setAssets] = React.useState(initialAssetsToAdd || []);
+  const [assetToEdit, setAssetToEdit] = React.useState<File | Asset | undefined>(undefined);
 
-  const handleAddToPendingAssets = (nextAssets) => {
+  const handleAddToPendingAssets = (nextAssets: Asset[]) => {
     validateAssetsTypes(nextAssets, () => {
       setAssets((prevAssets) => prevAssets.concat(nextAssets));
       setStep(Steps.PendingAsset);
@@ -40,7 +61,7 @@ export const UploadAssetDialog = ({
     setStep(Steps.AddAsset);
   };
 
-  const handleCancelUpload = (file) => {
+  const handleCancelUpload = (file: RawFile) => {
     const nextAssets = assets.filter((asset) => asset.rawFile !== file);
     setAssets(nextAssets);
 
@@ -50,7 +71,7 @@ export const UploadAssetDialog = ({
     }
   };
 
-  const handleUploadSuccess = (file) => {
+  const handleUploadSuccess = (file: RawFile) => {
     const nextAssets = assets.filter((asset) => asset.rawFile !== file);
     setAssets(nextAssets);
 
@@ -59,8 +80,8 @@ export const UploadAssetDialog = ({
     }
   };
 
-  const handleAssetEditValidation = (nextAsset) => {
-    if (nextAsset) {
+  const handleAssetEditValidation = (nextAsset?: Asset | boolean | null) => {
+    if (nextAsset && typeof nextAsset !== 'boolean') {
       const nextAssets = assets.map((asset) => (asset === assetToEdit ? nextAsset : asset));
       setAssets(nextAssets);
     }
@@ -86,7 +107,7 @@ export const UploadAssetDialog = ({
     }
   };
 
-  const handleRemoveAsset = (assetToRemove) => {
+  const handleRemoveAsset = (assetToRemove: File) => {
     const nextAssets = assets.filter((asset) => asset !== assetToRemove);
     setAssets(nextAssets);
   };
@@ -97,7 +118,9 @@ export const UploadAssetDialog = ({
         <Modal.Content>
           <AddAssetStep
             onClose={onClose}
-            onAddAsset={handleAddToPendingAssets}
+            onAddAsset={(assets: FileWithRawFile[]) =>
+              handleAddToPendingAssets(assets as unknown as Asset[])
+            }
             trackedLocation={trackedLocation}
           />
         </Modal.Content>
@@ -125,7 +148,7 @@ export const UploadAssetDialog = ({
         <Modal.Content>
           <EditAssetContent
             onClose={handleAssetEditValidation}
-            asset={assetToEdit}
+            asset={assetToEdit as Asset}
             canUpdate
             canCopyLink={false}
             canDownload={false}
@@ -135,23 +158,4 @@ export const UploadAssetDialog = ({
       )}
     </Modal.Root>
   );
-};
-
-UploadAssetDialog.defaultProps = {
-  addUploadedFiles: undefined,
-  folderId: null,
-  initialAssetsToAdd: undefined,
-  onClose() {},
-  trackedLocation: undefined,
-  validateAssetsTypes: undefined,
-};
-
-UploadAssetDialog.propTypes = {
-  addUploadedFiles: PropTypes.func,
-  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  initialAssetsToAdd: PropTypes.arrayOf(AssetDefinition),
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func,
-  trackedLocation: PropTypes.string,
-  validateAssetsTypes: PropTypes.func,
 };

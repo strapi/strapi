@@ -1,13 +1,10 @@
 /* eslint-disable no-await-in-loop */
-import React from 'react';
-
 import { within } from '@testing-library/react';
 import { fireEvent, render, screen, waitFor } from '@tests/utils';
 
 import { UploadAssetDialog } from '../UploadAssetDialog';
-
 describe('UploadAssetDialog', () => {
-  let confirmSpy;
+  let confirmSpy: jest.SpyInstance;
 
   beforeAll(() => {
     confirmSpy = jest.spyOn(window, 'confirm');
@@ -31,9 +28,10 @@ describe('UploadAssetDialog', () => {
     it('open confirm box when clicking on cancel on the pending asset step', async () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
 
-      const { user, getByRole } = render(<UploadAssetDialog open />);
+      const onCloseMock = jest.fn();
+      const { user, getByRole } = render(<UploadAssetDialog open onClose={onCloseMock} />);
 
-      await user.upload(document.querySelector('[type="file"]'), file);
+      await user.upload(document.querySelector('[type="file"]')!, file);
 
       await user.click(getByRole('button', { name: 'cancel' }));
 
@@ -47,11 +45,13 @@ describe('UploadAssetDialog', () => {
       ['unknown', 'unknown', 'Doc', 1],
     ].forEach(([ext, mime, assetType, number]) => {
       it(`shows ${number} valid ${mime} file`, async () => {
-        const file = new File(['Some stuff'], `test.${ext}`, { type: mime });
+        const file = new File(['Some stuff'], `test.${ext}`, { type: mime as string });
 
-        const { user, getByText, getAllByText } = render(<UploadAssetDialog open />);
+        const { user, getByText, getAllByText } = render(
+          <UploadAssetDialog open onClose={() => {}} />
+        );
 
-        await user.upload(document.querySelector('[type="file"]'), file);
+        await user.upload(document.querySelector('[type="file"]')!, file);
 
         expect(getByText('1 asset ready to upload')).toBeInTheDocument();
         expect(
@@ -67,7 +67,8 @@ describe('UploadAssetDialog', () => {
 
   describe('from url', () => {
     it('shows an error message when the asset does not exist', async () => {
-      const { user, getByRole } = render(<UploadAssetDialog open />);
+      const onCloseMock = jest.fn();
+      const { user, getByRole } = render(<UploadAssetDialog open onClose={onCloseMock} />);
 
       await user.click(getByRole('tab', { name: 'From URL' }));
 
@@ -81,9 +82,9 @@ describe('UploadAssetDialog', () => {
 
       // eslint-disable-next-line no-restricted-syntax
       for (const url of urls) {
-        await user.type(getByRole('textbox', 'URL'), url);
+        await user.type(getByRole('textbox', { name: 'URL' }), url);
 
-        await user.type(getByRole('textbox', 'URL'), '[Enter]');
+        await user.type(getByRole('textbox', { name: 'URL' }), '[Enter]');
       }
 
       /**
@@ -99,8 +100,8 @@ describe('UploadAssetDialog', () => {
      * atm it requires a lot of mocking and triggers many async operations
      * which are hard to follow.
      */
-    it.skip('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
-      const { user, getByText, getByRole } = render(<UploadAssetDialog open />);
+    it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
+      const { user, getByText, getByRole } = render(<UploadAssetDialog open onClose={() => {}} />);
 
       await user.click(getByRole('tab', { name: 'From URL' }));
 
@@ -113,10 +114,10 @@ describe('UploadAssetDialog', () => {
 
       // eslint-disable-next-line no-restricted-syntax
       for (const url of urls) {
-        await user.type(getByRole('textbox', 'URL'), url);
+        await user.type(getByRole('textbox', { name: 'URL' }), url);
 
         if (urls.indexOf(url) < urls.length - 1) {
-          await user.type(getByRole('textbox', 'URL'), '[Enter]');
+          await user.type(getByRole('textbox', { name: 'URL' }), '[Enter]');
         }
       }
 
