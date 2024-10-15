@@ -40,7 +40,7 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
             <Typography textColor="primary600" variant="pi" fontWeight="bold">
               {formatMessage({
                 id: getTranslation('components.empty-repeatable'),
-                defaultMessage: 'No entry yet. Click on the button below to add one.',
+                defaultMessage: 'No entry yet. Click to add one.',
               })}
             </Typography>
           </Flex>

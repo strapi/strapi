@@ -47,6 +47,7 @@ export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC } from './hooks/useRBAC';
+export { useClipboard } from './hooks/useClipboard';
 export { useAdminUsers } from './services/users';
 
 /**

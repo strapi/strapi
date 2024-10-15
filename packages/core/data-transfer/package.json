@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.0.2",
+  "version": "5.0.6",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -78,7 +78,7 @@
     "typescript": "5.3.2"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   }
 }

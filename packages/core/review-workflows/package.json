@@ -1,6 +1,6 @@
 {
   "name": "@strapi/review-workflows",
-  "version": "5.0.2",
+  "version": "5.0.6",
   "description": "Review workflows for your content",
   "repository": {
     "type": "git",
@@ -86,7 +86,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.0.2",
+  "version": "5.0.6",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -96,7 +96,7 @@
     "styled-components": "^6.0.0"
   },
   "engines": {
-    "node": ">=16.0.0 <=20.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   },
   "strapi": {

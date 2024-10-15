@@ -105,9 +105,9 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
 }
 
 const sqlClientModule = {
-  mysql: { mysql2: '3.9.4' },
+  mysql: { mysql2: '3.9.8' },
   postgres: { pg: '8.8.0' },
-  sqlite: { 'better-sqlite3': '9.4.3' },
+  sqlite: { 'better-sqlite3': '11.3.0' },
 };
 
 export function addDatabaseDependencies(scope: Scope) {

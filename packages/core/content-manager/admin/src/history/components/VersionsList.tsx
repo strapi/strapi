@@ -17,7 +17,9 @@ import type { HistoryVersions } from '../../../../shared/contracts';
  * -----------------------------------------------------------------------------------------------*/
 
 const BlueText = (children: React.ReactNode) => (
-  <Typography textColor="primary600">{children}</Typography>
+  <Typography textColor="primary600" variant="pi">
+    {children}
+  </Typography>
 );
 
 /* -------------------------------------------------------------------------------------------------
@@ -89,10 +91,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       borderStyle="solid"
       borderColor={isActive ? 'primary600' : 'neutral200'}
       color="neutral800"
-      paddingTop={4}
-      paddingBottom={4}
-      paddingLeft={5}
-      paddingRight={5}
+      padding={5}
       tag={Link}
       to={`?${stringify({ ...query, id: version.id })}`}
       style={{ textDecoration: 'none' }}
@@ -226,16 +225,7 @@ const VersionsList = () => {
             </PaginationButton>
           </Box>
         )}
-        <Flex
-          direction="column"
-          gap={3}
-          paddingTop={5}
-          paddingBottom={5}
-          paddingLeft={4}
-          paddingRight={4}
-          tag="ul"
-          alignItems="stretch"
-        >
+        <Flex direction="column" gap={3} padding={4} tag="ul" alignItems="stretch">
           {versions.data.map((version, index) => (
             <li
               key={version.id}
@@ -249,7 +239,7 @@ const VersionsList = () => {
           ))}
         </Flex>
         {versions.meta.pagination.page < versions.meta.pagination.pageCount && (
-          <Box paddingBottom={5} textAlign="center">
+          <Box paddingBottom={4} textAlign="center">
             <PaginationButton page={page + 1}>
               {formatMessage({
                 id: 'content-manager.history.sidebar.show-older',

@@ -43,6 +43,7 @@ describe('Version Utilities', () => {
       expect(isSemVerReleaseType(Version.ReleaseType.Major)).toBe(true);
       expect(isSemVerReleaseType(Version.ReleaseType.Minor)).toBe(true);
       expect(isSemVerReleaseType(Version.ReleaseType.Patch)).toBe(true);
+      expect(isSemVerReleaseType(Version.ReleaseType.Latest)).toBe(true);
     });
 
     it('should return false for invalid release types', () => {
