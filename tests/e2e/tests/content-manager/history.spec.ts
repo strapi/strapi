@@ -38,8 +38,16 @@ const goToHistoryPage = async (page: Page) => {
 };
 
 const goToContentTypeBuilder = async (page: Page) => {
-  await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+  await clickAndWait(page, { name: 'Content-Type Builder' });
   await skipCtbTour(page);
+};
+
+const clickAndWait = async (page: Page, options?: { name?: string | RegExp; exact?: boolean }) => {
+  await page.getByRole('link', options).click();
+
+  if (page.context().browser()?.browserType().name() === 'webkit') {
+    await page.waitForLoadState('networkidle');
+  }
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
@@ -57,8 +65,8 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test.fixme('A user should be able to restore a history version', async ({ page }) => {
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+    await clickAndWait(page, { name: 'Content Manager' });
+    await clickAndWait(page, { name: /Create new entry/, exact: true });
     await page.waitForURL(ARTICLE_CREATE_URL);
 
     const titleInput = await page.getByRole('textbox', { name: 'title' });
@@ -92,10 +100,10 @@ describeOnCondition(edition === 'EE')('History', () => {
       'A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list',
       async ({ page }) => {
         // Navigate to the content-manager - collection type - article
-        await page.getByRole('link', { name: 'Content Manager' }).click();
+        await clickAndWait(page, { name: 'Content Manager' });
         await page.getByRole('combobox', { name: 'Select a locale' }).click();
         await page.getByRole('option', { name: 'French (fr)' }).click();
-        await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+        await clickAndWait(page, { name: /Create new entry/, exact: true });
         await page.waitForURL(ARTICLE_CREATE_URL);
 
         /**
@@ -115,8 +123,8 @@ describeOnCondition(edition === 'EE')('History', () => {
 
         // Go back to the CM to create a new english entry
         await page.goto('/admin');
-        await page.getByRole('link', { name: 'Content Manager' }).click();
-        await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+        await clickAndWait(page, { name: 'Content Manager' });
+        await clickAndWait(page, { name: /Create new entry/, exact: true });
         await page.waitForURL(ARTICLE_CREATE_URL);
 
         // Create an english version
@@ -142,7 +150,7 @@ describeOnCondition(edition === 'EE')('History', () => {
         await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
         // Go back to the entry
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, { name: 'Back' });
 
         /**
          * Update
@@ -163,7 +171,7 @@ describeOnCondition(edition === 'EE')('History', () => {
         await expect(previousVersion.getByText('(current)')).not.toBeVisible();
 
         // Go back to the entry
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, { name: 'Back' });
 
         /**
          * Publish
@@ -180,7 +188,7 @@ describeOnCondition(edition === 'EE')('History', () => {
         await expect(titleInput).toHaveValue('Being from Kansas City');
 
         // Go back to the entry
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, { name: 'Back' });
 
         /**
          * Modified
@@ -200,18 +208,18 @@ describeOnCondition(edition === 'EE')('History', () => {
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create new author
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Author' }).click();
-      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await clickAndWait(page, { name: 'Content Manager' });
+      await clickAndWait(page, { name: 'Author' });
+      await clickAndWait(page, { name: /Create new entry/, exact: true });
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
       await page.getByRole('button', { name: 'Save' }).click();
       await page.waitForURL(AUTHOR_EDIT_URL);
 
       // Create new article and add authors to it
-      await page.getByRole('link', { name: 'Article' }).click();
+      await clickAndWait(page, { name: 'Article' });
       await page.waitForURL(ARTICLE_LIST_URL);
-      await page.getByRole('link', { name: 'Create new entry' }).click();
+      await clickAndWait(page, { name: 'Create new entry' });
       await page.getByRole('textbox', { name: 'title' }).fill('Zava retires');
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Will Kitman').click();
@@ -221,14 +229,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(ARTICLE_EDIT_URL);
 
       // Delete one of the authors, leaving only Coach Beard
-      await page.getByRole('link', { name: 'Will Kitman' }).click();
+      await clickAndWait(page, { name: 'Will Kitman' });
       await page.waitForURL(AUTHOR_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the the article's history page
-      await page.getByRole('link', { name: 'Article' }).click();
+      await clickAndWait(page, { name: 'Article' });
       await page.getByRole('gridcell', { name: 'Zava retires' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
       await goToHistoryPage(page);
@@ -246,8 +254,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Create an initial entry to also create an initial version
        */
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await clickAndWait(page, { name: 'Content Manager' });
+      await clickAndWait(page, { name: /Create new entry/, exact: true });
       await page.waitForURL(ARTICLE_CREATE_URL);
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
       await page.getByRole('textbox', { name: 'slug' }).fill('being-from-kansas');
@@ -272,8 +280,8 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Update the existing entry to create another version
        */
       await page.goto('/admin');
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Article' }).click();
+      await clickAndWait(page, { name: 'Content Manager' });
+      await clickAndWait(page, { name: 'Article' });
       await page.getByRole('gridcell', { name: 'being-from-kansas' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Being from Kansas City');
@@ -309,8 +317,8 @@ describeOnCondition(edition === 'EE')('History', () => {
           /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
 
         // Navigate to the content-manager - single type - homepage
-        await page.getByRole('link', { name: 'Content Manager' }).click();
-        await page.getByRole('link', { name: 'Homepage' }).click();
+        await clickAndWait(page, { name: 'Content Manager' });
+        await clickAndWait(page, { name: 'Homepage' });
         await page.getByRole('combobox', { name: 'Locales' }).click();
         await page.getByRole('option', { name: 'French (fr)' }).click();
 
@@ -328,7 +336,7 @@ describeOnCondition(edition === 'EE')('History', () => {
         await expect(titleInput).toHaveValue(frenchTitle);
 
         // Go back to the CM to create a new english entry
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, { name: 'Back' });
         await page.getByRole('combobox', { name: 'Locales' }).click();
         await page.getByRole('option', { name: 'English (en)' }).click();
 
@@ -355,7 +363,7 @@ describeOnCondition(edition === 'EE')('History', () => {
         await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
         // Go back to the entry
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, { name: 'Back' });
 
         /**
          * Update
@@ -373,7 +381,7 @@ describeOnCondition(edition === 'EE')('History', () => {
         await expect(titleInput).toHaveValue('AFC Richmond');
 
         // Go back to the entry
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, { name: 'Back' });
 
         /**
          * Publish
@@ -392,7 +400,7 @@ describeOnCondition(edition === 'EE')('History', () => {
         await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
 
         // Go back to the entry
-        await page.getByRole('link', { name: 'Back' }).click();
+        await clickAndWait(page, { name: 'Back' });
 
         /**
          * Modified
@@ -413,7 +421,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Create relation in Content-Type Builder
       await goToContentTypeBuilder(page);
 
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      await clickAndWait(page, { name: 'Homepage' });
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
       );
@@ -428,16 +436,18 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(page.getByRole('cell', { name: 'authors', exact: true })).toBeVisible();
 
       // Create new author
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Author' }).click();
-      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await clickAndWait(page, { name: 'Content Manager' });
+      // await page.waitForSelector('text=Author');
+      await clickAndWait(page, { name: 'Author' });
+      // await page.waitForSelector('text=Create new entry');
+      await clickAndWait(page, { name: /Create new entry/, exact: true });
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
       await page.getByRole('button', { name: 'Save' }).click();
       await page.waitForURL(AUTHOR_EDIT_URL);
 
       // Add author to homepage
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      await clickAndWait(page, { name: 'Homepage' });
       await page.waitForURL(HOMEPAGE_EDIT_URL);
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Will Kitman').click();
@@ -446,14 +456,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Save' }).click();
 
       // Delete one of the authors, leaving only Coach Beard
-      await page.getByRole('link', { name: 'Will Kitman' }).click();
+      await clickAndWait(page, { name: 'Will Kitman' });
       await page.waitForURL(AUTHOR_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the the article's history page
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      await clickAndWait(page, { name: 'Homepage' });
       await page.waitForURL(HOMEPAGE_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /content history/i }).click();
@@ -471,8 +481,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Create an initial entry to also create an initial version
        */
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      await clickAndWait(page, { name: 'Content Manager' });
+      await clickAndWait(page, { name: 'Homepage' });
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
@@ -482,7 +492,7 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await goToContentTypeBuilder(page);
 
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      await clickAndWait(page, { name: 'Homepage' });
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
       );
@@ -497,8 +507,8 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Update the existing entry to create another version
        */
       await page.goto('/admin');
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-      await page.getByRole('link', { name: 'Homepage' }).click();
+      await clickAndWait(page, { name: 'Content Manager' });
+      await clickAndWait(page, { name: 'Homepage' });
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
