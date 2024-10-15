@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -8,7 +6,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { BrowseStep } from '..';
-import { viewOptions } from '../../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { viewOptions } from '../../../../newConstants';
 import { useFolder } from '../../../../hooks/useFolder';
 import { usePersistentState } from '../../../../hooks/usePersistentState';
 
@@ -77,7 +76,7 @@ const client = new QueryClient({
   },
 });
 
-const setup = (props) =>
+const setup = (props?: any) =>
   render(
     <BrowseStep
       assets={[]}
@@ -106,9 +105,7 @@ const setup = (props) =>
           <DesignSystemProvider>
             <MemoryRouter>
               <IntlProvider messages={{}} locale="en">
-                <NotificationsProvider toggleNotification={() => {}}>
-                  {children}
-                </NotificationsProvider>
+                <NotificationsProvider>{children}</NotificationsProvider>
               </IntlProvider>
             </MemoryRouter>
           </DesignSystemProvider>
@@ -128,7 +125,7 @@ describe('BrowseStep', () => {
 
   it('should not fetch folder if the user does not have the permission', () => {
     const spy = jest.fn().mockReturnValueOnce({ isLoading: false });
-    useFolder.mockImplementationOnce(spy);
+    (useFolder as jest.Mock).mockImplementationOnce(spy);
 
     setup({
       canRead: false,
@@ -145,7 +142,7 @@ describe('BrowseStep', () => {
   });
 
   it('should hide breadcrumbs navigation if in root folder', () => {
-    useFolder.mockReturnValueOnce({ isLoading: false, data: undefined });
+    (useFolder as jest.Mock).mockReturnValueOnce({ isLoading: false, data: undefined });
     setup();
 
     expect(screen.queryByLabelText('Folders navigation')).not.toBeInTheDocument();
@@ -220,7 +217,7 @@ describe('BrowseStep', () => {
   describe('displays the appropriate switch to change the view', () => {
     const setView = jest.fn();
     it('starts with Grid View', () => {
-      usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
+      (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.GRID, setView]);
       const { queryByRole } = setup();
 
       const listSwitch = queryByRole('button', { name: 'List View' });
@@ -229,12 +226,14 @@ describe('BrowseStep', () => {
       expect(listSwitch).toBeInTheDocument();
       expect(gridSwitch).not.toBeInTheDocument();
 
-      fireEvent.click(listSwitch);
-      expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
+      if (listSwitch) {
+        fireEvent.click(listSwitch);
+        expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
+      }
     });
 
     it('starts with List View', () => {
-      usePersistentState.mockReturnValueOnce([viewOptions.LIST, setView]);
+      (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST, setView]);
       const { queryByRole } = setup();
 
       const listSwitch = queryByRole('button', { name: 'List View' });
@@ -243,14 +242,16 @@ describe('BrowseStep', () => {
       expect(gridSwitch).toBeInTheDocument();
       expect(listSwitch).not.toBeInTheDocument();
 
-      fireEvent.click(gridSwitch);
-      expect(setView).toHaveBeenCalledWith(viewOptions.GRID);
+      if (gridSwitch) {
+        fireEvent.click(gridSwitch);
+        expect(setView).toHaveBeenCalledWith(viewOptions.GRID);
+      }
     });
   });
 
   describe('displays the list view', () => {
     it('should render the table headers', () => {
-      usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+      (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST]);
 
       const { getByText, getByRole } = setup();
       expect(getByRole('gridcell', { name: 'preview' })).toBeInTheDocument();
@@ -262,14 +263,14 @@ describe('BrowseStep', () => {
     });
 
     it('should not render the sort button', () => {
-      usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+      (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST]);
       const { queryByRole } = setup();
 
       expect(queryByRole('button', { name: 'Sort by' })).not.toBeInTheDocument();
     });
 
     it('should not render the folders and assets titles', () => {
-      usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+      (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST]);
       const { queryByText } = setup();
 
       expect(queryByText('Folders (1)')).not.toBeInTheDocument();
@@ -277,7 +278,7 @@ describe('BrowseStep', () => {
     });
 
     it('should not render table if no assets and folders', () => {
-      usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+      (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST]);
       const { queryByRole, getByText } = setup({ folders: [] });
 
       expect(queryByRole('gridcell', { name: /preview/i })).not.toBeInTheDocument();
