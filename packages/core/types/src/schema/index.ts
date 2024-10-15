@@ -210,32 +210,30 @@ export type OptionalAttributeNames<TSchemaUID extends UID.Schema> = Object.KeysE
  * A union of every default attribute name like `createdAt` or `locale`.
  */
 type DefaultAttributeNames =
-	| "createdAt"
-	| "updatedAt"
-	| "publishedAt"
-	| "createdBy"
-	| "updatedBy"
-	| "locale"
-	| "localizations";
+  | 'createdAt'
+  | 'updatedAt'
+  | 'publishedAt'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'locale'
+  | 'localizations';
 
 /**
- * Defines the a defaultable Attribute as having a default value or beeing a default attribute. 
+ * Defines the a defaultable Attribute as having a default value or beeing a default attribute.
  */
 type Defaultable = Attribute.DefaultTo<any> | Attribute.OfType<Attribute.PopulatableKind>;
 
 /**
  * Returns a union of every attribute name with a default value from the given Schema UID.
  *
- * @remark `DefaultableAttributeNames` screens attributes based on the {@link Attribute.DefaultTo<any>} and 
+ * @remark `DefaultableAttributeNames` screens attributes based on the {@link Attribute.DefaultTo<any>} and
  * {@link Attribute.OfType<Attribute.PopulatableKind>} property, determining mandatory attributes from the given schema.
  *
  * @template TSchemaUID - The unique identifier for the schema.
  */
-export type DefaultableAttributeNames<TSchemaUID extends UID.Schema> = Object.KeysBy<
-  Attributes<TSchemaUID>,
-  Defaultable,
-  AttributeNames<TSchemaUID>
-> | DefaultAttributeNames;
+export type DefaultableAttributeNames<TSchemaUID extends UID.Schema> =
+  | Object.KeysBy<Attributes<TSchemaUID>, Defaultable, AttributeNames<TSchemaUID>>
+  | DefaultAttributeNames;
 
 /**
  * Returns a union of every attribute name without a default value by excluding {@link DefaultableAttributeNames} attribute keys from the given Schema UID.
