@@ -57,6 +57,18 @@ export class Upgrader implements UpgraderInterface {
     this.confirmationCallback = null;
   }
 
+  getNPMPackage(): NPM.Package {
+    return this.npmPackage;
+  }
+
+  getProject(): AppProject {
+    return this.project;
+  }
+
+  getTarget(): Version.SemVer {
+    return semVerFactory(this.target.raw);
+  }
+
   setRequirements(requirements: Requirement.Requirement[]) {
     this.requirements = requirements;
     return this;
@@ -170,6 +182,14 @@ export class Upgrader implements UpgraderInterface {
     }
 
     return successReport();
+  }
+
+  async confirm(message: string): Promise<boolean> {
+    if (typeof this.confirmationCallback !== 'function') {
+      return true;
+    }
+
+    return this.confirmationCallback(message);
   }
 
   private async checkRequirements(
@@ -292,10 +312,13 @@ export class Upgrader implements UpgraderInterface {
 
   private async runCodemods(range: Version.Range): Promise<void> {
     const codemodRunner = codemodRunnerFactory(this.project, range);
+
     codemodRunner.dry(this.isDry);
+
     if (this.logger) {
       codemodRunner.setLogger(this.logger);
     }
+
     await codemodRunner.run();
   }
 }
