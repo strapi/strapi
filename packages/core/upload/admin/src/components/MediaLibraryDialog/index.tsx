@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-
-import PropTypes from 'prop-types';
+import * as React from 'react';
 
 import { AssetDialog } from '../AssetDialog';
 import { EditFolderDialog } from '../EditFolderDialog';
@@ -12,9 +10,21 @@ const STEPS = {
   FolderCreate: 'FolderCreate',
 };
 
-export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) => {
-  const [step, setStep] = useState(STEPS.AssetSelect);
-  const [folderId, setFolderId] = useState(null);
+import type { File } from '../../../../shared/contracts/files';
+
+interface MediaLibraryDialogProps {
+  allowedTypes?: string[];
+  onClose: () => void;
+  onSelectAssets: (selectedAssets: File[]) => void;
+}
+
+export const MediaLibraryDialog = ({
+  onClose,
+  onSelectAssets,
+  allowedTypes,
+}: MediaLibraryDialogProps) => {
+  const [step, setStep] = React.useState(STEPS.AssetSelect);
+  const [folderId, setFolderId] = React.useState<number | null>(null);
 
   switch (step) {
     case STEPS.AssetSelect:
@@ -46,14 +56,4 @@ export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) =>
         <UploadAssetDialog open onClose={() => setStep(STEPS.AssetSelect)} folderId={folderId} />
       );
   }
-};
-
-MediaLibraryDialog.defaultProps = {
-  allowedTypes: ['files', 'images', 'videos', 'audios'],
-};
-
-MediaLibraryDialog.propTypes = {
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  onClose: PropTypes.func.isRequired,
-  onSelectAssets: PropTypes.func.isRequired,
 };
