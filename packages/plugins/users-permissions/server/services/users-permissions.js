@@ -34,72 +34,61 @@ const transformRoutePrefixFor = (pluginName) => (route) => {
 };
 
 module.exports = ({ strapi }) => ({
-  getActions({ defaultEnable = false } = {}) {
-    const actionMap = {};
-
+  async getActions({ defaultEnable } = {}) {
     const isContentApi = (action) => {
-      if (!_.has(action, Symbol.for('__type__'))) {
-        return false;
-      }
+      return _.has(action, Symbol.for('__type__')) && 
+             action[Symbol.for('__type__')].includes('content-api')
+    }
 
-      return action[Symbol.for('__type__')].includes('content-api');
-    };
+    const fetchPermissions = async () => {
+      const dbPermissions = await strapi.db
+        .query('plugin::users-permissions.permission')
+        .findMany({ select: ['action'] })
 
-    _.forEach(strapi.apis, (api, apiName) => {
-      const controllers = _.reduce(
-        api.controllers,
-        (acc, controller, controllerName) => {
-          const contentApiActions = _.pickBy(controller, isContentApi);
+      return dbPermissions.reduce((acc, { action }) => {
+        acc[action] = true
+        return acc
+      }, {})
+    }
 
-          if (_.isEmpty(contentApiActions)) {
-            return acc;
-          }
-
-          acc[controllerName] = _.mapValues(contentApiActions, () => {
+    const processControllers = (controllers, prefix, permissionsMap) => {
+      return Object.entries(controllers).reduce((result, [controllerName, controller]) => {
+        const contentApiActions = _.pickBy(controller, isContentApi)
+        
+        if (!_.isEmpty(contentApiActions)) {
+          result[controllerName] = _.mapValues(contentApiActions, (action, actionName) => {
+            const fullActionName = `${prefix}.${controllerName}.${actionName}`
             return {
-              enabled: defaultEnable,
+              enabled: permissionsMap[fullActionName] ?? 
+                (typeof defaultEnable === 'function' 
+                  ? defaultEnable(fullActionName)
+                  : defaultEnable ?? false),
               policy: '',
-            };
-          });
+            }
+          })
+        }
+        
+        return result
+      }, {})
+    }
 
-          return acc;
-        },
-        {}
-      );
+    const processApiOrPlugin = (items, prefix, permissionsMap) => {
+      return Object.entries(items).reduce((acc, [name, item]) => {
+        const controllers = processControllers(item.controllers, `${prefix}::${name}`, permissionsMap)
+        if (!_.isEmpty(controllers)) {
+          acc[`${prefix}::${name}`] = { controllers }
+        }
+        return acc
+      }, {})
+    }
 
-      if (!_.isEmpty(controllers)) {
-        actionMap[`api::${apiName}`] = { controllers };
-      }
-    });
+    const permissionsMap = await fetchPermissions()
+    const actionMap = {
+      ...processApiOrPlugin(strapi.apis, 'api', permissionsMap),
+      ...processApiOrPlugin(strapi.plugins, 'plugin', permissionsMap)
+    }
 
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
-      const controllers = _.reduce(
-        plugin.controllers,
-        (acc, controller, controllerName) => {
-          const contentApiActions = _.pickBy(controller, isContentApi);
-
-          if (_.isEmpty(contentApiActions)) {
-            return acc;
-          }
-
-          acc[controllerName] = _.mapValues(contentApiActions, () => {
-            return {
-              enabled: defaultEnable,
-              policy: '',
-            };
-          });
-
-          return acc;
-        },
-        {}
-      );
-
-      if (!_.isEmpty(controllers)) {
-        actionMap[`plugin::${pluginName}`] = { controllers };
-      }
-    });
-
-    return actionMap;
+    return actionMap
   },
 
   async getRoutes() {
