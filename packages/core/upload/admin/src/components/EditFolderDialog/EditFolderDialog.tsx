@@ -48,7 +48,7 @@ export interface EditFolderDialogProps {
   parentFolderId?: string | number | null;
   location?: string;
   folder?: FolderDefinition;
-  open: boolean;
+  open?: boolean;
   onClose: (arg?: any) => void;
 }
 

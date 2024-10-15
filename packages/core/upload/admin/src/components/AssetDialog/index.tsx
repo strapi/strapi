@@ -2,43 +2,75 @@ import * as React from 'react';
 
 import { Page } from '@strapi/admin/strapi-admin';
 import { Badge, Button, Divider, Flex, Loader, Modal, Tabs } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetDefinition } from '../../constants';
 import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
 import { useSelectionState } from '../../hooks/useSelectionState';
-import { containsAssetFilter, getTrad, getAllowedFiles, moveElement } from '../../utils';
-import { EditAssetContent } from '../EditAssetDialog';
+import {
+  containsAssetFilter,
+  getTrad,
+  getAllowedFiles,
+  moveElement,
+  AllowedFiles,
+} from '../../utils';
+import { EditAssetContent, Asset as EditAsset } from '../EditAssetDialog';
 import { EditFolderContent } from '../EditFolderDialog';
 
-import { BrowseStep } from './BrowseStep';
+import { BrowseStep, FolderWithType, FileWithType, Filter as BrowseFilter } from './BrowseStep';
 import { DialogFooter } from './DialogFooter';
 import { SelectedStep } from './SelectedStep';
+
+import type { File as Asset, FilterCondition, Query } from '../../../../shared/contracts/files';
+import type { Folder, FolderDefinition } from '../../../../shared/contracts/folders';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
   min-height: ${() => `calc(60vh + 8rem)`};
 `;
 
+export interface FileRow extends Asset {
+  folderURL?: string;
+  isSelectable?: boolean;
+  type?: string;
+}
+
+export interface FolderRow extends Folder {
+  folderURL?: string;
+  isSelectable?: boolean;
+  type?: string;
+}
+
+interface AssetContentProps {
+  allowedTypes?: string[];
+  folderId?: number | null;
+  onClose: () => void;
+  onAddAsset: (arg?: { folderId: number | { id: number } | null | undefined }) => void;
+  onAddFolder: ({ folderId }: { folderId: number | { id: number } | null | undefined }) => void;
+  onChangeFolder: (folderId: number | null) => void;
+  onValidate: (selectedAssets: Asset[]) => void;
+  multiple?: boolean;
+  trackedLocation?: string;
+  initiallySelectedAssets?: Asset[];
+}
+
 export const AssetContent = ({
-  allowedTypes,
-  folderId,
+  allowedTypes = [],
+  folderId = null,
   onClose,
   onAddAsset,
   onAddFolder,
   onChangeFolder,
   onValidate,
-  multiple,
-  initiallySelectedAssets,
+  multiple = false,
+  initiallySelectedAssets = [],
   trackedLocation,
-}) => {
-  const [assetToEdit, setAssetToEdit] = React.useState(undefined);
-  const [folderToEdit, setFolderToEdit] = React.useState(undefined);
+}: AssetContentProps) => {
+  const [assetToEdit, setAssetToEdit] = React.useState<FileWithType | undefined>(undefined);
+  const [folderToEdit, setFolderToEdit] = React.useState<FolderRow | undefined>(undefined);
   const { formatMessage } = useIntl();
   const {
     canRead,
@@ -72,7 +104,7 @@ export const AssetContent = ({
     isLoading: isLoadingFolders,
     error: errorFolders,
   } = useFolders({
-    enabled: canRead && !containsAssetFilter(queryObject) && pagination?.page === 1,
+    enabled: canRead && !containsAssetFilter(queryObject!) && pagination?.page === 1,
     query: queryObject,
   });
 
@@ -82,7 +114,7 @@ export const AssetContent = ({
   ] = useSelectionState(['id'], initiallySelectedAssets);
 
   const handleSelectAllAssets = () => {
-    const allowedAssets = getAllowedFiles(allowedTypes, assets);
+    const allowedAssets = getAllowedFiles(allowedTypes, assets as AllowedFiles[]);
 
     if (!multiple) {
       return undefined;
@@ -100,8 +132,8 @@ export const AssetContent = ({
     }
   };
 
-  const handleSelectAsset = (asset) => {
-    return multiple ? selectOne(asset) : selectOnly(asset);
+  const handleSelectAsset = (asset: Asset | FileRow | FolderRow) => {
+    return multiple ? selectOne(asset as Asset) : selectOnly(asset as Asset);
   };
 
   const isLoading = isLoadingPermissions || isLoadingAssets || isLoadingFolders;
@@ -169,7 +201,7 @@ export const AssetContent = ({
     return (
       <EditAssetContent
         onClose={() => setAssetToEdit(undefined)}
-        asset={assetToEdit}
+        asset={assetToEdit as EditAsset}
         canUpdate={canUpdate}
         canCopyLink={canCopyLink}
         canDownload={canDownload}
@@ -181,24 +213,26 @@ export const AssetContent = ({
   if (folderToEdit) {
     return (
       <EditFolderContent
-        folder={folderToEdit}
+        folder={folderToEdit as FolderDefinition}
         onClose={() => setFolderToEdit(undefined)}
         location="content-manager"
-        parentFolderId={queryObject?.folder}
+        parentFolderId={queryObject?.folder as string | number | null | undefined}
       />
     );
   }
 
-  const handleMoveItem = (hoverIndex, destIndex) => {
+  const handleMoveItem = (hoverIndex: number, destIndex: number) => {
     const offset = destIndex - hoverIndex;
     const orderedAssetsClone = selectedAssets.slice();
-    const nextAssets = moveElement(orderedAssetsClone, hoverIndex, offset);
+    const nextAssets = moveElement<Asset>(orderedAssetsClone, hoverIndex, offset);
     setSelections(nextAssets);
   };
-
-  const handleFolderChange = (folderId, folderPath) => {
+  // (id: number, path?: string) => void;
+  const handleFolderChange = (folderId: number, folderPath?: string) => {
     onChangeFolder(folderId);
-    onChangeFolderParam(folderId, folderPath);
+    if (onChangeFolderParam) {
+      onChangeFolderParam(folderId, folderPath);
+    }
   };
 
   return (
@@ -252,25 +286,27 @@ export const AssetContent = ({
           <Tabs.Content value="browse">
             <BrowseStep
               allowedTypes={allowedTypes}
-              assets={assets}
+              assets={assets!}
               canCreate={canCreate}
               canRead={canRead}
-              folders={folders}
+              folders={folders as FolderWithType[]}
               onSelectAsset={handleSelectAsset}
               selectedAssets={selectedAssets}
               multiple={multiple}
               onSelectAllAsset={handleSelectAllAssets}
               onEditAsset={setAssetToEdit}
               onEditFolder={setFolderToEdit}
-              pagination={pagination}
-              queryObject={queryObject}
+              pagination={pagination!}
+              queryObject={queryObject!}
               onAddAsset={onAddAsset}
-              onChangeFilters={onChangeFilters}
+              onChangeFilters={(filters: FilterCondition<string>[] | BrowseFilter[]) =>
+                onChangeFilters!(filters as FilterCondition<string>[])
+              }
               onChangeFolder={handleFolderChange}
-              onChangePage={onChangePage}
-              onChangePageSize={onChangePageSize}
-              onChangeSort={onChangeSort}
-              onChangeSearch={onChangeSearch}
+              onChangePage={onChangePage!}
+              onChangePageSize={onChangePageSize!}
+              onChangeSort={(sort: string | undefined) => onChangeSort!(sort as Query['sort'])}
+              onChangeSearch={onChangeSearch!}
             />
           </Tabs.Content>
           <Tabs.Content value="selected">
@@ -287,28 +323,11 @@ export const AssetContent = ({
   );
 };
 
-AssetContent.defaultProps = {
-  allowedTypes: [],
-  folderId: null,
-  initiallySelectedAssets: [],
-  multiple: false,
-  trackedLocation: undefined,
-};
+interface AssetDialogProps extends AssetContentProps {
+  open?: boolean;
+}
 
-AssetContent.propTypes = {
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  folderId: PropTypes.number,
-  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
-  multiple: PropTypes.bool,
-  onAddAsset: PropTypes.func.isRequired,
-  onAddFolder: PropTypes.func.isRequired,
-  onChangeFolder: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
-  onValidate: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
-};
-
-export const AssetDialog = ({ open, onClose, ...restProps }) => {
+export const AssetDialog = ({ open = false, onClose, ...restProps }: AssetDialogProps) => {
   return (
     <Modal.Root open={open} onOpenChange={onClose}>
       <Modal.Content>
@@ -316,29 +335,6 @@ export const AssetDialog = ({ open, onClose, ...restProps }) => {
       </Modal.Content>
     </Modal.Root>
   );
-};
-
-AssetDialog.defaultProps = {
-  allowedTypes: [],
-  folderId: null,
-  initiallySelectedAssets: [],
-  multiple: false,
-  open: false,
-  trackedLocation: undefined,
-};
-
-AssetDialog.propTypes = {
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  folderId: PropTypes.number,
-  initiallySelectedAssets: PropTypes.arrayOf(AssetDefinition),
-  multiple: PropTypes.bool,
-  onAddAsset: PropTypes.func.isRequired,
-  onAddFolder: PropTypes.func.isRequired,
-  onChangeFolder: PropTypes.func.isRequired,
-  open: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
-  onValidate: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };
 
 const TabsRoot = styled(Tabs.Root)`

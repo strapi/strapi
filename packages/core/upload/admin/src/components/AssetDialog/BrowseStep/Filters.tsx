@@ -26,7 +26,7 @@ export type FilterStructure = {
   [key: string]: MimeFilter | StringFilter | undefined;
 };
 
-type Filter = {
+export type Filter = {
   [key in 'mime' | 'createdAt' | 'updatedAt']?:
     | {
         [key in '$contains' | '$notContains' | '$eq' | '$not']?:

@@ -38,7 +38,7 @@ import PageSize from './PageSize';
 import PaginationFooter from './PaginationFooter';
 import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
-import type { File, Query } from '../../../../../shared/contracts/files';
+import type { File, Query, FilterCondition } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
 
 const TypographyMaxWidth = styled(Typography)`
@@ -71,7 +71,7 @@ export type FilterStructure = {
   [key: string]: MimeFilter | StringFilter | undefined;
 };
 
-type Filter = {
+export type Filter = {
   [key in 'mime' | 'createdAt' | 'updatedAt']?:
     | {
         [key in '$contains' | '$notContains' | '$eq' | '$not']?:
@@ -82,7 +82,7 @@ type Filter = {
     | undefined;
 };
 
-interface FolderWithType extends Omit<Folder, 'children' | 'files'> {
+export interface FolderWithType extends Omit<Folder, 'children' | 'files'> {
   folderURL?: string;
   isSelectable?: boolean;
   type?: string;
@@ -94,7 +94,7 @@ interface FolderWithType extends Omit<Folder, 'children' | 'files'> {
   };
 }
 
-interface FileWithType extends File {
+export interface FileWithType extends File {
   folderURL?: string;
   isSelectable?: boolean;
   type?: string;
@@ -108,12 +108,12 @@ interface BrowseStepProps {
   folders?: FolderWithType[];
   multiple?: boolean;
   onAddAsset: () => void;
-  onChangeFilters: (filters: Filter[]) => void;
+  onChangeFilters: (filters: FilterCondition<string>[] | Filter[]) => void;
   onChangeFolder: (id: number, path?: string) => void;
   onChangePage: (page: number) => void;
   onChangePageSize: (value: number) => void;
-  onChangeSort: (value: string) => void;
-  onChangeSearch: (_q: Query['_q'] | null) => void;
+  onChangeSort: (value: Query['sort'] | string) => void;
+  onChangeSearch: (_q?: Query['_q'] | null) => void;
   onEditAsset: ((asset: FileWithType) => void) | null;
   onEditFolder: ((folder: FolderRow) => void) | null;
   onSelectAsset: (element: FileRow | FolderRow) => void;

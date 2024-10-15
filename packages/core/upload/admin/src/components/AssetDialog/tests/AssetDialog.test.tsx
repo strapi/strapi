@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -55,7 +53,7 @@ describe('AssetDialog', () => {
 
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({ isLoading: true });
+      (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({ isLoading: true });
 
       renderML();
 
@@ -63,7 +61,7 @@ describe('AssetDialog', () => {
     });
 
     it('shows a loader when resolving assets', () => {
-      useAssets.mockReturnValueOnce({
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: true,
         error: null,
         data: { pagination: {}, results: [] },
@@ -75,7 +73,7 @@ describe('AssetDialog', () => {
     });
 
     it('shows a loader when resolving folders', () => {
-      useFolders.mockReturnValueOnce({ isLoading: true, error: null, data: null });
+      (useFolders as jest.Mock).mockReturnValueOnce({ isLoading: true, error: null, data: null });
 
       renderML();
 
@@ -86,7 +84,7 @@ describe('AssetDialog', () => {
   describe('content', () => {
     describe('empty state', () => {
       it('shows a specific empty state when the user is not allowed to see the content', () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           canRead: false,
         });
@@ -106,7 +104,7 @@ describe('AssetDialog', () => {
 
     describe('error state', () => {
       it('shows when loading assets threw an error', () => {
-        useAssets.mockReturnValueOnce({ isLoading: false, error: true });
+        (useAssets as jest.Mock).mockReturnValueOnce({ isLoading: false, error: true });
 
         renderML();
 
@@ -116,7 +114,7 @@ describe('AssetDialog', () => {
       });
 
       it('shows when loading folders threw an error', () => {
-        useAssets.mockReturnValueOnce({ isLoading: false, error: true });
+        (useAssets as jest.Mock).mockReturnValueOnce({ isLoading: false, error: true });
 
         renderML();
 
@@ -140,7 +138,7 @@ describe('AssetDialog', () => {
       });
 
       it('does not display folders, if the current page !== 1', () => {
-        useAssets.mockReturnValueOnce({
+        (useAssets as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           error: null,
           data: { pagination: { page: 2 } },
@@ -150,7 +148,7 @@ describe('AssetDialog', () => {
       });
 
       it('does not display folders, if the mime-type filter was applied', () => {
-        useModalQueryParams.mockReturnValueOnce([
+        (useModalQueryParams as jest.Mock).mockReturnValueOnce([
           {
             queryObject: {
               page: 1,
