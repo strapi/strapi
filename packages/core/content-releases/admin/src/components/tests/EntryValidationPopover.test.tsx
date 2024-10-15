@@ -16,7 +16,7 @@ describe('EntryValidationPopover', () => {
     schema: {
       kind: 'collectionType',
       uid: 'api::article.article',
-      options: { reviewWorkflows: true },
+      hasReviewWorkflow: true,
       stageRequiredToPublish: { id: 'stage1', name: 'Ready' },
     },
     entry: {

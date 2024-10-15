@@ -109,9 +109,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         metrics.sendDidCreateWorkflow();
 
         // Create Workflow
-        return strapi.db
+        const createdWorkflow = await strapi.db
           .query(WORKFLOW_MODEL_UID)
           .create(strapi.get('query-params').transform(WORKFLOW_MODEL_UID, createOpts));
+
+        if (opts.data.stageRequiredToPublishName) {
+          await strapi
+            .plugin('content-releases')
+            .service('release-action')
+            .validateActionsByContentTypes(opts.data.contentTypes);
+        }
+
+        return createdWorkflow;
       });
     },
 
@@ -180,10 +189,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, updateOpts);
 
         // Update Workflow
-        return strapi.db.query(WORKFLOW_MODEL_UID).update({
+        const updatedWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).update({
           ...query,
           where: { id: workflow.id },
         });
+
+        await strapi
+          .plugin('content-releases')
+          .service('release-action')
+          .validateActionsByContentTypes([
+            ...workflow.contentTypes,
+            ...(opts.data.contentTypes || []),
+          ]);
+
+        return updatedWorkflow;
       });
     },
 
@@ -214,11 +233,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, opts);
+
         // Delete Workflow
-        return strapi.db.query(WORKFLOW_MODEL_UID).delete({
+        const deletedWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).delete({
           ...query,
           where: { id: workflow.id },
         });
+
+        await strapi
+          .plugin('content-releases')
+          .service('release-action')
+          .validateActionsByContentTypes(workflow.contentTypes);
+
+        return deletedWorkflow;
       });
     },
     /**
