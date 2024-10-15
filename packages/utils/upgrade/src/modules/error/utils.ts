@@ -19,6 +19,12 @@ export class NPMCandidateNotFoundError extends Error {
   }
 }
 
+export class AbortedError extends Error {
+  constructor(message: string = 'Upgrade aborted') {
+    super(message);
+  }
+}
+
 export const unknownToError = (e: unknown): Error => {
   if (e instanceof Error) {
     return e;

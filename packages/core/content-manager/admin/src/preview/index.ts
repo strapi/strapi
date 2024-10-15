@@ -3,6 +3,7 @@
 import { PreviewSidePanel } from './components/PreviewSidePanel';
 import { FEATURE_ID } from './constants';
 
+import type { ContentManagerPlugin } from '../content-manager';
 import type { PluginDefinition } from '@strapi/admin/strapi-admin';
 
 const previewAdmin = {
@@ -12,14 +13,10 @@ const previewAdmin = {
       return;
     }
 
-    const contentManagerPluginApis = app.getPlugin('content-manager').apis;
+    const contentManagerPluginApis = app.getPlugin('content-manager')
+      .apis as ContentManagerPlugin['config']['apis'];
 
-    if (
-      'addEditViewSidePanel' in contentManagerPluginApis &&
-      typeof contentManagerPluginApis.addEditViewSidePanel === 'function'
-    ) {
-      contentManagerPluginApis.addEditViewSidePanel([PreviewSidePanel]);
-    }
+    contentManagerPluginApis.addEditViewSidePanel([PreviewSidePanel]);
   },
 } satisfies Partial<PluginDefinition>;
 
