@@ -1,6 +1,6 @@
 import type { If, StrictEqual } from '../../utils';
 
-type ClientKind = 'mysql' | 'postgres' | 'sqlite';
+export type ClientKind = 'mysql' | 'postgres' | 'sqlite';
 
 type IfClientIs<TClient extends ClientKind, TClientKind extends ClientKind, TOnTrue, TOnFalse> = If<
   StrictEqual<TClient, TClientKind>,
@@ -45,7 +45,7 @@ type SqliteConnection = {
   filename: string;
 } & { [key: string]: unknown };
 
-export interface Database<TClient extends ClientKind> {
+export interface Database<TClient extends ClientKind = ClientKind> {
   connection: {
     client: TClient;
     connection: IfClientIs<TClient, 'sqlite', SqliteConnection, Connection<TClient>>;
