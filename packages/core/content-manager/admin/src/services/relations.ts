@@ -67,8 +67,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
              * Relations will always have unique IDs, so we can therefore assume
              * that we only need to push the new items to the cache.
              */
-
-            currentCache.results.push(...prepareTempKeys(newItems.results, currentCache.results));
+            currentCache.results = prepareTempKeys([...newItems.results, ...currentCache.results]);
             currentCache.pagination = newItems.pagination;
           } else if (newItems.pagination.page === 1) {
             /**
@@ -178,11 +177,8 @@ const relationsApi = contentManagerApi.injectEndpoints({
  * @description Adds a `__temp_key__` to each relation item. This gives us
  * a stable identifier regardless of it's ids etc. that we can then use for drag and drop.
  */
-const prepareTempKeys = (relations: RelResult[], existingRelations: RelationResult[] = []) => {
-  const [firstItem] = existingRelations.slice(0);
-
-  const keys = generateNKeysBetween(null, firstItem?.__temp_key__ ?? null, relations.length);
-
+const prepareTempKeys = (relations: RelResult[]) => {
+  const keys = generateNKeysBetween(null, null, relations.length);
   return relations.map((datum, index) => ({
     ...datum,
     __temp_key__: keys[index],
