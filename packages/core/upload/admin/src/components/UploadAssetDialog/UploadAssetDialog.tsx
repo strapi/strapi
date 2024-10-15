@@ -5,6 +5,8 @@ import { useIntl } from 'react-intl';
 
 import { EditAssetContent } from '../EditAssetDialog';
 
+import type { AllowedFiles } from '../../utils';
+
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
 import type { File, RawFile } from '../../../../shared/contracts/files';
@@ -20,20 +22,25 @@ interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {
   rawFile: RawFile;
 }
 
-interface Asset extends Omit<File, 'folder'> {
+type FileWithoutIdHash = Omit<File, 'id' | 'hash'>;
+
+export interface Asset extends Omit<File, 'folder'> {
   isLocal?: boolean;
   rawFile?: RawFile;
   folder?: File['folder'] & { id: number };
 }
 
-interface UploadAssetDialogProps {
+export interface UploadAssetDialogProps {
   addUploadedFiles?: (files: Asset[] | File[]) => void;
   folderId?: string | number | null;
   initialAssetsToAdd?: Asset[];
   onClose: () => void;
   open: boolean;
   trackedLocation?: string;
-  validateAssetsTypes?: (assets: Asset[], cb: (error?: string) => void) => void;
+  validateAssetsTypes?: (
+    assets: FileWithoutIdHash[] | Asset[],
+    cb: (assets?: AllowedFiles[], error?: string) => void
+  ) => void;
 }
 
 export const UploadAssetDialog = ({

@@ -21,7 +21,7 @@ interface MediaLibraryDialogProps {
 export const MediaLibraryDialog = ({
   onClose,
   onSelectAssets,
-  allowedTypes,
+  allowedTypes = ['files', 'images', 'videos', 'audios'],
 }: MediaLibraryDialogProps) => {
   const [step, setStep] = React.useState(STEPS.AssetSelect);
   const [folderId, setFolderId] = React.useState<number | null>(null);

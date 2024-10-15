@@ -12,7 +12,7 @@ import { EmptyStateAsset } from './EmptyStateAsset';
 
 import type { File as FileAsset, RawFile } from '../../../../../shared/contracts/files';
 
-type FileWithoutIdHash = Omit<FileAsset, 'id' | 'hash'>;
+export type FileWithoutIdHash = Omit<FileAsset, 'id' | 'hash'>;
 
 interface Asset extends Omit<FileAsset, 'folder'> {
   isLocal?: boolean;
@@ -20,7 +20,7 @@ interface Asset extends Omit<FileAsset, 'folder'> {
   folder?: FileAsset['folder'] & { id: number };
 }
 
-interface CarouselAssetsProps {
+export interface CarouselAssetsProps {
   assets: FileAsset[];
   disabled?: boolean;
   error?: string;

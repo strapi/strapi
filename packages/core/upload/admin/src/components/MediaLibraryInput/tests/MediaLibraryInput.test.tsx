@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Form } from '@strapi/admin/strapi-admin';
 import { screen, render } from '@tests/utils';
 
@@ -7,7 +5,7 @@ import { MediaLibraryInput } from '../index';
 
 describe('<MediaLibraryInput />', () => {
   it('renders and matches the snapshot', () => {
-    render(<MediaLibraryInput name="test" label="default message" required />, {
+    render(<MediaLibraryInput attribute={{}} name="test" label="default message" required />, {
       renderOptions: {
         wrapper: ({ children }) => (
           <Form onSubmit={jest.fn()} method="POST">
