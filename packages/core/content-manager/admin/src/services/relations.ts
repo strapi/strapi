@@ -66,6 +66,8 @@ const relationsApi = contentManagerApi.injectEndpoints({
             /**
              * Relations will always have unique IDs, so we can therefore assume
              * that we only need to push the new items to the cache.
+             *
+             * Push new items at the beginning as latest items are shown first
              */
             currentCache.results = prepareTempKeys([...newItems.results, ...currentCache.results]);
             currentCache.pagination = newItems.pagination;
