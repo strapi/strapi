@@ -42,7 +42,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@sendgrid/mail": "7.7.0",
+    "@sendgrid/mail": "8.1.3",
     "@strapi/utils": "workspace:*"
   },
   "devDependencies": {

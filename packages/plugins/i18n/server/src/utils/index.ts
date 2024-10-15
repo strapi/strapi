@@ -4,6 +4,7 @@ import type { ContentTypesService } from '../services/content-types';
 import type { MetricsService } from '../services/metrics';
 import type { ISOLocalesService } from '../services/iso-locales';
 import type { LocalizationsService } from '../services/localizations';
+import type { SanitizeService } from '../services/sanitize';
 
 type S = {
   permissions: PermissionsService;
@@ -12,6 +13,7 @@ type S = {
   localizations: LocalizationsService;
   ['iso-locales']: ISOLocalesService;
   ['content-types']: ContentTypesService;
+  sanitize: SanitizeService;
 };
 
 const getCoreStore = () => {
