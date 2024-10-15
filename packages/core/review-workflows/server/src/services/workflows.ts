@@ -197,7 +197,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         await strapi
           .plugin('content-releases')
           .service('release-action')
-          .validateActionsByContentTypes([...workflow.contentTypes, ...opts.data.contentTypes]);
+          .validateActionsByContentTypes([
+            ...workflow.contentTypes,
+            ...(opts.data.contentTypes || []),
+          ]);
 
         return updatedWorkflow;
       });
