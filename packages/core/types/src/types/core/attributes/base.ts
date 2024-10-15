@@ -43,6 +43,7 @@ export interface Attribute<TKind extends Kind = Kind> {
   /**
    * Database validations and settings
    * https://docs-v4.strapi.io/dev-docs/backend-customization/models#database-validations-and-settings
+   * @experimental
    * @deprecated The column property is experimental and can be deprecated/changed at any time in the future.
    */
   column?: Partial<Column>;
