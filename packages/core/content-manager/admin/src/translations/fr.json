@@ -49,7 +49,7 @@
   "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
   "components.TableEmpty.withSearch": "Aucun {contentType} n'a été trouvé avec cette recherche ({search})...",
   "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
-  "components.empty-repeatable": "Il n'a pas encore d'entrée. Cliquez sur le bouton pour en ajouter une.",
+  "components.empty-repeatable": "Il n'a pas encore d'entrée. Cliquez pour en ajouter une.",
   "components.notification.info.maximum-requirement": "Le nombre maximal de champs est atteint",
   "components.notification.info.minimum-requirement": "Un champ a été rajouté pour remplir les conditions minimales",
   "components.repeatable.reorder.error": "Une erreur s'est produite lors de la réorganisation du champ de votre composant, veuillez réessayer",
@@ -192,5 +192,15 @@
   "apiError.This attribute must be unique": "Le champ {field} doit être unique",
   "popUpWarning.warning.publish-question": "Êtes-vous sûr de vouloir le publier ?",
   "popUpwarning.warning.has-draft-relations.button-confirm": "Oui, publier",
-  "popUpwarning.warning.has-draft-relations.message": "<b>{count, plural, =0 { des relations de votre contenu n'est} one { des relations de votre contenu n'est} other { des relations de votre contenu ne sont}}</b> pas publié actuellement.<br></br>Cela peut engendrer des liens cassés ou des erreurs dans votre projet."
+  "popUpwarning.warning.has-draft-relations.message": "<b>{count, plural, =0 { des relations de votre contenu n'est} one { des relations de votre contenu n'est} other { des relations de votre contenu ne sont}}</b> pas publié actuellement.<br></br>Cela peut engendrer des liens cassés ou des erreurs dans votre projet.",
+  "history.sidebar.show-newer": "Voir les versions récentes",
+  "history.sidebar.show-older": "Voir les anciennes versions",
+  "history.content.new-field.message": "Ce champ n'existait pas lorsque cette version a été sauvegardée. Si vous restaurez cette version, il sera vide.",
+  "history.content.unknown-fields.message": "Ces champs ont été supprimés ou renommés dans le Content-Type Builder. <b>Ces champs ne seront pas restaurés.</b>",
+  "history.content.no-relations": "Aucune relation.",
+  "history.restore.confirm.button": "Restaurer",
+  "history.restore.confirm.title": "Êtes-vous sûr de vouloir restaurer cette version ?",
+  "history.restore.confirm.message": "{isDraft, select, true {Le contenu restauré écrasera votre brouillon.} other {Le contenu restauré ne sera pas publié, il écrasera le brouillon et sera sauvegardé en tant que changement en attente de publication. Vous pourrez publier les changements à tout moment.}}",
+  "history.restore.success.title": "Version restaurée.",
+  "history.restore.success.message": "Le contenu de la version restaurée n'a pas encore été publié."
 }

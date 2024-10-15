@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@koa/cors": "5.0.0",
-    "@koa/router": "12.0.1",
+    "@koa/router": "12.0.2",
     "@paralleldrive/cuid2": "2.2.2",
     "@strapi/admin": "workspace:*",
     "@strapi/database": "workspace:*",
