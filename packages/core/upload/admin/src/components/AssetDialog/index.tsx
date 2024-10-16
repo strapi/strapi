@@ -227,7 +227,7 @@ export const AssetContent = ({
     const nextAssets = moveElement<Asset>(orderedAssetsClone, hoverIndex, offset);
     setSelections(nextAssets);
   };
-  
+
   const handleFolderChange = (folderId: number, folderPath?: string) => {
     onChangeFolder(folderId);
     if (onChangeFolderParam) {

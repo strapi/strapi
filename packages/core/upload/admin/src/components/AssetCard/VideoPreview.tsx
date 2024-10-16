@@ -14,7 +14,14 @@ interface VideoPreviewProps {
   size?: 'S' | 'M';
 }
 
-export const VideoPreview = ({ url, mime, onLoadDuration = () => {}, alt, size='M', ...props }: VideoPreviewProps) => {
+export const VideoPreview = ({
+  url,
+  mime,
+  onLoadDuration = () => {},
+  alt,
+  size = 'M',
+  ...props
+}: VideoPreviewProps) => {
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     if (e.currentTarget.currentTime > 0) {
       const video = e.currentTarget;

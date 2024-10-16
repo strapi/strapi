@@ -148,7 +148,7 @@ export const BrowseStep = ({
   const { formatMessage } = useIntl();
   const [view, setView] = usePersistentState(localStorageKeys.modalView, viewOptions.GRID);
   const isGridView = view === viewOptions.GRID;
-  
+
   const { data: currentFolder, isLoading: isCurrentFolderLoading } = useFolder(
     queryObject?.folder as number | null | undefined,
     {
