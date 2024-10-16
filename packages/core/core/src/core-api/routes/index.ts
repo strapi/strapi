@@ -42,7 +42,7 @@ const getCollectionTypeRoutes = ({ uid, info }: Schema.ContentType) => {
     },
     findOne: {
       method: 'GET',
-      path: `/${info.pluralName}/:id`,
+      path: `/${info.pluralName}/:documentId`,
       handler: `${uid}.findOne`,
       config: {},
     },
@@ -54,13 +54,13 @@ const getCollectionTypeRoutes = ({ uid, info }: Schema.ContentType) => {
     },
     update: {
       method: 'PUT',
-      path: `/${info.pluralName}/:id`,
+      path: `/${info.pluralName}/:documentId`,
       handler: `${uid}.update`,
       config: {},
     },
     delete: {
       method: 'DELETE',
-      path: `/${info.pluralName}/:id`,
+      path: `/${info.pluralName}/:documentId`,
       handler: `${uid}.delete`,
       config: {},
     },
