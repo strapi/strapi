@@ -133,7 +133,7 @@ class Database {
       this.logger.debug('Forcing Knex to make real connection to db');
 
       // sqlite does not support connection pooling so acquireConnection doesn't work
-      if (this.config.connection.client !== 'sqlite') {
+      if (this.config.connection.client === 'sqlite') {
         await this.connection.raw('SELECT 1');
       } else {
         await this.connection.client.acquireConnection();
