@@ -11,5 +11,19 @@ export default class CustomJSDOMEnvironment extends JSDOMEnvironment {
 
     // TODO: remove once https://github.com/jsdom/jsdom/issues/3363 is closed.
     this.global.structuredClone = structuredClone;
+
+    // fixing these global APIs according to https://github.com/mswjs/jest-fixed-jsdom/blob/main/index.js
+    this.global.TextDecoder = TextDecoder;
+    this.global.TextEncoder = TextEncoder;
+    this.global.ReadableStream = ReadableStream;
+
+    this.global.Blob = Blob;
+    this.global.Headers = Headers;
+    this.global.FormData = FormData;
+    this.global.Request = Request;
+    this.global.Response = Response;
+    this.global.fetch = fetch;
+
+    this.global.URL = URL;
   }
 }

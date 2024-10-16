@@ -134,7 +134,6 @@
     "jest-circus": "29.6.0",
     "jest-cli": "29.6.0",
     "jest-environment-jsdom": "29.6.1",
-    "jest-fixed-jsdom": "0.0.4",
     "jest-watch-typeahead": "2.2.2",
     "lerna": "8.1.2",
     "lint-staged": "15.2.10",
