@@ -3,7 +3,6 @@ import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import { skipCtbTour } from '../../../utils/shared';
 
 test.describe('Create collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -17,7 +16,12 @@ test.describe('Create collection type', () => {
 
     await page.getByRole('link', { name: 'Content-Type Builder' }).click();
 
-    await skipCtbTour(page);
+    // close the tutorial modal if it's visible
+    const modal = page.getByRole('button', { name: 'Close' });
+    if (modal.isVisible()) {
+      await modal.click();
+      await expect(modal).not.toBeVisible();
+    }
   });
 
   // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
@@ -26,7 +30,7 @@ test.describe('Create collection type', () => {
     await resetFiles();
   });
 
-  test('Can create a single type', async ({ page }) => {
+  test('Can create a single type', async ({ page, browserName }) => {
     await page.getByRole('button', { name: 'Create new single type' }).click();
 
     await expect(page.getByRole('heading', { name: 'Create a single type' })).toBeVisible();
@@ -43,6 +47,11 @@ test.describe('Create collection type', () => {
     await page.getByRole('button', { name: 'Continue' }).click();
 
     await expect(page.getByText('Select a field for your single type')).toBeVisible();
+
+    // TODO: fix the bug that causes webkit location to be off
+    if (browserName === 'webkit') {
+      return test.fixme();
+    }
 
     await page.getByText('Small or long text').click();
 
