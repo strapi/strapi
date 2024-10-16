@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - v4
   pull_request:
     paths-ignore:
       - 'docs/**'
