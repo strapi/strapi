@@ -132,6 +132,25 @@ const EntryStatusTrigger = ({
     );
   }
 
+  if (status === 'published') {
+    return (
+      <Popover.Trigger>
+        <Button
+          variant="ghost"
+          startIcon={<CheckCircle fill="success600" />}
+          endIcon={<CaretDown />}
+        >
+          <Typography textColor="success600" variant="omega" fontWeight="bold">
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
+              defaultMessage: 'Ready to unpublish',
+            })}
+          </Typography>
+        </Button>
+      </Popover.Trigger>
+    );
+  }
+
   return (
     <Popover.Trigger>
       <Button variant="ghost" startIcon={<CheckCircle fill="success600" />} endIcon={<CaretDown />}>
