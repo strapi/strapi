@@ -47,7 +47,7 @@ const getFileData = (filePath: string) => ({
   alternativeText: 'image.png',
   caption: 'image.png',
   ext: '.png',
-  folder: null,
+  folder: undefined,
   folderPath: '/',
   filepath: filePath,
   getStream: () => fs.createReadStream(filePath),
@@ -56,6 +56,7 @@ const getFileData = (filePath: string) => ({
   size: 4,
   width: 1500,
   tmpWorkingDirectory,
+  name: 'image.png',
 });
 
 describe('Upload image', () => {

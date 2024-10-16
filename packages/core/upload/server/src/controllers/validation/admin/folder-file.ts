@@ -29,7 +29,7 @@ const validateStructureMoveManyFoldersFilesSchema = yup
 
 const validateDuplicatesMoveManyFoldersFilesSchema = yup
   .object()
-  .test('are-folders-unique', 'some folders already exist', async function (value) {
+  .test('are-folders-unique', 'some folders already exist', async function areFoldersUnique(value) {
     const { folderIds, destinationFolderId } = value;
     if (isEmpty(folderIds)) return true;
 
@@ -58,7 +58,7 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
   .test(
     'dont-move-inside-self',
     'folders cannot be moved inside themselves or one of its children',
-    async function (value) {
+    async function validateMoveFoldersNotInsideThemselves(value) {
       const { folderIds, destinationFolderId } = value;
       if (destinationFolderId === null || isEmpty(folderIds)) return true;
 

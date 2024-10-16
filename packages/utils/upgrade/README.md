@@ -39,7 +39,7 @@ Data migrations are not handled by the upgrade tool.
 
 For Strapi v4, no data migrations will be allowed and no support is planned (except in extenuating circumstances eg, a critical security issue somehow relating to the database shape)
 
-For Strapi v5, automated data migrations can be added in the `packages/core/database` package of the `v5/main` branch of this repo.
+For Strapi v5, automated data migrations can be added in the `packages/core/database` package of the `develop` branch of this repo.
 
 ## Usage
 

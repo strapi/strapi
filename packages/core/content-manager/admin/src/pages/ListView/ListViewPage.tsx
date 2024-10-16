@@ -100,9 +100,21 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+  const queryString = React.useMemo(
+    () => stringify(params, { encode: true, encodeValuesOnly: true }),
+    [params]
+  );
+  const paramObject = React.useMemo(() => {
+    const pairs = queryString.split('&').map((param) => {
+      const [key, value] = param.split('=');
+      return { [key]: value };
+    });
+    return Object.assign({}, ...pairs);
+  }, [queryString]);
+
   const { data, error, isFetching } = useGetAllDocumentsQuery({
     model,
-    params,
+    params: paramObject,
   });
 
   /**

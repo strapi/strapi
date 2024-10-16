@@ -16,6 +16,7 @@ interface SelectCategoryProps {
   onChange: (value: { target: { name: string; value: any; type: string } }) => void;
   value?: string;
   isCreating?: boolean;
+  dynamicZoneTarget?: string | null;
 }
 
 export const SelectCategory = ({
@@ -25,6 +26,7 @@ export const SelectCategory = ({
   onChange,
   value = undefined,
   isCreating,
+  dynamicZoneTarget,
 }: SelectCategoryProps) => {
   const { formatMessage } = useIntl();
   const { allComponentsCategories } = useDataManager();
@@ -48,7 +50,7 @@ export const SelectCategory = ({
       <Combobox
         // TODO: re-enable category edits, renaming categories of already existing components currently breaks other functionality
         // See https://github.com/strapi/strapi/issues/20356
-        disabled={!isCreating}
+        disabled={!isCreating && !dynamicZoneTarget}
         onChange={handleChange}
         onCreateOption={handleCreateOption}
         value={value}

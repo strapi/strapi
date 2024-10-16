@@ -3,9 +3,11 @@ import { Config, defineConfig } from '@strapi/pack-up';
 const config: Config = defineConfig({
   bundles: [
     {
-      source: './admin/src/index.js',
+      types: './dist/admin/src/index.d.ts',
+      source: './admin/src/index.js', // TODO: change it with the .ts file
       import: './dist/admin/index.mjs',
       require: './dist/admin/index.js',
+      tsconfig: './admin/tsconfig.build.json',
       runtime: 'web',
     },
     {

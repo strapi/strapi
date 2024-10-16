@@ -118,7 +118,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           minute: 'numeric',
         })}
         subtitle={
-          <Typography variant="epsilon">
+          <Typography variant="epsilon" textColor="neutral600">
             {formatMessage(
               {
                 id: 'content-manager.history.version.subtitle',

@@ -19,7 +19,7 @@ interface RawColumn {
 interface RawIndex {
   Key_name: string;
   Column_name: string;
-  Non_unique: boolean;
+  Non_unique: boolean | string;
 }
 
 interface RawForeignKey {
@@ -205,7 +205,7 @@ export default class MysqlSchemaInspector implements SchemaInspector {
           columns: [index.Column_name],
           name: index.Key_name,
         };
-        if (!index.Non_unique) {
+        if (!index.Non_unique || index.Non_unique === '0') {
           indexInfo.type = 'unique';
         }
 

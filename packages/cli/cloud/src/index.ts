@@ -6,6 +6,7 @@ import login from './login';
 import logout from './logout';
 import createProject from './create-project';
 import listProjects from './list-projects';
+import listEnvironments from './environment/list';
 import { CLIContext } from './types';
 import { getLocalConfig, saveLocalConfig } from './config/local';
 
@@ -16,9 +17,10 @@ export const cli = {
   logout,
   createProject,
   listProjects,
+  listEnvironments,
 };
 
-const cloudCommands = [deployProject, link, login, logout, listProjects];
+const cloudCommands = [deployProject, link, login, logout, listProjects, listEnvironments];
 
 async function initCloudCLIConfig() {
   const localConfig = await getLocalConfig();
