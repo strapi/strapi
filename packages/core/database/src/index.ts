@@ -130,8 +130,14 @@ class Database {
        * change that it cannot be relied on to exist before init so that we can call
        * this feature stable.
        */
-      this.logger.debug('Forcing Knex to init the client pool');
-      await this.connection.client.acquireConnection();
+      this.logger.debug('Forcing Knex to make real connection to db');
+
+      // sqlite does not support connection pooling so acquireConnection doesn't work
+      if (this.config.connection.client !== 'sqlite') {
+        await this.connection.raw('SELECT 1');
+      } else {
+        await this.connection.client.acquireConnection();
+      }
     }
 
     this.metadata.loadModels(models);
