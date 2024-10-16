@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import {
-  clickLinkAndWaitForLoad,
+  clickLocatorAndWaitForLoad,
   describeOnCondition,
   findAndClose,
   skipCtbTour,
@@ -43,7 +43,7 @@ const goToHistoryPage = async (page: Page) => {
 };
 
 const goToContentTypeBuilder = async (page: Page) => {
-  await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+  await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   await skipCtbTour(page);
 };
 
@@ -62,8 +62,8 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test('A user should be able to restore a history version', async ({ page }) => {
-    await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickLinkAndWaitForLoad(
+    await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickLocatorAndWaitForLoad(
       page,
       page.getByRole('link', { name: /Create new entry/, exact: true })
     );
@@ -100,10 +100,10 @@ describeOnCondition(edition === 'EE')('History', () => {
       page,
     }) => {
       // Navigate to the content-manager - collection type - article
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
       await page.getByRole('combobox', { name: 'Select a locale' }).click();
       await page.getByRole('option', { name: 'French (fr)' }).click();
-      await clickLinkAndWaitForLoad(
+      await clickLocatorAndWaitForLoad(
         page,
         page.getByRole('link', { name: /Create new entry/, exact: true })
       );
@@ -127,8 +127,8 @@ describeOnCondition(edition === 'EE')('History', () => {
 
       // Go back to the CM to create a new english entry
       await page.goto('/admin');
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickLinkAndWaitForLoad(
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(
         page,
         page.getByRole('link', { name: /Create new entry/, exact: true })
       );
@@ -158,7 +158,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
       // Go back to the entry
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
 
       /**
        * Update
@@ -179,7 +179,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(previousVersion.getByText('(current)')).not.toBeVisible();
 
       // Go back to the entry
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
 
       /**
        * Publish
@@ -197,7 +197,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue('Being from Kansas City');
 
       // Go back to the entry
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
 
       /**
        * Modified
@@ -216,9 +216,9 @@ describeOnCondition(edition === 'EE')('History', () => {
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create new author
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Author' }));
-      await clickLinkAndWaitForLoad(
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Author' }));
+      await clickLocatorAndWaitForLoad(
         page,
         page.getByRole('link', { name: /Create new entry/, exact: true })
       );
@@ -228,9 +228,9 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(AUTHOR_EDIT_URL);
 
       // Create new article and add authors to it
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Article' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Article' }));
       await page.waitForURL(ARTICLE_LIST_URL);
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Create new entry' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Create new entry' }));
       await page.getByRole('textbox', { name: 'title' }).fill('Zava retires');
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Will Kitman').click();
@@ -240,14 +240,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(ARTICLE_EDIT_URL);
 
       // Delete one of the authors, leaving only Coach Beard
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Will Kitman' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Will Kitman' }));
       await page.waitForURL(AUTHOR_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the the article's history page
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Article' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Article' }));
       await page.getByRole('gridcell', { name: 'Zava retires' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
       await goToHistoryPage(page);
@@ -265,8 +265,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Create an initial entry to also create an initial version
        */
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickLinkAndWaitForLoad(
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(
         page,
         page.getByRole('link', { name: /Create new entry/, exact: true })
       );
@@ -294,8 +294,8 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Update the existing entry to create another version
        */
       await page.goto('/admin');
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Article' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Article' }));
       await page.getByRole('gridcell', { name: 'being-from-kansas' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Being from Kansas City');
@@ -331,8 +331,8 @@ describeOnCondition(edition === 'EE')('History', () => {
         /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
 
       // Navigate to the content-manager - single type - homepage
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
       await page.getByRole('combobox', { name: 'Locales' }).click();
       await page.getByRole('option', { name: 'French (fr)' }).click();
 
@@ -350,7 +350,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue(frenchTitle);
 
       // Go back to the CM to create a new english entry
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
       await page.getByRole('combobox', { name: 'Locales' }).click();
       await page.getByRole('option', { name: 'English (en)' }).click();
 
@@ -377,7 +377,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
       // Go back to the entry
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
 
       /**
        * Update
@@ -395,7 +395,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue('AFC Richmond');
 
       // Go back to the entry
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
 
       /**
        * Publish
@@ -414,7 +414,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
 
       // Go back to the entry
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Back' }));
 
       /**
        * Modified
@@ -434,7 +434,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Create relation in Content-Type Builder
       await goToContentTypeBuilder(page);
 
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
       );
@@ -449,11 +449,11 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(page.getByRole('cell', { name: 'authors', exact: true })).toBeVisible();
 
       // Create new author
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
       // await page.waitForSelector('text=Author');
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Author' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Author' }));
       // await page.waitForSelector('text=Create new entry');
-      await clickLinkAndWaitForLoad(
+      await clickLocatorAndWaitForLoad(
         page,
         page.getByRole('link', { name: /Create new entry/, exact: true })
       );
@@ -463,7 +463,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(AUTHOR_EDIT_URL);
 
       // Add author to homepage
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
       await page.waitForURL(HOMEPAGE_EDIT_URL);
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Will Kitman').click();
@@ -472,14 +472,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Save' }).click();
 
       // Delete one of the authors, leaving only Coach Beard
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Will Kitman' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Will Kitman' }));
       await page.waitForURL(AUTHOR_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the the article's history page
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
       await page.waitForURL(HOMEPAGE_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /content history/i }).click();
@@ -497,8 +497,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Create an initial entry to also create an initial version
        */
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
@@ -508,7 +508,7 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await goToContentTypeBuilder(page);
 
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
       );
@@ -523,8 +523,8 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Update the existing entry to create another version
        */
       await page.goto('/admin');
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Homepage' }));
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');

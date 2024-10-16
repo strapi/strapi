@@ -81,7 +81,7 @@ export const skipCtbTour = async (page: Page) => {
  * NOTE: this util is used to avoid inconsistent behaviour on webkit
  *
  */
-export const clickLinkAndWaitForLoad = async (page: Page, locator: Locator) => {
+export const clickLocatorAndWaitForLoad = async (page: Page, locator: Locator) => {
   await locator.click();
 
   if (page.context().browser()?.browserType().name() === 'webkit') {
