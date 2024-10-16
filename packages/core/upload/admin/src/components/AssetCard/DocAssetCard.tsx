@@ -23,7 +23,7 @@ interface DocAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'childr
 export const DocAssetCard = ({
   name,
   extension,
-  size,
+  size = 'M',
   selected = false,
   ...restProps
 }: DocAssetCardProps) => {
