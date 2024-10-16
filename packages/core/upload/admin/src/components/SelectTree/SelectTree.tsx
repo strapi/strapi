@@ -200,7 +200,7 @@ const CarretBox = styled(IconBox)`
   }
 `;
 
-const DropdownIndicator = ({ innerProps }: { innerProps: any }) => {
+const DropdownIndicator = ({ innerProps }: { innerProps: object }) => {
   return (
     <CarretBox paddingRight={3} {...innerProps}>
       <CaretDown />
@@ -307,7 +307,7 @@ const getSelectStyles = (
       whiteSpace: 'nowrap',
       maxWidth: '80%',
     }),
-    singleValue(base: object, state: { isDisabled: any }) {
+    singleValue(base: object, state: { isDisabled: boolean }) {
       let color = theme.colors.neutral800;
 
       if (state.isDisabled) {

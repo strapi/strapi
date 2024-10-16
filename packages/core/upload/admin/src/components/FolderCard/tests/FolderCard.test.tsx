@@ -49,15 +49,11 @@ describe('FolderCard', () => {
     const callback = jest.fn();
     const { container } = setup({ onClick: callback });
 
-    const button = container.querySelector('button');
+    act(() => {
+      fireEvent(container.querySelector('button')!, new MouseEvent('click', { bubbles: true }));
+    });
 
-    if (button) {
-      act(() => {
-        fireEvent(button, new MouseEvent('click', { bubbles: true }));
-      });
-
-      expect(callback).toHaveBeenCalledTimes(1);
-    }
+    expect(callback).toHaveBeenCalledTimes(1);
   });
 
   test('has all required ids set when rendering a start action', () => {
