@@ -27,6 +27,9 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      api: ${{ steps.filter.outputs.api }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      cli: ${{ steps.filter.outputs.cli }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,6 +60,7 @@ jobs:
 
   lint:
     name: 'lint (node: ${{ matrix.node }})'
+    needs: [build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -94,7 +98,7 @@ jobs:
 
   typescript:
     name: 'typescript (node: ${{ matrix.node }})'
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -121,7 +125,7 @@ jobs:
   unit_back:
     if: needs.changes.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     env:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
@@ -144,8 +148,9 @@ jobs:
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
+    if: needs.changes.outputs.frontend == 'true'
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -167,10 +172,10 @@ jobs:
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
-    name: '[CE] e2e (browser: ${{ matrix.project }})'
+    needs: [changes, build]
+    name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -209,10 +214,10 @@ jobs:
           retention-days: 1
 
   e2e_ee:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
-    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    needs: [changes, build]
+    name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
@@ -254,9 +259,9 @@ jobs:
           retention-days: 1
 
   cli:
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true'
     timeout-minutes: 60
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:
@@ -281,9 +286,9 @@ jobs:
         run: yarn test:cli
 
   api_ce_pg:
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -321,9 +326,9 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -356,13 +361,13 @@ jobs:
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
         with:
-          dbOptions: '--dbclient=${{ matrix.db_client }} --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -385,9 +390,9 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -428,9 +433,9 @@ jobs:
 
   api_ee_mysql:
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -470,9 +475,9 @@ jobs:
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [changes, lint, pretty, build]
+    needs: [changes, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
