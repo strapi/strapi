@@ -88,7 +88,7 @@
     "koa": "2.15.2",
     "koa-body": "6.0.1",
     "koa-session": "6.4.0",
-    "msw": "2.4.9",
+    "msw": "2.4.11",
     "openapi-types": "12.1.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",

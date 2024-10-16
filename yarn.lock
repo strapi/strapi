@@ -7207,7 +7207,7 @@ __metadata:
     koa-static: "npm:5.0.0"
     koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     node-schedule: "npm:2.1.1"
     ora: "npm:5.4.1"
     p-map: "npm:4.0.0"
@@ -7316,7 +7316,7 @@ __metadata:
     markdown-it-mark: "npm:^3.0.1"
     markdown-it-sub: "npm:^1.0.0"
     markdown-it-sup: "npm:1.0.0"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     node-schedule: "npm:2.1.1"
     qs: "npm:6.11.1"
     react: "npm:18.3.1"
@@ -7367,7 +7367,7 @@ __metadata:
     formik: "npm:2.4.5"
     koa: "npm:2.15.2"
     lodash: "npm:4.17.21"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     node-schedule: "npm:2.1.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -7627,7 +7627,7 @@ __metadata:
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
@@ -7712,7 +7712,7 @@ __metadata:
     "@testing-library/react": "npm:15.0.7"
     "@testing-library/user-event": "npm:14.5.2"
     lodash: "npm:4.17.21"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     qs: "npm:6.11.1"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -7945,7 +7945,7 @@ __metadata:
     koa-session: "npm:6.4.0"
     koa-static: "npm:^5.0.0"
     lodash: "npm:4.17.21"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     openapi-types: "npm:12.1.3"
     path-to-regexp: "npm:6.3.0"
     react: "npm:18.3.1"
@@ -8054,7 +8054,7 @@ __metadata:
     koa: "npm:2.15.2"
     koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     prop-types: "npm:^15.8.1"
     purest: "npm:4.0.2"
     react: "npm:18.3.1"
@@ -8197,7 +8197,7 @@ __metadata:
     "@strapi/utils": "workspace:*"
     "@testing-library/react": "npm:15.0.7"
     fractional-indexing: "npm:3.2.0"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
     react-dnd-html5-backend: "npm:16.0.1"
@@ -8485,7 +8485,7 @@ __metadata:
     koa-static: "npm:5.0.0"
     lodash: "npm:4.17.21"
     mime-types: "npm:2.1.35"
-    msw: "npm:2.4.9"
+    msw: "npm:2.4.11"
     prop-types: "npm:^15.8.1"
     qs: "npm:6.11.1"
     react: "npm:18.3.1"
@@ -20096,15 +20096,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-fixed-jsdom@npm:0.0.4":
-  version: 0.0.4
-  resolution: "jest-fixed-jsdom@npm:0.0.4"
-  peerDependencies:
-    jest-environment-jsdom: ">=28.0.0"
-  checksum: 10c0/31bde19df1feb9e6ac28fdaedb27026a5962cc17e135b300770b627e29d6a12797e5d1880456647894fb62d0ee67dcf4fcd3ef86d8f298cee7f9d5cc567fdcf1
-  languageName: node
-  linkType: hard
-
 "jest-get-type@npm:^29.4.3, jest-get-type@npm:^29.6.3":
   version: 29.6.3
   resolution: "jest-get-type@npm:29.6.3"
@@ -22711,9 +22702,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"msw@npm:2.4.9":
-  version: 2.4.9
-  resolution: "msw@npm:2.4.9"
+"msw@npm:2.4.11":
+  version: 2.4.11
+  resolution: "msw@npm:2.4.11"
   dependencies:
     "@bundled-es-modules/cookie": "npm:^2.0.0"
     "@bundled-es-modules/statuses": "npm:^1.0.1"
@@ -22727,10 +22718,10 @@ __metadata:
     graphql: "npm:^16.8.1"
     headers-polyfill: "npm:^4.0.2"
     is-node-process: "npm:^1.2.0"
-    outvariant: "npm:^1.4.2"
+    outvariant: "npm:^1.4.3"
     path-to-regexp: "npm:^6.3.0"
     strict-event-emitter: "npm:^0.5.1"
-    type-fest: "npm:^4.9.0"
+    type-fest: "npm:^4.26.1"
     yargs: "npm:^17.7.2"
   peerDependencies:
     typescript: ">= 4.8.x"
@@ -22739,7 +22730,7 @@ __metadata:
       optional: true
   bin:
     msw: cli/index.js
-  checksum: 10c0/2ba476d49807161514b1551ef2e121b9540941d3cff7be6ef83183df4f4509a27ae6db7258d2fc75c4b171c5963ecb489a8f49e57f062d2a4cb57b98d636c759
+  checksum: 10c0/2deb2ab740f2c937d74d9141c0f78864f3d45b44b939980a05b317a8c0eb81b3ca9205311eec3baabe0be0da63a3188f174c2657c70d31cbc45c8492f043a4a0
   languageName: node
   linkType: hard
 
@@ -24049,7 +24040,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"outvariant@npm:^1.4.2, outvariant@npm:^1.4.3":
+"outvariant@npm:^1.4.3":
   version: 1.4.3
   resolution: "outvariant@npm:1.4.3"
   checksum: 10c0/5976ca7740349cb8c71bd3382e2a762b1aeca6f33dc984d9d896acdf3c61f78c3afcf1bfe9cc633a7b3c4b295ec94d292048f83ea2b2594fae4496656eba992c
@@ -27975,7 +27966,6 @@ __metadata:
     jest-circus: "npm:29.6.0"
     jest-cli: "npm:29.6.0"
     jest-environment-jsdom: "npm:29.6.1"
-    jest-fixed-jsdom: "npm:0.0.4"
     jest-watch-typeahead: "npm:2.2.2"
     lerna: "npm:8.1.2"
     lint-staged: "npm:15.2.10"
@@ -29342,7 +29332,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^4.9.0":
+"type-fest@npm:^4.26.1":
   version: 4.26.1
   resolution: "type-fest@npm:4.26.1"
   checksum: 10c0/d2719ff8d380befe8a3c61068f37f28d6fa2849fd140c5d2f0f143099e371da6856aad7c97e56b83329d45bfe504afe9fd936a7cff600cc0d46aa9ffb008d6c6
