@@ -122,19 +122,16 @@ class Database {
     if (typeof this.config.connection.connection === 'function') {
       /*
        * User code needs to be able to access `connection.connection` directly as if
-       * it were always an object. Running a query forces Knex to resolve the
-       * function into an object if it hasn't yet.
-       *
-       * Note that this works in practice, but Knex doesn't guarantee it, so it could
-       * break in the future.
+       * it were always an object. For a connection function, that doesn't happen
+       * until the pool is created, so we need to do that here
        *
        * TODO: In the next major version, we need to replace all internal code that
-       * references `connection.connection` directly and list it as a breaking
-       * change. Instead, we can provide a `resolvedConnection` method that can be
-       * relied on to be an object.
+       * directly references `connection.connection` prior to init, and make a breaking
+       * change that it cannot be relied on to exist before init so that we can call
+       * this feature stable.
        */
-      this.logger.debug('Forcing Knex to resolve connection function to object in db init');
-      await this.connection.select(this.connection.raw('1'));
+      this.logger.debug('Forcing Knex to init the client pool');
+      await this.connection.client.acquireConnection();
     }
 
     this.metadata.loadModels(models);
