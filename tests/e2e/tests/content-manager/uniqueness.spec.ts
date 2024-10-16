@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose } from '../../utils/shared';
+import { findAndClose, clickLinkAndWaitForLoad } from '../../utils/shared';
 
 type Field = {
   name: string;
@@ -20,8 +20,8 @@ test.describe('Uniqueness', () => {
     await page.goto('/admin');
     await login({ page });
 
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Unique' }).click();
+    await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Unique' }));
   });
 
   const SCALAR_FIELDS: Field[] = [
@@ -127,7 +127,7 @@ test.describe('Uniqueness', () => {
   };
 
   const createNewEntry = async (page: Page, url: RegExp) => {
-    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Create new entry' }));
     await page.waitForURL(url);
   };
 
@@ -142,7 +142,7 @@ test.describe('Uniqueness', () => {
   };
 
   const navigateToListView = async (page: Page) => {
-    await page.getByRole('link', { name: 'Unique' }).click();
+    await clickLinkAndWaitForLoad(page, page.getByRole('link', { name: 'Unique' }));
     if (await page.getByText('Confirmation').isVisible()) {
       await page.getByRole('button', { name: 'Confirm' }).click();
     }
@@ -173,12 +173,7 @@ test.describe('Uniqueness', () => {
 
     test(`A user should not be able to duplicate the ${field.name} ${fieldDescription} value in the same content type and dimensions (locale + publication state).`, async ({
       page,
-      browserName,
     }) => {
-      // TODO: there is a webkit bug to be fixed
-      if (browserName === 'webkit') {
-        return test.fixme();
-      }
       await createNewEntry(page, CREATE_URL);
 
       const fieldRole = 'role' in field ? field.role : 'textbox';
