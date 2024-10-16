@@ -16,7 +16,7 @@ interface Asset extends Omit<File, 'id' | 'hash'> {
 
 const uploadAsset = (
   asset: Asset,
-  folderId: number,
+  folderId: number | null,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
   post: FetchClient['post']
@@ -56,7 +56,7 @@ export const useUpload = () => {
   const mutation = useMutation<
     CreateFile.Response['data'],
     CreateFile.Response['error'],
-    { asset: Asset; folderId: number }
+    { asset: Asset; folderId: number | null }
   >(
     ({ asset, folderId }) => {
       return uploadAsset(asset, folderId, signal, setProgress, post);
@@ -69,7 +69,8 @@ export const useUpload = () => {
     }
   );
 
-  const upload = (asset: Asset, folderId: number) => mutation.mutateAsync({ asset, folderId });
+  const upload = (asset: Asset, folderId: number | null) =>
+    mutation.mutateAsync({ asset, folderId });
 
   const cancel = () => abortController.abort();
 

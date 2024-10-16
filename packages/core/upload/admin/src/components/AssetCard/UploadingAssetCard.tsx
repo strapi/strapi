@@ -80,12 +80,10 @@ export const UploadingAssetCard = ({
 
   React.useEffect(() => {
     const uploadFile = async () => {
-      if (folderId && typeof folderId === 'number') {
-        const files = await upload(asset, folderId);
+      const files = await upload(asset, folderId ? Number(folderId) : null);
 
-        if (addUploadedFiles) {
-          addUploadedFiles(files);
-        }
+      if (addUploadedFiles) {
+        addUploadedFiles(files);
       }
     };
 
