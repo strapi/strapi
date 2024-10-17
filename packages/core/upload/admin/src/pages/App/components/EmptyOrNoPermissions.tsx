@@ -13,7 +13,7 @@ interface EmptyOrNoPermissionsProps {
   onActionClick: () => void;
 };
 
-type GetContentIntlMessageProps = Omit<EmptyOrNoPermissionsProps, 'onActionClick'>
+type GetContentIntlMessageProps = Omit<EmptyOrNoPermissionsProps, 'onActionClick'>;
 
 const getContentIntlMessage = ({ isFiltering, canCreate, canRead }: GetContentIntlMessageProps) => {
   if (isFiltering) {
@@ -43,7 +43,12 @@ const getContentIntlMessage = ({ isFiltering, canCreate, canRead }: GetContentIn
   };
 };
 
-export const EmptyOrNoPermissions = ({ canCreate, isFiltering, canRead, onActionClick }: EmptyOrNoPermissionsProps) => {
+export const EmptyOrNoPermissions = ({
+  canCreate,
+  isFiltering,
+  canRead,
+  onActionClick,
+}: EmptyOrNoPermissionsProps) => {
   const { formatMessage } = useIntl();
   const content = getContentIntlMessage({ isFiltering, canCreate, canRead });
 
