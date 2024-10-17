@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { strings } from '@strapi/utils';
 
 interface ServerConfig {
   url: string;
