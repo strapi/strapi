@@ -460,7 +460,9 @@ class Strapi extends Container implements Core.Strapi {
     }
 
     if (this.EE) {
+      const start = Date.now();
       await utils.ee.checkLicense({ strapi: this });
+      this.log.debug(`License check finished (${Date.now() - start}ms)`);
     }
 
     await this.server.initMiddlewares();
