@@ -156,6 +156,10 @@ export const MediaLibraryInput = forwardRef(
         : [allowedUploadedFiles[0]];
     }
 
+    const handleSelect = (assetIndex) => {
+      setSelectedIndex(assetIndex);
+    };
+
     return (
       <>
         <CarouselAssets
@@ -171,6 +175,7 @@ export const MediaLibraryInput = forwardRef(
           onEditAsset={handleAssetEdit}
           onNext={handleNext}
           onPrevious={handlePrevious}
+          onSelect={handleSelect}
           error={error}
           hint={hint}
           required={required}
