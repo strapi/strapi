@@ -64,6 +64,27 @@ export interface Attribute<TKind extends Kind = Kind> {
    * Meaning that, if it's set to 'true', the attribute would be considered while performing a search operation.
    */
   searchable?: boolean;
+
+  /**
+   * Database validations and settings
+   * https://docs.strapi.io/dev-docs/backend-customization/models#database-validations-and-settings
+   *
+   * @experimental
+   * @deprecated The column property is experimental and can be deprecated/changed at any time in the future.
+   */
+  column?: Partial<Column>;
+}
+
+// NOTE: Copied directly from @strapi/database package
+export interface Column {
+  type?: string;
+  name?: string;
+  args?: unknown[];
+  defaultTo?: unknown;
+  notNullable?: boolean;
+  unsigned?: boolean;
+  unique?: boolean;
+  primary?: boolean;
 }
 
 /**
