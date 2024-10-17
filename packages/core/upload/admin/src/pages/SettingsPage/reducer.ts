@@ -1,7 +1,35 @@
 import { produce } from 'immer';
 import set from 'lodash/set';
 
-const initialState = {
+export type InitialState = {
+  initialData: {
+    responsiveDimensions?: boolean;
+    sizeOptimization?: boolean;
+    autoOrientation?: boolean;
+    videoPreview?: boolean;
+  } | null;
+  modifiedData: {
+    responsiveDimensions?: boolean;
+    sizeOptimization?: boolean;
+    autoOrientation?: boolean;
+    videoPreview?: boolean;
+  } | null;
+};
+
+interface ActionGetDataSucceeded {
+  type: 'GET_DATA_SUCCEEDED';
+  data: InitialState['initialData'];
+}
+
+interface ActionOnChange {
+  type: 'ON_CHANGE';
+  keys: keyof NonNullable<InitialState['initialData']>;
+  value: boolean;
+}
+
+export type Action = ActionGetDataSucceeded | ActionOnChange;
+
+const initialState: InitialState = {
   initialData: {
     responsiveDimensions: true,
     sizeOptimization: true,
@@ -16,8 +44,7 @@ const initialState = {
   },
 };
 
-const reducer = (state, action) =>
-  // eslint-disable-next-line consistent-return
+const reducer = (state: InitialState, action: Action) =>
   produce(state, (drafState) => {
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
