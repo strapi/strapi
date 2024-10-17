@@ -36,7 +36,7 @@ module.exports = ({ strapi }) => {
   const fileTypeName = getTypeName(fileModel);
   const fileEntityResponseType = getEntityResponseName(fileModel);
 
-  const { optimize, isSupportedImage } = getUploadService('image-manipulation');
+  const { optimize, isOptimizableImage } = getUploadService('image-manipulation');
 
   /**
    * Optimize and format a file using the upload services
@@ -64,7 +64,7 @@ module.exports = ({ strapi }) => {
     );
     currentFile.getStream = createReadStream;
 
-    if (!(await isSupportedImage(currentFile))) {
+    if (!(await isOptimizableImage(currentFile))) {
       return currentFile;
     }
 
