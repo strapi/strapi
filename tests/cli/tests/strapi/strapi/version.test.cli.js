@@ -15,6 +15,7 @@ describe('--version', () => {
     appPath = testApps.at(0);
   });
 
+  // TODO: check that it matches the version listed in the test app package.json
   it('should output version with argument', async () => {
     const { stdout } = await coffee
       .spawn('npm', ['run', '-s', 'strapi', '--', 'version'], { cwd: appPath })

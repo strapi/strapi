@@ -11,6 +11,20 @@ interface Options {
 }
 
 /**
+ * @description - Convert attribute component names to OpenAPI component names
+ *
+ * @returns OpenAPI component name
+ */
+const convertComponentName = (component: string, isRef = false): string => {
+  const cleanComponentName = `${pascalCase(component)}Component`;
+
+  if (isRef) {
+    return `#/components/schemas/${cleanComponentName}`;
+  }
+  return cleanComponentName;
+};
+
+/**
  * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
  * @returns Attributes using OpenAPI acceptable data types
@@ -104,11 +118,11 @@ const cleanSchemaAttributes = (
         };
 
         const refComponentSchema: OpenAPIV3.ReferenceObject = {
-          $ref: `#/components/schemas/${pascalCase(attribute.component)}Component`,
+          $ref: convertComponentName(attribute.component, true),
         };
 
         const componentExists = didAddStrapiComponentsToSchemas(
-          `${pascalCase(attribute.component)}Component`,
+          convertComponentName(attribute.component),
           rawComponentSchema
         );
 
@@ -130,7 +144,7 @@ const cleanSchemaAttributes = (
             type: 'object',
             properties: {
               ...(isRequest ? {} : { id: { type: 'number' } }),
-              __component: { type: 'string' },
+              __component: { type: 'string', enum: [component] },
               ...cleanSchemaAttributes(componentAttributes, {
                 typeMap,
                 isRequest,
@@ -140,22 +154,38 @@ const cleanSchemaAttributes = (
           };
 
           const refComponentSchema: OpenAPIV3.ReferenceObject = {
-            $ref: `#/components/schemas/${pascalCase(component)}Component`,
+            $ref: convertComponentName(component, true),
           };
 
           const componentExists = didAddStrapiComponentsToSchemas(
-            `${pascalCase(component)}Component`,
+            convertComponentName(component),
             rawComponentSchema
           );
           const finalComponentSchema = componentExists ? refComponentSchema : rawComponentSchema;
           return finalComponentSchema;
         });
+        let discriminator: OpenAPIV3.DiscriminatorObject | undefined;
+        if (components.every((component) => Object.hasOwn(component, '$ref'))) {
+          discriminator = {
+            propertyName: '__component',
+            mapping: attribute.components.reduce(
+              (acc, component) => {
+                acc[component] = convertComponentName(component, true);
+                return acc;
+              },
+              {} as {
+                [value: string]: string;
+              }
+            ),
+          };
+        }
 
         schemaAttributes[prop] = {
           type: 'array',
           items: {
             anyOf: components,
           },
+          discriminator,
         };
         break;
       }

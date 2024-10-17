@@ -1,4 +1,4 @@
-import type { UID } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 import { async } from '@strapi/utils';
 import { assoc, omit } from 'lodash/fp';
 
@@ -9,9 +9,11 @@ import { transformParamsToQuery } from './transform/query';
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { transformData } from './transform/data';
-import entityValidator from '../entity-validator';
 
-const createEntriesService = (uid: UID.ContentType) => {
+const createEntriesService = (
+  uid: UID.ContentType,
+  entityValidator: Modules.EntityValidator.EntityValidator
+) => {
   const contentType = strapi.contentType(uid);
 
   async function createEntry(params = {} as any) {

@@ -18,9 +18,9 @@ module.exports = {
   },
 
   generateImportDefinition() {
-    const formattedImports = imports.map((key) =>
-      factory.createImportSpecifier(false, undefined, factory.createIdentifier(key))
-    );
+    const formattedImports = imports
+      .sort()
+      .map((key) => factory.createImportSpecifier(false, undefined, factory.createIdentifier(key)));
 
     return [
       factory.createImportDeclaration(

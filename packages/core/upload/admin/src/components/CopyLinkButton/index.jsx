@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { useNotification, useClipboard } from '@strapi/admin/strapi-admin';
 import { IconButton } from '@strapi/design-system';
 import { Link as LinkIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { useClipboard } from '../../hooks/useClipboard';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 
 export const CopyLinkButton = ({ url }) => {
   const { toggleNotification } = useNotification();
