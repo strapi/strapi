@@ -419,39 +419,49 @@ class Strapi extends Container implements Core.Strapi {
       ...this.get('models').get(),
     ];
 
-    await this.db.init({ models });
+    const skipSync = process.env.STRAPI_SKIP_SCHEMA_SYNC === 'true';
+
+    await this.db.init({ models, validate: !skipSync });
 
     let oldContentTypes;
-    if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
-      oldContentTypes = await this.store.get({
+
+    if (!skipSync) {
+      const start = Date.now();
+      if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
+        oldContentTypes = await this.store.get({
+          type: 'strapi',
+          name: 'content_types',
+          key: 'schema',
+        });
+      }
+
+      await this.hook('strapi::content-types.beforeSync').call({
+        oldContentTypes,
+        contentTypes: this.contentTypes,
+      });
+
+      await this.db.schema.sync();
+
+      await this.hook('strapi::content-types.afterSync').call({
+        oldContentTypes,
+        contentTypes: this.contentTypes,
+      });
+
+      await this.store.set({
         type: 'strapi',
         name: 'content_types',
         key: 'schema',
+        value: this.contentTypes,
       });
+
+      this.log.debug(`Database sync finished (${Date.now() - start}ms)`);
+    } else {
+      this.log.warn('Skipping schema sync');
     }
-
-    await this.hook('strapi::content-types.beforeSync').call({
-      oldContentTypes,
-      contentTypes: this.contentTypes,
-    });
-
-    await this.db.schema.sync();
 
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });
     }
-
-    await this.hook('strapi::content-types.afterSync').call({
-      oldContentTypes,
-      contentTypes: this.contentTypes,
-    });
-
-    await this.store.set({
-      type: 'strapi',
-      name: 'content_types',
-      key: 'schema',
-      value: this.contentTypes,
-    });
 
     await this.server.initMiddlewares();
     this.server.initRouting();
@@ -477,6 +487,7 @@ class Strapi extends Container implements Core.Strapi {
     if (!httpProxy && !httpsProxy) {
       return;
     }
+
     const globalAgent = await import('global-agent');
 
     globalAgent.bootstrap();

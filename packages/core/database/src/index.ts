@@ -96,9 +96,13 @@ class Database {
     this.logger = config.logger ?? console;
   }
 
-  async init({ models }: { models: Model[] }) {
+  async init({ models, validate = true }: { models: Model[], validate: boolean }) {
     this.metadata.loadModels(models);
-    await validateDatabase(this);
+
+    if (validate) {
+      await validateDatabase(this);
+    }
+
     return this;
   }
 
