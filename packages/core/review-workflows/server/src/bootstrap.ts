@@ -54,4 +54,5 @@ export default async (args: any) => {
   const docsMiddlewares = getService('document-service-middlewares');
   strapi.documents.use(docsMiddlewares.assignStageOnCreate);
   strapi.documents.use(docsMiddlewares.handleStageOnUpdate);
+  strapi.documents.use(docsMiddlewares.checkStageBeforePublish);
 };

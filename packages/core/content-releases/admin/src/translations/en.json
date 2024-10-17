@@ -78,12 +78,21 @@
   "pages.ReleaseDetails.entry-validation.modified": "Ready to publish changes",
   "pages.ReleaseDetails.entry-validation.already-unpublished": "Already unpublished",
   "pages.ReleaseDetails.entry-validation.ready-to-unpublish": "Ready to unpublish",
+  "pages.ReleaseDetails.entry-validation.not-ready": "Not ready to publish",
   "pages.ReleaseDetails.groupBy.option.content-type": "Content-Types",
   "pages.ReleaseDetails.groupBy.option.locales": "Locales",
   "pages.ReleaseDetails.groupBy.option.actions": "Actions",
   "pages.ReleaseDetails.header-subtitle.scheduled": "Scheduled for {date} at {time} ({offset})",
+  "pages.ReleaseDetails.entry-validation.fields": "Fields",
   "pages.Settings.releases.title": "Releases",
   "pages.Settings.releases.description": "Create and manage content updates",
   "pages.Settings.releases.timezone.label": "Default timezone",
-  "pages.Settings.releases.setting.default-timezone-notification-success": "Default timezone updated."
+  "pages.Settings.releases.setting.default-timezone-notification-success": "Default timezone updated.",
+  "pages.ReleaseDetails.entry-validation.fields.error": "{errors} errors on fields.",
+  "pages.ReleaseDetails.entry-validation.fields.success": "All fields are filled correctly.",
+  "pages.ReleaseDetails.entry-validation.fields.see-errors": "See errors",
+  "pages.ReleaseDetails.entry-validation.review-stage.not-enabled": "This entry is not associated to any workflow.",
+  "pages.ReleaseDetails.entry-validation.review-stage.not-ready": "This entry is not at the required stage for publishing. ({stageName})",
+  "pages.ReleaseDetails.entry-validation.review-stage.ready": "This entry is at the required stage for publishing. ({stageName})",
+  "pages.ReleaseDetails.entry-validation.review-stage.stage-not-required": "No required stage for publication."
 }

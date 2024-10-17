@@ -1,6 +1,6 @@
 import { errors, async } from '@strapi/utils';
 
-import type { Core, Internal, Struct, Modules } from '@strapi/types';
+import type { Core, Internal, Modules, UID, Data } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
@@ -234,7 +234,7 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       return _.groupBy(groupName)(formattedData);
     },
 
-    getContentTypeModelsFromActions(actions: ReleaseAction[]) {
+    async getContentTypeModelsFromActions(actions: ReleaseAction[]) {
       const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
         if (!acc.includes(action.contentType)) {
           acc.push(action.contentType);
@@ -243,12 +243,25 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
         return acc;
       }, []);
 
-      const contentTypeModelsMap = contentTypeUids.reduce(
-        (
-          acc: { [key: ReleaseAction['contentType']]: Struct.ContentTypeSchema },
+      const workflowsService = strapi.plugin('review-workflows').service('workflows');
+
+      const contentTypeModelsMap = await async.reduce(contentTypeUids)(
+        async (
+          accPromise: Promise<GetReleaseActions.Response['meta']['contentTypes']>,
           contentTypeUid: ReleaseAction['contentType']
         ) => {
-          acc[contentTypeUid] = strapi.getModel(contentTypeUid);
+          const acc = await accPromise;
+          const contentTypeModel = strapi.getModel(contentTypeUid);
+
+          const workflow = await workflowsService.getAssignedWorkflow(contentTypeUid, {
+            populate: 'stageRequiredToPublish',
+          });
+
+          acc[contentTypeUid] = {
+            ...contentTypeModel,
+            hasReviewWorkflow: !!workflow,
+            stageRequiredToPublish: workflow?.stageRequiredToPublish,
+          };
 
           return acc;
         },
@@ -349,6 +362,61 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
       getService('release', { strapi }).updateReleaseStatus(releaseId);
 
       return deletedAction;
+    },
+
+    async validateActionsByContentTypes(contentTypeUids: UID.ContentType[]) {
+      const actions = await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
+        where: {
+          contentType: {
+            $in: contentTypeUids,
+          },
+          // We only want to validate actions that are going to be published
+          type: 'publish',
+          release: {
+            releasedAt: {
+              $null: true,
+            },
+          },
+        },
+        populate: { release: true },
+      });
+
+      const releasesUpdated: Data.ID[] = [];
+
+      await async.map(actions, async (action: ReleaseAction) => {
+        const isValid = await getDraftEntryValidStatus(
+          {
+            contentType: action.contentType,
+            documentId: action.entryDocumentId,
+            locale: action.locale,
+          },
+          { strapi }
+        );
+
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+          where: {
+            id: action.id,
+          },
+          data: {
+            isEntryValid: isValid,
+          },
+        });
+
+        if (!releasesUpdated.includes(action.release.id)) {
+          releasesUpdated.push(action.release.id);
+        }
+
+        return {
+          id: action.id,
+          isEntryValid: isValid,
+        };
+      });
+
+      if (releasesUpdated.length > 0) {
+        await async.map(releasesUpdated, async (releaseId: number) => {
+          await getService('release', { strapi }).updateReleaseStatus(releaseId);
+        });
+      }
     },
   };
 };

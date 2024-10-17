@@ -18,9 +18,6 @@ const model = {
       type: 'string',
     },
   },
-  options: {
-    reviewWorkflows: true,
-  },
 };
 
 const baseWorkflow = {

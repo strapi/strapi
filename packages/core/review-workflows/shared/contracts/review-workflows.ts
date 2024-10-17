@@ -94,6 +94,7 @@ interface Workflow extends Entity {
   name: string;
   contentTypes: string[];
   stages: Stage[];
+  stageRequiredToPublish: Stage | null;
 }
 
 namespace GetAll {
@@ -101,7 +102,7 @@ namespace GetAll {
     body: {};
     query: Modules.EntityService.Params.Pick<
       'admin::review-workflow',
-      'filters' | 'populate:string'
+      'filters' | 'populate:array'
     >;
   }
 
@@ -115,7 +116,9 @@ namespace GetAll {
 namespace Update {
   export interface Request {
     body: {
-      data: Partial<Workflow>;
+      data: Partial<Omit<Workflow, 'stageRequiredToPublish'>> & {
+        stageRequiredToPublishName?: Stage['name'] | null;
+      };
     };
     query: {};
   }
@@ -133,7 +136,11 @@ namespace Update {
 namespace Create {
   export interface Request {
     body: {
-      data: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'>;
+      data: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'> & {
+        // We cannot use id because the stage could be not created yet
+        // And considering name is unique inside the workflow, name is a better option
+        stageRequiredToPublishName?: Stage['name'] | null;
+      };
     };
     query: {};
   }

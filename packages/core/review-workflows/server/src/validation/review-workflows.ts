@@ -62,6 +62,7 @@ const validateWorkflowCreateSchema = yup.object().shape({
     .max(200, 'Can not have more than 200 stages')
     .required('Can not create a workflow without stages'),
   contentTypes: validateContentTypes,
+  stageRequiredToPublishName: yup.string().min(1).nullable(),
 });
 
 const validateWorkflowUpdateSchema = yup.object().shape({
@@ -74,6 +75,7 @@ const validateWorkflowUpdateSchema = yup.object().shape({
     .min(1, 'Can not update a workflow without stages')
     .max(200, 'Can not have more than 200 stages'),
   contentTypes: validateContentTypes,
+  stageRequiredToPublishName: yup.string().min(1).nullable(),
 });
 
 const validateUpdateAssigneeOnEntitySchema = yup

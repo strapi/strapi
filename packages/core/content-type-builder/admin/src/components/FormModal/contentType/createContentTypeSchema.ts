@@ -190,7 +190,6 @@ export const createContentTypeSchema = ({
       .required(errorsTrads.required.id),
     draftAndPublish: yup.boolean(),
     kind: yup.string().oneOf(['singleType', 'collectionType']),
-    reviewWorkflows: yup.boolean(),
   };
 
   return yup.object(shape);

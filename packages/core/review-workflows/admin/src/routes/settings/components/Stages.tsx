@@ -82,7 +82,7 @@ const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps)
                   canReorder={stages.length > 1}
                   canUpdate={canUpdate}
                   stagesCount={stages.length}
-                  defaultOpen={isCreating}
+                  defaultOpen={!stage.id}
                   {...stage}
                 />
               </Box>
