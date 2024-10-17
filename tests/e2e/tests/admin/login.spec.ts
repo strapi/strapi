@@ -3,6 +3,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { toggleRateLimiting } from '../../utils/rate-limit';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../constants';
 import { login } from '../../utils/login';
+import { Admin } from '../../pageHelpers/Admin';
 
 test.describe('Login', () => {
   test.beforeEach(async ({ page }) => {
@@ -15,25 +16,27 @@ test.describe('Login', () => {
       page,
       context,
     }) => {
+      const admin = new Admin(page);
+
       // Test without making user authentication persistent
       await login({ page });
-      await expect(page).toHaveTitle(TITLE_HOME);
+      await admin.expectHomeTitle();
 
       await page.close();
 
       page = await context.newPage();
       await page.goto('/admin');
-      await expect(page).toHaveTitle(TITLE_LOGIN);
+      await admin.expectLoginTitle();
 
       // Test with making user authentication persistent
       await login({ page, rememberMe: true });
-      await expect(page).toHaveTitle(TITLE_HOME);
+      await admin.expectHomeTitle();
 
       await page.close();
 
       page = await context.newPage();
       await page.goto('/admin');
-      await expect(page).toHaveTitle(TITLE_HOME);
+      await admin.expectHomeTitle();
     });
   });
 
@@ -42,65 +45,63 @@ test.describe('Login', () => {
       page,
       browserName,
     }) => {
-      async function clickLoginTimes(n) {
-        for (let i = 0; i < n; i++) {
-          // eslint-disable-next-line no-await-in-loop
-          await page.getByRole('button', { name: 'Login' }).click();
-        }
-      }
+      const admin = new Admin(page);
 
       await toggleRateLimiting(page, true);
 
-      await page
-        .getByLabel('Email*', { exact: true })
-        .fill(ADMIN_EMAIL_ADDRESS.replace('@', `+${browserName}@`));
-      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
-      clickLoginTimes(6);
+      await admin.fillEmail(ADMIN_EMAIL_ADDRESS.replace('@', `+${browserName}@`));
+      await admin.fillPassword(ADMIN_PASSWORD);
 
-      await expect(page.getByText('Too many requests, please try again later.')).toBeVisible();
+      for (let i = 0; i < 6; i++) {
+        await admin.clickLoginButton();
+      }
+
+      await admin.validateTooManyRequestsError();
 
       await toggleRateLimiting(page, false);
     });
   });
 
   test.describe('Validations', () => {
-    test('A user should see a validation errors when not passing in an email, a wrong email, not passing a password or a wrong password', async ({
+    test('A user should see validation errors when not passing in an email, a wrong email, not passing a password or a wrong password', async ({
       page,
     }) => {
+      const admin = new Admin(page);
+
       // Test without email value
-      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
-      await page.getByRole('button', { name: 'Login' }).click();
-      await expect(page.getByText('Value is required')).toBeVisible();
-      await expect(await page.getByLabel('Email*', { exact: true })).toBeFocused();
+      await admin.fillPassword(ADMIN_PASSWORD);
+      await admin.clickLoginButton();
+      await admin.validateValueRequiredError();
+      await admin.expectValidationErrorFocus('Email*');
 
       // Test without password value
-      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
-      await page.getByLabel('Password*', { exact: true }).fill('');
-      await page.getByRole('button', { name: 'Login' }).click();
-      await expect(page.getByText('Value is required')).toBeVisible();
-      await expect(await page.getByLabel('Password*')).toBeFocused();
+      await admin.fillEmail(ADMIN_EMAIL_ADDRESS);
+      await admin.fillPassword('');
+      await admin.clickLoginButton();
+      await admin.validateValueRequiredError();
+      await admin.expectValidationErrorFocus('Password*');
 
       // Test with a wrong email value
-      await page.getByLabel('Email*', { exact: true }).fill('e2e+wrong-email@strapi.io');
-      await page.getByLabel('Password*', { exact: true }).fill(ADMIN_PASSWORD);
-      await page.getByRole('button', { name: 'Login' }).click();
-      await expect(page.getByText('Invalid credentials')).toBeVisible();
+      await admin.fillEmail('e2e+wrong-email@strapi.io');
+      await admin.fillPassword(ADMIN_PASSWORD);
+      await admin.clickLoginButton();
+      await admin.validateLoginErrorMessage('Invalid credentials');
 
       // Test with a wrong password value
-      await page.getByLabel('Email*', { exact: true }).fill(ADMIN_EMAIL_ADDRESS);
-      await page.getByLabel('Password*', { exact: true }).fill('wrongPassword');
-      await page.getByRole('button', { name: 'Login' }).click();
-      await expect(page.getByText('Invalid credentials')).toBeVisible();
+      await admin.fillEmail(ADMIN_EMAIL_ADDRESS);
+      await admin.fillPassword('wrongPassword');
+      await admin.clickLoginButton();
+      await admin.validateLoginErrorMessage('Invalid credentials');
     });
   });
 
   test.describe('Forgot password', () => {
     test('A user should be able to access the forgot password page', async ({ page }) => {
-      // Test forgot password redirection
-      await page.getByRole('link', { name: 'Forgot your password?' }).click();
-      await expect(page.getByText('Password Recovery')).toBeVisible();
+      const admin = new Admin(page);
 
-      await page.getByRole('link', { name: 'Ready to sign in?' }).click();
+      await admin.clickForgotPassword();
+      await admin.checkPasswordRecoveryVisibility();
+      await admin.clickBackToLogin();
     });
   });
 });
