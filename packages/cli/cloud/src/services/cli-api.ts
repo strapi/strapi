@@ -66,7 +66,7 @@ export interface CloudApiService {
   deploy(
     deployInput: {
       filePath: string;
-      project: { name: string, targetEnvironment?: string };
+      project: { name: string; targetEnvironment?: string };
     },
     {
       onUploadProgress,

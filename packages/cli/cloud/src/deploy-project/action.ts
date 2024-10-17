@@ -201,7 +201,6 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
     const isProjectSuspended = projectData.suspendedAt;
     environments = projectData.environments;
 
-
     if (isProjectSuspended) {
       ctx.logger.log(
         '\n Oops! This project has been suspended. \n\n Please reactivate it from the dashboard to continue deploying: '
@@ -262,13 +261,10 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
     targetEnvironment = opts.environment;
   } else {
     targetEnvironment =
-      environments.length > 1
-        ? await promptForEnvironment(environments)
-        : environments[0];
+      environments.length > 1 ? await promptForEnvironment(environments) : environments[0];
   }
 
   project.targetEnvironment = targetEnvironment;
-
 
   const buildId = await upload(ctx, project, token, maxSize);
 
