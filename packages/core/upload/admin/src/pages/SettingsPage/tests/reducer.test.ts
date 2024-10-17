@@ -1,19 +1,34 @@
-import reducer from '../reducer';
+import reducer, { Action, InitialState } from '../reducer';
 
 describe('SettingsPage | reducer', () => {
   describe('GET_DATA_SUCCEEDED', () => {
     it('should set the modifiedData and the initialData correctly', () => {
-      const action = {
+      const action: Action = {
         type: 'GET_DATA_SUCCEEDED',
-        data: { test: true },
+        data: {
+          responsiveDimensions: true,
+          sizeOptimization: true,
+          autoOrientation: false,
+          videoPreview: false,
+        },
       };
-      const state = {
+      const state: InitialState = {
         initialData: null,
         modifiedData: null,
       };
       const expected = {
-        initialData: { test: true },
-        modifiedData: { test: true },
+        initialData: {
+          responsiveDimensions: true,
+          sizeOptimization: true,
+          autoOrientation: false,
+          videoPreview: false,
+        },
+        modifiedData: {
+          responsiveDimensions: true,
+          sizeOptimization: true,
+          autoOrientation: false,
+          videoPreview: false,
+        },
       };
 
       expect(reducer(state, action)).toEqual(expected);
@@ -22,7 +37,7 @@ describe('SettingsPage | reducer', () => {
 
   describe('ON_CHANGE', () => {
     it('should update the modifiedData correctly', () => {
-      const action = {
+      const action: Action = {
         type: 'ON_CHANGE',
         keys: 'responsiveDimensions',
         value: false,
