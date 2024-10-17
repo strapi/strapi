@@ -21,10 +21,12 @@ import {
 import { isOperator } from '../operators';
 
 import type { Model, Data } from '../types';
+import type { Parent } from '../traverse/factory';
 
 interface Context {
   schema: Model;
   getModel: (model: string) => Model;
+  parent?: Parent;
 }
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
@@ -164,25 +166,27 @@ const defaultSanitizePopulate = curry((ctx: Context, populate: unknown) => {
 
   return pipeAsync(
     traverseQueryPopulate(expandWildcardPopulate, ctx),
-    traverseQueryPopulate(async ({ key, value, schema, attribute, getModel }, { set }) => {
+    traverseQueryPopulate(async ({ key, value, schema, attribute, getModel, path }, { set }) => {
       if (attribute) {
         return;
       }
 
+      const parent = { key, path, schema, attribute } satisfies Parent;
+
       if (key === 'sort') {
-        set(key, await defaultSanitizeSort({ schema, getModel }, value));
+        set(key, await defaultSanitizeSort({ schema, getModel, parent }, value));
       }
 
       if (key === 'filters') {
-        set(key, await defaultSanitizeFilters({ schema, getModel }, value));
+        set(key, await defaultSanitizeFilters({ schema, getModel, parent }, value));
       }
 
       if (key === 'fields') {
-        set(key, await defaultSanitizeFields({ schema, getModel }, value));
+        set(key, await defaultSanitizeFields({ schema, getModel, parent }, value));
       }
 
       if (key === 'populate') {
-        set(key, await defaultSanitizePopulate({ schema, getModel }, value));
+        set(key, await defaultSanitizePopulate({ schema, getModel, parent }, value));
       }
     }, ctx),
     // Remove private fields
