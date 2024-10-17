@@ -22,6 +22,30 @@ describe('Version Utilities', () => {
       expect(range.raw).toBe('>1.0.0 <=2');
     });
 
+    it('should create a range for Minor release type', () => {
+      const currentVersion = new semver.SemVer('1.0.0');
+
+      const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Minor);
+      expect(range).toBeInstanceOf(semver.Range);
+      expect(range.raw).toBe('>1.0.0 <2.0.0');
+    });
+
+    it('should create a range for Patch release type', () => {
+      const currentVersion = new semver.SemVer('1.0.0');
+
+      const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Patch);
+      expect(range).toBeInstanceOf(semver.Range);
+      expect(range.raw).toBe('>1.0.0 <1.1.0');
+    });
+
+    it('should create a range for Latest release type', () => {
+      const currentVersion = new semver.SemVer('1.0.0');
+
+      const range = rangeFromReleaseType(currentVersion, Version.ReleaseType.Latest);
+      expect(range).toBeInstanceOf(semver.Range);
+      expect(range.raw).toBe('>1.0.0');
+    });
+
     it('should throw for unsupported release types', () => {
       const currentVersion = new semver.SemVer('1.0.0');
       expect(() =>
