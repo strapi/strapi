@@ -325,7 +325,7 @@ const Empty = (props: Table.EmptyProps) => {
               defaultMessage: 'No content found',
             })}
             hasRadius
-            icon={<EmptyDocuments width="16rem" />}
+            icon={<EmptyDocuments width="160" />}
             {...props}
           />
         </Td>
