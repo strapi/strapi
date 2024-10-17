@@ -1,11 +1,11 @@
 import { type StrapiCloudCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
 import action from './action';
-import { getEnvironmentCommand }  from '../command';
+import { initializeEnvironmentCommand }  from '../command';
 
 const command: StrapiCloudCommand = ({ command, ctx }) => {
 
-  const environmentCmd = getEnvironmentCommand(command);
+  const environmentCmd = initializeEnvironmentCommand(command);
 
   environmentCmd
       .command('list')
