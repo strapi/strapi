@@ -3,12 +3,14 @@ import flattenTree from '../components/SelectTree/utils/flattenTree';
 import type { FolderNode } from '../../../shared/contracts/folders';
 
 interface FolderStructureValue extends Omit<FolderNode, 'children'> {
-  value: number | null;
+  value: string | number | null;
   children?: FolderStructureValue[];
 }
 
+type Parents = { id?: number | string | null; label?: string; path?: string }[];
+
 export const getFolderParents = (folders: FolderStructureValue[], currentFolderId: number) => {
-  const parents = [];
+  const parents: Parents = [];
   const flatFolders = flattenTree(folders);
   const currentFolder = flatFolders.find((folder) => folder.value === currentFolderId);
 

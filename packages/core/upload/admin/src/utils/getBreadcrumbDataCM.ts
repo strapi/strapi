@@ -3,7 +3,7 @@ import { getTrad } from './getTrad';
 import type { Folder } from '../../../shared/contracts/folders';
 import type { MessageDescriptor } from 'react-intl';
 
-interface BreadcrumbDataFolder extends Omit<Folder, 'children' | 'files' | 'parent'> {
+export interface BreadcrumbDataFolder extends Omit<Folder, 'children' | 'files' | 'parent'> {
   parent?: BreadcrumbDataFolder;
   children?: {
     count: number;

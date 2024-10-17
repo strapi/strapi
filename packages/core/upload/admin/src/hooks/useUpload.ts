@@ -8,13 +8,15 @@ import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-interface Asset extends File {
-  rawFile: RawFile;
+interface Asset extends Omit<File, 'id' | 'hash'> {
+  rawFile?: RawFile;
+  id?: File['id'];
+  hash?: File['hash'];
 }
 
 const uploadAsset = (
   asset: Asset,
-  folderId: number,
+  folderId: number | null,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
   post: FetchClient['post']
@@ -22,7 +24,7 @@ const uploadAsset = (
   const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
-  formData.append('files', rawFile);
+  formData.append('files', rawFile!);
 
   formData.append(
     'fileInfo',
@@ -54,7 +56,7 @@ export const useUpload = () => {
   const mutation = useMutation<
     CreateFile.Response['data'],
     CreateFile.Response['error'],
-    { asset: Asset; folderId: number }
+    { asset: Asset; folderId: number | null }
   >(
     ({ asset, folderId }) => {
       return uploadAsset(asset, folderId, signal, setProgress, post);
@@ -67,12 +69,14 @@ export const useUpload = () => {
     }
   );
 
-  const upload = (asset: Asset, folderId: number) => mutation.mutateAsync({ asset, folderId });
+  const upload = (asset: Asset, folderId: number | null) =>
+    mutation.mutateAsync({ asset, folderId });
 
   const cancel = () => abortController.abort();
 
   return {
     upload,
+    isLoading: mutation.isLoading,
     cancel,
     error: mutation.error,
     progress,

@@ -6,7 +6,7 @@ import pluginId from '../pluginId';
 import { getTrad } from '../utils';
 import { GetFolder } from '../../../shared/contracts/folders';
 
-export const useFolder = (id: number, { enabled = true } = {}) => {
+export const useFolder = (id: number | null | undefined, { enabled = true } = {}) => {
   const { toggleNotification } = useNotification();
   const { get } = useFetchClient();
   const { formatMessage } = useIntl();
