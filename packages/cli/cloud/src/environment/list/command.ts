@@ -4,7 +4,7 @@ import action from './action';
 import { initializeEnvironmentCommand } from '../command';
 
 const command: StrapiCloudCommand = ({ command, ctx }) => {
-  const environmentCmd = initializeEnvironmentCommand(command);
+  const environmentCmd = initializeEnvironmentCommand(command, ctx);
 
   environmentCmd
     .command('list')
