@@ -11,7 +11,7 @@ interface EmptyOrNoPermissionsProps {
   canRead: boolean;
   isFiltering: boolean;
   onActionClick: () => void;
-};
+}
 
 type GetContentIntlMessageProps = Omit<EmptyOrNoPermissionsProps, 'onActionClick'>;
 

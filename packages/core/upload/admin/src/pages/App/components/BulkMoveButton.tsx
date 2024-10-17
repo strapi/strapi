@@ -20,7 +20,7 @@ interface BulkMoveButtonProps {
   onSuccess: () => void;
   currentFolder?: FolderWithType;
   selected: Array<FolderWithType | FileWithType>;
-};
+}
 
 export const BulkMoveButton = ({ selected, onSuccess, currentFolder }: BulkMoveButtonProps) => {
   const { formatMessage } = useIntl();
