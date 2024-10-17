@@ -1,4 +1,5 @@
 import fse from 'fs-extra';
+import inquirer from 'inquirer';
 import path from 'path';
 import chalk from 'chalk';
 import { AxiosError } from 'axios';
@@ -21,6 +22,40 @@ type PackageJson = {
     uuid: string;
   };
 };
+
+interface CmdOptions {
+  environment?: string;
+}
+
+const QUIT_OPTION = 'Quit';
+
+async function promptForEnvironment(environments: string[]): Promise<string> {
+  const choices = environments.map((env) => ({ name: env, value: env }));
+  const { selectedEnvironment } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectedEnvironment',
+      message: 'Select the environment to deploy:',
+      choices: [...choices, { name: chalk.grey(`(${QUIT_OPTION})`), value: null }],
+    },
+  ]);
+  if (selectedEnvironment === null) {
+    process.exit(1);
+  }
+
+  const { confirm } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: `Do you want to proceed with deployment to ${chalk.cyan(selectedEnvironment)}?`,
+    },
+  ]);
+
+  if (!confirm) {
+    process.exit(1);
+  }
+  return selectedEnvironment;
+}
 
 async function upload(
   ctx: CLIContext,
@@ -143,7 +178,7 @@ async function getConfig({
   }
 }
 
-export default async (ctx: CLIContext) => {
+export default async (ctx: CLIContext, opts: CmdOptions) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
   if (!token) {
@@ -156,6 +191,7 @@ export default async (ctx: CLIContext) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx, token);
+  let environments: string[];
 
   try {
     const {
@@ -163,6 +199,7 @@ export default async (ctx: CLIContext) => {
     } = await cloudApiService.getProject({ name: project.name });
 
     const isProjectSuspended = projectData.suspendedAt;
+    environments = projectData.environments;
 
     if (isProjectSuspended) {
       ctx.logger.log(
@@ -213,6 +250,21 @@ export default async (ctx: CLIContext) => {
     );
     maxSize = 100000000;
   }
+
+  let targetEnvironment: string;
+
+  if (opts.environment) {
+    if (!environments.includes(opts.environment)) {
+      ctx.logger.error(`Environment ${opts.environment} does not exist.`);
+      return;
+    }
+    targetEnvironment = opts.environment;
+  } else {
+    targetEnvironment =
+      environments.length > 1 ? await promptForEnvironment(environments) : environments[0];
+  }
+
+  project.targetEnvironment = targetEnvironment;
 
   const buildId = await upload(ctx, project, token, maxSize);
 
