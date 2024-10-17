@@ -106,12 +106,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           });
         }
 
-        metrics.sendDidCreateWorkflow();
-
         // Create Workflow
         const createdWorkflow = await strapi.db
           .query(WORKFLOW_MODEL_UID)
           .create(strapi.get('query-params').transform(WORKFLOW_MODEL_UID, createOpts));
+
+        metrics.sendDidCreateWorkflow(createdWorkflow.id, !!opts.data.stageRequiredToPublishName);
 
         if (opts.data.stageRequiredToPublishName) {
           await strapi
@@ -184,7 +184,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           });
         }
 
-        metrics.sendDidEditWorkflow();
+        metrics.sendDidEditWorkflow(workflow.id, !!opts.data.stageRequiredToPublishName);
 
         const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, updateOpts);
 
