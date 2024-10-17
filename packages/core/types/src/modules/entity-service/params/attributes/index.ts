@@ -34,9 +34,9 @@ export type ScalarValues = GetValue<
   | Schema.Attribute.Time
   | Schema.Attribute.Timestamp
   | Schema.Attribute.UID
-  // /!\  Password attributes are NOT filterable and should NOT be part of this union type.
-  //      The member below has been commented on purpose to avoid adding it back without noticing.
-  // | Attribute.Password
+// /!\  Password attributes are NOT filterable and should NOT be part of this union type.
+//      The member below has been commented on purpose to avoid adding it back without noticing.
+// | Attribute.Password
 >;
 
 /**
@@ -47,11 +47,24 @@ export type GetValues<TSchemaUID extends UID.Schema> = {
 } & OmitRelationsWithoutTarget<
   TSchemaUID,
   {
-    [TKey in Schema.OptionalAttributeNames<TSchemaUID>]?: GetValue<
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID> &
+    Schema.DefaultableAttributeNames<TSchemaUID>]?:
+    | GetValue<Schema.AttributeByName<TSchemaUID, TKey>>
+    | null
+    | undefined;
+  } & {
+    [TKey in Schema.RequiredAttributeNames<TSchemaUID> &
+    Schema.DefaultableAttributeNames<TSchemaUID>]?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>
     >;
   } & {
-    [TKey in Schema.RequiredAttributeNames<TSchemaUID>]-?: GetValue<
+    [TKey in Schema.OptionalAttributeNames<TSchemaUID> &
+    Schema.NoDefaultAttributeNames<TSchemaUID>]-?: GetValue<
+      Schema.AttributeByName<TSchemaUID, TKey>
+    > | null;
+  } & {
+    [TKey in Schema.RequiredAttributeNames<TSchemaUID> &
+    Schema.NoDefaultAttributeNames<TSchemaUID>]-?: GetValue<
       Schema.AttributeByName<TSchemaUID, TKey>
     >;
   }
@@ -70,33 +83,33 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
       [
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
         TAttribute extends Schema.Attribute.Relation<infer TRelationKind, infer TTarget>
-          ? If<IsNotNever<TTarget>, RelationInputValue<TRelationKind>>
-          : never,
+        ? If<IsNotNever<TTarget>, RelationInputValue<TRelationKind>>
+        : never,
       ],
       // DynamicZone
       [
         Extends<TAttribute, Schema.Attribute.OfType<'dynamiczone'>>,
         TAttribute extends Schema.Attribute.DynamicZone<infer TComponentsUIDs>
-          ? Array<
-              // Extract tuple values to a component uid union type
-              Array.Values<TComponentsUIDs> extends infer TComponentUID
-                ? TComponentUID extends UID.Component
-                  ? GetValues<TComponentUID> & { __component: TComponentUID }
-                  : never
-                : never
-            >
-          : never,
+        ? Array<
+          // Extract tuple values to a component uid union type
+          Array.Values<TComponentsUIDs> extends infer TComponentUID
+          ? TComponentUID extends UID.Component
+          ? GetValues<TComponentUID> & { __component: TComponentUID }
+          : never
+          : never
+        >
+        : never,
       ],
       // Component
       [
         Extends<TAttribute, Schema.Attribute.OfType<'component'>>,
         TAttribute extends Schema.Attribute.Component<infer TComponentUID, infer TRepeatable>
-          ? TComponentUID extends UID.Component
-            ? GetValues<TComponentUID> extends infer TValues
-              ? If<TRepeatable, TValues[], TValues>
-              : never
-            : never
-          : never,
+        ? TComponentUID extends UID.Component
+        ? GetValues<TComponentUID> extends infer TValues
+        ? If<TRepeatable, TValues[], TValues>
+        : never
+        : never
+        : never,
       ],
       // Boolean
       [Extends<TAttribute, Schema.Attribute.Boolean>, Literals.BooleanValue],
