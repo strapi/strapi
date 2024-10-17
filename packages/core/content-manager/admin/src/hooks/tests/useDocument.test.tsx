@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { errors } from '@strapi/utils';
 import { renderHook, server, waitFor, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { mockData } from '../../../tests/mockData';
@@ -33,12 +33,12 @@ describe('useDocument', () => {
 
   it('should display an error if there is an error fetching the document', async () => {
     server.use(
-      rest.get('/content-manager/:collectionType/:model/:id', (_, res, ctx) =>
-        res(
-          ctx.status(500),
-          ctx.json({
+      http.get('/content-manager/:collectionType/:model/:id', () =>
+        HttpResponse.json(
+          {
             error: new errors.ApplicationError('Server error'),
-          })
+          },
+          { status: 500 }
         )
       )
     );
@@ -124,8 +124,8 @@ describe('useDocument', () => {
 
   it('should throw the validate function if called before the schema has been loaded', async () => {
     server.use(
-      rest.get('/content-manager/init', (req, res, ctx) => {
-        return res(ctx.status(500));
+      http.get('/content-manager/init', () => {
+        return new HttpResponse(null, { status: 500 });
       })
     );
 

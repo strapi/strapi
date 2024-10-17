@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { act, renderHook, screen, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { mockData } from '../../../tests/mockData';
 import { useDocumentActions } from '../useDocumentActions';
@@ -61,12 +61,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/clone/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/clone/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't clone entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -139,12 +139,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't create entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -208,12 +208,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.delete('/content-manager/:collectionType/:uid/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.delete('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't delete entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -273,12 +273,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/collection-types/:uid/actions/bulkDelete', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/collection-types/:uid/actions/bulkDelete', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't delete entries."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -338,12 +338,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/:id/actions/discard', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/:id/actions/discard', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't discard entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -403,12 +403,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.delete('/content-manager/:collectionType/:uid/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.delete('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't delete entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -474,12 +474,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/:id/actions/publish', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/:id/actions/publish', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't publish entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -556,12 +556,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.put('/content-manager/:collectionType/:uid/:id', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.put('/content-manager/:collectionType/:uid/:id', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't update entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -628,12 +628,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/:collectionType/:uid/:id/actions/unpublish', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/:collectionType/:uid/:id/actions/unpublish', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't unpublish entry."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
@@ -690,12 +690,12 @@ describe('useDocumentActions', () => {
 
     it('should return the errors when unsuccessful', async () => {
       server.use(
-        rest.post('/content-manager/collection-types/:uid/actions/bulkUnpublish', (_, res, ctx) => {
-          return res(
-            ctx.status(500),
-            ctx.json({
+        http.post('/content-manager/collection-types/:uid/actions/bulkUnpublish', () => {
+          return HttpResponse.json(
+            {
               error: new errors.ApplicationError("Couldn't unpublish entries."),
-            })
+            },
+            { status: 500 }
           );
         })
       );
