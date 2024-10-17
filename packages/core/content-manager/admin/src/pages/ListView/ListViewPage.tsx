@@ -107,7 +107,7 @@ const ListViewPage = () => {
   const paramObject = React.useMemo(() => {
     const pairs = queryString.split('&').map((param) => {
       const [key, value] = param.split('=');
-      return { [key]: value };
+      return { [key]: decodeURIComponent(value) };
     });
     return Object.assign({}, ...pairs);
   }, [queryString]);
