@@ -1,9 +1,9 @@
 import type { Common } from '../../..';
 
-export type ArrayNotation = Common.RouteInput[];
+export type ArrayNotation = readonly Common.RouteInput[];
 
 export interface ObjectNotation {
-  routes: Common.RouteInput[];
+  routes: readonly Common.RouteInput[];
   type?: Common.RouterType;
 }
 
