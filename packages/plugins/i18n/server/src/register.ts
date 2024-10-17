@@ -3,6 +3,7 @@ import type { Core } from '@strapi/types';
 
 import validateLocaleCreation from './controllers/validate-locale-creation';
 import graphqlProvider from './graphql';
+import { getService } from './utils';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   extendContentTypes(strapi);
@@ -38,12 +39,16 @@ const addContentManagerLocaleMiddleware = (strapi: Core.Strapi) => {
  * @param {Strapi} strapi
  */
 const extendContentTypes = (strapi: Core.Strapi) => {
+  const { isLocalizedContentType } = getService('content-types');
+
   Object.values(strapi.contentTypes).forEach((contentType) => {
     const { attributes } = contentType;
 
+    const isLocalized = isLocalizedContentType(contentType);
+
     _.set(attributes, 'locale', {
       writable: true,
-      private: false,
+      private: !isLocalized,
       configurable: false,
       visible: false,
       type: 'string',
@@ -54,7 +59,7 @@ const extendContentTypes = (strapi: Core.Strapi) => {
       relation: 'oneToMany',
       target: contentType.uid,
       writable: false,
-      private: false,
+      private: !isLocalized,
       configurable: false,
       visible: false,
       unstable_virtual: true,
