@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import { Box, Flex } from '@strapi/design-system';
 import { File, FilePdf } from '@strapi/icons';
+import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
 import { AssetDefinition, AssetType } from '../../../constants';
@@ -11,6 +12,9 @@ import { VideoPreview } from '../../AssetCard/VideoPreview';
 
 const DocAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
+  &:hover {
+    border: 1px solid;
+  }
 `;
 
 const VideoPreviewWrapper = styled(Box)`
@@ -19,6 +23,9 @@ const VideoPreviewWrapper = styled(Box)`
     max-width: 100%;
     height: 124px;
   }
+  &:hover {
+    border: 1px solid;
+  }
 `;
 
 const AudioPreviewWrapper = styled(Box)`
@@ -26,9 +33,20 @@ const AudioPreviewWrapper = styled(Box)`
   audio {
     max-width: 100%;
   }
+  &:hover {
+    border: 1px solid;
+  }
 `;
 
-export const CarouselAsset = ({ asset }) => {
+const ImageWrapper = styled(Box)`
+  cursor: pointer;
+  border: ${(props) => (props.assetId === props.currentAssetId ? '1px solid' : 'none')};
+  &:hover {
+    border: 1px solid;
+  }
+`;
+
+export const CarouselAsset = forwardRef(({ asset, currentAsset, assetIndex, onSelect }) => {
   if (asset.mime.includes(AssetType.Video)) {
     return (
       <VideoPreviewWrapper height="100%">
@@ -51,12 +69,15 @@ export const CarouselAsset = ({ asset }) => {
 
   if (asset.mime.includes(AssetType.Image)) {
     return (
-      <Box
+      <ImageWrapper
         tag="img"
         maxHeight="100%"
         maxWidth="100%"
         src={createAssetUrl(asset, true)}
         alt={asset.alternativeText || asset.name}
+        assetId={asset.id}
+        currentAssetId={currentAsset.id}
+        onClick={() => onSelect(assetIndex)}
       />
     );
   }
@@ -70,8 +91,11 @@ export const CarouselAsset = ({ asset }) => {
       )}
     </DocAsset>
   );
-};
+});
 
 CarouselAsset.propTypes = {
   asset: AssetDefinition.isRequired,
+  currentAsset: AssetDefinition.isRequired,
+  assetIndex: PropTypes.number.isRequired,
+  onSelect: PropTypes.func.isRequired,
 };
