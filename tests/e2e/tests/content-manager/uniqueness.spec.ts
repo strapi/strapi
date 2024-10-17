@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose, clickLocatorAndWaitForLoad } from '../../utils/shared';
+import { findAndClose, clickAndWait } from '../../utils/shared';
 
 type Field = {
   name: string;
@@ -20,8 +20,8 @@ test.describe('Uniqueness', () => {
     await page.goto('/admin');
     await login({ page });
 
-    await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Unique' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Unique' }));
   });
 
   const SCALAR_FIELDS: Field[] = [
@@ -101,8 +101,8 @@ test.describe('Uniqueness', () => {
 
   const clickSave = async (page: Page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
-    await clickLocatorAndWaitForLoad(page, page.getByRole('tab', { name: 'Draft' }));
-    await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Save' }));
+    await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await expect(page.getByText('Saved document')).toBeVisible();
   };
 
@@ -114,20 +114,11 @@ test.describe('Uniqueness', () => {
       // testing against
 
       if (isSingle) {
-        await clickLocatorAndWaitForLoad(
-          page,
-          page.getByRole('button', { name: 'No entry yet. Click' }).first()
-        );
-        await clickLocatorAndWaitForLoad(
-          page,
-          page.getByRole('button', { name: 'No entry yet. Click' }).first()
-        );
+        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).first());
+        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).first());
       } else {
-        await clickLocatorAndWaitForLoad(
-          page,
-          page.getByRole('button', { name: 'No entry yet. Click' }).nth(1)
-        );
-        await clickLocatorAndWaitForLoad(
+        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).nth(1));
+        await clickAndWait(
           page,
           page.getByLabel('', { exact: true }).getByRole('button', { name: 'No entry yet. Click' })
         );
@@ -136,10 +127,7 @@ test.describe('Uniqueness', () => {
   };
 
   const createNewEntry = async (page: Page, url: RegExp) => {
-    await clickLocatorAndWaitForLoad(
-      page,
-      page.getByRole('link', { name: 'Create new entry' }).first()
-    );
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
     await page.waitForURL(url);
   };
 
@@ -149,22 +137,22 @@ test.describe('Uniqueness', () => {
   };
 
   const publishDocument = async (page: Page) => {
-    await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Publish' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
     await expect(page.getByText('Published document')).toBeVisible();
   };
 
   const navigateToListView = async (page: Page) => {
-    await clickLocatorAndWaitForLoad(page, page.getByRole('link', { name: 'Unique' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Unique' }));
     if (await page.getByText('Confirmation').isVisible()) {
-      await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Confirm' }));
+      await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
     }
 
     await page.waitForURL(LIST_URL);
   };
 
   const changeLocale = async (page: Page, locale: string) => {
-    await clickLocatorAndWaitForLoad(page, page.getByRole('combobox', { name: 'Select a locale' }));
-    await clickLocatorAndWaitForLoad(page, page.getByText(locale));
+    await clickAndWait(page, page.getByRole('combobox', { name: 'Select a locale' }));
+    await clickAndWait(page, page.getByText(locale));
   };
 
   /**
@@ -200,8 +188,8 @@ test.describe('Uniqueness', () => {
       if (isRepeatableComponentField) {
         // If the field is a repeatable component field, we add an entry and fill
         // it with the same value to test uniqueness within the same entity.
-        await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Add an entry' }));
-        await clickLocatorAndWaitForLoad(
+        await clickAndWait(page, page.getByRole('button', { name: 'Add an entry' }));
+        await clickAndWait(
           page,
           page.getByRole('region').getByRole('button', { name: 'No entry yet. Click' })
         );
@@ -210,10 +198,10 @@ test.describe('Uniqueness', () => {
         await clickSave(page);
         await findAndClose(page, 'Saved document');
 
-        await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Publish' }));
+        await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
         await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
 
-        await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Delete' }).nth(1));
+        await clickAndWait(page, page.getByRole('button', { name: 'Delete' }).nth(1));
       }
 
       await clickSave(page);
@@ -238,7 +226,7 @@ test.describe('Uniqueness', () => {
       await clickSave(page);
       await findAndClose(page, 'Saved document');
 
-      await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Publish' }));
+      await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
       await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
 
       await navigateToListView(page);

@@ -3,7 +3,7 @@ import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import { clickLocatorAndWaitForLoad } from '../../../utils/shared';
+import { clickAndWait } from '../../../utils/shared';
 
 test.describe('Create collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -15,10 +15,7 @@ test.describe('Create collection type', () => {
     await page.goto('/admin');
     await login({ page });
 
-    await clickLocatorAndWaitForLoad(
-      page,
-      page.getByRole('link', { name: 'Content-Type Builder' })
-    );
+    await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
 
     // close the tutorial modal if it's visible
     const modal = page.getByRole('button', { name: 'Close' });
@@ -35,10 +32,7 @@ test.describe('Create collection type', () => {
   });
 
   test('Can create a single type', async ({ page, browserName }) => {
-    await clickLocatorAndWaitForLoad(
-      page,
-      page.getByRole('button', { name: 'Create new single type' })
-    );
+    await clickAndWait(page, page.getByRole('button', { name: 'Create new single type' }));
 
     await expect(page.getByRole('heading', { name: 'Create a single type' })).toBeVisible();
 
@@ -51,15 +45,15 @@ test.describe('Create collection type', () => {
     const pluralId = page.getByLabel('API ID (Plural)');
     await expect(pluralId).toHaveValue('secret-documents');
 
-    await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Continue' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
 
     await expect(page.getByText('Select a field for your single type')).toBeVisible();
 
-    await clickLocatorAndWaitForLoad(page, page.getByText('Small or long text'));
+    await clickAndWait(page, page.getByText('Small or long text'));
 
     await page.getByLabel('Name', { exact: true }).fill('myattribute');
-    await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Finish' }));
-    await clickLocatorAndWaitForLoad(page, page.getByRole('button', { name: 'Save' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 
     await waitForRestart(page);
 
