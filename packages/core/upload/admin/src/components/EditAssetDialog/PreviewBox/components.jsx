@@ -21,11 +21,15 @@ export const Wrapper = styled.div`
   }
 
   img,
-  video {
+  mux-player {
     margin: 0;
     padding: 0;
     max-height: 26.4rem;
     max-width: 100%;
+  }
+
+  mux-player {
+    --pip-button: inline-flex;
   }
 `;
 
