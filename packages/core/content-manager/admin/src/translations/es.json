@@ -49,7 +49,7 @@
   "components.TableEmpty.withFilters": "No hay {contentType} con los filtros aplicados...",
   "components.TableEmpty.withSearch": "No hay {contentType} que coincida con la búsqueda ({search})...",
   "components.TableEmpty.withoutFilter": "No hay {contentType}...",
-  "components.empty-repeatable": "Aún no hay entrada. Haga clic en el botón de abajo para agregar uno.",
+  "components.empty-repeatable": "Aún no hay entrada. Haga clic para agregar una.",
   "components.notification.info.maximum-requirement": "Ya has alcanzado el número máximo de campos",
   "components.notification.info.minimum-requirement": "Se ha agregado un campo para cumplir con el requisito mínimo",
   "components.repeatable.reorder.error": "Se produjo un error al reordenar el campo de su componente. Vuelva a intentarlo.",
