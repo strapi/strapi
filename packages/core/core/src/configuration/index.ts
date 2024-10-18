@@ -80,11 +80,14 @@ export const loadConfiguration = (opts: StrapiOptions) => {
 
   const { serverUrl, adminUrl, adminPath } = getConfigUrls(config);
 
+  const serverAbsoluteUrl = getAbsoluteServerUrl(config);
+  const adminAbsoluteUrl = getAbsoluteAdminUrl(config);
+
   _.set(config, 'server.url', serverUrl);
-  _.set(config, 'server.absoluteUrl', getAbsoluteServerUrl(config));
+  _.set(config, 'server.absoluteUrl', serverAbsoluteUrl);
   _.set(config, 'admin.url', adminUrl);
   _.set(config, 'admin.path', adminPath);
-  _.set(config, 'admin.absoluteUrl', getAbsoluteAdminUrl(config));
+  _.set(config, 'admin.absoluteUrl', adminAbsoluteUrl);
   _.set(config, 'dirs', getDirs(opts, config));
 
   return config;
