@@ -75,8 +75,8 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
     >
       <PicturePlus
         aria-hidden
-        width="3.2rem"
-        height="3.2rem"
+        width="32"
+        height="32"
         fill={disabled ? 'neutral400' : 'primary600'}
       />
       <TextAlignTypography
