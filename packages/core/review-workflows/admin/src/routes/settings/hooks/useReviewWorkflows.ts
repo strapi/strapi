@@ -31,7 +31,7 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
 
   const { data, isLoading, error } = useGetWorkflowsQuery(
     {
-      populate: 'stages',
+      populate: ['stages', 'stageRequiredToPublish'],
       ...queryParams,
     },
     {

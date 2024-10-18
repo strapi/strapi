@@ -92,6 +92,11 @@ export declare namespace CreateManyReleaseActions {
  * GET /content-releases/:id/actions - Get all release actions
  */
 
+export interface Stage extends Entity {
+  color: string;
+  name: string;
+}
+
 export type ReleaseActionGroupBy = 'contentType' | 'action' | 'locale';
 export declare namespace GetReleaseActions {
   export interface Request {
@@ -109,7 +114,10 @@ export declare namespace GetReleaseActions {
     };
     meta: {
       pagination: Pagination;
-      contentTypes: Record<Struct.ContentTypeSchema['uid'], Struct.ContentTypeSchema>;
+      contentTypes: Record<
+        Struct.ContentTypeSchema['uid'],
+        Struct.ContentTypeSchema & { hasReviewWorkflow: boolean; stageRequiredToPublish?: Stage }
+      >;
       components: Record<Struct.ComponentSchema['uid'], Struct.ComponentSchema>;
     };
   }
