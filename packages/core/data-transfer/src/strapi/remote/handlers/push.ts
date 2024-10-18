@@ -35,6 +35,10 @@ export interface PushHandler extends Handler {
    */
   streams?: { [stage in TransferStage]?: Writable };
 
+  stats: {
+    [stage in Exclude<TransferStage, 'schemas'>]: Protocol.Client.Stats;
+  };
+
   /**
    * Holds all the transferred assets for the current transfer handler (one registry per connection)
    */
@@ -313,6 +317,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       await this.createWritableStreamForStep(stage);
 
+      this.stats[stage] = { started: 0, finished: 0 };
+
       return { ok: true };
     }
 
@@ -332,7 +338,13 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       }
 
       // For all other steps
-      await Promise.all(msg.data.map((item) => writeAsync(stream, item)));
+      await Promise.all(
+        msg.data.map(async (item) => {
+          this.stats[stage].started += 1;
+          await writeAsync(stream, item);
+          this.stats[stage].finished += 1;
+        })
+      );
     }
 
     if (msg.action === 'end') {
@@ -348,7 +360,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       delete this.streams?.[stage];
 
-      return { ok: true };
+      return { ok: true, stats: this.stats[stage] };
     }
   },
 
@@ -390,6 +402,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       }
 
       if (action === 'start') {
+        this.stats.assets.started += 1;
         this.assets[assetID] = { ...item.data, stream: new PassThrough() };
         writeAsync(assetsStream, this.assets[assetID]);
       }
@@ -407,6 +420,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
           const { stream: assetStream } = this.assets[assetID];
           assetStream
             .on('close', () => {
+              this.stats.assets.finished += 1;
               delete this.assets[assetID];
               resolve();
             })
@@ -443,6 +457,12 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
     this.assets = {};
     this.streams = {};
+    this.stats = {
+      assets: { started: 0, finished: 0 },
+      configuration: { started: 0, finished: 0 },
+      entities: { started: 0, finished: 0 },
+      links: { started: 0, finished: 0 },
+    };
 
     this.flow = createFlow(DEFAULT_TRANSFER_FLOW);
 
