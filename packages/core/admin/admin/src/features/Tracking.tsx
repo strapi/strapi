@@ -186,6 +186,7 @@ interface EventWithoutProperties {
     | 'willSaveComponent'
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
+    | 'willOpenPreview'
     | 'didEditFieldNameOnContentType'
     | 'didCreateRelease';
   properties?: never;

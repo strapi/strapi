@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useClipboard, useNotification } from '@strapi/admin/strapi-admin';
+import { useClipboard, useNotification, useTracking } from '@strapi/admin/strapi-admin';
 import { Button, Flex, IconButton } from '@strapi/design-system';
 import { Link as LinkIcon } from '@strapi/icons';
 import { UID } from '@strapi/types';
@@ -15,6 +15,7 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { copy } = useClipboard();
+  const { trackUsage } = useTracking();
   const { data, error } = useGetPreviewUrlQuery({
     params: {
       contentType: model as UID.ContentType,
@@ -43,11 +44,22 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     });
   };
 
+  const handleClick = () => {
+    trackUsage('willOpenPreview');
+  };
+
   return {
     title: formatMessage({ id: 'content-manager.preview.panel.title', defaultMessage: 'Preview' }),
     content: (
       <Flex gap={2} width="100%">
-        <Button variant="tertiary" tag={Link} to={url} target="_blank" flex="auto">
+        <Button
+          variant="tertiary"
+          tag={Link}
+          to={url}
+          onClick={handleClick}
+          target="_blank"
+          flex="auto"
+        >
           {formatMessage({
             id: 'content-manager.preview.panel.button',
             defaultMessage: 'Open preview',
