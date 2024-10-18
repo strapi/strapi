@@ -52,7 +52,7 @@
     "copyfiles": "2.4.1",
     "fs-extra": "11.2.0",
     "node-plop": "0.26.3",
-    "plop": "2.7.6",
+    "plop": "4.0.1",
     "pluralize": "8.0.0"
   },
   "devDependencies": {
