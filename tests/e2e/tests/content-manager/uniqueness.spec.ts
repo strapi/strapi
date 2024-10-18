@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose } from '../../utils/shared';
+import { findAndClose, clickAndWait } from '../../utils/shared';
 
 type Field = {
   name: string;
@@ -20,8 +20,8 @@ test.describe('Uniqueness', () => {
     await page.goto('/admin');
     await login({ page });
 
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Unique' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Unique' }));
   });
 
   const SCALAR_FIELDS: Field[] = [
@@ -101,8 +101,8 @@ test.describe('Uniqueness', () => {
 
   const clickSave = async (page: Page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
-    await page.getByRole('tab', { name: 'Draft' }).click();
-    await page.getByRole('button', { name: 'Save' }).click();
+    await clickAndWait(page, page.getByRole('tab', { name: 'Draft' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await expect(page.getByText('Saved document')).toBeVisible();
   };
 
@@ -114,20 +114,20 @@ test.describe('Uniqueness', () => {
       // testing against
 
       if (isSingle) {
-        await page.getByRole('button', { name: 'No entry yet. Click' }).first().click();
-        await page.getByRole('button', { name: 'No entry yet. Click' }).first().click();
+        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).first());
+        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).first());
       } else {
-        await page.getByRole('button', { name: 'No entry yet. Click' }).nth(1).click();
-        await page
-          .getByLabel('', { exact: true })
-          .getByRole('button', { name: 'No entry yet. Click' })
-          .click();
+        await clickAndWait(page, page.getByRole('button', { name: 'No entry yet. Click' }).nth(1));
+        await clickAndWait(
+          page,
+          page.getByLabel('', { exact: true }).getByRole('button', { name: 'No entry yet. Click' })
+        );
       }
     }
   };
 
   const createNewEntry = async (page: Page, url: RegExp) => {
-    await page.getByRole('link', { name: 'Create new entry' }).first().click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).first());
     await page.waitForURL(url);
   };
 
@@ -137,22 +137,22 @@ test.describe('Uniqueness', () => {
   };
 
   const publishDocument = async (page: Page) => {
-    await page.getByRole('button', { name: 'Publish' }).click();
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
     await expect(page.getByText('Published document')).toBeVisible();
   };
 
   const navigateToListView = async (page: Page) => {
-    await page.getByRole('link', { name: 'Unique' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Unique' }));
     if (await page.getByText('Confirmation').isVisible()) {
-      await page.getByRole('button', { name: 'Confirm' }).click();
+      await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
     }
 
     await page.waitForURL(LIST_URL);
   };
 
   const changeLocale = async (page: Page, locale: string) => {
-    await page.getByRole('combobox', { name: 'Select a locale' }).click();
-    await page.getByText(locale).click();
+    await clickAndWait(page, page.getByRole('combobox', { name: 'Select a locale' }));
+    await clickAndWait(page, page.getByText(locale));
   };
 
   /**
@@ -179,6 +179,7 @@ test.describe('Uniqueness', () => {
       if (browserName === 'webkit') {
         return test.fixme();
       }
+
       await createNewEntry(page, CREATE_URL);
 
       const fieldRole = 'role' in field ? field.role : 'textbox';
@@ -187,17 +188,20 @@ test.describe('Uniqueness', () => {
       if (isRepeatableComponentField) {
         // If the field is a repeatable component field, we add an entry and fill
         // it with the same value to test uniqueness within the same entity.
-        await page.getByRole('button', { name: 'Add an entry' }).click();
-        await page.getByRole('region').getByRole('button', { name: 'No entry yet. Click' }).click();
+        await clickAndWait(page, page.getByRole('button', { name: 'Add an entry' }));
+        await clickAndWait(
+          page,
+          page.getByRole('region').getByRole('button', { name: 'No entry yet. Click' })
+        );
         await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
         await clickSave(page);
         await findAndClose(page, 'Saved document');
 
-        await page.getByRole('button', { name: 'Publish' }).click();
+        await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
         await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
 
-        await page.getByRole('button', { name: 'Delete' }).nth(1).click();
+        await clickAndWait(page, page.getByRole('button', { name: 'Delete' }).nth(1));
       }
 
       await clickSave(page);
@@ -222,7 +226,7 @@ test.describe('Uniqueness', () => {
       await clickSave(page);
       await findAndClose(page, 'Saved document');
 
-      await page.getByRole('button', { name: 'Publish' }).click();
+      await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
       await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
 
       await navigateToListView(page);
