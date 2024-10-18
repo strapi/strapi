@@ -19,6 +19,9 @@ const handlers = [
       })
     );
   }),
+  rest.post('*/openapi.json', (req, res, ctx) => {
+    return res(ctx.status(200));
+  }),
   rest.post('*/regenerateDoc', (req, res, ctx) => {
     return res(ctx.status(200));
   }),
