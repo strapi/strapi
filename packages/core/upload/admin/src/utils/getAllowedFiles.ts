@@ -7,7 +7,7 @@ import type { File } from '../../../shared/contracts/files';
  * @returns Object[]
  */
 
-interface AllowedFiles extends File {
+export interface AllowedFiles extends File {
   documentId: string;
   isSelectable: boolean;
   locale: string | null;

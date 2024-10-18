@@ -5,13 +5,9 @@ import { useMutation, useQueryClient } from 'react-query';
 import pluginId from '../pluginId';
 import { getTrad } from '../utils';
 import { BulkDeleteFiles, File } from '../../../shared/contracts/files';
-import type { BulkDeleteFolders, Folder } from '../../../shared/contracts/folders';
+import type { BulkDeleteFolders, FolderDefinition } from '../../../shared/contracts/folders';
 
 export interface FileWithType extends File {
-  type: string;
-}
-
-export interface FolderWithType extends Folder {
   type: string;
 }
 
@@ -24,7 +20,7 @@ export const useBulkRemove = () => {
   const queryClient = useQueryClient();
   const { post } = useFetchClient();
 
-  const bulkRemoveQuery = (filesAndFolders: Array<FileWithType | FolderWithType>) => {
+  const bulkRemoveQuery = (filesAndFolders: Array<FileWithType | FolderDefinition>) => {
     const payload = filesAndFolders.reduce<BulkRemovePayload>((acc, selected) => {
       const { id, type } = selected;
       const key = type === 'asset' ? 'fileIds' : 'folderIds';
@@ -44,7 +40,7 @@ export const useBulkRemove = () => {
   const mutation = useMutation<
     BulkDeleteFiles.Response | BulkDeleteFolders.Response,
     BulkDeleteFiles.Response['error'] | BulkDeleteFolders.Response['error'],
-    Array<FileWithType | FolderWithType>
+    Array<FileWithType | FolderDefinition>
   >(bulkRemoveQuery, {
     onSuccess(res) {
       const {

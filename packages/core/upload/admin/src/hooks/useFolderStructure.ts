@@ -14,6 +14,12 @@ const FIELD_MAPPING: Record<string, string> = {
   id: 'value',
 };
 
+interface FolderNodeWithChildren extends Omit<FolderNode, 'children'> {
+  children: FolderNodeWithChildren[];
+  label?: string;
+  value: string | number | null;
+}
+
 export const useFolderStructure = ({ enabled = true } = {}) => {
   const { formatMessage } = useIntl();
   const { get } = useFetchClient();
@@ -22,8 +28,7 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
     const {
       data: { data },
     } = await get<GetFolderStructure.Response['data']>('/upload/folder-structure');
-
-    const children = data.map((f: FolderNode) =>
+    const children = data.map((f: FolderNodeWithChildren) =>
       recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key)
     );
 
