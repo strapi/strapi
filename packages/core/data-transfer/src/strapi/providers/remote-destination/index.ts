@@ -116,7 +116,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         step,
       });
 
-      return { stats: res?.stats, error: null };
+      return { stats: res?.stats ?? null, error: null };
     } catch (e) {
       if (e instanceof Error) {
         return { stats: null, error: e };
