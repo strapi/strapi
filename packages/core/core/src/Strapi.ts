@@ -277,7 +277,7 @@ class Strapi extends Container implements Core.Strapi {
             logger,
             settings: {
               migrations: {
-                dir: path.join(root, 'database/migrations'),
+                dir: path.join(outDir, 'database/migrations'),
               },
             },
           })
