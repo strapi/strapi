@@ -5,6 +5,7 @@ import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
 import { Core, Modules } from '@strapi/types';
 import type { Server } from 'node:http';
+import { strings } from '@strapi/utils';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -79,14 +80,24 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     });
 
   const serverUrl = strapiInstance.config.get<string>('server.url');
-  const adminPath = strapiInstance.config.get<string>('admin.path');
+  const serverAbsoluteUrl = strapiInstance.config.get<string>('server.absoluteUrl');
+  const adminUrl = strapiInstance.config.get<string>('admin.url');
+  const adminAbsoluteUrl = strapiInstance.config.get<string>('admin.absoluteUrl');
+
+  const adminPath =
+    new URL(adminAbsoluteUrl).origin === new URL(serverAbsoluteUrl).origin
+      ? adminUrl.replace(strings.getCommonPath(serverUrl, adminUrl), '')
+      : new URL(adminUrl).pathname;
 
   const appDir = strapiInstance.dirs.app.root;
 
   await loadEnv(cwd);
 
+  const adminBaseName = new URL(adminAbsoluteUrl).pathname;
+  const serverPath = new URL(serverAbsoluteUrl).pathname;
+
   const env = getStrapiAdminEnvVars({
-    ADMIN_PATH: adminPath,
+    ADMIN_PATH: adminBaseName,
     STRAPI_ADMIN_BACKEND_URL: serverUrl,
     STRAPI_TELEMETRY_DISABLED: String(strapiInstance.telemetry.isDisabled),
   });
@@ -138,7 +149,8 @@ const createBuildContext = async <TOptions extends BaseOptions>({
 
   const buildContext = {
     appDir,
-    basePath: `${adminPath}/`,
+    adminPath,
+    basePath: serverPath,
     bundler,
     customisations,
     cwd,

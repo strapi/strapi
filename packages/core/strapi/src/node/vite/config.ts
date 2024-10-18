@@ -13,6 +13,7 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
 
   return {
     root: ctx.cwd,
+    base: ctx.basePath,
     build: {
       emptyOutDir: false, // Rely on CLI to do this
       outDir: ctx.distDir,
@@ -53,7 +54,6 @@ const resolveProductionConfig = async (ctx: BuildContext): Promise<InlineConfig>
 
   return {
     ...baseConfig,
-    base: ctx.basePath,
     logLevel: 'silent',
     mode: 'production',
     build: {
