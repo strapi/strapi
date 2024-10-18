@@ -76,6 +76,20 @@ export const skipCtbTour = async (page: Page) => {
 };
 
 /**
+ * Clicks on a link and waits for the page to load completely.
+ *
+ * NOTE: this util is used to avoid inconsistent behaviour on webkit
+ *
+ */
+export const clickAndWait = async (page: Page, locator: Locator) => {
+  await locator.click();
+
+  if (page.context().browser()?.browserType().name() === 'webkit') {
+    await page.waitForLoadState('networkidle');
+  }
+};
+
+/**
  * Look for an element containing text, and then click a sibling close button
  */
 export const findAndClose = async (
