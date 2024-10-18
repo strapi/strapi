@@ -36,10 +36,7 @@ export interface PushHandler extends Handler {
   streams?: { [stage in TransferStage]?: Writable };
 
   stats: {
-    [stage in Exclude<TransferStage, 'schemas'>]: {
-      started: number;
-      finished: number;
-    };
+    [stage in Exclude<TransferStage, 'schemas'>]: Protocol.Client.Stats;
   };
 
   /**

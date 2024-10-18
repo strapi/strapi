@@ -12,12 +12,12 @@ import type {
   ProviderType,
   IAsset,
   TransferStage,
+  Protocol,
 } from '../../../../types';
 import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
-import { TransferAssetFlow } from '../../../../types/remote/protocol/client';
 
 export interface IRemoteStrapiDestinationProviderOptions
   extends Pick<ILocalStrapiDestinationProviderOptions, 'restore' | 'strategy'> {
@@ -44,7 +44,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   transferID: string | null;
 
-  stats!: { [TStage in Exclude<TransferStage, 'schemas'>]: { count: 0 } };
+  stats!: { [TStage in Exclude<TransferStage, 'schemas'>]: { count: number } };
 
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
@@ -110,7 +110,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     try {
       const res = await this.dispatcher?.dispatchTransferStep<{
         ok: boolean;
-        stats: { started: number; finished: number };
+        stats: Protocol.Client.Stats;
       }>({
         action: 'end',
         step,
@@ -136,7 +136,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   ) {
     try {
       if (step === 'assets') {
-        const assetMessage = message as TransferAssetFlow[];
+        const assetMessage = message as Protocol.Client.TransferAssetFlow[];
         this.stats[step].count += assetMessage.filter((data) => data.action === 'start').length;
       } else {
         this.stats[step].count += message.length;
@@ -183,13 +183,12 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         }
         const { error, stats } = await this.#endStep(step);
 
-        if (
-          stats &&
-          (stats.started !== this.stats[step].count || stats.finished !== this.stats[step].count)
-        ) {
+        const { count } = this.stats[step];
+
+        if (stats && (stats.started !== count || stats.finished !== count)) {
           callback(
             new Error(
-              `Data missing: sent ${this.stats[step].count} ${step}, recieved ${stats.started} and added ${stats.finished} ${step}`
+              `Data missing: sent ${this.stats[step].count} ${step}, recieved ${stats.started} and saved ${stats.finished} ${step}`
             )
           );
         }

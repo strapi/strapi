@@ -25,3 +25,5 @@ export type TransferPushStep = TransferPushMessage['step'];
 type TransferStepCommands<T extends string, U> = { step: T } & TransferStepFlow<U>;
 
 type TransferStepFlow<U> = { action: 'start' } | { action: 'stream'; data: U } | { action: 'end' };
+
+export type Stats = { started: number; finished: number };
