@@ -5,6 +5,7 @@ import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
 import { Core, Modules } from '@strapi/types';
 import type { Server } from 'node:http';
+import { strings } from '@strapi/utils';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -79,15 +80,26 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     });
 
   const serverUrl = strapiInstance.config.get<string>('server.url');
-  const adminPath = strapiInstance.config.get<string>('admin.path');
+  const serverAbsoluteUrl = strapiInstance.config.get<string>('server.absoluteUrl');
+  const adminUrl = strapiInstance.config.get<string>('admin.url');
+  const adminAbsoluteUrl = strapiInstance.config.get<string>('admin.absoluteUrl');
+
+  // NOTE: Checks that both the server and admin will be served from the same origin (protocol, host, port)
+  const sameOrigin = new URL(adminAbsoluteUrl).origin === new URL(serverAbsoluteUrl).origin;
+
+  const adminPublicPath = new URL(adminAbsoluteUrl).pathname;
+
+  const adminPath = sameOrigin
+    ? adminUrl.replace(strings.getCommonPath(serverUrl, adminUrl), '')
+    : new URL(adminUrl).pathname;
 
   const appDir = strapiInstance.dirs.app.root;
 
   await loadEnv(cwd);
 
   const env = getStrapiAdminEnvVars({
-    ADMIN_PATH: adminPath,
-    STRAPI_ADMIN_BACKEND_URL: serverUrl,
+    ADMIN_PATH: adminPublicPath,
+    STRAPI_ADMIN_BACKEND_URL: serverAbsoluteUrl,
     STRAPI_TELEMETRY_DISABLED: String(strapiInstance.telemetry.isDisabled),
   });
 
@@ -138,7 +150,8 @@ const createBuildContext = async <TOptions extends BaseOptions>({
 
   const buildContext = {
     appDir,
-    basePath: `${adminPath}/`,
+    adminPath,
+    basePath: adminPublicPath,
     bundler,
     customisations,
     cwd,

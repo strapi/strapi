@@ -55,7 +55,7 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
 
   const vite = await createServer(finalConfig);
 
-  ctx.strapi.server.app.use((ctx, next) => {
+  ctx.strapi.server.router.use(`${ctx.adminPath}/:path*`, (ctx, next) => {
     return new Promise((resolve, reject) => {
       vite.middlewares(ctx.req, ctx.res, (err: unknown) => {
         if (err) {
@@ -87,14 +87,7 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
     koaCtx.body = template;
   };
 
-  ctx.strapi.server.routes([
-    {
-      method: 'GET',
-      path: `${ctx.basePath}:path*`,
-      handler: serveAdmin,
-      config: { auth: false },
-    },
-  ]);
+  ctx.strapi.server.router.get(`${ctx.adminPath}/:path*`, serveAdmin);
 
   return {
     async close() {
