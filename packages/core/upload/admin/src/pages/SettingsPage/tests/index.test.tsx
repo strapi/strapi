@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { render, waitFor } from '@tests/utils';
 
 import { SettingsPage } from '../index';

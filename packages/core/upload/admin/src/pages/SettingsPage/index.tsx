@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import * as React from 'react';
 
 import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/design-system';
@@ -7,8 +7,11 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
-import { PERMISSIONS } from '../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { PERMISSIONS } from '../../newConstants';
 import { getTrad } from '../../utils';
+import { UpdateSettings } from '../../../../shared/contracts/settings';
+import type { InitialState } from './reducer';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -18,7 +21,7 @@ export const SettingsPage = () => {
   const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
 
-  const [{ initialData, modifiedData }, dispatch] = useReducer(reducer, initialState, init);
+  const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['upload', 'settings'],
@@ -42,34 +45,46 @@ export const SettingsPage = () => {
 
   const isSaveButtonDisabled = isEqual(initialData, modifiedData);
 
-  const { mutateAsync, isLoading: isSubmiting } = useMutation({
-    async mutationFn(body) {
-      return put('/upload/settings', body);
-    },
-    onSuccess() {
-      refetch();
+  const { mutateAsync, isLoading: isSubmitting } = useMutation<
+    UpdateSettings.Response['data'],
+    UpdateSettings.Response['error'],
+    UpdateSettings.Request['body']
+  >(
+    async (body) => {
+      const { data } = await put('/upload/settings', body);
 
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({ id: 'notification.form.success.fields' }),
-      });
+      return data;
     },
-    onError(err) {
-      console.error(err);
-    },
-  });
+    {
+      onSuccess() {
+        refetch();
 
-  const handleSubmit = async (e) => {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({ id: 'notification.form.success.fields' }),
+        });
+      },
+      onError(err) {
+        console.error(err);
+      },
+    }
+  );
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isSaveButtonDisabled) {
       return;
     }
 
-    await mutateAsync(modifiedData);
+    await mutateAsync(modifiedData!);
   };
 
-  const handleChange = ({ target: { name, value } }) => {
+  const handleChange = ({
+    target: { name, value },
+  }: {
+    target: { name: keyof NonNullable<InitialState['initialData']>; value: boolean };
+  }) => {
     dispatch({
       type: 'ON_CHANGE',
       keys: name,
@@ -98,7 +113,7 @@ export const SettingsPage = () => {
           primaryAction={
             <Button
               disabled={isSaveButtonDisabled}
-              loading={isSubmiting}
+              loading={isSubmitting}
               type="submit"
               startIcon={<Check />}
               size="S"
@@ -144,7 +159,7 @@ export const SettingsPage = () => {
                           })}
                         </Field.Label>
                         <Toggle
-                          checked={modifiedData.responsiveDimensions}
+                          checked={modifiedData?.responsiveDimensions}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
                             defaultMessage: 'Off',
@@ -178,7 +193,7 @@ export const SettingsPage = () => {
                           })}
                         </Field.Label>
                         <Toggle
-                          checked={modifiedData.sizeOptimization}
+                          checked={modifiedData?.sizeOptimization}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
                             defaultMessage: 'Off',
@@ -212,7 +227,7 @@ export const SettingsPage = () => {
                           })}
                         </Field.Label>
                         <Toggle
-                          checked={modifiedData.autoOrientation}
+                          checked={modifiedData?.autoOrientation}
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
                             defaultMessage: 'Off',
