@@ -401,7 +401,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       </div>
       <div
         class="c6 c7 c8"
-        id="folder-1-title"
+        id="folder-3-title"
       >
         <button
           class="c9 c10"

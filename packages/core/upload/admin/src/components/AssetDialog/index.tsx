@@ -44,8 +44,10 @@ export interface FolderRow extends Folder {
   type?: string;
 }
 
+type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+
 interface AssetContentProps {
-  allowedTypes?: string[];
+  allowedTypes?: AllowedTypes[];
   folderId?: number | null;
   onClose: () => void;
   onAddAsset: (arg?: { folderId: number | { id: number } | null | undefined }) => void;

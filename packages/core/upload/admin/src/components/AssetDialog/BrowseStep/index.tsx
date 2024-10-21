@@ -100,8 +100,10 @@ export interface FileWithType extends File {
   type?: string;
 }
 
+type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+
 export interface BrowseStepProps {
-  allowedTypes?: string[];
+  allowedTypes?: AllowedTypes[];
   assets: File[];
   canCreate: boolean;
   canRead: boolean;

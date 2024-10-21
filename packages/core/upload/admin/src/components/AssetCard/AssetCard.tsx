@@ -11,6 +11,8 @@ import type { File } from '../../../../shared/contracts/files';
 
 type FileSelectable = File & { isSelectable?: boolean };
 
+type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+
 interface AssetCardProps {
   asset: FileSelectable;
   local?: boolean;
@@ -19,7 +21,7 @@ interface AssetCardProps {
   onRemove?: (asset: FileSelectable) => void;
   isSelected?: boolean;
   size?: 'S' | 'M';
-  allowedTypes?: string[];
+  allowedTypes?: AllowedTypes[];
   alt?: string;
 }
 
@@ -49,7 +51,7 @@ export const AssetCard = ({
   };
 
   if (asset.mime?.includes(AssetType.Video)) {
-    return <VideoAssetCard variant="Video" {...commonAssetCardProps} />;
+    return <VideoAssetCard {...commonAssetCardProps} />;
   }
 
   if (asset.mime?.includes(AssetType.Image)) {

@@ -1,5 +1,6 @@
 import { DesignSystemProvider } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
+import { render } from '@tests/utils';
 import { IntlProvider } from 'react-intl';
 import type { Query } from '../../../../../../../shared/contracts/files';
 
@@ -19,112 +20,7 @@ describe('SearchAsset', () => {
   it('renders and matches the snapshot', () => {
     const { container } = render(makeApp(null));
 
-    expect(container).toMatchInlineSnapshot(`
-      .c0 {
-        border-radius: 4px;
-        display: inline-flex;
-        cursor: pointer;
-      }
-
-      .c1 {
-        align-items: center;
-        justify-content: center;
-        flex-direction: row;
-        display: flex;
-      }
-
-      .c3 {
-        border: 0;
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c2 {
-        text-decoration: none;
-        padding-block: 0.7rem;
-        padding-inline: 0.7rem;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-        color: #32324d;
-        color: #8e8ea9;
-      }
-
-      .c2:hover {
-        background-color: #f6f6f9;
-        color: #666687;
-      }
-
-      .c2:active {
-        background-color: #eaeaef;
-      }
-
-      .c2[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-        color: #666687;
-        cursor: default;
-      }
-
-      @media (prefers-reduced-motion: no-preference) {
-        .c2 {
-          transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-      }
-
-      <div>
-        <button
-          aria-disabled="false"
-          class="c0 c1 c2"
-          data-state="closed"
-        >
-          <svg
-            aria-hidden="true"
-            fill="currentColor"
-            focusable="false"
-            height="16"
-            viewBox="0 0 32 32"
-            width="16"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
-            />
-          </svg>
-          <span
-            class="c3"
-          >
-            Search
-          </span>
-        </button>
-        <span
-          class="c3"
-        >
-          <p
-            aria-live="polite"
-            aria-relevant="all"
-            id="live-region-log"
-            role="log"
-          />
-          <p
-            aria-live="polite"
-            aria-relevant="all"
-            id="live-region-status"
-            role="status"
-          />
-          <p
-            aria-live="assertive"
-            aria-relevant="all"
-            id="live-region-alert"
-            role="alert"
-          />
-        </span>
-      </div>
-    `);
+    expect(container).toMatchSnapshot();
   });
 
   it('should set input value to queryValue if it exists', () => {
@@ -137,13 +33,13 @@ describe('SearchAsset', () => {
     expect(input?.value).toEqual(queryValue);
   });
 
-  it('should call handleChange when submitting search input', () => {
-    const { container } = render(makeApp(null));
+  it('should call handleChange when submitting search input', async () => {
+    const { container, user } = render(makeApp(null));
 
     const button = container.querySelector('button');
 
     if (button) {
-      fireEvent.click(button);
+      await user.click(button);
     }
     const input: HTMLInputElement | null = container.querySelector('input[name="search"]');
 

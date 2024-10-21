@@ -2,11 +2,10 @@ import * as React from 'react';
 
 import { Box, CardAction, Flex, BoxProps } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
-import { NavLink } from 'react-router-dom';
+import { NavLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { FolderCardContext } from '../contexts/FolderCard';
-import useId from '../hooks/useId';
 
 const FauxClickWrapper = styled.button`
   height: 100%;
@@ -48,7 +47,7 @@ export interface FolderCardProps extends Omit<BoxProps, 'id'> {
   startAction?: React.ReactNode;
   cardActions?: React.ReactNode;
   onClick?: () => void;
-  to?: string;
+  to?: LinkProps['to'];
 }
 
 export const FolderCard = React.forwardRef(
@@ -65,7 +64,7 @@ export const FolderCard = React.forwardRef(
     }: FolderCardProps,
     ref
   ) => {
-    const generatedId = useId(id!);
+    const generatedId = React.useId();
     const fodlerCtxValue = React.useMemo(() => ({ id: generatedId }), [generatedId]);
 
     return (

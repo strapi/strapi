@@ -17,6 +17,8 @@ const STEPS = {
   FolderCreate: 'FolderCreate',
 };
 
+type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+
 interface MediaLibraryInputProps {
   required?: boolean;
   name: string;
@@ -25,7 +27,7 @@ interface MediaLibraryInputProps {
   hint?: string;
   disabled?: boolean;
   attribute: {
-    allowedTypes?: string[];
+    allowedTypes?: AllowedTypes[];
     multiple?: boolean;
   };
 }

@@ -1,5 +1,5 @@
 import { DesignSystemProvider } from '@strapi/design-system';
-import { render as renderTL } from '@testing-library/react';
+import { render as renderTL, screen } from '@testing-library/react';
 
 import en from '../../../translations/en.json';
 import { AudioAssetCard } from '../AudioAssetCard';
@@ -12,7 +12,7 @@ jest.mock('react-intl', () => ({
 
 describe('AudioAssetCard', () => {
   it('renders the component with the correct infos', () => {
-    const { getByRole } = renderTL(
+    renderTL(
       <DesignSystemProvider>
         <AudioAssetCard
           name="hello.mp3"
@@ -27,7 +27,7 @@ describe('AudioAssetCard', () => {
     );
 
     // Get the heading of the card
-    const headingElement = getByRole('heading', { name: 'hello.mp3' });
+    const headingElement = screen.getByRole('heading', { name: 'hello.mp3' });
     expect(headingElement).toBeInTheDocument();
   });
 });

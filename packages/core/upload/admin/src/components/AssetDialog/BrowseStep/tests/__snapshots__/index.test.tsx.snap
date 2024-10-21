@@ -909,7 +909,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
               </div>
               <div
                 class="c48 c49 c50"
-                id="folder-1-1-title"
+                id=":r5:-title"
               >
                 <button
                   class="c51 c52"
@@ -980,7 +980,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       >
         <div
           aria-autocomplete="none"
-          aria-controls="radix-:r6:"
+          aria-controls="radix-:r7:"
           aria-expanded="false"
           aria-label="Entries per page"
           class="c5 c6 c7"

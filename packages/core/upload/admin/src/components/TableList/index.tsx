@@ -32,9 +32,11 @@ export interface FolderRow extends Folder {
   type?: string;
 }
 
+type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+
 export interface TableListProps {
   isFolderSelectionAllowed?: boolean;
-  allowedTypes?: string[];
+  allowedTypes?: AllowedTypes[];
   assetCount?: number;
   folderCount?: number;
   indeterminate?: boolean;
