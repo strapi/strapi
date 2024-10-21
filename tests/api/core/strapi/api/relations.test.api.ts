@@ -347,7 +347,6 @@ describe('Relations', () => {
             populateShop
           );
 
-          console.log('shop', shop);
           expect(shop.data).toMatchObject({
             myCompo: {
               compo_products_mw: [{ documentId: docid1 }, { documentId: docid2 }],
