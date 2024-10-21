@@ -23,7 +23,7 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Check that the preview link can be copied
-    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await context.grantPermissions(['clipboard-read']);
     await page.getByRole('button', { name: /copy preview link/i }).click();
     await findAndClose(page, 'Copied preview link');
     const clipboardText = await page.evaluate(() => {
