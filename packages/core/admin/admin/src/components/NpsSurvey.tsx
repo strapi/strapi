@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { env } from '@strapi/utils';
 
 import {
   Box,
@@ -190,7 +189,7 @@ const NpsSurvey = () => {
         environment: currentEnvironment,
         version: strapiVersion ?? undefined,
         license: window.strapi.projectType,
-        isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+        isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
       };
       const res = await fetch('https://analytics.strapi.io/submit-nps', {
         method: 'POST',
