@@ -38,19 +38,25 @@ type RequiredCreateComponentOptions = Required<CreateComponentOptionsBase> &
 
 // Select a component icon
 export const selectComponentIcon = async (page: Page, icon: string) => {
-  const iconLoc = page.locator(`label:has(input[type="radio"][value="${icon}"])`);
-  await iconLoc.scrollIntoViewIfNeeded();
-  await iconLoc.click({ force: true });
+  // Test the search and avoiding needing to scroll to the icon
+  const searchButton = page.getByRole('button', { name: 'Search icon button' });
+  await clickAndWait(page, searchButton);
+  const searchInput = page.getByPlaceholder('Search for an icon');
+  await searchInput.fill(icon);
 
-  // Optionally, verify if the input is checked
-  const isChecked = await iconLoc.isChecked();
+  // click the icon
+  const iconResult = page.locator(`label:has(input[type="radio"][value="${icon}"])`);
+  await clickAndWait(page, iconResult);
+
+  // verify the correct icon was selected
+  const isChecked = await iconResult.isChecked();
   expect(isChecked).toBe(true);
 };
 
 // open the component builder
 const openComponentBuilder = async (page: Page) => {
-  await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-  await page.getByRole('button', { name: 'Create new component' }).click();
+  await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+  await clickAndWait(page, page.getByRole('button', { name: 'Create new component' }));
 };
 
 export const fillComponent = async (page: Page, options: CreateComponentOptions) => {
