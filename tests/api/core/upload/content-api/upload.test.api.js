@@ -404,7 +404,7 @@ describe('Upload plugin', () => {
     });
 
     describe('Media relations', () => {
-      test('connect returns the right status code', async () => {
+      test('connect works', async () => {
         // upload images
         const images = await rq({
           method: 'POST',
@@ -446,17 +446,16 @@ describe('Upload plugin', () => {
 
         expect(connectRes.status).toBe(200);
 
-        // TODO: once Github issue 20961 is fixed, uncomment these lines to test results and update this test name to "works"
-        // expect(connectRes.body.data.relatedMedia).toHaveLength(1);
+        expect(connectRes.body.data.relatedMedia).toHaveLength(1);
 
-        // expect(connectRes.body.data.relatedMedia[1]).toEqual(
-        //   expect.objectContaining({
-        //     id: images.body[1].id,
-        //   })
-        // );
+        expect(connectRes.body.data.relatedMedia[1]).toEqual(
+          expect.objectContaining({
+            id: images.body[1].id,
+          })
+        );
       });
 
-      test('disconnect returns the right status code', async () => {
+      test('disconnect works', async () => {
         // upload images
         const images = await rq({
           method: 'POST',
@@ -498,14 +497,13 @@ describe('Upload plugin', () => {
 
         expect(connectRes.status).toBe(200);
 
-        // TODO: once Github issue 20961 is fixed, uncomment these lines to test results and update this test name to "works"
-        // expect(connectRes.body.data.relatedMedia).toHaveLength(1);
+        expect(connectRes.body.data.relatedMedia).toHaveLength(1);
 
-        // expect(connectRes.body.data.relatedMedia[1]).toEqual(
-        //   expect.objectContaining({
-        //     id: images.body[1].id,
-        //   })
-        // );
+        expect(connectRes.body.data.relatedMedia[1]).toEqual(
+          expect.objectContaining({
+            id: images.body[1].id,
+          })
+        );
       });
 
       test('set works', async () => {

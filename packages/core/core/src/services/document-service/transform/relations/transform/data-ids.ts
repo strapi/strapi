@@ -16,11 +16,14 @@ interface Options {
   allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
 }
 
+export const isPolymorphicRelation = (attribute: any): any =>
+  ['morphOne', 'morphMany', 'morphToOne', 'morphToMany'].includes(attribute.relation);
+
 /**
  * Get the entry ids for a given documentId.
  */
 const getRelationIds = curry(
-  (idMap: IdMap, targetUid: UID.Schema, source: Options, relation: LongHandDocument) => {
+  (idMap: IdMap, source: Options, targetUid: UID.Schema, relation: LongHandDocument) => {
     // locale to connect to
     const targetLocale = getRelationTargetLocale(relation, {
       targetUid,
@@ -70,10 +73,8 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
       if (!attribute) {
         return;
       }
-
-      // Find relational attributes, and return the document ids
-      const targetUid = attribute.target!;
-      const getIds = getRelationIds(idMap, targetUid, source);
+      const isPolymorphic = isPolymorphicRelation(attribute);
+      const getIds = getRelationIds(idMap, source);
 
       // Transform the relation documentId to entity id
       const newRelation = await mapRelation((relation) => {
@@ -81,26 +82,36 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
           return relation;
         }
 
-        const ids = getIds(relation);
+        // Find relational attributes, and return the document ids
+        // if its a polymorphic relation we need to get it from the data itself
+        const targetUid = (attribute.target || relation.__type) as UID.Schema;
+        const ids = getIds(targetUid, relation);
 
         // Handle positional arguments
         const position = { ...relation.position };
 
         if (position.before) {
           const beforeRelation = { ...relation, ...position, documentId: position.before };
-          position.before = getIds(beforeRelation).at(0);
+          // TODO: Reordering on polymorphic relations
+          position.before = getIds(targetUid, beforeRelation).at(0);
         }
 
         if (position.after) {
           const afterRelation = { ...relation, ...position, documentId: position.after };
-          position.after = getIds(afterRelation).at(0);
+          position.after = getIds(targetUid, afterRelation).at(0);
         }
 
         // Transform all ids to new relations
         return ids?.map((id) => {
           const newRelation = { id } as typeof relation;
+
           if (relation.position) {
             newRelation.position = position;
+          }
+
+          // Insert type if its a polymorphic relation
+          if (isPolymorphic) {
+            newRelation.__type = targetUid;
           }
 
           return newRelation;

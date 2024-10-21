@@ -63,6 +63,8 @@ export default (auth: unknown): Visitor =>
 
           // Assign the filtered options back to newValue
           newValue.options = filteredOptions;
+        } else {
+          newValue.options = {};
         }
 
         set(key, newValue);

@@ -141,12 +141,6 @@ const traverseEntityRelations = async (
         return;
       }
 
-      // TODO: Handle morph relations (they have multiple targets)
-      const target = attribute.target as UID.Schema | undefined;
-      if (!target) {
-        return;
-      }
-
       return visitor(options, utils);
     },
     options,

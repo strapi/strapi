@@ -18,7 +18,7 @@ interface Options {
  * Load a relation documentId into the idMap.
  */
 const addRelationDocId = curry(
-  (idMap: IdMap, targetUid: UID.Schema, source: Options, relation: LongHandDocument) => {
+  (idMap: IdMap, source: Options, targetUid: UID.Schema, relation: LongHandDocument) => {
     const targetLocale = getRelationTargetLocale(relation, {
       targetUid,
       sourceUid: source.uid,
@@ -47,31 +47,34 @@ const addRelationDocId = curry(
  * Those will later be transformed to entity ids.
  */
 const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options) => {
+  // This is not iterating polymorphics
   return traverseEntityRelations(
     async ({ attribute, value }) => {
       if (!attribute) {
         return;
       }
-
-      const targetUid = attribute.target!;
-      const addDocId = addRelationDocId(idMap, targetUid, source);
+      const addDocId = addRelationDocId(idMap, source);
 
       return mapRelation((relation) => {
         if (!relation || !relation.documentId) {
           return relation;
         }
 
-        addDocId(relation);
+        // Regular relations will always target the same target
+        // if its a polymorphic relation we need to get it from the data itself
+        const targetUid = attribute.target || (relation.__type as string);
+
+        addDocId(targetUid, relation);
 
         // Handle positional arguments
         const position = relation.position;
 
         if (position?.before) {
-          addDocId({ ...relation, ...position, documentId: position.before });
+          addDocId(targetUid, { ...relation, ...position, documentId: position.before });
         }
 
         if (position?.after) {
-          addDocId({ ...relation, ...position, documentId: position.after });
+          addDocId(targetUid, { ...relation, ...position, documentId: position.after });
         }
 
         return relation;
