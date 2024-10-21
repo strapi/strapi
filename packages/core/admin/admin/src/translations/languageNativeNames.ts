@@ -10,6 +10,7 @@ export const languageNativeNames = {
   fr: 'Français',
   gu: 'Gujarati',
   he: 'עברית',
+  hr: 'Hrvatski',
   hu: 'Magyar',
   id: 'Indonesian',
   it: 'Italiano',

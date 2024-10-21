@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
-import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
+import type { CLIContext, CloudApiService, ProjectAnswers, ProjectInput } from '../types';
 import { cloudApiFactory, local, tokenServiceFactory } from '../services';
 import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
 import { promptLogin } from '../login/action';
@@ -44,7 +44,11 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-async function createProject(ctx: CLIContext, cloudApi: any, projectInput: ProjectInput) {
+async function createProject(
+  ctx: CLIContext,
+  cloudApi: CloudApiService,
+  projectInput: ProjectInput
+): Promise<ProjectInput> {
   const { logger } = ctx;
   const spinner = logger.spinner('Setting up your project...').start();
   try {
@@ -58,7 +62,7 @@ async function createProject(ctx: CLIContext, cloudApi: any, projectInput: Proje
   }
 }
 
-export default async (ctx: CLIContext) => {
+export default async (ctx: CLIContext): Promise<ProjectInput | undefined> => {
   const { logger } = ctx;
   const { getValidToken, eraseToken } = await tokenServiceFactory(ctx);
 
