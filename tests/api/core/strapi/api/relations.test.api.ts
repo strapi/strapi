@@ -165,7 +165,7 @@ const createShop = async ({
   anyToOneRel = [{ documentId: docid1 }],
   anyToManyRel = [{ documentId: docid1 }, { documentId: docid2 }, { documentId: docid3 }],
   data = {},
-  populate,
+  populate = populateShop,
   strict,
 }: ShopOptions) => {
   const options = strict ? { strict } : {};
@@ -184,7 +184,7 @@ const createShop = async ({
         options,
         connect: anyToManyRel.map((rel) => {
           return {
-            id: rel.documentId ? rel.documentId : rel,
+            documentId: rel.documentId ? rel.documentId : rel,
             __type: 'api::product.product',
             position: rel?.position || undefined,
           };
@@ -196,7 +196,7 @@ const createShop = async ({
       },
       ...data,
     },
-    populate || populateShop
+    populate
   );
 
   return result;
@@ -209,7 +209,7 @@ const updateShop = async (
     anyToManyRel = [{ documentId: docid1 }, { documentId: docid2 }, { documentId: docid3 }],
     relAction = 'connect',
     data = {},
-    populate,
+    populate = populateShop,
     strict = true,
   }: ShopOptions
 ) => {
@@ -228,7 +228,7 @@ const updateShop = async (
         options: { strict },
         [relAction]: anyToManyRel.map((rel) => {
           return {
-            id: rel.documentId ? rel.documentId : rel,
+            documentId: rel.documentId ? rel.documentId : rel,
             __type: 'api::product.product',
             position: rel?.position || undefined,
           };
@@ -243,7 +243,7 @@ const updateShop = async (
       // },
       ...data,
     },
-    populate || populateShop
+    populate
   );
 
   return result;
@@ -311,7 +311,10 @@ describe('Relations', () => {
     (connectOrSet) => {
       describe.each([
         /*  ['directly in the array ([1, 2])', 'object'], */
-        ['an object in the array ([{ id: 1 }, { id: 2 }])', 'array'],
+        [
+          'an object in the array ([{ documentId: "123asdf" }, { documentId: "432fdsa" }])',
+          'array',
+        ],
       ])('ids being %s', (name, mode) => {
         test('In one order', async () => {
           const oneRelation = mode === 'object' ? [{ documentId: docid1 }] : [docid1];
@@ -379,7 +382,7 @@ describe('Relations', () => {
               products_morphtomany: {
                 [connectOrSet]: manyRelations.map((rel) => {
                   return {
-                    id: mode === 'object' ? rel.documentId : rel,
+                    documentId: mode === 'object' ? rel.documentId : rel,
                     __type: 'api::product.product',
                   };
                 }),
@@ -551,13 +554,13 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToAdd.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.id : rel,
+                  documentId: mode === 'object' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
               disconnect: relationsToRemove.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.id : rel,
+                  documentId: mode === 'object' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -581,7 +584,7 @@ describe('Relations', () => {
           products_mm: [{ documentId: docid2 }, { documentId: docid3 }],
           products_mo: { documentId: docid3 },
           products_mw: [{ documentId: docid2 }, { documentId: docid3 }],
-          products_morphtomany: [{ id: docid2 }, { id: docid3 }],
+          products_morphtomany: [{ documentId: docid2 }, { documentId: docid3 }],
           products_om: [{ documentId: docid2 }, { documentId: docid3 }],
           products_oo: { documentId: docid3 },
           products_ow: { documentId: docid3 },
@@ -632,10 +635,16 @@ describe('Relations', () => {
             products_mw: { connect: relationsToAdd, disconnect: relationsToRemove },
             products_morphtomany: {
               connect: relationsToAdd.map((rel) => {
-                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+                return {
+                  documentId: mode === 'object' ? rel.documentId : rel,
+                  __type: 'api::product.product',
+                };
               }),
               disconnect: relationsToRemove.map((rel) => {
-                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+                return {
+                  documentId: mode === 'object' ? rel.documentId : rel,
+                  __type: 'api::product.product',
+                };
               }),
             },
             // TODO V5: Discuss component id update, updating a draft component
@@ -657,7 +666,7 @@ describe('Relations', () => {
           products_mm: [{ documentId: docid2 }, { documentId: docid3 }],
           products_mo: { documentId: docid3 },
           products_mw: [{ documentId: docid2 }, { documentId: docid3 }],
-          products_morphtomany: [{ id: docid2 }, { id: docid3 }],
+          products_morphtomany: [{ documentId: docid2 }, { documentId: docid3 }],
           products_om: [{ documentId: docid2 }, { documentId: docid3 }],
           products_oo: { documentId: docid3 },
           products_ow: { documentId: docid3 },
@@ -701,7 +710,10 @@ describe('Relations', () => {
             products_mw: { connect: relationsToChange },
             products_morphtomany: {
               connect: relationsToChange.map((rel) => {
-                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+                return {
+                  documentId: mode === 'object' ? rel.documentId : rel,
+                  __type: 'api::product.product',
+                };
               }),
             },
             // TODO V5: Discuss component id update, updating a draft component
@@ -720,7 +732,11 @@ describe('Relations', () => {
           // },
           products_mm: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
           products_mw: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
-          products_morphtomany: [{ id: docid3 }, { id: docid2 }, { id: docid1 }],
+          products_morphtomany: [
+            { documentId: docid3 },
+            { documentId: docid2 },
+            { documentId: docid1 },
+          ],
           products_om: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
         });
       });
@@ -737,7 +753,7 @@ describe('Relations', () => {
             products_mw: { connect: manyRelations },
             products_morphtomany: {
               connect: manyRelations.map((rel) => {
-                return { id: rel, __type: 'api::product.product' };
+                return { documentId: rel, __type: 'api::product.product' };
               }),
             },
             myCompo: {
@@ -825,7 +841,10 @@ describe('Relations', () => {
             products_mw: { connect: relationsToChange },
             products_morphtomany: {
               connect: relationsToChange.map((rel) => {
-                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+                return {
+                  documentId: mode === 'object' ? rel.documentId : rel,
+                  __type: 'api::product.product',
+                };
               }),
             },
             // TODO V5: Discuss component id update, updating a draft component
@@ -928,12 +947,9 @@ describe('Relations', () => {
           products_mo: null,
           products_mm: [],
           products_mw: [],
-          // products_morphtomany: []],
+          products_morphtomany: [],
           products_om: [],
         });
-
-        // TODO: This is a bug in how morphtomany returns an empty result; it should return an empty array
-        expect(updatedShop.data.attributes.products_morphtomany).not.toBeDefined();
       });
 
       // TODO: V5 - relations should throw an error if they do not exist
@@ -981,7 +997,10 @@ describe('Relations', () => {
             products_mw: { disconnect: relationsToDisconnectMany },
             products_morphtomany: {
               disconnect: relationsToDisconnectMany.map((rel) => {
-                return { id: mode === 'object' ? rel.id : rel, __type: 'api::product.product' };
+                return {
+                  documentId: mode === 'object' ? rel.documentId : rel,
+                  __type: 'api::product.product',
+                };
               }),
             },
             // TODO V5: Discuss component id update, updating a draft component
@@ -1005,7 +1024,7 @@ describe('Relations', () => {
           products_mo: { documentId: docid1 },
           products_mm: [{ documentId: docid1 }],
           products_mw: [{ documentId: docid1 }],
-          products_morphtomany: [{ id: docid1 }],
+          products_morphtomany: [{ documentId: docid1 }],
           products_om: [{ documentId: docid1 }],
         });
       });
@@ -1107,7 +1126,7 @@ describe('Relations', () => {
             options: { strict: true, invalid: true },
             connect: [
               {
-                id: docid1,
+                documentId: docid1,
                 __type: 'api::product.product',
                 position: 'end',
               },
@@ -1130,7 +1149,7 @@ describe('Relations', () => {
             options: { strict: true, invalid: true },
             connect: [
               {
-                id: docid1,
+                documentId: docid1,
                 __type: 'api::product.product',
                 position: 'end',
               },
@@ -1152,7 +1171,7 @@ describe('Relations', () => {
             options: { strict: true },
             connect: [
               {
-                id: docid1,
+                documentId: docid1,
                 __type: 'api::product.product',
                 position: 'end',
               },
@@ -1175,7 +1194,7 @@ describe('Relations', () => {
             options: { strict: true, invalid: true },
             disconnect: [
               {
-                id: docid1,
+                documentId: docid1,
                 __type: 'api::product.product',
                 position: 'end',
               },
@@ -1198,7 +1217,7 @@ describe('Relations', () => {
             options: { strict: true, invalid: true },
             set: [
               {
-                id: docid1,
+                documentId: docid1,
                 __type: 'api::product.product',
                 position: 'end',
               },
