@@ -1,15 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import {
-  createSingleType,
-  describeOnCondition,
-  navToHeader,
-  skipCtbTour,
-} from '../../../utils/shared';
+import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
+import { createSingleType } from '../../../utils/content-types';
 
 test.describe('Edit single type', () => {
   // very long timeout for these tests because they restart the server multiple times
