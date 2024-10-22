@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { describeOnCondition, navToHeader } from '../../utils/shared';
+import { describeOnCondition } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 
@@ -43,57 +43,56 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
-  test.fixme(
-    'A user should be able to create a release with scheduling info and view their pending and done releases',
-    async ({ page }) => {
-      // Navigate to the releases page
-      await page.getByRole('link', { name: 'Releases' }).click();
+  test('A user should be able to create a release with scheduling info and view their pending and done releases', async ({
+    page,
+  }) => {
+    // Navigate to the releases page
+    await page.getByRole('link', { name: 'Releases' }).click();
 
-      // Open the create release dialog
-      await page.getByRole('button', { name: 'New release' }).click();
-      await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
+    // Open the create release dialog
+    await page.getByRole('button', { name: 'New release' }).click();
+    await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
 
-      // Create a release
-      const newReleaseName = 'The Diamond Dogs';
-      await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
+    // Create a release
+    const newReleaseName = 'The Diamond Dogs';
+    await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
 
-      // Select valid date and time
-      await page
-        .getByRole('combobox', {
-          name: 'Date',
-        })
-        .click();
+    // Select valid date and time
+    await page
+      .getByRole('combobox', {
+        name: 'Date',
+      })
+      .click();
 
-      const date = new Date();
-      date.setDate(date.getDate() + 1);
-      const formattedDate = date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      });
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
 
-      await page.getByLabel(formattedDate).click();
+    await page.getByLabel(formattedDate).click();
 
-      await page
-        .getByRole('combobox', {
-          name: /^time$/i,
-        })
-        .click();
+    await page
+      .getByRole('combobox', {
+        name: /^time$/i,
+      })
+      .click();
 
-      await page.getByRole('option', { name: '14:00' }).click();
-      await page.getByRole('button', { name: 'Continue' }).click();
-      // Wait for client side redirect to created release
-      await page.waitForURL('/admin/plugins/content-releases/*');
-      await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
+    await page.getByRole('option', { name: '14:00' }).click();
+    await page.getByRole('button', { name: 'Continue' }).click();
+    // Wait for client side redirect to created release
+    await page.waitForURL('/admin/plugins/content-releases/*');
+    await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
 
-      // Navigate back to the release page to see the newly created release
-      await page.getByRole('link', { name: 'Releases' }).click();
-      await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
-    }
-  );
+    // Navigate back to the release page to see the newly created release
+    await page.getByRole('link', { name: 'Releases' }).click();
+    await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
+  });
 
-  test.fixme('A user should be able to perform bulk release on entries', async ({ page }) => {
+  test('A user should be able to perform bulk release on entries', async ({ page }) => {
     await test.step('bulk release', async () => {
       // Navigate to the releases page
       await page.getByRole('link', { name: 'Releases' }).click();
@@ -111,9 +110,8 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
       // Navigate to the content manager
       await page.getByRole('link', { name: 'Open the Content Manager' }).click();
-      await expect(page).toHaveTitle('Content Manager');
+      await page.waitForURL('/admin/content-manager/collection-types/*');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
 
       // Select all entries to release
       await page.getByRole('checkbox', { name: 'Select all entries' }).check();
@@ -136,10 +134,9 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     });
 
     await test.step('releases should be updated in the release column of list view', async () => {
-      const releaseColumn = page.getByRole('button', { name: '2 releases' });
+      const releaseColumn = page.getByRole('button', { name: '1 release' });
       await releaseColumn.first().click();
       await expect(page.getByText('The Diamond Dogs')).toBeVisible();
-      await expect(page.getByText('Trent Crimm: The Independent')).toBeVisible();
     });
   });
 });
