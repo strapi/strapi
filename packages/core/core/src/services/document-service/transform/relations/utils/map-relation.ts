@@ -1,7 +1,6 @@
 /* eslint-disable node/no-callback-literal */
 import { isObject, curry, isNil } from 'lodash/fp';
 
-import type { UID } from '@strapi/types';
 import { traverseEntity, async } from '@strapi/utils';
 
 import { Relation } from './types';
