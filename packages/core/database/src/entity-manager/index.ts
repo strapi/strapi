@@ -577,31 +577,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             continue;
           }
 
-          // TODO: check; this wasn't in the v4 version but it seems like it should be
-          // if (!isEmpty(cleanRelationData.set)) {
-          //   const rowsToDelete =
-          //     cleanRelationData.set?.map((data, idx) => ({
-          //       [joinColumn.name]: id,
-          //       [idColumn.name]: data.id,
-          //       [typeColumn.name]: data[typeField],
-          //       ...(('on' in joinTable && joinTable.on) || {}),
-          //       ...(data.__pivot || {}),
-          //       order: idx + 1,
-          //     })) ?? [];
-
-          //   // delete previous relations
-          //   await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rowsToDelete as any, {
-          //     uid,
-          //     attributeName,
-          //     joinTable,
-          //     db,
-          //     transaction: trx,
-          //   });
-          // }
-
-          // set has priority over connect
-          // TODO: should we throw an error when both are passed in?
-          // TODO: why fallback to []? shouldn't that be impossible?
+          // set happens before connect/disconnect
           const dataset = cleanRelationData.set || cleanRelationData.connect || [];
 
           const rows = dataset.map((data, idx) => ({
@@ -611,7 +587,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             ...(('on' in joinTable && joinTable.on) || {}),
             ...(data.__pivot || {}),
             order: idx + 1,
-          })) as Record<string, any>[];
+          })) satisfies Record<string, any>[];
 
           const orderMap = relationsOrderer(
             [],
@@ -700,7 +676,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               ...(('on' in joinTable && joinTable.on) || {}),
               ...(data.__pivot || {}),
             };
-          }) as Record<string, any>[];
+          }) satisfies Record<string, any>[];
 
           // add order value
           if (cleanRelationData.set && hasOrderColumn(attribute)) {
@@ -856,7 +832,7 @@ export const createEntityManager = (db: Database): EntityManager => {
 
                 const startOrder = (start as any)?.max || 0;
 
-                const rows = cleanRelationData.connect?.map((data, idx) => ({
+                const rows = (cleanRelationData.connect ?? []).map((data, idx) => ({
                   [joinColumn.name]: data.id,
                   [idColumn.name]: id,
                   [typeColumn.name]: uid,
@@ -864,7 +840,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                   ...(data.__pivot || {}),
                   order: startOrder + idx + 1,
                   field: attributeName,
-                })) as Record<string, any>;
+                })) satisfies Record<string, any>[];
 
                 await this.createQueryBuilder(joinTable.name)
                   .insert(rows)
@@ -888,7 +864,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               .execute();
 
             if (hasSet) {
-              const rows = cleanRelationData.set?.map((data, idx) => ({
+              const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
@@ -896,7 +872,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 ...(data.__pivot || {}),
                 order: idx + 1,
                 field: attributeName,
-              })) as Record<string, any>;
+              })) satisfies Record<string, any>[];
 
               await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
             }
@@ -926,6 +902,26 @@ export const createEntityManager = (db: Database): EntityManager => {
             const idsToDelete = [
               ...(cleanRelationData.disconnect || []),
               ...(cleanRelationData.connect || []),
+            ];
+
+            const rowsToDelete = [
+              ...(cleanRelationData.disconnect ?? []).map((data, idx) => ({
+                [joinColumn.name]: id,
+                [idColumn.name]: data.id,
+                [typeColumn.name]: data[typeField],
+                ...(('on' in joinTable && joinTable.on) || {}),
+                ...(data.__pivot || {}),
+                order: idx + 1,
+              })),
+              ...(cleanRelationData.connect ?? []).map((data, idx) => ({
+                [joinColumn.name]: id,
+                [idColumn.name]: data.id,
+                // @ts-expect-error TODO
+                [typeColumn.name]: data[typeField],
+                ...(('on' in joinTable && joinTable.on) || {}),
+                ...(data.__pivot || {}),
+                order: idx + 1,
+              })),
             ];
 
             const adjacentRelations = await this.createQueryBuilder(joinTable.name)
@@ -968,11 +964,20 @@ export const createEntityManager = (db: Database): EntityManager => {
                 }),
               };
 
+              // delete previous relations
               await this.createQueryBuilder(joinTable.name)
                 .delete()
                 .where(where)
                 .transacting(trx)
                 .execute();
+
+              await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rowsToDelete as any, {
+                uid,
+                attributeName,
+                joinTable,
+                db,
+                transaction: trx,
+              });
             }
 
             // connect relations
@@ -986,7 +991,7 @@ export const createEntityManager = (db: Database): EntityManager => {
                 ...(joinTable.on || {}),
                 ...(data.__pivot || {}),
                 field: attributeName,
-              })) as Record<string, any>;
+              })) satisfies Record<string, any>[];
 
               const orderMap = relationsOrderer(
                 adjacentRelations,
@@ -1007,25 +1012,6 @@ export const createEntityManager = (db: Database): EntityManager => {
             continue;
           }
 
-          // TODO: do we need to do the deleteMorphOneRelations here? I think we do
-          // const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
-          //   [joinColumn.name]: id,
-          //   [idColumn.name]: data.id,
-          //   [typeColumn.name]: data[typeField],
-          //   ...(joinTable.on || {}),
-          //   ...(data.__pivot || {}),
-          //   order: idx + 1,
-          // })) as Record<string, any>[];
-
-          // // delete previous relations
-          // await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
-          //   uid,
-          //   attributeName,
-          //   joinTable,
-          //   db,
-          //   transaction: trx,
-          // });
-
           // delete all relations
           await this.createQueryBuilder(joinTable.name)
             .delete()
@@ -1039,7 +1025,7 @@ export const createEntityManager = (db: Database): EntityManager => {
             .execute();
 
           if (hasSet) {
-            const rows = cleanRelationData.set?.map((data, idx) => ({
+            const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
               [joinColumn.name]: id,
               [idColumn.name]: data.id,
               [typeColumn.name]: data[typeField],
@@ -1047,7 +1033,7 @@ export const createEntityManager = (db: Database): EntityManager => {
               ...(data.__pivot || {}),
               order: idx + 1,
               field: attributeName,
-            })) as Record<string, any>;
+            })) satisfies Record<string, any>[];
 
             await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
           }
