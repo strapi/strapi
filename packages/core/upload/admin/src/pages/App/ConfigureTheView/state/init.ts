@@ -1,6 +1,8 @@
+import type { Configuration } from '../../../../../../shared/contracts/configuration';
+
 export type InitialState = {
-  initialData: Record<string, string | number> | {};
-  modifiedData: Record<string, string | number> | {};
+  initialData: Partial<Configuration>;
+  modifiedData: Partial<Configuration>;
 };
 
 const initialState: InitialState = {
@@ -8,7 +10,7 @@ const initialState: InitialState = {
   modifiedData: {},
 };
 
-const init = (configData: InitialState['initialData']) => {
+const init = (configData: InitialState['initialData']): InitialState => {
   return {
     ...initialState,
     initialData: configData,

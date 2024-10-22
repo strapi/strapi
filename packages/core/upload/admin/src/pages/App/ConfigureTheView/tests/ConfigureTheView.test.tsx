@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -7,7 +5,9 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
 import ConfigureTheView from '..';
-import { pageSizes, sortOptions } from '../../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { pageSizes, sortOptions } from '../../../../newConstants';
+import type { Configuration } from '../../../../../../shared/contracts/configuration';
 
 const mutateAsync = jest.fn();
 jest.mock('../../../../hooks/useConfig', () => ({
@@ -19,9 +19,9 @@ jest.mock('../../../../hooks/useConfig', () => ({
 }));
 
 const render = (
-  config = {
+  config: Configuration = {
     pageSize: pageSizes[0],
-    sort: sortOptions[0].value,
+    sort: sortOptions[0].value as Configuration['sort'],
   }
 ) => ({
   user: userEvent.setup(),

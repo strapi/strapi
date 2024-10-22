@@ -4,11 +4,16 @@ import { useIntl } from 'react-intl';
 // TODO: replace this import with the import from constants file when it will be migrated to TS
 import { pageSizes, sortOptions } from '../../../../newConstants';
 import { getTrad } from '../../../../utils';
+import type { Configuration } from '../../../../../../shared/contracts/configuration';
 
 interface SettingsProps {
   sort: string;
-  pageSize: number;
-  onChange: (event: { target: { name: string; value: string | number } }) => void;
+  pageSize: string | number;
+  onChange: ({
+    target: { name, value },
+  }: {
+    target: { name: keyof Configuration; value: string | number };
+  }) => void;
 }
 
 const Settings = ({ sort = '', pageSize = 10, onChange }: SettingsProps) => {
