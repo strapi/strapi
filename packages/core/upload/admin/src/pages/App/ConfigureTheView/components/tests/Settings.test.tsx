@@ -1,12 +1,11 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { pageSizes, sortOptions } from '../../../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { pageSizes, sortOptions } from '../../../../../newConstants';
 import { Settings } from '../Settings';
 
 const testPageSize = pageSizes[0];
@@ -47,7 +46,7 @@ describe('Upload - Configure | Settings', () => {
       await user.click(getByRole('combobox', { name: 'Entries per page' }));
 
       pageSizes.forEach((size) => {
-        expect(getByRole('option', { name: size })).toBeInTheDocument();
+        expect(getByRole('option', { name: size.toString() })).toBeInTheDocument();
       });
     });
 
@@ -59,7 +58,7 @@ describe('Upload - Configure | Settings', () => {
 
       await user.click(getByRole('combobox', { name: 'Entries per page' }));
 
-      await user.click(getByRole('option', { name: testValue }));
+      await user.click(getByRole('option', { name: testValue.toString() }));
 
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledWith({ target: { name: 'pageSize', value: testValue } });
