@@ -309,16 +309,18 @@ describe('Relations', () => {
     'Create an entity with relations using %s',
     (connectOrSet) => {
       describe.each([
-        ['directly in the array ([1, 2])', 'object'],
+        ['direct documentId ([1, 2])', 'docId'],
         [
-          'an object in the array ([{ documentId: "123asdf" }, { documentId: "432fdsa" }])',
-          'array',
+          'object with documentId ([{ documentId: "123asdf" }, { documentId: "432fdsa" }])',
+          'docIdObject',
         ],
       ])('ids being %s', (name, mode) => {
         test('In one order', async () => {
-          const oneRelation = mode === 'object' ? [{ documentId: docid1 }] : [docid1];
+          const oneRelation = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
           const manyRelations =
-            mode === 'object' ? [{ documentId: docid1 }, { documentId: docid2 }] : [docid1, docid2];
+            mode === 'docIdObject'
+              ? [{ documentId: docid1 }, { documentId: docid2 }]
+              : [docid1, docid2];
 
           const shop = await createEntry(
             'shops',
@@ -333,7 +335,7 @@ describe('Relations', () => {
               products_morphtomany: {
                 [connectOrSet]: manyRelations.map((rel) => {
                   return {
-                    documentId: mode === 'object' ? rel.documentId : rel,
+                    documentId: mode === 'docIdObject' ? rel.documentId : rel,
                     __type: 'api::product.product',
                   };
                 }),
@@ -362,9 +364,11 @@ describe('Relations', () => {
         });
 
         test('In reversed order', async () => {
-          const oneRelation = mode === 'object' ? [{ documentId: docid1 }] : [docid1];
+          const oneRelation = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
           const manyRelations =
-            mode === 'object' ? [{ documentId: docid1 }, { documentId: docid2 }] : [docid1, docid2];
+            mode === 'docIdObject'
+              ? [{ documentId: docid1 }, { documentId: docid2 }]
+              : [docid1, docid2];
           manyRelations.reverse();
 
           const shop = await createEntry(
@@ -380,7 +384,7 @@ describe('Relations', () => {
               products_morphtomany: {
                 [connectOrSet]: manyRelations.map((rel) => {
                   return {
-                    documentId: mode === 'object' ? rel.documentId : rel,
+                    documentId: mode === 'docIdObject' ? rel.documentId : rel,
                     __type: 'api::product.product',
                   };
                 }),
@@ -413,8 +417,8 @@ describe('Relations', () => {
 
   describe('Update an entity relations', () => {
     describe.each([
-      ['directly in the array ([3])', 'object'],
-      ['an object in the array ([{ id: 3 }])', 'array'],
+      ['directly in the array ([3])', 'docId'],
+      ['an object in the array ([{ docid: 3 }])', 'docIdObject'],
     ])('ids being %s', (name, mode) => {
       test('Adding id3', async () => {
         const oneRelation = [docid1];
@@ -457,7 +461,7 @@ describe('Relations', () => {
           products_ow: { documentId: docid1 },
         });
 
-        const relationsToAdd = mode === 'object' ? [{ documentId: docid3 }] : [docid3];
+        const relationsToAdd = mode === 'docIdObject' ? [{ documentId: docid3 }] : [docid3];
 
         const updatedShop = await updateEntry(
           'shops',
@@ -473,7 +477,7 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToAdd.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -535,8 +539,8 @@ describe('Relations', () => {
           ['myCompo']
         );
 
-        const relationsToAdd = mode === 'object' ? [{ documentId: docid3 }] : [docid3];
-        const relationsToRemove = mode === 'object' ? [{ documentId: docid1 }] : [docid1];
+        const relationsToAdd = mode === 'docIdObject' ? [{ documentId: docid3 }] : [docid3];
+        const relationsToRemove = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
 
         const updatedShop = await updateEntry(
           'shops',
@@ -552,13 +556,13 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToAdd.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
               disconnect: relationsToRemove.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -616,9 +620,11 @@ describe('Relations', () => {
           ['myCompo']
         );
 
-        const relationsToAdd = mode === 'object' ? [{ documentId: docid3 }] : [docid3];
+        const relationsToAdd = mode === 'docIdObject' ? [{ documentId: docid3 }] : [docid3];
         const relationsToRemove =
-          mode === 'object' ? [{ documentId: docid1 }, { documentId: docid3 }] : [docid1, docid3];
+          mode === 'docIdObject'
+            ? [{ documentId: docid1 }, { documentId: docid3 }]
+            : [docid1, docid3];
 
         const updatedShop = await updateEntry(
           'shops',
@@ -634,13 +640,13 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToAdd.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
               disconnect: relationsToRemove.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -694,7 +700,7 @@ describe('Relations', () => {
         );
 
         const relationsToChange =
-          mode === 'object'
+          mode === 'docIdObject'
             ? [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }]
             : [docid3, docid2, docid1];
 
@@ -709,7 +715,7 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToChange.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -761,7 +767,7 @@ describe('Relations', () => {
           ['myCompo']
         );
 
-        const relationsToChange = mode === 'object' ? [{ documentId: docid2 }] : [docid2];
+        const relationsToChange = mode === 'docIdObject' ? [{ documentId: docid2 }] : [docid2];
 
         const updatedShop = await updateEntry(
           'shops',
@@ -774,7 +780,7 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToChange.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -827,7 +833,9 @@ describe('Relations', () => {
         );
 
         const relationsToChange =
-          mode === 'object' ? [{ documentId: docid2 }, { documentId: docid1 }] : [docid2, docid1];
+          mode === 'docIdObject'
+            ? [{ documentId: docid2 }, { documentId: docid1 }]
+            : [docid2, docid1];
 
         const updatedShop = await updateEntry(
           'shops',
@@ -840,7 +848,7 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToChange.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -869,8 +877,11 @@ describe('Relations', () => {
 
   describe('Disconnect entity relations', () => {
     describe.each([
-      ['directly in the array ([1, 2, 3])', 'object'],
-      ['an object in the array ([{ id: 1 }, { id: 2 }, { id: 3 }])', 'array'],
+      ['direct documentId ([1, 2, 3])', 'docId'],
+      [
+        'object with documentId ([{ documentId: 1 }, { documentId: 2 }, { documentId: 3 }])',
+        'docIdObject',
+      ],
     ])('ids being %s', (name, mode) => {
       test('Remove all relations docid1, docid2, docid3', async () => {
         const manyRelations = [docid1, docid2, docid3];
@@ -899,9 +910,10 @@ describe('Relations', () => {
           ['myCompo']
         );
 
-        const relationsToDisconnectOne = mode === 'object' ? [{ documentId: docid1 }] : [docid1];
+        const relationsToDisconnectOne =
+          mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
         const relationsToDisconnectMany =
-          mode === 'object'
+          mode === 'docIdObject'
             ? [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }]
             : [docid3, docid2, docid1];
 
@@ -919,7 +931,7 @@ describe('Relations', () => {
             products_morphtomany: {
               disconnect: relationsToDisconnectMany.map((rel) => {
                 return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
+                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
                   __type: 'api::product.product',
                 };
               }),
@@ -953,8 +965,7 @@ describe('Relations', () => {
         expect(updatedShop.data.products_morphtomany).not.toBeDefined();
       });
 
-      // TODO: V5 - relations should throw an error if they do not exist
-      test.skip("Remove relations that doesn't exist doesn't fail", async () => {
+      test("Remove relations that doesn't exist doesn't fail", async () => {
         const createRelation = [docid1];
 
         const createdShop = await createEntry(
@@ -981,53 +992,84 @@ describe('Relations', () => {
         );
 
         const relationsToDisconnectMany =
-          mode === 'object'
+          mode === 'docIdObject'
             ? [{ documentId: docid3 }, { documentId: docid2 }, { documentId: 9999 }]
             : [docid3, docid2, 9999];
 
-        const updatedShop = await updateEntry(
-          'shops',
-          createdShop.data.documentId,
-          {
-            name: 'Cazotte Shop',
-            products_ow: { disconnect: relationsToDisconnectMany },
-            products_oo: { disconnect: relationsToDisconnectMany },
-            products_mo: { disconnect: relationsToDisconnectMany },
-            products_om: { disconnect: relationsToDisconnectMany },
-            products_mm: { disconnect: relationsToDisconnectMany },
-            products_mw: { disconnect: relationsToDisconnectMany },
-            products_morphtomany: {
-              disconnect: relationsToDisconnectMany.map((rel) => {
-                return {
-                  documentId: mode === 'object' ? rel.documentId : rel,
-                  __type: 'api::product.product',
-                };
-              }),
-            },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_ow: { disconnect: relationsToDisconnectMany },
-            //   compo_products_mw: { disconnect: relationsToDisconnectMany },
-            // },
-          },
-          populateShop
-        );
+        /**
+         * Note: The API returns an error for missing disconnect on objects, but
+         * using an array of ids works without error
+         */
 
-        expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_ow: { documentId: id1 },
-          //   compo_products_mw: [{ documentId: id1 }],
-          // },
-          products_ow: { documentId: docid1 },
-          products_oo: { documentId: docid1 },
-          products_mo: { documentId: docid1 },
-          products_mm: [{ documentId: docid1 }],
-          products_mw: [{ documentId: docid1 }],
-          products_morphtomany: [{ documentId: docid1 }],
-          products_om: [{ documentId: docid1 }],
-        });
+        if (mode === 'docIdObject') {
+          const productTypes = [
+            'products_ow',
+            'products_oo',
+            'products_mo',
+            'products_om',
+            'products_mm',
+            'products_mw',
+            'products_morphtomany',
+          ];
+
+          // Test each relation type individually
+          for (const productType of productTypes) {
+            const updatePayload = {
+              name: 'Cazotte Shop',
+              [productType]: {
+                disconnect: relationsToDisconnectMany.map((rel) => {
+                  if (productType === 'products_morphtomany') {
+                    return {
+                      documentId: mode === 'docIdObject' ? rel.documentId : rel,
+                      __type: 'api::product.product',
+                    };
+                  }
+                  return rel;
+                }),
+              },
+            };
+
+            const updatedShop = await updateEntry(
+              'shops',
+              createdShop.data.documentId,
+              updatePayload,
+              populateShop
+            );
+
+            expect(updatedShop.error).toBeDefined();
+            expect(updatedShop.error.status).toBe(400);
+          }
+        } else if (mode === 'docId') {
+          const updatedShop = await updateEntry(
+            'shops',
+            createdShop.data.documentId,
+            {
+              name: 'Cazotte Shop',
+              products_ow: { disconnect: relationsToDisconnectMany },
+              products_oo: { disconnect: relationsToDisconnectMany },
+              products_mo: { disconnect: relationsToDisconnectMany },
+              products_om: { disconnect: relationsToDisconnectMany },
+              products_mm: { disconnect: relationsToDisconnectMany },
+              products_mw: { disconnect: relationsToDisconnectMany },
+              // Note: products_morphtomany only works with object form, so we won't test it here
+            },
+            populateShop
+          );
+
+          expect(updatedShop.data).toMatchObject({
+            // myCompo: {
+            //   compo_products_ow: { documentId: id1 },
+            //   compo_products_mw: [{ documentId: id1 }],
+            // },
+            products_ow: { documentId: docid1 },
+            products_oo: { documentId: docid1 },
+            products_mo: { documentId: docid1 },
+            products_mm: [{ documentId: docid1 }],
+            products_mw: [{ documentId: docid1 }],
+            products_morphtomany: [{ documentId: docid1 }],
+            products_om: [{ documentId: docid1 }],
+          });
+        }
       });
     });
   });
