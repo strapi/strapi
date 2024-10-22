@@ -1,16 +1,20 @@
-import React from 'react';
-
 import { Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition, FolderDefinition } from '../../../constants';
 import { getTrad } from '../../../utils';
 
 import { BulkDeleteButton } from './BulkDeleteButton';
+import type { BulkDeleteButtonProps } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
+import type { BulkMoveButtonProps } from './BulkMoveButton';
 
-export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
+interface BulkActionsProps {
+  selected: BulkDeleteButtonProps['selected'] | BulkMoveButtonProps['selected'];
+  onSuccess: () => void;
+  currentFolder?: BulkMoveButtonProps['currentFolder'];
+}
+
+export const BulkActions = ({ selected, onSuccess, currentFolder }: BulkActionsProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -29,18 +33,15 @@ export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
         )}
       </Typography>
 
-      <BulkDeleteButton selected={selected} onSuccess={onSuccess} />
-      <BulkMoveButton currentFolder={currentFolder} selected={selected} onSuccess={onSuccess} />
+      <BulkDeleteButton
+        selected={selected as BulkDeleteButtonProps['selected']}
+        onSuccess={onSuccess}
+      />
+      <BulkMoveButton
+        currentFolder={currentFolder}
+        selected={selected as BulkMoveButtonProps['selected']}
+        onSuccess={onSuccess}
+      />
     </Flex>
   );
-};
-
-BulkActions.defaultProps = {
-  currentFolder: undefined,
-};
-
-BulkActions.propTypes = {
-  onSuccess: PropTypes.func.isRequired,
-  currentFolder: FolderDefinition,
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
 };

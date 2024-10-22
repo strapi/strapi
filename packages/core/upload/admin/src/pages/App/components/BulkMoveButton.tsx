@@ -16,7 +16,7 @@ interface FileWithType extends File {
   type: string;
 }
 
-interface BulkMoveButtonProps {
+export interface BulkMoveButtonProps {
   onSuccess: () => void;
   currentFolder?: FolderWithType;
   selected: Array<FolderWithType | FileWithType>;

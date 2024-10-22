@@ -12,7 +12,7 @@ export interface FileWithType extends File {
   type: string;
 }
 
-interface BulkDeleteButtonProps {
+export interface BulkDeleteButtonProps {
   selected: Array<FileWithType | FolderDefinition>;
   onSuccess: () => void;
 }
