@@ -8,9 +8,10 @@ import { Utils } from '@strapi/types';
 
 export interface Settings {
   data: {
-    sizeOptimization: boolean;
-    responsiveDimensions: boolean;
+    sizeOptimization?: boolean;
+    responsiveDimensions?: boolean;
     autoOrientation?: boolean;
+    videoPreview?: boolean;
   };
 }
 

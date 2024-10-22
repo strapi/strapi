@@ -119,6 +119,8 @@ export const sortOptions = [
   { key: 'sort.updated_at_asc', value: 'updatedAt:ASC' },
 ];
 
+export const pageSizes = [10, 20, 50, 100];
+
 export const localStorageKeys = {
   modalView: `STRAPI_UPLOAD_MODAL_VIEW`,
   view: `STRAPI_UPLOAD_LIBRARY_VIEW`,

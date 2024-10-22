@@ -4,10 +4,27 @@ import set from 'lodash/set';
 
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
 import { init, initialState } from './init';
+import type { InitialState } from './init';
+
+export interface ActionOnChange {
+  type: string;
+  keys?: string;
+  value: string | number;
+}
+
+export interface ActionSetLoaded {
+  type: string;
+}
+
+interface ActionInitialValue {
+  type: string;
+}
+
+export type Action = ActionSetLoaded | ActionOnChange | ActionInitialValue;
 
 const reducer = (
-  state = initialState,
-  action = {
+  state: InitialState = initialState,
+  action: Action = {
     type: '',
   }
 ) =>
@@ -15,7 +32,9 @@ const reducer = (
   produce(state, (draftState) => {
     switch (action.type) {
       case ON_CHANGE: {
-        set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
+        if ('keys' in action && 'value' in action && action.keys) {
+          set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
+        }
         break;
       }
       case SET_LOADED: {

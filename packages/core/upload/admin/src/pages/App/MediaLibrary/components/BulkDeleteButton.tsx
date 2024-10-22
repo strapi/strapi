@@ -1,15 +1,18 @@
-import * as React from 'react';
-
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Button, Dialog } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition, FolderDefinition } from '../../../../constants';
 import { useBulkRemove } from '../../../../hooks/useBulkRemove';
+import type { FileWithType } from '../../../../hooks/useBulkRemove';
+import type { FolderDefinition } from '../../../../../../shared/contracts/folders';
 
-export const BulkDeleteButton = ({ selected, onSuccess }) => {
+export interface BulkDeleteButtonProps {
+  selected: Array<FileWithType | FolderDefinition>;
+  onSuccess: () => void;
+}
+
+export const BulkDeleteButton = ({ selected, onSuccess }: BulkDeleteButtonProps) => {
   const { formatMessage } = useIntl();
   const { remove } = useBulkRemove();
 
@@ -28,9 +31,4 @@ export const BulkDeleteButton = ({ selected, onSuccess }) => {
       <ConfirmDialog onConfirm={handleConfirmRemove} />
     </Dialog.Root>
   );
-};
-
-BulkDeleteButton.propTypes = {
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
-  onSuccess: PropTypes.func.isRequired,
 };

@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import * as React from 'react';
 
 import {
   ConfirmDialog,
@@ -10,7 +10,6 @@ import {
 import { Button, Dialog, Link } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -22,30 +21,42 @@ import { Settings } from './components/Settings';
 import { onChange, setLoaded } from './state/actions';
 import { init, initialState } from './state/init';
 import reducer from './state/reducer';
+import type { Configuration } from '../../../../../shared/contracts/configuration';
+import type { InitialState } from './state/init';
+import type { Action } from './state/reducer';
 
-const ConfigureTheView = ({ config }) => {
+interface ConfigureTheViewProps {
+  config: Configuration;
+}
+
+const ConfigureTheView = ({ config }: ConfigureTheViewProps) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { mutateConfig } = useConfig();
   const { isLoading: isSubmittingForm } = mutateConfig;
 
-  const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const [showWarningSubmit, setWarningSubmit] = React.useState(false);
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () => init(config));
+  const [reducerState, dispatch] = React.useReducer(
+    reducer,
+    initialState,
+    (): InitialState => init(config)
+  );
+  const typedDispatch: React.Dispatch<Action> = dispatch;
   const { initialData, modifiedData } = reducerState;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     toggleWarningSubmit();
   };
 
   const handleConfirm = async () => {
     trackUsage('willEditMediaLibraryConfig');
-    await mutateConfig.mutateAsync(modifiedData);
+    await mutateConfig.mutateAsync(modifiedData as Configuration);
     setWarningSubmit(false);
-    dispatch(setLoaded());
+    typedDispatch(setLoaded());
     toggleNotification({
       type: 'success',
       message: formatMessage({
@@ -55,8 +66,12 @@ const ConfigureTheView = ({ config }) => {
     });
   };
 
-  const handleChange = ({ target: { name, value } }) => {
-    dispatch(onChange({ name, value }));
+  const handleChange = ({
+    target: { name, value },
+  }: {
+    target: { name: keyof Configuration; value: string | number };
+  }) => {
+    typedDispatch(onChange({ name, value }));
   };
 
   return (
@@ -93,7 +108,6 @@ const ConfigureTheView = ({ config }) => {
               defaultMessage: 'Configure the view - Media Library',
             })}
           />
-
           <Layouts.Content>
             <Settings
               data-testid="settings"
@@ -102,7 +116,7 @@ const ConfigureTheView = ({ config }) => {
               onChange={handleChange}
             />
           </Layouts.Content>
-
+          x
           <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
             <ConfirmDialog onConfirm={handleConfirm} variant="default">
               {formatMessage({
@@ -115,13 +129,6 @@ const ConfigureTheView = ({ config }) => {
       </Page.Main>
     </Layouts.Root>
   );
-};
-
-ConfigureTheView.propTypes = {
-  config: PropTypes.shape({
-    pageSize: PropTypes.number,
-    sort: PropTypes.string,
-  }).isRequired,
 };
 
 export default ConfigureTheView;

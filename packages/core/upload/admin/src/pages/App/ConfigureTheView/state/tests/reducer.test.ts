@@ -1,8 +1,9 @@
 import { ON_CHANGE, SET_LOADED } from '../actionTypes';
 import reducer from '../reducer';
+import type { InitialState } from '../init';
 
 describe('Upload | ConfigureTheView | reducer', () => {
-  let state;
+  let state: InitialState | undefined = undefined;
 
   beforeEach(() => {
     state = {
@@ -14,7 +15,11 @@ describe('Upload | ConfigureTheView | reducer', () => {
   it('should handle the default action correctly', () => {
     const expected = state;
 
-    expect(reducer(state, {})).toEqual(expected);
+    expect(
+      reducer(state, {
+        type: '',
+      })
+    ).toEqual(expected);
   });
 
   describe(`${ON_CHANGE}`, () => {

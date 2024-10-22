@@ -604,6 +604,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
               </div>
             </div>
           </div>
+          x
         </form>
       </main>
     </div>

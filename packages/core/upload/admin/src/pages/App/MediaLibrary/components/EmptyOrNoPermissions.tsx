@@ -1,15 +1,23 @@
-import React from 'react';
-
 import { Button } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyPermissions } from '@strapi/icons/symbols';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { EmptyAssets } from '../../../../components/EmptyAssets';
 import { getTrad } from '../../../../utils';
 
-const getContentIntlMessage = ({ isFiltering, canCreate, canRead }) => {
+interface EmptyOrNoPermissionsProps {
+  canCreate: boolean;
+  canRead: boolean;
+  isFiltering: boolean;
+  onActionClick: () => void;
+}
+
+const getContentIntlMessage = ({
+  isFiltering,
+  canCreate,
+  canRead,
+}: Omit<EmptyOrNoPermissionsProps, 'onActionClick'>) => {
   if (isFiltering) {
     return {
       id: 'list.assets-empty.title-withSearch',
@@ -37,7 +45,12 @@ const getContentIntlMessage = ({ isFiltering, canCreate, canRead }) => {
   };
 };
 
-export const EmptyOrNoPermissions = ({ canCreate, isFiltering, canRead, onActionClick }) => {
+export const EmptyOrNoPermissions = ({
+  canCreate,
+  isFiltering,
+  canRead,
+  onActionClick,
+}: EmptyOrNoPermissionsProps) => {
   const { formatMessage } = useIntl();
   const content = getContentIntlMessage({ isFiltering, canCreate, canRead });
 
@@ -61,11 +74,4 @@ export const EmptyOrNoPermissions = ({ canCreate, isFiltering, canRead, onAction
       })}
     />
   );
-};
-
-EmptyOrNoPermissions.propTypes = {
-  canCreate: PropTypes.bool.isRequired,
-  canRead: PropTypes.bool.isRequired,
-  isFiltering: PropTypes.bool.isRequired,
-  onActionClick: PropTypes.func.isRequired,
 };

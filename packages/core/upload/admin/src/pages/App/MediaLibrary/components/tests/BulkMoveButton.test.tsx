@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { within } from '@testing-library/dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -9,6 +7,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { useBulkMove } from '../../../../../hooks/useBulkMove';
 import { BulkMoveButton } from '../BulkMoveButton';
+import type { BulkMoveButtonProps } from '../BulkMoveButton';
 
 jest.mock('../../../../../hooks/useBulkMove');
 jest.mock('../../../../../hooks/useFolderStructure');
@@ -28,7 +27,9 @@ const FIXTURE_SELECTION = [
 ];
 
 const setup = (
-  props = {
+  props: BulkMoveButtonProps & {
+    onClose?: () => void;
+  } = {
     selected: [],
     onSuccess: jest.fn(),
   }
@@ -70,11 +71,11 @@ describe('BulkMoveButton', () => {
     const onSuccessSpy = jest.fn();
     const { getByText } = setup({
       onSuccess: onSuccessSpy,
-      selected: FIXTURE_SELECTION,
+      selected: FIXTURE_SELECTION as unknown as BulkMoveButtonProps['selected'],
     });
     const moveSpy = jest.fn().mockResolvedValueOnce({});
 
-    useBulkMove.mockReturnValueOnce({
+    (useBulkMove as jest.Mock).mockReturnValueOnce({
       isLoading: false,
       error: null,
       move: moveSpy,
@@ -117,7 +118,7 @@ describe('BulkMoveButton', () => {
       pathId: 2,
     };
     const { getByText } = setup({
-      currentFolder: FIXTURE_PARENT_FOLDER,
+      currentFolder: FIXTURE_PARENT_FOLDER as unknown as BulkMoveButtonProps['currentFolder'],
       onClose: jest.fn(),
       selected: [],
       onSuccess: jest.fn(),
@@ -134,7 +135,7 @@ describe('BulkMoveButton', () => {
     const onSuccessSpy = jest.fn();
     const { getByText } = setup({
       onSuccess: onSuccessSpy,
-      selected: FIXTURE_SELECTION,
+      selected: FIXTURE_SELECTION as unknown as BulkMoveButtonProps['selected'],
     });
     const moveSpy = jest.fn().mockRejectedValueOnce({
       response: {
@@ -155,7 +156,7 @@ describe('BulkMoveButton', () => {
       },
     });
 
-    useBulkMove.mockReturnValueOnce({
+    (useBulkMove as jest.Mock).mockReturnValueOnce({
       isLoading: false,
       error: null,
       move: moveSpy,

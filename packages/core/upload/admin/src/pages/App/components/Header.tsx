@@ -1,30 +1,39 @@
-import React from 'react';
-
 import { useQueryParams, Layouts } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Link } from '@strapi/design-system';
 import { ArrowLeft, Plus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
+import { useLocation, NavLink } from 'react-router-dom';
 
 import { Breadcrumbs } from '../../../components/Breadcrumbs';
-import { BreadcrumbsDefinition, FolderDefinition } from '../../../constants';
+import type { CrumbDefinition } from '../../../components/Breadcrumbs/Breadcrumbs';
+import type { Folder } from '../../../../../shared/contracts/folders';
 import { getTrad } from '../../../utils';
 
+interface HeaderProps {
+  breadcrumbs?: Array<CrumbDefinition> | boolean;
+  canCreate: boolean;
+  folder?: Folder | null;
+  onToggleEditFolderDialog: ({ created }?: { created?: boolean }) => void;
+  onToggleUploadAssetDialog: () => void;
+}
+
 export const Header = ({
-  breadcrumbs,
+  breadcrumbs = false,
   canCreate,
-  folder,
+  folder = null,
   onToggleEditFolderDialog,
   onToggleUploadAssetDialog,
-}) => {
+}: HeaderProps) => {
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
   const backQuery = {
     ...query,
-    folder: folder?.parent?.id ?? undefined,
+    folder:
+      folder?.parent && typeof folder.parent !== 'number' && folder.parent.id
+        ? folder.parent.id
+        : undefined,
   };
 
   return (
@@ -35,8 +44,10 @@ export const Header = ({
       })}
       subtitle={
         breadcrumbs &&
+        typeof breadcrumbs !== 'boolean' &&
         folder && (
           <Breadcrumbs
+            // @ts-ignore
             tag="nav"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
@@ -50,6 +61,7 @@ export const Header = ({
       navigationAction={
         folder && (
           <Link
+            tag={NavLink}
             startIcon={<ArrowLeft />}
             to={`${pathname}?${stringify(backQuery, { encode: false })}`}
           >
@@ -81,17 +93,4 @@ export const Header = ({
       }
     />
   );
-};
-
-Header.defaultProps = {
-  breadcrumbs: false,
-  folder: null,
-};
-
-Header.propTypes = {
-  breadcrumbs: PropTypes.oneOfType([BreadcrumbsDefinition, PropTypes.bool]),
-  canCreate: PropTypes.bool.isRequired,
-  folder: FolderDefinition,
-  onToggleEditFolderDialog: PropTypes.func.isRequired,
-  onToggleUploadAssetDialog: PropTypes.func.isRequired,
 };
