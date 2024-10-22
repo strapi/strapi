@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -9,11 +7,12 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { useBulkRemove } from '../../../../../hooks/useBulkRemove';
 import { BulkDeleteButton } from '../BulkDeleteButton';
+import type { BulkDeleteButtonProps } from '../BulkDeleteButton';
 
 jest.mock('../../../../../hooks/useBulkRemove');
 
 const setup = (
-  props = {
+  props: BulkDeleteButtonProps = {
     selected: [],
     onSuccess: jest.fn(),
   }
@@ -57,11 +56,11 @@ describe('BulkDeleteButton', () => {
     const onSuccessSpy = jest.fn();
     const { getByText } = setup({
       onSuccess: onSuccessSpy,
-      selected: [{ type: 'asset' }],
+      selected: [{ type: 'asset' }] as BulkDeleteButtonProps['selected'],
     });
     const removeSpy = jest.fn().mockResolvedValueOnce({});
 
-    useBulkRemove.mockReturnValueOnce({
+    (useBulkRemove as jest.Mock).mockReturnValueOnce({
       isLoading: false,
       error: null,
       remove: removeSpy,

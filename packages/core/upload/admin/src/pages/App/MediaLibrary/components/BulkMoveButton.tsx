@@ -1,16 +1,33 @@
-import React, { useState } from 'react';
-
-import { Button, Modal } from '@strapi/design-system';
+import * as React from 'react';
 import { Folder } from '@strapi/icons';
-import PropTypes from 'prop-types';
+import { Button, Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { BulkMoveDialog } from '../../../../components/BulkMoveDialog';
-import { AssetDefinition, FolderDefinition } from '../../../../constants';
+import type { Folder as FolderDefinition } from '../../../../../../shared/contracts/folders';
+import type { File } from '../../../../../../shared/contracts/files';
 
-export const BulkMoveButton = ({ selected, onSuccess, currentFolder }) => {
+interface FolderWithType extends FolderDefinition {
+  type: string;
+}
+
+interface FileWithType extends File {
+  type: string;
+}
+
+export interface BulkMoveButtonProps {
+  onSuccess: () => void;
+  currentFolder?: FolderWithType;
+  selected?: Array<FolderWithType | FileWithType>;
+}
+
+export const BulkMoveButton = ({
+  selected = [],
+  onSuccess,
+  currentFolder,
+}: BulkMoveButtonProps) => {
   const { formatMessage } = useIntl();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
   const handleConfirmMove = () => {
     setShowConfirmDialog(false);
@@ -31,15 +48,4 @@ export const BulkMoveButton = ({ selected, onSuccess, currentFolder }) => {
       />
     </Modal.Root>
   );
-};
-
-BulkMoveButton.defaultProps = {
-  currentFolder: undefined,
-  selected: [],
-};
-
-BulkMoveButton.propTypes = {
-  onSuccess: PropTypes.func.isRequired,
-  currentFolder: FolderDefinition,
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
 };
