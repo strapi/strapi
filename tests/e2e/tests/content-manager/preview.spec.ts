@@ -16,14 +16,22 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await page.waitForURL('/admin');
   });
 
-  test('Preview button should appear for configured content types', async ({ page, context }) => {
+  test('Preview button should appear for configured content types', async ({
+    page,
+    context,
+    browser,
+  }) => {
     // Open an edit view for a content type that has preview
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
-    // Check that the preview link can be copied
-    await context.grantPermissions(['clipboard-read']);
+    // Check that the preview link can be copied. Webkit doesn't support clipboard-write
+    if (browser.browserType().name() === 'webkit') {
+      await context.grantPermissions(['clipboard-read']);
+    } else {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    }
     await page.getByRole('button', { name: /copy preview link/i }).click();
     await findAndClose(page, 'Copied preview link');
     const clipboardText = await page.evaluate(() => {
