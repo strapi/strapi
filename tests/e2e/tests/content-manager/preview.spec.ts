@@ -34,10 +34,14 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     }
     await page.getByRole('button', { name: /copy preview link/i }).click();
     await findAndClose(page, 'Copied preview link');
-    const clipboardText = await page.evaluate(() => {
-      return navigator.clipboard.readText();
-    });
-    expect(clipboardText).toContain('https://strapi.io');
+
+    // Clipboard is broken in webkit: it requires permissions but doesn't support clipboard-write
+    if (browser.browserType().name() !== 'webkit') {
+      const clipboardText = await page.evaluate(() => {
+        return navigator.clipboard.readText();
+      });
+      expect(clipboardText).toContain('https://strapi.io');
+    }
 
     // Check that preview opens in a new tab
     const newTabPromiseDraft = page.waitForEvent('popup');
