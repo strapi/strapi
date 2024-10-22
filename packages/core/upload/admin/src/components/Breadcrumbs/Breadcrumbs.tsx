@@ -9,7 +9,7 @@ import { NavLink } from 'react-router-dom';
 
 import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 
-type CrumbDefinition = {
+export type CrumbDefinition = {
   id?: number | null;
   label?: MessageDescriptor | string;
   href?: string;

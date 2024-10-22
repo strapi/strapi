@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
@@ -43,7 +41,7 @@ const FIXTURE_FOLDER = {
   },
 };
 
-const setup = (props) => {
+const setup = (props: any) => {
   const withDefaults = {
     ...props,
     assetCount: 2,
@@ -93,7 +91,10 @@ describe('Header', () => {
   });
 
   test('does render a back button at a nested level of the media library', () => {
-    useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { folder: 2 } }, jest.fn()]);
+    (useQueryParams as jest.Mock).mockReturnValueOnce([
+      { rawQuery: '', query: { folder: 2 } },
+      jest.fn(),
+    ]);
     const { queryByText } = setup({ folder: FIXTURE_FOLDER });
 
     expect(queryByText('Back')).toBeInTheDocument();
