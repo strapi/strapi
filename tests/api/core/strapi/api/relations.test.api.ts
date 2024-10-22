@@ -1287,8 +1287,7 @@ describe('Relations', () => {
       expect(updatedShop.error).toMatchObject({ status: 400, name: 'ValidationError' });
     });
 
-    // TODO: V5 - relations should throw an error if they do not exist. Remove strict mode of relations
-    test.skip('Update relations with invalid connect array in non-strict mode', async () => {
+    test('Update relations with invalid connect array in non-strict mode', async () => {
       const shop = await createShop({
         anyToManyRel: [{ documentId: docid1 }],
       });
