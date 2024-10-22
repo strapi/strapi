@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -7,12 +5,13 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { BulkActions } from '../BulkActions';
+import type { BulkActionsProps } from '../BulkActions';
 
 jest.mock('../../../../../hooks/useBulkRemove');
 jest.mock('../../../../../components/BulkMoveDialog');
 
 const setup = (
-  props = {
+  props: BulkActionsProps = {
     selected: [],
     onSuccess: jest.fn(),
   }
@@ -63,7 +62,7 @@ describe('BulkActions', () => {
           type: 'folder',
           files: { count: 0 },
         })),
-      ],
+      ] as BulkActionsProps['selected'],
     });
 
     expect(
