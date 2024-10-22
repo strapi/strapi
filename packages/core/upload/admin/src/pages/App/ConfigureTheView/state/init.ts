@@ -1,4 +1,4 @@
-type InitialState = {
+export type InitialState = {
   initialData: Record<string, string | number> | {};
   modifiedData: Record<string, string | number> | {};
 };
