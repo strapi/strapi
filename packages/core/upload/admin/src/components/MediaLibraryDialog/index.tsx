@@ -12,8 +12,7 @@ const STEPS = {
 
 import type { File } from '../../../../shared/contracts/files';
 
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
-
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 interface MediaLibraryDialogProps {
   allowedTypes?: AllowedTypes[];
   onClose: () => void;

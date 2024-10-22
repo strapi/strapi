@@ -6,7 +6,7 @@ import { Draggable } from './Draggable';
 
 import type { File } from '../../../../shared/contracts/files';
 
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 interface AssetGridListProps {
   allowedTypes?: AllowedTypes[];

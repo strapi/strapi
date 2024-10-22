@@ -26,6 +26,7 @@ import { SelectedStep } from './SelectedStep';
 
 import type { File as Asset, FilterCondition, Query } from '../../../../shared/contracts/files';
 import type { Folder, FolderDefinition } from '../../../../shared/contracts/folders';
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
@@ -43,8 +44,6 @@ export interface FolderRow extends Folder {
   isSelectable?: boolean;
   type?: string;
 }
-
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 interface AssetContentProps {
   allowedTypes?: AllowedTypes[];

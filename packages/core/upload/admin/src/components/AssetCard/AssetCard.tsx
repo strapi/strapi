@@ -11,7 +11,7 @@ import type { File } from '../../../../shared/contracts/files';
 
 type FileSelectable = File & { isSelectable?: boolean };
 
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
+export type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 interface AssetCardProps {
   asset: FileSelectable;

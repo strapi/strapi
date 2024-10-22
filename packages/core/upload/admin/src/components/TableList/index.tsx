@@ -13,6 +13,7 @@ import { CaretDown, CaretUp } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import type { File } from '../../../../shared/contracts/files';
 import type { Folder } from '../../../../shared/contracts/folders';
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 // TODO: replace this import with the import from constants file when it will be migrated to TS
 import { tableHeaders } from '../../newConstants';
@@ -31,8 +32,6 @@ export interface FolderRow extends Folder {
   isSelectable?: boolean;
   type?: string;
 }
-
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 export interface TableListProps {
   isFolderSelectionAllowed?: boolean;

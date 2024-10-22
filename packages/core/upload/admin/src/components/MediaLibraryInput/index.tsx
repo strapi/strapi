@@ -10,14 +10,13 @@ import { UploadAssetDialog, Asset } from '../UploadAssetDialog/UploadAssetDialog
 
 import { CarouselAssets, CarouselAssetsProps, FileWithoutIdHash } from './Carousel/CarouselAssets';
 import type { File } from '../../../../shared/contracts/files';
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 const STEPS = {
   AssetSelect: 'SelectAsset',
   AssetUpload: 'UploadAsset',
   FolderCreate: 'FolderCreate',
 };
-
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 interface MediaLibraryInputProps {
   required?: boolean;

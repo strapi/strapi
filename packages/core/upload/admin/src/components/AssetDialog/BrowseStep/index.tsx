@@ -40,6 +40,7 @@ import SearchAsset from './SearchAsset';
 import { isSelectable } from './utils/isSelectable';
 import type { File, Query, FilterCondition } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
+import type { AllowedTypes } from '../../AssetCard/AssetCard';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
@@ -99,8 +100,6 @@ export interface FileWithType extends File {
   isSelectable?: boolean;
   type?: string;
 }
-
-type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 export interface BrowseStepProps {
   allowedTypes?: AllowedTypes[];
