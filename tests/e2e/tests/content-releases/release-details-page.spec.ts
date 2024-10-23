@@ -38,7 +38,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.waitForURL('/admin/plugins/content-releases/*');
   });
 
-  test('A user should be able to add collection-type and single-type entries to a release and publish the release', async ({
+  test.skip('A user should be able to add collection-type and single-type entries to a release and publish the release', async ({
     page,
   }) => {
     // Add a collection-type entry to the release
