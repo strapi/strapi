@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect } from 'react';
+import * as React from 'react';
 
 import { Page, useQueryParams } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
@@ -8,8 +8,9 @@ import { useConfig } from '../../hooks/useConfig';
 import { getTrad } from '../../utils';
 
 import { MediaLibrary } from './MediaLibrary';
+import type { Configuration } from '../../../../shared/contracts/configuration';
 
-const ConfigureTheView = lazy(() => import('./ConfigureTheView'));
+const ConfigureTheView = React.lazy(() => import('./ConfigureTheView'));
 
 const Upload = () => {
   const {
@@ -20,11 +21,15 @@ const Upload = () => {
   const { formatMessage } = useIntl();
   const title = formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Media Library' });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isLoading || isError || rawQuery) {
       return;
     }
-    setQuery({ sort: config.sort, page: 1, pageSize: config.pageSize });
+    setQuery({
+      sort: (config as Configuration).sort,
+      page: 1,
+      pageSize: (config as Configuration).pageSize,
+    });
   }, [isLoading, isError, config, rawQuery, setQuery]);
 
   if (isLoading) {
@@ -39,12 +44,15 @@ const Upload = () => {
   return (
     <Page.Main>
       {rawQuery ? (
-        <Suspense fallback={<Page.Loading />}>
+        <React.Suspense fallback={<Page.Loading />}>
           <Routes>
             <Route index element={<MediaLibrary />} />
-            <Route path="configuration" element={<ConfigureTheView config={config} />} />
+            <Route
+              path="configuration"
+              element={<ConfigureTheView config={config as Configuration} />}
+            />
           </Routes>
-        </Suspense>
+        </React.Suspense>
       ) : null}
     </Page.Main>
   );
