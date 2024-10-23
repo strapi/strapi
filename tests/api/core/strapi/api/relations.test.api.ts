@@ -939,33 +939,19 @@ describe('Relations', () => {
                 };
               }),
             },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_ow: { disconnect: relationsToDisconnectOne },
-            //   compo_products_mw: { disconnect: relationsToDisconnectMany },
-            // },
           },
           populateShop
         );
 
         expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_ow: null ,
-          //   compo_products_mw:  [] ,
-          // },
           products_ow: null,
           products_oo: null,
           products_mo: null,
           products_mm: [],
           products_mw: [],
-          // products_morphtomany: [], // TODO: fix bug that causes this to return undefined
+          products_morphtomany: [],
           products_om: [],
         });
-
-        // TODO: This is a bug in how morphtomany returns an empty result; it should return an empty array
-        expect(updatedShop.data.products_morphtomany).not.toBeDefined();
       });
 
       test("Remove relations that doesn't exist doesn't fail", async () => {
