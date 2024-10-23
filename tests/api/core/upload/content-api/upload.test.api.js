@@ -448,9 +448,9 @@ describe('Upload plugin', () => {
 
         expect(connectRes.body.data.relatedMedia).toHaveLength(1);
 
-        expect(connectRes.body.data.relatedMedia[1]).toEqual(
+        expect(connectRes.body.data.relatedMedia[0]).toEqual(
           expect.objectContaining({
-            id: images.body[1].id,
+            id: images.body[0].id,
           })
         );
       });
@@ -499,9 +499,9 @@ describe('Upload plugin', () => {
 
         expect(connectRes.body.data.relatedMedia).toHaveLength(1);
 
-        expect(connectRes.body.data.relatedMedia[1]).toEqual(
+        expect(connectRes.body.data.relatedMedia[0]).toEqual(
           expect.objectContaining({
-            id: images.body[1].id,
+            id: images.body[0].id,
           })
         );
       });
