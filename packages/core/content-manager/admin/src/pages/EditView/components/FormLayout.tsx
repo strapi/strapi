@@ -23,7 +23,7 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
         if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
           const [row] = panel;
           const [field] = row;
-          
+
           const fieldWithTranslatedLabel = {
             ...field,
             label: getTranslatedLabel(field.label),
