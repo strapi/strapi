@@ -75,14 +75,23 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await page.getByLabel(formattedDate).click();
 
-    await page
-      .getByRole('combobox', {
-        name: /^time$/i,
-      })
-      .click();
+    await page.getByRole('combobox', { name: /^time$/i }).click();
 
-    await page.getByRole('option', { name: '14:00' }).click();
+    const optionIsVisible = await page.getByRole('option', { name: '08:00' }).isVisible();
+    console.log('08:00 option visible:', optionIsVisible);
+
+    const buttonVisible = await page.getByRole('button', { name: 'Continue' }).isVisible();
+    console.log('Continue button visible:', buttonVisible);
+
+    // Log URL changes
+    page.on('framenavigated', async (frame) => {
+      if (frame === page.mainFrame()) {
+        console.log('Navigation occurred to:', frame.url());
+      }
+    });
+    await page.getByRole('option', { name: '08:00' }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
+
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');
     await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
