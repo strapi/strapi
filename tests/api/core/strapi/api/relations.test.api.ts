@@ -234,13 +234,6 @@ const updateShop = async (
           };
         }),
       },
-      // TODO V5: Discuss component id update, updating a draft component
-      //          with a published component id will fail
-      // myCompo: {
-      //   id: shop?.myCompo?.id,
-      //   compo_products_ow: { [relAction]: anyToOneRel },
-      //   compo_products_mw: { options: { strict }, [relAction]: anyToManyRel },
-      // },
       ...data,
     },
     populate
@@ -255,12 +248,6 @@ const shopFactory = ({
   data = {},
 }) => {
   return {
-    // TODO V5: Discuss component id update, updating a draft component
-    //          with a published component id will fail
-    // myCompo: {
-    //   compo_products_mw: anyToManyRel,
-    //   compo_products_ow: anyToOneRel,
-    // },
     products_mm: anyToManyRel,
     products_mo: anyToOneRel,
     products_mw: anyToManyRel,
