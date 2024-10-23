@@ -30,7 +30,7 @@ type Filter = {
     | undefined;
 };
 
-interface FilterPopoverProps {
+export interface FilterPopoverProps {
   displayedFilters: {
     name: string;
     metadatas?: {

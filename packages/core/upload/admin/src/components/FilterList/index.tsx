@@ -23,7 +23,7 @@ export type FilterStructure = {
   [key: string]: MimeFilter | StringFilter | undefined;
 };
 
-interface FilterListProps {
+export interface FilterListProps {
   appliedFilters: FilterStructure[];
   filtersSchema: {
     name: string;
