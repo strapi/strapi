@@ -10,7 +10,7 @@ import type { CrumbDefinition } from '../../../../components/Breadcrumbs/Breadcr
 import type { Folder } from '../../../../../../shared/contracts/folders';
 import { getTrad } from '../../../../utils';
 
-interface HeaderProps {
+export interface HeaderProps {
   breadcrumbs?: Array<CrumbDefinition> | boolean;
   canCreate: boolean;
   folder?: Folder | null;

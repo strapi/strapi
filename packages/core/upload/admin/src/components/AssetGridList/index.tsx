@@ -6,7 +6,7 @@ import { Draggable } from './Draggable';
 
 import type { File } from '../../../../shared/contracts/files';
 
-interface AssetGridListProps {
+export interface AssetGridListProps {
   allowedTypes?: string[];
   assets: File[];
   onEditAsset?: (asset: File) => void;

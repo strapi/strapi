@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL, waitFor } from '@testing-library/react';
@@ -9,7 +7,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { MediaLibrary } from '..';
-import { viewOptions } from '../../../../constants';
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { viewOptions } from '../../../../newConstants';
 import { useAssets } from '../../../../hooks/useAssets';
 import { useFolder } from '../../../../hooks/useFolder';
 import { useFolders } from '../../../../hooks/useFolders';
@@ -113,7 +112,7 @@ describe('Media library homepage', () => {
 
   describe('loading state', () => {
     it('shows a loader when resolving the permissions', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({
+      (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
         isLoading: true,
         canCreate: false,
         canRead: false,
@@ -124,14 +123,14 @@ describe('Media library homepage', () => {
     });
 
     it('shows a loader while resolving assets', () => {
-      useAssets.mockReturnValueOnce({ isLoading: true });
+      (useAssets as jest.Mock).mockReturnValueOnce({ isLoading: true });
       const { getByRole, getByText } = renderML();
       expect(getByRole('main').getAttribute('aria-busy')).toBe('true');
       expect(getByText('Loading content.')).toBeInTheDocument();
     });
 
     it('shows a loader while resolving folders', () => {
-      useFolders.mockReturnValueOnce({ isLoading: true });
+      (useFolders as jest.Mock).mockReturnValueOnce({ isLoading: true });
       const { getByRole, getByText } = renderML();
       expect(getByRole('main').getAttribute('aria-busy')).toBe('true');
       expect(getByText('Loading content.')).toBeInTheDocument();
@@ -147,7 +146,7 @@ describe('Media library homepage', () => {
       });
 
       it('hides the filters dropdown when the user is not allowed to read', () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           canRead: false,
           canCreate: false,
@@ -164,7 +163,7 @@ describe('Media library homepage', () => {
       });
 
       it('hides the sort by dropdown when the user is not allowed to read', () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           canRead: false,
           canCreate: false,
@@ -183,7 +182,10 @@ describe('Media library homepage', () => {
       ].forEach((sortKey) => {
         it(`modifies the URL with the according params: ${sortKey}`, async () => {
           const setQueryMock = jest.fn();
-          useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: {} }, setQueryMock]);
+          (useQueryParams as jest.Mock).mockReturnValueOnce([
+            { rawQuery: '', query: {} },
+            setQueryMock,
+          ]);
 
           const { getByRole, getByText, user } = renderML();
 
@@ -206,12 +208,12 @@ describe('Media library homepage', () => {
       });
 
       it('hides the select all if there are not folders and assets', () => {
-        useAssets.mockReturnValueOnce({
+        (useAssets as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           error: null,
           data: {},
         });
-        useFolders.mockReturnValueOnce({
+        (useFolders as jest.Mock).mockReturnValueOnce({
           data: [],
           isLoading: false,
           error: null,
@@ -223,12 +225,12 @@ describe('Media library homepage', () => {
       });
 
       it('hides the select all button when the user is not allowed to update', () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           canUpdate: true,
           canRead: true,
           canCreate: true,
         });
-        useMediaLibraryPermissions.mockReturnValue({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValue({
           isLoading: false,
           canRead: true,
           canCreate: true,
@@ -241,7 +243,7 @@ describe('Media library homepage', () => {
 
     describe('create asset', () => {
       it('hides the "Upload new asset" button when the user does not have the permissions to', async () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           canRead: false,
           canCreate: false,
@@ -251,7 +253,7 @@ describe('Media library homepage', () => {
       });
 
       it('shows the "Upload assets" button when the user does have the permissions to', async () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           canRead: true,
           canCreate: true,
@@ -263,7 +265,7 @@ describe('Media library homepage', () => {
 
     describe('create folder', () => {
       it('shows the create button if the user has create permissions', () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           canUpdate: true,
           canRead: true,
           canCreate: true,
@@ -273,7 +275,7 @@ describe('Media library homepage', () => {
       });
 
       it('hides the create button if the user does not have create permissions', () => {
-        useMediaLibraryPermissions.mockReturnValueOnce({
+        (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
           isLoading: false,
           canCreate: false,
         });
@@ -291,20 +293,20 @@ describe('Media library homepage', () => {
     });
 
     it('should hide breadcrumbs navigation if in root folder', () => {
-      useFolder.mockReturnValueOnce({ isLoading: false, data: undefined });
+      (useFolder as jest.Mock).mockReturnValueOnce({ isLoading: false, data: undefined });
       const { queryByLabelText } = renderML();
 
       expect(queryByLabelText('Folders navigation')).not.toBeInTheDocument();
     });
 
     it('does display empty state upload first assets if no folder or assets', () => {
-      useFolders.mockReturnValueOnce({
+      (useFolders as jest.Mock).mockReturnValueOnce({
         data: [],
         isLoading: false,
         error: null,
       });
 
-      useAssets.mockReturnValueOnce({
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         error: null,
         data: {},
@@ -314,39 +316,48 @@ describe('Media library homepage', () => {
     });
 
     it('does display empty state no results found if searching with no results', () => {
-      useAssets.mockReturnValueOnce({
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         error: null,
         data: {},
       });
-      useFolders.mockReturnValueOnce({
+      (useFolders as jest.Mock).mockReturnValueOnce({
         data: [],
         isLoading: false,
         error: null,
       });
-      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
+        { rawQuery: '', query: { _q: 'true' } },
+        jest.fn(),
+      ]);
       const { queryByText } = renderML();
       expect(queryByText('There are no elements with the applied filters')).toBeInTheDocument();
     });
 
     it('does not display assets title if searching and no folders', () => {
-      useFolders.mockReturnValueOnce({
+      (useFolders as jest.Mock).mockReturnValueOnce({
         data: [],
         isLoading: false,
         error: null,
       });
-      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
+        { rawQuery: '', query: { _q: 'true' } },
+        jest.fn(),
+      ]);
       const { queryByText } = renderML();
       expect(queryByText('Assets')).not.toBeInTheDocument();
     });
 
     it('does not display folders title if searching and no assets', () => {
-      useAssets.mockReturnValueOnce({
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         error: null,
         data: {},
       });
-      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
+        { rawQuery: '', query: { _q: 'true' } },
+        jest.fn(),
+      ]);
       const { queryByText } = renderML();
       expect(queryByText('Folders')).not.toBeInTheDocument();
     });
@@ -359,12 +370,12 @@ describe('Media library homepage', () => {
     });
 
     it('displays folder with checked checkbox when is selected', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({
+      (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
         canUpdate: true,
         canRead: true,
         canCreate: true,
       });
-      useSelectionState.mockReturnValueOnce([
+      (useSelectionState as jest.Mock).mockReturnValueOnce([
         [
           {
             id: 1,
@@ -385,7 +396,7 @@ describe('Media library homepage', () => {
     });
 
     it('doest not displays folder with checked checkbox when is not selected', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({
+      (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
         canUpdate: true,
         canRead: true,
         canCreate: true,
@@ -396,7 +407,7 @@ describe('Media library homepage', () => {
     });
 
     it('does not display folders if the user does not have read permissions', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({
+      (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         canRead: false,
         canCreate: false,
@@ -409,7 +420,10 @@ describe('Media library homepage', () => {
     });
 
     it('does display folders if a search is performed', () => {
-      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
+        { rawQuery: '', query: { _q: 'true' } },
+        jest.fn(),
+      ]);
 
       const { queryByText } = renderML();
 
@@ -418,7 +432,10 @@ describe('Media library homepage', () => {
     });
 
     it('does display folders if the media library is being filtered', () => {
-      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
+        { rawQuery: '', query: { filters: 'true' } },
+        jest.fn(),
+      ]);
 
       const { queryByText } = renderML();
 
@@ -427,7 +444,7 @@ describe('Media library homepage', () => {
     });
 
     it('does not fetch folders if the current page !== 1', () => {
-      useAssets.mockReturnValueOnce({
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         data: {
           pagination: {
@@ -439,13 +456,16 @@ describe('Media library homepage', () => {
           results: FIXTURE_ASSETS,
         },
       });
-      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { _q: 'true' } }, jest.fn()]);
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
+        { rawQuery: '', query: { _q: 'true' } },
+        jest.fn(),
+      ]);
       renderML();
       expect(useFolders).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
 
     it('does not fetch folders if the mime-type was applied', () => {
-      useAssets.mockReturnValueOnce({
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         data: {
           pagination: {
@@ -457,7 +477,7 @@ describe('Media library homepage', () => {
           results: FIXTURE_ASSETS,
         },
       });
-      useQueryParams.mockReturnValueOnce([
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
         { rawQuery: '', query: { _q: '', filters: { $and: { mime: 'audio' } } } },
         jest.fn(),
       ]);
@@ -471,7 +491,7 @@ describe('Media library homepage', () => {
     });
 
     it('does not display assets if the user does not have read permissions', () => {
-      useMediaLibraryPermissions.mockReturnValueOnce({
+      (useMediaLibraryPermissions as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         canRead: false,
         canCreate: false,
@@ -481,14 +501,14 @@ describe('Media library homepage', () => {
     });
 
     it('does display empty assets action, if there are no assets and no folders', () => {
-      useAssets.mockReturnValueOnce({
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         data: {
           pagination: FIXTURE_ASSET_PAGINATION,
           results: [],
         },
       });
-      useFolders.mockReturnValueOnce({
+      (useFolders as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         data: [],
       });
@@ -497,8 +517,11 @@ describe('Media library homepage', () => {
     });
 
     it('does not display empty assets action, if there are no assets, no folders and the user is currently filtering', () => {
-      useQueryParams.mockReturnValueOnce([{ rawQuery: '', query: { filters: 'true' } }, jest.fn()]);
-      useAssets.mockReturnValueOnce({
+      (useQueryParams as jest.Mock).mockReturnValueOnce([
+        { rawQuery: '', query: { filters: 'true' } },
+        jest.fn(),
+      ]);
+      (useAssets as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         error: null,
         data: {
@@ -506,7 +529,7 @@ describe('Media library homepage', () => {
           results: [],
         },
       });
-      useFolders.mockReturnValueOnce({
+      (useFolders as jest.Mock).mockReturnValueOnce({
         isLoading: false,
         error: null,
         data: [],
@@ -520,7 +543,7 @@ describe('Media library homepage', () => {
       const setView = jest.fn();
 
       it('starts with Grid View', async () => {
-        usePersistentState.mockReturnValueOnce([viewOptions.GRID, setView]);
+        (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.GRID, setView]);
         const { queryByRole, user } = renderML();
 
         const listSwitch = queryByRole('button', { name: 'List View' });
@@ -529,12 +552,12 @@ describe('Media library homepage', () => {
         expect(listSwitch).toBeInTheDocument();
         expect(gridSwitch).not.toBeInTheDocument();
 
-        await user.click(listSwitch);
+        await user.click(listSwitch as Element);
         expect(setView).toHaveBeenCalledWith(viewOptions.LIST);
       });
 
       it('starts with List View', async () => {
-        usePersistentState.mockReturnValueOnce([viewOptions.LIST, setView]);
+        (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST, setView]);
         const { queryByRole, user } = renderML();
 
         const listSwitch = queryByRole('button', { name: 'List View' });
@@ -543,21 +566,21 @@ describe('Media library homepage', () => {
         expect(gridSwitch).toBeInTheDocument();
         expect(listSwitch).not.toBeInTheDocument();
 
-        await user.click(gridSwitch);
+        await user.click(gridSwitch as Element);
         expect(setView).toHaveBeenCalledWith(viewOptions.GRID);
       });
     });
 
     describe('displays the list view', () => {
       it('should not render the sort button', () => {
-        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+        (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST]);
         const { queryByRole } = renderML();
 
         expect(queryByRole('button', { name: 'Sort by' })).not.toBeInTheDocument();
       });
 
       it('should not render the folders and assets titles', () => {
-        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
+        (usePersistentState as jest.Mock).mockReturnValueOnce([viewOptions.LIST]);
         const { queryByText } = renderML();
 
         expect(queryByText('Folders (1)')).not.toBeInTheDocument();
