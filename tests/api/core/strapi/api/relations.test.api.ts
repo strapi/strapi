@@ -296,11 +296,9 @@ describe('Relations', () => {
       populate: populateShop,
     });
 
-    console.error('init shop', JSON.stringify(createdShop1, undefined, 2));
     data.shops.push(createdShop1.data);
     shopid1 = data.shops[0].id;
     shopdocid1 = data.shops[0].documentId;
-    console.error('shopdocid', shopdocid1);
   });
 
   afterAll(async () => {
