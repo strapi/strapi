@@ -14,6 +14,9 @@ interface Options {
   status?: 'draft' | 'published';
 }
 
+export const isPolymorphicRelation = (attribute: any): any =>
+  ['morphOne', 'morphMany', 'morphToOne', 'morphToMany'].includes(attribute.relation);
+
 /**
  * Load a relation documentId into the idMap.
  */
@@ -53,6 +56,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
       if (!attribute) {
         return;
       }
+      const isPolymorphic = isPolymorphicRelation(attribute);
       const addDocId = addRelationDocId(idMap, source);
 
       return mapRelation((relation) => {
@@ -69,12 +73,18 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
         // Handle positional arguments
         const position = relation.position;
 
+        // The positional relation target uid can be different for polymorphic relations
+        let positionTargetUid = targetUid;
+        if (isPolymorphic && position?.__type) {
+          positionTargetUid = position.__type;
+        }
+
         if (position?.before) {
-          addDocId(targetUid, { ...relation, ...position, documentId: position.before });
+          addDocId(positionTargetUid, { ...relation, ...position, documentId: position.before });
         }
 
         if (position?.after) {
-          addDocId(targetUid, { ...relation, ...position, documentId: position.after });
+          addDocId(positionTargetUid, { ...relation, ...position, documentId: position.after });
         }
 
         return relation;

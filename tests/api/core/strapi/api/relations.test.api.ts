@@ -17,6 +17,8 @@ let docid3;
 let id1;
 let id2;
 let id3;
+let shopid1;
+let shopdocid1;
 
 const populateShop = {
   products_ow: true,
@@ -285,6 +287,20 @@ describe('Relations', () => {
     id1 = data.products[0].id;
     id2 = data.products[1].id;
     id3 = data.products[2].id;
+
+    const createdShop1 = await createShop({
+      anyToOneRel: [],
+      anyToManyRel: [],
+      data: { name: 'Test Shop' },
+      // @ts-expect-error ignore
+      populate: populateShop,
+    });
+
+    console.error('init shop', JSON.stringify(createdShop1, undefined, 2));
+    data.shops.push(createdShop1.data);
+    shopid1 = data.shops[0].id;
+    shopdocid1 = data.shops[0].documentId;
+    console.error('shopdocid', shopdocid1);
   });
 
   afterAll(async () => {
@@ -750,6 +766,103 @@ describe('Relations', () => {
             { documentId: docid1 },
           ],
           products_om: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
+        });
+      });
+
+      // TODO: once this works, refactor tests so that all relevant tests check with different types for polymorph
+      test.skip('with other uid Change relation order from id1, id2, id3 to id3, id2, id1', async () => {
+        const manyRelations = [docid1, docid2, docid3];
+        const morphRelations = manyRelations.map((rel) => {
+          return { documentId: rel, __type: 'api::product.product' };
+        });
+
+        morphRelations.push({ documentId: shopdocid1, __type: 'api::shop.shop' });
+
+        console.log('morphRelations', morphRelations);
+
+        const createdShop = await createEntry(
+          'shops',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            products_morphtomany: {
+              connect: morphRelations,
+            },
+            myCompo: {
+              compo_products_mw: { connect: manyRelations },
+            },
+          },
+          ['myCompo']
+        );
+
+        console.error('Created Shop', JSON.stringify(createdShop, undefined, 2));
+
+        const relationsToChange =
+          mode === 'docIdObject'
+            ? [
+                { documentId: docid3 },
+                { documentId: shopdocid1 },
+                { documentId: docid2 },
+                { documentId: docid1 },
+              ]
+            : [docid3, shopdocid1, docid2, docid1];
+
+        console.log('relations to change', JSON.stringify(relationsToChange));
+        const polymorphChangeMap = relationsToChange.map((rel) => {
+          return {
+            ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+            // ...(mode === 'idObject' && { id: rel.id }),
+            ...(mode === 'docId' && { documentId: rel }),
+            __type:
+              rel === shopdocid1 || rel.documentId === shopdocid1
+                ? 'api::shop.shop'
+                : 'api::product.product',
+          };
+        });
+
+        console.log('polymorph change map', JSON.stringify(polymorphChangeMap));
+        const updatedShop = await updateEntry(
+          'shops',
+          createdShop.data.documentId,
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: relationsToChange },
+            products_mm: { connect: relationsToChange },
+            products_mw: { connect: relationsToChange },
+            products_morphtomany: {
+              connect: polymorphChangeMap,
+            },
+          },
+          populateShop
+        );
+
+        expect(updatedShop.data).toMatchObject({
+          products_mm: [
+            { documentId: docid3 },
+            { documentId: shopdocid1 },
+            { documentId: docid2 },
+            { documentId: docid1 },
+          ],
+          products_mw: [
+            { documentId: docid3 },
+            { documentId: shopdocid1 },
+            { documentId: docid2 },
+            { documentId: docid1 },
+          ],
+          products_morphtomany: [
+            { documentId: docid3 },
+            { documentId: shopdocid1 },
+            { documentId: docid2 },
+            { documentId: docid1 },
+          ],
+          products_om: [
+            { documentId: docid3 },
+            { documentId: shopdocid1 },
+            { documentId: docid2 },
+            { documentId: docid1 },
+          ],
         });
       });
 

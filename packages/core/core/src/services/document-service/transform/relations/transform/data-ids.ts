@@ -90,15 +90,21 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
         // Handle positional arguments
         const position = { ...relation.position };
 
+        // The positional relation target uid can be different for polymorphic relations
+        let positionTargetUid = targetUid;
+        if (isPolymorphic && position?.__type) {
+          positionTargetUid = position.__type;
+        }
+
         if (position.before) {
           const beforeRelation = { ...relation, ...position, documentId: position.before };
           // TODO: Reordering on polymorphic relations
-          position.before = getIds(targetUid, beforeRelation).at(0);
+          position.before = getIds(positionTargetUid, beforeRelation).at(0);
         }
 
         if (position.after) {
           const afterRelation = { ...relation, ...position, documentId: position.after };
-          position.after = getIds(targetUid, afterRelation).at(0);
+          position.after = getIds(positionTargetUid, afterRelation).at(0);
         }
 
         // Transform all ids to new relations
