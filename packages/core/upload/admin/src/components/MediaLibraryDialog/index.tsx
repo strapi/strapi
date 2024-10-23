@@ -12,7 +12,7 @@ const STEPS = {
 
 import type { File } from '../../../../shared/contracts/files';
 
-interface MediaLibraryDialogProps {
+export interface MediaLibraryDialogProps {
   allowedTypes?: string[];
   onClose: () => void;
   onSelectAssets: (selectedAssets: File[]) => void;

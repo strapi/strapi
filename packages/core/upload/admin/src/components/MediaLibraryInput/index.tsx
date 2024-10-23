@@ -17,7 +17,7 @@ const STEPS = {
   FolderCreate: 'FolderCreate',
 };
 
-interface MediaLibraryInputProps {
+export interface MediaLibraryInputProps {
   required?: boolean;
   name: string;
   labelAction?: React.ReactNode;

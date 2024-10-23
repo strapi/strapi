@@ -4,14 +4,19 @@ import pluginPkg from '../../package.json';
 
 import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput';
-import { PERMISSIONS } from './constants';
+import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog';
+import type { MediaLibraryInputProps } from './components/MediaLibraryInput';
+
+// TODO: replace this import with the import from constants file when it will be migrated to TS
+import { PERMISSIONS } from './newConstants';
 import pluginId from './pluginId';
 import { getTrad, prefixPluginTranslations } from './utils';
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
 
 const name = pluginPkg.strapi.name;
 
 export default {
-  register(app) {
+  register(app: StrapiApp) {
     app.addMenuLink({
       to: `plugins/${pluginId}`,
       icon: Images,
@@ -35,15 +40,23 @@ export default {
       permissions: PERMISSIONS.settings,
     });
 
-    app.addFields({ type: 'media', Component: MediaLibraryInput });
-    app.addComponents([{ name: 'media-library', Component: MediaLibraryDialog }]);
+    app.addFields({
+      type: 'media',
+      Component: MediaLibraryInput as React.FC<Partial<MediaLibraryInputProps>>,
+    });
+    app.addComponents([
+      {
+        name: 'media-library',
+        Component: MediaLibraryDialog as React.FC<Partial<MediaLibraryDialogProps>>,
+      },
+    ]);
 
     app.registerPlugin({
       id: pluginId,
       name,
     });
   },
-  async registerTrads({ locales }) {
+  async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
         return import(`./translations/${locale}.json`)
