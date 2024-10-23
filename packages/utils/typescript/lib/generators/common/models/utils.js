@@ -111,7 +111,7 @@ const toTypeLiteral = (data) => {
     throw new Error(`Cannot convert to object literal. Unknown type "${typeof data}"`);
   }
 
-  const entries = Object.entries(data);
+  const entries = Object.entries(data).sort((a, b) => a[0].localeCompare(b[0]));
 
   const props = entries.reduce((acc, [key, value]) => {
     // Handle keys such as content-type-builder & co.
