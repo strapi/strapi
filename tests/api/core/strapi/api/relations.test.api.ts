@@ -314,13 +314,22 @@ describe('Relations', () => {
           'object with documentId ([{ documentId: "123asdf" }, { documentId: "432fdsa" }])',
           'docIdObject',
         ],
+        ['object with id ([{ id: 123 }, { id: 321 }])', 'idObject'],
       ])('ids being %s', (name, mode) => {
         test('In one order', async () => {
-          const oneRelation = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
+          const oneRelation =
+            mode === 'docIdObject'
+              ? [{ documentId: docid1 }]
+              : mode === 'idObject'
+                ? [{ id: id1 }]
+                : [docid1];
+
           const manyRelations =
             mode === 'docIdObject'
               ? [{ documentId: docid1 }, { documentId: docid2 }]
-              : [docid1, docid2];
+              : mode === 'idObject'
+                ? [{ id: id1 }, { id: id2 }]
+                : [docid1, docid2];
 
           const shop = await createEntry(
             'shops',
@@ -335,7 +344,9 @@ describe('Relations', () => {
               products_morphtomany: {
                 [connectOrSet]: manyRelations.map((rel) => {
                   return {
-                    documentId: mode === 'docIdObject' ? rel.documentId : rel,
+                    ...(mode === 'docId' && { documentId: rel }),
+                    ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+                    ...(mode === 'idObject' && { id: rel.id }),
                     __type: 'api::product.product',
                   };
                 }),
@@ -348,27 +359,41 @@ describe('Relations', () => {
             populateShop
           );
 
+          const expectedRelation =
+            mode === 'idObject'
+              ? [{ id: id1 }, { id: id2 }]
+              : [{ documentId: docid1 }, { documentId: docid2 }];
+          const expectedOneRelation = mode === 'idObject' ? { id: id1 } : { documentId: docid1 };
+
           expect(shop.data).toMatchObject({
             myCompo: {
-              compo_products_mw: [{ documentId: docid1 }, { documentId: docid2 }],
-              compo_products_ow: { documentId: docid1 },
+              compo_products_mw: expectedRelation,
+              compo_products_ow: expectedOneRelation,
             },
-            products_mm: [{ documentId: docid1 }, { documentId: docid2 }],
-            products_mo: { documentId: docid1 },
-            products_mw: [{ documentId: docid1 }, { documentId: docid2 }],
-            products_morphtomany: [{ documentId: docid1 }, { documentId: docid2 }],
-            products_om: [{ documentId: docid1 }, { documentId: docid2 }],
-            products_oo: { documentId: docid1 },
-            products_ow: { documentId: docid1 },
+            products_mm: expectedRelation,
+            products_mo: expectedOneRelation,
+            products_mw: expectedRelation,
+            products_morphtomany: expectedRelation,
+            products_om: expectedRelation,
+            products_oo: expectedOneRelation,
+            products_ow: expectedOneRelation,
           });
         });
 
         test('In reversed order', async () => {
-          const oneRelation = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
+          const oneRelation =
+            mode === 'docIdObject'
+              ? [{ documentId: docid1 }]
+              : mode === 'idObject'
+                ? [{ id: id1 }]
+                : [docid1];
+
           const manyRelations =
             mode === 'docIdObject'
               ? [{ documentId: docid1 }, { documentId: docid2 }]
-              : [docid1, docid2];
+              : mode === 'idObject'
+                ? [{ id: id1 }, { id: id2 }]
+                : [docid1, docid2];
           manyRelations.reverse();
 
           const shop = await createEntry(
@@ -384,7 +409,9 @@ describe('Relations', () => {
               products_morphtomany: {
                 [connectOrSet]: manyRelations.map((rel) => {
                   return {
-                    documentId: mode === 'docIdObject' ? rel.documentId : rel,
+                    ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+                    ...(mode === 'idObject' && { id: rel.id }),
+                    ...(mode === 'docId' && { documentId: rel }),
                     __type: 'api::product.product',
                   };
                 }),
@@ -397,18 +424,24 @@ describe('Relations', () => {
             populateShop
           );
 
+          const expectedRelation =
+            mode === 'idObject'
+              ? [{ id: id2 }, { id: id1 }]
+              : [{ documentId: docid2 }, { documentId: docid1 }];
+          const expectedOneRelation = mode === 'idObject' ? { id: id1 } : { documentId: docid1 };
+
           expect(shop.data).toMatchObject({
             myCompo: {
-              compo_products_mw: [{ documentId: docid2 }, { documentId: docid1 }],
-              compo_products_ow: { documentId: docid1 },
+              compo_products_mw: expectedRelation,
+              compo_products_ow: expectedOneRelation,
             },
-            products_mm: [{ documentId: docid2 }, { documentId: docid1 }],
-            products_mo: { documentId: docid1 },
-            products_mw: [{ documentId: docid2 }, { documentId: docid1 }],
-            products_morphtomany: [{ documentId: docid2 }, { documentId: docid1 }],
-            products_om: [{ documentId: docid2 }, { documentId: docid1 }],
-            products_oo: { documentId: docid1 },
-            products_ow: { documentId: docid1 },
+            products_mm: expectedRelation,
+            products_mo: expectedOneRelation,
+            products_mw: expectedRelation,
+            products_morphtomany: expectedRelation,
+            products_om: expectedRelation,
+            products_oo: expectedOneRelation,
+            products_ow: expectedOneRelation,
           });
         });
       });
@@ -419,10 +452,22 @@ describe('Relations', () => {
     describe.each([
       ['directly in the array ([3])', 'docId'],
       ['an object in the array ([{ docid: 3 }])', 'docIdObject'],
+      ['object with id ([{ id: 123 }, { id: 321 }])', 'idObject'],
     ])('ids being %s', (name, mode) => {
       test('Adding id3', async () => {
-        const oneRelation = [docid1];
-        const manyRelations = [docid1, docid2];
+        const oneRelation =
+          mode === 'docIdObject'
+            ? [{ documentId: docid1 }]
+            : mode === 'idObject'
+              ? [{ id: id1 }]
+              : [docid1];
+
+        const manyRelations =
+          mode === 'docIdObject'
+            ? [{ documentId: docid1 }, { documentId: docid2 }]
+            : mode === 'idObject'
+              ? [{ id: id1 }, { id: id2 }]
+              : [docid1, docid2];
 
         const createdShop = await createEntry(
           'shops',
@@ -436,7 +481,12 @@ describe('Relations', () => {
             products_mw: { connect: manyRelations },
             products_morphtomany: {
               connect: manyRelations.map((rel) => {
-                return { documentId: rel, __type: 'api::product.product' };
+                return {
+                  ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+                  ...(mode === 'idObject' && { id: rel.id }),
+                  ...(mode === 'docId' && { documentId: rel }),
+                  __type: 'api::product.product',
+                };
               }),
             },
             myCompo: {
@@ -447,21 +497,31 @@ describe('Relations', () => {
           populateShop
         );
 
+        const expectedRelation =
+          mode === 'idObject'
+            ? [{ id: id1 }, { id: id2 }]
+            : [{ documentId: docid1 }, { documentId: docid2 }];
+
         expect(createdShop.data).toMatchObject({
           myCompo: {
-            compo_products_mw: [{ documentId: docid1 }, { documentId: docid2 }],
-            compo_products_ow: { documentId: docid1 },
+            compo_products_mw: expectedRelation,
+            compo_products_ow: mode === 'idObject' ? { id: id1 } : { documentId: docid1 },
           },
-          products_mm: [{ documentId: docid1 }, { documentId: docid2 }],
-          products_mo: { documentId: docid1 },
-          products_mw: [{ documentId: docid1 }, { documentId: docid2 }],
-          products_morphtomany: [{ documentId: docid1 }, { documentId: docid2 }],
-          products_om: [{ documentId: docid1 }, { documentId: docid2 }],
-          products_oo: { documentId: docid1 },
-          products_ow: { documentId: docid1 },
+          products_mm: expectedRelation,
+          products_mo: mode === 'idObject' ? { id: id1 } : { documentId: docid1 },
+          products_mw: expectedRelation,
+          products_morphtomany: expectedRelation,
+          products_om: expectedRelation,
+          products_oo: mode === 'idObject' ? { id: id1 } : { documentId: docid1 },
+          products_ow: mode === 'idObject' ? { id: id1 } : { documentId: docid1 },
         });
 
-        const relationsToAdd = mode === 'docIdObject' ? [{ documentId: docid3 }] : [docid3];
+        const relationsToAdd =
+          mode === 'docIdObject'
+            ? [{ documentId: docid3 }]
+            : mode === 'idObject'
+              ? [{ id: id3 }]
+              : [docid3];
 
         const updatedShop = await updateEntry(
           'shops',
@@ -477,38 +537,30 @@ describe('Relations', () => {
             products_morphtomany: {
               connect: relationsToAdd.map((rel) => {
                 return {
-                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
+                  ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+                  ...(mode === 'idObject' && { id: rel.id }),
+                  ...(mode === 'docId' && { documentId: rel }),
                   __type: 'api::product.product',
                 };
               }),
             },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_ow: { connect: relationToAdd },
-            //   compo_products_mw: { connect: relationToAdd },
-            // },
           },
           populateShop
         );
 
+        const expectedUpdatedRelation =
+          mode === 'idObject'
+            ? [{ id: id1 }, { id: id2 }, { id: id3 }]
+            : [{ documentId: docid1 }, { documentId: docid2 }, { documentId: docid3 }];
+
         expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_mw: [{ documentId: id1 }, { documentId: id2 }, { documentId: id3 }],
-          //   compo_products_ow: { documentId: id3 },
-          // },
-          products_mm: [{ documentId: docid1 }, { documentId: docid2 }, { documentId: docid3 }],
-          products_mo: { documentId: docid3 },
-          products_mw: [{ documentId: docid1 }, { documentId: docid2 }, { documentId: docid3 }],
-          products_morphtomany: [
-            { documentId: docid1 },
-            { documentId: docid2 },
-            { documentId: docid3 },
-          ],
-          products_om: [{ documentId: docid1 }, { documentId: docid2 }, { documentId: docid3 }],
-          products_oo: { documentId: docid3 },
-          products_ow: { documentId: docid3 },
+          products_mm: expectedUpdatedRelation,
+          products_mo: mode === 'idObject' ? { id: id3 } : { documentId: docid3 },
+          products_mw: expectedUpdatedRelation,
+          products_morphtomany: expectedUpdatedRelation,
+          products_om: expectedUpdatedRelation,
+          products_oo: mode === 'idObject' ? { id: id3 } : { documentId: docid3 },
+          products_ow: mode === 'idObject' ? { id: id3 } : { documentId: docid3 },
         });
       });
 
@@ -567,22 +619,11 @@ describe('Relations', () => {
                 };
               }),
             },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
-            //   compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
-            // },
           },
           populateShop
         );
 
         expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_mw: [{ documentId: id2 }, { documentId: id3 }],
-          //   compo_products_ow: { documentId: id3 },
-          // },
           products_mm: [{ documentId: docid2 }, { documentId: docid3 }],
           products_mo: { documentId: docid3 },
           products_mw: [{ documentId: docid2 }, { documentId: docid3 }],
@@ -651,22 +692,11 @@ describe('Relations', () => {
                 };
               }),
             },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_ow: { connect: relationToAdd, disconnect: relationToRemove },
-            //   compo_products_mw: { connect: relationToAdd, disconnect: relationToRemove },
-            // },
           },
           populateShop
         );
 
         expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_mw:  [{ documentId: id2 }, { documentId: id3 }] ,
-          //   compo_products_ow:  { documentId: id3 } ,
-          // },
           products_mm: [{ documentId: docid2 }, { documentId: docid3 }],
           products_mo: { documentId: docid3 },
           products_mw: [{ documentId: docid2 }, { documentId: docid3 }],
@@ -720,20 +750,11 @@ describe('Relations', () => {
                 };
               }),
             },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_mw: { connect: relationToChange },
-            // },
           },
           populateShop
         );
 
         expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_mw: [{ documentId: id3 }, { documentId: id2 }, { documentId: id1 }],
-          // },
           products_mm: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
           products_mw: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
           products_morphtomany: [
@@ -785,20 +806,11 @@ describe('Relations', () => {
                 };
               }),
             },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_mw: { connect: relationToChange },
-            // },
           },
           populateShop
         );
 
         expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_mw: [{ documentId: id1 }, { documentId: id3 }, { documentId: id2 }],
-          // },
           products_mm: [{ documentId: docid1 }, { documentId: docid3 }, { documentId: docid2 }],
           products_mw: [{ documentId: docid1 }, { documentId: docid3 }, { documentId: docid2 }],
           products_morphtomany: [
@@ -853,20 +865,11 @@ describe('Relations', () => {
                 };
               }),
             },
-            // TODO V5: Discuss component id update, updating a draft component
-            //          with a published component id will fail
-            // myCompo: {
-            //   id: createdShop.data.myCompo.id,
-            //   compo_products_mw: { connect: relationsToChange },
-            // },
           },
           populateShop
         );
 
         expect(updatedShop.data).toMatchObject({
-          // myCompo: {
-          //   compo_products_mw: [{ documentId: id3 }, { documentId: id2 }, { documentId: id1 }],
-          // },
           products_mm: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
           products_mw: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
           products_om: [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }],
