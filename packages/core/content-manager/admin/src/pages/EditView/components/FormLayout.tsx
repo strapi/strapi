@@ -1,9 +1,9 @@
 import { Box, Flex, Grid } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
-import { useIntl } from 'react-intl';
 
 interface FormLayoutProps extends Pick<EditLayout, 'layout'> {}
 
