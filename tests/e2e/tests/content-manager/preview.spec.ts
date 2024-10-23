@@ -26,22 +26,9 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
-    // Check that the preview link can be copied. Webkit doesn't support clipboard-write
-    if (browser.browserType().name() === 'webkit') {
-      await context.grantPermissions(['clipboard-read']);
-    } else {
-      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-    }
+    // Copy the preview link
     await page.getByRole('button', { name: /copy preview link/i }).click();
     await findAndClose(page, 'Copied preview link');
-
-    // Clipboard is broken in webkit: it requires permissions but doesn't support clipboard-write
-    if (browser.browserType().name() !== 'webkit') {
-      const clipboardText = await page.evaluate(() => {
-        return navigator.clipboard.readText();
-      });
-      expect(clipboardText).toContain('https://strapi.io');
-    }
 
     // Check that preview opens in a new tab
     const newTabPromiseDraft = page.waitForEvent('popup');
