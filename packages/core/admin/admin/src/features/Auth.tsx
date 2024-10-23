@@ -7,6 +7,7 @@ import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch } from '../core/store/hooks';
 import { setLocale } from '../reducer';
+import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
   useLoginMutation,
@@ -154,10 +155,11 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 
   const logout = React.useCallback(async () => {
+    dispatch(adminApi.util.resetApiState());
     await logoutMutation();
     clearStorage();
     push('/auth/login');
-  }, [clearStorage, logoutMutation, push]);
+  }, [clearStorage, logoutMutation, push, dispatch]);
 
   return (
     <Provider token={token} user={user} login={login} logout={logout} setToken={setToken}>
