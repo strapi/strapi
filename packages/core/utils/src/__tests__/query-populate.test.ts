@@ -152,17 +152,18 @@ describe('traverseQueryPopulate', () => {
       getModel: strapi.getModel,
     } as const;
 
-    await traverseQueryPopulate(({ key, parent }) => {
+    await traverseQueryPopulate(({ key, parent, attribute }) => {
       switch (key) {
         case 'address':
           // top level populate should not have parent
           expect(parent).toBeUndefined();
+          expect(attribute).toBeDefined();
           break;
-
         case 'filters':
           // Parent information should be available
           expect(parent.key).toBe('address');
           expect(parent.attribute).not.toBeUndefined();
+          expect(attribute).toBeDefined();
           break;
         default:
           break;

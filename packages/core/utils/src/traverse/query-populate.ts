@@ -37,6 +37,10 @@ const isObj = (value: unknown): value is Record<string, unknown> => isObject(val
 
 const populate = traverseFactory()
   .intercept(isPopulateString, async (visitor, options, populate, { recurse }) => {
+    /**
+     * Ensure the populate clause its in the extended format ( { populate: { ... } }, and not just a string)
+     * This gives a consistent structure to track the "parent" node of each nested populate clause
+     */
     const populateObject = pathsToObjectPopulate([populate]);
     const traversedPopulate = (await recurse(visitor, options, populateObject)) as PopulateObject;
     const [result] = objectPopulateToPaths(traversedPopulate);
