@@ -7,8 +7,7 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { PERMISSIONS } from '../../newConstants';
+import { PERMISSIONS } from '../../constants';
 import { getTrad } from '../../utils';
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import type { InitialState } from './reducer';

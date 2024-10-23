@@ -5,8 +5,7 @@ import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
 import ConfigureTheView from '..';
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { pageSizes, sortOptions } from '../../../../newConstants';
+import { pageSizes, sortOptions } from '../../../../constants';
 import type { Configuration } from '../../../../../../shared/contracts/configuration';
 
 const mutateAsync = jest.fn();

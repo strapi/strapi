@@ -6,8 +6,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { BrowseStep } from '..';
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { viewOptions } from '../../../../newConstants';
+import { viewOptions } from '../../../../constants';
 import { useFolder } from '../../../../hooks/useFolder';
 import { usePersistentState } from '../../../../hooks/usePersistentState';
 

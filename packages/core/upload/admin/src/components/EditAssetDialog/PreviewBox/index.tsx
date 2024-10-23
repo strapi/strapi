@@ -5,8 +5,7 @@ import { Flex, IconButton } from '@strapi/design-system';
 import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetType } from '../../../newConstants';
+import { AssetType } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';

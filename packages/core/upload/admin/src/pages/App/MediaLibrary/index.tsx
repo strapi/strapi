@@ -37,8 +37,7 @@ import { FolderGridList } from '../../../components/FolderGridList';
 import SortPicker from '../../../components/SortPicker';
 import { TableList } from '../../../components/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { localStorageKeys, viewOptions } from '../../../newConstants';
+import { localStorageKeys, viewOptions } from '../../../constants';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';

@@ -13,8 +13,7 @@ import { GridFour as GridIcon, List, Pencil, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { localStorageKeys, viewOptions } from '../../../newConstants';
+import { localStorageKeys, viewOptions } from '../../../constants';
 import { useFolder } from '../../../hooks/useFolder';
 import { usePersistentState } from '../../../hooks/usePersistentState';
 import {

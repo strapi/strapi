@@ -14,8 +14,7 @@ import { useIntl } from 'react-intl';
 import type { File } from '../../../../shared/contracts/files';
 import type { Folder } from '../../../../shared/contracts/folders';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { tableHeaders } from '../../newConstants';
+import { tableHeaders } from '../../constants';
 import { getTrad } from '../../utils';
 
 import { TableRows } from './TableRows';

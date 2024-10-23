@@ -7,8 +7,7 @@ import { MediaLibraryInput } from './components/MediaLibraryInput';
 import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog';
 import type { MediaLibraryInputProps } from './components/MediaLibraryInput';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { PERMISSIONS } from './newConstants';
+import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 import { getTrad, prefixPluginTranslations } from './utils';
 import type { StrapiApp } from '@strapi/admin/strapi-admin';

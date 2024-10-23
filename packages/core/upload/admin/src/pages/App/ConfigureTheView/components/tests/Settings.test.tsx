@@ -4,8 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { pageSizes, sortOptions } from '../../../../../newConstants';
+import { pageSizes, sortOptions } from '../../../../../constants';
 import { Settings } from '../Settings';
 
 const testPageSize = pageSizes[0];

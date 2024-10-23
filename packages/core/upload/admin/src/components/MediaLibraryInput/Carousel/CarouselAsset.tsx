@@ -2,8 +2,7 @@ import { Box, Flex } from '@strapi/design-system';
 import { File, FilePdf } from '@strapi/icons';
 import { styled } from 'styled-components';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetType } from '../../../newConstants';
+import { AssetType } from '../../../constants';
 import { createAssetUrl } from '../../../utils';
 import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';

@@ -1,8 +1,7 @@
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { sortOptions } from '../../newConstants';
+import { sortOptions } from '../../constants';
 import { getTrad } from '../../utils';
 import type { Query } from '../../../../shared/contracts/files';
 

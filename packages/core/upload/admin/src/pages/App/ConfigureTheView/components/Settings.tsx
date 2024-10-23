@@ -1,8 +1,7 @@
 import { Box, Grid, SingleSelectOption, SingleSelect, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { pageSizes, sortOptions } from '../../../../newConstants';
+import { pageSizes, sortOptions } from '../../../../constants';
 import { getTrad } from '../../../../utils';
 import type { Configuration } from '../../../../../../shared/contracts/configuration';
 
