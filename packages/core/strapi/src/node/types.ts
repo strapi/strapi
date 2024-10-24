@@ -16,6 +16,10 @@ interface BaseContext {
   /**
    * The bundler to use for building & watching
    */
+  adminPath: string;
+  /**
+   * The bundler to use for building & watching
+   */
   bundler: Pick<Required<BuildOptions>, 'bundler'>['bundler'];
   /**
    * The current working directory
