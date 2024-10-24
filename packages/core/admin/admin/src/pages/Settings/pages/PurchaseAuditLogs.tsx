@@ -30,7 +30,7 @@ const PurchaseAuditLogs = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://strp.cc/45mbAdF"
+                href="https://bit.ly/3MLiphK"
                 isExternal
                 target="_blank"
               >
