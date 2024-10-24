@@ -74,14 +74,8 @@ const ConfigurationProvider = ({
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions.settings?.['project-settings']
-  );
-  const token = useAuth('ConfigurationProvider', (state) => state.token);
 
-  const {
-    allowedActions: { canRead },
-  } = useRBAC(permissions);
+  const token = useAuth('ConfigurationProvider', (state) => state.token);
 
   const {
     data: { authLogo: customAuthLogo, menuLogo: customMenuLogo } = {},
@@ -99,7 +93,7 @@ const ConfigurationProvider = ({
   }, [error, formatMessage, toggleNotification]);
 
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
-    skip: !token || !canRead,
+    skip: !token,
   });
 
   const [updateProjectSettingsMutation] = useUpdateProjectSettingsMutation();
