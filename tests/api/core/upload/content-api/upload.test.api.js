@@ -438,7 +438,7 @@ describe('Upload plugin', () => {
           body: JSON.stringify({
             data: {
               relatedMedia: {
-                connect: [imageIds[0]],
+                connect: [imageIds[1]],
               },
             },
           }),
@@ -446,12 +446,13 @@ describe('Upload plugin', () => {
 
         expect(connectRes.status).toBe(200);
 
-        expect(connectRes.body.data.relatedMedia).toHaveLength(1);
+        expect(connectRes.body.data.relatedMedia).toHaveLength(2);
 
-        expect(connectRes.body.data.relatedMedia[0]).toEqual(
-          expect.objectContaining({
-            id: images.body[0].id,
-          })
+        expect(connectRes.body.data.relatedMedia).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: imageIds[0] }),
+            expect.objectContaining({ id: imageIds[1] }),
+          ])
         );
       });
 
@@ -469,20 +470,20 @@ describe('Upload plugin', () => {
         });
         const imageIds = images.body.map((item) => item.id);
 
-        // create entity with just the first image
+        // create entity with both images
         const res = await rq({
           method: 'POST',
           url: `/dogs/?populate=*`,
           body: {
             data: {
-              relatedMedia: [imageIds[0]],
+              relatedMedia: [imageIds[0], imageIds[1]],
             },
           },
         });
 
         const documentId = res.body.data.documentId;
 
-        // connect the second image
+        // disconnect the first image
         const connectRes = await rq({
           method: 'PUT',
           url: `/dogs/${documentId}?populate=*`,
@@ -496,12 +497,13 @@ describe('Upload plugin', () => {
         });
 
         expect(connectRes.status).toBe(200);
+        console.error(JSON.stringify(connectRes.body, null, 2));
 
         expect(connectRes.body.data.relatedMedia).toHaveLength(1);
 
         expect(connectRes.body.data.relatedMedia[0]).toEqual(
           expect.objectContaining({
-            id: images.body[0].id,
+            id: imageIds[1],
           })
         );
       });
