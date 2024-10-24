@@ -12,6 +12,10 @@ export interface Config {
   get<T = unknown>(key: string, defaultVal?: T): T;
 }
 
+export interface RelationOrderingOptions {
+  strict?: boolean;
+}
+
 export interface Attribute {
   type: string;
   writable?: boolean;
