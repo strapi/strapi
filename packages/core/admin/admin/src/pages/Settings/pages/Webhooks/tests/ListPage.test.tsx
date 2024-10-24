@@ -1,7 +1,7 @@
 import { fireEvent, getByText, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
 import { render, waitFor, server, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { useLocation } from 'react-router-dom';
 
 import { ListPage } from '../ListPage';
@@ -63,13 +63,15 @@ describe('Webhooks | ListPage', () => {
     });
 
     server.use(
-      rest.get('/admin/webhooks', (req, res, ctx) => {
-        return res.once(
-          ctx.json({
+      http.get(
+        '/admin/webhooks',
+        () => {
+          return HttpResponse.json({
             data: [],
-          })
-        );
-      })
+          });
+        },
+        { once: true }
+      )
     );
 
     await user.click(getByRole('button', { name: /confirm/i }));
@@ -90,13 +92,15 @@ describe('Webhooks | ListPage', () => {
     await findByText('Are you sure?');
 
     server.use(
-      rest.get('/admin/webhooks', (req, res, ctx) => {
-        return res.once(
-          ctx.json({
+      http.get(
+        '/admin/webhooks',
+        () => {
+          return HttpResponse.json({
             data: [mockData.webhooks[1]],
-          })
-        );
-      })
+          });
+        },
+        { once: true }
+      )
     );
 
     const confirmButton = await findByRole('button', { name: /confirm/i });
@@ -115,18 +119,16 @@ describe('Webhooks | ListPage', () => {
     const enableSwitches = getAllByRole('switch', { name: /status/i });
 
     server.use(
-      rest.get('/admin/webhooks', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            data: [
-              {
-                ...mockData.webhooks[0],
-                isEnabled: false,
-              },
-              ...mockData.webhooks.slice(1),
-            ],
-          })
-        );
+      http.get('/admin/webhooks', () => {
+        return HttpResponse.json({
+          data: [
+            {
+              ...mockData.webhooks[0],
+              isEnabled: false,
+            },
+            ...mockData.webhooks.slice(1),
+          ],
+        });
       })
     );
 
@@ -139,12 +141,10 @@ describe('Webhooks | ListPage', () => {
 
   it('should allow to create a new webhook on empty state screen by clicking on the button', async () => {
     server.use(
-      rest.get('/admin/webhooks', (req, res, ctx) => {
-        return res(
-          ctx.json({
-            data: [],
-          })
-        );
+      http.get('/admin/webhooks', () => {
+        return HttpResponse.json({
+          data: [],
+        });
       })
     );
 

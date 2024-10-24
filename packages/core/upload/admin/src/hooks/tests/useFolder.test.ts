@@ -1,5 +1,5 @@
 import { renderHook, screen, server, waitFor } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { useFolder } from '../useFolder';
 
@@ -44,7 +44,7 @@ describe('useFolder', () => {
     const originalConsoleError = console.error;
     console.error = jest.fn();
 
-    server.use(rest.get('/upload/folders/:id', (req, res, ctx) => res(ctx.status(500))));
+    server.use(http.get('/upload/folders/:id', () => new HttpResponse(null, { status: 500 })));
 
     const { result } = renderHook(() => useFolder(1));
 
