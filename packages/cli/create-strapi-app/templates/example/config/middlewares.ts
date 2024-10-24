@@ -1,4 +1,6 @@
-export default [
+import { Core } from '@strapi/strapi';
+
+const config: Core.Config.MiddlewaresConfigExport = [
   'strapi::logger',
   'strapi::errors',
   'strapi::security',
@@ -10,3 +12,5 @@ export default [
   'strapi::favicon',
   'strapi::public',
 ];
+
+export default config;
