@@ -14,7 +14,7 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
 
   const getTranslatedLabel = (label: string) => {
     return formatMessage({
-      id: `content-manager.${model}.${label}`,
+      id: `content-manager.content-types.${model}.${label}`,
       defaultMessage: label,
     });
   };

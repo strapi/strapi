@@ -169,7 +169,7 @@ const ListViewPage = () => {
       const translation =
         typeof header.label === 'string'
           ? {
-              id: `content-manager.${model}.${header.label}`,
+              id: `content-manager.content-types.${model}.${header.label}`,
               defaultMessage: header.label,
             }
           : header.label;
