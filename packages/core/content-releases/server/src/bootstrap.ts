@@ -49,8 +49,8 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
             deleteReleasesActionsAndUpdateReleaseStatus({
               contentType: model.uid,
-              locale: where.locale ?? null,
-              ...(where.documentId && { entryDocumentId: where.documentId }),
+              locale: where?.locale ?? null,
+              ...(where?.documentId && { entryDocumentId: where.documentId }),
             });
           }
         } catch (error) {
