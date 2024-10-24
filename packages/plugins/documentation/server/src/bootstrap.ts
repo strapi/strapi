@@ -45,6 +45,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   if (!config) {
     pluginStore.set({ key: 'config', value: { restrictedAccess: false } });
   }
-
-  await getService('documentation').generateFullDoc();
+  if (process.env.NODE_ENV !== 'production') {
+    await getService('documentation').generateFullDoc();
+  }
 }
