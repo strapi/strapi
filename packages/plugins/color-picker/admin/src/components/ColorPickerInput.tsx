@@ -141,6 +141,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                       defaultMessage: 'Color picker input',
                     })}
                     style={{ textTransform: 'uppercase' }}
+                    name={name}
                     value={value}
                     placeholder="#000000"
                     onChange={onChange}
