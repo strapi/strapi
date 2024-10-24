@@ -1,7 +1,6 @@
 /* eslint-disable node/no-callback-literal */
 import { isObject, curry, isNil } from 'lodash/fp';
 
-import type { UID } from '@strapi/types';
 import { traverseEntity, async } from '@strapi/utils';
 
 import { Relation } from './types';
@@ -138,12 +137,6 @@ const traverseEntityRelations = async (
 
       // TODO: Handle join columns
       if (attribute.useJoinTable === false) {
-        return;
-      }
-
-      // TODO: Handle morph relations (they have multiple targets)
-      const target = attribute.target as UID.Schema | undefined;
-      if (!target) {
         return;
       }
 

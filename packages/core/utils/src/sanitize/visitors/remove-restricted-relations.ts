@@ -63,15 +63,16 @@ export default (auth: unknown): Visitor =>
 
           // Assign the filtered options back to newValue
           newValue.options = filteredOptions;
+        } else {
+          newValue.options = {};
         }
 
         set(key, newValue);
       } else {
         const newMorphValue = await handleMorphElements(elements);
 
-        // If the new value is empty, remove the relation completely
         if (newMorphValue.length === 0) {
-          remove(key);
+          // keep empty arrays
         } else {
           set(key, newMorphValue);
         }

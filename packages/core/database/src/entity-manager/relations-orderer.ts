@@ -8,6 +8,7 @@ interface Link {
   id: ID;
   position?: { before?: ID; after?: ID; start?: true; end?: true };
   order?: number;
+  __component?: string;
 }
 
 interface OrderedLink extends Link {
@@ -51,8 +52,16 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
         needsSorting = true;
       }
 
-      // If the relation is already in the array, throw an error
-      if (mapper[relation.id]) {
+      // Check if the relation already exists in the mapper
+      const existingRelation = mapper[relation.id];
+
+      // Determine if the existing relation has no component or the same component
+      const hasNoComponent = existingRelation && !('__component' in existingRelation);
+      const hasSameComponent =
+        existingRelation && existingRelation.__component === relation.__component;
+
+      // If the relation exists and either has no component or the same component, throw an error
+      if (existingRelation && (hasNoComponent || hasSameComponent)) {
         throw new InvalidRelationError(
           `The relation with id ${relation.id} is already connected. ` +
             'You cannot connect the same relation twice.'
