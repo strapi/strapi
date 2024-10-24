@@ -45,7 +45,7 @@ const ResetPassword = () => {
   const query = useQuery();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const setToken = useAuth('ResetPassword', (state) => state.setToken);
+  const { setToken } = useAuth('ResetPassword');
 
   const [resetPassword, { error }] = useResetPasswordMutation();
 

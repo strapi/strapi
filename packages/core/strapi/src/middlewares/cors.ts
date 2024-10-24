@@ -54,6 +54,11 @@ export const cors: Common.MiddlewareFactory<Config> = (config) => {
         return originList.includes(ctx.get('Origin')) ? ctx.get('Origin') : false;
       }
 
+      const parsedOrigin = originList.split(',').map((origin) => origin.trim());
+      if (parsedOrigin.length > 1) {
+        return parsedOrigin.includes(ctx.get('Origin')) ? ctx.get('Origin') : false;
+      }
+
       return originList;
     },
     exposeHeaders: expose,

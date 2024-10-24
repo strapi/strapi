@@ -251,10 +251,9 @@ export const forms = {
       const takenCollectionNames = isEditing
         ? collectionNames.filter((collectionName) => {
             const { schema } = contentTypes[ctUid];
-            const currentPluralName = schema.pluralName;
             const currentCollectionName = schema.collectionName;
 
-            return collectionName !== currentPluralName || collectionName !== currentCollectionName;
+            return collectionName !== currentCollectionName;
           })
         : collectionNames;
 

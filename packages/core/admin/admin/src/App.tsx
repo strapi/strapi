@@ -70,7 +70,7 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const appInfo = useAppInfo();
-  const token = useAuth('App', (state) => state.token);
+  const { token } = useAuth('App');
 
   const authRoutes = React.useMemo(() => {
     if (!routes) {

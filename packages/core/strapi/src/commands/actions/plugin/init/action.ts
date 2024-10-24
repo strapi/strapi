@@ -119,7 +119,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
         name: 'repo',
         type: 'text',
         message: 'git url',
-        validate(v) {
+        validate(v: string) {
           if (!v) {
             return true;
           }
@@ -140,7 +140,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
         type: 'text',
         message: 'plugin name',
         initial: () => repo?.name ?? '',
-        validate(v) {
+        validate(v: string) {
           if (!v) {
             return 'package name is required';
           }
@@ -181,7 +181,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
         type: 'text',
         message: 'plugin license',
         initial: 'MIT',
-        validate(v) {
+        validate(v: string) {
           if (!v) {
             return 'license is required';
           }

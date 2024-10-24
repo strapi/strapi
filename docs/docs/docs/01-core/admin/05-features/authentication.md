@@ -12,7 +12,7 @@ However, we now store the token in state along with the user & this can be passe
 ## Usage
 
 The `useAuth` hook is built on top of a custom `createContext` version which asserts the context is there and throws an error if this is not the case.
-Therefore the hook expects a "consumer name" to be passed so a helpful error message can be provided. It is also built using the `use-context-selector` library meaning we can also pass a selector function to the hook to select a specific part of the context.
+Therefore the hook expects a "consumer name" to be passed so a helpful error message can be provided. It is also built using the React.Context API meaning we can have back the context from the hook.
 
 ```ts
 const token = useAuth('App', (state) => state.token); // token will be a string or null

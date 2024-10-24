@@ -9,7 +9,7 @@ interface PrivateRouteProps extends Omit<RouteProps, 'render' | 'component'> {
 }
 
 const PrivateRoute = ({ children, ...rest }: PrivateRouteProps) => {
-  const token = useAuth('PrivateRoute', (state) => state.token);
+  const { token } = useAuth('PrivateRoute');
 
   return (
     <Route

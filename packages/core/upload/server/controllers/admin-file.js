@@ -1,7 +1,7 @@
 'use strict';
 
 const { merge } = require('lodash/fp');
-const { mapAsync } = require('@strapi/utils');
+const { mapAsync, pipeAsync } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { ACTIONS, FILE_MODEL_UID } = require('../constants');
 const { findEntityAndCheckPermissions } = require('./utils/find-entity-and-check-permissions');
@@ -24,10 +24,17 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const pmQuery = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
+    // validate the incoming user query params
+    await pm.validateQuery(ctx.query);
 
-    await pm.validateQuery(pmQuery);
-    const query = await pm.sanitizeQuery(pmQuery);
+    const query = await pipeAsync(
+      // Start by sanitizing the incoming query
+      (q) => pm.sanitizeQuery(q),
+      // Add the default query which should not be validated or sanitized
+      (q) => merge(defaultQuery, q),
+      // Add the dynamic filters based on permissions' conditions
+      (q) => pm.addPermissionsQueryTo(q)
+    )(ctx.query);
 
     const { results: files, pagination } = await getService('upload').findPage(query);
 

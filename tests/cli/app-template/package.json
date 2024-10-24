@@ -1,0 +1,26 @@
+{
+  "name": "@strapi/e2e-test-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "E2E template application",
+  "license": "MIT",
+  "scripts": {
+    "build": "strapi build",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi"
+  },
+  "dependencies": {
+    "@strapi/plugin-users-permissions": "latest",
+    "@strapi/strapi": "latest",
+    "better-sqlite3": "9.4.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.21.1",
+    "styled-components": "6.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
+  }
+}
