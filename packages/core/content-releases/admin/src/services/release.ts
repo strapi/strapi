@@ -105,6 +105,24 @@ const releaseApi = adminApi
           { type: 'ReleaseAction', id: 'LIST' },
         ]);
       },
+      createWorkflow(endpoint: AnyEndpointDefinition) {
+        extendInvalidatesTags(endpoint, [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ]);
+      },
+      updateWorkflow(endpoint: AnyEndpointDefinition) {
+        extendInvalidatesTags(endpoint, [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ]);
+      },
+      deleteWorkflow(endpoint: AnyEndpointDefinition) {
+        extendInvalidatesTags(endpoint, [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ]);
+      },
     },
   })
   .injectEndpoints({

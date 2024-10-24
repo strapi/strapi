@@ -138,7 +138,7 @@ const releaseActionController = {
 
     const groupedData = await releaseActionService.groupActions(sanitizedResults, query.sort);
 
-    const contentTypes = releaseActionService.getContentTypeModelsFromActions(results);
+    const contentTypes = await releaseActionService.getContentTypeModelsFromActions(results);
 
     const releaseService = getService('release', { strapi });
     const components = await releaseService.getAllComponents();

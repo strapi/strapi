@@ -20,10 +20,10 @@ const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) 
 const processPopulate = (populate: any) => {
   // If it does not exist or it's not an object (like an array) return the default populate
   if (!populate) {
-    return populate;
+    return WORKFLOW_POPULATE;
   }
 
-  return WORKFLOW_POPULATE;
+  return populate;
 };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
@@ -87,6 +87,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         createOpts = set('data.stages', mapIds(stages), createOpts);
 
+        if (opts.data.stageRequiredToPublishName) {
+          const stageRequiredToPublish = stages.find(
+            (stage: any) => stage.name === opts.data.stageRequiredToPublishName
+          );
+          if (!stageRequiredToPublish) {
+            throw new errors.ApplicationError('Stage required to publish does not exist');
+          }
+
+          createOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, createOpts);
+        }
+
         // Update (un)assigned Content Types
         if (opts.data.contentTypes) {
           await workflowsContentTypes.migrate({
@@ -95,12 +106,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           });
         }
 
-        metrics.sendDidCreateWorkflow();
-
         // Create Workflow
-        return strapi.db
+        const createdWorkflow = await strapi.db
           .query(WORKFLOW_MODEL_UID)
           .create(strapi.get('query-params').transform(WORKFLOW_MODEL_UID, createOpts));
+
+        metrics.sendDidCreateWorkflow(createdWorkflow.id, !!opts.data.stageRequiredToPublishName);
+
+        if (opts.data.stageRequiredToPublishName) {
+          await strapi
+            .plugin('content-releases')
+            .service('release-action')
+            .validateActionsByContentTypes(opts.data.contentTypes);
+        }
+
+        return createdWorkflow;
       });
     },
 
@@ -114,6 +134,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async update(workflow: any, opts: any) {
       const stageService = getService('stages', { strapi });
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
+      let updatedStages: any = [];
       let updatedStageIds: any;
 
       await workflowValidator.validateWorkflowCount();
@@ -126,11 +147,32 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
 
-          updatedStageIds = await stageService
-            .replaceStages(workflow.stages, opts.data.stages, workflow.contentTypes)
-            .then((stages: any) => stages.map((stage: any) => stage.id));
+          updatedStages = await stageService.replaceStages(
+            workflow.stages,
+            opts.data.stages,
+            workflow.contentTypes
+          );
+          updatedStageIds = updatedStages.map((stage: any) => stage.id);
 
           updateOpts = set('data.stages', updatedStageIds, updateOpts);
+        }
+
+        if (opts.data.stageRequiredToPublishName !== undefined) {
+          const stages = updatedStages ?? workflow.stages;
+
+          if (opts.data.stageRequiredToPublishName === null) {
+            updateOpts = set('data.stageRequiredToPublish', null, updateOpts);
+          } else {
+            const stageRequiredToPublish = stages.find(
+              (stage: any) => stage.name === opts.data.stageRequiredToPublishName
+            );
+
+            if (!stageRequiredToPublish) {
+              throw new errors.ApplicationError('Stage required to publish does not exist');
+            }
+
+            updateOpts = set('data.stageRequiredToPublish', stageRequiredToPublish.id, updateOpts);
+          }
         }
 
         // Update (un)assigned Content Types
@@ -142,15 +184,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           });
         }
 
-        metrics.sendDidEditWorkflow();
+        metrics.sendDidEditWorkflow(workflow.id, !!opts.data.stageRequiredToPublishName);
 
         const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, updateOpts);
 
         // Update Workflow
-        return strapi.db.query(WORKFLOW_MODEL_UID).update({
+        const updatedWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).update({
           ...query,
           where: { id: workflow.id },
         });
+
+        await strapi
+          .plugin('content-releases')
+          .service('release-action')
+          .validateActionsByContentTypes([
+            ...workflow.contentTypes,
+            ...(opts.data.contentTypes || []),
+          ]);
+
+        return updatedWorkflow;
       });
     },
 
@@ -181,11 +233,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, opts);
+
         // Delete Workflow
-        return strapi.db.query(WORKFLOW_MODEL_UID).delete({
+        const deletedWorkflow = await strapi.db.query(WORKFLOW_MODEL_UID).delete({
           ...query,
           where: { id: workflow.id },
         });
+
+        await strapi
+          .plugin('content-releases')
+          .service('release-action')
+          .validateActionsByContentTypes(workflow.contentTypes);
+
+        return deletedWorkflow;
       });
     },
     /**
