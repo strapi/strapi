@@ -423,7 +423,7 @@ test.describe('Edit View', () => {
        */
       await page.waitForURL(EDIT_URL);
 
-      await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Homepage' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
 
       /**
@@ -518,7 +518,7 @@ test.describe('Edit View', () => {
          */
         await page.waitForURL(EDIT_URL);
 
-        await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Homepage' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
 
         /**
@@ -563,7 +563,7 @@ test.describe('Edit View', () => {
 
         // the title should update post save because it's the `mainField` of the content-type
         await expect(page.getByRole('heading', { name: 'Welcome to AFC Richmond' })).toBeVisible();
-        await expect(page.getByRole('heading', { name: 'Untitled' })).not.toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Homepage' })).not.toBeVisible();
         await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
         await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 

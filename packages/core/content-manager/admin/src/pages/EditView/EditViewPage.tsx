@@ -140,12 +140,17 @@ const EditViewPage = () => {
   };
 
   /**
-   * We look to see what the mainField is from the configuration,
-   * if it's an id we don't use it because it's a uuid format and
-   * not very user friendly. Instead in that case, we simply write "Untitled".
+   * We look to see what the mainField is from the configuration, if it's an id
+   * we don't use it because it's a uuid format and not very user friendly.
+   * Instead, we display the schema name for single-type documents
+   * or "Untitled".
    */
-  const documentTitle =
-    mainField !== 'id' && document?.[mainField] ? document[mainField] : 'Untitled';
+  let documentTitle = 'Untitled';
+  if (mainField !== 'id' && document?.[mainField]) {
+    documentTitle = document[mainField];
+  } else if (isSingleType && schema?.info.displayName) {
+    documentTitle = schema.info.displayName;
+  }
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
