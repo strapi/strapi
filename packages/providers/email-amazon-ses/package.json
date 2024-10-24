@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-amazon-ses",
-  "version": "4.25.13",
+  "version": "4.25.14",
   "description": "Amazon SES provider for strapi email",
   "keywords": [
     "email",
@@ -42,13 +42,13 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.25.13",
+    "@strapi/utils": "4.25.14",
     "node-ses": "^3.0.3"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
-    "eslint-config-custom": "4.25.13",
-    "tsconfig": "4.25.13"
+    "eslint-config-custom": "4.25.14",
+    "tsconfig": "4.25.14"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
