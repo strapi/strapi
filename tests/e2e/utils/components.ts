@@ -3,29 +3,34 @@ import { clickAndWait, findByRowColumn } from './shared';
 import { waitForRestart } from './restart';
 import { kebabCase } from 'lodash/fp';
 
-const typeMap = {
-  text: 'Small or long text',
-};
-
 // TODO: share this with CTB in general
-interface AddAttribute {
+export interface AddAttribute {
   type: string;
   name: string;
-  options?: any;
+  options?: any; // TODO: this doesn't have anything in it yet
+  number?: { format: numberFormat };
+  date?: { format: dateFormat };
+  media?: { multiple: boolean };
+  enumeration?: { values: string[] };
 }
 
-interface CreateComponentOptionsBase {
+// Enumeration needs "values"
+
+type numberFormat = 'integer' | 'big integer' | 'decimal';
+type dateFormat = 'date' | 'time' | 'datetime';
+
+export interface CreateComponentOptionsBase {
   name?: string;
   icon?: string;
   attributes?: AddAttribute[];
 }
 
-interface CategoryCreateOption {
+export interface CategoryCreateOption {
   categoryCreate: string;
   categorySelect?: never;
 }
 
-interface CategorySelectOption {
+export interface CategorySelectOption {
   categorySelect: string;
   categoryCreate?: never;
 }
@@ -35,6 +40,42 @@ type CreateComponentOptions = CreateComponentOptionsBase &
 
 type RequiredCreateComponentOptions = Required<CreateComponentOptionsBase> &
   (CategoryCreateOption | CategorySelectOption);
+
+const typeInputMap = {
+  text: 'Text',
+  boolean: 'Boolean',
+  blocks: 'Rich text (blocks)',
+  json: 'JSON',
+  number: 'Number',
+  email: 'Email',
+  date: 'Date',
+  time: 'Date',
+  datetime: 'Date',
+  password: 'Password',
+  media: 'Media',
+  enumeration: 'Enumeration',
+  relation: 'Relation',
+  markdown: 'Rich text (Markdown)',
+  component: 'Component',
+};
+
+const typeLabelMap = {
+  text: 'Text',
+  boolean: 'Boolean',
+  blocks: 'Rich text (blocks)',
+  json: 'JSON',
+  number: 'Number',
+  email: 'Email',
+  date: 'Date',
+  time: 'Time',
+  datetime: 'Datetime',
+  password: 'Password',
+  media: 'Media',
+  enumeration: 'Enumeration',
+  relation: 'Relation',
+  markdown: 'Rich text (Markdown)',
+  component: 'Component',
+};
 
 // Select a component icon
 export const selectComponentIcon = async (page: Page, icon: string) => {
@@ -85,9 +126,58 @@ export const fillComponent = async (page: Page, options: CreateComponentOptions)
   }
 };
 
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
-  await clickAndWait(page, page.getByText(typeMap[attribute.type]));
+  // find the tabpanel with attributes by looking for text we know it contains
+  const tabPanel = page.getByRole('tabpanel');
+
+  // Target a button within tabPanel that contains a span with the exact text of attribute.type
+  await clickAndWait(
+    page,
+    tabPanel.locator(`button:has(span)`, {
+      hasText: new RegExp(`^${escapeRegExp(typeInputMap[attribute.type])}`, 'i'),
+    })
+  );
+
+  // Fill the input with the exact label "Name"
   await page.getByLabel('Name', { exact: true }).fill(attribute.name);
+
+  // TODO: add a tool for handling Strapi pseudo-select lists so we don't have to handle it custom (and error-prone) each time like number and date
+
+  if (attribute.number?.format) {
+    const format = attribute.number.format;
+
+    const list = page.getByText('Choose here', { exact: true }).first();
+    // open the list
+    await clickAndWait(page, list);
+    // click the targeted element
+    await clickAndWait(page, page.getByText(new RegExp('^' + format, 'i')).first());
+  }
+
+  if (attribute.date?.format) {
+    const format = attribute.date.format;
+
+    // open the list
+    const list = page.getByText('Choose here', { exact: true }).first();
+    await clickAndWait(page, list);
+    // select the item
+    await clickAndWait(page, page.getByText(new RegExp('^' + format, 'i')).first());
+  }
+
+  if (attribute.media?.multiple !== undefined) {
+    // TODO: there has to be a better way; if not, improve the html so we can target better
+    const multipleValue = attribute.media.multiple ? 'true' : 'false';
+    await clickAndWait(page, page.locator(`label[for="${multipleValue}"]`));
+  }
+
+  if (attribute.enumeration?.values) {
+    await page.locator('textarea[name="enum"]').fill(attribute.enumeration?.values.join('\n'));
+  }
+
+  // TODO: add support for advanced options
 };
 
 export const addAttributes = async (page: Page, attributes: AddAttribute[]) => {
@@ -140,6 +230,9 @@ export const createComponent = async (page: Page, options: RequiredCreateCompone
     const attribute = options.attributes[i];
 
     const typeCell = await findByRowColumn(page, attribute.name, 'Type');
-    await expect(typeCell).toContainText(attribute.type, { ignoreCase: true });
+    if (!typeInputMap[attribute.type]) {
+      throw new Error('unknown type ' + attribute.type);
+    }
+    await expect(typeCell).toContainText(typeLabelMap[attribute.type], { ignoreCase: true });
   }
 };
