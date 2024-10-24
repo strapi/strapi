@@ -261,6 +261,15 @@ const shopFactory = ({
   };
 };
 
+const testCases = [
+  ['direct documentId ([1, 2])', 'docId'],
+  [
+    'object with documentId ([{ documentId: "123asdf" }, { documentId: "432fdsa" }])',
+    'docIdObject',
+  ],
+  ['object with id ([{ id: 123 }, { id: 321 }])', 'idObject'],
+];
+
 describe('Relations', () => {
   const builder = createTestBuilder();
 
@@ -309,14 +318,7 @@ describe('Relations', () => {
   describe.each([['connect'], ['set']])(
     'Create an entity with relations using %s',
     (connectOrSet) => {
-      describe.each([
-        ['direct documentId ([1, 2])', 'docId'],
-        [
-          'object with documentId ([{ documentId: "123asdf" }, { documentId: "432fdsa" }])',
-          'docIdObject',
-        ],
-        ['object with id ([{ id: 123 }, { id: 321 }])', 'idObject'],
-      ])('ids being %s', (name, mode) => {
+      describe.each(testCases)('ids being %s', (name, mode) => {
         test('In one order', async () => {
           const oneRelation =
             mode === 'docIdObject'
@@ -450,11 +452,7 @@ describe('Relations', () => {
   );
 
   describe('Update an entity relations', () => {
-    describe.each([
-      ['directly in the array ([3])', 'docId'],
-      ['an object in the array ([{ docid: 3 }])', 'docIdObject'],
-      ['object with id ([{ id: 123 }, { id: 321 }])', 'idObject'],
-    ])('ids being %s', (name, mode) => {
+    describe.each(testCases)('ids being %s', (name, mode) => {
       test('Adding id3', async () => {
         const oneRelation =
           mode === 'docIdObject'
@@ -977,16 +975,20 @@ describe('Relations', () => {
   });
 
   describe('Disconnect entity relations', () => {
-    describe.each([
-      ['direct documentId ([1, 2, 3])', 'docId'],
-      [
-        'object with documentId ([{ documentId: 1 }, { documentId: 2 }, { documentId: 3 }])',
-        'docIdObject',
-      ],
-    ])('ids being %s', (name, mode) => {
+    describe.each(testCases)('ids being %s', (name, mode) => {
       test('Remove all relations docid1, docid2, docid3', async () => {
-        const manyRelations = [docid1, docid2, docid3];
-        const oneRelation = [docid1];
+        const manyRelations =
+          mode === 'docIdObject'
+            ? [{ documentId: docid1 }, { documentId: docid2 }, { documentId: docid3 }]
+            : mode === 'idObject'
+              ? [{ id: id1 }, { id: id2 }, { id: id3 }]
+              : [docid1, docid2, docid3];
+        const oneRelation =
+          mode === 'docIdObject'
+            ? [{ documentId: docid1 }]
+            : mode === 'idObject'
+              ? [{ id: id1 }]
+              : [docid1];
 
         const createdShop = await createEntry(
           'shops',
@@ -1000,23 +1002,34 @@ describe('Relations', () => {
             products_mw: { connect: manyRelations },
             products_morphtomany: {
               connect: manyRelations.map((rel) => {
-                return { documentId: rel, __type: 'api::product.product' };
+                return {
+                  ...(mode === 'docId' && { documentId: rel }),
+                  ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+                  ...(mode === 'idObject' && { id: rel.id }),
+                  __type: 'api::product.product',
+                };
               }),
             },
             myCompo: {
-              compo_products_ow: { connect: [docid1] },
-              compo_products_mw: { connect: [docid1, docid2, docid3] },
+              compo_products_ow: { connect: oneRelation },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
         const relationsToDisconnectOne =
-          mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
+          mode === 'docIdObject'
+            ? [{ documentId: docid1 }]
+            : mode === 'idObject'
+              ? [{ id: id1 }]
+              : [docid1];
         const relationsToDisconnectMany =
           mode === 'docIdObject'
             ? [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }]
-            : [docid3, docid2, docid1];
+            : mode === 'idObject'
+              ? [{ id: id3 }, { id: id2 }, { id: id1 }]
+              : [docid3, docid2, docid1];
 
         const updatedShop = await updateEntry(
           'shops',
@@ -1032,7 +1045,9 @@ describe('Relations', () => {
             products_morphtomany: {
               disconnect: relationsToDisconnectMany.map((rel) => {
                 return {
-                  documentId: mode === 'docIdObject' ? rel.documentId : rel,
+                  ...(mode === 'docId' && { documentId: rel }),
+                  ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+                  ...(mode === 'idObject' && { id: rel.id }),
                   __type: 'api::product.product',
                 };
               }),
@@ -1053,7 +1068,12 @@ describe('Relations', () => {
       });
 
       test("Remove relations that doesn't exist doesn't fail", async () => {
-        const createRelation = [docid1];
+        const createRelation =
+          mode === 'docIdObject'
+            ? [{ documentId: docid1 }]
+            : mode === 'idObject'
+              ? [{ id: id1 }]
+              : [docid1];
 
         const createdShop = await createEntry(
           'shops',
@@ -1067,7 +1087,12 @@ describe('Relations', () => {
             products_mw: { connect: createRelation },
             products_morphtomany: {
               connect: createRelation.map((rel) => {
-                return { documentId: rel, __type: 'api::product.product' };
+                return {
+                  ...(mode === 'docId' && { documentId: rel }),
+                  ...(mode === 'docIdObject' && { documentId: rel.documentId }),
+                  ...(mode === 'idObject' && { id: rel.id }),
+                  __type: 'api::product.product',
+                };
               }),
             },
             myCompo: {
@@ -1081,12 +1106,9 @@ describe('Relations', () => {
         const relationsToDisconnectMany =
           mode === 'docIdObject'
             ? [{ documentId: docid3 }, { documentId: docid2 }, { documentId: 9999 }]
-            : [docid3, docid2, 9999];
-
-        /**
-         * Note: The API returns an error for missing disconnect on objects, but
-         * using an array of ids works without error
-         */
+            : mode === 'idObject'
+              ? [{ id: id3 }, { id: id2 }, { id: 9999 }]
+              : [docid3, docid2, 9999];
 
         if (mode === 'docIdObject') {
           const productTypes = [
@@ -1099,7 +1121,6 @@ describe('Relations', () => {
             'products_morphtomany',
           ];
 
-          // Test each relation type individually
           for (const productType of productTypes) {
             const updatePayload = {
               name: 'Cazotte Shop',
@@ -1107,7 +1128,7 @@ describe('Relations', () => {
                 disconnect: relationsToDisconnectMany.map((rel) => {
                   if (productType === 'products_morphtomany') {
                     return {
-                      documentId: mode === 'docIdObject' ? rel.documentId : rel,
+                      ...(mode === 'docIdObject' && { documentId: rel.documentId }),
                       __type: 'api::product.product',
                     };
                   }
@@ -1126,7 +1147,7 @@ describe('Relations', () => {
             expect(updatedShop.error).toBeDefined();
             expect(updatedShop.error.status).toBe(400);
           }
-        } else if (mode === 'docId') {
+        } else if (mode === 'docId' || mode === 'idObject') {
           const updatedShop = await updateEntry(
             'shops',
             createdShop.data.documentId,
@@ -1138,16 +1159,11 @@ describe('Relations', () => {
               products_om: { disconnect: relationsToDisconnectMany },
               products_mm: { disconnect: relationsToDisconnectMany },
               products_mw: { disconnect: relationsToDisconnectMany },
-              // Note: products_morphtomany only works with object form, so we won't test it here
             },
             populateShop
           );
 
           expect(updatedShop.data).toMatchObject({
-            // myCompo: {
-            //   compo_products_ow: { documentId: id1 },
-            //   compo_products_mw: [{ documentId: id1 }],
-            // },
             products_ow: { documentId: docid1 },
             products_oo: { documentId: docid1 },
             products_mo: { documentId: docid1 },

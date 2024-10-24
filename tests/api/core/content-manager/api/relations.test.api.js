@@ -1083,7 +1083,7 @@ describe('Relations', () => {
       expect(clonedShop.products_ow).toMatchObject({ documentId: docid2 });
     });
 
-    test.skip('Clone entity with relations and disconnect data', async () => {
+    test('Clone entity with relations and disconnect data', async () => {
       const createdShop = await createEntry(
         'shop',
         {
@@ -1166,7 +1166,7 @@ describe('Relations', () => {
       expect(populatedCreatedShop.products_oo).toMatchObject({ documentId: docid1 });
     });
 
-    test.skip('Clone entity with relations and set data should not steal relations', async () => {
+    test('Clone entity with relations and set data should not steal relations', async () => {
       const createdShop = await createEntry(
         'shop',
         {
