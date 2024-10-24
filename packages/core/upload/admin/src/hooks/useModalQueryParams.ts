@@ -64,7 +64,7 @@ const useModalQueryParams = (initialState?: Partial<Query>) => {
     }
   };
 
-  const handleChangeSearch = (_q: Query['_q']) => {
+  const handleChangeSearch = (_q: Query['_q'] | null) => {
     if (_q) {
       setQueryObject((prev) => ({ ...prev, _q, page: 1 }));
     } else {
