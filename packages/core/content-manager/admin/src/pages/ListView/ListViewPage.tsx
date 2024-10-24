@@ -169,7 +169,7 @@ const ListViewPage = () => {
       const translation =
         typeof header.label === 'string'
           ? {
-              id: `content-manager.containers.ListPage.table-headers.${header.label}`,
+              id: `content-manager.${model}.${header.label}`,
               defaultMessage: header.label,
             }
           : header.label;
@@ -197,7 +197,14 @@ const ListViewPage = () => {
     }
 
     return formattedHeaders;
-  }, [displayedHeaders, formatMessage, list, runHookWaterfall, schema?.options?.draftAndPublish]);
+  }, [
+    displayedHeaders,
+    formatMessage,
+    list,
+    runHookWaterfall,
+    schema?.options?.draftAndPublish,
+    model,
+  ]);
 
   if (isFetching) {
     return <Page.Loading />;
