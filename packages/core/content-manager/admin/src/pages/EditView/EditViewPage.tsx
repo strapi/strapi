@@ -149,7 +149,7 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Page.Title>{`${documentTitle}`}</Page.Title>
+      <Page.Title>{documentTitle}</Page.Title>
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
@@ -228,7 +228,7 @@ const StatusTab = styled(Tabs.Trigger)`
 
 /**
  * @internal
- * @description Returns the status of the document where it's latest state takes priority,
+ * @description Returns the status of the document where its latest state takes priority,
  * this typically will be "published" unless a user has edited their draft in which we should
  * display "modified".
  */
