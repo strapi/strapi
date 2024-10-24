@@ -17,7 +17,6 @@ technical concepts but also hold documentation for hooks, utils etc.
 
 If you don’t plan to make any contributions to [strapi/strapi](https://github.com/strapi/strapi), you probably shouldn’t read and use the present documentation, and [docs.strapi.io](https://docs.strapi.io) might be a better fit for your use case.
 
-
 ## Structure
 
 The general layout focusses on 4 key areas:
