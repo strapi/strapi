@@ -4,7 +4,7 @@ import { Link, LinkProps } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, type To, useLocation, useNavigate } from 'react-router-dom';
 
 import { createContext } from '../components/Context';
 
@@ -188,7 +188,9 @@ const reducer = (state: HistoryState, action: HistoryActions) =>
 /* -------------------------------------------------------------------------------------------------
  * BackButton
  * -----------------------------------------------------------------------------------------------*/
-interface BackButtonProps extends Pick<LinkProps, 'disabled'> {}
+interface BackButtonProps extends Pick<LinkProps, 'disabled'> {
+  fallback?: To;
+}
 
 /**
  * @beta
@@ -196,35 +198,44 @@ interface BackButtonProps extends Pick<LinkProps, 'disabled'> {}
  * context to navigate the user back to the previous location. It can be completely disabled in a
  * specific user case.
  */
-const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(({ disabled }, ref) => {
-  const { formatMessage } = useIntl();
+const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
+  ({ disabled, fallback = '' }, ref) => {
+    const { formatMessage } = useIntl();
+    const navigate = useNavigate();
 
-  const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
-  const goBack = useHistory('BackButton', (state) => state.goBack);
-  const history = useHistory('BackButton', (state) => state.history);
+    const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
+    const goBack = useHistory('BackButton', (state) => state.goBack);
+    const history = useHistory('BackButton', (state) => state.history);
+    const hasFallback = fallback !== '';
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    goBack();
-  };
+    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
 
-  return (
-    <Link
-      ref={ref}
-      tag={NavLink}
-      to={history.at(-1) ?? ''}
-      onClick={handleClick}
-      disabled={disabled || !canGoBack}
-      aria-disabled={disabled || !canGoBack}
-      startIcon={<ArrowLeft />}
-    >
-      {formatMessage({
-        id: 'global.back',
-        defaultMessage: 'Back',
-      })}
-    </Link>
-  );
-});
+      if (canGoBack) {
+        goBack();
+      } else if (hasFallback) {
+        navigate(fallback);
+      }
+    };
+
+    return (
+      <Link
+        ref={ref}
+        tag={NavLink}
+        to={history.at(-1) ?? fallback}
+        onClick={handleClick}
+        disabled={disabled || (!canGoBack && !hasFallback)}
+        aria-disabled={disabled || (!canGoBack && !hasFallback)}
+        startIcon={<ArrowLeft />}
+      >
+        {formatMessage({
+          id: 'global.back',
+          defaultMessage: 'Back',
+        })}
+      </Link>
+    );
+  }
+);
 
 export { BackButton, HistoryProvider };
 export type { BackButtonProps, HistoryProviderProps, HistoryContextValue, HistoryState };
