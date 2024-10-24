@@ -179,6 +179,8 @@ const develop = async ({
      */
     let bundleWatcher: WebpackWatcher | ViteWatcher | undefined;
 
+    const strapiInstance = await strapi.load();
+
     if (watchAdmin) {
       timer.start('createBuildContext');
       const contextSpinner = logger.spinner(`Building build context`).start();
@@ -212,8 +214,6 @@ const develop = async ({
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
       adminSpinner.succeed();
     }
-
-    const strapiInstance = await strapi.load();
 
     const loadStrapiDuration = timer.end('loadStrapi');
     loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
