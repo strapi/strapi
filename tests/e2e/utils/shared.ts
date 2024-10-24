@@ -131,14 +131,18 @@ export const findAndClose = async (
  * @warning This function assumes a standard table structure where each row has an equal number of cells,
  *          and no cells are merged (`colspan` or `rowspan`). If the table contains merged cells,
  *          this method may return incorrect results or fail to locate the correct cell.
+ *          Matches the header exactly (cell contains only exact text)
+ *          Matches the row loosely (finds a row containing that text somewhere)
  */
 export const findByRowColumn = async (page: Page, rowText: string, columnText: string) => {
   // Locate the row that contains the rowText
-  const row = page.locator('tr').filter({ hasText: new RegExp(rowText, 'i') });
+  // This just looks for the text in a row, so ensure that it is specific enough
+  const row = page.locator('tr').filter({ hasText: new RegExp(`${rowText}`) });
   await expect(row).toBeVisible();
 
   // Locate the column header that matches the columnText
-  const header = page.locator('thead th').filter({ hasText: new RegExp(columnText, 'i') });
+  // This assumes that header is exact (cell only contains that text and nothing else)
+  const header = page.locator('thead th').filter({ hasText: new RegExp(`^${columnText}$`, 'i') });
   await expect(header).toBeVisible();
 
   // Find the index of the matching column header

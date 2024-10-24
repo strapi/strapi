@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetFiles } from '../../../utils/file-reset';
 import { sharedSetup } from '../../../utils/setup';
-import { createComponent, type AddAttribute } from '../../../utils/components';
+import { createComponent, type AddAttribute } from '../../../utils/content-types';
 
 test.describe('Create a new component', () => {
   const attributes = [

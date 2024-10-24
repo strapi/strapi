@@ -11,8 +11,7 @@ test.describe('Edit collection type', () => {
 
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
-
-  let dependentTestsInitialized = false;
+  const attributes = [{ type: 'text', name: 'testtext' }];
 
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-ct', page, {
@@ -24,13 +23,16 @@ test.describe('Edit collection type', () => {
         // create a collection type to be used
         await createCollectionType(page, {
           name: ctName,
+          attributes,
         });
 
         await createCollectionType(page, {
           name: 'dog',
+          attributes,
         });
         await createCollectionType(page, {
           name: 'owner',
+          attributes,
         });
       },
     });
@@ -96,6 +98,7 @@ test.describe('Edit collection type', () => {
 
   test('Can add a field with default value', async ({ page }) => {
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
+
     await page
       .getByRole('button', { name: 'Text Small or long text like title or description' })
       .click();
