@@ -4,6 +4,7 @@ const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
+const { isArray } = require('lodash');
 
 let strapi;
 let rq;
@@ -22,7 +23,7 @@ let docid3;
 
 const testCases = [
   ['documentId object format ([{ documentId: "123f" }, { documentId: "54ed" }])', 'docIdObject'],
-  // ['id object format ([{ id: 1 }, { id: 2 }])', 'idObject'],
+  ['id object format ([{ id: 1 }, { id: 2 }])', 'idObject'],
   ['documentId directly (["1faw23", "2fawe"])', 'docId'],
 ];
 
@@ -164,7 +165,32 @@ const getRelations = async (uid, field, id) => {
   return res.body;
 };
 
-// TODO: Fix relations
+const mapRelationsByMode = (mode, docids, ids) => {
+  if (mode === 'docIdObject') {
+    if (isArray(docids)) {
+      return docids.map((id) => {
+        return {
+          documentId: id,
+        };
+      });
+    }
+    return { documentId: docids };
+  }
+  if (mode === 'idObject') {
+    if (isArray(ids)) {
+      return ids.map((id) => {
+        return {
+          id,
+        };
+      });
+    }
+    return { id: ids };
+  }
+  if (mode === 'docId') {
+    return ids;
+  }
+};
+
 describe('Relations', () => {
   const builder = createTestBuilder();
 
@@ -203,11 +229,8 @@ describe('Relations', () => {
     (connectOrSet) => {
       describe.each(testCases)('ids being %s', (name, mode) => {
         test('In one order', async () => {
-          const oneRelation = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
-          const manyRelations =
-            mode === 'docIdObject'
-              ? [{ documentId: docid1 }, { documentId: docid2 }]
-              : [docid1, docid2];
+          const oneRelation = mapRelationsByMode(mode, [docid1], [id1]);
+          const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
 
           const shop = await createEntry(
             'shop',
@@ -228,37 +251,40 @@ describe('Relations', () => {
           );
 
           let res;
+          const expectedOneRelation = mode === 'idObject' ? { id: id1 } : { documentId: docid1 };
+          const expectedManyRelations =
+            mode === 'idObject'
+              ? [{ id: id2 }, { id: id1 }]
+              : [{ documentId: docid2 }, { documentId: docid1 }];
+
           res = await getRelations('default.compo', 'compo_products_mw', shop.data.myCompo.id);
-          expect(res.results).toMatchObject([{ documentId: docid2 }, { documentId: docid1 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('default.compo', 'compo_products_ow', shop.data.myCompo.id);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
 
           res = await getRelations('api::shop.shop', 'products_mm', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid2 }, { documentId: docid1 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('api::shop.shop', 'products_mo', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
 
           res = await getRelations('api::shop.shop', 'products_mw', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid2 }, { documentId: docid1 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('api::shop.shop', 'products_om', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid2 }, { documentId: docid1 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('api::shop.shop', 'products_oo', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
 
           res = await getRelations('api::shop.shop', 'products_ow', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
         });
 
         test('In reversed order', async () => {
-          const oneRelation = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
-          const manyRelations =
-            mode === 'docIdObject'
-              ? [{ documentId: docid1 }, { documentId: docid2 }]
-              : [docid1, docid2];
+          const oneRelation = mapRelationsByMode(mode, [docid1], [id1]);
+          const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
           manyRelations.reverse();
 
           const shop = await createEntry(
@@ -280,29 +306,35 @@ describe('Relations', () => {
           );
 
           let res;
+          const expectedOneRelation = mode === 'idObject' ? { id: id1 } : { documentId: docid1 };
+          const expectedManyRelations =
+            mode === 'idObject'
+              ? [{ id: id1 }, { id: id2 }]
+              : [{ documentId: docid1 }, { documentId: docid2 }];
+
           res = await getRelations('default.compo', 'compo_products_mw', shop.data.myCompo.id);
-          expect(res.results).toMatchObject([{ documentId: docid1 }, { documentId: docid2 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('default.compo', 'compo_products_ow', shop.data.myCompo.id);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
 
           res = await getRelations('api::shop.shop', 'products_mm', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }, { documentId: docid2 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('api::shop.shop', 'products_mo', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
 
           res = await getRelations('api::shop.shop', 'products_mw', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }, { documentId: docid2 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('api::shop.shop', 'products_om', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }, { documentId: docid2 }]);
+          expect(res.results).toMatchObject(expectedManyRelations);
 
           res = await getRelations('api::shop.shop', 'products_oo', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
 
           res = await getRelations('api::shop.shop', 'products_ow', shop.data.documentId);
-          expect(res.results).toMatchObject([{ documentId: docid1 }]);
+          expect(res.results).toMatchObject([expectedOneRelation]);
         });
       });
     }
@@ -311,25 +343,28 @@ describe('Relations', () => {
   describe('Update an entity relations', () => {
     describe.each(testCases)('ids being %s', (name, mode) => {
       test('Adding id3', async () => {
+        const oneRelation = mapRelationsByMode(mode, [docid1], [id1]);
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
+
         const createdShop = await createEntry(
           'shop',
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: [docid1] },
-            products_oo: { connect: [docid1] },
-            products_mo: { connect: [docid1] },
-            products_om: { connect: [docid1, docid2] },
-            products_mm: { connect: [docid1, docid2] },
-            products_mw: { connect: [docid1, docid2] },
+            products_ow: { connect: oneRelation },
+            products_oo: { connect: oneRelation },
+            products_mo: { connect: oneRelation },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
             myCompo: {
-              compo_products_ow: { connect: [docid1] },
-              compo_products_mw: { connect: [docid1, docid2] },
+              compo_products_ow: { connect: oneRelation },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToAdd = mode === 'docIdObject' ? [{ documentId: docid3 }] : [docid3];
+        const relationToAdd = mapRelationsByMode(mode, [docid3], [id3]);
 
         const updatedShop = await updateEntry(
           'shop',
@@ -394,26 +429,29 @@ describe('Relations', () => {
       });
 
       test('Adding docid3 & removing docid1', async () => {
+        const oneRelation = mapRelationsByMode(mode, [docid1], [id1]);
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
+
         const createdShop = await createEntry(
           'shop',
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: [docid1] },
-            products_oo: { connect: [docid1] },
-            products_mo: { connect: [docid1] },
-            products_om: { connect: [docid1, docid2] },
-            products_mm: { connect: [docid1, docid2] },
-            products_mw: { connect: [docid1, docid2] },
+            products_ow: { connect: oneRelation },
+            products_oo: { connect: oneRelation },
+            products_mo: { connect: oneRelation },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
             myCompo: {
-              compo_products_ow: { connect: [docid1] },
-              compo_products_mw: { connect: [docid1, docid2] },
+              compo_products_ow: { connect: oneRelation },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToAdd = mode === 'docIdObject' ? [{ documentId: docid3 }] : [docid3];
-        const relationToRemove = mode === 'docIdObject' ? [{ documentId: docid1 }] : [docid1];
+        const relationToAdd = mapRelationsByMode(mode, [docid3], [id3]);
+        const relationToRemove = mapRelationsByMode(mode, [docid1], [id1]);
 
         const updatedShop = await updateEntry(
           'shop',
@@ -460,31 +498,30 @@ describe('Relations', () => {
         res = await getRelations('api::shop.shop', 'products_ow', updatedShop.data.documentId);
         expect(res.results).toMatchObject([{ documentId: docid3 }]);
       });
-
       test('Adding docid3 & removing docid1, docid3 (should still add docid3)', async () => {
+        const oneRelation = mapRelationsByMode(mode, [docid1], [id1]);
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
+
         const createdShop = await createEntry(
           'shop',
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: [docid1] },
-            products_oo: { connect: [docid1] },
-            products_mo: { connect: [docid1] },
-            products_om: { connect: [docid1, docid2] },
-            products_mm: { connect: [docid1, docid2] },
-            products_mw: { connect: [docid1, docid2] },
+            products_ow: { connect: oneRelation },
+            products_oo: { connect: oneRelation },
+            products_mo: { connect: oneRelation },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
             myCompo: {
-              compo_products_ow: { connect: [docid1] },
-              compo_products_mw: { connect: [docid1, docid2] },
+              compo_products_ow: { connect: oneRelation },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToAdd = mode === 'docIdObject' ? [{ documentId: docid3 }] : [docid3];
-        const relationToRemove =
-          mode === 'docIdObject'
-            ? [{ documentId: docid1 }, { documentId: docid3 }]
-            : [docid1, docid3];
+        const relationToAdd = mapRelationsByMode(mode, [docid3], [id3]);
+        const relationToRemove = mapRelationsByMode(mode, [docid1, docid3], [id1, id3]);
 
         const updatedShop = await updateEntry(
           'shop',
@@ -533,24 +570,27 @@ describe('Relations', () => {
       });
 
       test('Change relation order from id1, id2, id3 to id3, id2, id1', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
+
         const createdShop = await createEntry(
           'shop',
           {
             name: 'Cazotte Shop',
-            products_om: { connect: [docid1, docid2, docid3] },
-            products_mm: { connect: [docid1, docid2, docid3] },
-            products_mw: { connect: [docid1, docid2, docid3] },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
             myCompo: {
-              compo_products_mw: { connect: [docid1, docid2, docid3] },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToChange =
-          mode === 'docIdObject'
-            ? [{ documentId: docid3 }, { documentId: docid2 }, { documentId: docid1 }]
-            : [docid3, docid2, docid1];
+        const relationToChange = mapRelationsByMode(
+          mode,
+          [docid3, docid2, docid1],
+          [id3, id2, id1]
+        );
 
         const updatedShop = await updateEntry(
           'shop',
@@ -599,21 +639,23 @@ describe('Relations', () => {
       });
 
       test('Change relation order by putting id2 at the end', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
+
         const createdShop = await createEntry(
           'shop',
           {
             name: 'Cazotte Shop',
-            products_om: { connect: [docid1, docid2, docid3] },
-            products_mm: { connect: [docid1, docid2, docid3] },
-            products_mw: { connect: [docid1, docid2, docid3] },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
             myCompo: {
-              compo_products_mw: { connect: [docid1, docid2, docid3] },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToChange = mode === 'docIdObject' ? [{ documentId: docid2 }] : [docid2];
+        const relationToChange = mapRelationsByMode(mode, [docid2], [id2]);
 
         const updatedShop = await updateEntry(
           'shop',
@@ -662,22 +704,23 @@ describe('Relations', () => {
       });
 
       test('Change relation order by putting docid2, docid1 at the end', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
+
         const createdShop = await createEntry(
           'shop',
           {
             name: 'Cazotte Shop',
-            products_om: { connect: [docid1, docid2, docid3] },
-            products_mm: { connect: [docid1, docid2, docid3] },
-            products_mw: { connect: [docid1, docid2, docid3] },
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
             myCompo: {
-              compo_products_mw: { connect: [docid1, docid2, docid3] },
+              compo_products_mw: { connect: manyRelations },
             },
           },
           ['myCompo']
         );
 
-        const relationToChange =
-          mode === 'docIdObject' ? [{ documentId: docid2 }, { documentId: docid1 }] : [id2, id1];
+        const relationToChange = mapRelationsByMode(mode, [docid2, docid1], [id2, id1]);
 
         const updatedShop = await updateEntry(
           'shop',
@@ -728,137 +771,164 @@ describe('Relations', () => {
     });
   });
 
-  describe('Reorder an entity relations', () => {
-    test('Reorder single relation', async () => {
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_om: { connect: [docid1, docid2, docid3] },
-          products_mm: { connect: [docid1, docid2, docid3] },
-          products_mw: { connect: [docid1, docid2, docid3] },
-          myCompo: {
-            compo_products_mw: { connect: [docid1, docid2, docid3] },
-          },
-        },
-        ['myCompo']
-      );
+  // exclude docId because reordering only works with objects
+  // eslint-disable-next-line no-unused-vars
+  describe.each(testCases.filter(([_name, mode]) => mode !== 'docId'))(
+    'Reorder an entity relations - %s',
+    (name, mode) => {
+      test('Reorder single relation', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
 
-      const relationToChange = [{ documentId: docid1, position: { before: docid3 } }];
-      const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
-        name: 'Cazotte Shop',
-        products_om: { connect: relationToChange },
-        products_mm: { connect: relationToChange },
-        products_mw: { connect: relationToChange },
-        myCompo: {
-          id: createdShop.data.myCompo.id,
-          compo_products_mw: { connect: relationToChange },
-        },
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            myCompo: {
+              compo_products_mw: { connect: manyRelations },
+            },
+          },
+          ['myCompo']
+        );
+
+        const relationToChange =
+          mode === 'idObject'
+            ? [{ id: id1, position: { before: id3 } }]
+            : [{ documentId: docid1, position: { before: docid3 } }];
+
+        const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
+          name: 'Cazotte Shop',
+          products_om: { connect: relationToChange },
+          products_mm: { connect: relationToChange },
+          products_mw: { connect: relationToChange },
+          myCompo: {
+            id: createdShop.data.myCompo.id,
+            compo_products_mw: { connect: relationToChange },
+          },
+        });
+
+        const expectedRelations =
+          mode === 'idObject'
+            ? [{ id: id2 }, { id: id1 }, { id: id3 }]
+            : [{ documentId: docid2 }, { documentId: docid1 }, { documentId: docid3 }];
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_om).toMatchObject(expectedRelations);
       });
 
-      const expectedRelations = [
-        { documentId: docid2 },
-        { documentId: docid1 },
-        { documentId: docid3 },
-      ];
+      test('Reorder multiple relations', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2, docid3], [id1, id2, id3]);
 
-      const updatedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
-
-      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
-      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
-      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
-      expect(updatedShop.products_om).toMatchObject(expectedRelations);
-    });
-
-    test('Reorder multiple relations', async () => {
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_om: { connect: [docid1, docid2, docid3] },
-          products_mm: { connect: [docid1, docid2, docid3] },
-          products_mw: { connect: [docid1, docid2, docid3] },
-          myCompo: {
-            compo_products_mw: { connect: [docid1, docid2, docid3] },
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            myCompo: {
+              compo_products_mw: { connect: manyRelations },
+            },
           },
-        },
-        ['myCompo']
-      );
+          ['myCompo']
+        );
 
-      const relationToChange = [
-        { documentId: docid1, position: { end: true } },
-        { documentId: docid3, position: { start: true } },
-        { documentId: docid2, position: { after: docid1 } },
-      ];
-      const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
-        name: 'Cazotte Shop',
-        products_om: { connect: relationToChange },
-        products_mm: { connect: relationToChange },
-        products_mw: { connect: relationToChange },
-        myCompo: {
-          id: createdShop.data.myCompo.id,
-          compo_products_mw: { connect: relationToChange },
-        },
+        const relationToChange =
+          mode === 'idObject'
+            ? [
+                { id: id1, position: { end: true } },
+                { id: id3, position: { start: true } },
+                { id: id2, position: { after: id1 } },
+              ]
+            : [
+                { documentId: docid1, position: { end: true } },
+                { documentId: docid3, position: { start: true } },
+                { documentId: docid2, position: { after: docid1 } },
+              ];
+
+        const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
+          name: 'Cazotte Shop',
+          products_om: { connect: relationToChange },
+          products_mm: { connect: relationToChange },
+          products_mw: { connect: relationToChange },
+          myCompo: {
+            id: createdShop.data.myCompo.id,
+            compo_products_mw: { connect: relationToChange },
+          },
+        });
+
+        const expectedRelations =
+          mode === 'idObject'
+            ? [{ id: id3 }, { id: id1 }, { id: id2 }]
+            : [{ documentId: docid3 }, { documentId: docid1 }, { documentId: docid2 }];
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_om).toMatchObject(expectedRelations);
       });
 
-      const updatedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+      test('Invalid reorder with non-strict mode should not give an error', async () => {
+        const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
 
-      const expectedRelations = [
-        { documentId: docid3 },
-        { documentId: docid1 },
-        { documentId: docid2 },
-      ];
-
-      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
-      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
-      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
-      expect(updatedShop.products_om).toMatchObject(expectedRelations);
-    });
-
-    test('Invalid reorder with non-strict mode should not give an error', async () => {
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_om: { connect: [docid1, docid2] },
-          products_mm: { connect: [docid1, docid2] },
-          products_mw: { connect: [docid1, docid2] },
-          myCompo: {
-            compo_products_mw: { connect: [docid1, docid2] },
+        const createdShop = await createEntry(
+          'shop',
+          {
+            name: 'Cazotte Shop',
+            products_om: { connect: manyRelations },
+            products_mm: { connect: manyRelations },
+            products_mw: { connect: manyRelations },
+            myCompo: {
+              compo_products_mw: { connect: manyRelations },
+            },
           },
-        },
-        ['myCompo']
-      );
+          ['myCompo']
+        );
 
-      const relationToChange = [
-        { documentId: docid1, position: { before: docid3 } }, // id3 does not exist in these relations
-      ];
-      const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
-        name: 'Cazotte Shop',
-        products_om: { options: { strict: false }, connect: relationToChange },
-        products_mm: { options: { strict: false }, connect: relationToChange },
-        products_mw: { options: { strict: false }, connect: relationToChange },
-        myCompo: {
-          id: createdShop.data.myCompo.id,
-          compo_products_mw: { options: { strict: false }, connect: relationToChange },
-        },
+        const relationToChange =
+          mode === 'idObject'
+            ? [{ id: id1, position: { before: id3 } }] // id3 does not exist in these relations
+            : [{ documentId: docid1, position: { before: docid3 } }]; // docid3 does not exist in these relations
+
+        const updatedEntry = await updateEntry('shop', createdShop.data.documentId, {
+          name: 'Cazotte Shop',
+          products_om: { options: { strict: false }, connect: relationToChange },
+          products_mm: { options: { strict: false }, connect: relationToChange },
+          products_mw: { options: { strict: false }, connect: relationToChange },
+          myCompo: {
+            id: createdShop.data.myCompo.id,
+            compo_products_mw: { options: { strict: false }, connect: relationToChange },
+          },
+        });
+
+        const expectedRelations =
+          mode === 'idObject'
+            ? [{ id: id2 }, { id: id1 }]
+            : [{ documentId: docid2 }, { documentId: docid1 }];
+
+        const updatedShop = await strapi.db
+          .query('api::shop.shop')
+          .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
+
+        expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mm).toMatchObject(expectedRelations);
+        expect(updatedShop.products_mw).toMatchObject(expectedRelations);
+        expect(updatedShop.products_om).toMatchObject(expectedRelations);
       });
-
-      const expectedRelations = [{ documentId: docid2 }, { documentId: docid1 }];
-      const updatedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
-
-      expect(updatedShop.myCompo.compo_products_mw).toMatchObject(expectedRelations);
-      expect(updatedShop.products_mm).toMatchObject(expectedRelations);
-      expect(updatedShop.products_mw).toMatchObject(expectedRelations);
-      expect(updatedShop.products_om).toMatchObject(expectedRelations);
-    });
-  });
+    }
+  );
 
   describe('Disconnect entity relations', () => {
     describe.each(testCases)('ids being %s', (name, mode) => {
@@ -971,7 +1041,7 @@ describe('Relations', () => {
         if (mode === 'docIdObject') {
           expect(updatedEntry.error).toBeDefined();
           expect(updatedEntry.error.status).toBe(400);
-        } else if (mode === 'docId') {
+        } else if (mode === 'docId' || mode === 'idObject') {
           const updatedShop = await strapi.db
             .query('api::shop.shop')
             .findOne({ where: { id: updatedEntry.data.id }, populate: populateShop });
