@@ -8,12 +8,14 @@ sidebar_label: Introduction
 Welcome to the Strapi Contributor documentation.
 
 :::caution
-No single squad “owns” the contributor documentation, it's a collective effort.
+No single Strapi squad “owns” the contributor documentation, it's a collective effort.
 :::
 
-This documentation site is a constant WIP so please, continue to add and improve these docs. These are not “user” docs,
+This documentation site is a constant WIP so please, continue to add and improve these docs. These are not “user-facing” docs,
 they're related directly to the codebase for both internal and external engineers written with that in mind they explain
 technical concepts but also hold documentation for hooks, utils etc.
+
+If you don’t plan to make any contributions to [strapi/strapi](https://github.com/strapi/strapi), you probably shouldn’t read and use the present documentation, and [docs.strapi.io](https://docs.strapi.io) might be a better fit for your use case.
 
 ## Structure
 

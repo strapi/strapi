@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { NodePlopAPI } from 'plop';
+import type { NodePlopAPI } from 'plop';
 import fs from 'fs-extra';
 import tsUtils from '@strapi/typescript-utils';
 
