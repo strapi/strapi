@@ -1,4 +1,4 @@
-import { capitalize, kebabCase, startCase } from 'lodash/fp';
+import { kebabCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
@@ -46,7 +46,7 @@ export interface CreateContentTypeOptions {
   name: string;
   singularId?: string;
   pluralId?: string;
-  attributes?: AddAttribute[];
+  attributes: AddAttribute[];
 }
 
 const typeMap = {
@@ -201,74 +201,54 @@ export const submitComponent = async (page: Page, options: CreateComponentOption
   await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 };
 
+const saveAndVerifyContent = async (
+  page: Page,
+  options: { name: string; attributes: AddAttribute[] }
+) => {
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+  await waitForRestart(page);
+
+  // This must be case insensitive to cover up a minor display bug in the Strapi Admin where headers are always capitalized
+  const header = page.getByRole('heading', {
+    name: new RegExp(`^${options.name}$`, 'i'),
+  });
+  await expect(header).toBeVisible();
+
+  for (let i = 0; i < options.attributes.length; i++) {
+    const attribute = options.attributes[i];
+    const typeCell = await findByRowColumn(page, attribute.name, 'Type');
+
+    if (!typeMap[attribute.type].buttonName) {
+      throw new Error('unknown type ' + attribute.type);
+    }
+    await expect(typeCell).toContainText(typeMap[attribute.type].listLabel, { ignoreCase: true });
+  }
+};
+
+// Refactored method for creating a component
 export const createComponent = async (page: Page, options: RequiredCreateComponentOptions) => {
   await openComponentBuilder(page);
   await fillComponent(page, options);
 
   await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-
   await addAttributes(page, options.attributes);
 
-  // Save the component
-  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-  await waitForRestart(page);
-
-  const header = page.getByRole('heading', { name: options.name, exact: true });
-
-  // expect each attribute.name to be in a row that also contains attribute.type
-  for (let i = 0; i < options.attributes.length; i++) {
-    const attribute = options.attributes[i];
-
-    const typeCell = await findByRowColumn(page, attribute.name, 'Type');
-    if (!typeMap[attribute.type].buttonName) {
-      throw new Error('unknown type ' + attribute.type);
-    }
-    await expect(typeCell).toContainText(typeMap[attribute.type].listLabel, { ignoreCase: true });
-  }
+  await saveAndVerifyContent(page, options);
 };
 
-export const createSingleType = async (page, data) => {
-  const { name, singularId, pluralId } = data;
-
-  await page.getByRole('button', { name: 'Create new single type' }).click();
-
-  await expect(page.getByRole('heading', { name: 'Create a single type' })).toBeVisible();
-
-  const displayName = page.getByLabel('Display name');
-  await displayName.fill(name);
-
-  const singularIdField = page.getByLabel('API ID (Singular)');
-  await expect(singularIdField).toHaveValue(singularId || kebabCase(name));
-  if (singularId) {
-    singularIdField.fill(singularId);
-  }
-
-  const pluralIdField = page.getByLabel('API ID (Plural)');
-  await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
-  if (pluralId) {
-    pluralIdField.fill(pluralId);
-  }
-
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  // Create an initial text field for it
-  await expect(page.getByText('Select a field for your single type')).toBeVisible();
-  await page.getByText('Small or long text').click();
-  await page.getByLabel('Name', { exact: true }).fill('myattribute');
-  await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
-
-  await waitForRestart(page);
-
-  await expect(page.getByRole('heading', { name })).toBeVisible();
-};
-
-export const createCollectionType = async (page, options: CreateContentTypeOptions) => {
+// Helper function for creating content types
+const createContentType = async (
+  page: Page,
+  options: CreateContentTypeOptions,
+  type: 'single' | 'collection'
+) => {
   const { name, singularId, pluralId } = options;
 
-  await page.getByRole('button', { name: 'Create new collection type' }).click();
+  const buttonName = type === 'single' ? 'Create new single type' : 'Create new collection type';
+  const headingName = type === 'single' ? 'Create a single type' : 'Create a collection type';
 
-  await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
+  await page.getByRole('button', { name: buttonName }).click();
+  await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
   const displayName = page.getByLabel('Display name');
   await displayName.fill(name);
@@ -286,25 +266,17 @@ export const createCollectionType = async (page, options: CreateContentTypeOptio
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();
-
   await addAttributes(page, options.attributes);
 
-  // Save the content type
-  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-  await waitForRestart(page);
+  await saveAndVerifyContent(page, options);
+};
 
-  // This only uses startCase because that's what the Strapi admin does for headers, but it's a small bug that should be fixed
-  const header = page.getByRole('heading', { name: startCase(options.name), exact: true });
+// Refactored method for creating a single type
+export const createSingleType = async (page: Page, options: CreateContentTypeOptions) => {
+  await createContentType(page, options, 'single');
+};
 
-  await expect(header).toBeVisible();
-  // expect each attribute.name to be in a row that also contains attribute.type
-  for (let i = 0; i < options.attributes.length; i++) {
-    const attribute = options.attributes[i];
-
-    const typeCell = await findByRowColumn(page, attribute.name, 'Type');
-    if (!typeMap[attribute.type].buttonName) {
-      throw new Error('unknown type ' + attribute.type);
-    }
-    await expect(typeCell).toContainText(typeMap[attribute.type].listLabel, { ignoreCase: true });
-  }
+// Refactored method for creating a collection type
+export const createCollectionType = async (page: Page, options: CreateContentTypeOptions) => {
+  await createContentType(page, options, 'collection');
 };

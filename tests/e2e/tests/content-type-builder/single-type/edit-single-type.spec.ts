@@ -11,6 +11,7 @@ test.describe('Edit single type', () => {
 
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
+  const attributes = [{ type: 'text', name: 'testtext' }];
 
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {
@@ -21,6 +22,7 @@ test.describe('Edit single type', () => {
       afterSetup: async () => {
         await createSingleType(page, {
           name: ctName,
+          attributes,
         });
       },
     });
