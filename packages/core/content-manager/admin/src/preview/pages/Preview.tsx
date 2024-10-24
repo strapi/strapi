@@ -93,13 +93,16 @@ const PreviewPage = () => {
   }
 
   if (
-    !previewUrlResponse.data?.data?.url ||
     previewUrlResponse.error ||
     documentLayoutResponse.error ||
     !documentResponse.document ||
     !documentResponse.meta ||
     !documentResponse.schema
   ) {
+    return <Page.Error />;
+  }
+
+  if (!previewUrlResponse.data?.data?.url) {
     return <Page.NoData />;
   }
 
