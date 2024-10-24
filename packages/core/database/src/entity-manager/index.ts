@@ -25,7 +25,11 @@ import * as types from '../utils/types';
 import { createField } from '../fields';
 import { createQueryBuilder } from '../query';
 import { createRepository } from './entity-repository';
-import { deleteRelatedMorphOneRelationsAfterMorphToManyUpdate } from './morph-relations';
+import {
+  deleteRelatedMorphOneRelationsAfterMorphToManyUpdate,
+  encodePolymorphicRelation,
+  encodePolymorphicId,
+} from './morph-relations';
 import {
   isBidirectional,
   isAnyToOne,
@@ -591,17 +595,24 @@ export const createEntityManager = (db: Database): EntityManager => {
 
           const orderMap = relationsOrderer(
             [],
-            morphColumn.idColumn.name, // TODO: Is this right? it doesn't seem to have any effect
+            morphColumn.idColumn.name,
             'order',
             true // Always make a strict connect when inserting
           )
-            .connect(dataset as any)
+            .connect(
+              // Merge id & __type to get a single id key
+              dataset.map(encodePolymorphicRelation({ idColumn: 'id', typeColumn: '__type' }))
+            )
             .get()
             // set the order based on the order of the ids
             .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {} as Record<ID, number>);
 
           rows.forEach((row: Record<string, unknown>) => {
-            row.order = orderMap[row[morphColumn.idColumn.name] as number];
+            const rowId = row[morphColumn.idColumn.name] as ID;
+            const rowType = row[morphColumn.typeColumn.name] as string;
+            const encodedId = encodePolymorphicId(rowId, rowType);
+
+            row.order = orderMap[encodedId];
           });
 
           await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
@@ -994,16 +1005,29 @@ export const createEntityManager = (db: Database): EntityManager => {
               })) satisfies Record<string, any>[];
 
               const orderMap = relationsOrderer(
-                adjacentRelations,
+                // Merge id & __type to get a single id key
+                adjacentRelations.map(
+                  encodePolymorphicRelation({
+                    idColumn: idColumn.name,
+                    typeColumn: typeColumn.name,
+                  })
+                ),
                 idColumn.name,
                 'order',
                 cleanRelationData.options?.strict
               )
-                .connect(dataset as any)
+                .connect(
+                  // Merge id & __type to get a single id key
+                  dataset.map(encodePolymorphicRelation({ idColumn: 'id', typeColumn: '__type' }))
+                )
                 .getOrderMap();
 
               rows.forEach((row: Record<string, unknown>) => {
-                row.order = orderMap[row[idColumn.name] as number];
+                const rowId = row[idColumn.name] as number;
+                const rowType = row[typeColumn.name] as string;
+                const encodedId = encodePolymorphicId(rowId, rowType);
+
+                row.order = orderMap[encodedId];
               });
 
               await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();

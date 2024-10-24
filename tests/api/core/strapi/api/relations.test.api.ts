@@ -29,6 +29,7 @@ const populateShop = {
   products_mw: true,
   products_morphtomany: {
     on: {
+      'api::shop.shop': true,
       'api::product.product': true,
     },
   },
@@ -1222,6 +1223,42 @@ describe('Relations', () => {
       expect(createdShop.data).toMatchObject(expectedShop);
     });
 
+    test("Create polymorphic relations with different types using 'before' and 'after'", async () => {
+      // Create shop directly without the utility
+      const shop = await createEntry(
+        'shops',
+        {
+          name: 'Cazotte Shop',
+          products_morphtomany: {
+            connect: [
+              {
+                documentId: docid1,
+                __type: 'api::product.product',
+                position: 'end',
+              },
+              // Connect shop before product
+              {
+                documentId: shopdocid1,
+                __type: 'api::shop.shop',
+                position: {
+                  before: docid1,
+                  __type: 'api::product.product',
+                },
+              },
+            ],
+          },
+        },
+        populateShop
+      );
+
+      expect(shop.data).toMatchObject({
+        products_morphtomany: [
+          { documentId: shopdocid1, __type: 'api::shop.shop' },
+          { documentId: docid1, __type: 'api::product.product' },
+        ],
+      });
+    });
+
     test('Update relations using before and after', async () => {
       const shop = await createShop({
         anyToManyRel: [
@@ -1242,6 +1279,43 @@ describe('Relations', () => {
         anyToManyRel: [{ documentId: docid2 }, { documentId: docid1 }, { documentId: docid3 }],
       });
       expect(updatedShop.data).toMatchObject(expectedShop);
+    });
+
+    test('Update polymorphic relations with different types using before and after', async () => {
+      const shop = await createEntry('shops', {
+        name: 'Cazotte Shop',
+        products_morphtomany: {
+          connect: [
+            { documentId: docid1, __type: 'api::product.product' },
+            { documentId: shopdocid1, __type: 'api::shop.shop' },
+          ],
+        },
+      });
+
+      const updatedShop = await updateEntry(
+        'shops',
+        shop.data.documentId,
+        {
+          name: 'Cazotte Shop',
+          products_morphtomany: {
+            connect: [
+              {
+                documentId: docid1,
+                __type: 'api::product.product',
+                position: { before: shopdocid1, __type: 'api::shop.shop' },
+              },
+            ],
+          },
+        },
+        populateShop
+      );
+
+      expect(updatedShop.data).toMatchObject({
+        products_morphtomany: [
+          { documentId: docid1, __type: 'api::product.product' },
+          { documentId: shopdocid1, __type: 'api::shop.shop' },
+        ],
+      });
     });
 
     test('Update relations using the same id multiple times', async () => {
