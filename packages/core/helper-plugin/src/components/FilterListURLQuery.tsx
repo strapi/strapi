@@ -7,6 +7,7 @@ import { useIntl } from 'react-intl';
 import { useQueryParams } from '../hooks/useQueryParams';
 
 import type { FilterData, Filter } from '../types';
+import { FilterPopoverURLQuery } from './FilterPopoverURLQuery';
 export interface FilterListURLQueryProps {
   filtersSchema: FilterData[];
 }
@@ -18,7 +19,6 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
     };
     page?: number;
   }>();
-
   const handleClick = (filter: Filter) => {
     const nextFilters = (query?.filters?.$and || []).filter((prevFilter) => {
       const name = Object.keys(filter)[0] as keyof Filter;
@@ -59,6 +59,7 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
                 // eslint-disable-next-line react/no-array-index-key
                 key={`${attributeName}-${i}`}
                 attribute={attribute}
+                filtersSchema={filtersSchema}
                 filter={filter}
                 onClick={handleClick}
                 operator={operator}
@@ -75,15 +76,18 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
 
           if (typeof value === 'string' || value === null) {
             return (
-              <AttributeTag
-                // eslint-disable-next-line react/no-array-index-key
-                key={`${attributeName}-${i}`}
-                attribute={attribute}
-                filter={filter}
-                onClick={handleClick}
-                operator={operator}
-                value={value ?? ''}
-              />
+              <>
+                <AttributeTag
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={`${attributeName}-${i}`}
+                  attribute={attribute}
+                  filtersSchema={filtersSchema}
+                  filter={filter}
+                  onClick={handleClick}
+                  operator={operator}
+                  value={value ?? ''}
+                />
+              </>
             );
           }
 
@@ -96,17 +100,37 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
 
 interface AttributeTagProps {
   attribute: FilterData;
+  filtersSchema: FilterData[];
   filter: Filter;
   onClick: (filter: Filter) => void;
   operator: string;
   value: string;
 }
 
-const AttributeTag = ({ attribute, filter, onClick, operator, value }: AttributeTagProps) => {
+const AttributeTag = ({
+  attribute,
+  filtersSchema,
+  filter,
+  onClick,
+  operator,
+  value,
+}: AttributeTagProps) => {
   const { formatMessage, formatDate, formatTime, formatNumber } = useIntl();
+
+  const [isVisible, setIsVisible] = React.useState(false);
+  const buttonRef = React.useRef<HTMLButtonElement>(null!);
 
   const handleClick = () => {
     onClick(filter);
+  };
+
+  const handleToggle = () => {
+    setIsVisible((prev) => !prev);
+  };
+
+  const handleContentClick = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevents the event from bubbling up to the Tag's onClick
+    handleToggle();
   };
 
   const { fieldSchema } = attribute;
@@ -162,8 +186,17 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }: Attribute
   return (
     <Box padding={1}>
       <Tag onClick={handleClick} icon={<Cross />}>
-        {content}
+        <span onClick={handleContentClick}>{content}</span>
       </Tag>
+      {isVisible && (
+        <FilterPopoverURLQuery
+          displayedFilters={filtersSchema}
+          isVisible={true}
+          onToggle={handleToggle}
+          source={buttonRef}
+          initialFilter={filter}
+        />
+      )}
     </Box>
   );
 };
