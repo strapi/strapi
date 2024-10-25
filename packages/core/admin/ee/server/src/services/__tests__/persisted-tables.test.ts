@@ -1,4 +1,4 @@
-import { findTables } from '../persisted-tables';
+import { findTables } from '../persist-tables';
 
 const strapiMock = {
   db: {
