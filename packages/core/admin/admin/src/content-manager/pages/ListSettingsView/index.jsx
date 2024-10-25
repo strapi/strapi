@@ -184,7 +184,7 @@ export const ListSettingsView = ({ layout, slug }) => {
               <Link
                 startIcon={<ArrowLeft />}
                 to={{
-                  to: `/content-manager/${kind}/${uid}`,
+                  pathname: `/content-manager/${kind}/${uid}`,
                   search: stringify(
                     {
                       page: 1,

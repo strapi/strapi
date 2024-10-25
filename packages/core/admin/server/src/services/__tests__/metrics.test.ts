@@ -1,8 +1,4 @@
-import {
-  sendDidInviteUser,
-  sendDidUpdateRolePermissions,
-  sendDidChangeInterfaceLanguage,
-} from '../metrics';
+import metrics from '../metrics';
 
 describe('Metrics', () => {
   test('sendDidInviteUser', async () => {
@@ -19,7 +15,7 @@ describe('Metrics', () => {
       },
     } as any;
 
-    await sendDidInviteUser();
+    await metrics.sendDidInviteUser();
 
     expect(send).toHaveBeenCalledWith('didInviteUser', {
       groupProperties: {
@@ -37,7 +33,7 @@ describe('Metrics', () => {
       telemetry: { send },
     } as any;
 
-    await sendDidUpdateRolePermissions();
+    await metrics.sendDidUpdateRolePermissions();
 
     expect(send).toHaveBeenCalledWith('didUpdateRolePermissions');
   });
@@ -55,7 +51,7 @@ describe('Metrics', () => {
       },
     } as any;
 
-    await sendDidChangeInterfaceLanguage();
+    await metrics.sendDidChangeInterfaceLanguage();
 
     expect(getLanguagesInUse).toHaveBeenCalledWith();
     expect(send).toHaveBeenCalledWith('didChangeInterfaceLanguage', {

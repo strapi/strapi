@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "4.23.1",
+  "version": "4.25.14",
   "description": "Strapi maintained Custom Fields",
   "repository": {
     "type": "git",
@@ -53,15 +53,15 @@
     "watch": "strapi plugin:watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.18.0",
-    "@strapi/helper-plugin": "4.23.1",
-    "@strapi/icons": "1.18.0",
+    "@strapi/design-system": "1.19.0",
+    "@strapi/helper-plugin": "4.25.14",
+    "@strapi/icons": "1.19.0",
     "prop-types": "^15.8.1",
     "react-colorful": "5.6.1",
     "react-intl": "6.4.1"
   },
   "devDependencies": {
-    "@strapi/strapi": "4.23.1",
+    "@strapi/strapi": "4.25.14",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/styled-components": "5.1.32",

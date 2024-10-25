@@ -1,4 +1,11 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Check for .only in the staged changes of test files
+if git --no-pager diff --cached | grep -E '^\+\s*(test|it|describe)\.only'; then
+  echo "Error: .only found in staged changes. Please remove it before committing."
+  exit 1
+fi
+
+# Run lint-staged if no .only is found
 yarn lint-staged

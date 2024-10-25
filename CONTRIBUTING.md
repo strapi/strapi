@@ -104,7 +104,14 @@ cd ./packages/core/admin
 yarn watch
 ```
 
-The administration panel should now be available at http://localhost:4000/admin. Make sure the example application (step 4) is still running.
+Run the example application but watching the admin panel:
+
+```bash
+cd ./examples/getstarted
+yarn develop --watch-admin
+```
+
+Both commands must be running at same time; now you will be able to see the admin panel changes on the application example.
 
 **Awesome! You are now able to contribute to Strapi.**
 

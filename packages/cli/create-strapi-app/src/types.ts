@@ -3,6 +3,7 @@ export interface Program {
   useNpm?: boolean;
   debug?: boolean;
   quickstart?: boolean;
+  skipCloud?: boolean;
   dbclient?: string;
   dbhost?: string;
   dbport?: string;

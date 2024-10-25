@@ -70,7 +70,7 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const appInfo = useAppInfo();
-  const token = useAuth('App', (state) => state.token);
+  const { token } = useAuth('App');
 
   const authRoutes = React.useMemo(() => {
     if (!routes) {
@@ -137,7 +137,13 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
     [uuid, telemetryPropertiesQuery.data]
   );
 
-  if (initQuery.isLoading) {
+  /**
+   * `routes` will only be an array if EE mode is activated,
+   * therefore we need to ensure the lazy loading of EE routes
+   * has been complete otherwise the SSO repsonse URL will not be
+   * caught by the component and you won't be able to login with it.
+   */
+  if (initQuery.isLoading || (Array.isArray(routes) && routes.length === 0)) {
     return <LoadingIndicatorPage />;
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
-  "version": "4.23.1",
+  "version": "4.25.14",
   "description": "Cloudinary provider for strapi upload",
   "keywords": [
     "upload",
@@ -42,14 +42,14 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.23.1",
+    "@strapi/utils": "4.25.14",
     "cloudinary": "^1.41.0",
     "into-stream": "^5.1.0"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
-    "eslint-config-custom": "4.23.1",
-    "tsconfig": "4.23.1"
+    "eslint-config-custom": "4.25.14",
+    "tsconfig": "4.25.14"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

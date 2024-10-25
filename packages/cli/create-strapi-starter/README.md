@@ -1,3 +1,7 @@
+> [!WARNING]
+> This package is only compatible with Strapi v4 version <br/>
+> The most recent versions of Strapi packages can be found at [https://github.com/strapi/strapi](https://github.com/strapi/strapi)
+
 # Create strapi starter
 
 This package includes the `create-strapi-starter` CLI to simplify creating a Strapi project using starters and templates
