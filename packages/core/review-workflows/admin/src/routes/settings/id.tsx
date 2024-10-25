@@ -329,7 +329,7 @@ const EditPage = () => {
         {({ modified, isSubmitting, values, setErrors }) => (
           <>
             <Layout.Header
-              navigationAction={<BackButton />}
+              navigationAction={<BackButton fallback=".." />}
               primaryAction={
                 canUpdate || canCreate ? (
                   <Button

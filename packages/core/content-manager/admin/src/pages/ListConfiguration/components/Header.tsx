@@ -19,7 +19,7 @@ const Header = ({ name }: HeaderProps) => {
 
   return (
     <Layouts.Header
-      navigationAction={<BackButton />}
+      navigationAction={<BackButton fallback=".." />}
       primaryAction={
         <Button size="S" disabled={!modified} type="submit" loading={isSubmitting}>
           {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}

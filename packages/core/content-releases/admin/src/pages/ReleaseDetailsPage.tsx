@@ -435,7 +435,7 @@ const ReleaseDetailsLayout = ({
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
         }
-        navigationAction={<BackButton />}
+        navigationAction={<BackButton fallback=".." />}
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>

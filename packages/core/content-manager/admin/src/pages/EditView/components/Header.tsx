@@ -65,7 +65,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
 
   return (
     <Flex direction="column" alignItems="flex-start" paddingTop={6} paddingBottom={4} gap={2}>
-      <BackButton />
+      <BackButton fallback=".." />
       <Flex width="100%" justifyContent="space-between" gap="80px" alignItems="flex-start">
         <Typography variant="alpha" tag="h1">
           {title}
