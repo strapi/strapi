@@ -14,7 +14,7 @@ const { getService } = require('../utils');
 
 
 const getFormatsToResize = () => {
-  return ['jpeg', 'jpg','png', 'webp', 'tiff', 'gif'];
+  return ['jpeg', 'jpg', 'png', 'webp', 'tiff', 'gif'];
 }
 
 const getFormatsToProcess  = () => {
