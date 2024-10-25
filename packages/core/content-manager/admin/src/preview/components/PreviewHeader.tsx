@@ -126,6 +126,12 @@ const DocumentStatus = () => {
     return null;
   }
 
+  /**
+   * TODO: Add an XS size to the Status component from the design system so that we can add
+   * a variant to the VersionsList component.
+   * Then we could reuse it both here and in history's VersionCard component.
+   */
+
   return (
     <Box
       background={statusData.background}
