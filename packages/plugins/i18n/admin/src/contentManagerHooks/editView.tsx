@@ -1,7 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { Flex, VisuallyHidden } from '@strapi/design-system';
+import { Flex, Tooltip, VisuallyHidden } from '@strapi/design-system';
 import { Earth, EarthStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -101,10 +101,12 @@ const LabelAction = ({ title, icon }: LabelActionProps) => {
   return (
     <Span tag="span">
       <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
-      {React.cloneElement(icon as React.ReactElement, {
-        'aria-hidden': true,
-        focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable
-      })}
+      <Tooltip label={formatMessage(title)}>
+        {React.cloneElement(icon as React.ReactElement, {
+          'aria-hidden': true,
+          focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable
+        })}
+      </Tooltip>
     </Span>
   );
 };
@@ -115,7 +117,7 @@ const Span = styled(Flex)`
     height: 12px;
 
     fill: ${({ theme }) => theme.colors.neutral500};
-
+    cursor: pointer;
     path {
       fill: ${({ theme }) => theme.colors.neutral500};
     }
