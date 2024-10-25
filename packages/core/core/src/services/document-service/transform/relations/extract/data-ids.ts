@@ -66,7 +66,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
 
         // Regular relations will always target the same target
         // if its a polymorphic relation we need to get it from the data itself
-        const targetUid = attribute.target || (relation.__type as string);
+        const targetUid = isPolymorphic ? relation.__type : attribute.target;
 
         addDocId(targetUid, relation);
 
