@@ -16,36 +16,15 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await page.waitForURL('/admin');
   });
 
-  test('Preview button should appear for configured content types', async ({
-    page,
-    context,
-    browser,
-  }) => {
+  test('Preview button should appear for configured content types', async ({ page, context }) => {
     // Open an edit view for a content type that has preview
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
-    // Copy the preview link
-    await page.getByRole('button', { name: /copy preview link/i }).click();
-    await findAndClose(page, 'Copied preview link');
-
-    // Check that preview opens in a new tab
-    const newTabPromiseDraft = page.waitForEvent('popup');
-    await page.getByRole('link', { name: /open preview/i }).click();
-    const newTab = await newTabPromiseDraft;
-    expect(newTab.url()).toMatch(/^https:\/\/strapi\.io\/preview\/api::article\.article.*\/draft$/);
-
-    // Check that preview link reflects the publication status
-    await page.getByRole('button', { name: /publish/i }).click();
-    await findAndClose(page, 'Published document');
-    await page.getByRole('tab', { name: /published/i }).click();
-    const newTabPromisePublished = page.waitForEvent('popup');
-    await page.getByRole('link', { name: /open preview/i }).click();
-    const newTab2 = await newTabPromisePublished;
-    expect(newTab2.url()).toMatch(
-      /^https:\/\/strapi\.io\/preview\/api::article\.article.*\/published$/
-    );
+    // Check that preview opens in its own page
+    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    await expect(page.getByText('Preview will go here!')).toBeVisible();
   });
 
   test('Preview button should not appear for content types without preview config', async ({
