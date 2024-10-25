@@ -1,7 +1,7 @@
 import { curry } from 'lodash/fp';
 
 import type { UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { errors, relations } from '@strapi/utils';
 
 import { ID, LongHandDocument } from '../utils/types';
 import { IdMap } from '../../id-map';
@@ -9,15 +9,14 @@ import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 
+const { isPolymorphic } = relations;
+
 interface Options {
   uid: UID.Schema;
   locale?: string | null;
   status?: 'draft' | 'published';
   allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
 }
-
-export const isPolymorphicRelation = (attribute: any): any =>
-  ['morphOne', 'morphMany', 'morphToOne', 'morphToMany'].includes(attribute.relation);
 
 /**
  * Get the entry ids for a given documentId.
@@ -73,7 +72,7 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
       if (!attribute) {
         return;
       }
-      const isPolymorphic = isPolymorphicRelation(attribute);
+      const isPolymorphicRelation = isPolymorphic(attribute);
       const getIds = getRelationIds(idMap, source);
 
       // Transform the relation documentId to entity id
@@ -84,7 +83,7 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
 
         // Find relational attributes, and return the document ids
         // if its a polymorphic relation we need to get it from the data itself
-        const targetUid = (attribute.target || relation.__type) as UID.Schema;
+        const targetUid = isPolymorphicRelation ? relation.__type : attribute.target;
         const ids = getIds(targetUid, relation);
 
         // Handle positional arguments
@@ -92,7 +91,7 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
 
         // The positional relation target uid can be different for polymorphic relations
         let positionTargetUid = targetUid;
-        if (isPolymorphic && position?.__type) {
+        if (isPolymorphicRelation && position?.__type) {
           positionTargetUid = position.__type;
         }
 
@@ -116,7 +115,7 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
           }
 
           // Insert type if its a polymorphic relation
-          if (isPolymorphic) {
+          if (isPolymorphicRelation) {
             newRelation.__type = targetUid;
           }
 

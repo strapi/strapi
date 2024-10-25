@@ -1,21 +1,20 @@
 import { curry } from 'lodash/fp';
 
 import { UID } from '@strapi/types';
-
+import { relations } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { LongHandDocument } from '../utils/types';
 
+const { isPolymorphic } = relations;
+
 interface Options {
   uid: UID.Schema;
   locale?: string | null;
   status?: 'draft' | 'published';
 }
-
-export const isPolymorphicRelation = (attribute: any): any =>
-  ['morphOne', 'morphMany', 'morphToOne', 'morphToMany'].includes(attribute.relation);
 
 /**
  * Load a relation documentId into the idMap.
@@ -56,7 +55,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
       if (!attribute) {
         return;
       }
-      const isPolymorphic = isPolymorphicRelation(attribute);
+      const isPolymorphicRelation = isPolymorphic(attribute);
       const addDocId = addRelationDocId(idMap, source);
 
       return mapRelation((relation) => {
@@ -66,7 +65,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
 
         // Regular relations will always target the same target
         // if its a polymorphic relation we need to get it from the data itself
-        const targetUid = isPolymorphic ? relation.__type : attribute.target;
+        const targetUid = isPolymorphicRelation ? relation.__type : attribute.target;
 
         addDocId(targetUid, relation);
 
@@ -75,7 +74,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
 
         // The positional relation target uid can be different for polymorphic relations
         let positionTargetUid = targetUid;
-        if (isPolymorphic && position?.__type) {
+        if (isPolymorphicRelation && position?.__type) {
           positionTargetUid = position.__type;
         }
 
