@@ -106,8 +106,7 @@ describe('traverseQueryPopulate', () => {
   });
 
   test('should work with filters attribute', async () => {
-    // Expect should be called 4 times
-    expect.assertions(3);
+    expect.assertions(5);
 
     const strapi = {
       getModel: jest.fn((uid) => {
