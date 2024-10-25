@@ -1,4 +1,5 @@
 import { Status, StatusProps, Typography } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 
 import { capitalise } from '../../../utils/strings';
 
@@ -20,10 +21,15 @@ const DocumentStatus = ({ status = 'draft', ...restProps }: DocumentStatusProps)
   const statusVariant =
     status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
 
+  const { formatMessage } = useIntl();
+
   return (
     <Status {...restProps} showBullet={false} size={'S'} variant={statusVariant}>
       <Typography tag="span" variant="omega" fontWeight="bold">
-        {capitalise(status)}
+        {formatMessage({
+          id: `content-manager.containers.List.${status}`,
+          defaultMessage: capitalise(status),
+        })}
       </Typography>
     </Status>
   );
