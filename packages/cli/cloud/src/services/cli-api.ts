@@ -38,6 +38,20 @@ export type ListLinkProjectsResponse = {
   };
 };
 
+export type GetProjectResponse = {
+  data: {
+    updatedAt: string;
+    suspendedAt?: string;
+    isTrial: boolean;
+  };
+  metadata: {
+    dashboardUrls: {
+      project: string;
+      deployments: string;
+    };
+  };
+};
+
 export interface CloudApiService {
   deploy(
     deployInput: {
@@ -63,6 +77,8 @@ export interface CloudApiService {
   listProjects(): Promise<AxiosResponse<ListProjectsResponse>>;
 
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
+
+  getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
@@ -166,7 +182,7 @@ export async function cloudApiFactory(
 
     async listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse, unknown>> {
       try {
-        const response = await axiosCloudAPI.get('/projects/linkable');
+        const response = await axiosCloudAPI.get('/projects-linkable');
 
         if (response.status !== 200) {
           throw new Error('Error fetching cloud projects from the server.');
@@ -176,6 +192,23 @@ export async function cloudApiFactory(
       } catch (error) {
         logger.debug(
           "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async getProject({ name }): Promise<AxiosResponse<GetProjectResponse>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}`);
+
+        if (response.status !== 200) {
+          throw new Error("Error fetching project's details.");
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! There was a problem retrieving your project's details. Please try again."
         );
         throw error;
       }

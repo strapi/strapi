@@ -7,7 +7,6 @@ const providerMethods = [
   'registerMany',
   'delete',
   'get',
-  'getWhere',
   'values',
   'keys',
   'has',

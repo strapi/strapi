@@ -71,6 +71,7 @@ const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
 `;
 
 const DragIconButton = styled(IconButton)<{ dragHandleTopMargin?: CSSProperties['marginTop'] }>`
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,6 +225,7 @@ const DragAndDropElement = ({
           dragVisibility={dragVisibility}
         >
           <DragIconButton
+            contentEditable={false}
             forwardedAs="div"
             role="button"
             tabIndex={0}

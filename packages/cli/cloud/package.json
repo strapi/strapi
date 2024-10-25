@@ -1,6 +1,6 @@
 {
   "name": "@strapi/cloud-cli",
-  "version": "4.25.5",
+  "version": "4.25.14",
   "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
     "strapi",
@@ -45,8 +45,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.25.5",
-    "axios": "1.6.0",
+    "@strapi/utils": "4.25.14",
+    "axios": "1.7.4",
     "chalk": "4.1.2",
     "cli-progress": "3.12.0",
     "commander": "8.3.0",
@@ -61,7 +61,7 @@
     "open": "8.4.0",
     "ora": "5.4.1",
     "pkg-up": "3.1.0",
-    "tar": "6.1.13",
+    "tar": "6.2.1",
     "xdg-app-paths": "8.3.0",
     "yup": "0.32.9"
   },
@@ -70,8 +70,8 @@
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
     "@types/lodash": "^4.14.191",
-    "eslint-config-custom": "4.25.5",
-    "tsconfig": "4.25.5"
+    "eslint-config-custom": "4.25.14",
+    "tsconfig": "4.25.14"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

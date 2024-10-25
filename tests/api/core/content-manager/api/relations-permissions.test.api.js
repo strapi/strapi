@@ -102,6 +102,9 @@ describe('Relations', () => {
         action: 'plugin::content-manager.explorer.read',
         subject: 'plugin::users-permissions.user',
       },
+      {
+        action: 'plugin::users-permissions.roles.read',
+      },
     ]);
     rqPermissive = await createUserAndReq('permissive', [
       // Can read shops and products
@@ -116,6 +119,9 @@ describe('Relations', () => {
       {
         action: 'plugin::content-manager.explorer.read',
         subject: 'plugin::users-permissions.user',
+      },
+      {
+        action: 'plugin::users-permissions.roles.read',
       },
     ]);
   };
