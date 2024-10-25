@@ -24,8 +24,8 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
-    await expect(page.getByText('Draft')).toBeVisible();
-    await expect(page.getByText(/west ham post match/i)).toBeVisible();
+    await expect(page.getByText(/^draft$/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
 
     // Copies the link of the page
     await page.getByRole('button', { name: /copy preview link/i }).click();
