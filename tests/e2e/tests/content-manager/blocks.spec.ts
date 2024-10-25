@@ -12,7 +12,7 @@ test.describe('Blocks editor', () => {
     await login({ page });
   });
 
-  test.fixme('adds a code block and specifies the language', async ({ page }) => {
+  test('adds a code block and specifies the language', async ({ page, browserName }) => {
     // Write some text into a blocks editor
     const code = 'const problems = 99';
     await navToHeader(page, ['Content Manager', 'Homepage'], 'Untitled');
@@ -22,6 +22,11 @@ test.describe('Blocks editor', () => {
     await textbox.click();
     await textbox.fill(code);
     await expect(page.getByText(code)).toBeVisible();
+
+    test.skip(
+      browserName === 'firefox',
+      'Firefox loses focus when clicking the toolbar in Playwright, but not in a real environment'
+    );
 
     // Use the toolbar to convert the block to a code block and specify the language
     const toolbar = page.getByRole('toolbar');
