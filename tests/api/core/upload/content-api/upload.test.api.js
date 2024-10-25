@@ -497,7 +497,6 @@ describe('Upload plugin', () => {
         });
 
         expect(connectRes.status).toBe(200);
-        console.error(JSON.stringify(connectRes.body, null, 2));
 
         expect(connectRes.body.data.relatedMedia).toHaveLength(1);
 

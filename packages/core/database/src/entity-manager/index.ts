@@ -1036,28 +1036,34 @@ export const createEntityManager = (db: Database): EntityManager => {
             continue;
           }
 
-          // delete all relations
-          await this.createQueryBuilder(joinTable.name)
-            .delete()
-            .where({
-              [idColumn.name]: id,
-              [typeColumn.name]: uid,
-              ...(joinTable.on || {}),
-              field: attributeName,
-            })
-            .transacting(trx)
-            .execute();
-
           if (hasSet) {
+            // delete all relations for this entity
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({
+                [joinColumn.name]: id,
+                ...(joinTable.on || {}),
+              })
+              .transacting(trx)
+              .execute();
+
             const rows = (cleanRelationData.set ?? []).map((data, idx) => ({
               [joinColumn.name]: id,
               [idColumn.name]: data.id,
               [typeColumn.name]: data[typeField],
+              field: attributeName,
               ...(joinTable.on || {}),
               ...(data.__pivot || {}),
               order: idx + 1,
-              field: attributeName,
             })) satisfies Record<string, any>[];
+
+            await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows, {
+              uid,
+              attributeName,
+              joinTable,
+              db,
+              transaction: trx,
+            });
 
             await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
           }
