@@ -1,17 +1,48 @@
 import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
+import type { Context } from 'koa';
 import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
+// Define proper types for the request body
 interface RequestBody {
   locale?: string;
   [key: string]: any;
 }
 
-// TODO: v5 if implemented in the CM => delete this middleware
-const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
+// Define extended Context type
+interface StrapiContext extends Context {
+  params: {
+    model: string;
+  };
+  request: {
+    body: RequestBody;
+    query: {
+      locale?: string;
+      [key: string]: any;
+    };
+  };
+}
+
+// Declare global strapi object
+declare global {
+  var strapi: {
+    getModel: (model: string) => Struct.ContentTypeSchema;
+    entityService: {
+      findMany: (uid: string, params: { locale: string }) => Promise<any>;
+    };
+  };
+}
+
+// Service type definitions
+interface ContentTypeService {
+  getValidLocale: (locale?: string) => Promise<string>;
+  isLocalizedContentType: (model: Struct.ContentTypeSchema) => boolean;
+}
+
+const validateLocaleCreation: Core.MiddlewareHandler = async (ctx: StrapiContext, next) => {
   const { model } = ctx.params;
   const { query } = ctx.request;
 
@@ -19,10 +50,13 @@ const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
   if (!ctx.request.body) {
     ctx.request.body = {};
   }
-  const body = ctx.request.body as RequestBody;
 
-  const { getValidLocale, isLocalizedContentType } = getService('content-types');
-  const modelDef = strapi.getModel(model) as Struct.ContentTypeSchema;
+  const body = ctx.request.body;
+
+  // Get content-type service with proper typing
+  const { getValidLocale, isLocalizedContentType } = getService('content-types') as ContentTypeService;
+
+  const modelDef = strapi.getModel(model);
 
   if (!isLocalizedContentType(modelDef)) {
     return next();
