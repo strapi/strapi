@@ -5,55 +5,58 @@ import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
+interface RequestBody {
+  locale?: string;
+  [key: string]: any;
+}
+
 // TODO: v5 if implemented in the CM => delete this middleware
 const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
   const { model } = ctx.params;
   const { query } = ctx.request;
 
-  // Prevent empty body
+  // Initialize body with type safety
   if (!ctx.request.body) {
     ctx.request.body = {};
   }
-
-  const body = ctx.request.body as any;
+  const body = ctx.request.body as RequestBody;
 
   const { getValidLocale, isLocalizedContentType } = getService('content-types');
-
   const modelDef = strapi.getModel(model) as Struct.ContentTypeSchema;
 
   if (!isLocalizedContentType(modelDef)) {
     return next();
   }
 
-  // Prevent empty string locale
+  // Get locale with proper type checking
   const locale = get('locale', query) || get('locale', body) || undefined;
 
   // cleanup to avoid creating duplicates in single types
   ctx.request.query = {};
 
-  let entityLocale;
   try {
-    entityLocale = await getValidLocale(locale);
-  } catch (e) {
-    throw new ApplicationError("This locale doesn't exist");
-  }
+    const entityLocale = await getValidLocale(locale);
+    body.locale = entityLocale;
 
-  body.locale = entityLocale;
+    if (modelDef.kind === 'singleType') {
+      const entity = await strapi.entityService.findMany(modelDef.uid, {
+        locale: entityLocale,
+      });
 
-  if (modelDef.kind === 'singleType') {
-    const entity = await strapi.entityService.findMany(modelDef.uid, {
-      locale: entityLocale,
-    } as any); // TODO: add this type to entityService
+      ctx.request.query.locale = entityLocale;
 
-    ctx.request.query.locale = body.locale;
-
-    // updating
-    if (entity) {
-      return next();
+      // updating
+      if (entity) {
+        return next();
+      }
     }
-  }
 
-  return next();
+    return next();
+  } catch (e) {
+    throw new ApplicationError('Invalid locale provided', {
+      details: { locale },
+    });
+  }
 };
 
 export default validateLocaleCreation;
