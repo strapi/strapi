@@ -13,8 +13,8 @@
  */
 import { useIntl } from 'react-intl';
 
-import { Dots, NextLink, PageLink, PreviousLink } from './Components';
 import { Pagination } from './Pagination';
+import { Dots, NextLink, PageLink, PreviousLink } from './PaginationComponents';
 
 interface PaginationFooterProps {
   activePage: number;

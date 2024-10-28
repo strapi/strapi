@@ -5,7 +5,7 @@ import { styled, useTheme } from 'styled-components';
 
 import { getTrad } from '../../../utils/utils';
 
-import { CroppingActionRow } from './Components';
+import { CroppingActionRow } from './PreviewBoxComponents';
 
 interface CroppingActionsProps {
   onCancel: () => void;
