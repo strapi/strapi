@@ -24,7 +24,16 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
-    await expect(page.getByText('Preview will go here!')).toBeVisible();
+    await expect(page.getByText(/^Draft$/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
+
+    // Copies the link of the page
+    await page.getByRole('button', { name: /copy preview link/i }).click();
+    await findAndClose(page, 'Copied preview link');
+
+    // Should go back to the edit view on close
+    await clickAndWait(page, page.getByRole('link', { name: /close preview/i }));
+    await expect(page.getByRole('textbox', { name: /title/i })).toBeVisible();
   });
 
   test('Preview button should not appear for content types without preview config', async ({
