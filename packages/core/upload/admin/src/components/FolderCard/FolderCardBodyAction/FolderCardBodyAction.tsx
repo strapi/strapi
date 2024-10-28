@@ -1,5 +1,5 @@
 import { Box, BoxProps } from '@strapi/design-system';
-import { NavLink } from 'react-router-dom';
+import { NavLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 const BoxOutline = styled(Box)`
@@ -14,7 +14,7 @@ const BoxTextDecoration = styled(BoxOutline)`
 `;
 
 interface FolderCardBodyActionProps extends BoxProps {
-  to?: string;
+  to?: LinkProps['to'];
 }
 
 export const FolderCardBodyAction = ({ to, ...props }: FolderCardBodyActionProps) => {

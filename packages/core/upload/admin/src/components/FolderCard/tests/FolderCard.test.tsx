@@ -1,6 +1,6 @@
 import { Flex, DesignSystemProvider, Typography } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, LinkProps } from 'react-router-dom';
 
 import { FolderCard } from '../FolderCard/FolderCard';
 import { FolderCardBody } from '../FolderCardBody/FolderCardBody';
@@ -11,8 +11,18 @@ import type { FolderCardProps } from '../FolderCard/FolderCard';
 
 const ID_FIXTURE = 'folder';
 
-// eslint-disable-next-line react/prop-types
-const ComponentFixture = ({ to, ...props }: { to?: string }) => {
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  useId: () => `${ID_FIXTURE}-3`,
+}));
+
+const ComponentFixture = ({
+  to,
+  ...props
+}: {
+  to?: LinkProps['to'];
+  props?: Partial<FolderCardProps>;
+}) => {
   return (
     <DesignSystemProvider>
       <MemoryRouter>

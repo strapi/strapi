@@ -42,6 +42,7 @@ import { isSelectable } from './utils/isSelectable';
 
 import type { File, Query, FilterCondition } from '../../../../../shared/contracts/files';
 import type { Folder } from '../../../../../shared/contracts/folders';
+import type { AllowedTypes } from '../../AssetCard/AssetCard';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 100%;
@@ -103,7 +104,7 @@ export interface FileWithType extends File {
 }
 
 export interface BrowseStepProps {
-  allowedTypes?: string[];
+  allowedTypes?: AllowedTypes[];
   assets: File[];
   canCreate: boolean;
   canRead: boolean;

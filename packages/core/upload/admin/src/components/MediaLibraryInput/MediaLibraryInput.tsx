@@ -11,6 +11,7 @@ import { UploadAssetDialog, Asset } from '../UploadAssetDialog/UploadAssetDialog
 import { CarouselAssets, CarouselAssetsProps, FileWithoutIdHash } from './Carousel/CarouselAssets';
 
 import type { File } from '../../../../shared/contracts/files';
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 const STEPS = {
   AssetSelect: 'SelectAsset',
@@ -26,7 +27,7 @@ export interface MediaLibraryInputProps {
   hint?: string;
   disabled?: boolean;
   attribute: {
-    allowedTypes?: string[];
+    allowedTypes?: AllowedTypes[];
     multiple?: boolean;
   };
 }

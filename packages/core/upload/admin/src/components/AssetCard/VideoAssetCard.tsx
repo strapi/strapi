@@ -5,7 +5,7 @@ import { styled } from 'styled-components';
 
 import { formatDuration } from '../../utils/utils';
 
-import { AssetCardBase } from './AssetCardBase';
+import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 import { VideoPreview } from './VideoPreview';
 
 const VideoPreviewWrapper = styled(Box)`
@@ -18,23 +18,10 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-interface VideoAssetCardProps {
+interface VideoAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children'> {
   mime: string;
-  name: string;
-  onSelect?: () => void;
-  onEdit?: (
-    event:
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => void;
-  onRemove?: () => void;
   url: string;
-  selected?: boolean;
   size?: 'S' | 'M';
-  extension: string;
-  isSelectable?: boolean;
-  subtitle?: string;
-  variant: 'Image' | 'Video' | 'Audio' | 'Doc';
 }
 
 export const VideoAssetCard = ({

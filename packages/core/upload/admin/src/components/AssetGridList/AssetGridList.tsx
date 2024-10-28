@@ -5,9 +5,10 @@ import { AssetCard } from '../AssetCard/AssetCard';
 import { Draggable } from './Draggable';
 
 import type { File } from '../../../../shared/contracts/files';
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 export interface AssetGridListProps {
-  allowedTypes?: string[];
+  allowedTypes?: AllowedTypes[];
   assets: File[];
   onEditAsset?: (asset: File) => void;
   onSelectAsset: (asset: File) => void;
@@ -18,7 +19,7 @@ export interface AssetGridListProps {
 }
 
 export const AssetGridList = ({
-  allowedTypes = ['images', 'files', 'videos', 'audios'],
+  allowedTypes = ['files', 'images', 'videos', 'audios'],
   assets,
   onEditAsset,
   onSelectAsset,

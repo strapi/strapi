@@ -19,6 +19,7 @@ import { TableRows } from './TableRows';
 
 import type { File } from '../../../../shared/contracts/files';
 import type { Folder } from '../../../../shared/contracts/folders';
+import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 export interface FileRow extends File {
   folderURL?: string;
@@ -34,7 +35,7 @@ export interface FolderRow extends Folder {
 
 export interface TableListProps {
   isFolderSelectionAllowed?: boolean;
-  allowedTypes?: string[];
+  allowedTypes?: AllowedTypes[];
   assetCount?: number;
   folderCount?: number;
   indeterminate?: boolean;

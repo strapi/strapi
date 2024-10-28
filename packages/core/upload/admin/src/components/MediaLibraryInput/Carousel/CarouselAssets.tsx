@@ -69,7 +69,7 @@ export const CarouselAssets = React.forwardRef(
     return (
       <>
         <CarouselInput
-          ref={forwardedRef as React.LegacyRef<HTMLDivElement>}
+          ref={forwardedRef as React.Ref<HTMLDivElement>}
           label={label}
           labelAction={labelAction}
           secondaryLabel={currentAsset?.name}

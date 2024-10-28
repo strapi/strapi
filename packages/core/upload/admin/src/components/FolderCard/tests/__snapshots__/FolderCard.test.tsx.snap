@@ -159,6 +159,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 <div>
   <div
     class="c0 "
+    id="folder"
     tabindex="0"
   >
     <button
@@ -372,6 +373,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 <div>
   <div
     class="c0 "
+    id="folder"
     tabindex="0"
   >
     <button
@@ -402,8 +404,8 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       </div>
       <div
         class="c6 c7 c8"
-        data-testid="folder-1-title"
-        id="folder-1-title"
+        data-testid="folder-3-title"
+        id="folder-3-title"
       >
         <button
           class="c9 c10"
