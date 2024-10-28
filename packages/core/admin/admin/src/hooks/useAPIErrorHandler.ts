@@ -83,6 +83,8 @@ interface YupFormattedError {
    * The name of the error, typically identifies the type of validation error that occurred.
    */
   name: string;
+
+  value: string;
 }
 
 /**
