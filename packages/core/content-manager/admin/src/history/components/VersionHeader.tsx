@@ -14,7 +14,6 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
 
-import { COLLECTION_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { useHistoryContext } from '../pages/History';
 import { useRestoreVersionMutation } from '../services/historyVersion';
@@ -47,13 +46,6 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
 
   const getNextNavigation = (): To => {
     const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
-
-    if (collectionType === COLLECTION_TYPES) {
-      return {
-        pathname: '..',
-        search: pluginsQueryParams,
-      };
-    }
 
     return {
       pathname: '..',
