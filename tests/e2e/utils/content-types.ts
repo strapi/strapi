@@ -4,7 +4,6 @@ import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
 import { clickAndWait, findByRowColumn } from './shared';
 
-// TODO: share this with CTB in general
 export interface AddAttribute {
   type: string;
   name: string;
@@ -13,6 +12,7 @@ export interface AddAttribute {
   date?: { format: dateFormat };
   media?: { multiple: boolean };
   enumeration?: { values: string[] };
+  component?: { useExisting?: string; options: AddComponentOptions };
 }
 
 // Enumeration needs "values"
@@ -42,6 +42,10 @@ type CreateComponentOptions = CreateComponentOptionsBase &
 type RequiredCreateComponentOptions = Required<CreateComponentOptionsBase> &
   (CategoryCreateOption | CategorySelectOption);
 
+type AddComponentOptions = {
+  repeatable: boolean;
+} & CreateComponentOptions;
+
 export interface CreateContentTypeOptions {
   name: string;
   singularId?: string;
@@ -49,6 +53,10 @@ export interface CreateContentTypeOptions {
   attributes: AddAttribute[];
 }
 
+// lookup table for attribute types+subtypes so they can be found
+// buttonName is the header of the button clicked from the "Add Attribute" screen
+// listLabel is how they appear in the list of all attributes on the content type page
+// TODO: improve on this so we don't have things like componentrepeatable with an options.repeatable
 const typeMap = {
   text: { buttonName: 'Text', listLabel: 'Text' },
   boolean: { buttonName: 'Boolean', listLabel: 'Boolean' },
@@ -65,6 +73,7 @@ const typeMap = {
   relation: { buttonName: 'Relation', listLabel: 'Relation' },
   markdown: { buttonName: 'Rich text (Markdown)', listLabel: 'Rich text (Markdown)' },
   component: { buttonName: 'Component', listLabel: 'Component' },
+  componentrepeatable: { buttonName: 'Component', listLabel: 'Component (repeatable)' },
 };
 
 // Select a component icon
@@ -90,7 +99,8 @@ const openComponentBuilder = async (page: Page) => {
   await clickAndWait(page, page.getByRole('button', { name: 'Create new component' }));
 };
 
-export const fillComponent = async (page: Page, options: CreateComponentOptions) => {
+// The initial "create a component" screen
+export const fillCreateComponent = async (page: Page, options: CreateComponentOptions) => {
   if (options.name) {
     await page.getByLabel('Display name').fill(options.name);
   }
@@ -116,9 +126,56 @@ export const fillComponent = async (page: Page, options: CreateComponentOptions)
   }
 };
 
+// TODO: describe where this is
+export const fillAddComponent = async (page: Page, component: AddAttribute['component']) => {
+  if (component.options.name) {
+    await page.getByLabel('Name').fill(component.options.name);
+  }
+
+  // if existing component, select it
+  if (component.useExisting) {
+    // open the list
+    await page.getByRole('combobox', { name: 'component' }).click();
+    // select the item
+    const item = page.getByText(new RegExp(component.useExisting, 'i')).nth(1);
+
+    await item.scrollIntoViewIfNeeded();
+    await item.click();
+  }
+
+  // Select repeatable or single
+  const repeatableValue = component.options.repeatable ? 'true' : 'false';
+  await page.click(`label[for="${repeatableValue}"]`);
+};
+
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+// TODO: type this so it only accepts attribute type=component or repeatablecomponent
+export const addComponentAttribute = async (page: Page, attribute: AddAttribute) => {
+  const options = attribute.component.options;
+  await fillCreateComponent(page, { ...options, name: attribute.name });
+
+  const useExisting = attribute.component.useExisting ? 'false' : 'true';
+  await page.click(`label[for="${useExisting}"]`);
+
+  if (attribute.component.useExisting) {
+    await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
+  } else {
+    await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
+  }
+
+  await fillAddComponent(page, attribute.component);
+
+  if (options.attributes) {
+    await clickAndWait(
+      page,
+      page.getByRole('button', { name: new RegExp('Add first field to the component', 'i') })
+    );
+    await addAttributes(page, options.attributes, { clickFinish: false });
+  }
+};
 
 export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
   // find the tabpanel with attributes by looking for text we know it contains
@@ -131,6 +188,12 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
       hasText: new RegExp(`^${escapeRegExp(typeMap[attribute.type].buttonName)}`, 'i'),
     })
   );
+
+  // components are handled separately
+  if (attribute.type === 'component' || attribute.type === 'componentrepeatable') {
+    await addComponentAttribute(page, attribute);
+    return;
+  }
 
   // Fill the input with the exact label "Name"
   await page.getByLabel('Name', { exact: true }).fill(attribute.name);
@@ -170,17 +233,24 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
   // TODO: add support for advanced options
 };
 
-export const addAttributes = async (page: Page, attributes: AddAttribute[]) => {
+export const addAttributes = async (page: Page, attributes: AddAttribute[], options?: any) => {
   for (let i = 0; i < attributes.length; i++) {
     const attribute = attributes[i];
     await fillAttribute(page, attribute);
 
     if (i < attributes.length - 1) {
       // Not the last attribute, click 'Add Another Field'
-      await clickAndWait(page, page.getByRole('button', { name: 'Add Another Field' }));
+      // NOTE: Fields after components only work because 'Add Another Field' is the button text on both the page Add and the modal Add button
+      await clickAndWait(
+        page,
+        page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
+      );
     } else {
       // Last attribute, click 'Finish'
-      await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+      // TODO: This is covering up a bug (either in the test utils or in strapi) where components 'finish' button closes the whole process
+      if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
+        await page.getByRole('button', { name: 'Finish' }).click({ force: true });
+      }
     }
   }
 };
@@ -189,7 +259,7 @@ export const addAttributes = async (page: Page, attributes: AddAttribute[]) => {
 export const submitComponent = async (page: Page, options: CreateComponentOptions) => {
   await openComponentBuilder(page);
 
-  await fillComponent(page, options);
+  await fillCreateComponent(page, options);
 
   await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
 
@@ -216,19 +286,22 @@ const saveAndVerifyContent = async (
 
   for (let i = 0; i < options.attributes.length; i++) {
     const attribute = options.attributes[i];
-    const typeCell = await findByRowColumn(page, attribute.name, 'Type');
+    const name = attribute.component?.options.name || attribute.name;
+    const typeCell = await findByRowColumn(page, name, 'Type');
 
     if (!typeMap[attribute.type].buttonName) {
       throw new Error('unknown type ' + attribute.type);
     }
     await expect(typeCell).toContainText(typeMap[attribute.type].listLabel, { ignoreCase: true });
   }
+
+  // TODO: verify that it appears in the sidenav
 };
 
 // Refactored method for creating a component
 export const createComponent = async (page: Page, options: RequiredCreateComponentOptions) => {
   await openComponentBuilder(page);
-  await fillComponent(page, options);
+  await fillCreateComponent(page, options);
 
   await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
   await addAttributes(page, options.attributes);

@@ -25,9 +25,50 @@ test.describe('Create a new component', () => {
       enumeration: { values: ['first', 'second', 'third'] },
     },
     { type: 'markdown', name: 'testmarkdown' },
-    // TODO:
+    // new single component with new category
+    {
+      type: 'component',
+      name: 'testnewcomponentnewcategory',
+      component: {
+        options: {
+          repeatable: false,
+          name: 'testnewcomponent2',
+          icon: 'alien',
+          categoryCreate: 'testcategory',
+          attributes: [{ type: 'text', name: 'testcompotext' }],
+        },
+      },
+    },
+    // new repeatable component with existing category
+    {
+      type: 'componentrepeatable',
+      name: 'testnewcomponentexistingcategory',
+      component: {
+        options: {
+          repeatable: true,
+          name: 'testnewcomponent3',
+          icon: 'alien',
+          categorySelect: 'testcategory',
+          attributes: [{ type: 'text', name: 'testcompotext' }],
+        },
+      },
+    },
+    // existing component with existing category
+    {
+      type: 'component',
+      name: 'testexistingcomponentexistingcategory',
+      component: {
+        useExisting: 'testnewcomponentnewcategory',
+        options: {
+          repeatable: false,
+          name: 'testexistingcomponentexistingcategory',
+          icon: 'alien',
+          categorySelect: 'testcategory',
+        },
+      },
+    },
+    // TODO: test relations
     // { type: 'relation', name: 'testrelation' },
-    // { type: 'component', name: 'testcomponent' },
   ] satisfies AddAttribute[];
 
   test.beforeEach(async ({ page }) => {
@@ -44,7 +85,7 @@ test.describe('Create a new component', () => {
     await resetFiles();
   });
 
-  test('Can create a component with a new category', async ({ page }) => {
+  test.only('Can create a component with a new category', async ({ page }) => {
     const options = {
       name: 'ArticlesComponent',
       categoryCreate: 'BlogPosts',
@@ -55,6 +96,7 @@ test.describe('Create a new component', () => {
     await createComponent(page, options);
   });
 
+  // TODO: components need to be either reset or re-used, or there are unique name conflicts
   test('Can create a component using a previously created category', async ({ page }) => {
     const options = {
       name: 'PostsComponent',
