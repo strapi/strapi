@@ -38,11 +38,8 @@ module.exports = ({ strapi }) => ({
     const actionMap = {};
 
     const isContentApi = (action) => {
-      if (!_.has(action, Symbol.for('__type__'))) {
-        return false;
-      }
-
-      return action[Symbol.for('__type__')].includes('content-api');
+      const actionType = action[Symbol.for('__type__')];
+      return actionType ? actionType.includes('content-api') : false;
     };
 
     _.forEach(strapi.apis, (api, apiName) => {
