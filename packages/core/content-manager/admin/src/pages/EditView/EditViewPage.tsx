@@ -294,4 +294,4 @@ const ProtectedEditViewPage = () => {
   );
 };
 
-export { EditViewPage, ProtectedEditViewPage };
+export { EditViewPage, ProtectedEditViewPage, getDocumentStatus };
