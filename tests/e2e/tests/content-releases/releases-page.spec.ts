@@ -54,7 +54,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
 
     // Create a release
-    const newReleaseName = 'The Diamond Dogs';
+    const newReleaseName = 'The Diamond Dogs - 2';
     await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
 
     // Select valid date and time
@@ -81,9 +81,9 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
 
-    await page.waitForLoadState('networkidle');
-
     // Wait for client side redirect to created release
+    await page.waitForURL('/admin/plugins/content-releases/*');
+
     await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
 
     // Navigate back to the release page to see the newly created release
@@ -98,7 +98,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       await page.getByRole('button', { name: 'New release' }).click();
       await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
       // Create a new release
-      const newReleaseName = 'The Diamond Dogs';
+      const newReleaseName = 'The Diamond Dogs - 3';
       await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
       // Uncheck default scheduling of a release and save
       await page.getByRole('checkbox', { name: 'Schedule release' }).uncheck();
