@@ -91,11 +91,11 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
           console.log('Could not get response body');
         }
       }
-    }),
-      page.on('requestfailed', (request) => {
-        console.log(`Request failed: ${request.url()}`);
-        console.log(`Error: ${request.failure().errorText}`);
-      });
+    });
+    page.on('requestfailed', (request) => {
+      console.log(`Request failed: ${request.url()}`);
+      console.log(`Error: ${request.failure().errorText}`);
+    });
 
     await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
 
