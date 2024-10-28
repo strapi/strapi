@@ -71,9 +71,7 @@ export default (auth: unknown): Visitor =>
       } else {
         const newMorphValue = await handleMorphElements(elements);
 
-        if (newMorphValue.length === 0) {
-          // keep empty arrays
-        } else {
+        if (newMorphValue.length) {
           set(key, newMorphValue);
         }
       }
