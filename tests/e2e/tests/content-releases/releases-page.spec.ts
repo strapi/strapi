@@ -54,7 +54,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
 
     // Create a release
-    const newReleaseName = 'The Diamond Dogs - 2';
+    const newReleaseName = 'The Diamond Dogs';
     await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
 
     // Select valid date and time
@@ -79,6 +79,24 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await page.getByRole('option', { name: '08:00' }).click();
 
+    // Listen for network responses
+    page.on('response', async (response) => {
+      console.log(`Response: ${response.status()} ${response.url()}`);
+      if (!response.ok()) {
+        try {
+          // Try to get response body for more details
+          const text = await response.text();
+          console.log('Response body:', text);
+        } catch (e) {
+          console.log('Could not get response body');
+        }
+      }
+    }),
+      page.on('requestfailed', (request) => {
+        console.log(`Request failed: ${request.url()}`);
+        console.log(`Error: ${request.failure().errorText}`);
+      });
+
     await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
 
     // Wait for client side redirect to created release
@@ -98,7 +116,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       await page.getByRole('button', { name: 'New release' }).click();
       await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
       // Create a new release
-      const newReleaseName = 'The Diamond Dogs - 3';
+      const newReleaseName = 'The Diamond Dogs';
       await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
       // Uncheck default scheduling of a release and save
       await page.getByRole('checkbox', { name: 'Schedule release' }).uncheck();
