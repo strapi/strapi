@@ -83,22 +83,22 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
 
         // Find relational attributes, and return the document ids
         // if its a polymorphic relation we need to get it from the data itself
-        const targetUid = isPolymorphicRelation ? relation.__type : attribute.target;
-        const ids = getIds(targetUid, relation);
+        const targetUid: UID.Schema = isPolymorphicRelation ? relation.__type : attribute.target;
+        const ids: ID[] = getIds(targetUid, relation);
 
         // Handle positional arguments
         const position = { ...relation.position };
 
         // The positional relation target uid can be different for polymorphic relations
-        let positionTargetUid = targetUid;
+        let positionTargetUid: UID.Schema = targetUid;
         if (isPolymorphicRelation && position?.__type) {
           positionTargetUid = position.__type;
         }
 
         if (position.before) {
           const beforeRelation = { ...relation, ...position, documentId: position.before };
-          // TODO: Reordering on polymorphic relations
-          position.before = getIds(positionTargetUid, beforeRelation).at(0);
+          const beforeIds: ID[] = getIds(positionTargetUid, beforeRelation);
+          position.before = beforeIds.at(0);
         }
 
         if (position.after) {
