@@ -54,8 +54,12 @@ function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.Strapi }) {
   }
 }
 
-// TODO: V6 - Instead of persisting the join tables, always create the stage & assignee attributes, even in CE mode
-//            It was decided in V4 & V5 to not expose them in CE (as they pollute the CTs) but it's not worth given the complexity this needs
+/**
+ * Persist the stage & assignee attributes so they are not removed when downgrading to CE.
+ *
+ * TODO: V6 - Instead of persisting the join tables, always create the stage & assignee attributes, even in CE mode
+ *            It was decided in V4 & V5 to not expose them in CE (as they pollute the CTs) but it's not worth given the complexity this needs
+ */
 function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
   const { removePersistedTablesWithSuffix, persistTables } = getAdminService('persist-tables');
 
