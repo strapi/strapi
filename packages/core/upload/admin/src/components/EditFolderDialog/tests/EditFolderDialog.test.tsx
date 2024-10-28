@@ -1,7 +1,6 @@
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { within } from '@testing-library/dom';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { within, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
@@ -30,7 +29,7 @@ const client = new QueryClient({
   },
 });
 
-function ComponentFixture(
+const ComponentFixture = (
   props: Omit<EditFolderDialogProps, 'open' | 'onClose'> & {
     folderStructure?: {
       value?: number;
@@ -38,7 +37,7 @@ function ComponentFixture(
       name?: string;
     }[];
   }
-) {
+) => {
   const nextProps = {
     canUpdate: true,
     ...props,
@@ -55,7 +54,7 @@ function ComponentFixture(
       </IntlProvider>
     </QueryClientProvider>
   );
-}
+};
 
 function setup(
   props?: Partial<EditFolderDialogProps> & {
@@ -91,9 +90,7 @@ describe('EditFolderDialog', () => {
     const spy = jest.fn();
     const { baseElement } = setup({ onClose: spy });
 
-    act(() => {
-      fireEvent.click(getButton(baseElement, 'cancel')!);
-    });
+    fireEvent.click(getButton(baseElement, 'cancel')!);
 
     expect(spy).toBeCalledTimes(1);
   });
@@ -103,19 +100,13 @@ describe('EditFolderDialog', () => {
     const { baseElement } = setup({ onClose: spy });
     const name = getInput(baseElement, 'name');
 
-    act(() => {
-      fireEvent.click(getButton(baseElement, 'submit')!);
-    });
+    fireEvent.click(getButton(baseElement, 'submit')!);
 
     expect(spy).toBeCalledTimes(0);
 
-    act(() => {
-      fireEvent.change(name!, { target: { value: 'folder name' } });
-    });
+    fireEvent.change(name!, { target: { value: 'folder name' } });
 
-    act(() => {
-      fireEvent.click(getButton(baseElement, 'submit')!);
-    });
+    fireEvent.click(getButton(baseElement, 'submit')!);
 
     await waitFor(() => expect(spy).toBeCalledTimes(1));
 
@@ -134,17 +125,17 @@ describe('EditFolderDialog', () => {
       parent: null,
       type: 'folder',
     };
-    const { baseElement, queryByText } = setup({ folder, onClose: spy });
+    const { baseElement, getByText } = setup({ folder, onClose: spy });
 
     expect((getInput(baseElement, 'name')! as HTMLInputElement).value).toBe(folder.name);
-    expect(queryByText('Media Library')).toBeInTheDocument();
+    expect(getByText('Media Library')).toBeInTheDocument();
   });
 
   test('set default form values with parentFolderId', async () => {
     const spy = jest.fn();
-    const { queryByText } = setup({ parentFolderId: 2, onClose: spy });
+    const { getByText } = setup({ parentFolderId: 2, onClose: spy });
 
-    expect(queryByText('second child')).toBeInTheDocument();
+    expect(getByText('second child')).toBeInTheDocument();
   });
 
   test('show confirmation delete dialog', async () => {
@@ -167,13 +158,11 @@ describe('EditFolderDialog', () => {
       type: 'folder',
     };
     const folderStructure = [{ value: 1, label: 'Some parent' }];
-    const { baseElement, queryByText } = setup({ folder, folderStructure });
+    const { baseElement, getByText } = setup({ folder, folderStructure });
 
-    act(() => {
-      fireEvent.click(getButton(baseElement, 'delete')!);
-    });
+    fireEvent.click(getButton(baseElement, 'delete')!);
 
-    expect(queryByText('Are you sure?')).toBeInTheDocument();
+    expect(getByText('Are you sure?')).toBeInTheDocument();
   });
 
   test('keeps edit folder dialog open and show error message on API error', async () => {

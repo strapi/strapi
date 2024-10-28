@@ -5,12 +5,13 @@ import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import FilterList from '../../../components/FilterList';
-import type { FilterListProps } from '../../../components/FilterList';
-import FilterPopover from '../../../components/FilterPopover';
-import type { FilterPopoverProps } from '../../../components/FilterPopover';
-import { displayedFilters } from '../../../utils';
+import { FilterList } from '../../../components/FilterList/FilterList';
+import { FilterPopover } from '../../../components/FilterPopover/FilterPopover';
+import { displayedFilters } from '../../../utils/utils';
+
 import type { Query } from '../../../../../shared/contracts/files';
+import type { FilterListProps } from '../../../components/FilterList/FilterList';
+import type { FilterPopoverProps } from '../../../components/FilterPopover/FilterPopover';
 
 export const Filters = () => {
   const [open, setOpen] = React.useState(false);

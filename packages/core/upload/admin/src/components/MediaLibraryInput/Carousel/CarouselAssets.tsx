@@ -4,7 +4,7 @@ import { CarouselInput, CarouselSlide } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils/getTrad';
-import { EditAssetDialog } from '../../EditAssetDialog';
+import { EditAssetDialog } from '../../EditAssetDialog/EditAssetContent';
 
 import { CarouselAsset } from './CarouselAsset';
 import { CarouselAssetActions } from './CarouselAssetActions';

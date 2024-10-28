@@ -17,8 +17,9 @@ import { styled } from 'styled-components';
 
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
-import { getTrad } from '../../utils';
-import { UploadProgress } from '../UploadProgress';
+import { getTrad } from '../../utils/utils';
+import { UploadProgress } from '../UploadProgress/UploadProgress';
+
 import type { RawFile, File } from '../../../../shared/contracts/files';
 
 const UploadProgressWrapper = styled.div`

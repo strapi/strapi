@@ -3,9 +3,9 @@ import { Check, Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../../utils/utils';
 
-import { CroppingActionRow } from './components';
+import { CroppingActionRow } from './Components';
 
 interface CroppingActionsProps {
   onCancel: () => void;

@@ -38,7 +38,7 @@ const PROPS_FIXTURE = {
   selected: [],
 };
 
-const setup = (props?: any) =>
+const setup = (props?: object) =>
   render(<TableRows {...PROPS_FIXTURE} {...props} />, {
     renderOptions: {
       wrapper: ({ children }) => (

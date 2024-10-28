@@ -1,10 +1,11 @@
 import { Box, Divider, Modal, Tabs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../../utils/utils';
 
 import { FromComputerForm } from './FromComputerForm';
 import { FromUrlForm } from './FromUrlForm';
+
 import type { RawFile, File } from '../../../../../shared/contracts/files';
 
 export interface FileWithRawFile extends Omit<File, 'id' | 'hash'> {

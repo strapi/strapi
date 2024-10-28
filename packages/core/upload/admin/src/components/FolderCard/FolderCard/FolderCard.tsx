@@ -6,7 +6,7 @@ import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { FolderCardContext } from '../contexts/FolderCard';
-import useId from '../hooks/useId';
+import { useId } from '../hooks/useId';
 
 const FauxClickWrapper = styled.button`
   height: 100%;

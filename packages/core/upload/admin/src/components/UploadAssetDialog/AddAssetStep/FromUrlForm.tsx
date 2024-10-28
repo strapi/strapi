@@ -5,7 +5,8 @@ import { Box, Button, Field, Modal, Textarea } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 
-import { getTrad, urlsToAssets, urlSchema } from '../../../utils';
+import { getTrad, urlsToAssets, urlSchema } from '../../../utils/utils';
+
 import type { FileWithRawFile } from './AddAssetStep';
 
 interface FromUrlFormProps {

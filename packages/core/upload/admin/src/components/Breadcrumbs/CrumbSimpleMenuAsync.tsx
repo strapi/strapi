@@ -3,10 +3,10 @@ import * as React from 'react';
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { CrumbSimpleMenu, Loader, MenuItem } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { getFolderParents, getFolderURL, getTrad } from '../../utils';
+import { getFolderParents, getFolderURL, getTrad } from '../../utils/utils';
 
 interface CrumbSimpleMenuAsyncProps {
   parentsToOmit?: number[];

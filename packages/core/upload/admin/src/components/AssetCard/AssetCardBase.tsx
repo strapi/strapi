@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -19,7 +19,7 @@ import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { getTrad } from '../../utils';
+import { getTrad } from '../../utils/utils';
 
 const Extension = styled.span`
   text-transform: uppercase;

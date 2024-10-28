@@ -1,5 +1,6 @@
 import { ON_CHANGE, SET_LOADED } from '../actionTypes';
-import reducer from '../reducer';
+import { reducer } from '../reducer';
+
 import type { InitialState } from '../init';
 
 describe('Upload | ConfigureTheView | reducer', () => {

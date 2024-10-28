@@ -1,11 +1,12 @@
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../../utils';
+import { getTrad } from '../../../../utils/utils';
 
 import { BulkDeleteButton } from './BulkDeleteButton';
-import type { BulkDeleteButtonProps } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
+
+import type { BulkDeleteButtonProps } from './BulkDeleteButton';
 import type { BulkMoveButtonProps } from './BulkMoveButton';
 
 export interface BulkActionsProps {
@@ -17,7 +18,7 @@ export interface BulkActionsProps {
 export const BulkActions = ({ selected = [], onSuccess, currentFolder }: BulkActionsProps) => {
   const { formatMessage } = useIntl();
   const numberAssets = selected?.reduce(function (_this, val) {
-    return val?.type === 'folder' && 'files' in val && 'count' in val?.files!
+    return val?.type === 'folder' && 'files' in val && val?.files && 'count' in val.files
       ? _this + val?.files?.count
       : _this + 1;
   }, 0);

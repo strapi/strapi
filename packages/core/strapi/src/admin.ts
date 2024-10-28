@@ -15,6 +15,7 @@ const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderA
       'content-type-builder': contentTypeBuilder,
       // @ts-expect-error – TODO: fix this
       email,
+      // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
       upload,
       // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
       contentReleases,

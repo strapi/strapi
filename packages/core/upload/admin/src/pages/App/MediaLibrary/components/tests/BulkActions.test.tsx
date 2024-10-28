@@ -5,10 +5,11 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { BulkActions } from '../BulkActions';
+
 import type { BulkActionsProps } from '../BulkActions';
 
 jest.mock('../../../../../hooks/useBulkRemove');
-jest.mock('../../../../../components/BulkMoveDialog');
+jest.mock('../../../../../components/BulkMoveDialog/BulkMoveDialog');
 
 const setup = (
   props: BulkActionsProps = {
@@ -53,7 +54,7 @@ describe('BulkActions', () => {
     const ASSET_COUNT = 2;
     const FOLDER_COUNT = 8;
 
-    const { queryByText } = setup({
+    const { getByText } = setup({
       onSuccess: jest.fn(),
       selected: [
         ...[...Array(ASSET_COUNT).keys()].map((index) => ({ id: index, type: 'asset' })),
@@ -66,7 +67,7 @@ describe('BulkActions', () => {
     });
 
     expect(
-      queryByText(`${FOLDER_COUNT} folders - ${ASSET_COUNT} assets selected`)
+      getByText(`${FOLDER_COUNT} folders - ${ASSET_COUNT} assets selected`)
     ).toBeInTheDocument();
   });
 });

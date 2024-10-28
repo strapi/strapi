@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, CardAsset, CardTimer } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { formatDuration } from '../../utils';
+import { formatDuration } from '../../utils/utils';
 
 import { AssetCardBase } from './AssetCardBase';
 import { VideoPreview } from './VideoPreview';

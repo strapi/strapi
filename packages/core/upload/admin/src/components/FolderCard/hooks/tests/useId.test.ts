@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 
-import useId from '../useId';
+import { useId } from '../useId';
 
 function setup(arg: string) {
   const { result } = renderHook((...props) => useId(...props), {

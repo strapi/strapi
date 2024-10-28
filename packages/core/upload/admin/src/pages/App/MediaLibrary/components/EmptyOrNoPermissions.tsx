@@ -3,10 +3,10 @@ import { Plus } from '@strapi/icons';
 import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
-import { EmptyAssets } from '../../../../components/EmptyAssets';
-import { getTrad } from '../../../../utils';
+import { EmptyAssets } from '../../../../components/EmptyAssets/EmptyAssets';
+import { getTrad } from '../../../../utils/utils';
 
-interface EmptyOrNoPermissionsProps {
+export interface EmptyOrNoPermissionsProps {
   canCreate: boolean;
   canRead: boolean;
   isFiltering: boolean;

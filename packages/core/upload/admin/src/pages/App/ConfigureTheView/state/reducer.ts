@@ -4,6 +4,7 @@ import set from 'lodash/set';
 
 import { ON_CHANGE, SET_LOADED } from './actionTypes';
 import { init, initialState } from './init';
+
 import type { InitialState } from './init';
 
 export interface ActionOnChange {
@@ -22,7 +23,7 @@ interface ActionInitialValue {
 
 export type Action = ActionSetLoaded | ActionOnChange | ActionInitialValue;
 
-const reducer = (
+export const reducer = (
   state: InitialState = initialState,
   action: Action = {
     type: '',
@@ -48,5 +49,3 @@ const reducer = (
         return draftState;
     }
   });
-
-export default reducer;

@@ -2,7 +2,7 @@ import { useRBAC } from '@strapi/admin/strapi-admin';
 
 import { PERMISSIONS } from '../constants';
 
-const { main, ...restPermissions } = PERMISSIONS;
+const { main: _main, ...restPermissions } = PERMISSIONS;
 
 type UseRBACReturnType = ReturnType<typeof useRBAC>;
 

@@ -4,11 +4,12 @@ import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { tableHeaders as cells } from '../../constants';
-import { getTrad } from '../../utils';
-import type { File } from '../../../../shared/contracts/files';
-import type { Folder } from '../../../../shared/contracts/folders';
+import { getTrad } from '../../utils/utils';
 
 import { CellContent } from './CellContent';
+
+import type { File } from '../../../../shared/contracts/files';
+import type { Folder } from '../../../../shared/contracts/folders';
 
 interface FileRow extends File {
   folderURL?: string;

@@ -1,11 +1,12 @@
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../../utils/utils';
 
 import { BulkDeleteButton } from './BulkDeleteButton';
-import type { BulkDeleteButtonProps } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
+
+import type { BulkDeleteButtonProps } from './BulkDeleteButton';
 import type { BulkMoveButtonProps } from './BulkMoveButton';
 
 interface BulkActionsProps {

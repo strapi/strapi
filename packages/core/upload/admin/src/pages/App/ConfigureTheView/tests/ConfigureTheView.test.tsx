@@ -1,11 +1,12 @@
 import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import ConfigureTheView from '..';
 import { pageSizes, sortOptions } from '../../../../constants';
+import { ConfigureTheView } from '../ConfigureTheView';
+
 import type { Configuration } from '../../../../../../shared/contracts/configuration';
 
 const mutateAsync = jest.fn();
@@ -59,7 +60,7 @@ describe('Upload - Configure', () => {
         getByRole('button', {
           name: 'Save',
         })
-      ).toHaveAttribute('disabled');
+      ).toBeDisabled();
     });
   });
 

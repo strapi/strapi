@@ -1,4 +1,4 @@
-import reducer, { Action, InitialState } from '../reducer';
+import { reducer, Action, InitialState } from '../reducer';
 
 describe('SettingsPage | reducer', () => {
   describe('GET_DATA_SUCCEEDED', () => {

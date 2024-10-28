@@ -3,9 +3,10 @@ import { File, FilePdf } from '@strapi/icons';
 import { styled } from 'styled-components';
 
 import { AssetType } from '../../../constants';
-import { createAssetUrl } from '../../../utils';
+import { createAssetUrl } from '../../../utils/utils';
 import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
+
 import type { File as FileAsset } from '../../../../../shared/contracts/files';
 
 const DocAsset = styled(Flex)`

@@ -5,15 +5,26 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useLocation, NavLink } from 'react-router-dom';
 
-import { Breadcrumbs } from '../../../../components/Breadcrumbs';
-import type { CrumbDefinition } from '../../../../components/Breadcrumbs/Breadcrumbs';
+import { Breadcrumbs } from '../../../../components/Breadcrumbs/Breadcrumbs';
+import { getTrad } from '../../../../utils/utils';
+
 import type { Folder } from '../../../../../../shared/contracts/folders';
-import { getTrad } from '../../../../utils';
+import type { CrumbDefinition } from '../../../../components/Breadcrumbs/Breadcrumbs';
+
+interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'parent'> {
+  children: {
+    count: number;
+  };
+  files: {
+    count: number;
+  };
+  parent?: FolderDefinition;
+}
 
 export interface HeaderProps {
   breadcrumbs?: Array<CrumbDefinition> | boolean;
   canCreate: boolean;
-  folder?: Folder | null;
+  folder?: FolderDefinition | null;
   onToggleEditFolderDialog: ({ created }?: { created?: boolean }) => void;
   onToggleUploadAssetDialog: () => void;
 }
@@ -51,8 +62,7 @@ export const Header = ({
         typeof breadcrumbs !== 'boolean' &&
         folder && (
           <Breadcrumbs
-            // @ts-ignore
-            tag="nav"
+            tag="div"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',

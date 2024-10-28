@@ -21,15 +21,15 @@ const setup = (props: object) =>
 
 describe('EmptyOrNoPermissions', () => {
   test('isFiltering', () => {
-    const { queryByText } = setup({ isFiltering: true });
+    const { getByText } = setup({ isFiltering: true });
 
-    expect(queryByText('There are no elements with the applied filters')).toBeInTheDocument();
+    expect(getByText('There are no elements with the applied filters')).toBeInTheDocument();
   });
 
   test('canCreate', () => {
-    const { queryByText } = setup({});
+    const { getByText } = setup({});
 
-    expect(queryByText('Add new assets')).toBeInTheDocument();
+    expect(getByText('Add new assets')).toBeInTheDocument();
   });
 
   test('isFiltering and canCreate', () => {
@@ -39,14 +39,14 @@ describe('EmptyOrNoPermissions', () => {
   });
 
   test('canRead and not canCreate', () => {
-    const { queryByText } = setup({ canCreate: false });
+    const { getByText } = setup({ canCreate: false });
 
-    expect(queryByText('Media Library is empty')).toBeInTheDocument();
+    expect(getByText('Media Library is empty')).toBeInTheDocument();
   });
 
   test('not canRead', () => {
-    const { queryByText } = setup({ canRead: false });
+    const { getByText } = setup({ canRead: false });
 
-    expect(queryByText('No permissions to view')).toBeInTheDocument();
+    expect(getByText('No permissions to view')).toBeInTheDocument();
   });
 });

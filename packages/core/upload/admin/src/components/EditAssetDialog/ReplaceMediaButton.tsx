@@ -4,7 +4,7 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 import { Button, VisuallyHidden, ButtonProps } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils';
+import { getTrad } from '../../utils/utils';
 
 interface ReplaceMediaButtonProps extends ButtonProps {
   acceptedMime: string;
@@ -51,6 +51,7 @@ export const ReplaceMediaButton = ({
           accept={acceptedMime}
           type="file"
           name="file"
+          data-testid="file-input"
           tabIndex={-1}
           ref={inputRef}
           onChange={handleChange}

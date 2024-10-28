@@ -1,6 +1,6 @@
 import { CardAsset } from '@strapi/design-system';
 
-import { appendSearchParamsToUrl } from '../../utils';
+import { appendSearchParamsToUrl } from '../../utils/utils';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 

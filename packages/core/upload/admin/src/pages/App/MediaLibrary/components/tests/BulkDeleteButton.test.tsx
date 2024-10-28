@@ -1,5 +1,5 @@
 import { DesignSystemProvider } from '@strapi/design-system';
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -7,6 +7,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { useBulkRemove } from '../../../../../hooks/useBulkRemove';
 import { BulkDeleteButton } from '../BulkDeleteButton';
+
 import type { BulkDeleteButtonProps } from '../BulkDeleteButton';
 
 jest.mock('../../../../../hooks/useBulkRemove');
@@ -72,6 +73,6 @@ describe('BulkDeleteButton', () => {
 
     await user.click(getByText('Confirm'));
 
-    waitFor(() => expect(onSuccessSpy).toBeCalledTimes(1));
+    expect(onSuccessSpy).toBeCalledTimes(1);
   });
 });

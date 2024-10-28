@@ -1,6 +1,6 @@
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 

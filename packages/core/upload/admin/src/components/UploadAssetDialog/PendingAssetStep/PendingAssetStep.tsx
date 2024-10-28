@@ -5,9 +5,10 @@ import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strap
 import { useIntl } from 'react-intl';
 
 import { AssetType } from '../../../constants';
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../../utils/utils';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
+
 import type { File, RawFile } from '../../../../../shared/contracts/files';
 
 const Status = {

@@ -1,12 +1,12 @@
 import { DesignSystemProvider } from '@strapi/design-system';
-import { within } from '@testing-library/dom';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { within, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useBulkMove } from '../../../../../hooks/useBulkMove';
 import { BulkMoveButton } from '../BulkMoveButton';
+
 import type { BulkMoveButtonProps } from '../BulkMoveButton';
 
 jest.mock('../../../../../hooks/useBulkMove');
@@ -81,19 +81,15 @@ describe('BulkMoveButton', () => {
       move: moveSpy,
     });
 
-    act(() => {
-      fireEvent.click(getByText('Move'));
-    });
+    fireEvent.click(getByText('Move'));
 
     expect(getByText('Move elements to')).toBeInTheDocument();
 
-    act(() => {
-      const dialog = screen.getByRole('dialog');
-      const submit = within(dialog).getByRole('button', {
-        name: /move/i,
-      });
-      fireEvent.click(submit);
+    const dialog = screen.getByRole('dialog');
+    const submit = within(dialog).getByRole('button', {
+      name: /move/i,
     });
+    fireEvent.click(submit);
 
     await waitFor(() => expect(moveSpy).toBeCalledWith('', FIXTURE_SELECTION));
     await waitFor(() => expect(onSuccessSpy).toBeCalled());
@@ -162,19 +158,15 @@ describe('BulkMoveButton', () => {
       move: moveSpy,
     });
 
-    act(() => {
-      fireEvent.click(getByText('Move'));
-    });
+    fireEvent.click(getByText('Move'));
 
     expect(getByText('Move elements to')).toBeInTheDocument();
 
-    act(() => {
-      const dialog = screen.getByRole('dialog');
-      const submit = within(dialog).getByRole('button', {
-        name: /move/i,
-      });
-      fireEvent.click(submit);
+    const dialog = screen.getByRole('dialog');
+    const submit = within(dialog).getByRole('button', {
+      name: /move/i,
     });
+    fireEvent.click(submit);
 
     await waitFor(() => expect(moveSpy).toBeCalledWith('', FIXTURE_SELECTION));
 

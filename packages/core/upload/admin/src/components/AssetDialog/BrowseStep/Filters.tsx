@@ -4,9 +4,9 @@ import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { displayedFilters } from '../../../utils';
-import FilterList from '../../FilterList';
-import FilterPopover from '../../FilterPopover';
+import { displayedFilters } from '../../../utils/utils';
+import { FilterList } from '../../FilterList/FilterList';
+import { FilterPopover } from '../../FilterPopover/FilterPopover';
 
 type NumberKeyedObject = Record<number, string>;
 

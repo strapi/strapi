@@ -4,8 +4,9 @@ import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useBulkRemove } from '../../../../hooks/useBulkRemove';
-import type { FileWithType } from '../../../../hooks/useBulkRemove';
+
 import type { FolderDefinition } from '../../../../../../shared/contracts/folders';
+import type { FileWithType } from '../../../../hooks/useBulkRemove';
 
 export interface BulkDeleteButtonProps {
   selected: Array<FileWithType | FolderDefinition>;

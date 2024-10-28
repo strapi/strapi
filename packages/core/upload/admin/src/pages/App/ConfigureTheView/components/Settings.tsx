@@ -2,7 +2,8 @@ import { Box, Grid, SingleSelectOption, SingleSelect, Field } from '@strapi/desi
 import { useIntl } from 'react-intl';
 
 import { pageSizes, sortOptions } from '../../../../constants';
-import { getTrad } from '../../../../utils';
+import { getTrad } from '../../../../utils/utils';
+
 import type { Configuration } from '../../../../../../shared/contracts/configuration';
 
 interface SettingsProps {

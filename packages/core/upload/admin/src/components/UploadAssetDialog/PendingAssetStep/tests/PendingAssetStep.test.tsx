@@ -3,11 +3,11 @@ import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { PendingAssetStep } from '../PendingAssetStep';
 import { AssetType } from '../../../../constants';
+import { PendingAssetStep } from '../PendingAssetStep';
 
-jest.mock('../../../../utils', () => ({
-  ...jest.requireActual('../../../../utils'),
+jest.mock('../../../../utils/utils', () => ({
+  ...jest.requireActual('../../../../utils/utils'),
   getTrad: (x: string) => x,
 }));
 

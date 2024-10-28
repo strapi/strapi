@@ -61,5 +61,4 @@ const reducer = (state: InitialState, action: Action) =>
     }
   });
 
-export default reducer;
-export { initialState };
+export { initialState, reducer };

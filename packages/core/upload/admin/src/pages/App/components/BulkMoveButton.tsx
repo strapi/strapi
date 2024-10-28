@@ -4,9 +4,10 @@ import { Button, Modal } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { BulkMoveDialog } from '../../../components/BulkMoveDialog';
-import type { Folder as FolderDefinition } from '../../../../../shared/contracts/folders';
+import { BulkMoveDialog } from '../../../components/BulkMoveDialog/BulkMoveDialog';
+
 import type { File } from '../../../../../shared/contracts/files';
+import type { Folder as FolderDefinition } from '../../../../../shared/contracts/folders';
 
 interface FolderWithType extends FolderDefinition {
   type: string;

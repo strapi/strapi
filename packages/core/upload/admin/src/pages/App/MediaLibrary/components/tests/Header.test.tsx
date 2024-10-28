@@ -7,6 +7,8 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { Header } from '../Header';
 
+import type { HeaderProps } from '../Header';
+
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
   useQueryParams: jest.fn(() => [{ rawQuery: '', query: { folder: 2 } }, jest.fn()]),
@@ -41,7 +43,7 @@ const FIXTURE_FOLDER = {
   },
 };
 
-const setup = (props: any) => {
+const setup = (props: Partial<HeaderProps>) => {
   const withDefaults = {
     ...props,
     assetCount: 2,
@@ -95,8 +97,8 @@ describe('Header', () => {
       { rawQuery: '', query: { folder: 2 } },
       jest.fn(),
     ]);
-    const { queryByText } = setup({ folder: FIXTURE_FOLDER });
+    const { getByText } = setup({ folder: FIXTURE_FOLDER });
 
-    expect(queryByText('Back')).toBeInTheDocument();
+    expect(getByText('Back')).toBeInTheDocument();
   });
 });

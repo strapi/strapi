@@ -7,7 +7,8 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
-import { getTrad, rawFileToAsset } from '../../../utils';
+import { getTrad, rawFileToAsset } from '../../../utils/utils';
+
 import type { FileWithRawFile } from './AddAssetStep';
 
 const Wrapper = styled(Flex)`
@@ -148,6 +149,10 @@ export const FromComputerForm = ({
                   type="file"
                   multiple
                   name="files"
+                  aria-label={formatMessage({
+                    id: getTrad('input.label'),
+                    defaultMessage: 'Drag & Drop here or',
+                  })}
                   tabIndex={-1}
                   ref={inputRef}
                   zIndex={1}

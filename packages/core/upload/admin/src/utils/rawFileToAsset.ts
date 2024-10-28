@@ -1,5 +1,7 @@
 import { AssetSource } from '../constants';
+
 import { typeFromMime } from './typeFromMime';
+
 import type { RawFile } from '../../../shared/contracts/files';
 
 export const rawFileToAsset = (rawFile: RawFile, assetSource: AssetSource) => {
