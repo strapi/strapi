@@ -49,7 +49,6 @@ const addRelationDocId = curry(
  * Those will later be transformed to entity ids.
  */
 const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options) => {
-  // This is not iterating polymorphics
   return traverseEntityRelations(
     async ({ attribute, value }) => {
       if (!attribute) {
