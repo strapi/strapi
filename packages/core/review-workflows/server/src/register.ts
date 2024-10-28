@@ -55,8 +55,8 @@ function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.Strapi }) {
 }
 
 // TODO: V6 - Instead of persisting the join tables, always create the stage & assignee attributes, even in CE mode
-//            It was decided in V4 & V5 to not expose them (as they pollute the CTs) but it's not worth given the complexity this needs
-function persistStagesJoinTables({ strapi }: { strapi: Core.Strapi }) {
+//            It was decided in V4 & V5 to not expose them in CE (as they pollute the CTs) but it's not worth given the complexity this needs
+function persistRWOnDowngrade({ strapi }: { strapi: Core.Strapi }) {
   const { removePersistedTablesWithSuffix, persistTables } = getAdminService('persist-tables');
 
   return async ({ contentTypes }: any) => {
@@ -70,22 +70,42 @@ function persistStagesJoinTables({ strapi }: { strapi: Core.Strapi }) {
       };
     };
 
-    const joinTablesToPersist = pipe([
+    const getAssigneeTableToPersist = (contentTypeUID: any) => {
+      // Persist the assignee join table
+      const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID) as any;
+      const joinTableName = attributes[ENTITY_ASSIGNEE_ATTRIBUTE].joinTable.name;
+      return {
+        name: joinTableName,
+        dependsOn: [{ name: tableName }],
+      };
+    };
+
+    const stageJoinTablesToPersist = pipe([
       getVisibleContentTypesUID,
       filter((uid: any) => hasStageAttribute(contentTypes[uid])),
       map(getStageTableToPersist),
     ])(contentTypes);
 
     // Remove previously created join tables and persist the new ones
-    await removePersistedTablesWithSuffix('_strapi_stage_links');
-    await persistTables(joinTablesToPersist);
+    await removePersistedTablesWithSuffix('_strapi_stage_lnk');
+    await persistTables(stageJoinTablesToPersist);
+
+    const assigneeJoinTablesToPersist = pipe([
+      getVisibleContentTypesUID,
+      filter((uid: any) => hasStageAttribute(contentTypes[uid])),
+      map(getAssigneeTableToPersist),
+    ])(contentTypes);
+
+    // Remove previously created join tables and persist the new ones
+    await removePersistedTablesWithSuffix('_strapi_assignee_lnk');
+    await persistTables(assigneeJoinTablesToPersist);
   };
 }
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Data Migrations
   strapi.hook('strapi::content-types.beforeSync').register(migrateStageAttribute);
-  strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
+  strapi.hook('strapi::content-types.afterSync').register(persistRWOnDowngrade({ strapi }));
   strapi
     .hook('strapi::content-types.afterSync')
     .register(migrateReviewWorkflowStagesColor)
