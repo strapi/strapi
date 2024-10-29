@@ -140,16 +140,21 @@ const EditViewPage = () => {
   };
 
   /**
-   * We look to see what the mainField is from the configuration,
-   * if it's an id we don't use it because it's a uuid format and
-   * not very user friendly. Instead in that case, we simply write "Untitled".
+   * We look to see what the mainField is from the configuration, if it's an id
+   * we don't use it because it's a uuid format and not very user friendly.
+   * Instead, we display the schema name for single-type documents
+   * or "Untitled".
    */
-  const documentTitle =
-    mainField !== 'id' && document?.[mainField] ? document[mainField] : 'Untitled';
+  let documentTitle = 'Untitled';
+  if (mainField !== 'id' && document?.[mainField]) {
+    documentTitle = document[mainField];
+  } else if (isSingleType && schema?.info.displayName) {
+    documentTitle = schema.info.displayName;
+  }
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Page.Title>{`${documentTitle}`}</Page.Title>
+      <Page.Title>{documentTitle}</Page.Title>
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
@@ -228,7 +233,7 @@ const StatusTab = styled(Tabs.Trigger)`
 
 /**
  * @internal
- * @description Returns the status of the document where it's latest state takes priority,
+ * @description Returns the status of the document where its latest state takes priority,
  * this typically will be "published" unless a user has edited their draft in which we should
  * display "modified".
  */
@@ -294,4 +299,4 @@ const ProtectedEditViewPage = () => {
   );
 };
 
-export { EditViewPage, ProtectedEditViewPage };
+export { EditViewPage, ProtectedEditViewPage, getDocumentStatus };

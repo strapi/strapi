@@ -1,9 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { lazy } from 'react';
+import * as React from 'react';
 
 import { type PathRouteProps } from 'react-router-dom';
 
-const ProtectedHistoryPage = lazy(() =>
+const ProtectedHistoryPage = React.lazy(() =>
   import('./pages/History').then((mod) => ({ default: mod.ProtectedHistoryPage }))
 );
 
