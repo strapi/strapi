@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Page, useQueryParams, useRBAC, createContext } from '@strapi/admin/strapi-admin';
-import { Box, FocusTrap, Portal } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, Portal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
@@ -11,6 +11,7 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../utils/api';
+import { PreviewContent } from '../components/PreviewContent';
 import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 
@@ -127,7 +128,10 @@ const PreviewPage = () => {
         meta={documentResponse.meta}
         schema={documentResponse.schema}
       >
-        <PreviewHeader />
+        <Flex direction="column" height="100%" alignItems={'stretch'}>
+          <PreviewHeader />
+          <PreviewContent />
+        </Flex>
       </PreviewProvider>
     </>
   );
