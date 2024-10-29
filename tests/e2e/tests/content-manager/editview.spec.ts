@@ -511,8 +511,8 @@ test.describe('Edit View', () => {
        */
       await page.waitForURL(EDIT_URL);
 
-        await expect(page.getByRole('heading', { name: 'Homepage' })).toBeVisible();
-        await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
+      await expect(page.getByRole('heading', { name: 'Homepage' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'More actions' })).not.toBeDisabled();
 
       /**
        * There should be two tabs, draft and published.
