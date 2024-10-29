@@ -162,14 +162,14 @@ const ListViewPage = () => {
     const formattedHeaders = headers.displayedHeaders.map<ListFieldLayout>((header) => {
       /**
        * When the header label is a string, it is an attribute on the current content-type:
-       * Use that value to compute the translation object.
+       * Use the attribute name value to compute the translation.
        * Otherwise, it should be a  translation object coming from a plugin that injects into the table (ie i18n, content-releases, review-workflows):
        * Use the translation object as is.
        */
       const translation =
         typeof header.label === 'string'
           ? {
-              id: `content-manager.content-types.${model}.${header.label}`,
+              id: `content-manager.content-types.${model}.${header.name}`,
               defaultMessage: header.label,
             }
           : header.label;
