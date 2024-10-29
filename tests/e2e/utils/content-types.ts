@@ -7,12 +7,20 @@ import { clickAndWait, findByRowColumn } from './shared';
 export interface AddAttribute {
   type: string;
   name: string;
-  options?: any; // TODO: this doesn't have anything in it yet
   number?: { format: numberFormat };
   date?: { format: dateFormat };
   media?: { multiple: boolean };
   enumeration?: { values: string[] };
-  component?: { useExisting?: string; options: AddComponentOptions };
+  component?: { useExisting?: string; options: Partial<AddComponentOptions> };
+}
+
+interface AddComponentAttribute extends AddAttribute {
+  type: 'component';
+}
+
+// Type guard function to check if an attribute is a ComponentAttribute
+function isComponentAttribute(attribute: AddAttribute): attribute is AddComponentAttribute {
+  return attribute.type === 'component';
 }
 
 // Enumeration needs "values"
@@ -20,10 +28,19 @@ export interface AddAttribute {
 type numberFormat = 'integer' | 'big integer' | 'decimal';
 type dateFormat = 'date' | 'time' | 'datetime';
 
-export interface CreateComponentOptionsBase {
-  name?: string;
-  icon?: string;
-  attributes?: AddAttribute[];
+export interface CreateContentTypeOptions {
+  name: string;
+  singularId?: string;
+  pluralId?: string;
+  attributes: AddAttribute[];
+}
+
+export interface CreateComponentOptions {
+  name: string;
+  icon: string;
+  attributes: AddAttribute[];
+  categoryCreate?: string;
+  categorySelect?: string;
 }
 
 export interface CategoryCreateOption {
@@ -36,22 +53,9 @@ export interface CategorySelectOption {
   categoryCreate?: never;
 }
 
-type CreateComponentOptions = CreateComponentOptionsBase &
-  (CategoryCreateOption | CategorySelectOption);
-
-type RequiredCreateComponentOptions = Required<CreateComponentOptionsBase> &
-  (CategoryCreateOption | CategorySelectOption);
-
 type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
-
-export interface CreateContentTypeOptions {
-  name: string;
-  singularId?: string;
-  pluralId?: string;
-  attributes: AddAttribute[];
-}
 
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
@@ -111,8 +115,8 @@ const openComponentBuilder = async (page: Page) => {
   await clickAndWait(page, page.getByRole('button', { name: 'Create new component' }));
 };
 
-// The initial "create a component" screen
-export const fillCreateComponent = async (page: Page, options: CreateComponentOptions) => {
+// The initial "create a component" screen from the content type builder nav
+export const fillCreateComponent = async (page: Page, options: Partial<CreateComponentOptions>) => {
   if (options.name) {
     await page.getByLabel('Display name').fill(options.name);
   }
@@ -138,8 +142,11 @@ export const fillCreateComponent = async (page: Page, options: CreateComponentOp
   }
 };
 
-// TODO: describe where this is
-export const fillAddComponent = async (page: Page, component: AddAttribute['component']) => {
+// The screen when a component is added as an attribute
+export const fillAddComponentAttribute = async (
+  page: Page,
+  component: AddAttribute['component']
+) => {
   if (component.options.name) {
     await page.getByLabel('Name').fill(component.options.name);
   }
@@ -165,7 +172,7 @@ function escapeRegExp(string: string) {
 }
 
 // TODO: type this so it only accepts attribute type=component or repeatablecomponent
-export const addComponentAttribute = async (page: Page, attribute: AddAttribute) => {
+export const addComponentAttribute = async (page: Page, attribute: AddComponentAttribute) => {
   const options = attribute.component.options;
   await fillCreateComponent(page, { ...options, name: attribute.name });
 
@@ -178,7 +185,7 @@ export const addComponentAttribute = async (page: Page, attribute: AddAttribute)
     await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
   }
 
-  await fillAddComponent(page, attribute.component);
+  await fillAddComponentAttribute(page, attribute.component);
 
   if (options.attributes) {
     await clickAndWait(
@@ -202,7 +209,7 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
   );
 
   // components are handled separately
-  if (attribute.type === 'component' || attribute.type === 'componentrepeatable') {
+  if (isComponentAttribute(attribute)) {
     await addComponentAttribute(page, attribute);
     return;
   }
@@ -313,7 +320,7 @@ const saveAndVerifyContent = async (
 };
 
 // Refactored method for creating a component
-export const createComponent = async (page: Page, options: RequiredCreateComponentOptions) => {
+export const createComponent = async (page: Page, options: CreateComponentOptions) => {
   await openComponentBuilder(page);
   await fillCreateComponent(page, options);
 
