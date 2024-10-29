@@ -19,9 +19,7 @@ const PreviewContent = () => {
       })}
       width="100%"
       height="100%"
-      style={{
-        border: 'none',
-      }}
+      borderWidth={0}
       tag="iframe"
     />
   );
