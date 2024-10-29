@@ -15,7 +15,7 @@ test.describe('Blocks editor', () => {
   test('adds a code block and specifies the language', async ({ page, browserName }) => {
     // Write some text into a blocks editor
     const code = 'const problems = 99';
-    await navToHeader(page, ['Content Manager', 'Homepage'], 'Untitled');
+    await navToHeader(page, ['Content Manager', 'Homepage'], 'Homepage');
     await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
     const textbox = page.getByRole('textbox').nth(1);
     await expect(textbox).toBeVisible();
