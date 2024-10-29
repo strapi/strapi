@@ -60,7 +60,6 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
           border: 'alternative200',
           text: 'alternative700',
           message: {
-            // TODO: check the translation key once D&P v5 is done
             id: 'content-manager.containers.List.modified',
             defaultMessage: 'Modified',
           },

@@ -1,6 +1,6 @@
 import { curry, isObject, isEmpty, isArray, isNil, cloneDeep, omit } from 'lodash/fp';
 
-import traverseFactory from './factory';
+import traverseFactory, { type Parent } from './factory';
 
 const isObj = (value: unknown): value is Record<string, unknown> => isObject(value);
 
@@ -55,38 +55,61 @@ const filters = traverseFactory()
   // Recursion on operators (non attributes)
   .on(
     ({ attribute }) => isNil(attribute),
-    async ({ key, visitor, path, value, schema, getModel }, { set, recurse }) => {
-      set(key, await recurse(visitor, { schema, path, getModel }, value));
+    async ({ key, visitor, path, value, schema, getModel, attribute }, { set, recurse }) => {
+      const parent: Parent = { key, path, schema, attribute };
+
+      set(key, await recurse(visitor, { schema, path, getModel, parent }, value));
     }
   )
   // Handle relation recursion
-  .onRelation(async ({ key, attribute, visitor, path, value, getModel }, { set, recurse }) => {
-    const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
+  .onRelation(
+    async ({ key, attribute, visitor, path, value, schema, getModel }, { set, recurse }) => {
+      const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
-    if (isMorphRelation) {
-      return;
+      if (isMorphRelation) {
+        return;
+      }
+
+      const parent: Parent = { key, path, schema, attribute };
+
+      const targetSchemaUID = attribute.target;
+      const targetSchema = getModel(targetSchemaUID!);
+
+      const newValue = await recurse(
+        visitor,
+        { schema: targetSchema, path, getModel, parent },
+        value
+      );
+
+      set(key, newValue);
     }
+  )
+  .onComponent(
+    async ({ key, attribute, visitor, path, schema, value, getModel }, { set, recurse }) => {
+      const parent: Parent = { key, path, schema, attribute };
+      const targetSchema = getModel(attribute.component);
 
-    const targetSchemaUID = attribute.target;
-    const targetSchema = getModel(targetSchemaUID!);
+      const newValue = await recurse(
+        visitor,
+        { schema: targetSchema, path, getModel, parent },
+        value
+      );
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
-
-    set(key, newValue);
-  })
-  .onComponent(async ({ key, attribute, visitor, path, value, getModel }, { set, recurse }) => {
-    const targetSchema = getModel(attribute.component);
-
-    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
-
-    set(key, newValue);
-  })
+      set(key, newValue);
+    }
+  )
   // Handle media recursion
-  .onMedia(async ({ key, visitor, path, value, getModel }, { set, recurse }) => {
+  .onMedia(async ({ key, visitor, path, schema, attribute, value, getModel }, { set, recurse }) => {
+    const parent: Parent = { key, path, schema, attribute };
+
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = getModel(targetSchemaUID);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
+    const newValue = await recurse(
+      visitor,
+      { schema: targetSchema, path, getModel, parent },
+      value
+    );
 
     set(key, newValue);
   });
