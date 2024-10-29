@@ -1,15 +1,9 @@
 import * as React from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
-
 import { usePreviewContext } from '../pages/Preview';
 
 const PreviewContent = () => {
-  const previewUrl = usePreviewContext('PreviewIframe', (state) => state.url);
-
-  if (!previewUrl) {
-    return <Page.Loading />;
-  }
+  const previewUrl = usePreviewContext('PreviewContent', (state) => state.url);
 
   return (
     <iframe
