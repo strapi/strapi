@@ -18,8 +18,9 @@ export default class SqliteDialect extends Dialect {
     this.schemaInspector = new SqliteSchemaInspector(db);
   }
 
-  configure() {
-    const connection = this.db.config.connection.connection as Knex.Sqlite3ConnectionConfig;
+  configure(conn?: Knex.Sqlite3ConnectionConfig) {
+    const connection =
+      conn || (this.db.config.connection.connection as Knex.Sqlite3ConnectionConfig);
     if (typeof connection !== 'string') {
       connection.filename = path.resolve(connection.filename);
     }
