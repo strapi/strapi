@@ -14,8 +14,8 @@ test.describe('Create a new component', () => {
     { type: 'number', name: 'testdecimal', number: { format: 'decimal' } },
     { type: 'email', name: 'testemail' },
     { type: 'date', name: 'testdateonlydate', date: { format: 'date' } },
-    { type: 'time', name: 'testdatetime', date: { format: 'time' } },
-    { type: 'datetime', name: 'testdatedatetime', date: { format: 'datetime' } },
+    { type: 'date', name: 'testdatetime', date: { format: 'time' } },
+    { type: 'date', name: 'testdatedatetime', date: { format: 'datetime' } },
     { type: 'password', name: 'testpassword' },
     { type: 'media', name: 'testmediasingle', media: { multiple: false } },
     { type: 'media', name: 'testmediamultiple', media: { multiple: true } },
@@ -41,7 +41,7 @@ test.describe('Create a new component', () => {
     },
     // new repeatable component with existing category
     {
-      type: 'componentrepeatable',
+      type: 'component',
       name: 'testnewcomponentexistingcategory',
       component: {
         options: {

@@ -56,7 +56,8 @@ export interface CreateContentTypeOptions {
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
-// TODO: improve on this so we don't have things like componentrepeatable with an options.repeatable
+// This is necessary because the labels used for each attribute type differ based on
+// their other attribute options
 const typeMap = {
   text: { buttonName: 'Text', listLabel: 'Text' },
   boolean: { buttonName: 'Boolean', listLabel: 'Boolean' },
@@ -64,16 +65,27 @@ const typeMap = {
   json: { buttonName: 'JSON', listLabel: 'JSON' },
   number: { buttonName: 'Number', listLabel: 'Number' },
   email: { buttonName: 'Email', listLabel: 'Email' },
-  date: { buttonName: 'Date', listLabel: 'Date' },
-  time: { buttonName: 'Date', listLabel: 'Time' },
-  datetime: { buttonName: 'Date', listLabel: 'Datetime' },
+  date_date: { buttonName: 'Date', listLabel: 'Date' },
+  date_time: { buttonName: 'Date', listLabel: 'Time' },
+  date_datetime: { buttonName: 'Date', listLabel: 'Datetime' },
   password: { buttonName: 'Password', listLabel: 'Password' },
   media: { buttonName: 'Media', listLabel: 'Media' },
   enumeration: { buttonName: 'Enumeration', listLabel: 'Enumeration' },
   relation: { buttonName: 'Relation', listLabel: 'Relation' },
   markdown: { buttonName: 'Rich text (Markdown)', listLabel: 'Rich text (Markdown)' },
   component: { buttonName: 'Component', listLabel: 'Component' },
-  componentrepeatable: { buttonName: 'Component', listLabel: 'Component (repeatable)' },
+  component_repeatable: { buttonName: 'Component', listLabel: 'Component (repeatable)' },
+};
+
+const getAttributeIdentifiers = (attribute: AddAttribute) => {
+  let type = attribute.type;
+  if (attribute.component?.options?.repeatable) {
+    type = 'component_repeatable';
+  } else if (attribute.date?.format) {
+    type = 'date_' + attribute.date.format;
+  }
+
+  return typeMap[type];
 };
 
 // Select a component icon
@@ -185,7 +197,7 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
   await clickAndWait(
     page,
     tabPanel.locator(`button:has(span)`, {
-      hasText: new RegExp(`^${escapeRegExp(typeMap[attribute.type].buttonName)}`, 'i'),
+      hasText: new RegExp(`^${escapeRegExp(getAttributeIdentifiers(attribute).buttonName)}`, 'i'),
     })
   );
 
@@ -289,10 +301,12 @@ const saveAndVerifyContent = async (
     const name = attribute.component?.options.name || attribute.name;
     const typeCell = await findByRowColumn(page, name, 'Type');
 
-    if (!typeMap[attribute.type].buttonName) {
+    if (!getAttributeIdentifiers(attribute).buttonName) {
       throw new Error('unknown type ' + attribute.type);
     }
-    await expect(typeCell).toContainText(typeMap[attribute.type].listLabel, { ignoreCase: true });
+    await expect(typeCell).toContainText(getAttributeIdentifiers(attribute).listLabel, {
+      ignoreCase: true,
+    });
   }
 
   // TODO: verify that it appears in the sidenav
