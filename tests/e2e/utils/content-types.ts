@@ -171,7 +171,6 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// TODO: type this so it only accepts attribute type=component or repeatablecomponent
 export const addComponentAttribute = async (page: Page, attribute: AddComponentAttribute) => {
   const options = attribute.component.options;
   await fillCreateComponent(page, { ...options, name: attribute.name });
@@ -266,7 +265,7 @@ export const addAttributes = async (page: Page, attributes: AddAttribute[], opti
       );
     } else {
       // Last attribute, click 'Finish'
-      // TODO: This is covering up a bug (either in the test utils or in strapi) where components 'finish' button closes the whole process
+      // TODO: ...but only if it's visible; this covers a bug (in the test utils or in strapi) where modal gets closed from a previous finish
       if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
         await page.getByRole('button', { name: 'Finish' }).click({ force: true });
       }
