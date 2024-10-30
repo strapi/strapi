@@ -19,6 +19,8 @@ import { styled } from 'styled-components';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
 import { usePreviewContext } from '../pages/Preview';
+import styled from 'styled-components';
+import { has } from 'markdown-it/lib/common/utils';
 
 /* -------------------------------------------------------------------------------------------------
  * ClosePreviewButton
@@ -115,6 +117,56 @@ const PreviewTabs = () => {
         </Tabs.List>
       </Tabs.Root>
     </>
+  );
+};
+
+const PreviewTabs = () => {
+  const { formatMessage } = useIntl();
+
+  // URL query params
+  const [{ query }, setQuery] = useQueryParams<{ status: 'draft' | 'published' }>();
+
+  // Get status
+  const document = usePreviewContext('PreviewHeader', (state) => state.document);
+  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const hasDraftAndPublish = schema?.options?.draftAndPublish ?? false;
+  const documentStatus = getDocumentStatus(document, meta);
+
+  const handleTabChange = (status: string) => {
+    if (status === 'published' || status === 'draft') {
+      setQuery({ status }, 'push', true);
+    }
+  };
+
+  if (!hasDraftAndPublish) {
+    return null;
+  }
+
+  return (
+    <Flex margin="auto">
+      <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
+        <Tabs.List
+          aria-label={formatMessage({
+            id: 'preview.tabs.label',
+            defaultMessage: 'Document status',
+          })}
+        >
+          <StatusTab value="draft">
+            {formatMessage({
+              id: 'preview.tabs.draft',
+              defaultMessage: 'draft',
+            })}
+          </StatusTab>
+          <StatusTab value="published" disabled={documentStatus === 'draft'}>
+            {formatMessage({
+              id: 'preview.tabs.published',
+              defaultMessage: 'published',
+            })}
+          </StatusTab>
+        </Tabs.List>
+      </Tabs.Root>
+    </Flex>
   );
 };
 
