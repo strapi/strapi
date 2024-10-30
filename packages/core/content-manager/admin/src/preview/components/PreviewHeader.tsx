@@ -18,7 +18,7 @@ import {
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
-import { Link, type To, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
@@ -29,39 +29,19 @@ import { usePreviewContext } from '../pages/Preview';
  * -----------------------------------------------------------------------------------------------*/
 
 const ClosePreviewButton = () => {
-  const [{ query }] = useQueryParams();
-  const navigate = useNavigate();
+  const [{ query }] = useQueryParams<{
+    plugins?: Record<string, unknown>;
+  }>();
   const { formatMessage } = useIntl();
-
-  const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
-  const goBack = useHistory('BackButton', (state) => state.goBack);
-  const history = useHistory('BackButton', (state) => state.history);
-
-  const fallbackUrl: To = {
-    pathname: '..',
-    search: stringify(query, { encode: false }),
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    /**
-     * Prevent normal link behavior. We only make it an achor for accessibility reasons.
-     * The point of this logic is to act as the browser's back button when possible, and to fallback
-     * to a link behavior to the edit view when no history is available.
-     *  */
-    e.preventDefault();
-
-    if (canGoBack) {
-      goBack();
-    } else {
-      navigate(fallbackUrl);
-    }
-  };
 
   return (
     <IconButton
       tag={Link}
-      to={history.at(-1) ?? fallbackUrl}
-      onClick={handleClick}
+      relative="path"
+      to={{
+        pathname: '..',
+        search: stringify({ plugins: query.plugins }, { encode: false }),
+      }}
       label={formatMessage({
         id: 'content-manager.preview.header.close',
         defaultMessage: 'Close preview',
