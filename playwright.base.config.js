@@ -62,6 +62,9 @@ const createConfig = ({ port, testDir, appDir }) => ({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: `http://127.0.0.1:${port}`,
 
+    /** Set timezone for consistency across any machine*/
+    timezoneId: 'Europe/Paris',
+
     /* Default time each action such as `click()` can take to 20s */
     actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 20 * 1000),
     trace: 'retain-on-failure',
