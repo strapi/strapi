@@ -6,7 +6,15 @@ import {
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Box, type BoxProps, Flex, IconButton, Typography } from '@strapi/design-system';
+import {
+  Box,
+  type BoxProps,
+  Flex,
+  IconButton,
+  Tabs,
+  Typography,
+  Grid,
+} from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
@@ -14,6 +22,8 @@ import { Link, type To, useNavigate } from 'react-router-dom';
 
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
 import { usePreviewContext } from '../pages/Preview';
+import styled from 'styled-components';
+import { has } from 'markdown-it/lib/common/utils';
 
 /* -------------------------------------------------------------------------------------------------
  * ClosePreviewButton
@@ -151,6 +161,56 @@ const DocumentStatus = () => {
   );
 };
 
+const PreviewTabs = () => {
+  const { formatMessage } = useIntl();
+
+  // URL query params
+  const [{ query }, setQuery] = useQueryParams<{ status: 'draft' | 'published' }>();
+
+  // Get status
+  const document = usePreviewContext('PreviewHeader', (state) => state.document);
+  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const hasDraftAndPublish = schema?.options?.draftAndPublish ?? false;
+  const documentStatus = getDocumentStatus(document, meta);
+
+  const handleTabChange = (status: string) => {
+    if (status === 'published' || status === 'draft') {
+      setQuery({ status }, 'push', true);
+    }
+  };
+
+  if (!hasDraftAndPublish) {
+    return null;
+  }
+
+  return (
+    <Flex margin="auto">
+      <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
+        <Tabs.List
+          aria-label={formatMessage({
+            id: 'preview.tabs.label',
+            defaultMessage: 'Document status',
+          })}
+        >
+          <StatusTab value="draft">
+            {formatMessage({
+              id: 'preview.tabs.draft',
+              defaultMessage: 'draft',
+            })}
+          </StatusTab>
+          <StatusTab value="published" disabled={documentStatus === 'draft'}>
+            {formatMessage({
+              id: 'preview.tabs.published',
+              defaultMessage: 'published',
+            })}
+          </StatusTab>
+        </Tabs.List>
+      </Tabs.Root>
+    </Flex>
+  );
+};
+
 /* -------------------------------------------------------------------------------------------------
  * PreviewHeader
  * -----------------------------------------------------------------------------------------------*/
@@ -177,32 +237,50 @@ const PreviewHeader = () => {
   };
 
   return (
-    <Flex
-      justifyContent="space-between"
+    <Grid.Root
+      gap={3}
+      gridCols={3}
+      paddingLeft={2}
+      paddingRight={2}
       background="neutral0"
-      padding={2}
       borderColor="neutral150"
       tag="header"
     >
-      <Flex gap={3}>
-        <ClosePreviewButton />
-        <Typography tag="h1" fontWeight={600} fontSize={2}>
-          {title}
-        </Typography>
-        <DocumentStatus />
-      </Flex>
-      <IconButton
-        type="button"
-        label={formatMessage({
-          id: 'preview.copy.label',
-          defaultMessage: 'Copy preview link',
-        })}
-        onClick={handleCopyLink}
-      >
-        <LinkIcon />
-      </IconButton>
-    </Flex>
+      {/* Title and status */}
+      <Grid.Item xs={1}>
+        <Flex gap={3}>
+          <ClosePreviewButton />
+          <Typography tag="h1" fontWeight={600} fontSize={2}>
+            {title}
+          </Typography>
+          <DocumentStatus />
+        </Flex>
+      </Grid.Item>
+
+      {/* Tabs */}
+      <Grid.Item xs={1}>
+        <PreviewTabs />
+      </Grid.Item>
+
+      {/* Copy link */}
+      <Grid.Item xs={1} justifyContent={'end'}>
+        <IconButton
+          type="button"
+          label={formatMessage({
+            id: 'preview.copy.label',
+            defaultMessage: 'Copy preview link',
+          })}
+          onClick={handleCopyLink}
+        >
+          <LinkIcon />
+        </IconButton>
+      </Grid.Item>
+    </Grid.Root>
   );
 };
+
+const StatusTab = styled(Tabs.Trigger)`
+  text-transform: uppercase;
+`;
 
 export { PreviewHeader };
