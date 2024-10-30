@@ -1,4 +1,4 @@
-import { generateNKeysBetween } from 'fractional-indexing';
+import { generateNKeysBetween, generateKeyBetween } from 'fractional-indexing';
 
 import {
   RelationResult as RelResult,
@@ -179,12 +179,28 @@ const relationsApi = contentManagerApi.injectEndpoints({
 
 /**
  * @internal
- * @description Adds a `__temp_key__` to each relation item. This gives us
- * a stable identifier regardless of it's ids etc. that we can then use for drag and drop.
+ * @description Adds a unique `__temp_key__` to each relation item, ensuring stable
+ * identifiers for drag-and-drop operations, reordering, and pagination. It handles
+ * edge cases like narrow key ranges or identical keys to prevent collisions, especially
+ * when dealing with upper-bound values like `"Zv"`.
  */
-const prepareTempKeys = (relations: RelResult[], existingRelations: RelationResult[] = []) => {
-  const [firstItem] = existingRelations.slice(0);
-  const keys = generateNKeysBetween(null, firstItem?.__temp_key__ ?? null, relations.length);
+const prepareTempKeys = (
+  relations: RelResult[],
+  existingRelations: RelationResult[] = []
+): RelationResult[] => {
+  let beforeKey: string | null = null;
+  let afterKey: string | null = existingRelations[0]?.__temp_key__ ?? null;
+
+  if (!afterKey) {
+    beforeKey = 'a0';
+    afterKey = null;
+  }
+
+  if (beforeKey === afterKey) {
+    afterKey = generateKeyBetween(beforeKey, null);
+  }
+
+  const keys = generateNKeysBetween(beforeKey, afterKey, relations.length);
 
   return relations.map((datum, index) => ({
     ...datum,
