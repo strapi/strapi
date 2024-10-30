@@ -240,7 +240,7 @@
   "preview.header.close": "Close preview",
   "preview.copy.label": "Copy preview link",
   "preview.copy.success": "Copied preview link",
-  "preview.tabs.label": "Document status",
+  "preview.tabs.label": "Preview status",
   "preview.tabs.draft": "draft",
   "preview.tabs.published": "published",
   "relation.add": "Add relation",
