@@ -19,7 +19,7 @@ import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { Link, type To, useNavigate } from 'react-router-dom';
-import * as styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
 import { usePreviewContext } from '../pages/Preview';
