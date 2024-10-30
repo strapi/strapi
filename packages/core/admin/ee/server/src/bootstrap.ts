@@ -1,10 +1,11 @@
 import executeCEBootstrap from '../../../server/src/bootstrap';
-import { getService } from '../../server/src/utils';
+import { getService } from './utils';
 import actions from './config/admin-actions';
-import { persistTablesWithPrefix } from './utils/persisted-tables';
 
 export default async (args: any) => {
   const { actionProvider } = getService('permission');
+  const { persistTablesWithPrefix } = getService('persist-tables');
+
   if (strapi.ee.features.isEnabled('sso')) {
     await actionProvider.registerMany(actions.sso);
   }
