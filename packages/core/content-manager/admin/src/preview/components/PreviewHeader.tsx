@@ -32,18 +32,14 @@ const ClosePreviewButton = () => {
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
 
-  const closePreview = () => {
-    return {
-      pathname: '..',
-      search: stringify({ plugins: query.plugins }, { encode: false }),
-    };
-  };
-
   return (
     <IconButton
       tag={Link}
       relative="path"
-      to={closePreview()}
+      to={{
+        pathname: '..',
+        search: stringify({ plugins: query.plugins }, { encode: false }),
+      }}
       label={formatMessage({
         id: 'content-manager.preview.header.close',
         defaultMessage: 'Close preview',
