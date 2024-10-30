@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 import { differenceWith, isEqual } from 'lodash/fp';
 
-interface PersistedTable {
+export interface PersistedTable {
   name: string;
   dependsOn?: Array<{ name: string }>;
 }
