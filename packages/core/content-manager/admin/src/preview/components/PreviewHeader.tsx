@@ -29,7 +29,9 @@ import { usePreviewContext } from '../pages/Preview';
  * -----------------------------------------------------------------------------------------------*/
 
 const ClosePreviewButton = () => {
-  const [{ query }] = useQueryParams();
+  const [{ query }] = useQueryParams<{
+    plugins?: Record<string, unknown>;
+  }>();
   const { formatMessage } = useIntl();
 
   return (
