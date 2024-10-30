@@ -144,11 +144,6 @@ const EditPage = () => {
       permissionsRef.current?.setFormAfterSubmit();
 
       await refetchRole();
-
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({ id: 'notification.success.saved' }),
-      });
     } catch (error) {
       toggleNotification({
         type: 'danger',
