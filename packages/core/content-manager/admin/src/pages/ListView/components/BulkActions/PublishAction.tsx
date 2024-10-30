@@ -250,7 +250,7 @@ const SelectedEntriesTableContent = ({
                   state={{ from: pathname }}
                   label={formatMessage({
                     id: 'app.component.HelperPluginTable.edit',
-                    defaultMessage: 'Edit item',
+                    defaultMessage: 'Edit',
                   })}
                   target="_blank"
                   marginLeft="auto"
