@@ -12,13 +12,6 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const { model } = useDoc();
 
-  const getTranslatedLabel = (label: string) => {
-    return formatMessage({
-      id: `content-manager.content-types.${model}.${label}`,
-      defaultMessage: label,
-    });
-  };
-
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
       {layout.map((panel, index) => {
@@ -28,7 +21,10 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
 
           const fieldWithTranslatedLabel = {
             ...field,
-            label: getTranslatedLabel(field.label),
+            label: formatMessage({
+              id: `content-manager.content-types.${model}.${field.name}`,
+              defaultMessage: field.label,
+            }),
           };
 
           return (
@@ -58,7 +54,10 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
                   {row.map(({ size, ...field }) => {
                     const fieldWithTranslatedLabel = {
                       ...field,
-                      label: getTranslatedLabel(field.label),
+                      label: formatMessage({
+                        id: `content-manager.content-types.${model}.${field.name}`,
+                        defaultMessage: field.label,
+                      }),
                     };
                     return (
                       <Grid.Item
