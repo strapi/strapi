@@ -19,8 +19,6 @@ import { styled } from 'styled-components';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
 import { usePreviewContext } from '../pages/Preview';
-import styled from 'styled-components';
-import { has } from 'markdown-it/lib/common/utils';
 
 /* -------------------------------------------------------------------------------------------------
  * ClosePreviewButton
