@@ -19,7 +19,7 @@ const newAttributes: string[] = [];
 const NewBadge = () => (
   <Flex grow={1} justifyContent="flex-end">
     <Flex gap={1} hasRadius background="alternative100" padding={`0.2rem 0.4rem`}>
-      <Sparkle width={`1rem`} height={`1rem`} fill="alternative600" />
+      <Sparkle width={`10`} height={`10`} fill="alternative600" />
       <Typography textColor="alternative600" variant="sigma">
         New
       </Typography>

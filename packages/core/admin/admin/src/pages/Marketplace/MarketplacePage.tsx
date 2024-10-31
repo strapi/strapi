@@ -266,8 +266,8 @@ const MarketplacePage = () => {
                   endAction={
                     <ExternalLink
                       fill="neutral600"
-                      width="1.2rem"
-                      height="1.2rem"
+                      width="12"
+                      height="12"
                       style={{ marginLeft: '0.8rem' }}
                     />
                   }

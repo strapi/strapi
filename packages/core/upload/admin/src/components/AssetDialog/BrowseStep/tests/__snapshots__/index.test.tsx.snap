@@ -897,9 +897,9 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 <svg
                   class="c47"
                   fill="currentColor"
-                  height="2.4rem"
+                  height="24"
                   viewBox="0 0 32 32"
-                  width="2.4rem"
+                  width="24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path

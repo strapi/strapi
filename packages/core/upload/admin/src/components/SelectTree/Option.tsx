@@ -68,7 +68,7 @@ const Option = ({ children, data, selectProps, ...props }: OptionProps) => {
               onOptionToggle(value);
             }}
           >
-            <Icon width="1.4rem" fill="neutral500" />
+            <Icon width="14" fill="neutral500" />
           </ToggleButton>
         )}
       </Flex>

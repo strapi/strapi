@@ -83,7 +83,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                   position="relative"
                 >
                   {formatMessage(link.intlLabel)}
-                  {link?.licenseOnly && <CustomIcon width="1.5rem" height="1.5rem" />}
+                  {link?.licenseOnly && <CustomIcon width="15" height="15" />}
                 </Link>
               );
             })}

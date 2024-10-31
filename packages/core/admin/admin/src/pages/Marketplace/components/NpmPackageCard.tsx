@@ -217,7 +217,7 @@ const InstallPluginButton = ({
   if (isInstalled) {
     return (
       <Flex gap={2} paddingLeft={4}>
-        <Check width="1.2rem" height="1.2rem" color="success600" />
+        <Check width="12" height="12" color="success600" />
         <Typography variant="omega" textColor="success600" fontWeight="bold">
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.installed',
@@ -327,8 +327,8 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
     <Flex gap={1}>
       {!!githubStars && (
         <>
-          <GitHub height="1.2rem" width="1.2rem" aria-hidden />
-          <Star height="1.2rem" width="1.2rem" fill="warning500" aria-hidden />
+          <GitHub height="12" width="12" aria-hidden />
+          <Star height="12" width="12" fill="warning500" aria-hidden />
           <p
             aria-label={formatMessage(
               {
@@ -348,7 +348,7 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
           <VerticalDivider />
         </>
       )}
-      <Download height="1.2rem" width="1.2rem" aria-hidden />
+      <Download height="12" width="12" aria-hidden />
       <p
         aria-label={formatMessage(
           {

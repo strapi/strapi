@@ -103,7 +103,7 @@ export const ContentTypeBuilderNav = () => {
               <Box paddingLeft={7}>
                 <TextButton
                   onClick={section.customLink.onClick}
-                  startIcon={<Plus width="0.8rem" height="0.8rem" />}
+                  startIcon={<Plus width="8" height="8" />}
                   marginTop={2}
                   cursor="pointer"
                 >

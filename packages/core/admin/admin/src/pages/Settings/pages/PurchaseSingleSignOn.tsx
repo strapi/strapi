@@ -23,7 +23,7 @@ const PurchaseSingleSignOn = () => {
         />
         <Box paddingLeft={10} paddingRight={10}>
           <EmptyStateLayout
-            icon={<EmptyPermissions width="16rem" />}
+            icon={<EmptyPermissions width="160" />}
             content={formatMessage({
               id: 'Settings.sso.not-available',
               defaultMessage:

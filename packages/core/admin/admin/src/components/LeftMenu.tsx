@@ -115,7 +115,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                         <NavLinkBadgeCounter
                           label={badgeContentNumeric}
                           backgroundColor="primary600"
-                          width="2.3rem"
+                          width="23"
                           color="neutral0"
                         >
                           {badgeContentNumeric}

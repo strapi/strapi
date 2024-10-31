@@ -26,7 +26,7 @@ const StageDragPreview = ({ name }: StageDragPreviewType) => {
         justifyContent="center"
         width={6}
       >
-        <CaretDown width="0.8rem" fill="neutral600" />
+        <CaretDown width="8" fill="neutral600" />
       </Flex>
 
       <Typography fontWeight="bold">{name}</Typography>

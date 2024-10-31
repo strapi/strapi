@@ -45,7 +45,7 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
                       defaultMessage: 'cancel',
                     })}
                   </Typography>
-                  <Cross fill="neutral400" height="1.2rem" width="1.2rem" />
+                  <Cross fill="neutral400" height="12" width="12" />
                 </Flex>
               </button>
             </Flex>
@@ -71,7 +71,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
   if (isPending || !statusCode) {
     return (
       <Flex gap={2} alignItems="center">
-        <Loader height="1.2rem" width="1.2rem" />
+        <Loader height="12" width="12" />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.pending', defaultMessage: 'pending' })}
         </Typography>
@@ -82,7 +82,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
   if (statusCode >= 200 && statusCode < 300) {
     return (
       <Flex gap={2} alignItems="center">
-        <Check fill="success700" height="1.2rem" width="1.2rem" />
+        <Check fill="success700" height="12" width="12" />
         <Typography>
           {formatMessage({ id: 'Settings.webhooks.trigger.success', defaultMessage: 'success' })}
         </Typography>
@@ -93,7 +93,7 @@ const Status = ({ isPending, statusCode }: StatusProps) => {
   if (statusCode >= 300) {
     return (
       <Flex gap={2} alignItems="center">
-        <Cross fill="danger700" height="1.2rem" width="1.2rem" />
+        <Cross fill="danger700" height="12" width="12" />
         <Typography>
           {formatMessage({ id: 'Settings.error', defaultMessage: 'error' })} {statusCode}
         </Typography>

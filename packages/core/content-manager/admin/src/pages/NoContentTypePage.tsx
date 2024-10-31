@@ -39,7 +39,7 @@ const NoContentType = () => {
               "You don't have any content yet, we recommend you to create your first Content-Type.",
           })}
           hasRadius
-          icon={<EmptyDocuments width="16rem" />}
+          icon={<EmptyDocuments width="160" />}
           shadow="tableShadow"
         />
       </Layouts.Content>

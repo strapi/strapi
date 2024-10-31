@@ -110,7 +110,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
             target: sectionTitle,
           }
         )}
-        icon={<EmptyDocuments width="16rem" />}
+        icon={<EmptyDocuments width="160" />}
       />
     );
   }

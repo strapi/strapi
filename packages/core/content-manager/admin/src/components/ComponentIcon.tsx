@@ -29,7 +29,7 @@ const ComponentIcon = ({
       borderRadius={showBackground ? '50%' : 0}
       {...props}
     >
-      <Icon height="2rem" width="2rem" />
+      <Icon height="20" width="20" />
     </Flex>
   );
 };

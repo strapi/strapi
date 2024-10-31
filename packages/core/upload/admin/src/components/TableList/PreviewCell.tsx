@@ -38,7 +38,7 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
         height="3.2rem"
         borderRadius="50%"
       >
-        <Folder fill="secondary500" width="1.6rem" height="1.6rem" />
+        <Folder fill="secondary500" width="16" height="16" />
       </Flex>
     );
   }

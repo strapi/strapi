@@ -94,7 +94,7 @@ export const List = ({
                   defaultMessage: 'Create your first Collection-Type',
                 })}
                 hasRadius
-                icon={<EmptyDocuments width="16rem" />}
+                icon={<EmptyDocuments width="160" />}
               />
             </Td>
           </Tr>

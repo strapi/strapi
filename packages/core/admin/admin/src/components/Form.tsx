@@ -778,7 +778,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
               defaultMessage: 'Confirmation',
             })}
           </Dialog.Header>
-          <Dialog.Body icon={<WarningCircle width="24px" height="24px" fill="danger600" />}>
+          <Dialog.Body icon={<WarningCircle width="24" height="24" fill="danger600" />}>
             {formatMessage({
               id: 'global.prompt.unsaved',
               defaultMessage: 'You have unsaved changes, are you sure you want to leave?',

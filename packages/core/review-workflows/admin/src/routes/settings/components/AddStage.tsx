@@ -17,7 +17,7 @@ export const AddStage = ({ children, ...props }: ButtonProps) => {
     >
       <Typography variant="pi" fontWeight="bold">
         <Flex tag="span" gap={2}>
-          <PlusCircle width="2.4rem" height="2.4rem" aria-hidden />
+          <PlusCircle width="24" height="24" aria-hidden />
           {children}
         </Flex>
       </Typography>

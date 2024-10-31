@@ -30,7 +30,7 @@ export const CreateActionEE = React.forwardRef<HTMLButtonElement, CreateActionCE
             })}
             side="left"
           >
-            <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
+            <WarningCircle width="14" height="14" fill="danger500" />
           </Tooltip>
         )}
         <Button

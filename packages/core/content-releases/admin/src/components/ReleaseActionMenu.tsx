@@ -104,7 +104,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
   return (
     <StyledMenuItem $variant="danger" onSelect={handleDeleteAction}>
       <Flex gap={2}>
-        <Cross width="1.6rem" height="1.6rem" />
+        <Cross width="16" height="16" />
         <Typography textColor="danger600" variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.remove-from-release',
@@ -174,7 +174,7 @@ const ReleaseActionEntryLinkItem = ({
       }}
     >
       <Flex gap={2}>
-        <Pencil width="1.6rem" height="1.6rem" />
+        <Pencil width="16" height="16" />
         <Typography variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.edit-entry',
@@ -200,7 +200,7 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
     /* @ts-expect-error inference isn't working in DS */
     <StyledMenuItem tag={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
       <Flex gap={2}>
-        <Pencil width="1.6rem" height="1.6rem" />
+        <Pencil width="16" height="16" />
         <Typography textColor="neutral800" variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.edit-release',
