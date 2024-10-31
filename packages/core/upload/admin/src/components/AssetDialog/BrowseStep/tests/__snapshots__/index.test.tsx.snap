@@ -407,6 +407,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   padding-block: 4px;
   padding-inline-start: 16px;
   padding-inline-end: 12px;
+  cursor: pointer;
   outline: none;
   box-shadow: none;
   transition-property: border-color,box-shadow,fill;
