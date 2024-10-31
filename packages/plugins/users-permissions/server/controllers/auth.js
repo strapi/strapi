@@ -244,7 +244,7 @@ module.exports = ({ strapi }) => ({
       .query('plugin::users-permissions.user')
       .findOne({ where: { email: email.toLowerCase() } });
 
-    if (!user || user.blocked) {
+    if (!user || user.blocked || !user.confirmed) {
       return ctx.send({ ok: true });
     }
 
