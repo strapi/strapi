@@ -17,7 +17,8 @@ export default class Dialect {
     this.client = client;
   }
 
-  configure() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  configure(conn?: any) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async initialize(_nativeConnection?: unknown) {
