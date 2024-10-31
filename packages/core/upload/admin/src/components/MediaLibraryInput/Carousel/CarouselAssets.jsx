@@ -28,6 +28,7 @@ export const CarouselAssets = forwardRef(
       onEditAsset,
       onNext,
       onPrevious,
+      onSelect,
       required,
       selectedAssetIndex,
       trackedLocation,
@@ -95,7 +96,12 @@ export const CarouselAssets = forwardRef(
                   { n: index + 1, m: assets.length }
                 )}
               >
-                <CarouselAsset asset={asset} />
+                <CarouselAsset
+                  asset={asset}
+                  currentAsset={currentAsset}
+                  assetIndex={index}
+                  onSelect={onSelect}
+                />
               </CarouselSlide>
             ))
           )}
@@ -149,6 +155,7 @@ CarouselAssets.propTypes = {
   onEditAsset: PropTypes.func.isRequired,
   onNext: PropTypes.func.isRequired,
   onPrevious: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
   required: PropTypes.bool,
   selectedAssetIndex: PropTypes.number.isRequired,
   trackedLocation: PropTypes.string,
