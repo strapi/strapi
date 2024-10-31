@@ -5,6 +5,7 @@ import { Navigate, PathRouteProps, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
 import { routes as historyRoutes } from './history/routes';
+import { routes as previewRoutes } from './preview/routes';
 
 const ProtectedEditViewPage = lazy(() =>
   import('./pages/EditView/EditViewPage').then((mod) => ({ default: mod.ProtectedEditViewPage }))
@@ -90,6 +91,7 @@ const routes: PathRouteProps[] = [
     Component: NoContentType,
   },
   ...historyRoutes,
+  ...previewRoutes,
 ];
 
 export { routes, CLONE_PATH, LIST_PATH };

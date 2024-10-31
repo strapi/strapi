@@ -77,12 +77,36 @@ class Database {
       },
     };
 
+    this.logger = config.logger ?? console;
+
     this.dialect = getDialect(this);
-    this.dialect.configure();
+
+    let knexConfig: Knex.Config = this.config.connection;
+
+    // for object connections, we can configure the dialect synchronously
+    if (typeof this.config.connection.connection !== 'function') {
+      this.dialect.configure();
+    }
+    // for connection functions, we wrap it so that we can modify it with dialect configure before it reaches knex
+    else {
+      this.logger.warn(
+        'Knex connection functions are currently experimental. Attempting to access the connection object before database initialization will result in errors.'
+      );
+
+      knexConfig = {
+        ...this.config.connection,
+        connection: async () => {
+          // @ts-expect-error confirmed it was a function above
+          const conn = await this.config.connection.connection();
+          this.dialect.configure(conn);
+          return conn;
+        },
+      };
+    }
 
     this.metadata = createMetadata([]);
 
-    this.connection = createConnection(this.config.connection, {
+    this.connection = createConnection(knexConfig, {
       pool: { afterCreate: afterCreate(this) },
     });
 
@@ -92,11 +116,30 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
-
-    this.logger = config.logger ?? console;
   }
 
   async init({ models }: { models: Model[] }) {
+    if (typeof this.config.connection.connection === 'function') {
+      /*
+       * User code needs to be able to access `connection.connection` directly as if
+       * it were always an object. For a connection function, that doesn't happen
+       * until the pool is created, so we need to do that here
+       *
+       * TODO: In the next major version, we need to replace all internal code that
+       * directly references `connection.connection` prior to init, and make a breaking
+       * change that it cannot be relied on to exist before init so that we can call
+       * this feature stable.
+       */
+      this.logger.debug('Forcing Knex to make real connection to db');
+
+      // sqlite does not support connection pooling so acquireConnection doesn't work
+      if (this.config.connection.client === 'sqlite') {
+        await this.connection.raw('SELECT 1');
+      } else {
+        await this.connection.client.acquireConnection();
+      }
+    }
+
     this.metadata.loadModels(models);
     await validateDatabase(this);
     return this;
