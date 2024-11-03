@@ -16,7 +16,7 @@ import { UploadProgress } from '../../UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
 import type { File as FileDefinition, RawFile } from '../../../../../shared/contracts/files';
-
+import { createGlobalStyle } from 'styled-components';
 import { AssetPreview } from './AssetPreview';
 import {
   ActionRow,
@@ -27,7 +27,7 @@ import {
 } from './components';
 import { CroppingActions } from './CroppingActions';
 
-import 'cropperjs/dist/cropper.css';
+import cropperjscss from 'cropperjs/dist/cropper.css?raw';
 
 interface Asset extends Omit<FileDefinition, 'folder'> {
   isLocal?: boolean;
@@ -60,6 +60,8 @@ export const PreviewBox = ({
   replacementFile,
   trackedLocation,
 }: PreviewBoxProps) => {
+
+  const CropperjsStyle = createGlobalStyle`${cropperjscss}`
   const { trackUsage } = useTracking();
   const previewRef = React.useRef(null);
   const [isCropImageReady, setIsCropImageReady] = React.useState(false);
@@ -166,6 +168,7 @@ export const PreviewBox = ({
 
   return (
     <>
+      <CropperjsStyle />
       <RelativeBox hasRadius background="neutral150" borderColor="neutral200">
         {isCropperReady && isInCroppingMode && (
           <CroppingActions
