@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import inquirer, { type Answers } from 'inquirer';
+import { ProjectInput } from '../../services/cli-api';
 import type { CLIContext, CloudApiService } from '../../types';
 import { cloudApiFactory, tokenServiceFactory, local } from '../../services';
 import { promptLogin } from '../../login/action';
@@ -39,7 +40,7 @@ export default async (ctx: CLIContext) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx, token);
-  const environments = await getEnvironmentsList(ctx, cloudApiService, project.name);
+  const environments = await getEnvironmentsList(ctx, cloudApiService, project);
 
   if (!environments) {
     return;
@@ -69,7 +70,7 @@ export default async (ctx: CLIContext) => {
   }
 
   logger.log(
-    `Environment ${chalk.cyan(answer.targetEnvironment)} linked successfully. Future deployments will default to this environment.`
+    `You have successfully linked your project to ${chalk.cyan(answer.targetEnvironment)}, on ${chalk.cyan(project.displayName)}, you are now able to deploy your project.`
   );
   await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', {
     projectName: project.name,
@@ -108,19 +109,21 @@ async function promptUserForEnvironment(
 async function getEnvironmentsList(
   ctx: CLIContext,
   cloudApiService: CloudApiService,
-  projectName: string
+  project: ProjectInput
 ) {
   const spinner = ctx.logger.spinner('Fetching environments...\n').start();
 
   try {
     const {
       data: { data: environmentsList },
-    } = await cloudApiService.listLinkEnvironments({ name: projectName });
+    } = await cloudApiService.listLinkEnvironments({ name: project.name });
     spinner.succeed();
 
-    return (environmentsList as unknown as Environment[]).map((environment: Environment) => {
-      return environment;
-    });
+    return (environmentsList as unknown as Environment[])
+      .filter((environment: Environment) => environment.name !== project.targetEnvironment)
+      .map((environment: Environment) => {
+        return environment;
+      });
   } catch (e: any) {
     if (e.response && e.response.status === 404) {
       spinner.succeed();
