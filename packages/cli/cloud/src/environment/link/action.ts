@@ -51,19 +51,30 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  await trackEvent(ctx, cloudApiService, 'willLinkEnvironment', { projectName: project.name, environment: answer });
+  await trackEvent(ctx, cloudApiService, 'willLinkEnvironment', {
+    projectName: project.name,
+    environment: answer,
+  });
 
   try {
-  await local.addEnvironment(answer.targetEnvironment);
+    await local.addEnvironment(answer.targetEnvironment);
   } catch (e) {
-    await trackEvent(ctx, cloudApiService, 'didNotLinkEnvironment', { projectName: project.name, environment: answer });
+    await trackEvent(ctx, cloudApiService, 'didNotLinkEnvironment', {
+      projectName: project.name,
+      environment: answer,
+    });
     logger.debug('Failed to link environment', e);
     logger.error('An error occurred while trying to link the environment.');
     process.exit(1);
   }
 
-  logger.info(`Environment ${chalk.cyan(answer)} linked successfully. Future deployments will default to this environment.`);
-  await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', { projectName: project.name, environment: answer });
+  logger.info(
+    `Environment ${chalk.cyan(answer)} linked successfully. Future deployments will default to this environment.`
+  );
+  await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', {
+    projectName: project.name,
+    environment: answer,
+  });
 };
 
 async function promptUserForEnvironment(
@@ -94,7 +105,6 @@ async function promptUserForEnvironment(
   }
 }
 
-
 async function getEnvironmentsList(
   ctx: CLIContext,
   cloudApiService: CloudApiService,
@@ -108,11 +118,9 @@ async function getEnvironmentsList(
     } = await cloudApiService.listLinkEnvironments({ name: projectName });
     spinner.succeed();
 
-    const environments = (environmentsList as unknown as Environment[]).map((environment: Environment) => {
+    return (environmentsList as unknown as Environment[]).map((environment: Environment) => {
       return environment;
     });
-
-    return environments;
   } catch (e: any) {
     if (e.response && e.response.status === 404) {
       spinner.succeed();
