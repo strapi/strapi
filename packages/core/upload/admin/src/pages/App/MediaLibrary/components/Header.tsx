@@ -62,7 +62,6 @@ export const Header = ({
         typeof breadcrumbs !== 'boolean' &&
         folder && (
           <Breadcrumbs
-            tag="div"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',
