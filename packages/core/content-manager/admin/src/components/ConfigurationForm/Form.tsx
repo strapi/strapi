@@ -297,7 +297,7 @@ const Header = ({ name }: HeaderProps) => {
         id: getTranslation('components.SettingsViewWrapper.pluginHeader.description.edit-settings'),
         defaultMessage: 'Customize how the edit view will look like.',
       })}
-      navigationAction={<BackButton fallback=".." />}
+      navigationAction={<BackButton />}
       primaryAction={
         <Button disabled={!modified} loading={isSubmitting} type="submit">
           {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}

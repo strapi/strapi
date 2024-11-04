@@ -196,7 +196,8 @@ interface BackButtonProps extends Pick<LinkProps, 'disabled'> {
  * @beta
  * @description The universal back button for the Strapi application. This uses the internal history
  * context to navigate the user back to the previous location. It can be completely disabled in a
- * specific user case.
+ * specific user case. When no history is available, you can provide a fallback destination,
+ * otherwise the link will be disabled.
  */
 const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
   ({ disabled, fallback = '' }, ref) => {
@@ -207,6 +208,7 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
     const goBack = useHistory('BackButton', (state) => state.goBack);
     const history = useHistory('BackButton', (state) => state.history);
     const hasFallback = fallback !== '';
+    const shouldBeDisabled = disabled || (!canGoBack && !hasFallback);
 
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
@@ -218,14 +220,19 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
       }
     };
 
+    // The link destination from the history. Undefined if there is only 1 location in the history.
+    const historyTo = canGoBack ? history.at(-1) : undefined;
+    // If no link destination from the history, use the fallback.
+    const toWithFallback = historyTo ?? fallback;
+
     return (
       <Link
         ref={ref}
         tag={NavLink}
-        to={history.at(-1) ?? fallback}
+        to={toWithFallback}
         onClick={handleClick}
-        disabled={disabled || (!canGoBack && !hasFallback)}
-        aria-disabled={disabled || (!canGoBack && !hasFallback)}
+        disabled={shouldBeDisabled}
+        aria-disabled={shouldBeDisabled}
         startIcon={<ArrowLeft />}
       >
         {formatMessage({
