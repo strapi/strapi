@@ -59,8 +59,10 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await page.getByRole('link', { name: 'Releases' }).click();
     await page.getByRole('link', { name: `${releaseName}` }).click();
     await page.getByRole('button', { name: 'Publish' }).click();
-    expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Publish' })).not.toBeVisible();
+    await expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
+
+    // Check the already released release
+    await expect(page.getByRole('button', { name: 'Publish', exact: true })).not.toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Release edit and delete menu' })
     ).not.toBeVisible();
