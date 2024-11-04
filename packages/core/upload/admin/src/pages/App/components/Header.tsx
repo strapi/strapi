@@ -6,13 +6,13 @@ import { useIntl } from 'react-intl';
 import { useLocation, NavLink } from 'react-router-dom';
 
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs';
-import { getTrad } from '../../../utils/utils';
+import { getTrad } from '../../../utils';
 
 import type { Folder } from '../../../../../shared/contracts/folders';
 import type { CrumbDefinition } from '../../../components/Breadcrumbs/Breadcrumbs';
 
 interface HeaderProps {
-  breadcrumbs?: Array<CrumbDefinition> | boolean;
+  breadcrumbs?: Array<CrumbDefinition> | null;
   canCreate: boolean;
   folder?: Folder | null;
   onToggleEditFolderDialog: ({ created }?: { created?: boolean }) => void;
@@ -20,7 +20,7 @@ interface HeaderProps {
 }
 
 export const Header = ({
-  breadcrumbs = false,
+  breadcrumbs = null,
   canCreate,
   folder = null,
   onToggleEditFolderDialog,
@@ -45,7 +45,6 @@ export const Header = ({
       })}
       subtitle={
         breadcrumbs &&
-        typeof breadcrumbs !== 'boolean' &&
         folder && (
           <Breadcrumbs
             label={formatMessage({

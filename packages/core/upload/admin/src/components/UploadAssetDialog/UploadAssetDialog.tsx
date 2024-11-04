@@ -9,7 +9,7 @@ import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
 
 import type { File, RawFile } from '../../../../shared/contracts/files';
-import type { AllowedFiles } from '../../utils/utils';
+import type { AllowedFiles } from '../../utils';
 
 const Steps = {
   AddAsset: 'AddAsset',

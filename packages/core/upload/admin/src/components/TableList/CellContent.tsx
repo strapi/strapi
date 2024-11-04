@@ -2,7 +2,7 @@ import { Typography } from '@strapi/design-system';
 import parseISO from 'date-fns/parseISO';
 import { useIntl } from 'react-intl';
 
-import { formatBytes, getFileExtension } from '../../utils/utils';
+import { formatBytes, getFileExtension } from '../../utils';
 
 import { PreviewCell } from './PreviewCell';
 

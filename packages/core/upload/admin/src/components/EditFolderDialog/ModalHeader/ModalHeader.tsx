@@ -1,7 +1,7 @@
 import { Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../utils/utils';
+import { getTrad } from '../../../utils';
 
 interface EditFolderModalHeaderProps {
   isEditing?: boolean;

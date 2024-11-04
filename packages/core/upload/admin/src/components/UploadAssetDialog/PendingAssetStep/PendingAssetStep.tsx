@@ -5,7 +5,7 @@ import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strap
 import { useIntl } from 'react-intl';
 
 import { AssetType } from '../../../constants';
-import { getTrad } from '../../../utils/utils';
+import { getTrad } from '../../../utils';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 

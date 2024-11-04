@@ -1,5 +1,5 @@
 import { AssetType } from '../../constants';
-import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils/utils';
+import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 
 import { AudioAssetCard } from './AudioAssetCard';
 import { DocAssetCard } from './DocAssetCard';

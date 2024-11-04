@@ -23,7 +23,7 @@ import {
   getAllowedFiles,
   BreadcrumbDataFolder,
   AllowedFiles,
-} from '../../../utils/utils';
+} from '../../../utils';
 import { AssetGridList } from '../../AssetGridList/AssetGridList';
 import { Breadcrumbs } from '../../Breadcrumbs/Breadcrumbs';
 import { EmptyAssets } from '../../EmptyAssets/EmptyAssets';
@@ -181,7 +181,7 @@ export const BrowseStep = ({
     (asset) => selectedAssets.findIndex((currAsset) => currAsset.id === asset.id) !== -1
   );
   const isSearching = !!queryObject?._q;
-  const isFiltering = queryObject?.filters?.$and?.length && queryObject.filters.$and.length > 0;
+  const isFiltering = !!queryObject?.filters?.$and?.length && queryObject.filters.$and.length > 0;
   const isSearchingOrFiltering = isSearching || isFiltering;
   const assetCount = assets.length;
   const folderCount = folders.length;

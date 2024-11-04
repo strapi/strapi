@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { getFolderParents, getFolderURL, getTrad } from '../../utils/utils';
+import { getFolderParents, getFolderURL, getTrad } from '../../utils';
 
 interface CrumbSimpleMenuAsyncProps {
   parentsToOmit?: number[];

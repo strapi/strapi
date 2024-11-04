@@ -4,7 +4,7 @@ import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { EmptyAssets } from '../../../../components/EmptyAssets/EmptyAssets';
-import { getTrad } from '../../../../utils/utils';
+import { getTrad } from '../../../../utils';
 
 export interface EmptyOrNoPermissionsProps {
   canCreate: boolean;

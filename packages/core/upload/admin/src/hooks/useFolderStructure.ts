@@ -4,7 +4,7 @@ import { useQuery } from 'react-query';
 
 import { FolderNode, GetFolderStructure } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';
-import { getTrad } from '../utils/utils';
+import { getTrad } from '../utils';
 
 import { recursiveRenameKeys } from './utils/renameKeys';
 

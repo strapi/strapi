@@ -1,7 +1,7 @@
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../../utils/utils';
+import { getTrad } from '../../../../utils';
 
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';

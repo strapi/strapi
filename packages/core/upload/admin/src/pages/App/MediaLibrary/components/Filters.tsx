@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 
 import { FilterList } from '../../../../components/FilterList/FilterList';
 import { FilterPopover } from '../../../../components/FilterPopover/FilterPopover';
-import { displayedFilters } from '../../../../utils/utils';
+import { displayedFilters } from '../../../../utils';
 
 import type { Query } from '../../../../../../shared/contracts/files';
 import type { FilterListProps } from '../../../../components/FilterList/FilterList';

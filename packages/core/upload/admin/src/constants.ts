@@ -1,4 +1,4 @@
-import { getTrad } from './utils/utils';
+import { getTrad } from './utils';
 
 export enum AssetType {
   Video = 'video',

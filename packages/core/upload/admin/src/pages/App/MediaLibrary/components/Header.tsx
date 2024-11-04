@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { useLocation, NavLink } from 'react-router-dom';
 
 import { Breadcrumbs } from '../../../../components/Breadcrumbs/Breadcrumbs';
-import { getTrad } from '../../../../utils/utils';
+import { getTrad } from '../../../../utils';
 
 import type { Folder } from '../../../../../../shared/contracts/folders';
 import type { CrumbDefinition } from '../../../../components/Breadcrumbs/Breadcrumbs';
@@ -22,7 +22,7 @@ interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'parent'>
 }
 
 export interface HeaderProps {
-  breadcrumbs?: Array<CrumbDefinition> | boolean;
+  breadcrumbs?: Array<CrumbDefinition> | null;
   canCreate: boolean;
   folder?: FolderDefinition | null;
   onToggleEditFolderDialog: ({ created }?: { created?: boolean }) => void;
@@ -30,7 +30,7 @@ export interface HeaderProps {
 }
 
 export const Header = ({
-  breadcrumbs = false,
+  breadcrumbs = null,
   canCreate,
   folder = null,
   onToggleEditFolderDialog,

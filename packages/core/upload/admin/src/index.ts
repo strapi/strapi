@@ -6,7 +6,7 @@ import { MediaLibraryDialog } from './components/MediaLibraryDialog/MediaLibrary
 import { MediaLibraryInput } from './components/MediaLibraryInput/MediaLibraryInput';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
-import { getTrad, prefixPluginTranslations } from './utils/utils';
+import { getTrad, prefixPluginTranslations } from './utils';
 
 import type { MediaLibraryDialogProps } from './components/MediaLibraryDialog/MediaLibraryDialog';
 import type { MediaLibraryInputProps } from './components/MediaLibraryInput/MediaLibraryInput';

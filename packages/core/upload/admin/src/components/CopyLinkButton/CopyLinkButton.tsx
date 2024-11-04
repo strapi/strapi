@@ -3,7 +3,7 @@ import { IconButton } from '@strapi/design-system';
 import { Link as LinkIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../utils/utils';
+import { getTrad } from '../../utils';
 
 export const CopyLinkButton = ({ url }: { url: string }) => {
   const { toggleNotification } = useNotification();

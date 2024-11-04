@@ -9,20 +9,20 @@ import { AssetType } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
-import { createAssetUrl, getTrad, downloadFile } from '../../../utils/utils';
+import { createAssetUrl, getTrad, downloadFile } from '../../../utils';
 import { CopyLinkButton } from '../../CopyLinkButton/CopyLinkButton';
 import { UploadProgress } from '../../UploadProgress/UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
 import { AssetPreview } from './AssetPreview';
-import { CroppingActions } from './CroppingActions';
 import {
   ActionRow,
   BadgeOverride,
   RelativeBox,
   UploadProgressWrapper,
   Wrapper,
-} from './PreviewBoxComponents';
+} from './Components';
+import { CroppingActions } from './CroppingActions';
 
 import type { File as FileDefinition, RawFile } from '../../../../../shared/contracts/files';
 

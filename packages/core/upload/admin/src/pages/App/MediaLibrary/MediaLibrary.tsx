@@ -42,12 +42,7 @@ import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { usePersistentState } from '../../../hooks/usePersistentState';
 import { useSelectionState } from '../../../hooks/useSelectionState';
-import {
-  containsAssetFilter,
-  getBreadcrumbDataML,
-  getFolderURL,
-  getTrad,
-} from '../../../utils/utils';
+import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../../utils';
 
 import { BulkActions } from './components/BulkActions';
 import { EmptyOrNoPermissions } from './components/EmptyOrNoPermissions';
@@ -240,8 +235,12 @@ export const MediaLibrary = () => {
       <Page.Main>
         <Header
           breadcrumbs={
-            !isCurrentFolderLoading &&
-            (getBreadcrumbDataML(currentFolder!, { pathname, query }) as HeaderProps['breadcrumbs'])
+            !isCurrentFolderLoading
+              ? (getBreadcrumbDataML(currentFolder!, {
+                  pathname,
+                  query,
+                }) as HeaderProps['breadcrumbs'])
+              : null
           }
           canCreate={canCreate}
           onToggleEditFolderDialog={toggleEditFolderDialog}
@@ -530,7 +529,7 @@ export const MediaLibrary = () => {
       {showEditFolderDialog && (
         <EditFolderDialog
           open={showEditFolderDialog}
-          onClose={handleEditFolderClose}
+          onClose={() => handleEditFolderClose()}
           folder={folderToEdit as FolderDefinition}
           parentFolderId={query?.folder as string | number | null | undefined}
           location="upload"

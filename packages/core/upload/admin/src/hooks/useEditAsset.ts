@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from 'react-query';
 
 import { UpdateFile, File as FileAsset } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
-import { getTrad } from '../utils/utils';
+import { getTrad } from '../utils';
 
 export type ErrorMutation = {
   message: string;

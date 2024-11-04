@@ -9,7 +9,7 @@ import {
   getFileExtension,
   getTrad,
   prefixFileUrlWithBackendUrl,
-} from '../../utils/utils';
+} from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
 
 import type { File } from '../../../../shared/contracts/files';

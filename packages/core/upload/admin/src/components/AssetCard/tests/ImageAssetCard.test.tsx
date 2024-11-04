@@ -4,8 +4,8 @@ import { render as renderTL } from '@testing-library/react';
 import en from '../../../translations/en.json';
 import { ImageAssetCard } from '../ImageAssetCard';
 
-jest.mock('../../../utils/utils', () => ({
-  ...jest.requireActual('../../../utils/utils'),
+jest.mock('../../../utils/index', () => ({
+  ...jest.requireActual('../../../utils/index'),
   getTrad: (x: string) => x,
 }));
 

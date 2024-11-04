@@ -16,7 +16,7 @@ import {
   getAllowedFiles,
   moveElement,
   AllowedFiles,
-} from '../../utils/utils';
+} from '../../utils';
 import { EditAssetContent, Asset as EditAsset } from '../EditAssetDialog/EditAssetContent';
 import { EditFolderContent } from '../EditFolderDialog/EditFolderDialog';
 

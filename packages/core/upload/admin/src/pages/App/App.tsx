@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
 import { useConfig } from '../../hooks/useConfig';
-import { getTrad } from '../../utils/utils';
+import { getTrad } from '../../utils';
 
 import { MediaLibrary } from './MediaLibrary/MediaLibrary';
 
@@ -18,7 +18,7 @@ const ConfigureTheView = React.lazy(async () =>
 export const Upload = () => {
   const {
     config: { isLoading, isError, data: config },
-  } = useConfig();
+  } = useConfig() as { config: { isLoading: boolean; isError: boolean; data: Configuration } };
 
   const [{ rawQuery }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
@@ -29,9 +29,9 @@ export const Upload = () => {
       return;
     }
     setQuery({
-      sort: (config as Configuration).sort,
+      sort: config.sort,
       page: 1,
-      pageSize: (config as Configuration).pageSize,
+      pageSize: config.pageSize,
     });
   }, [isLoading, isError, config, rawQuery, setQuery]);
 

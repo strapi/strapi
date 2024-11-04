@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { File } from '../../../../shared/contracts/files';
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import { getTrad, normalizeAPIError } from '../../utils/utils';
+import { getTrad, normalizeAPIError } from '../../utils';
 import { SelectTree } from '../SelectTree/SelectTree';
 
 import type { Folder } from '../../../../shared/contracts/folders';

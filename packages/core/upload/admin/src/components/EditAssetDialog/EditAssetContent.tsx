@@ -24,12 +24,7 @@ import * as yup from 'yup';
 
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
-import {
-  findRecursiveFolderByValue,
-  getTrad,
-  getFileExtension,
-  formatBytes,
-} from '../../utils/utils';
+import { findRecursiveFolderByValue, getTrad, getFileExtension, formatBytes } from '../../utils';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';
 
@@ -162,7 +157,7 @@ export const EditAssetContent = ({
     },
   };
 
-  const handleClose = (values?: object) => {
+  const handleClose = (values?: { [key: string]: unknown }) => {
     if (!isEqual(initialFormData, values)) {
       handleConfirmClose();
     } else {
@@ -357,7 +352,7 @@ export const EditAssetContent = ({
             </Grid.Root>
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={() => handleClose(values)} variant="tertiary">
+            <Button onClick={() => handleClose({ ...values })} variant="tertiary">
               {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
             </Button>
             <Flex gap={2}>

@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { tableHeaders as cells } from '../../constants';
-import { getTrad } from '../../utils/utils';
+import { getTrad } from '../../utils';
 
 import { CellContent } from './CellContent';
 

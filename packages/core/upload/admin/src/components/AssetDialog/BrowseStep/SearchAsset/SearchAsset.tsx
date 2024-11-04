@@ -5,7 +5,7 @@ import { IconButton, Searchbar, SearchForm } from '@strapi/design-system';
 import { Search } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { getTrad } from '../../../../utils/utils';
+import { getTrad } from '../../../../utils';
 
 import type { Query } from '../../../../../../shared/contracts/files';
 

@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
-import { getTrad, rawFileToAsset } from '../../../utils/utils';
+import { getTrad, rawFileToAsset } from '../../../utils';
 
 import type { FileWithRawFile } from './AddAssetStep';
 

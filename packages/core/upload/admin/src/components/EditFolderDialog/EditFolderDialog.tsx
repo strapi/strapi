@@ -20,7 +20,7 @@ import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils/utils';
+import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
 import { ContextInfo } from '../ContextInfo/ContextInfo';
 import { SelectTree } from '../SelectTree/SelectTree';
 
@@ -50,8 +50,7 @@ export interface EditFolderDialogProps {
   location?: string;
   folder?: FolderDefinition;
   open?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onClose: (arg?: any) => void;
+  onClose: (payload?: { created?: boolean | undefined } | boolean) => void;
 }
 
 export const EditFolderContent = ({

@@ -4,7 +4,7 @@ import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { displayedFilters } from '../../../utils/utils';
+import { displayedFilters } from '../../../utils';
 import { FilterList } from '../../FilterList/FilterList';
 import { FilterPopover } from '../../FilterPopover/FilterPopover';
 

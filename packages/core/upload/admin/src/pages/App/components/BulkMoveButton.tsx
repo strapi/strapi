@@ -6,14 +6,10 @@ import { useIntl } from 'react-intl';
 
 import { BulkMoveDialog } from '../../../components/BulkMoveDialog/BulkMoveDialog';
 
-import type { File } from '../../../../../shared/contracts/files';
+import type { FileWithType } from './BulkDeleteButton';
 import type { Folder as FolderDefinition } from '../../../../../shared/contracts/folders';
 
 interface FolderWithType extends FolderDefinition {
-  type: string;
-}
-
-interface FileWithType extends File {
   type: string;
 }
 

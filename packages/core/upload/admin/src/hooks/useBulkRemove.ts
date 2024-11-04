@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from 'react-query';
 
 import { BulkDeleteFiles, File } from '../../../shared/contracts/files';
 import { pluginId } from '../pluginId';
-import { getTrad } from '../utils/utils';
+import { getTrad } from '../utils';
 
 import type { BulkDeleteFolders, FolderDefinition } from '../../../shared/contracts/folders';
 

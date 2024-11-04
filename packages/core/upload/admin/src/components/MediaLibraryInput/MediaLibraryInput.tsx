@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useField, useNotification } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
-import { getTrad, getAllowedFiles, AllowedFiles } from '../../utils/utils';
+import { getTrad, getAllowedFiles, AllowedFiles } from '../../utils';
 import { AssetDialog } from '../AssetDialog/AssetDialog';
 import { EditFolderDialog } from '../EditFolderDialog/EditFolderDialog';
 import { UploadAssetDialog, Asset } from '../UploadAssetDialog/UploadAssetDialog';

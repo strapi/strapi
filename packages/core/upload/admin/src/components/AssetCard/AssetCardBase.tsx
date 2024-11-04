@@ -19,7 +19,7 @@ import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { getTrad } from '../../utils/utils';
+import { getTrad } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;

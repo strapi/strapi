@@ -2,7 +2,7 @@ import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { sortOptions } from '../../constants';
-import { getTrad } from '../../utils/utils';
+import { getTrad } from '../../utils';
 
 import type { Query } from '../../../../shared/contracts/files';
 

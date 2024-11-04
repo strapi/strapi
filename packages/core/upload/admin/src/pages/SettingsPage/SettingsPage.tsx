@@ -9,7 +9,7 @@ import { useMutation, useQuery } from 'react-query';
 
 import { UpdateSettings } from '../../../../shared/contracts/settings';
 import { PERMISSIONS } from '../../constants';
-import { getTrad } from '../../utils/utils';
+import { getTrad } from '../../utils';
 
 import { init } from './init';
 import { initialState, reducer } from './reducer';

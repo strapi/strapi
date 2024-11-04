@@ -13,7 +13,7 @@ import { CaretDown, CaretUp } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { tableHeaders } from '../../constants';
-import { getTrad } from '../../utils/utils';
+import { getTrad } from '../../utils';
 
 import { TableRows } from './TableRows';
 

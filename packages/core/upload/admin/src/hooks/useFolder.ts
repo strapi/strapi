@@ -4,7 +4,7 @@ import { useQuery } from 'react-query';
 
 import { GetFolder } from '../../../shared/contracts/folders';
 import { pluginId } from '../pluginId';
-import { getTrad } from '../utils/utils';
+import { getTrad } from '../utils';
 
 export const useFolder = (id: number | null | undefined, { enabled = true } = {}) => {
   const { toggleNotification } = useNotification();
