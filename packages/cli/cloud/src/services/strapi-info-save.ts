@@ -8,7 +8,10 @@ export type LocalSave = {
   project?: Omit<ProjectInfo, 'id'>;
 };
 
-export async function addEnvironment(targetEnvironment: string, { directoryPath }: { directoryPath?: string } = {}) {
+export async function addEnvironment(
+  targetEnvironment: string,
+  { directoryPath }: { directoryPath?: string } = {}
+) {
   const alreadyInFileData = await retrieve({ directoryPath });
   const storedData = {
     ...alreadyInFileData,
