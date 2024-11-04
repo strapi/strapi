@@ -9,6 +9,7 @@ import { LocalSave } from '../services/strapi-info-save';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { promptLogin } from '../login/action';
 import { trackEvent } from '../utils/analytics';
+import { getLocalConfig } from '../utils/get-local-config';
 
 const QUIT_OPTION = 'Quit';
 
@@ -38,16 +39,6 @@ type Project = {
   displayName: string;
   isMaintainer: boolean;
 };
-
-async function getExistingConfig(ctx: CLIContext) {
-  try {
-    return await local.retrieve();
-  } catch (e) {
-    ctx.logger.debug('Failed to get project config', e);
-    ctx.logger.error('An error occurred while retrieving config data from your local project.');
-    return null;
-  }
-}
 
 async function promptForRelink(
   ctx: CLIContext,
@@ -157,7 +148,7 @@ export default async (ctx: CLIContext) => {
 
   const cloudApiService = await cloudApiFactory(ctx, token);
 
-  const existingConfig: LocalSave | null = await getExistingConfig(ctx);
+  const existingConfig: LocalSave | null = await getLocalConfig(ctx);
   const shouldRelink = await promptForRelink(ctx, cloudApiService, existingConfig);
 
   if (!shouldRelink) {

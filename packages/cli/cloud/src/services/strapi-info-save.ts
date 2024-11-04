@@ -1,20 +1,31 @@
 import fse from 'fs-extra';
 import path from 'path';
-import type { ProjectInfos } from './cli-api';
+import type { ProjectInfo } from './cli-api';
 
 export const LOCAL_SAVE_FILENAME = '.strapi-cloud.json';
 
 export type LocalSave = {
-  project?: Omit<ProjectInfos, 'id'>;
+  project?: Omit<ProjectInfo, 'id'>;
 };
 
-export async function save(data: LocalSave, { directoryPath }: { directoryPath?: string } = {}) {
+export async function addEnvironment(targetEnvironment: string, { directoryPath }: { directoryPath?: string } = {}) {
   const alreadyInFileData = await retrieve({ directoryPath });
-  const storedData = { ...alreadyInFileData, ...data };
+  const storedData = {
+    ...alreadyInFileData,
+    project: {
+      ...alreadyInFileData.project,
+      targetEnvironment,
+    },
+  };
   const pathToFile = path.join(directoryPath || process.cwd(), LOCAL_SAVE_FILENAME);
-  // Ensure the directory exists
   await fse.ensureDir(path.dirname(pathToFile));
   await fse.writeJson(pathToFile, storedData, { encoding: 'utf8' });
+}
+
+export async function save(data: LocalSave, { directoryPath }: { directoryPath?: string } = {}) {
+  const pathToFile = path.join(directoryPath || process.cwd(), LOCAL_SAVE_FILENAME);
+  await fse.ensureDir(path.dirname(pathToFile));
+  await fse.writeJson(pathToFile, data, { encoding: 'utf8' });
 }
 
 export async function retrieve({
