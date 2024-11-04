@@ -68,8 +68,8 @@ export default async (ctx: CLIContext) => {
     process.exit(1);
   }
 
-  logger.info(
-    `Environment ${chalk.cyan(answer)} linked successfully. Future deployments will default to this environment.`
+  logger.log(
+    `Environment ${chalk.cyan(answer.targetEnvironment)} linked successfully. Future deployments will default to this environment.`
   );
   await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', {
     projectName: project.name,
