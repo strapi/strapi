@@ -15,14 +15,14 @@ import { UploadProgress } from '../../UploadProgress/UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
 import { AssetPreview } from './AssetPreview';
+import { CroppingActions } from './CroppingActions';
 import {
   ActionRow,
   BadgeOverride,
   RelativeBox,
   UploadProgressWrapper,
   Wrapper,
-} from './Components';
-import { CroppingActions } from './CroppingActions';
+} from './PreviewComponents';
 
 import type { File as FileDefinition, RawFile } from '../../../../../shared/contracts/files';
 

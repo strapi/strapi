@@ -6,8 +6,8 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { AssetType } from '../../../../constants';
 import { PendingAssetStep } from '../PendingAssetStep';
 
-jest.mock('../../../../utils/index', () => ({
-  ...jest.requireActual('../../../../utils/index'),
+jest.mock('../../../../utils', () => ({
+  ...jest.requireActual('../../../../utils'),
   getTrad: (x: string) => x,
 }));
 

@@ -311,25 +311,6 @@ const DocumentActionsMenu = ({
                   </Flex>
                   {action.label}
                 </Flex>
-                {/* TODO: remove this in 5.1 release */}
-                {action.id.startsWith('HistoryAction') && (
-                  <Flex
-                    alignItems="center"
-                    background="alternative100"
-                    borderStyle="solid"
-                    borderColor="alternative200"
-                    borderWidth="1px"
-                    height={5}
-                    paddingLeft={2}
-                    paddingRight={2}
-                    hasRadius
-                    color="alternative600"
-                  >
-                    <Typography variant="sigma" fontWeight="bold" lineHeight={1}>
-                      {formatMessage({ id: 'global.new', defaultMessage: 'New' })}
-                    </Typography>
-                  </Flex>
-                )}
               </Flex>
             </Menu.Item>
           );
@@ -685,7 +666,6 @@ const PublishAction: DocumentActionComponent = ({
   };
 
   const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
-
   // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
   // see RFC "Count draft relations" in Notion
   const enableDraftRelationsCount = false;

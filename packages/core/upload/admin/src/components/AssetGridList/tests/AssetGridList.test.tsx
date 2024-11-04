@@ -7,8 +7,8 @@ import { AssetGridList } from '../AssetGridList';
 
 type Messages = typeof en;
 
-jest.mock('../../../utils/index', () => ({
-  ...jest.requireActual('../../../utils/index'),
+jest.mock('../../../utils', () => ({
+  ...jest.requireActual('../../../utils'),
   getTrad: (x: string) => x,
 }));
 

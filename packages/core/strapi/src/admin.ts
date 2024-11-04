@@ -13,14 +13,10 @@ const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderA
     plugins: {
       'content-manager': contentManager,
       'content-type-builder': contentTypeBuilder,
-      // @ts-expect-error – TODO: fix this
       email,
-      // @ts-expect-error – TODO: we need to fix the Type error "You cannot assign the type 'AdminInput' to the type 'StrapiAppPlugin'"
       upload,
-      // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
       contentReleases,
       i18n,
-      // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
       reviewWorkflows,
       ...plugins,
     },
