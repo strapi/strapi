@@ -1,6 +1,6 @@
 {
   "name": "@strapi/i18n",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -53,8 +53,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-rc.11",
-    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/design-system": "2.0.0-rc.12",
+    "@strapi/icons": "2.0.0-rc.12",
     "@strapi/utils": "workspace:*",
     "lodash": "4.17.21",
     "qs": "6.11.1",

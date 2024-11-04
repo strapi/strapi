@@ -237,5 +237,5 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
   }
 );
 
-export { BackButton, HistoryProvider };
+export { BackButton, HistoryProvider, useHistory };
 export type { BackButtonProps, HistoryProviderProps, HistoryContextValue, HistoryState };
