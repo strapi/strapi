@@ -199,6 +199,7 @@ const PreviewHeader = () => {
       gridCols={3}
       paddingLeft={2}
       paddingRight={2}
+      style={{ gridTemplateRows: '47px' }}
       background="neutral0"
       borderColor="neutral150"
       tag="header"
