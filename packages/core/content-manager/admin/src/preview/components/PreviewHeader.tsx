@@ -174,13 +174,13 @@ const PreviewTabs = () => {
         >
           <StatusTab value="draft">
             {formatMessage({
-              id: 'preview.tabs.draft',
+              id: 'content-manager.containers.List.draft',
               defaultMessage: 'draft',
             })}
           </StatusTab>
           <StatusTab value="published" disabled={documentStatus === 'draft'}>
             {formatMessage({
-              id: 'preview.tabs.published',
+              id: 'content-manager.containers.List.published',
               defaultMessage: 'published',
             })}
           </StatusTab>
@@ -235,12 +235,10 @@ const PreviewHeader = () => {
           <DocumentStatus />
         </Flex>
       </Grid.Item>
-
       {/* Tabs */}
       <Grid.Item xs={1}>
         <PreviewTabs />
       </Grid.Item>
-
       {/* Copy link */}
       <Grid.Item xs={1} justifyContent={'end'}>
         <IconButton
