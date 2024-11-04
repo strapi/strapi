@@ -15,29 +15,29 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   position: relative;
 }
 
-.c11 {
+.c12 {
   border-radius: 4px;
   display: inline-flex;
   cursor: pointer;
 }
 
-.c16 {
+.c17 {
   padding-block-start: 8px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
   padding-inline-end: 12px;
 }
 
-.c19 {
+.c20 {
   padding-block-start: 4px;
 }
 
-.c24 {
+.c25 {
   padding-block-start: 4px;
   flex-grow: 1;
 }
 
-.c27 {
+.c28 {
   padding-inline-start: 8px;
   padding-inline-end: 8px;
   min-width: 20px;
@@ -58,45 +58,45 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   display: flex;
 }
 
-.c17 {
+.c18 {
   align-items: flex-start;
   flex-direction: row;
   display: flex;
 }
 
-.c25 {
+.c26 {
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
-.c28 {
+.c29 {
   align-items: center;
   justify-content: center;
   flex-direction: row;
   display: inline-flex;
 }
 
-.c20 {
+.c21 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
 }
 
-.c21 {
+.c22 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #32324d;
   font-weight: 600;
 }
 
-.c22 {
+.c23 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c31 {
+.c32 {
   font-weight: 600;
   font-size: 1.1rem;
   line-height: 1.45;
@@ -105,7 +105,7 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   line-height: 1rem;
 }
 
-.c13 {
+.c14 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -116,12 +116,12 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   width: 1px;
 }
 
-.c29 {
+.c30 {
   border-radius: 4px;
   padding-block: 0.7rem;
 }
 
-.c12 {
+.c13 {
   text-decoration: none;
   padding-block: 0.7rem;
   padding-inline: 0.7rem;
@@ -131,16 +131,16 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   color: #8e8ea9;
 }
 
-.c12:hover {
+.c13:hover {
   background-color: #f6f6f9;
   color: #666687;
 }
 
-.c12:active {
+.c13:active {
   background-color: #eaeaef;
 }
 
-.c12[aria-disabled='true'] {
+.c13[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
@@ -153,13 +153,13 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   left: 12px;
 }
 
-.c8 {
+.c9 {
   position: absolute;
   top: 12px;
   right: 12px;
 }
 
-.c15 {
+.c16 {
   margin: 0;
   padding: 0;
   max-height: 100%;
@@ -167,7 +167,7 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   object-fit: contain;
 }
 
-.c14 {
+.c15 {
   display: flex;
   justify-content: center;
   height: 16.4rem;
@@ -177,12 +177,12 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   border-top-right-radius: 4px;
 }
 
-.c26 {
+.c27 {
   margin-left: auto;
   flex-shrink: 0;
 }
 
-.c30 {
+.c31 {
   margin-left: 4px;
 }
 
@@ -218,11 +218,18 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   transform: translate(-50%, -50%);
   width: 100%;
   height: 100%;
+  z-index: -1;
   min-width: 44px;
   min-height: 44px;
 }
 
-.c18 {
+.c8 {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.c19 {
   word-break: break-all;
 }
 
@@ -230,15 +237,15 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c23 {
+.c24 {
   text-transform: uppercase;
 }
 
-.c10 {
+.c11 {
   opacity: 0;
 }
 
-.c10:focus-within {
+.c11:focus-within {
   opacity: 1;
 }
 
@@ -246,12 +253,12 @@ exports[`ImageAssetCard snapshots the component 1`] = `
   cursor: pointer;
 }
 
-.c1:hover .c9 {
+.c1:hover .c10 {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c12 {
+  .c13 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -278,15 +285,21 @@ exports[`ImageAssetCard snapshots the component 1`] = `
             role="checkbox"
             type="button"
             value="on"
-          />
+          >
+            <span
+              class="c8"
+              data-state="unchecked"
+              style="pointer-events: auto; display: inline-flex;"
+            />
+          </button>
         </div>
       </div>
       <div
-        class="c5 c8 c9 c10"
+        class="c5 c9 c10 c11"
       >
         <button
           aria-disabled="false"
-          class="c11 c3 c12"
+          class="c12 c3 c13"
           data-state="closed"
         >
           <svg
@@ -303,40 +316,40 @@ exports[`ImageAssetCard snapshots the component 1`] = `
             />
           </svg>
           <span
-            class="c13"
+            class="c14"
           >
             Edit
           </span>
         </button>
       </div>
       <div
-        class="c14"
+        class="c15"
       >
         <img
           alt=""
           aria-hidden="true"
-          class="c15"
+          class="c16"
           src="http://somewhere.com/hello.png"
         />
       </div>
     </div>
     <div
-      class="c16"
+      class="c17"
     >
       <div
-        class="c17"
+        class="c18"
       >
         <div
-          class="c18"
+          class="c19"
         >
           <div
-            class="c19"
+            class="c20"
           >
             <h2
-              class="c20"
+              class="c21"
             >
               <span
-                class="c21"
+                class="c22"
                 id=":r0:-title"
               >
                 hello.png
@@ -344,10 +357,10 @@ exports[`ImageAssetCard snapshots the component 1`] = `
             </h2>
           </div>
           <div
-            class="c22"
+            class="c23"
           >
             <span
-              class="c23"
+              class="c24"
             >
               png
             </span>
@@ -355,16 +368,16 @@ exports[`ImageAssetCard snapshots the component 1`] = `
           </div>
         </div>
         <div
-          class="c24 c25"
+          class="c25 c26"
         >
           <div
-            class="c26"
+            class="c27"
           >
             <div
-              class="c27 c28 c29 c30"
+              class="c28 c29 c30 c31"
             >
               <span
-                class="c31"
+                class="c32"
               >
                 Image
               </span>
@@ -375,7 +388,7 @@ exports[`ImageAssetCard snapshots the component 1`] = `
     </div>
   </article>
   <span
-    class="c13"
+    class="c14"
   >
     <p
       aria-live="polite"

@@ -54,6 +54,15 @@ export const isEntryValid = async (
       entry
     );
 
+    const workflowsService = strapi.plugin('review-workflows').service('workflows');
+    const workflow = await workflowsService.getAssignedWorkflow(contentTypeUid, {
+      populate: 'stageRequiredToPublish',
+    });
+
+    if (workflow?.stageRequiredToPublish) {
+      return entry.strapi_stage.id === workflow.stageRequiredToPublish.id;
+    }
+
     return true;
   } catch {
     return false;
