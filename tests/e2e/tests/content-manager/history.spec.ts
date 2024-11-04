@@ -252,7 +252,9 @@ describeOnCondition(edition === 'EE')('History', () => {
       await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
       await page.waitForURL(ARTICLE_CREATE_URL);
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
-      await page.getByRole('textbox', { name: 'slug' }).fill('being-from-kansas');
+      await page
+        .getByRole('textbox', { name: 'slug This value is unique for the selected locale' })
+        .fill('being-from-kansas');
       await page.getByRole('button', { name: 'Save' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
 
