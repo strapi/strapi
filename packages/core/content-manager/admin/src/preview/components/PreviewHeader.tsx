@@ -226,21 +226,19 @@ const PreviewHeader = () => {
       tag="header"
     >
       {/* Title and status */}
-      <Grid.Item xs={1} paddingTop={2} paddingBottom={2}>
-        <Flex gap={3}>
-          <ClosePreviewButton />
-          <Typography tag="h1" fontWeight={600} fontSize={2}>
-            {title}
-          </Typography>
-          <DocumentStatus />
-        </Flex>
+      <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
+        <ClosePreviewButton />
+        <Typography tag="h1" fontWeight={600} fontSize={2}>
+          {title}
+        </Typography>
+        <DocumentStatus />
       </Grid.Item>
       {/* Tabs */}
       <Grid.Item xs={1}>
         <PreviewTabs />
       </Grid.Item>
       {/* Copy link */}
-      <Grid.Item xs={1} justifyContent={'end'} paddingTop={2} paddingBottom={2}>
+      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2}>
         <IconButton
           type="button"
           label={formatMessage({
