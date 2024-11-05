@@ -95,7 +95,6 @@ const LocaleOption = ({
           paddingRight="6px"
           paddingTop="2px"
           paddingBottom="2px"
-          showBullet={false}
           size="S"
           variant={statusVariants[status]}
         >

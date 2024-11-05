@@ -16,12 +16,18 @@ export const sendDidChangeEntryStage = async () => {
   strapi.telemetry.send('didChangeEntryStage', {});
 };
 
-export const sendDidCreateWorkflow = async () => {
-  strapi.telemetry.send('didCreateWorkflow', {});
+export const sendDidCreateWorkflow = async (
+  workflowId: string,
+  hasRequiredStageToPublish: boolean
+) => {
+  strapi.telemetry.send('didCreateWorkflow', { workflowId, hasRequiredStageToPublish });
 };
 
-export const sendDidEditWorkflow = async () => {
-  strapi.telemetry.send('didEditWorkflow', {});
+export const sendDidEditWorkflow = async (
+  workflowId: string,
+  hasRequiredStageToPublish: boolean
+) => {
+  strapi.telemetry.send('didEditWorkflow', { workflowId, hasRequiredStageToPublish });
 };
 
 export const sendDidEditAssignee = async (fromId: any, toId: any) => {
