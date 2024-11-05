@@ -1,5 +1,6 @@
 import { useField } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Grid } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
@@ -13,6 +14,7 @@ const NonRepeatableComponent = ({
   children,
   layout,
 }: NonRepeatableComponentProps) => {
+  const { formatMessage } = useIntl();
   const { value } = useField(name);
   const level = useComponent('NonRepeatableComponent', (state) => state.level);
   const isNested = level > 0;
@@ -41,6 +43,11 @@ const NonRepeatableComponent = ({
                    */
                   const completeFieldName = `${name}.${field.name}`;
 
+                  const translatedLabel = formatMessage({
+                    id: `content-manager.components.${attribute.component}.${field.name}`,
+                    defaultMessage: field.label,
+                  });
+
                   return (
                     <Grid.Item
                       col={size}
@@ -50,7 +57,7 @@ const NonRepeatableComponent = ({
                       direction="column"
                       alignItems="stretch"
                     >
-                      {children({ ...field, name: completeFieldName })}
+                      {children({ ...field, label: translatedLabel, name: completeFieldName })}
                     </Grid.Item>
                   );
                 })}
