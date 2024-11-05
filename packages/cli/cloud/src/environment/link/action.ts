@@ -54,7 +54,7 @@ export default async (ctx: CLIContext) => {
 
   await trackEvent(ctx, cloudApiService, 'willLinkEnvironment', {
     projectName: project.name,
-    environment: answer,
+    environmentName: answer.targetEnvironment,
   });
 
   try {
@@ -62,7 +62,7 @@ export default async (ctx: CLIContext) => {
   } catch (e) {
     await trackEvent(ctx, cloudApiService, 'didNotLinkEnvironment', {
       projectName: project.name,
-      environment: answer,
+      environmentName: answer.targetEnvironment,
     });
     logger.debug('Failed to link environment', e);
     logger.error('An error occurred while trying to link the environment.');
@@ -74,7 +74,7 @@ export default async (ctx: CLIContext) => {
   );
   await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', {
     projectName: project.name,
-    environment: answer,
+    environmentName: answer.targetEnvironment,
   });
 };
 
