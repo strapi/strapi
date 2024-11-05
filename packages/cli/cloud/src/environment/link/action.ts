@@ -70,7 +70,7 @@ export default async (ctx: CLIContext) => {
   }
 
   logger.log(
-    `You have successfully linked your project to ${chalk.cyan(answer.targetEnvironment)}, on ${chalk.cyan(project.displayName)}, you are now able to deploy your project.`
+    `You have successfully linked your project to ${chalk.cyan(answer.targetEnvironment)}, on ${chalk.cyan(project.displayName)}. You are now able to deploy your project.`
   );
   await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', {
     projectName: project.name,
