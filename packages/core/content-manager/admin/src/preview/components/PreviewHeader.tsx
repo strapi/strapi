@@ -221,13 +221,12 @@ const PreviewHeader = () => {
       gridCols={3}
       paddingLeft={2}
       paddingRight={2}
-      style={{ gridTemplateRows: '47px' }}
       background="neutral0"
       borderColor="neutral150"
       tag="header"
     >
       {/* Title and status */}
-      <Grid.Item xs={1}>
+      <Grid.Item xs={1} paddingTop={2} paddingBottom={2}>
         <Flex gap={3}>
           <ClosePreviewButton />
           <Typography tag="h1" fontWeight={600} fontSize={2}>
@@ -241,7 +240,7 @@ const PreviewHeader = () => {
         <PreviewTabs />
       </Grid.Item>
       {/* Copy link */}
-      <Grid.Item xs={1} justifyContent={'end'}>
+      <Grid.Item xs={1} justifyContent={'end'} paddingTop={2} paddingBottom={2}>
         <IconButton
           type="button"
           label={formatMessage({
