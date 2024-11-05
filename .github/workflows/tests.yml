@@ -209,7 +209,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
+          name: ce-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
