@@ -24,11 +24,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
      * Update the assignee of an entity
      */
     async updateEntityAssignee(
-      documentId: string,
-      locale: string,
+      entityToUpdate: {
+        id: number | string;
+        documentId: string;
+        locale: string;
+        updatedAt: string;
+      },
       model: UID.ContentType,
       assigneeId: string
     ) {
+      const { documentId, locale } = entityToUpdate;
+
       if (isNil(assigneeId)) {
         return this.deleteEntityAssignee(documentId, locale, model);
       }
@@ -41,13 +47,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(documentId, model), assigneeId);
 
-      return strapi.documents(model).update({
+      const entity = await strapi.documents(model).update({
         documentId,
         locale,
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
         fields: [],
       });
+
+      // Update the `updated_at` field of the entity, so that the `status` is not considered `Modified`
+      const { tableName } = strapi.db.metadata.get(model);
+      await strapi.db
+        .connection()
+        .from(tableName)
+        .where({ id: entityToUpdate.id })
+        .update({
+          updated_at: new Date(entityToUpdate.updatedAt),
+        });
+
+      return entity;
     },
 
     async deleteEntityAssignee(documentId: string, locale: string, model: UID.ContentType) {
