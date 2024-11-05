@@ -195,7 +195,7 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright@1.42.1 install --with-deps
+        run: npx playwright install --with-deps
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
@@ -239,7 +239,7 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright@1.42.1 install --with-deps
+        run: npx playwright install --with-deps
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
