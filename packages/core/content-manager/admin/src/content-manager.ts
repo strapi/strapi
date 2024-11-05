@@ -1,7 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { INJECTION_ZONES } from './components/InjectionZone';
 import { PLUGIN_ID } from './constants/plugin';
-import { HistoryAction } from './history/components/HistoryAction';
 import {
   DEFAULT_ACTIONS,
   type DocumentActionDescription,
