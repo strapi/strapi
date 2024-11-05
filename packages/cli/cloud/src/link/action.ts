@@ -192,7 +192,9 @@ export default async (ctx: CLIContext) => {
     }
 
     await local.save({ project: answer.linkProject });
-    logger.log(` You have successfully linked your project to ${chalk.cyan(answer.linkProject.displayName)}. You are now able to deploy your project.`);
+    logger.log(
+      ` You have successfully linked your project to ${chalk.cyan(answer.linkProject.displayName)}. You are now able to deploy your project.`
+    );
     await trackEvent(ctx, cloudApiService, 'didLinkProject', {
       projectInternalName: answer.linkProject,
     });
