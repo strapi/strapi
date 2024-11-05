@@ -152,6 +152,15 @@ const EditViewPage = () => {
     documentTitle = schema.info.displayName;
   }
 
+  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
+    const yupSchema = createYupSchema(schema?.attributes, components, {
+      status,
+      ...options,
+    });
+
+    return yupSchema.validateSync(values, { abortEarly: false });
+  };
+
   return (
     <Main paddingLeft={10} paddingRight={10}>
       <Page.Title>{documentTitle}</Page.Title>
@@ -167,6 +176,7 @@ const EditViewPage = () => {
 
           return yupSchema.validate(values, { abortEarly: false });
         }}
+        initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
         {({ resetForm }) => (
           <>
