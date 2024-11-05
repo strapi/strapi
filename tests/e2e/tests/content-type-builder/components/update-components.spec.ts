@@ -25,6 +25,38 @@ test.describe('Update a new component', () => {
 
   const componentAttributeName = 'mycomponentname';
 
+  const singleType = {
+    attributes: [
+      {
+        component: {
+          useExisting: 'SomeComponent',
+          options: {
+            name: componentAttributeName,
+          },
+        },
+        type: 'component',
+        name: componentAttributeName,
+      },
+    ],
+    name: 'Singletypepage',
+  };
+
+  const collectionType = {
+    attributes: [
+      {
+        component: {
+          useExisting: 'SomeComponent',
+          options: {
+            name: componentAttributeName,
+          },
+        },
+        type: 'component',
+        name: componentAttributeName,
+      },
+    ],
+    name: 'Mycollectiontype',
+  };
+
   test.beforeEach(async ({ page }) => {
     await sharedSetup('update-component', page, {
       resetFiles: true,
@@ -46,37 +78,9 @@ test.describe('Update a new component', () => {
         await navToHeader(page, ['Content Manager', 'Homepage'], 'Homepage');
         await navToHeader(page, ['Content-Type Builder'], 'Article');
 
-        await createCollectionType(page, {
-          attributes: [
-            {
-              component: {
-                useExisting: 'SomeComponent',
-                options: {
-                  name: componentAttributeName,
-                },
-              },
-              type: 'component',
-              name: componentAttributeName,
-            },
-          ],
-          name: 'mycollectiontype',
-        });
+        await createCollectionType(page, collectionType);
 
-        await createSingleType(page, {
-          attributes: [
-            {
-              component: {
-                useExisting: 'SomeComponent',
-                options: {
-                  name: componentAttributeName,
-                },
-              },
-              type: 'component',
-              name: componentAttributeName,
-            },
-          ],
-          name: 'singletypepage',
-        });
+        await createSingleType(page, singleType);
       },
     });
   });
@@ -89,42 +93,42 @@ test.describe('Update a new component', () => {
     await addAttributeToComponent(page, 'SomeComponent', addedAttribute);
 
     // confirm that it exists in the content type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Mycollectiontype'], 'Mycollectiontype');
+    await navToHeader(page, ['Content-Type Builder', collectionType.name], collectionType.name);
     await expect(page.getByText(addedAttribute.name, { exact: true })).toBeVisible();
 
     // confirm that it exists in the single type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Singletypepage'], 'Singletypepage');
+    await navToHeader(page, ['Content-Type Builder', singleType.name], singleType.name);
     await expect(page.getByText(addedAttribute.name, { exact: true })).toBeVisible();
   });
 
   test('Remove attribute from component', async ({ page }) => {
     const removedAttribute = originalAttributes[0];
     // confirm that it initially exists in the content type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Mycollectiontype'], 'Mycollectiontype');
+    await navToHeader(page, ['Content-Type Builder', collectionType.name], collectionType.name);
     await expect(page.getByText(removedAttribute.name, { exact: true })).toBeVisible();
 
     // confirm that it initially exists in the single type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Singletypepage'], 'Singletypepage');
+    await navToHeader(page, ['Content-Type Builder', singleType.name], singleType.name);
     await expect(page.getByText(removedAttribute.name, { exact: true })).toBeVisible();
 
     await removeAttributeFromComponent(page, 'SomeComponent', removedAttribute.name);
 
     // confirm that it no longer exists in the content type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Mycollectiontype'], 'Mycollectiontype');
+    await navToHeader(page, ['Content-Type Builder', collectionType.name], collectionType.name);
     await expect(page.getByText(removedAttribute.name, { exact: true })).not.toBeVisible();
 
     // confirm that it no longer exists in the single type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Singletypepage'], 'Singletypepage');
+    await navToHeader(page, ['Content-Type Builder', singleType.name], singleType.name);
     await expect(page.getByText(removedAttribute.name, { exact: true })).not.toBeVisible();
   });
 
   test('delete component', async ({ page }) => {
     // confirm it exists in collection type
-    await navToHeader(page, ['Content-Type Builder', 'Mycollectiontype'], 'Mycollectiontype');
+    await navToHeader(page, ['Content-Type Builder', collectionType.name], collectionType.name);
     await expect(page.getByText(componentAttributeName, { exact: true })).toBeVisible();
 
     // confirm it exists in single type
-    await navToHeader(page, ['Content-Type Builder', 'Singletypepage'], 'Singletypepage');
+    await navToHeader(page, ['Content-Type Builder', singleType.name], singleType.name);
     await expect(page.getByText(componentAttributeName, { exact: true })).toBeVisible();
 
     // confirm it exists in navigation
@@ -137,11 +141,11 @@ test.describe('Update a new component', () => {
     await page.reload({ waitUntil: 'networkidle' });
 
     // confirm that it no longer exists in the content type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Mycollectiontype'], 'Mycollectiontype');
+    await navToHeader(page, ['Content-Type Builder', collectionType.name], collectionType.name);
     await expect(page.getByText(componentAttributeName, { exact: true })).not.toBeVisible();
 
     // confirm that it no longer exists in the single type this component was in
-    await navToHeader(page, ['Content-Type Builder', 'Singletypepage'], 'Singletypepage');
+    await navToHeader(page, ['Content-Type Builder', singleType.name], singleType.name);
     await expect(page.getByText(componentAttributeName, { exact: true })).not.toBeVisible();
 
     // confirm that is not longer exists in the navigation
