@@ -304,7 +304,7 @@ const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
 
 type BaseRenderElementProps = Direction & {
   props: RenderElementProps['children'];
-  blocks: BlocksStore;
+  blocks: Partial<BlocksStore>;
   editor: Editor;
 };
 
@@ -317,8 +317,13 @@ const baseRenderElement = ({
 }: BaseRenderElementProps) => {
   const { element } = props;
 
-  const blockMatch = Object.values(blocks).find((block) => block.matchNode(element));
+  const blockMatch = Object.values(blocks).find((block) => block?.matchNode(element));
   const block = blockMatch || blocks.paragraph;
+
+  if (!block) {
+    return <></>;
+  }
+
   const nodePath = ReactEditor.findPath(editor, element);
 
   // Link is inline block so it cannot be dragged
@@ -428,7 +433,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
 
     // Check if the text node starts with a known snippet
     const blockMatchingSnippet = Object.values(blocks).find((block) => {
-      return block.snippets?.includes(textNode.text);
+      return block?.snippets?.includes(textNode.text);
     });
 
     if (blockMatchingSnippet?.handleConvert) {
@@ -452,7 +457,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
     if (!selectedBlock) {
       return;
     }
@@ -467,7 +472,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     if (selectedBlock.handleEnterKey) {
       selectedBlock.handleEnterKey(editor);
     } else {
-      blocks.paragraph.handleEnterKey!(editor);
+      blocks.paragraph?.handleEnterKey!(editor);
     }
   };
 
@@ -477,7 +482,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
 
     if (!selectedBlock) {
       return;
@@ -494,7 +499,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
 
     const selectedNode = editor.children[editor.selection.anchor.path[0]];
-    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    const selectedBlock = Object.values(blocks).find((block) => block?.matchNode(selectedNode));
     if (!selectedBlock) {
       return;
     }
