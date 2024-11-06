@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -60,8 +60,8 @@
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-rc.11",
-    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/design-system": "2.0.0-rc.12",
+    "@strapi/icons": "2.0.0-rc.12",
     "@strapi/types": "workspace:*",
     "@strapi/utils": "workspace:*",
     "codemirror5": "npm:codemirror@^5.65.11",

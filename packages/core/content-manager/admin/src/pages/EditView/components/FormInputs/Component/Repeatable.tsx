@@ -283,6 +283,11 @@ const RepeatableComponent = ({
                          */
                         const completeFieldName = `${nameWithIndex}.${field.name}`;
 
+                        const translatedLabel = formatMessage({
+                          id: `content-manager.components.${attribute.component}.${field.name}`,
+                          defaultMessage: field.label,
+                        });
+
                         return (
                           <Grid.Item
                             col={size}
@@ -292,7 +297,11 @@ const RepeatableComponent = ({
                             direction="column"
                             alignItems="stretch"
                           >
-                            {children({ ...field, name: completeFieldName })}
+                            {children({
+                              ...field,
+                              label: translatedLabel,
+                              name: completeFieldName,
+                            })}
                           </Grid.Item>
                         );
                       })}

@@ -1,12 +1,6 @@
 import * as React from 'react';
 
-import {
-  useQueryParams,
-  Page,
-  createContext,
-  useRBAC,
-  BackButton,
-} from '@strapi/admin/strapi-admin';
+import { useQueryParams, Page, createContext, useRBAC } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Main, Portal, Link } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';

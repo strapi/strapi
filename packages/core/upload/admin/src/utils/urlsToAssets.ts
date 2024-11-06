@@ -33,7 +33,7 @@ export const urlsToAssets = async (urls: string[]) => {
     type: typeFromMime(fullFilledAsset.mime!),
     url: fullFilledAsset.url,
     ext: fullFilledAsset.url.split('.').pop(),
-    mime: fullFilledAsset.mime,
+    mime: fullFilledAsset.mime ? fullFilledAsset.mime : undefined,
     rawFile: fullFilledAsset.rawFile,
   }));
 
