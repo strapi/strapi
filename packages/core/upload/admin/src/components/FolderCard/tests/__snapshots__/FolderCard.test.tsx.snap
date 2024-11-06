@@ -24,7 +24,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   position: relative;
 }
 
-.c6 {
+.c7 {
   padding-block-start: 8px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
@@ -34,13 +34,13 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   border-radius: 4px;
 }
 
-.c8 {
+.c9 {
   max-width: 100%;
   position: relative;
   overflow: hidden;
 }
 
-.c11 {
+.c12 {
   padding-block-start: 4px;
   padding-inline-end: 4px;
   padding-block-end: 4px;
@@ -48,7 +48,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   max-width: 100%;
 }
 
-.c15 {
+.c16 {
   right: 16px;
 }
 
@@ -59,20 +59,20 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   display: flex;
 }
 
-.c9 {
+.c10 {
   align-items: flex-start;
   flex-direction: column;
   display: flex;
 }
 
-.c13 {
+.c14 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
   font-weight: 500;
 }
 
-.c17 {
+.c18 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -83,7 +83,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   width: 1px;
 }
 
-.c16 {
+.c17 {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -121,8 +121,15 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   transform: translate(-50%, -50%);
   width: 100%;
   height: 100%;
+  z-index: -1;
   min-width: 44px;
   min-height: 44px;
+}
+
+.c6 {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
 }
 
 .c1 {
@@ -139,19 +146,19 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   text-decoration: none;
 }
 
-.c7 path {
+.c8 path {
   fill: currentColor;
 }
 
-.c14 {
+.c15 {
   display: none;
 }
 
-.c10 {
+.c11 {
   user-select: none;
 }
 
-.c12:focus {
+.c13:focus {
   outline: 2px solid #4945ff;
   outline-offset: -2px;
 }
@@ -182,13 +189,19 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
           role="checkbox"
           type="button"
           value="false"
-        />
+        >
+          <span
+            class="c6"
+            data-state="unchecked"
+            style="pointer-events: auto; display: inline-flex;"
+          />
+        </button>
       </div>
       <div
-        class="c6"
+        class="c7"
       >
         <svg
-          class="c7"
+          class="c8"
           fill="currentColor"
           height="2.4rem"
           viewBox="0 0 32 32"
@@ -201,18 +214,18 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         </svg>
       </div>
       <div
-        class="c8 c9 c10"
+        class="c9 c10 c11"
         id="folder-3-title"
       >
         <button
-          class="c11 c12"
+          class="c12 c13"
           type="button"
         >
           <div
-            class="c9"
+            class="c10"
           >
             <span
-              class="c13"
+              class="c14"
             >
               Pictures
             </span>
@@ -220,16 +233,16 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         </button>
       </div>
       <div
-        class="c14"
+        class="c15"
       >
         <div
-          class="c15 c3 c16"
+          class="c16 c3 c17"
         />
       </div>
     </div>
   </div>
   <span
-    class="c17"
+    class="c18"
   >
     <p
       aria-live="polite"
