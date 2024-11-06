@@ -288,6 +288,7 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
   }
 
   try {
+    ctx.logger.log(`🚀 Deploying project to ${chalk.cyan(project.targetEnvironment ?? `production`)} environment...`);
     notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
     await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
 
