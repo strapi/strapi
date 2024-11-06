@@ -36,7 +36,7 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
       }
 
       case 'media': {
-        acc[attributeName] = { select: ['id'] };
+        acc[attributeName] = { select: ['*'] };
         break;
       }
 
