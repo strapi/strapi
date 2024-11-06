@@ -45,5 +45,17 @@
       "cache": true
     }
   },
-  "useInferencePlugins": false
+  "useInferencePlugins": false,
+  "release": {
+    "projects": ["packages/**/*"],
+    "version": {
+      "conventionalCommits": false
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "file": false,
+        "createRelease": "github"
+      }
+    }
+  }
 }
