@@ -1,6 +1,6 @@
 {
   "name": "@strapi/email",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "Easily configure your Strapi application to send emails.",
   "repository": {
     "type": "git",
@@ -52,8 +52,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.11",
-    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/design-system": "2.0.0-rc.12",
+    "@strapi/icons": "2.0.0-rc.12",
     "@strapi/provider-email-sendmail": "workspace:*",
     "@strapi/utils": "workspace:*",
     "lodash": "4.17.21",

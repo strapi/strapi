@@ -54,6 +54,15 @@ export const isEntryValid = async (
       entry
     );
 
+    const workflowsService = strapi.plugin('review-workflows').service('workflows');
+    const workflow = await workflowsService.getAssignedWorkflow(contentTypeUid, {
+      populate: 'stageRequiredToPublish',
+    });
+
+    if (workflow?.stageRequiredToPublish) {
+      return entry.strapi_stage.id === workflow.stageRequiredToPublish.id;
+    }
+
     return true;
   } catch {
     return false;
@@ -71,7 +80,19 @@ export const getEntry = async (
   { strapi }: { strapi: Core.Strapi }
 ) => {
   if (documentId) {
-    return strapi.documents(contentType).findOne({ documentId, locale, populate, status });
+    // Try to get an existing draft or published document
+    const entry = await strapi
+      .documents(contentType)
+      .findOne({ documentId, locale, populate, status });
+
+    // The document isn't published yet, but the action is to publish it, fetch the draft
+    if (status === 'published' && !entry) {
+      return strapi
+        .documents(contentType)
+        .findOne({ documentId, locale, populate, status: 'draft' });
+    }
+
+    return entry;
   }
 
   return strapi.documents(contentType).findFirst({ locale, populate, status });

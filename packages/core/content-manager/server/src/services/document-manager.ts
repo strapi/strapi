@@ -243,6 +243,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       if (!hasRelations) {
         return 0;
       }
+
       const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
         throw new ApplicationError(

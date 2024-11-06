@@ -1,7 +1,4 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
-import { waitForRestart } from './restart';
-import pluralize from 'pluralize';
-import { kebabCase } from 'lodash/fp';
 
 type NavItem = string | [string, string] | Locator;
 
@@ -76,6 +73,20 @@ export const skipCtbTour = async (page: Page) => {
 };
 
 /**
+ * Clicks on a link and waits for the page to load completely.
+ *
+ * NOTE: this util is used to avoid inconsistent behaviour on webkit
+ *
+ */
+export const clickAndWait = async (page: Page, locator: Locator) => {
+  await locator.click();
+
+  if (page.context().browser()?.browserType().name() === 'webkit') {
+    await page.waitForLoadState('networkidle');
+  }
+};
+
+/**
  * Look for an element containing text, and then click a sibling close button
  */
 export const findAndClose = async (
@@ -100,74 +111,47 @@ export const findAndClose = async (
   }
 };
 
-export const createSingleType = async (page, data) => {
-  const { name, singularId, pluralId } = data;
+/**
+ * Finds a specific cell in a table by matching both the row text and the column header text.
+ *
+ * This function performs the following steps:
+ * 1. Finds a row in the table that contains the specified `rowText` (case-insensitive).
+ * 2. Finds the column header in the table that contains the specified `columnText` (case-insensitive).
+ * 3. Identifies the cell in the located row that corresponds to the column where the header matches the `columnText`.
+ * 4. Returns the found cell for further interactions or assertions.
+ *
+ * @param {Page} page - The Playwright `Page` object representing the browser page.
+ * @param {string} rowText - The text to match in the row (case-insensitive).
+ * @param {string} columnText - The text to match in the column header (case-insensitive).
+ *
+ * @returns {Locator} - A Playwright Locator object representing the intersecting cell.
+ *
+ * @throws Will throw an error if the row or column header is not found, or if the cell is not visible.
+ *
+ * @warning This function assumes a standard table structure where each row has an equal number of cells,
+ *          and no cells are merged (`colspan` or `rowspan`). If the table contains merged cells,
+ *          this method may return incorrect results or fail to locate the correct cell.
+ *          Matches the header exactly (cell contains only exact text)
+ *          Matches the row loosely (finds a row containing that text somewhere)
+ */
+export const findByRowColumn = async (page: Page, rowText: string, columnText: string) => {
+  // Locate the row that contains the rowText
+  // This just looks for the text in a row, so ensure that it is specific enough
+  const row = page.locator('tr').filter({ hasText: new RegExp(`${rowText}`) });
+  await expect(row).toBeVisible();
 
-  await page.getByRole('button', { name: 'Create new single type' }).click();
+  // Locate the column header that matches the columnText
+  // This assumes that header is exact (cell only contains that text and nothing else)
+  const header = page.locator('thead th').filter({ hasText: new RegExp(`^${columnText}$`, 'i') });
+  await expect(header).toBeVisible();
 
-  await expect(page.getByRole('heading', { name: 'Create a single type' })).toBeVisible();
+  // Find the index of the matching column header
+  const columnIndex = await header.evaluate((el) => Array.from(el.parentNode.children).indexOf(el));
 
-  const displayName = page.getByLabel('Display name');
-  await displayName.fill(name);
+  // Find the cell in the located row that corresponds to the matching column index
+  const cell = row.locator(`td:nth-child(${columnIndex + 1})`);
+  await expect(cell).toBeVisible();
 
-  const singularIdField = page.getByLabel('API ID (Singular)');
-  await expect(singularIdField).toHaveValue(singularId || kebabCase(name));
-  if (singularId) {
-    singularIdField.fill(singularId);
-  }
-
-  const pluralIdField = page.getByLabel('API ID (Plural)');
-  await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
-  if (pluralId) {
-    pluralIdField.fill(pluralId);
-  }
-
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  // Create an initial text field for it
-  await expect(page.getByText('Select a field for your single type')).toBeVisible();
-  await page.getByText('Small or long text').click();
-  await page.getByLabel('Name', { exact: true }).fill('myattribute');
-  await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
-
-  await waitForRestart(page);
-
-  await expect(page.getByRole('heading', { name })).toBeVisible();
-};
-
-export const createCollectionType = async (page, data) => {
-  const { name, singularId, pluralId } = data;
-
-  await page.getByRole('button', { name: 'Create new collection type' }).click();
-
-  await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
-
-  const displayName = page.getByLabel('Display name');
-  await displayName.fill(name);
-
-  const singularIdField = page.getByLabel('API ID (Singular)');
-  await expect(singularIdField).toHaveValue(singularId || kebabCase(name));
-  if (singularId) {
-    singularIdField.fill(singularId);
-  }
-
-  const pluralIdField = page.getByLabel('API ID (Plural)');
-  await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
-  if (pluralId) {
-    pluralIdField.fill(pluralId);
-  }
-
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  // Create an initial text field for it
-  await expect(page.getByText('Select a field for your collection type')).toBeVisible();
-  await page.getByText('Small or long text').click();
-  await page.getByLabel('Name', { exact: true }).fill('myattribute');
-  await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
-
-  await waitForRestart(page);
-
-  await expect(page.getByRole('heading', { name })).toBeVisible();
+  // Return the found cell
+  return cell;
 };

@@ -20,7 +20,7 @@ const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const productUID = 'api::product.product';
 const model = {
   pluginOptions: {},
-  draftAndPublish: false,
+  draftAndPublish: true,
   singularName: 'product',
   pluralName: 'products',
   displayName: 'Product',
@@ -29,9 +29,6 @@ const model = {
     name: {
       type: 'string',
     },
-  },
-  options: {
-    reviewWorkflows: true,
   },
 };
 
@@ -74,6 +71,13 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       url: `/content-manager/collection-types/${uid}`,
     });
     return body;
+  };
+
+  const publishEntry = async (uid, id) => {
+    return await requests.admin({
+      method: 'POST',
+      url: `/content-manager/collection-types/${uid}/${id}/actions/publish`,
+    });
   };
 
   /**
@@ -131,6 +135,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       data: {
         uid: 'workflow',
         stages: { set: [defaultStage.id, secondStage.id] },
+        stageRequiredToPublish: { set: [secondStage.id] },
       },
     });
     defaultStage = await strapi.db.query(STAGE_MODEL_UID).update({
@@ -184,7 +189,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       expect(res.status).toBe(400);
       expect(res.body.error.message).toBe('Can not create a workflow without stages');
     });
-    test('It should create a workflow with stages', async () => {
+    test('It should create a workflow with stages and required stage for publish', async () => {
       const res = await requests.admin.post('/review-workflows/workflows?populate=stages', {
         body: {
           data: {
@@ -193,6 +198,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
               { name: 'Stage 1', color: '#343434' },
               { name: 'Stage 2', color: '#141414' },
             ],
+            stageRequiredToPublishName: 'Stage 2',
           },
         },
       });
@@ -205,6 +211,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
             { name: 'Stage 1', color: '#343434' },
             { name: 'Stage 2', color: '#141414' },
           ],
+          stageRequiredToPublish: { name: 'Stage 2' },
         });
       } else {
         expect(res.status).toBe(404);
@@ -336,6 +343,44 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(res.status).toBe(404);
         expect(res.body.data).toBeUndefined();
       }
+    });
+  });
+
+  describe('Publishing entries with required stage for publish', () => {
+    beforeAll(async () => {
+      await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+        body: { data: { contentTypes: [productUID] } },
+      });
+    });
+
+    afterAll(async () => {
+      await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+        body: { data: { contentTypes: [] } },
+      });
+    });
+
+    test('It should publish an entry if the required stage for publish is set', async () => {
+      const entry = await createEntry(productUID, { name: 'Product' });
+
+      const res = await requests.admin.put(
+        `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/stage`,
+        {
+          body: { data: { id: secondStage.id } },
+        }
+      );
+
+      expect(res.status).toBe(200);
+
+      const publishRes = await publishEntry(productUID, entry.documentId);
+      expect(publishRes.status).toBe(200);
+    });
+
+    test('It should not publish an entry if the required stage for publish is not set', async () => {
+      const entry = await createEntry(productUID, { name: 'Product' });
+
+      const publishRes = await publishEntry(productUID, entry.documentId);
+
+      expect(publishRes.status).toBe(400);
     });
   });
 
@@ -485,8 +530,18 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         const assigneeAttribute = 'strapi_assignee';
 
         const { status, body } = await requests.public.get(`/api/${model.pluralName}`, {
-          qs: { populate: assigneeAttribute },
+          qs: { populate: assigneeAttribute, status: 'draft' },
         });
+
+        // Assigne user to entry
+        const entry = await createEntry(productUID, { name: 'Product' });
+        const user = requests.admin.getLoggedUser();
+        await requests.admin.put(
+          `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
+          {
+            body: { data: { id: user.id } },
+          }
+        );
 
         expect(status).toBe(200);
         expect(body.data.length).toBeGreaterThan(0);
@@ -504,9 +559,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         // Assert that every assignee returned is sanitized correctly
         body.data.forEach((item) => {
           expect(item).toHaveProperty(assigneeAttribute);
-          privateUserFields.forEach((field) => {
-            expect(item[assigneeAttribute]).not.toHaveProperty(field);
-          });
+
+          if (item[assigneeAttribute]) {
+            privateUserFields.forEach((field) => {
+              expect(item[assigneeAttribute]).not.toHaveProperty(field);
+            });
+          }
         });
       });
 
@@ -537,6 +595,10 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
 
       test('Should not update the entity', async () => {
+        await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+          body: { data: { contentTypes: [] } },
+        });
+
         const entry = await createEntry(productUID, { name: 'Product' });
         const user = requests.admin.getLoggedUser();
 
@@ -606,7 +668,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         const stageAttribute = 'strapi_stage';
 
         const { status, body } = await requests.public.get(`/api/${model.pluralName}`, {
-          qs: { populate: stageAttribute },
+          qs: { populate: stageAttribute, status: 'draft' },
         });
 
         expect(status).toBe(200);

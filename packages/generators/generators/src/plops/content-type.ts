@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { NodePlopAPI, ActionType } from 'plop';
+import type { NodePlopAPI, ActionType } from 'plop';
 import slugify from '@sindresorhus/slugify';
 import fs from 'fs-extra';
 import { strings } from '@strapi/utils';
@@ -18,6 +18,7 @@ export default (plop: NodePlopAPI) => {
     description: 'Generate a content type for an API',
     async prompts(inquirer) {
       const config = await inquirer.prompt([...ctNamesPrompts, ...kindPrompts]);
+      // @ts-expect-error issue with deprecated inquirer.prompts attribute to fix with ugprade to inquirer
       const attributes = await getAttributesPrompts(inquirer);
 
       const api = await inquirer.prompt([
