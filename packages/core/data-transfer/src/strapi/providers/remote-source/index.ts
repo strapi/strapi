@@ -13,6 +13,7 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../engine/diagnostic';
 import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
@@ -46,6 +47,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   results?: ISourceProviderTransferResults | undefined;
+
+  #diagnostics?: IDiagnosticReporter;
 
   async #createStageReadStream(stage: Exclude<TransferStage, 'schemas'>) {
     const startResult = await this.#startStep(stage);
@@ -348,7 +351,18 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     return res.transferID;
   }
 
-  async bootstrap(): Promise<void> {
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message: `[remote-source-provider] ${message}`,
+      },
+      kind: 'info',
+    });
+  }
+
+  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
+    this.#diagnostics = diagnostics;
     const { url, auth } = this.options;
     let ws: WebSocket;
     this.assertValidProtocol(url);
@@ -357,6 +371,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       url.pathname
     )}${TRANSFER_PATH}/pull`;
 
+    this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = await connectToWebsocket(wsUrl);

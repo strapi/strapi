@@ -14,6 +14,7 @@ import type {
   TransferStage,
   Protocol,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../engine/diagnostic';
 import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
@@ -45,6 +46,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
   transferID: string | null;
 
   stats!: { [TStage in Exclude<TransferStage, 'schemas'>]: { count: number } };
+
+  #diagnostics?: IDiagnosticReporter;
 
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
@@ -219,7 +222,18 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     });
   }
 
-  async bootstrap(): Promise<void> {
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message: `[remote-destination-provider] ${message}`,
+      },
+      kind: 'info',
+    });
+  }
+
+  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
+    this.#diagnostics = diagnostics;
     const { url, auth } = this.options;
     const validProtocols = ['https:', 'http:'];
 
@@ -239,6 +253,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       url.pathname
     )}${TRANSFER_PATH}/push`;
 
+    this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
     if (!auth) {
       ws = await connectToWebsocket(wsUrl);

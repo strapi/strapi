@@ -604,8 +604,8 @@ class TransferEngine<
    */
   async bootstrap(): Promise<void> {
     const results = await Promise.allSettled([
-      this.sourceProvider.bootstrap?.(),
-      this.destinationProvider.bootstrap?.(),
+      this.sourceProvider.bootstrap?.(this.diagnostics),
+      this.destinationProvider.bootstrap?.(this.diagnostics),
     ]);
 
     results.forEach((result) => {

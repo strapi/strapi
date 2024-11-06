@@ -11,6 +11,7 @@ import type {
   ProviderType,
   Transaction,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../engine/diagnostic';
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';
@@ -47,6 +48,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   onWarning?: ((message: string) => void) | undefined;
 
+  #diagnostics?: IDiagnosticReporter;
+
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
@@ -58,7 +61,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     this.uploadsBackupDirectoryName = `uploads_backup_${Date.now()}`;
   }
 
-  async bootstrap(): Promise<void> {
+  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
+    this.#diagnostics = diagnostics;
     this.#validateOptions();
     this.strapi = await this.options.getStrapi();
     if (!this.strapi) {
@@ -83,6 +87,16 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     return !excluded && !notIncluded;
   };
+
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message: `[local-destination] ${message}`,
+      },
+      kind: 'info',
+    });
+  }
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
@@ -169,6 +183,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getMetadata(): IMetadata {
+    this.#reportInfo('getting metadata');
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
     const strapiVersion = this.strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
@@ -182,6 +197,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getSchemas(): Record<string, Struct.Schema> {
+    this.#reportInfo('getting schema');
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
 
     const schemas = utils.schema.schemasToValidJSON({
@@ -193,6 +209,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   createEntitiesWriteStream(): Writable {
+    this.#reportInfo('creating entities stream');
     assertValidStrapi(this.strapi, 'Not able to import entities');
     const { strategy } = this.options;
 
@@ -266,7 +283,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.#areAssetsIncluded()) {
       return;
     }
-
+    this.#reportInfo('removing assets backup');
     // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
     if (this.strapi.config.get<{ provider: string }>('plugin::upload').provider === 'local') {
       assertValidStrapi(this.strapi);

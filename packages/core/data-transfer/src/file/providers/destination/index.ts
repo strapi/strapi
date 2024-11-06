@@ -15,6 +15,7 @@ import type {
   ProviderType,
   Stream,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../engine/diagnostic';
 import { createFilePathFactory, createTarEntryStream } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -61,8 +62,20 @@ class LocalFileDestinationProvider implements IDestinationProvider {
 
   #archive: { stream?: tar.Pack; pipeline?: Stream } = {};
 
+  #diagnostics?: IDiagnosticReporter;
+
   constructor(options: ILocalFileDestinationProviderOptions) {
     this.options = options;
+  }
+
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message: `[file-destination-provider] ${message}`,
+      },
+      kind: 'info',
+    });
   }
 
   get #archivePath() {
@@ -91,7 +104,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     return zlib.createGzip();
   }
 
-  bootstrap(): void | Promise<void> {
+  bootstrap(diagnostics: IDiagnosticReporter): void | Promise<void> {
+    this.#diagnostics = diagnostics;
     const { compression, encryption } = this.options;
 
     if (encryption.enabled && !encryption.key) {
@@ -153,6 +167,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   async #writeMetadata(): Promise<void> {
+    this.#reportInfo('writing metadata');
     const metadata = this.#providersMetadata.source;
 
     if (metadata) {
