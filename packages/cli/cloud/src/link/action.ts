@@ -84,7 +84,7 @@ async function getProjectsList(
     spinner.succeed();
 
     if (!Array.isArray(projectList)) {
-      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud");
+      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud.");
       return null;
     }
     const projects: ProjectsList = (projectList as unknown as Project[])
@@ -99,7 +99,7 @@ async function getProjectsList(
         };
       });
     if (projects.length === 0) {
-      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud");
+      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud.");
       return null;
     }
     return projects;

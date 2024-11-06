@@ -20,7 +20,7 @@ async function getLocalProject(ctx: CLIContext) {
     ctx.logger.warn(
       `\nWe couldn't find a valid local project config.\nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
         'link'
-      )} command`
+      )} command.`
     );
     process.exit(1);
   }

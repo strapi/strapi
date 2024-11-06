@@ -133,7 +133,7 @@ async function getEnvironmentsList(
       ctx.logger.warn(
         `\nThe project associated with this folder does not exist in Strapi Cloud. \nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
           'link'
-        )} command`
+        )} command.`
       );
     } else {
       spinner.fail('An error occurred while fetching environments data from Strapi Cloud.');
