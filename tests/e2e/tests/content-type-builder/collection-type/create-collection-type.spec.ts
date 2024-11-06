@@ -45,6 +45,7 @@ test.describe('Create collection type', () => {
     const pluralId = page.getByLabel('API ID (Plural)');
     await expect(pluralId).toHaveValue('secret-documents');
 
+    // TODO: refactor using the utilities for adding attributes
     await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
 
     await expect(page.getByText('Select a field for your collection type')).toBeVisible();
