@@ -58,7 +58,7 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     // Publish the release
     await clickAndWait(page, page.getByRole('link', { name: 'Releases' }));
     await clickAndWait(page, page.getByRole('link', { name: `${releaseName}` }));
-    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish', exact: true }));
     await expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
 
     // Check the already released release
