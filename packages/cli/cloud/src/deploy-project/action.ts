@@ -24,7 +24,7 @@ type PackageJson = {
 };
 
 interface CmdOptions {
-  environment?: string;
+  env?: string;
 }
 
 const QUIT_OPTION = 'Quit';
@@ -190,9 +190,9 @@ async function getTargetEnvironment(
   project: ProjectInfo,
   environments: string[]
 ): Promise<string> {
-  if (opts.environment) {
-    validateEnvironment(ctx, opts.environment, environments);
-    return opts.environment;
+  if (opts.env) {
+    validateEnvironment(ctx, opts.env, environments);
+    return opts.env;
   }
 
   if (project.targetEnvironment) {
