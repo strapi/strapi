@@ -6,13 +6,24 @@ import { getTrad } from '../../../../utils';
 import { BulkDeleteButton } from './BulkDeleteButton';
 import { BulkMoveButton } from './BulkMoveButton';
 
-import type { BulkDeleteButtonProps } from './BulkDeleteButton';
-import type { BulkMoveButtonProps } from './BulkMoveButton';
+import type { File } from '../../../../../../shared/contracts/files';
+import type {
+  FolderDefinition,
+  Folder as FolderInitial,
+} from '../../../../../../shared/contracts/folders';
+
+interface FolderWithType extends FolderInitial {
+  type: string;
+}
+
+export interface FileWithType extends File {
+  type: string;
+}
 
 export interface BulkActionsProps {
-  selected: BulkDeleteButtonProps['selected'] | BulkMoveButtonProps['selected'];
+  selected: Array<FileWithType | FolderDefinition> | Array<FolderWithType | FileWithType>;
   onSuccess: () => void;
-  currentFolder?: BulkMoveButtonProps['currentFolder'];
+  currentFolder?: FolderWithType;
 }
 
 export const BulkActions = ({ selected = [], onSuccess, currentFolder }: BulkActionsProps) => {
@@ -40,12 +51,12 @@ export const BulkActions = ({ selected = [], onSuccess, currentFolder }: BulkAct
       </Typography>
 
       <BulkDeleteButton
-        selected={selected as BulkDeleteButtonProps['selected']}
+        selected={selected as Array<FileWithType | FolderDefinition>}
         onSuccess={onSuccess}
       />
       <BulkMoveButton
         currentFolder={currentFolder}
-        selected={selected as BulkMoveButtonProps['selected']}
+        selected={selected as Array<FolderWithType | FileWithType>}
         onSuccess={onSuccess}
       />
     </Flex>

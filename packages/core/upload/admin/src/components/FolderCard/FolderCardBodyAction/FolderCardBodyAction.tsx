@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 import { Box, BoxProps } from '@strapi/design-system';
 import { NavLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';

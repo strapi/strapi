@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
 import { useField, useNotification } from '@strapi/admin/strapi-admin';
@@ -11,7 +12,7 @@ import { UploadAssetDialog, Asset } from '../UploadAssetDialog/UploadAssetDialog
 import { CarouselAssets, CarouselAssetsProps, FileWithoutIdHash } from './Carousel/CarouselAssets';
 
 import type { File } from '../../../../shared/contracts/files';
-import type { AllowedTypes } from '../AssetCard/AssetCard';
+type AllowedTypes = 'files' | 'images' | 'videos' | 'audios';
 
 const STEPS = {
   AssetSelect: 'SelectAsset',

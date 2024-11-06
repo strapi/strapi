@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 /**
  * The component works as follows: this is a duplicate of the helper-plugin one but without the router
  * `1` , 2, 3, ... 10

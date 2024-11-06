@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 import * as React from 'react';
 
 import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';

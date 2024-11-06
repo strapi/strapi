@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 

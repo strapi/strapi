@@ -42,7 +42,7 @@ export const Filters = () => {
       <FilterPopover
         displayedFilters={displayedFilters}
         filters={filters}
-        onToggle={setOpen as FilterPopoverProps['onToggle']}
+        onToggle={setOpen as () => void}
         onSubmit={handleSubmit}
       />
       <FilterList

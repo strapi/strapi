@@ -1,5 +1,6 @@
 import { Flex, DesignSystemProvider, Typography } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, LinkProps } from 'react-router-dom';
 
 import { FolderCard } from '../FolderCard/FolderCard';
@@ -57,13 +58,12 @@ describe('FolderCard', () => {
     expect(container).toMatchSnapshot();
   });
 
-  test('properly calls the onClick callback', () => {
+  test('properly calls the onClick callback', async () => {
     const callback = jest.fn();
-    const { container } = setup({ onClick: callback });
+    const { getByLabelText } = setup({ onClick: callback });
 
-    // TODO: refactor this piece to use the user event instead of the fireEvent and getByRole
-    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    fireEvent(container.querySelector('button')!, new MouseEvent('click', { bubbles: true }));
+    const button = getByLabelText('Folder 1');
+    await userEvent.click(button);
 
     expect(callback).toHaveBeenCalledTimes(1);
   });

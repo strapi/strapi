@@ -1,3 +1,4 @@
+// TODO: find a better naming convention for the file that was an index file before
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 
