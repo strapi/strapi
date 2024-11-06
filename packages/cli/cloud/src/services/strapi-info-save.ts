@@ -9,20 +9,21 @@ export type LocalSave = {
 };
 
 export async function addEnvironment(
-  targetEnvironment: string,
+  targetEnvironment: string | undefined,
   { directoryPath }: { directoryPath?: string } = {}
 ) {
   const alreadyInFileData = await retrieve({ directoryPath });
-  const storedData = {
+  if (!alreadyInFileData || !alreadyInFileData.project) {
+    throw new Error('No valid configuration found in the local configuration file.');
+  }
+  const dataToSave: LocalSave = {
     ...alreadyInFileData,
     project: {
       ...alreadyInFileData.project,
       targetEnvironment,
     },
   };
-  const pathToFile = path.join(directoryPath || process.cwd(), LOCAL_SAVE_FILENAME);
-  await fse.ensureDir(path.dirname(pathToFile));
-  await fse.writeJson(pathToFile, storedData, { encoding: 'utf8' });
+  await save(dataToSave, { directoryPath });
 }
 
 export async function save(data: LocalSave, { directoryPath }: { directoryPath?: string } = {}) {
