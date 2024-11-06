@@ -17,8 +17,10 @@ interface LinkEnvironmentInput extends Answers {
   targetEnvironment: string;
 }
 
-type Environment = {
+export type Environment = {
   name: string;
+  hasLiveDeployment: boolean;
+  hasPendingDeployment: boolean;
 };
 
 type EnvironmentsList = Environment[];

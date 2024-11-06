@@ -7176,6 +7176,7 @@ __metadata:
     "@types/eventsource": "npm:1.1.15"
     "@types/lodash": "npm:^4.14.191"
     axios: "npm:1.7.4"
+    boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
     cli-progress: "npm:3.12.0"
     commander: "npm:8.3.0"
