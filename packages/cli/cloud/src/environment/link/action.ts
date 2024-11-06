@@ -65,12 +65,14 @@ export default async (ctx: CLIContext) => {
       environmentName: answer.targetEnvironment,
     });
     logger.debug('Failed to link environment', e);
-    logger.error('An error occurred while trying to link the environment.');
+    logger.error(
+      'Failed to link the environment. If this issue persists, try re-linking your project or contact support.'
+    );
     process.exit(1);
   }
 
   logger.log(
-    `You have successfully linked your project to ${chalk.cyan(answer.targetEnvironment)}, on ${chalk.cyan(project.displayName)}. You are now able to deploy your project.`
+    ` You have successfully linked your project to ${chalk.cyan(answer.targetEnvironment)}, on ${chalk.cyan(project.displayName)}. You are now able to deploy your project.`
   );
   await trackEvent(ctx, cloudApiService, 'didLinkEnvironment', {
     projectName: project.name,
@@ -117,13 +119,14 @@ async function getEnvironmentsList(
     const {
       data: { data: environmentsList },
     } = await cloudApiService.listLinkEnvironments({ name: project.name });
-    spinner.succeed();
 
-    return (environmentsList as unknown as Environment[])
-      .filter((environment: Environment) => environment.name !== project.targetEnvironment)
-      .map((environment: Environment) => {
-        return environment;
-      });
+    if (!Array.isArray(environmentsList) || environmentsList.length === 0) {
+      throw new Error('Environments not found in server response');
+    }
+    spinner.succeed();
+    return environmentsList.filter(
+      (environment: Environment) => environment.name !== project.targetEnvironment
+    );
   } catch (e: any) {
     if (e.response && e.response.status === 404) {
       spinner.succeed();
