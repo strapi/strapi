@@ -24,6 +24,7 @@ const command = () => {
     .addOption(
       new Option('--no-compress', 'Disables gzip compression of output file').default(true)
     )
+    .addOption(new Option('-i, --info', 'log information about the export process'))
     .addOption(
       new Option(
         '-k, --key <string>',

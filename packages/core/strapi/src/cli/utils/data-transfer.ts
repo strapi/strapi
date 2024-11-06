@@ -210,7 +210,8 @@ const errorColors = {
 } as const;
 
 const formatDiagnostic = (
-  operation: string
+  operation: string,
+  info?: boolean
 ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
   // Create log file for all incoming diagnostics
   let logger: undefined | winston.Logger;
@@ -235,7 +236,7 @@ const formatDiagnostic = (
 
         getLogger().error(errorMessage);
       }
-      if (kind === 'info') {
+      if (kind === 'info' && info) {
         const { message, params } = details;
 
         const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
