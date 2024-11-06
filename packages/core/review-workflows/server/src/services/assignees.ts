@@ -56,6 +56,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       // Update the `updated_at` field of the entity, so that the `status` is not considered `Modified`
+      // NOTE: `updatedAt` is a protected attribute that can not be modified directly from the query layer
+      //        hence the knex query builder is used here.
       const { tableName } = strapi.db.metadata.get(model);
       await strapi.db
         .connection()
