@@ -7,6 +7,7 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
+import type { Environment } from '../services/cli-api';
 import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfo } from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
@@ -29,8 +30,8 @@ interface CmdOptions {
 
 const QUIT_OPTION = 'Quit';
 
-async function promptForEnvironment(environments: string[]): Promise<string> {
-  const choices = environments.map((env) => ({ name: env, value: env }));
+async function promptForEnvironment(environments: Environment[]): Promise<string> {
+  const choices = environments.map((env) => ({ name: env.name, value: env.name }));
   const { selectedEnvironment } = await inquirer.prompt([
     {
       type: 'list',
@@ -177,8 +178,12 @@ async function getConfig({
   }
 }
 
-function validateEnvironment(ctx: CLIContext, environment: string, environments: string[]): void {
-  if (!environments.includes(environment)) {
+function validateEnvironment(
+  ctx: CLIContext,
+  environment: string,
+  environments: Environment[]
+): void {
+  if (!environments.some((env) => env.name === environment)) {
     ctx.logger.error(`Environment ${environment} does not exist.`);
     process.exit(1);
   }
@@ -188,7 +193,7 @@ async function getTargetEnvironment(
   ctx: CLIContext,
   opts: CmdOptions,
   project: ProjectInfo,
-  environments: string[]
+  environments: Environment[]
 ): Promise<string> {
   if (opts.env) {
     validateEnvironment(ctx, opts.env, environments);
@@ -203,7 +208,7 @@ async function getTargetEnvironment(
     return promptForEnvironment(environments);
   }
 
-  return environments[0];
+  return environments[0].name;
 }
 
 export default async (ctx: CLIContext, opts: CmdOptions) => {
@@ -219,7 +224,7 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx, token);
-  let environments: string[];
+  let environments: Environment[];
 
   try {
     const {
