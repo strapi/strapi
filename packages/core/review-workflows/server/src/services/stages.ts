@@ -231,8 +231,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       //        hence the knex query builder is used here.
       const { tableName } = strapi.db.metadata.get(model);
       await strapi.db
-        .connection()
-        .from(tableName)
+        .connection(tableName)
         .where({ id: entityToUpdate.id })
         .update({
           updated_at: new Date(entityToUpdate.updatedAt),
