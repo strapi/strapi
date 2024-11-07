@@ -121,11 +121,11 @@ test.describe('Edit collection type', () => {
   test('Can configure advanced settings for multiple fields sequentially', async ({ page }) => {
     const fieldsToAdd = [
       {
-        name: 'testfield',
+        name: 'testfield2',
         defaultValue: 'mydefault',
       },
       {
-        name: 'testfield2',
+        name: 'testfield3',
         defaultValue: 'mydefault2',
       },
     ];
