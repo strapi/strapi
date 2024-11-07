@@ -527,7 +527,7 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
     const ids = idsByType[type];
 
     // type was removed but still in morph relation
-    if (!db.metadata.get(type)) {
+    if (!db.metadata.has(type)) {
       map[type] = {};
 
       continue;
@@ -550,6 +550,10 @@ const morphToMany = async (input: Input<Relation.MorphToMany>, ctx: Context) => 
     const matchingRows = joinResults.flatMap((joinResult) => {
       const id = joinResult[idColumn.name] as ID;
       const type = joinResult[typeColumn.name] as string;
+
+      if (!map[type][id]) {
+        return [];
+      }
 
       const targetMeta = db.metadata.get(type);
 
@@ -601,7 +605,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
     const ids = idsByType[type];
 
     // type was removed but still in morph relation
-    if (!db.metadata.get(type)) {
+    if (!db.metadata.has(type)) {
       map[type] = {};
       return;
     }
@@ -621,7 +625,7 @@ const morphToOne = async (input: Input<Relation.MorphToOne>, ctx: Context) => {
     const id = result[idColumn.name] as ID;
     const type = result[typeColumn.name] as string;
 
-    if (!type || !id) {
+    if (!type || !id || !map[type][id]) {
       result[attributeName] = null;
       return;
     }
