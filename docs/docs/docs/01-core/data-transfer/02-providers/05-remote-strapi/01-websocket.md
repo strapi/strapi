@@ -5,6 +5,7 @@ tags:
   - data-transfer
   - experimental
 ---
+
 # WebSocket
 
 ## Websocket Messages / Dispatcher
@@ -55,37 +56,37 @@ sequenceDiagram
     participant Dispatcher
     participant WebSocket
     participant Server
-    
+
     Note over Client,Server: Connection Phase
     Client->>WebSocket: Create WebSocket Connection
     Note right of WebSocket: /admin/transfer/runner/pull or push
     Note right of WebSocket: Authorization: Bearer <transfer_token>
-    
+
     Client->>Dispatcher: Create Message Dispatcher
-    
+
     Note over Client,Server: Initialization Phase
     Dispatcher->>Server: dispatchCommand("init")
     Server->>Dispatcher: Returns transferID
     Note right of Dispatcher: All future messages include transferID
-    
+
     Note over Client,Server: Transfer Actions Phase
     Dispatcher->>Server: dispatchTransferAction("bootstrap")
     Server->>Dispatcher: Response
-    
+
     Dispatcher->>Server: dispatchTransferAction("getMetadata")
     Server->>Dispatcher: Response
-    
+
     Dispatcher->>Server: dispatchTransferAction("beforeTransfer")
     Server->>Dispatcher: Response
-    
+
     Dispatcher->>Server: dispatchTransferAction("getSchemas")
     Server->>Dispatcher: Response
-    
+
     Note over Client,Server: Transfer Steps Phase
     loop Each Step (schemas, entities, assets, links, config)
         Dispatcher->>Server: dispatchTransferStep(step, "start")
         Server->>Dispatcher: Response
-        
+
         loop Data Streaming
             Dispatcher->>Server: dispatchTransferStep(step, "stream", data)
             alt Success
@@ -95,18 +96,18 @@ sequenceDiagram
                 Dispatcher->>Server: Retry Message
             end
         end
-        
+
         Dispatcher->>Server: dispatchTransferStep(step, "end")
         Server->>Dispatcher: Response
     end
-    
+
     Note over Client,Server: Closing Phase
     Dispatcher->>Server: dispatchTransferAction("close")
     Server->>Dispatcher: Response
-    
+
     Dispatcher->>Server: dispatchCommand("end")
     Server->>Dispatcher: Response
-    
+
     Client->>WebSocket: Close Connection
 ```
 
@@ -115,17 +116,18 @@ sequenceDiagram
 When the data transfer feature is enabled for a Strapi server (an `admin.transfer.token.salt` config value has been set and `server.transfer.remote.enabled` is not set to false), Strapi will create websocket servers available on the routes `/admin/transfer/runner/pull` and `/admin/transfer/runner/push`.
 
 **Create WebSocket Connection**
+
 - Opening a websocket connection on those routes requires a valid transfer token as a bearer token in the Authorization header.:
   ```
   Authorization: Bearer <transfer_token>
   ```
 - Server validates the token and establishes the connection
 
-
 Please see the `bootstrap()` method of the remote providers for an example of how to make the initial connection to the Strapi websocket.
 
 **Event Listener Attachment**
 Immediately after WebSocket creation, the following listeners are attached:
+
 - `'open'`: Handles successful connection establishment
 - `'close'`: Manages connection termination
 - `'error'`: Handles connection and transmission errors
@@ -135,40 +137,47 @@ Immediately after WebSocket creation, the following listeners are attached:
 
 Client sends initial command to establish transfer, server responds with unique transferID.
 
-   ```javascript
-   const transferID = await dispatcher.dispatchCommand("init");
-   // All subsequent messages must include this transferID
-   ```
+```javascript
+const transferID = await dispatcher.dispatchCommand('init');
+// All subsequent messages must include this transferID
+```
+
 All subsequent messages must include this transferID
 
 ### 3. Transfer Actions Phase
 
 Sequential actions executed through `dispatchTransferAction`:
+
 1. `bootstrap`: Initializes transfer environment
 2. `getMetadata`: Retrieves transfer metadata
 3. `beforeTransfer`: Performs pre-transfer preparations
 4. `getSchemas`: Retrieves content type schemas, used for validation between source and destination
 
 ### 4. Transfer Steps Phase
+
 The main phase where actual data transfer occurs, processing different types of data (schemas, entities, assets, links, configuration) in sequence:
 
 **Stage Start**
-   ```javascript
-   dispatchTransferStep(action: "start", step)
-   ```
+
+```javascript
+dispatchTransferStep(action: "start", step)
+```
 
 **Data Streaming**
-   ```javascript
-   dispatchTransferStep(action:"stream", step, data)
-   ```
+
+```javascript
+dispatchTransferStep(action:"stream", step, data)
+```
 
 **Stage Completion**
-   ```javascript
-   dispatchTransferStep(action:"end", step)
-   ```
+
+```javascript
+dispatchTransferStep(action:"end", step)
+```
 
 **Retry Mechanism**
 During data transfer:
+
 - If server response not received within `retryMessageTimeout`
 - System attempts retry up to `retryMessageMaxRetries` times
 - Automatic retry on timeout
@@ -177,23 +186,24 @@ During data transfer:
 ### 5.Closing Phase
 
 **Cleanup Actions**
+
 1. Send close action:
    ```javascript
-   dispatchTransferAction("close")
+   dispatchTransferAction('close');
    ```
 2. Send end command:
    ```javascript
-   dispatchCommand({ command: 'end', params: { transferID }})
+   dispatchCommand({ command: 'end', params: { transferID } });
    ```
 
 **Connection Termination**
+
 1. Remove event listeners in reverse order:
    - Remove `message` listener
    - Remove `error` listener
    - Remove `open` listener
    - Remove `close` listener
 2. Close WebSocket connection
-
 
 ## Message Timeouts and Retries
 
@@ -208,12 +218,12 @@ stateDiagram-v2
     Retrying --> WaitingResponse: Retry Attempt
     Retrying --> Error: Max Retries Exceeded
     Error --> [*]
-    
+
     note right of WaitingResponse
         Configurable timeout
         via retryMessageTimeout
     end note
-    
+
     note right of Retrying
         Limited by
         retryMessageMaxRetries

@@ -10,6 +10,7 @@ tags:
 ## Overview
 
 The transfer process consists of five sequential stages. Each stage follows the same stream lifecycle pattern but handles different types of data:
+
 ```mermaid
 flowchart LR
     subgraph Process["Transfer Process"]
@@ -67,23 +68,28 @@ flowchart LR
     %% Link styling
     linkStyle 0,1,2,3 stroke:#d0d0ff,stroke-width:2px
 ```
+
 1. **Schemas Stage**: Content type definitions
+
    - Transfers database structure
    - Content type configurations
    - Component definitions
 
 2. **Entities Stage**: Content without relations
+
    - Actual content data
    - Component data
    - Dynamic zone data
    - Media metadata (not files)
 
 3. **Assets Stage**: Media files
+
    - Files from /uploads folder
    - File metadata
    - File variants/formats
 
 4. **Links Stage**: Relations between entities
+
    - Content type relations
    - Component relations
    - Media relations
@@ -120,36 +126,39 @@ sequenceDiagram
         activate DP
     end
 ```
+
 **Process:**
+
 1. The Transfer Engine requests a read stream from the Source Provider
 2. A transform stream is created to handle data modifications
 3. A progress tracker stream is initialized for monitoring
 4. A write stream is requested from the Destination Provider
 
 **Example Implementation:**
+
 ```typescript
 async transferEntities(): Promise {
   const stage: TransferStage = 'entities';
-  
+
   // 1. Create read stream from source
   const source = await this.sourceProvider.createEntitiesReadStream?.();
-  
+
   // 2. Create transform stream for data modifications
   const transform = this.#createStageTransformStream(stage);
-  
+
   // 3. Create progress tracker
   const tracker = this.#progressTracker(stage);
-  
+
   // 4. Create write stream from destination
   const destination = await this.destinationProvider.createEntitiesWriteStream?.();
 
   // 5. Start the transfer
-  await this.#transferStage({ 
-    stage, 
-    source, 
-    destination, 
-    transform, 
-    tracker 
+  await this.#transferStage({
+    stage,
+    source,
+    destination,
+    transform,
+    tracker
   });
 }
 ```
@@ -167,13 +176,13 @@ sequenceDiagram
 
     rect rgb(255, 240, 240)
         Note over SP,DP: Data Flow Through Pipeline
-        
+
         SP->>TR: Read Data
         Note over SP,TR: 1. Read entities from database
-        
+
         TR->>PT: Transform Data
         Note over TR,PT: 2. Filter specific content types
-        
+
         PT->>DP: Track
         Note over PT,DP: 3. Track progress
         PT->>DP: Write
@@ -182,18 +191,21 @@ sequenceDiagram
 ```
 
 **Process:**
+
 1. Source Provider reads data (e.g., from database, file system)
 2. Data passes through transform stream for any modifications
 3. Progress tracker monitors and reports transfer progress
 4. Destination Provider writes processed data
 
 **Key Aspects:**
+
 - Data flows in chunks through the pipeline
 - Each stream can process data asynchronously
 - Progress events are emitted for monitoring
 - Errors are caught and handled at each step
 
 **Example Flow:**
+
 ```typescript
 async #transferStage(options: {
   stage: TransferStage;
@@ -206,17 +218,17 @@ async #transferStage(options: {
 
   // Create pipeline
   let stream: Readable = source;
-  
+
   // Add transform if provided
   if (transform) {
     stream = stream.pipe(transform);
   }
-  
+
   // Add progress tracker
   if (tracker) {
     stream = stream.pipe(tracker);
   }
-  
+
   // Connect to destination
   await new Promise((resolve, reject) => {
     this.#currentStream = stream
@@ -249,18 +261,20 @@ sequenceDiagram
         Note over TE,DP: Cleanup Process
         SP--xTE: Close Source
         Note over SP,TE: 1. Close database connections
-        
+
         TR--xTE: Close Transform
         Note over TR,TE: 2. Clear transform buffers
-        
+
         PT--xTE: Close Tracker
         Note over PT,TE: 3. Final progress update
-        
+
         DP--xTE: Close Destination
         Note over DP,TE: 4. Commit transactions
     end
 ```
+
 **Process:**
+
 1. Source stream indicates end of data
 2. Transform stream processes final data chunks
 3. Progress tracker records final metrics
@@ -268,6 +282,7 @@ sequenceDiagram
 5. Resources are cleaned up
 
 **Example Implementation:**
+
 ```typescript
 async close(): Promise {
   try {
@@ -299,10 +314,10 @@ The transfer engine maintains progress information for each stage:
 
 ```mermaid
 flowchart LR
-    Start[stage::start] --> 
-    Progress[stage::progress] --> 
+    Start[stage::start] -->
+    Progress[stage::progress] -->
     Finish[stage::finish]
-    
+
     Progress -.-> Error[stage::error]
     Start -.-> Skip[stage::skip]
 
@@ -312,7 +327,9 @@ flowchart LR
     style Error fill:#ffebee
     style Skip fill:#e3f2fd
 ```
+
 Progress events are emitted throughout the transfer:
+
 - `stage::start`: When a stage begins
 - `stage::progress`: During data transfer
 - `stage::finish`: When a stage completes
@@ -322,16 +339,17 @@ Progress events are emitted throughout the transfer:
 ```typescript
 interface TransferProgress {
   [stage: TransferStage]: {
-    count: number;        // Number of items processed
-    bytes: number;        // Amount of data transferred
-    startTime: number;    // When stage started
-    endTime?: number;     // When stage completed
-    aggregates?: {        // Optional grouped metrics
+    count: number; // Number of items processed
+    bytes: number; // Amount of data transferred
+    startTime: number; // When stage started
+    endTime?: number; // When stage completed
+    aggregates?: {
+      // Optional grouped metrics
       [key: string]: {
         count: number;
         bytes: number;
-      }
-    }
-  }
+      };
+    };
+  };
 }
 ```

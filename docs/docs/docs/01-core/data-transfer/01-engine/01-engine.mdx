@@ -7,12 +7,14 @@ tags:
 ---
 
 The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
+
 ## Architecture Overview
+
 ```mermaid
 flowchart LR
     subgraph Ops["Stream Operations"]
         direction LR
-        
+
         subgraph ReadOps["Read Operations"]
             direction TB
             SR[Schema Read]
@@ -29,7 +31,7 @@ flowchart LR
             LSP --> FSP[File Source Provider]
             style Sources fill:#f0f0ff,stroke:#d0d0ff
         end
-        
+
         subgraph Engine["Transfer Engine"]
             direction TB
             TE[Transfer Engine]
@@ -37,7 +39,7 @@ flowchart LR
             TF --> PT[Progress Tracker]
             style Engine fill:#f0f0ff,stroke:#d0d0ff
         end
-        
+
         subgraph Dests["Destination Providers"]
             direction TB
             RDP[Remote Destination Provider]
@@ -54,7 +56,7 @@ flowchart LR
             AW --> LW[Link Write]
             LW --> CW[Config Write]
         end
-        
+
         ReadOps --> Sources
         Sources --> Engine
         Engine --> Dests
