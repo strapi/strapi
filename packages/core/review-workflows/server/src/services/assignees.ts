@@ -1,4 +1,4 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, UID, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { isNil } from 'lodash/fp';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
@@ -10,7 +10,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('workflow-metrics', { strapi });
 
   return {
-    async findEntityAssigneeId(id: string, model: UID.ContentType) {
+    async findEntityAssigneeId(id: string | number, model: UID.ContentType) {
       const entity = await strapi.db.query(model).findOne({
         where: { id },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
@@ -31,26 +31,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         updatedAt: string;
       },
       model: UID.ContentType,
-      assigneeId: string
+      assigneeId: string | null
     ) {
       const { documentId, locale } = entityToUpdate;
 
-      if (isNil(assigneeId)) {
-        return this.deleteEntityAssignee(documentId, locale, model);
+      if (!isNil(assigneeId)) {
+        const userExists = await getAdminService('user', { strapi }).exists({ id: assigneeId });
+
+        if (!userExists) {
+          throw new ApplicationError(`Selected user does not exist`);
+        }
       }
 
-      const userExists = await getAdminService('user', { strapi }).exists({ id: assigneeId });
-
-      if (!userExists) {
-        throw new ApplicationError(`Selected user does not exist`);
-      }
-
-      metrics.sendDidEditAssignee(await this.findEntityAssigneeId(documentId, model), assigneeId);
+      const oldAssigneeId = await this.findEntityAssigneeId(entityToUpdate.id, model);
+      metrics.sendDidEditAssignee(oldAssigneeId, assigneeId || null);
 
       const entity = await strapi.documents(model).update({
         documentId,
         locale,
-        data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
+        data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId || null },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
         fields: [],
       });
@@ -68,18 +67,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
       return entity;
-    },
-
-    async deleteEntityAssignee(documentId: string, locale: string, model: UID.ContentType) {
-      metrics.sendDidEditAssignee(await this.findEntityAssigneeId(documentId, model), null);
-
-      return strapi.documents(model).update({
-        documentId,
-        locale,
-        data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: null },
-        populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
-      });
     },
   };
 };
