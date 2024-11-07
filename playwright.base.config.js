@@ -67,10 +67,11 @@ const createConfig = ({ port, testDir, appDir }) => ({
 
     /* Default time each action such as `click()` can take to 20s */
     actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 20 * 1000),
-    trace: 'retain-on-failure',
+    // Only record trace when retrying a test to optimize test performance
+    trace: 'on-first-retry',
     video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
       ? {
-          mode: 'retain-on-failure', // 'retain-on-failure' to save videos only for failed tests
+          mode: 'on-first-retry', // Only save videos when retrying a test
           size: {
             width: 1280,
             height: 720,

@@ -44,4 +44,13 @@ describe('RelativeTime', () => {
     expect(screen.getByRole('time')).toHaveTextContent('5 minutes ago');
     // expect(getByText('5 minutes ago')).toBeInTheDocument();
   });
+
+  it('handles when timestamp is exactly now', () => {
+    const now = new Date('2015-10-01 08:00:00').getTime();
+    spiedDateNow = setDateNow(now);
+
+    render(<RelativeTime timestamp={new Date(now)} />);
+
+    expect(screen.getByRole('time')).toHaveTextContent('now');
+  });
 });
