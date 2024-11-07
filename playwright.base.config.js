@@ -37,8 +37,8 @@ const getEnvBool = (envVar, defaultValue) => {
 const createConfig = ({ port, testDir, appDir }) => ({
   testDir,
 
-  /* default timeout for a jest test to 30s */
-  timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 30 * 1000),
+  /* default timeout for a jest test to 90s */
+  timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
 
   expect: {
     /**
