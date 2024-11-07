@@ -46,7 +46,8 @@ describe('logger', () => {
 
   describe('formatDiagnostic', () => {
     it('only creates a single logger', () => {
-      const diagnosticReporter = formatDiagnostic('export');
+      const info = true; // so we info reports are called
+      const diagnosticReporter = formatDiagnostic('export', info);
 
       // Use the diagnostic reporter to log different levels of messages
       diagnosticReporter({
