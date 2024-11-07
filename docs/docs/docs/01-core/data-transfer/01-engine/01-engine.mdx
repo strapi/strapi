@@ -8,11 +8,162 @@ tags:
 
 The transfer engine manages the data transfer process by facilitating communication between a source provider and a destination provider.
 
+## Architecture Overview
+
+```mermaid
+flowchart LR
+    subgraph Ops["Stream Operations"]
+        direction LR
+
+        subgraph ReadOps["Read Operations"]
+            direction TB
+            SR[Schema Read]
+            SR --> ER[Entity Read]
+            ER --> AR[Asset Read]
+            AR --> LR[Link Read]
+            LR --> CR[Config Read]
+        end
+
+        subgraph Sources["Source Providers"]
+            direction TB
+            RSP[Remote Source Provider]
+            RSP --> LSP[Local Source Provider]
+            LSP --> FSP[File Source Provider]
+            style Sources fill:#f0f0ff,stroke:#d0d0ff
+        end
+
+        subgraph Engine["Transfer Engine"]
+            direction TB
+            TE[Transfer Engine]
+            TE --> TF[Transform Stream]
+            TF --> PT[Progress Tracker]
+            style Engine fill:#f0f0ff,stroke:#d0d0ff
+        end
+
+        subgraph Dests["Destination Providers"]
+            direction TB
+            RDP[Remote Destination Provider]
+            RDP --> LDP[Local Destination Provider]
+            LDP --> FDP[File Destination Provider]
+            style Dests fill:#f0f0ff,stroke:#d0d0ff
+        end
+
+        subgraph WriteOps["Write Operations"]
+            direction TB
+            SW[Schema Write]
+            SW --> EW[Entity Write]
+            EW --> AW[Asset Write]
+            AW --> LW[Link Write]
+            LW --> CW[Config Write]
+        end
+
+        ReadOps --> Sources
+        Sources --> Engine
+        Engine --> Dests
+        Dests --> WriteOps
+    end
+
+    %% Styling
+    classDef provider fill:#fff0f0,stroke:#d0d0ff,color:black
+    classDef engine fill:#fff0f0,stroke:#d0d0ff,color:black
+    classDef stream fill:#c8ffc8,stroke:#a0ffa0,color:black
+    classDef ops fill:#f8f8f8,stroke:#e8e8e8,color:black
+
+    class RSP,LSP,FSP,RDP,LDP,FDP provider
+    class TE,TF,PT engine
+    class SR,ER,AR,LR,CR,SW,EW,AW,LW,CW stream
+    class ReadOps,WriteOps ops
+    style Ops fill:#f8f8f8,stroke:#e8e8e8
+```
+
 ## Code location
 
 `packages/core/data-transfer/src/engine/index.ts`
 
 ## The transfer process
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant TE as Transfer Engine
+    participant SP as Source Provider
+    participant DP as Destination Provider
+    participant DH as Diff Handler
+
+    rect rgb(230, 245, 230)
+        Note over Client,DP: 1️⃣ Bootstrap & Initialize Phase
+        Client->>+TE: Start Transfer
+        TE->>SP: Bootstrap
+        Note right of SP: Connect to files,<br/>databases, etc.
+        TE->>DP: Bootstrap
+        Note right of DP: Setup connections,<br/>prepare storage
+        TE->>SP: Get Metadata
+        SP-->>TE: Source Metadata
+        TE->>DP: Get Metadata
+        DP-->>TE: Destination Metadata
+    end
+
+    rect rgb(230, 240, 250)
+        Note over Client,DP: 2️⃣ Integrity Check Phase
+        TE->>TE: Version Strategy Check
+        Note right of TE: Compare Strapi versions
+        alt Version Mismatch
+            TE->>Client: Version Validation Error
+        end
+        TE->>SP: Get Schemas
+        SP-->>TE: Source Schemas
+        TE->>DP: Get Schemas
+        DP-->>TE: Destination Schemas
+        TE->>TE: Schema Strategy Check
+        alt Schema Differences
+            TE->>+DH: onSchemaDiff
+            Note right of DH: Resolve schema<br/>differences
+            alt Resolved
+                DH-->>-TE: Continue
+            else Unresolved
+                DH-->>TE: Schema Validation Error
+            end
+        end
+    end
+
+    rect rgb(245, 235, 250)
+        Note over Client,DP: 3️⃣ Data Transfer Phase
+
+        Note over TE,DP: Stage 1: Schemas
+        TE->>SP: Create Schemas ReadStream
+        TE->>DP: Create Schemas WriteStream
+        SP-->>DP: Stream Schema Data
+
+        Note over TE,DP: Stage 2: Entities
+        TE->>SP: Create Entities ReadStream
+        TE->>DP: Create Entities WriteStream
+        SP-->>DP: Stream Entity Data
+
+        Note over TE,DP: Stage 3: Assets
+        TE->>SP: Create Assets ReadStream
+        TE->>DP: Create Assets WriteStream
+        SP-->>DP: Stream Asset Files
+
+        Note over TE,DP: Stage 4: Links
+        TE->>SP: Create Links ReadStream
+        TE->>DP: Create Links WriteStream
+        SP-->>DP: Stream Relation Data
+
+        Note over TE,DP: Stage 5: Configuration
+        TE->>SP: Create Config ReadStream
+        TE->>DP: Create Config WriteStream
+        SP-->>DP: Stream Config Data
+    end
+
+    rect rgb(255, 240, 230)
+        Note over Client,DP: 4️⃣ Cleanup Phase
+        TE->>SP: Close
+        SP-->>TE: Closed
+        TE->>DP: Close
+        DP-->>TE: Closed
+        TE->>-Client: Transfer Complete
+    end
+```
 
 A transfer starts by bootstrapping and initializing itself and the providers. That is the stage where providers attempt to make any necessary connections to files, databases, websockets, etc.
 
