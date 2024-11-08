@@ -195,7 +195,7 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright@1.42.1 install --with-deps
+        run: npx playwright install --with-deps
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
@@ -209,7 +209,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ce-${{ matrix.project }}--playwright-trace
+          name: ce-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
@@ -239,7 +239,7 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
 
       - name: Install Playwright Browsers
-        run: npx playwright@1.42.1 install --with-deps
+        run: npx playwright install --with-deps
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
@@ -254,7 +254,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ee-${{ matrix.project }}--playwright-trace
+          name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 

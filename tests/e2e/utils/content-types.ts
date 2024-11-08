@@ -373,3 +373,46 @@ export const createSingleType = async (page: Page, options: CreateContentTypeOpt
 export const createCollectionType = async (page: Page, options: CreateContentTypeOptions) => {
   await createContentType(page, options, 'collection');
 };
+
+export const addAttributeToComponent = async (
+  page: Page,
+  componentName: string,
+  attribute: AddAttribute
+) => {
+  await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+  await clickAndWait(page, page.getByRole('link', { name: componentName }));
+  await clickAndWait(
+    page,
+    page.getByRole('button', { name: 'Add another field to this component' })
+  );
+  await addAttributes(page, [attribute]);
+
+  await saveAndVerifyContent(page, {
+    name: componentName,
+    attributes: [attribute],
+  });
+};
+
+export const removeAttributeFromComponent = async (
+  page: Page,
+  componentName: string,
+  attributeName: string
+) => {
+  await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+  await clickAndWait(page, page.getByRole('link', { name: componentName }));
+  await clickAndWait(page, page.getByRole('button', { name: 'Delete ' + attributeName }));
+
+  await saveAndVerifyContent(page, { name: componentName, attributes: [] });
+};
+
+export const deleteComponent = async (page: Page, componentName: string) => {
+  await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
+  await clickAndWait(page, page.getByRole('link', { name: componentName }));
+  await clickAndWait(page, page.getByRole('button', { name: 'Edit', exact: true }));
+
+  // need to accept the browser modal
+  page.on('dialog', (dialog) => dialog.accept());
+  await clickAndWait(page, page.getByRole('button', { name: 'Delete', exact: true }));
+
+  await waitForRestart(page);
+};
