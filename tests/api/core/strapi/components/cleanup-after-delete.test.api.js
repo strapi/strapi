@@ -3,6 +3,7 @@
 const { createAuthRequest } = require('api-tests/request');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
+const pluralize = require('pluralize');
 
 let strapi;
 let rq;
@@ -60,11 +61,10 @@ describe('Component Deletion and Cleanup Test', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
-    // await builder.addComponent(component).addContentType(contentType).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    // create the permanent component
+    // Create the permanent component
     await rq({
       method: 'POST',
       url: '/content-type-builder/components',
@@ -72,6 +72,7 @@ describe('Component Deletion and Cleanup Test', () => {
         component: compoKeepSchema,
       },
     });
+    await restart();
   });
 
   afterAll(async () => {
@@ -135,14 +136,12 @@ describe('Component Deletion and Cleanup Test', () => {
       .select('*')
       .from(`${contentType.pluralName}_cmps`);
 
-    // Expect that data for the components exists in the database
-    // Expect exactly two entries for each component type
+    // Verify data for the components exists in the database
+    expect(dbResultBeforeDeletion.filter((row) => row.component_type === componentUID).length).toBe(
+      2
+    );
     expect(
-      dbResultBeforeDeletion.filter((row) => row.component_type === 'default.temporarycomponent')
-        .length
-    ).toBe(2);
-    expect(
-      dbResultBeforeDeletion.filter((row) => row.component_type === 'default.keepcomponent').length
+      dbResultBeforeDeletion.filter((row) => row.component_type === componentKeepUID).length
     ).toBe(2);
 
     // Delete the component
@@ -153,10 +152,9 @@ describe('Component Deletion and Cleanup Test', () => {
 
     expect(deleteComponentRes.statusCode).toBe(200);
     expect(deleteComponentRes.body).toEqual({
-      data: { uid: 'default.temporarycomponent' },
+      data: { uid: componentUID },
     });
 
-    // Restart Strapi
     await restart();
 
     // Verify the component is no longer accessible
@@ -172,25 +170,22 @@ describe('Component Deletion and Cleanup Test', () => {
 
     // Ensure data related to the deleted component is no longer in the database
     const dbResult = await strapi.db.connection.raw(`SELECT * FROM ${contentType.pluralName}_cmps`);
-    console.error('dbResult', JSON.stringify(dbResult, null, 2));
 
     // Ensure table for the deleted component no longer exists
     const tempComponentTableExists = await strapi.db.connection.schema.hasTable(
-      'components_default_tempcomponents'
+      `components_${compoSchema.category}_${pluralize(compoSchema.displayName)}`
     );
-    expect(tempComponentTableExists).toBe(false); // Table for deleted component should not exist
+    expect(tempComponentTableExists).toBe(false);
 
     // Ensure table for the retained component still exists
     const keepComponentTableExists = await strapi.db.connection.schema.hasTable(
-      'components_default_keepcomponents'
+      `components_${compoKeepSchema.category}_${pluralize(compoKeepSchema.displayName)}`
     );
-    expect(keepComponentTableExists).toBe(true); // Table for retained component should still exist
+    expect(keepComponentTableExists).toBe(true);
 
-    // Expect that dbResult array does not contain an object with component_type of the deleted component
-    const hasDeletedComponentData = dbResult.some(
-      (row) => row.component_type === 'default.temporarycomponent'
-    );
-    expect(hasDeletedComponentData).toBe(false); // Should not contain data related to deleted component
+    // Verify our content type has no references to the deleted component
+    const hasDeletedComponentData = dbResult.some((row) => row.component_type === componentUID);
+    expect(hasDeletedComponentData).toBe(false);
 
     // Recreate the component
     const compoResult2 = await rq({
@@ -210,7 +205,7 @@ describe('Component Deletion and Cleanup Test', () => {
 
     await restart();
 
-    // update ct to add it back to confirm it works (no remnants blocking it)
+    // Update content type to add it back to confirm it works (no remnants blocking it)
     const ctResult2 = await rq({
       method: 'POST',
       url: '/content-type-builder/content-types',
