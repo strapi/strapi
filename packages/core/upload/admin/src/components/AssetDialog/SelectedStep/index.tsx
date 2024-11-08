@@ -21,7 +21,7 @@ export const SelectedStep = ({
 
   return (
     <Flex direction="column" alignItems="stretch" gap={4}>
-      <Flex gap={0}>
+      <Flex gap={0} direction="column" alignItems="start">
         <Typography variant="pi" fontWeight="bold" textColor="neutral800">
           {formatMessage(
             {
