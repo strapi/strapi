@@ -219,18 +219,18 @@ const PreviewHeader = () => {
       background="neutral0"
       borderColor="neutral150"
       tag="header"
+      style={{ alignItems: 'end' }}
     >
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <Typography tag="h1" fontWeight={600} fontSize={2} maxWidth={'200px'}>
+        <Typography tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
           {title}
         </Typography>
         <DocumentStatus />
       </Grid.Item>
       {/* Tabs */}
-      {/* <Grid.Item xs={1}> */}
-      <Grid.Item xs={1} style={{ alignSelf: 'end' }}>
+      <Grid.Item xs={1} marginBottom="-1px">
         <PreviewTabs />
       </Grid.Item>
       {/* Copy link */}
