@@ -1,11 +1,6 @@
 import * as React from 'react';
 
-import {
-  useClipboard,
-  useHistory,
-  useNotification,
-  useQueryParams,
-} from '@strapi/admin/strapi-admin';
+import { useClipboard, useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
 import {
   Box,
   type BoxProps,
