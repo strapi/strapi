@@ -202,6 +202,7 @@ const PreviewHeader = () => {
       background="neutral0"
       borderColor="neutral150"
       tag="header"
+      style={{ alignItems: 'end' }}
     >
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
