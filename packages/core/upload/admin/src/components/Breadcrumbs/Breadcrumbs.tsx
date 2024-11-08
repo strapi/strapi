@@ -5,6 +5,7 @@ import {
   BreadcrumbsProps as BaseBreadcrumbsProps,
 } from '@strapi/design-system';
 import { useIntl, MessageDescriptor } from 'react-intl';
+import { Link as ReactRouterLink } from 'react-router-dom';
 
 import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 
@@ -62,7 +63,13 @@ export const Breadcrumbs = ({
             );
           }
           return (
-            <CrumbLink key={`breadcrumb-${crumb?.id ?? 'root'}`} href={crumb.href}>
+            <CrumbLink
+              key={`breadcrumb-${crumb?.id ?? 'root'}`}
+              to={crumb.href}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore - `tag` prop is not defined in the `BaseLinkProps` type
+              tag={ReactRouterLink}
+            >
               {typeof crumb.label !== 'string' && crumb.label?.id
                 ? formatMessage(crumb.label)
                 : (crumb.label as string)}
