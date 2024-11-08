@@ -225,10 +225,10 @@ interface DocumentActionsMenuProps {
   variant?: 'ghost' | 'tertiary';
 }
 
-const MenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger'; $isDisabled?: false }>`
+const MenuItem = styled(Menu.Item)<{ isVariantDanger?: boolean; isDisabled?: boolean }>`
   &:hover {
-    background: ${({ theme, $variant = 'neutral', $isDisabled }) =>
-      $variant === 'danger' && !$isDisabled ? theme.colors[`${$variant}100`] : 'neutral'};
+    background: ${({ theme, isVariantDanger, isDisabled }) =>
+      isVariantDanger && !isDisabled ? theme.colors.danger100 : 'neutral'};
   }
 `;
 
@@ -301,8 +301,8 @@ const DocumentActionsMenu = ({
               onSelect={handleClick(action)}
               display="block"
               key={action.id}
-              $variant={action.variant as 'neutral' | 'danger'}
-              $isDisabled={action.disabled as false}
+              isVariantDanger={action.variant === 'danger'}
+              isDisabled={action.disabled}
             >
               <Flex justifyContent="space-between" gap={4}>
                 <Flex

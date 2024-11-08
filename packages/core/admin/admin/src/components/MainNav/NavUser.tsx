@@ -30,7 +30,7 @@ const MenuContent = styled(Menu.Content)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const MenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
+const MenuItem = styled(Menu.Item)`
   & > span {
     width: 100%;
     display: flex;
@@ -38,11 +38,13 @@ const MenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
     gap: ${({ theme }) => theme.spaces[3]};
     justify-content: space-between;
   }
+`;
 
+const MenuItemDanger = styled(MenuItem)`
   &:hover {
-    background: ${({ theme, $variant = 'neutral' }) =>
-      $variant === 'danger' ? theme.colors[`${$variant}100`] : 'neutral'};
-  }
+  ${({ theme }) => `
+    background: ${theme.colors.danger100};
+  `}
 `;
 
 export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
@@ -72,13 +74,13 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
             })}
           </MenuItem>
 
-          <MenuItem onSelect={handleLogout} color="danger600" $variant="danger">
+          <MenuItemDanger onSelect={handleLogout} color="danger600">
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
               defaultMessage: 'Logout',
             })}
             <SignOut />
-          </MenuItem>
+          </MenuItemDanger>
         </MenuContent>
       </Menu.Root>
     </Flex>
