@@ -198,8 +198,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     /**
      * Update the stage of an entity
      */
-    async updateEntity(documentId: string, locale: string, model: UID.ContentType, stageId: any) {
+    async updateEntity(
+      entityToUpdate: {
+        id: number | string;
+        documentId: string;
+        locale: string;
+        updatedAt: string;
+      },
+      model: UID.ContentType,
+      stageId: any
+    ) {
       const stage = await this.findById(stageId);
+      const { documentId, locale } = entityToUpdate;
 
       await workflowValidator.validateWorkflowCount();
 
@@ -210,9 +220,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const entity = await strapi.documents(model).update({
         documentId,
         locale,
-        data: { [ENTITY_STAGE_ATTRIBUTE]: stage },
+        // Stage doesn't have DP or i18n enabled, connecting it through the `id`
+        // will be safer than relying on the `documentId` + `locale` + `status` transformation
+        data: { [ENTITY_STAGE_ATTRIBUTE]: pick(['id'], stage) },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });
+
+      // Update the `updated_at` field of the entity, so that the `status` is not considered `Modified`
+      // NOTE: `updatedAt` is a protected attribute that can not be modified directly from the query layer
+      //        hence the knex query builder is used here.
+      const { tableName } = strapi.db.metadata.get(model);
+      await strapi.db
+        .connection(tableName)
+        .where({ id: entityToUpdate.id })
+        .update({
+          updated_at: new Date(entityToUpdate.updatedAt),
+        });
 
       metrics.sendDidChangeEntryStage();
 

@@ -5,20 +5,26 @@ import { isRelationalAttribute } from './content-types';
 
 const MANY_RELATIONS = ['oneToMany', 'manyToMany'];
 
-const getRelationalFields = (contentType: Model) => {
+export const getRelationalFields = (contentType: Model) => {
   return Object.keys(contentType.attributes).filter((attributeName) => {
     return contentType.attributes[attributeName].type === 'relation';
   });
 };
 
-const isOneToAny = (attribute: Attribute) =>
+export const isOneToAny = (attribute: Attribute) =>
   isRelationalAttribute(attribute) && ['oneToOne', 'oneToMany'].includes(attribute.relation);
-const isManyToAny = (attribute: Attribute) =>
+
+export const isManyToAny = (attribute: Attribute) =>
   isRelationalAttribute(attribute) && ['manyToMany', 'manyToOne'].includes(attribute.relation);
-const isAnyToOne = (attribute: Attribute) =>
+
+export const isAnyToOne = (attribute: Attribute) =>
   isRelationalAttribute(attribute) && ['oneToOne', 'manyToOne'].includes(attribute.relation);
-const isAnyToMany = (attribute: Attribute) =>
+
+export const isAnyToMany = (attribute: Attribute) =>
   isRelationalAttribute(attribute) && ['oneToMany', 'manyToMany'].includes(attribute.relation);
+
+export const isPolymorphic = (attribute: any): any =>
+  ['morphOne', 'morphMany', 'morphToOne', 'morphToMany'].includes(attribute.relation);
 
 export const constants = {
   MANY_RELATIONS,
@@ -29,5 +35,3 @@ export const constants = {
 export const VALID_RELATION_ORDERING_KEYS: { [key: string]: (value: any) => boolean } = {
   strict: isBoolean,
 };
-
-export { getRelationalFields, isOneToAny, isManyToAny, isAnyToOne, isAnyToMany };

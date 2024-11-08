@@ -12,12 +12,15 @@ export const VERSION = 'v1';
 export type ProjectInfos = {
   id: string;
   name: string;
+  selectedEnvironment?: string;
   displayName?: string;
   nodeVersion?: string;
   region?: string;
   plan?: string;
   url?: string;
 };
+
+export type EnvironmentInfo = Record<string, unknown>;
 
 export type ProjectInput = Omit<ProjectInfos, 'id'>;
 
@@ -32,6 +35,12 @@ export type ListProjectsResponse = {
   };
 };
 
+export type ListEnvironmentsResponse = {
+  data: {
+    data: EnvironmentInfo[] | Record<string, never>;
+  };
+};
+
 export type ListLinkProjectsResponse = {
   data: {
     data: ProjectInfos[] | Record<string, never>;
@@ -43,6 +52,7 @@ export type GetProjectResponse = {
     updatedAt: string;
     suspendedAt?: string;
     isTrial: boolean;
+    environments: string[];
   };
   metadata: {
     dashboardUrls: {
@@ -56,7 +66,7 @@ export interface CloudApiService {
   deploy(
     deployInput: {
       filePath: string;
-      project: { name: string };
+      project: { name: string; targetEnvironment?: string };
     },
     {
       onUploadProgress,
@@ -77,6 +87,8 @@ export interface CloudApiService {
   listProjects(): Promise<AxiosResponse<ListProjectsResponse>>;
 
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
+
+  listEnvironments(project: { name: string }): Promise<AxiosResponse<ListEnvironmentsResponse>>;
 
   getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
@@ -112,7 +124,7 @@ export async function cloudApiFactory(
     deploy({ filePath, project }, { onUploadProgress }) {
       return axiosCloudAPI.post(
         `/deploy/${project.name}`,
-        { file: fse.createReadStream(filePath) },
+        { file: fse.createReadStream(filePath), targetEnvironment: project.targetEnvironment },
         {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -192,6 +204,23 @@ export async function cloudApiFactory(
       } catch (error) {
         logger.debug(
           "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async listEnvironments({ name }): Promise<AxiosResponse<ListEnvironmentsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}/environments`);
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud environments from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's environments from the server. Please try again."
         );
         throw error;
       }

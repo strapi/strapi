@@ -1,0 +1,355 @@
+---
+title: Stream Lifecycle
+tags:
+  - providers
+  - data-transfer
+---
+
+# Stream Lifecycle in Data Transfer
+
+## Overview
+
+The transfer process consists of five sequential stages. Each stage follows the same stream lifecycle pattern but handles different types of data:
+
+```mermaid
+flowchart LR
+    subgraph Process["Transfer Process"]
+        subgraph S1["1.Schemas Stage"]
+            direction TB
+            DB["Database Structure"]
+            CT["Content Type Configs"]
+            CD["Component Definitions"]
+        end
+
+        subgraph S2["2.Entities Stage"]
+            direction TB
+            AC["Actual Content"]
+            CoD["Component Data"]
+            DZ["Dynamic Zone Data"]
+            MM["Media Metadata"]
+        end
+
+        subgraph S3["3.Assets Stage"]
+            direction TB
+            UF["Upload Files"]
+            FM["File Metadata"]
+            FV["File Variants/Formats"]
+        end
+
+        subgraph S4["4.Links Stage"]
+            direction TB
+            CTR["Content Type Relations"]
+            CR["Component Relations"]
+            MR["Media Relations"]
+        end
+
+        subgraph S5["5.Configuration Stage"]
+            direction TB
+            SC["Strapi Configurations"]
+            PS["Project Settings"]
+            AC2["API Configurations"]
+        end
+
+        S1 ==> S2
+        S2 ==> S3
+        S3 ==> S4
+        S4 ==> S5
+    end
+
+    %% Styling
+    classDef stageClass fill:#f0f0ff,stroke:#d0d0ff,color:black
+    classDef itemClass fill:white,stroke:#d0d0ff,color:black
+    classDef processClass fill:#fafafa,stroke:#e0e0e0
+
+    class S1,S2,S3,S4,S5 stageClass
+    class DB,CT,CD,AC,CoD,DZ,MM,UF,FM,FV,CTR,CR,MR,SC,PS,AC2 itemClass
+    class Process processClass
+
+    %% Link styling
+    linkStyle 0,1,2,3 stroke:#d0d0ff,stroke-width:2px
+```
+
+1. **Schemas Stage**: Content type definitions
+
+   - Transfers database structure
+   - Content type configurations
+   - Component definitions
+
+2. **Entities Stage**: Content without relations
+
+   - Actual content data
+   - Component data
+   - Dynamic zone data
+   - Media metadata (not files)
+
+3. **Assets Stage**: Media files
+
+   - Files from /uploads folder
+   - File metadata
+   - File variants/formats
+
+4. **Links Stage**: Relations between entities
+
+   - Content type relations
+   - Component relations
+   - Media relations
+
+5. **Configuration Stage**: Project settings
+   - Strapi configurations
+   - Project-specific settings
+   - API configurations
+
+## Stream Lifecycle Phases
+
+### 1. Stream Creation Phase
+
+During this phase, the Transfer Engine initializes and connects all necessary streams for the data transfer.
+
+```mermaid
+sequenceDiagram
+    participant TE as Transfer Engine
+    participant SP as Source Provider
+    participant TR as Transform Stream
+    participant PT as Progress Tracker
+    participant DP as Destination Provider
+
+    rect rgb(200, 255, 200)
+        Note over TE,DP: Stream Creation Phase
+        TE->>SP: createReadStream()
+        activate SP
+        SP-->>TE: Source Stream
+        TE->>TR: createTransformStream()
+        activate TR
+        TE->>PT: createProgressTracker()
+        activate PT
+        TE->>DP: createWriteStream()
+        activate DP
+    end
+```
+
+**Process:**
+
+1. The Transfer Engine requests a read stream from the Source Provider
+2. A transform stream is created to handle data modifications
+3. A progress tracker stream is initialized for monitoring
+4. A write stream is requested from the Destination Provider
+
+**Example Implementation:**
+
+```typescript
+async transferEntities(): Promise {
+  const stage: TransferStage = 'entities';
+
+  // 1. Create read stream from source
+  const source = await this.sourceProvider.createEntitiesReadStream?.();
+
+  // 2. Create transform stream for data modifications
+  const transform = this.#createStageTransformStream(stage);
+
+  // 3. Create progress tracker
+  const tracker = this.#progressTracker(stage);
+
+  // 4. Create write stream from destination
+  const destination = await this.destinationProvider.createEntitiesWriteStream?.();
+
+  // 5. Start the transfer
+  await this.#transferStage({
+    stage,
+    source,
+    destination,
+    transform,
+    tracker
+  });
+}
+```
+
+### 2. Stream Pipeline Phase
+
+This phase represents the active data transfer process where data flows through the connected streams.
+
+```mermaid
+sequenceDiagram
+    participant SP as Source Provider
+    participant TR as Transform Stream
+    participant PT as Progress Tracker
+    participant DP as Destination Provider
+
+    rect rgb(255, 240, 240)
+        Note over SP,DP: Data Flow Through Pipeline
+
+        SP->>TR: Read Data
+        Note over SP,TR: 1. Read entities from database
+
+        TR->>PT: Transform Data
+        Note over TR,PT: 2. Filter specific content types
+
+        PT->>DP: Track
+        Note over PT,DP: 3. Track progress
+        PT->>DP: Write
+        Note over PT,DP: 4. write to destination
+    end
+```
+
+**Process:**
+
+1. Source Provider reads data (e.g., from database, file system)
+2. Data passes through transform stream for any modifications
+3. Progress tracker monitors and reports transfer progress
+4. Destination Provider writes processed data
+
+**Key Aspects:**
+
+- Data flows in chunks through the pipeline
+- Each stream can process data asynchronously
+- Progress events are emitted for monitoring
+- Errors are caught and handled at each step
+
+**Example Flow:**
+
+```typescript
+async #transferStage(options: {
+  stage: TransferStage;
+  source?: Readable;
+  destination?: Writable;
+  transform?: PassThrough;
+  tracker?: PassThrough;
+}) {
+  const { stage, source, destination, transform, tracker } = options;
+
+  // Create pipeline
+  let stream: Readable = source;
+
+  // Add transform if provided
+  if (transform) {
+    stream = stream.pipe(transform);
+  }
+
+  // Add progress tracker
+  if (tracker) {
+    stream = stream.pipe(tracker);
+  }
+
+  // Connect to destination
+  await new Promise((resolve, reject) => {
+    this.#currentStream = stream
+      .pipe(destination)
+      .on('error', (error) => {
+        this.#emitStageUpdate('error', stage);
+        reject(error);
+      })
+      .on('close', () => {
+        this.#emitStageUpdate('finish', stage);
+        resolve();
+      });
+  });
+}
+```
+
+### 3. Stream Closing Phase
+
+The closing phase handles the cleanup of resources and ensures proper completion of the transfer.
+
+```mermaid
+sequenceDiagram
+    participant TE as Transfer Engine
+    participant SP as Source Provider
+    participant TR as Transform Stream
+    participant PT as Progress Tracker
+    participant DP as Destination Provider
+
+    rect rgb(240, 240, 255)
+        Note over TE,DP: Cleanup Process
+        SP--xTE: Close Source
+        Note over SP,TE: 1. Close database connections
+
+        TR--xTE: Close Transform
+        Note over TR,TE: 2. Clear transform buffers
+
+        PT--xTE: Close Tracker
+        Note over PT,TE: 3. Final progress update
+
+        DP--xTE: Close Destination
+        Note over DP,TE: 4. Commit transactions
+    end
+```
+
+**Process:**
+
+1. Source stream indicates end of data
+2. Transform stream processes final data chunks
+3. Progress tracker records final metrics
+4. Destination stream completes writing
+5. Resources are cleaned up
+
+**Example Implementation:**
+
+```typescript
+async close(): Promise {
+  try {
+    // Clean up providers
+    const results = await Promise.allSettled([
+      this.sourceProvider.close?.(),
+      this.destinationProvider.close?.()
+    ]);
+
+    // Handle any cleanup errors
+    results.forEach((result) => {
+      if (result.status === 'rejected') {
+        this.reportError(result.reason, 'error');
+      }
+    });
+
+    // Final cleanup
+    this.#currentStream = undefined;
+    this.progress.data = {};
+  } catch (error) {
+    this.panic(error);
+  }
+}
+```
+
+## Progress Tracking
+
+The transfer engine maintains progress information for each stage:
+
+```mermaid
+flowchart LR
+    Start[stage::start] -->
+    Progress[stage::progress] -->
+    Finish[stage::finish]
+
+    Progress -.-> Error[stage::error]
+    Start -.-> Skip[stage::skip]
+
+    style Start fill:#c8ffc8
+    style Progress fill:#f0f0ff
+    style Finish fill:#c8ffc8
+    style Error fill:#ffebee
+    style Skip fill:#e3f2fd
+```
+
+Progress events are emitted throughout the transfer:
+
+- `stage::start`: When a stage begins
+- `stage::progress`: During data transfer
+- `stage::finish`: When a stage completes
+- `stage::error`: If an error occurs
+- `stage::skip`: If a stage is skipped
+
+```typescript
+interface TransferProgress {
+  [stage: TransferStage]: {
+    count: number; // Number of items processed
+    bytes: number; // Amount of data transferred
+    startTime: number; // When stage started
+    endTime?: number; // When stage completed
+    aggregates?: {
+      // Optional grouped metrics
+      [key: string]: {
+        count: number;
+        bytes: number;
+      };
+    };
+  };
+}
+```
