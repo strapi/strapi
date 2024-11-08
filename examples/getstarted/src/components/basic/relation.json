@@ -1,7 +1,8 @@
 {
   "collectionName": "components_basic_relations",
   "info": {
-    "displayName": "Relation"
+    "displayName": "Relation",
+    "description": ""
   },
   "options": {},
   "attributes": {
@@ -9,6 +10,9 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::category.category"
+    },
+    "name": {
+      "type": "string"
     }
   }
 }
