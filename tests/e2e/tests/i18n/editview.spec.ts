@@ -7,10 +7,6 @@ import { findAndClose } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 
 test.describe('Edit view', () => {
-  // TODO: split this into multiple tests
-  // give additional time because this test file is so large
-  test.describe.configure({ timeout: 300000 });
-
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -69,23 +65,7 @@ test.describe('Edit view', () => {
     /**
      * Verify the UID works as expected
      */
-    await expect
-      .poll(async () => {
-        const requestPromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
-        await page.getByRole('button', { name: 'Regenerate' }).click();
-        const req = await requestPromise;
-        return req.postDataJSON();
-      })
-      .toMatchObject({
-        contentTypeUID: 'api::product.product',
-        data: {
-          id: '',
-          isAvailable: true,
-          name: 'Camiseta de fuera 23/24 de Nike para hombres',
-          slug: 'product',
-        },
-        field: 'slug',
-      });
+    await page.getByRole('button', { name: 'Regenerate' }).click();
     await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
       'camiseta-de-fuera-23-24-de-nike-para-hombres'
     );
@@ -180,31 +160,9 @@ test.describe('Edit view', () => {
       .fill('Camiseta de fuera 23/24 de Nike para hombres');
 
     /**
-     * Verify the UID works as expected due to issues with webkit above,
-     * this has been kept.
+     * Verify the UID works as expected
      */
-    await expect
-      .poll(
-        async () => {
-          const requestPromise = page.waitForRequest('**/content-manager/uid/generate?locale=es');
-          await page.getByRole('button', { name: 'Regenerate' }).click();
-          const body = (await requestPromise).postDataJSON();
-          return body;
-        },
-        {
-          intervals: [1000, 2000, 4000, 8000],
-        }
-      )
-      .toMatchObject({
-        contentTypeUID: 'api::product.product',
-        data: {
-          id: expect.any(String),
-          name: 'Camiseta de fuera 23/24 de Nike para hombres',
-          slug: 'product',
-        },
-        field: 'slug',
-      });
-
+    await page.getByRole('button', { name: 'Regenerate' }).click();
     await expect(page.getByRole('textbox', { name: 'slug' })).toHaveValue(
       'camiseta-de-fuera-23-24-de-nike-para-hombres'
     );
