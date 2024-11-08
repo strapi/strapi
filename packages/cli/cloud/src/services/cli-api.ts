@@ -53,18 +53,12 @@ export type ListLinkEnvironmentsResponse = {
   };
 };
 
-export interface Environment {
-  name: string;
-  hasLiveDeployment?: boolean;
-  hasPendingDeployment?: boolean;
-}
-
 export type GetProjectResponse = {
   data: {
     updatedAt: string;
     suspendedAt?: string;
     isTrial: boolean;
-    environments: Environment[];
+    environments: string[];
   };
   metadata: {
     dashboardUrls: {
