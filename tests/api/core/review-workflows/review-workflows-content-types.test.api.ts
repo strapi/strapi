@@ -47,6 +47,19 @@ const articleModel = {
   },
 };
 
+const dogUID = 'api::dog.dog';
+const dogModel = {
+  pluginOptions: {},
+  draftAndPublish: true,
+  singularName: 'dog',
+  pluralName: 'dogs',
+  displayName: 'Dog',
+  kind: 'collectionType',
+  attributes: {
+    name: { type: 'string' },
+  },
+};
+
 // TODO: V5 fix review workflows
 describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => {
   const builder = createTestBuilder();
@@ -103,7 +116,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([productModel, articleModel]).build();
+    await builder.addContentTypes([productModel, articleModel, dogModel]).build();
 
     strapi = await createStrapiInstance();
     requests.admin = await createAuthRequest({ strapi });
@@ -118,6 +131,12 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
     await Promise.all([
       createEntry(articleUID, { title: 'Article 1' }),
       createEntry(articleUID, { title: 'Article 2' }),
+    ]);
+
+    // Create dogs
+    await Promise.all([
+      createEntry(dogUID, { name: 'Dog 1' }),
+      createEntry(dogUID, { name: 'Dog 2' }),
     ]);
   });
 
@@ -181,6 +200,43 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
     test("It shouldn't create a workflow with invalid content type", async () => {
       const res = await createWorkflow({ contentTypes: ['someUID'] });
       expect(res.status).toBe(400);
+    });
+
+    test('It should create a workflow with a required stage to publish', async () => {
+      const res = await createWorkflow({
+        contentTypes: [dogUID],
+        stages: [{ name: 'Review' }, { name: 'Done' }],
+        stageRequiredToPublishName: 'Done',
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data).toMatchObject({ contentTypes: [dogUID] });
+
+      const dogs = await findAll(dogUID);
+      expect(dogs.results).toHaveLength(2);
+
+      const dog = dogs.results[0];
+
+      // If we try to publish, should fail because is not at the required stage
+      const publishRes = await requests.admin({
+        method: 'POST',
+        url: `/content-manager/collection-types/${dogUID}/${dog.documentId}/actions/publish`,
+      });
+      expect(publishRes.status).toBe(400);
+
+      const reviewRes = await requests.admin({
+        method: 'PUT',
+        url: `/review-workflows/content-manager/collection-types/${dogUID}/${dog.documentId}/stage`,
+        body: { data: { id: res.body.data.stages[1].id } },
+      });
+      expect(reviewRes.status).toBe(200);
+
+      // Publish
+      const publishRes2 = await requests.admin({
+        method: 'POST',
+        url: `/content-manager/collection-types/${dogUID}/${dog.documentId}/actions/publish`,
+      });
+      expect(publishRes2.status).toBe(200);
     });
   });
 
