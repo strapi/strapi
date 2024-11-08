@@ -142,7 +142,7 @@ const PreviewTabs = () => {
   }
 
   return (
-    <Flex margin="auto">
+    <>
       <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
         <Tabs.List
           aria-label={formatMessage({
@@ -164,7 +164,7 @@ const PreviewTabs = () => {
           </StatusTab>
         </Tabs.List>
       </Tabs.Root>
-    </Flex>
+    </>
   );
 };
 
@@ -202,7 +202,6 @@ const PreviewHeader = () => {
       background="neutral0"
       borderColor="neutral150"
       tag="header"
-      style={{ alignItems: 'end' }}
     >
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
@@ -217,7 +216,7 @@ const PreviewHeader = () => {
         <PreviewTabs />
       </Grid.Item>
       {/* Copy link */}
-      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2}>
+      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2} alignItems="end">
         <IconButton
           type="button"
           label={formatMessage({
