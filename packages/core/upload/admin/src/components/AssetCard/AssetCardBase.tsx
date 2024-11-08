@@ -27,10 +27,15 @@ const Extension = styled.span`
 
 const CardActionsContainer = styled(CardAction)`
   opacity: 0;
+  z-index: 1;
 
   &:focus-within {
     opacity: 1;
   }
+`;
+
+const CardCheckboxWrapper = styled.div`
+  z-index: 1;
 `;
 
 const CardContainer = styled(Card)`
@@ -93,9 +98,9 @@ export const AssetCardBase = ({
     <CardContainer role="button" height="100%" tabIndex={-1} onClick={handleClick}>
       <CardHeader>
         {isSelectable && (
-          <div onClick={handlePropagationClick}>
+          <CardCheckboxWrapper onClick={handlePropagationClick}>
             <CardCheckbox checked={selected} onCheckedChange={onSelect} />
-          </div>
+          </CardCheckboxWrapper>
         )}
         {(onRemove || onEdit) && (
           <CardActionsContainer onClick={handlePropagationClick} position="end">
