@@ -1,12 +1,12 @@
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
 import { downloadFile } from '../../../utils';
-import { EditAssetDialog, Asset } from '../index';
+import { EditAssetDialog, Asset } from '../EditAssetContent';
 
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
@@ -106,8 +106,7 @@ const renderCompo = (props = { canUpdate: true, canCopyLink: true, canDownload: 
           </NotificationsProvider>
         </IntlProvider>
       </DesignSystemProvider>
-    </QueryClientProvider>,
-    { container: document.getElementById('app')! }
+    </QueryClientProvider>
   );
 
 describe('<EditAssetDialog />', () => {
@@ -157,7 +156,10 @@ describe('<EditAssetDialog />', () => {
       expect(screen.getByLabelText('File name')).toHaveAttribute('aria-disabled', 'true');
       expect(screen.getByLabelText('Alternative text')).toHaveAttribute('aria-disabled', 'true');
       expect(screen.getByLabelText('Caption')).toHaveAttribute('aria-disabled', 'true');
-      expect(screen.getByText('Finish').parentElement).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByRole('button', { name: 'Finish' })).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
 
     it('shows an error on the FileName input when its not filled', async () => {
@@ -166,7 +168,7 @@ describe('<EditAssetDialog />', () => {
       fireEvent.change(screen.getByLabelText('File name'), { target: { value: '' } });
       fireEvent.click(screen.getByText('Finish'));
 
-      await waitFor(() => expect(screen.getByText('name is a required field')).toBeInTheDocument());
+      await screen.findByText('name is a required field');
     });
   });
 
@@ -191,9 +193,7 @@ describe('<EditAssetDialog />', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
 
-      await waitFor(() =>
-        expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument()
-      );
+      await screen.findByText('Link copied into the clipboard');
     });
 
     it('hides the copy link button when the user is not allowed to see it', () => {
@@ -235,7 +235,7 @@ describe('<EditAssetDialog />', () => {
     it('disables the replacement media button when the user is not allowed to update', () => {
       renderCompo({ canUpdate: false, canCopyLink: false, canDownload: false });
 
-      expect(screen.getByText('Replace media').parentElement).toHaveAttribute(
+      expect(screen.getByRole('button', { name: 'Replace media' })).toHaveAttribute(
         'aria-disabled',
         'true'
       );
@@ -244,6 +244,7 @@ describe('<EditAssetDialog />', () => {
     it('replaces the media when pressing the replace media button', async () => {
       const file = new File(['Replacement media'], 'test.png', { type: 'image/png' });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fileList = [file] as any;
       fileList.item = (i: number) => fileList[i];
 
@@ -253,10 +254,11 @@ describe('<EditAssetDialog />', () => {
         canDownload: false,
       });
 
-      fireEvent.change(document.querySelector('[type="file"]')!, { target: { files: fileList } });
-      const img = document.querySelector('img');
+      const fileInput = screen.getByTestId('file-input');
+      fireEvent.change(fileInput, { target: { files: fileList } });
+      const image = screen.getByRole('img');
 
-      expect(img).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
+      expect(image).toHaveAttribute('src', 'http://localhost:4000/assets/test.png');
     });
   });
 });

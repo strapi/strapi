@@ -22,7 +22,7 @@ interface BreadcrumbItem {
 type BreadcrumbData = BreadcrumbItem | [];
 
 export const getBreadcrumbDataCM = (folder: BreadcrumbDataFolder | null) => {
-  let data: BreadcrumbData[] = [
+  const data: BreadcrumbData[] = [
     {
       id: null,
       label: { id: getTrad('plugin.name'), defaultMessage: 'Media Library' },
