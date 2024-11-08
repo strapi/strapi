@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { describeOnCondition } from '../../utils/shared';
+import { clickAndWait, describeOnCondition } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 import { findAndClose } from '../../utils/shared';
@@ -56,9 +56,9 @@ describeOnCondition(edition === 'EE')('Release page', () => {
     await addEntryToRelease({ page, releaseName });
 
     // Publish the release
-    await page.getByRole('link', { name: 'Releases' }).click();
-    await page.getByRole('link', { name: `${releaseName}` }).click();
-    await page.getByRole('button', { name: 'Publish' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Releases' }));
+    await clickAndWait(page, page.getByRole('link', { name: `${releaseName}` }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish', exact: true }));
     await expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
 
     // Check the already released release
