@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 
 import { capitalise } from '../../../utils/strings';
 
-interface DocumentStatusProps extends Omit<StatusProps, 'children' | 'size' | 'variant'> {
+interface DocumentStatusProps extends Omit<StatusProps, 'children' | 'variant'> {
   /**
    * The status of the document (draft, published, etc.)
    * @default 'draft'
@@ -16,14 +16,14 @@ interface DocumentStatusProps extends Omit<StatusProps, 'children' | 'size' | 'v
  * @description Displays the status of a document (draft, published, etc.)
  * and automatically calculates the appropriate variant for the status.
  */
-const DocumentStatus = ({ status = 'draft', ...restProps }: DocumentStatusProps) => {
+const DocumentStatus = ({ status = 'draft', size = 'S', ...restProps }: DocumentStatusProps) => {
   const statusVariant =
     status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
 
   const { formatMessage } = useIntl();
 
   return (
-    <Status {...restProps} size={'S'} variant={statusVariant}>
+    <Status {...restProps} size={size} variant={statusVariant}>
       <Typography tag="span" variant="omega" fontWeight="bold">
         {formatMessage({
           id: `content-manager.containers.List.${status}`,
