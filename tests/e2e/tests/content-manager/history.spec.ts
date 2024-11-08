@@ -88,7 +88,7 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test.describe('Collection Type', () => {
-    test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
+    test('A user should be able to create an entry in one locale and see the versions for only that locale in history', async ({
       page,
     }) => {
       // Navigate to the content-manager - collection type - article
@@ -98,9 +98,6 @@ describeOnCondition(edition === 'EE')('History', () => {
       await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
       await page.waitForURL(ARTICLE_CREATE_URL);
 
-      /**
-       * Create
-       */
       const titleInput = page.getByRole('textbox', { name: 'title' });
       // Create a french version
       const frenchTitle = "N'importe quoi";
@@ -142,45 +139,62 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue(englishTitle);
       // Assert only the english versions are available
       await expect(page.getByText(frenchTitle)).not.toBeVisible();
+    });
 
-      // Go back to the entry
-      await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+    test('A user should be able to edit an entry several times and see several versions in history', async ({
+      page,
+    }) => {
+      // Navigate to the content-manager - collection type - article
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      // Select an entry to edit
+      await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
 
-      /**
-       * Update
-       */
-      await titleInput.fill('Being from Kansas City');
+      const titleInput = page.getByRole('textbox', { name: 'title' });
+      await titleInput.fill('West Ham pre match analysis');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
-      await expect(versionCards).toHaveCount(2);
+      const versionCards = page.getByRole('listitem', { name: 'Version card' });
+      await expect(versionCards).toHaveCount(1);
       // Assert the most recent version is the current version
-      await expect(titleInput).toHaveValue('Being from Kansas City');
-      // Assert the previous version in the list is the expected version
-      const previousVersion = versionCards.nth(1);
-      previousVersion.click();
-      await expect(titleInput).toHaveValue('Being from Kansas is a pity');
-      await expect(previousVersion.getByText('(current)')).not.toBeVisible();
+      await expect(titleInput).toHaveValue('West Ham pre match analysis');
 
-      // Go back to the entry
       await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
 
-      /**
-       * Publish
-       */
+      await titleInput.fill('West Ham mid match analysis');
+      await page.getByRole('button', { name: 'Save' }).click();
+      // Go to the history page
+      await goToHistoryPage(page);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
+      // Assert the previous version in the list is the expected version
+      await expect(versionCards).toHaveCount(2);
+      const previousVersion = versionCards.nth(1);
+      previousVersion.click();
+      await expect(titleInput).toHaveValue('West Ham pre match analysis');
+      await expect(previousVersion.getByText('(current)')).not.toBeVisible();
+    });
+
+    test('A user should be able to publish then modify an entry and see their versions in history', async ({
+      page,
+    }) => {
+      // Navigate to the content-manager - collection type - article
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      // Select an entry to edit
+      await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
       await page.getByRole('button', { name: 'Publish' }).click();
       await findAndClose(page, 'Published Document');
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
-      await expect(versionCards).toHaveCount(3);
+      const versionCards = page.getByRole('listitem', { name: 'Version card' });
+      await expect(versionCards).toHaveCount(1);
       // The current version is the most recent draft
+      const currentVersion = versionCards.nth(0);
       await expect(currentVersion.getByText('Published')).toBeVisible();
-      await expect(titleInput).toHaveValue('Being from Kansas City');
-      previousVersion.click();
-      await expect(titleInput).toHaveValue('Being from Kansas City');
+      const titleInput = page.getByRole('textbox', { name: 'title' });
+      await expect(titleInput).toHaveValue('West Ham post match analysis');
 
       // Go back to the entry
       await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
@@ -188,16 +202,16 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Modified
        */
-      await titleInput.fill('Being from Kansas City, Missouri');
+      await titleInput.fill('West Ham pre match analysis');
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
-      await expect(versionCards).toHaveCount(4);
+      await expect(versionCards).toHaveCount(2);
       // Assert the current version is the modified version
       await expect(currentVersion.getByText('Modified')).toBeVisible();
-      await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
+      await expect(titleInput).toHaveValue('West Ham pre match analysis');
     });
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
@@ -306,7 +320,7 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test.describe('Single Type', () => {
-    test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
+    test('A user should be able to create an entry in one locale and see the versions for only that locale in history', async ({
       page,
     }) => {
       const HISTORY_URL =
@@ -318,9 +332,6 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('combobox', { name: 'Locales' }).click();
       await page.getByRole('option', { name: 'French (fr)' }).click();
 
-      /**
-       * Create
-       */
       const titleInput = page.getByRole('textbox', { name: 'title' });
       // Create a french version
       const frenchTitle = 'Paris Saint-Germain';
@@ -350,50 +361,67 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(idRegex.test(page.url())).toBe(true);
       // Assert the most recent version is the current version
       const currentVersion = versionCards.nth(0);
-      const previousVersion = versionCards.nth(1);
       await expect(currentVersion.getByText('(current)')).toBeVisible();
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toBeDisabled();
       await expect(titleInput).toHaveValue(englishTitle);
       // Assert only the english versions are available
       await expect(page.getByText(frenchTitle)).not.toBeVisible();
+    });
 
-      // Go back to the entry
-      await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
+    test('A user should be able to edit an entry several times and see the versions in history', async ({
+      page,
+    }) => {
+      const HISTORY_URL =
+        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
+      // Navigate to the content-manager - single type - homepage
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
 
-      /**
-       * Update
-       */
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
-      await expect(versionCards).toHaveCount(2);
+      const versionCards = await page.getByRole('listitem', { name: 'Version card' });
+      await expect(versionCards).toHaveCount(1);
+
       // Assert the most recent version is the current version
+      const titleInput = page.getByRole('textbox', { name: 'title' });
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
-      // Assert the previous version in the list is the expected version
-      await previousVersion.click();
-      await expect(titleInput).toHaveValue('AFC Richmond');
 
       // Go back to the entry
       await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
 
-      /**
-       * Publish
-       */
+      await page.getByRole('textbox', { name: 'title' }).fill('AFC Richmond');
+      await page.getByRole('button', { name: 'Save' }).click();
+      await goToHistoryPage(page);
+      await page.waitForURL(HISTORY_URL);
+      // Assert the previous version in the list is the expected version
+      await expect(versionCards).toHaveCount(2);
+      versionCards.nth(1).click();
+      await expect(titleInput).toHaveValue('AFC Richmond');
+    });
+
+    test('A user should be able to publish then modify an entry and see their versions in history', async ({
+      page,
+    }) => {
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
+
+      const titleInput = page.getByRole('textbox', { name: 'title' });
+      await titleInput.fill('AFC Richmond');
+      await page.getByRole('button', { name: 'Save' }).click();
       await page.getByRole('button', { name: 'Publish' }).click();
       // Go to the history page
       await goToHistoryPage(page);
-      await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
-      await expect(versionCards).toHaveCount(3);
+      await page.waitForURL(HOMEPAGE_HISTORY_URL);
+      const versionCards = await page.getByRole('listitem', { name: 'Version card' });
+      await expect(versionCards).toHaveCount(2);
       // The current version is the most recent published
-      await expect(currentVersion.getByText('Published')).toBeVisible();
-      await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
-      // The second in the list is the draft version
-      await previousVersion.click();
-      await expect(previousVersion.getByText('Draft')).toBeVisible();
-      await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
+      await expect(versionCards.first().getByText('Published')).toBeVisible();
+      await expect(titleInput).toHaveValue('AFC Richmond');
 
       // Go back to the entry
       await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
@@ -401,15 +429,15 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Modified
        */
-      await titleInput.fill('Welcome to AFC Richmond!');
+      await titleInput.fill('Welcom to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
-      await expect(versionCards).toHaveCount(4);
+      await page.waitForURL(HOMEPAGE_HISTORY_URL);
+      await expect(versionCards).toHaveCount(3);
       // Assert the current version is the most recent published version
-      await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
-      await expect(currentVersion.getByText('Modified')).toBeVisible();
+      await expect(titleInput).toHaveValue('Welcom to AFC Richmond!');
+      await expect(versionCards.first().getByText('Modified')).toBeVisible();
     });
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
