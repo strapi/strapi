@@ -194,7 +194,9 @@ const migrateUp = async (trx: Knex, db: Database) => {
       });
 
     for await (const batch of getBatchToDiscard({ db, trx, uid: model.uid })) {
-      await async.map(batch, discardDraft, { concurrency: 10 });
+      // NOTE: concurrency had to be disabled to prevent a race condition with self-references
+      // TODO: improve performance in a safe way
+      await async.map(batch, discardDraft, { concurrency: 1 });
     }
   }
 };

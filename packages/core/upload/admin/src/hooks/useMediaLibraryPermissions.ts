@@ -5,7 +5,11 @@ import { PERMISSIONS } from '../newConstants';
 
 const { main, ...restPermissions } = PERMISSIONS;
 
-export const useMediaLibraryPermissions = () => {
+type UseRBACReturnType = ReturnType<typeof useRBAC>;
+
+type AllowedActionsType = UseRBACReturnType['allowedActions'];
+
+export const useMediaLibraryPermissions = (): AllowedActionsType & { isLoading: boolean } => {
   const { allowedActions, isLoading } = useRBAC(restPermissions);
 
   return { ...allowedActions, isLoading };

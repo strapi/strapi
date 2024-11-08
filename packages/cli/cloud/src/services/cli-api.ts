@@ -12,6 +12,7 @@ export const VERSION = 'v1';
 export type ProjectInfos = {
   id: string;
   name: string;
+  selectedEnvironment?: string;
   displayName?: string;
   nodeVersion?: string;
   region?: string;
@@ -51,6 +52,7 @@ export type GetProjectResponse = {
     updatedAt: string;
     suspendedAt?: string;
     isTrial: boolean;
+    environments: string[];
   };
   metadata: {
     dashboardUrls: {
@@ -64,7 +66,7 @@ export interface CloudApiService {
   deploy(
     deployInput: {
       filePath: string;
-      project: { name: string };
+      project: { name: string; targetEnvironment?: string };
     },
     {
       onUploadProgress,
@@ -122,7 +124,7 @@ export async function cloudApiFactory(
     deploy({ filePath, project }, { onUploadProgress }) {
       return axiosCloudAPI.post(
         `/deploy/${project.name}`,
-        { file: fse.createReadStream(filePath) },
+        { file: fse.createReadStream(filePath), targetEnvironment: project.targetEnvironment },
         {
           headers: {
             'Content-Type': 'multipart/form-data',
