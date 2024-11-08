@@ -233,7 +233,7 @@ const PreviewHeader = () => {
         <PreviewTabs />
       </Grid.Item>
       {/* Copy link */}
-      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2} alignItems="end">
+      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2}>
         <IconButton
           type="button"
           label={formatMessage({
