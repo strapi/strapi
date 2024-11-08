@@ -43,6 +43,14 @@ export default async (ctx: CLIContext) => {
   const environments = await getEnvironmentsList(ctx, cloudApiService, project);
 
   if (!environments) {
+    logger.debug(`Fetching environments failed.`);
+    return;
+  }
+
+  if (environments.length === 0) {
+    logger.log(
+      `The only available environment is already linked. You can add a new one from your project settings on the Strapi Cloud dashboard.`
+    );
     return;
   }
 
