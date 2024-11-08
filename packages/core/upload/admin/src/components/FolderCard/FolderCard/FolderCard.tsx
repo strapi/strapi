@@ -102,7 +102,7 @@ export const FolderCard = React.forwardRef(
               paddingRight={3}
               paddingTop={2}
             >
-              <StyledFolder width="2.4rem" height="2.4rem" />
+              <StyledFolder width="24" height="24" />
             </Box>
 
             {children}

@@ -84,8 +84,8 @@ const HeadersInput = () => {
                     />
                   </Box>
                   <IconButton
-                    width="4rem"
-                    height="4rem"
+                    width="40"
+                    height="40"
                     onClick={() => removeRow(index)}
                     color="primary600"
                     label={formatMessage(
@@ -97,7 +97,7 @@ const HeadersInput = () => {
                     )}
                     type="button"
                   >
-                    <Minus width="0.8rem" />
+                    <Minus width="8" />
                   </IconButton>
                 </Flex>
               </Grid.Item>

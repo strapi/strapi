@@ -83,9 +83,9 @@ exports[`AddStage should render a list of stages 1`] = `
         <svg
           aria-hidden="true"
           fill="currentColor"
-          height="2.4rem"
+          height="24"
           viewBox="0 0 32 32"
-          width="2.4rem"
+          width="24"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path

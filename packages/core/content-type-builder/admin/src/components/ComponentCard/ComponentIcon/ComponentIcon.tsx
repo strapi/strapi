@@ -19,7 +19,7 @@ export const ComponentIcon = ({ isActive = false, icon = 'dashboard' }: Componen
       width={8}
       borderRadius="50%"
     >
-      <Icon height="2rem" width="2rem" />
+      <Icon height="20" width="20" />
     </Flex>
   );
 };

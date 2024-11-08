@@ -81,7 +81,7 @@ export const AdminSeatInfoEE = () => {
               defaultMessage: 'At limit: add seats to invite more users',
             })}
           >
-            <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
+            <WarningCircle width="14" height="14" fill="danger500" />
           </Tooltip>
         )}
       </Flex>

@@ -211,7 +211,7 @@ const ListView = () => {
                     })}
                   </LinkButton>
                 }
-                icon={<EmptyDocuments width="16rem" />}
+                icon={<EmptyDocuments width="160" />}
                 content={formatMessage({
                   id: 'Settings.transferTokens.addFirstToken',
                   defaultMessage: 'Add your first Transfer Token',
@@ -220,7 +220,7 @@ const ListView = () => {
             ) : null}
             {!canCreate && transferTokens.length === 0 ? (
               <EmptyStateLayout
-                icon={<EmptyDocuments width="16rem" />}
+                icon={<EmptyDocuments width="160" />}
                 content={formatMessage({
                   id: 'Settings.transferTokens.emptyStateLayout',
                   defaultMessage: 'You don’t have any content yet...',

@@ -24,7 +24,7 @@ const Number = ({ children, state, ...props }: NumberProps) => {
       {...props}
     >
       {state === STATES.IS_DONE ? (
-        <Check aria-hidden width={`1.6rem`} fill="neutral0" />
+        <Check aria-hidden width={`16`} fill="neutral0" />
       ) : (
         <Typography fontWeight="semiBold" textColor="neutral0">
           {children}

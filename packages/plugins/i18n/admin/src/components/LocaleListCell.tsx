@@ -70,7 +70,7 @@ const LocaleListCell = ({
               {localesForDocument.join(', ')}
             </Typography>
             <Flex>
-              <CaretDown width="1.2rem" height="1.2rem" />
+              <CaretDown width="12" height="12" />
             </Flex>
           </Flex>
         </Button>

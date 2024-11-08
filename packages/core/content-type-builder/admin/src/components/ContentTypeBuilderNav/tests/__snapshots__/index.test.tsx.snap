@@ -485,7 +485,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       height="16"
                       style="transform: rotateX(0deg);"
                       viewBox="0 0 32 32"
-                      width="1.2rem"
+                      width="12"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -559,9 +559,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
               >
                 <svg
                   fill="currentColor"
-                  height="0.8rem"
+                  height="8"
                   viewBox="0 0 32 32"
-                  width="0.8rem"
+                  width="8"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -606,7 +606,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       height="16"
                       style="transform: rotateX(0deg);"
                       viewBox="0 0 32 32"
-                      width="1.2rem"
+                      width="12"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -660,9 +660,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
               >
                 <svg
                   fill="currentColor"
-                  height="0.8rem"
+                  height="8"
                   viewBox="0 0 32 32"
-                  width="0.8rem"
+                  width="8"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
@@ -707,7 +707,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       height="16"
                       style="transform: rotateX(0deg);"
                       viewBox="0 0 32 32"
-                      width="1.2rem"
+                      width="12"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -747,10 +747,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           <svg
                             aria-hidden="true"
                             fill="#4a4a6a"
-                            height="1.2rem"
+                            height="12"
                             style="transform: rotateX(0deg);"
                             viewBox="0 0 32 32"
-                            width="1.2rem"
+                            width="12"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -813,10 +813,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                           <svg
                             aria-hidden="true"
                             fill="#4a4a6a"
-                            height="1.2rem"
+                            height="12"
                             style="transform: rotateX(0deg);"
                             viewBox="0 0 32 32"
-                            width="1.2rem"
+                            width="12"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -893,9 +893,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
               >
                 <svg
                   fill="currentColor"
-                  height="0.8rem"
+                  height="8"
                   viewBox="0 0 32 32"
-                  width="0.8rem"
+                  width="8"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path

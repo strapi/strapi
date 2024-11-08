@@ -61,8 +61,8 @@ const AutoCloneFailureModalBody = ({ prohibitedFields }: AutoCloneFailureModalBo
                   {index !== fieldPath.length - 1 && (
                     <ChevronRight
                       fill="neutral500"
-                      height="0.8rem"
-                      width="0.8rem"
+                      height="8"
+                      width="8"
                       style={{ margin: '0 0.8rem' }}
                     />
                   )}

@@ -692,7 +692,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
         }),
         content: (
           <Flex direction="column" alignItems="center" gap={2}>
-            <WarningCircle width="2.4rem" height="2.4rem" fill="danger600" />
+            <WarningCircle width="24" height="24" fill="danger600" />
             <Typography textAlign="center">
               {formatMessage({
                 id: getTranslation('CMEditViewBulkLocale.draft-relation-warning'),

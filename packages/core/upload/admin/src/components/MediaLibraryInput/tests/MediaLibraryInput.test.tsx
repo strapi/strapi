@@ -48,9 +48,9 @@ describe('<MediaLibraryInput />', () => {
         <svg
           aria-hidden="true"
           fill="#4945ff"
-          height="3.2rem"
+          height="32"
           viewBox="0 0 32 32"
-          width="3.2rem"
+          width="32"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path

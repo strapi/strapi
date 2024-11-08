@@ -123,7 +123,7 @@ const DraggableCard = ({
                   )}
                   type="button"
                 >
-                  <Pencil width="1.2rem" height="1.2rem" />
+                  <Pencil width="12" height="12" />
                 </ActionButton>
               </Modal.Trigger>
               <EditFieldForm
@@ -146,7 +146,7 @@ const DraggableCard = ({
               )}
               type="button"
             >
-              <Cross width="1.2rem" height="1.2rem" />
+              <Cross width="12" height="12" />
             </ActionButton>
           </Flex>
         </FieldContainer>

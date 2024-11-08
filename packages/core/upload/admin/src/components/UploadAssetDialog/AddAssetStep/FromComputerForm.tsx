@@ -126,7 +126,7 @@ export const FromComputerForm = ({
             <Flex justifyContent="center">
               <Wrapper>
                 <IconWrapper>
-                  <PicturePlus aria-hidden width="3.2rem" height="3.2rem" />
+                  <PicturePlus aria-hidden width="32" height="32" />
                 </IconWrapper>
 
                 <Box paddingTop={3} paddingBottom={5}>

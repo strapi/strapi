@@ -369,7 +369,7 @@ const ComputerForm = () => {
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
               >
-                <PlusCircle fill="primary600" width="6rem" height="6rem" aria-hidden />
+                <PlusCircle fill="primary600" width="60" height="60" aria-hidden />
                 <Box paddingTop={3} paddingBottom={5}>
                   <Typography variant="delta" tag="label" htmlFor={id}>
                     {formatMessage({
