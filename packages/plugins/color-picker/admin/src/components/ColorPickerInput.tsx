@@ -10,7 +10,7 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
-import { useField, type InputProps, type FieldValue } from '@strapi/strapi/admin';
+import { type InputProps, type FieldValue } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -143,7 +143,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     style={{ textTransform: 'uppercase' }}
                     value={value}
                     placeholder="#000000"
-                    onChange={onChange}
+                    onChange={(e) => onChange(name, e.target.value)}
                   />
                 </Field.Root>
               </Flex>
