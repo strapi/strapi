@@ -1,4 +1,4 @@
-import { render, screen } from '@tests/utils';
+import { render, screen, fireEvent } from '@tests/utils';
 
 import { DocumentActions, DocumentActionsMenu } from '../DocumentActions';
 
@@ -342,5 +342,37 @@ describe('DocumentActionsMenu', () => {
     await user.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('should show correct background colors on hover for different variants', async () => {
+    const { user } = render(
+      <DocumentActionsMenu
+        actions={[
+          { id: '1', label: 'Action 1', onClick: jest.fn(), variant: 'default' },
+          { id: '2', label: 'Action 2', onClick: jest.fn(), variant: 'danger', disabled: false },
+          { id: '3', label: 'Action 3', onClick: jest.fn(), variant: 'danger', disabled: true },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'More document actions' }));
+
+    const neutralMenuItem = screen.getByText('Action 1');
+    fireEvent.mouseOver(neutralMenuItem);
+    expect(neutralMenuItem).toHaveStyle({
+      backgroundColor: 'theme.colors.neutral',
+    });
+
+    const dangerMenuItem = screen.getByText('Action 2');
+    fireEvent.mouseOver(dangerMenuItem);
+    expect(dangerMenuItem).toHaveStyle({
+      backgroundColor: 'theme.colors.danger100',
+    });
+
+    const disabledDangerMenuItem = screen.getByText('Action 3');
+    fireEvent.mouseOver(disabledDangerMenuItem);
+    expect(disabledDangerMenuItem).toHaveStyle({
+      backgroundColor: 'theme.colors.neutral',
+    });
   });
 });
