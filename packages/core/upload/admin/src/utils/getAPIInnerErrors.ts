@@ -1,4 +1,5 @@
 import { normalizeAPIError } from './normalizeAPIError';
+
 import type { FetchError } from '@strapi/admin/strapi-admin';
 import type { MessageDescriptor } from 'react-intl';
 

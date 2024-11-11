@@ -3,7 +3,8 @@ import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { getTrad, prefixFileUrlWithBackendUrl } from '../../../utils';
-import { CopyLinkButton } from '../../CopyLinkButton';
+import { CopyLinkButton } from '../../CopyLinkButton/CopyLinkButton';
+
 import type { File } from '../../../../../shared/contracts/files';
 
 interface CarouselAssetActionsProps {

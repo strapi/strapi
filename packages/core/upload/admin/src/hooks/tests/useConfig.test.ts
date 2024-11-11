@@ -47,7 +47,7 @@ describe('useConfig', () => {
 
       renderHook(() => useConfig());
 
-      await waitFor(() => expect(screen.getByText('notification.error')).toBeInTheDocument());
+      await screen.findByText('notification.error');
 
       console.error = originalConsoleError;
       server.restoreHandlers();
