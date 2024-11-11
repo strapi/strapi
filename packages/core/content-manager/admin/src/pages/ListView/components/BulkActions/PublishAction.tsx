@@ -248,18 +248,10 @@ const SelectedEntriesTableContent = ({
                     search: row.locale && `?plugins[i18n][locale]=${row.locale}`,
                   }}
                   state={{ from: pathname }}
-                  label={formatMessage(
-                    { id: 'app.component.HelperPluginTable.edit', defaultMessage: 'Edit {target}' },
-                    {
-                      target: formatMessage(
-                        {
-                          id: 'content-manager.components.ListViewHelperPluginTable.row-line',
-                          defaultMessage: 'item line {number}',
-                        },
-                        { number: index + 1 }
-                      ),
-                    }
-                  )}
+                  label={formatMessage({
+                    id: 'content-manager.bulk-publish.edit',
+                    defaultMessage: 'Edit',
+                  })}
                   target="_blank"
                   marginLeft="auto"
                   variant="ghost"
