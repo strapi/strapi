@@ -113,6 +113,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getMetadata() {
+    this.#reportInfo('getting metadata');
     if (!this.#metadata) {
       await this.#loadMetadata();
     }
@@ -121,6 +122,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
+    this.#reportInfo('getting schemas');
     const schemaCollection = await utils.stream.collect<Struct.Schema>(
       this.createSchemasReadStream()
     );
@@ -142,6 +144,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   createSchemasReadStream(): Readable {
+    this.#reportInfo('creating schemas read stream');
     return this.#streamJsonlDirectory('schemas');
   }
 
@@ -151,6 +154,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   createConfigurationReadStream(): Readable {
+    this.#reportInfo('creating configuration read stream');
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
@@ -159,7 +163,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
-
+    this.#reportInfo('creating assets read stream');
     pipeline(
       [
         inStream,

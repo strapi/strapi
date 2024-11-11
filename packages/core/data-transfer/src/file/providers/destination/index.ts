@@ -5,6 +5,7 @@ import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
+import chalk from 'chalk';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
 import type {
@@ -72,7 +73,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `[file-destination-provider] ${message}`,
+        message: `${chalk.cyan(`[file-destination-provider]`)} ${message}`,
       },
       kind: 'info',
     });
@@ -101,6 +102,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   createGzip(): zlib.Gzip {
+    this.#reportInfo('creating gzip');
     return zlib.createGzip();
   }
 
@@ -158,6 +160,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
   }
 
   async rollback(): Promise<void> {
+    this.#reportInfo('rolling back');
     await this.close();
     await rm(this.#archivePath, { force: true });
   }
@@ -194,7 +197,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating schemas write stream');
     const filePathFactory = createFilePathFactory('schemas');
 
     const entryStream = createTarEntryStream(
@@ -210,7 +213,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating entities write stream');
     const filePathFactory = createFilePathFactory('entities');
 
     const entryStream = createTarEntryStream(
@@ -226,7 +229,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating links write stream');
     const filePathFactory = createFilePathFactory('links');
 
     const entryStream = createTarEntryStream(
@@ -242,7 +245,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     if (!this.#archive.stream) {
       throw new Error('Archive stream is unavailable');
     }
-
+    this.#reportInfo('creating configuration write stream');
     const filePathFactory = createFilePathFactory('configuration');
 
     const entryStream = createTarEntryStream(
@@ -261,6 +264,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       throw new Error('Archive stream is unavailable');
     }
 
+    this.#reportInfo('creating assets write stream');
     return new Writable({
       objectMode: true,
       write(data: IAsset, _encoding, callback) {

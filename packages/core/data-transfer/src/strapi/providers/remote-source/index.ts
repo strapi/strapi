@@ -2,6 +2,7 @@ import { PassThrough, Readable, Writable } from 'stream';
 import type { Struct, Utils } from '@strapi/types';
 import { WebSocket } from 'ws';
 import { castArray } from 'lodash/fp';
+import chalk from 'chalk';
 
 import type {
   IAsset,
@@ -352,10 +353,11 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   #reportInfo(message: string) {
+    console.log(this.#diagnostics);
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `[remote-source-provider] ${message}`,
+        message: `${chalk.magenta(`[remote-source-provider]`)} ${message}`,
       },
       kind: 'info',
     });
@@ -393,10 +395,19 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       });
     }
 
+    this.#reportInfo('established websocket connection');
     this.ws = ws;
     const { retryMessageOptions } = this.options;
-    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
+
+    this.#reportInfo('creating dispatcher');
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions, (message: string) =>
+      this.#reportInfo(message)
+    );
+    this.#reportInfo('creating dispatcher');
+
+    this.#reportInfo('initialize transfer');
     const transferID = await this.initTransfer();
+    this.#reportInfo(`initialized transfer ${transferID}`);
 
     this.dispatcher.setTransferProperties({ id: transferID, kind: 'pull' });
     await this.dispatcher.dispatchTransferAction('bootstrap');

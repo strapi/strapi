@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { WebSocket } from 'ws';
 import { once } from 'lodash/fp';
+import chalk from 'chalk';
 import type { Struct, Utils } from '@strapi/types';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
@@ -226,7 +227,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `[remote-destination-provider] ${message}`,
+        message: `${chalk.cyan(`[remote-destination-provider]`)} ${message}`,
       },
       kind: 'info',
     });
@@ -275,11 +276,20 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       });
     }
 
+    this.#reportInfo('established websocket connection');
+
     this.ws = ws;
     const { retryMessageOptions } = this.options;
-    this.dispatcher = createDispatcher(this.ws, retryMessageOptions);
 
+    this.#reportInfo('creating dispatcher');
+    this.dispatcher = createDispatcher(this.ws, retryMessageOptions, (message: string) =>
+      this.#reportInfo(message)
+    );
+    this.#reportInfo('created dispatcher');
+
+    this.#reportInfo('initialize transfer');
     this.transferID = await this.initTransfer();
+    this.#reportInfo(`initialized transfer ${this.transferID}`);
 
     this.dispatcher.setTransferProperties({ id: this.transferID, kind: 'push' });
 

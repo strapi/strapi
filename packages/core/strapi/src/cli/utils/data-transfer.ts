@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
-import { configs, createLogger, type winston } from '@strapi/logger';
+import { configs, createLogger, type winston, formats } from '@strapi/logger';
 import { createStrapi, compileStrapi } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
@@ -218,7 +218,10 @@ const formatDiagnostic = (
   const getLogger = () => {
     if (!logger) {
       logger = createLogger(
-        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, { level: 'info' })
+        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, {
+          level: 'info',
+          format: formats.detailedLogs,
+        })
       );
     }
     return logger;
