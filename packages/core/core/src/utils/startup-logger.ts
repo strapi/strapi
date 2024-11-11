@@ -1,34 +1,17 @@
 import chalk from 'chalk';
 import CLITable from 'cli-table3';
 import _ from 'lodash/fp';
-import path from 'node:path';
 
 import type { Core } from '@strapi/types';
+import { Database } from '@strapi/database';
 
-const formatDbInfo = (app: Core.Strapi) => {
-  const connectionSettings = app.db?.connection?.client?.connectionSettings || {};
-  const client = app.db?.dialect?.client || '';
-
-  let dbName = '';
-  let schemaName;
-
-  try {
-    if (client === 'sqlite') {
-      // For SQLite, get the relative filename
-      const absolutePath = connectionSettings?.filename;
-      if (absolutePath) {
-        dbName = path.relative(process.cwd(), absolutePath);
-      }
-    } else {
-      dbName = connectionSettings?.database;
-      schemaName = connectionSettings?.schema;
-    }
-  } catch (err) {
-    // ignore, we just don't want to crash on startup if there is a problem
+const formatDbInfo = (dbInfo?: ReturnType<Database['getInfo']>) => {
+  if (!dbInfo) {
+    return '';
   }
 
-  const dbInfo = schemaName ? `'${dbName}', schema: '${schemaName}'` : `'${dbName}'`;
-  return dbInfo;
+  const { displayName, schema } = dbInfo;
+  return schema ? `'${displayName}', schema: '${schema}'` : `'${displayName}'`;
 };
 
 export const createStartupLogger = (app: Core.Strapi) => {
@@ -44,6 +27,8 @@ export const createStartupLogger = (app: Core.Strapi) => {
         chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
       });
 
+      const dbInfo = app.db?.getInfo();
+
       infoTable.push(
         [chalk.blue('Time'), `${new Date()}`],
         [chalk.blue('Launched in'), `${Date.now() - app.config.launchedAt} ms`],
@@ -51,8 +36,8 @@ export const createStartupLogger = (app: Core.Strapi) => {
         [chalk.blue('Process PID'), process.pid],
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
         [chalk.blue('Edition'), app.EE ? 'Enterprise' : 'Community'],
-        [chalk.blue('Database'), app.db?.dialect.client],
-        [chalk.blue('Database name'), formatDbInfo(app)]
+        [chalk.blue('Database'), dbInfo?.client],
+        [chalk.blue('Database name'), formatDbInfo(dbInfo)]
       );
 
       console.log(infoTable.toString());
