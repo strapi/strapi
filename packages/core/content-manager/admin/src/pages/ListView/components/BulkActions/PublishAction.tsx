@@ -249,7 +249,7 @@ const SelectedEntriesTableContent = ({
                   }}
                   state={{ from: pathname }}
                   label={formatMessage({
-                    id: 'app.utils.edit',
+                    id: 'content-manager.bulk-publish.edit',
                     defaultMessage: 'Edit',
                   })}
                   target="_blank"
