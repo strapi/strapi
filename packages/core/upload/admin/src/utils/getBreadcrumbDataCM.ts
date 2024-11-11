@@ -3,7 +3,7 @@ import { getTrad } from './getTrad';
 import type { Folder } from '../../../shared/contracts/folders';
 import type { MessageDescriptor } from 'react-intl';
 
-interface BreadcrumbDataFolder extends Omit<Folder, 'children' | 'files' | 'parent'> {
+export interface BreadcrumbDataFolder extends Omit<Folder, 'children' | 'files' | 'parent'> {
   parent?: BreadcrumbDataFolder;
   children?: {
     count: number;
@@ -22,7 +22,7 @@ interface BreadcrumbItem {
 type BreadcrumbData = BreadcrumbItem | [];
 
 export const getBreadcrumbDataCM = (folder: BreadcrumbDataFolder | null) => {
-  let data: BreadcrumbData[] = [
+  const data: BreadcrumbData[] = [
     {
       id: null,
       label: { id: getTrad('plugin.name'), defaultMessage: 'Media Library' },

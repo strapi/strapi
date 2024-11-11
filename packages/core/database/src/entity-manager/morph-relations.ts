@@ -1,4 +1,5 @@
-import { groupBy, pipe, mapValues, map, isEmpty } from 'lodash/fp';
+/* eslint-disable @typescript-eslint/naming-convention */ // allow __type
+import { curry, groupBy, pipe, mapValues, map, isEmpty } from 'lodash/fp';
 import type { Knex } from 'knex';
 
 import { createQueryBuilder } from '../query';
@@ -86,3 +87,34 @@ export const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
       .execute();
   }
 };
+
+/**
+ * Encoding utilities for polymorphic relations.
+ *
+ * In some scenarios is useful to encode both the id & __type of the relation
+ * to have a unique identifier for the relation. (e.g. relations reordering)
+ */
+
+export const encodePolymorphicId = (id: number | string, __type: string) => {
+  return `${id}:::${__type}`;
+};
+
+export const encodePolymorphicRelation = curry(({ idColumn, typeColumn }, relation?: any): any => {
+  // Encode the id of the relation and the positional argument if it exist
+  const newRelation = {
+    ...relation,
+    [idColumn]: encodePolymorphicId(relation[idColumn], relation[typeColumn]),
+  };
+
+  if (relation.position) {
+    const { before, after } = relation.position;
+    const __type = relation.position.__type || relation.__type;
+
+    newRelation.position = { ...relation.position };
+
+    if (before) newRelation.position.before = encodePolymorphicId(before, __type);
+    if (after) newRelation.position.after = encodePolymorphicId(after, __type);
+  }
+
+  return newRelation;
+});
