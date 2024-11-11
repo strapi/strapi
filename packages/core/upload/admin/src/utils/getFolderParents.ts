@@ -1,4 +1,4 @@
-import flattenTree from '../components/SelectTree/utils/flattenTree';
+import { flattenTree } from '../components/SelectTree/utils/flattenTree';
 
 import type { FolderNode } from '../../../shared/contracts/folders';
 
@@ -22,7 +22,7 @@ export const getFolderParents = (folders: FolderStructureValue[], currentFolderI
 
   while (parent !== undefined) {
     // eslint-disable-next-line no-loop-func
-    let parentToStore = flatFolders.find(({ value }) => value === parent);
+    const parentToStore = flatFolders.find(({ value }) => value === parent);
     parents.push({ id: parentToStore?.value, label: parentToStore?.label });
     parent = parentToStore?.parent;
   }

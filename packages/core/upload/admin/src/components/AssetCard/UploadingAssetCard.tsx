@@ -15,11 +15,11 @@ import {
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetType } from '../../newConstants';
+import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
-import { UploadProgress } from '../UploadProgress';
+import { UploadProgress } from '../UploadProgress/UploadProgress';
+
 import type { RawFile, File } from '../../../../shared/contracts/files';
 
 const UploadProgressWrapper = styled.div`

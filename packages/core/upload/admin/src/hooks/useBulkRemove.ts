@@ -2,9 +2,10 @@ import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
-import pluginId from '../pluginId';
-import { getTrad } from '../utils';
 import { BulkDeleteFiles, File } from '../../../shared/contracts/files';
+import { pluginId } from '../pluginId';
+import { getTrad } from '../utils';
+
 import type { BulkDeleteFolders, FolderDefinition } from '../../../shared/contracts/folders';
 
 export interface FileWithType extends File {

@@ -1,5 +1,5 @@
 import { rest } from 'msw';
-import qs from 'qs';
+import * as qs from 'qs';
 
 // Define the expected structure of your query parameters
 interface CustomQuery extends qs.ParsedQs {
