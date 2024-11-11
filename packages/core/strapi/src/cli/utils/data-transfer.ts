@@ -220,7 +220,7 @@ const formatDiagnostic = (
       logger = createLogger(
         configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, {
           level: 'info',
-          format: formats.detailedLogs,
+          format: formats?.detailedLogs,
         })
       );
     }
