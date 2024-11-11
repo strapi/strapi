@@ -234,6 +234,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
                 </span>
               </div>
               <input
+                aria-label="Drag & Drop here or"
                 class="c9 c10"
                 multiple=""
                 name="files"

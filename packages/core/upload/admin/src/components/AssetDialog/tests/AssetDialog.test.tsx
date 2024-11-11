@@ -4,11 +4,11 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
 
-import { AssetDialog } from '..';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
-import useModalQueryParams from '../../../hooks/useModalQueryParams';
+import { useModalQueryParams } from '../../../hooks/useModalQueryParams';
+import { AssetDialog } from '../AssetDialog';
 
 jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolders');
@@ -98,7 +98,7 @@ describe('AssetDialog', () => {
         expect(screen.queryByText('Folders')).not.toBeInTheDocument();
         expect(screen.queryByText('Assets')).not.toBeInTheDocument();
 
-        expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe(null);
+        expect(screen.getByRole('dialog')).not.toHaveAttribute('aria-busy');
       });
     });
 
