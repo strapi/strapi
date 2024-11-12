@@ -372,8 +372,6 @@ describeOnCondition(edition === 'EE')('History', () => {
     test('A user should be able to edit an entry several times and see the versions in history', async ({
       page,
     }) => {
-      const HISTORY_URL =
-        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
       // Navigate to the content-manager - single type - homepage
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
       await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
@@ -383,7 +381,7 @@ describeOnCondition(edition === 'EE')('History', () => {
 
       // Go to the history page
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(HOMEPAGE_HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
 
@@ -397,7 +395,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('textbox', { name: 'title' }).fill('AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(HOMEPAGE_HISTORY_URL);
       // Assert the previous version in the list is the expected version
       await expect(versionCards).toHaveCount(2);
       versionCards.nth(1).click();
@@ -429,14 +427,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Modified
        */
-      await titleInput.fill('Welcom to AFC Richmond!');
+      await titleInput.fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HOMEPAGE_HISTORY_URL);
       await expect(versionCards).toHaveCount(3);
       // Assert the current version is the most recent published version
-      await expect(titleInput).toHaveValue('Welcom to AFC Richmond!');
+      await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
       await expect(versionCards.first().getByText('Modified')).toBeVisible();
     });
 
