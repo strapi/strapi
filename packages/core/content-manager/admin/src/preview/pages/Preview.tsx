@@ -51,6 +51,7 @@ const PreviewPage = () => {
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
+
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
   if (!collectionType) {
