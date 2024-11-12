@@ -86,47 +86,40 @@ export const editComponent = async (
   return updatedComponent;
 };
 
-export const hasComponents = (
-  contentType: any
-): contentType is any & { type: 'dynamiczone' | 'component' } => {
-  return Object.values(contentType.attributes || {}).some(
-    (({ type }: { type: string }) => type === 'dynamiczone' || type === 'component') as any
-  );
-};
-
 export const deleteComponent = async (deleteUid: Internal.UID.Component) => {
-  const builder = createBuilder();
+  const deletedComponent = await strapi.db.transaction(async ({ trx }) => {
+    const builder = createBuilder();
 
-  const deletedComponent = builder.deleteComponent(deleteUid);
+    // Combine components and content types
+    const models = [...builder.contentTypes.entries(), ...builder.components.entries()];
 
-  // Combine components and content types into one iterable array of entries
-  const allTypes = [...builder.contentTypes.entries(), ...builder.components.entries()];
+    // Iterate over models to delete component data from the database
+    for (const [modelUid] of models) {
+      const metadata = strapi.db.metadata.get(modelUid);
 
-  // Delete this component from the cmps tables
-  for (const [modelUid, modelObject] of allTypes) {
-    // TODO: is there a better way to identify this?
-    // ensure this type has at least one component attribute and thus a components table
-    if (
-      !Object.values(modelObject.schema.attributes).some((attr: any) => attr.type === 'component')
-    ) {
-      continue;
+      // Find attributes with a target that matches deleteUid
+      const matchingAttributes = Object.values(metadata.attributes).filter(
+        (attr: any) => attr.target === deleteUid && attr.joinTable?.name
+      );
+
+      // Delete entries in each join table associated with matching attributes
+      for (const attr of matchingAttributes) {
+        if (!('joinTable' in attr && attr.joinTable && attr.joinTable.name)) {
+          continue;
+        }
+
+        await trx(attr.joinTable.name).where('component_type', deleteUid).delete();
+      }
     }
 
-    // Determine if the entry is a component or content type
-    const isComponent = builder.components.has(modelUid);
+    // Remove the component from schemas and write changes
+    const component = builder.deleteComponent(deleteUid);
+    await builder.writeFiles();
 
-    // Construct the table name based on whether it's a component or content type
-    // TODO: use metadata get name methods instead of hardcoding or this will break with long names
-    const tableName = isComponent
-      ? `components_${modelObject.modelName}_cmps`
-      : `${modelObject.schema.info.pluralName}_cmps`;
+    return component;
+  });
 
-    // TODO: do we need a try/catch here in case there are edge cases we haven't considered?
-    await strapi.db.connection.delete().from(tableName).where('component_type', deleteUid);
-  }
-
-  await builder.writeFiles();
-
+  // Emit delete event after transaction completes
   strapi.eventHub.emit('component.delete', { component: deletedComponent });
 
   return deletedComponent;
