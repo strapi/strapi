@@ -63,7 +63,6 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
 
     // Verify that Draft and Publish tabs are visible
-    // await expect(page.getByText(/^Draft$/).nth(1)).toBeVisible();
     await expect(page.getByRole('tab', { name: /^Draft$/ })).toBeVisible();
     await expect(page.getByRole('tab', { name: /^Published$/ })).toBeVisible();
 
