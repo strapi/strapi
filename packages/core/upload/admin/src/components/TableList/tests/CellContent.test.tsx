@@ -52,9 +52,9 @@ describe('TableList | CellContent', () => {
   });
 
   it('should render image cell type when element type is folder', () => {
-    const { container } = setup({ contentType: 'folder' });
+    const { container, getByLabelText } = setup({ contentType: 'folder' });
 
-    expect(container.querySelector('path')).toBeInTheDocument();
+    expect(getByLabelText('folder')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
 

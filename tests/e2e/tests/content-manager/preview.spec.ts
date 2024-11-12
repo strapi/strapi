@@ -24,7 +24,8 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
-    await expect(page.getByText(/^Draft$/)).toBeVisible();
+    // Draft status is visible (second Draft text is the draft tab)
+    await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
     await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
 
     // Copies the link of the page
@@ -45,5 +46,27 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await clickAndWait(page, page.getByRole('gridcell', { name: /nike mens/i }));
 
     await expect(page.getByRole('link', { name: /open preview/i })).not.toBeVisible();
+  });
+
+  test('Tabs for Draft and Publish should be visible for content type with D&P enabled', async ({
+    page,
+  }) => {
+    // Navigate to the Content Manager and open the edit view of a content type with D&P enabled
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    // Check that preview opens in its own page
+    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+    // Draft status is visible (second Draft text is the draft tab)
+    await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /west ham post match/i })).toBeVisible();
+
+    // Verify that Draft and Publish tabs are visible
+    await expect(page.getByRole('tab', { name: /^Draft$/ })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /^Published$/ })).toBeVisible();
+
+    // Expect the preview tab to be disabled (since the document is in draft status)
+    await expect(page.getByText(/^Published$/)).toBeDisabled();
   });
 });

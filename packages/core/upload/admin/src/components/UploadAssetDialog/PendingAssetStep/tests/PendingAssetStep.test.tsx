@@ -3,9 +3,8 @@ import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
+import { AssetType } from '../../../../constants';
 import { PendingAssetStep } from '../PendingAssetStep';
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetType } from '../../../../newConstants';
 
 jest.mock('../../../../utils', () => ({
   ...jest.requireActual('../../../../utils'),

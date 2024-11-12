@@ -54,7 +54,6 @@ export const FolderCard = React.forwardRef(
   (
     {
       children,
-      id,
       startAction = null,
       cardActions = null,
       ariaLabel,

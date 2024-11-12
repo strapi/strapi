@@ -2,7 +2,8 @@ import { DesignSystemProvider } from '@strapi/design-system';
 import { act, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
-import SelectTree from '../index';
+import { SelectTree } from '../SelectTree';
+
 import type { SelectTreeProps } from '../SelectTree';
 
 const FIXTURE_OPTIONS = [
