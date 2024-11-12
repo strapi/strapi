@@ -87,6 +87,8 @@ export const editComponent = async (
 };
 
 export const deleteComponent = async (deleteUid: Internal.UID.Component) => {
+  const failedDeletes: any[] = [];
+
   const deletedComponent = await strapi.db.transaction(async ({ trx }) => {
     const builder = createBuilder();
 
@@ -106,7 +108,12 @@ export const deleteComponent = async (deleteUid: Internal.UID.Component) => {
           continue;
         }
 
-        await trx(attr.joinTable.name).where('component_type', deleteUid).delete();
+        // Deleting component data is not critical
+        try {
+          await trx.delete().from(attr.joinTable.name).where('component_type', deleteUid);
+        } catch (error) {
+          failedDeletes.push({ table: attr.joinTable.name, error });
+        }
       }
     }
 
@@ -116,6 +123,12 @@ export const deleteComponent = async (deleteUid: Internal.UID.Component) => {
 
     return component;
   });
+
+  if (failedDeletes.length > 0) {
+    strapi.log.warn(
+      `Failed to delete component data for ${deleteUid} from ${failedDeletes.map((attr) => attr.table)}`
+    );
+  }
 
   // Emit delete event after transaction completes
   strapi.eventHub.emit('component.delete', { component: deletedComponent });
