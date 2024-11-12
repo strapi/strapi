@@ -14,27 +14,27 @@ test.describe('Edit collection type', () => {
   const attributes = [{ type: 'text', name: 'testtext' }];
 
   test.beforeEach(async ({ page }) => {
+    await resetFiles();
     await sharedSetup('ctb-edit-ct', page, {
-      resetFiles: true,
       importData: 'with-admin.tar',
       login: true,
       skipTour: true,
-      afterSetup: async () => {
-        // create a collection type to be used
-        await createCollectionType(page, {
-          name: ctName,
-          attributes,
-        });
+      // Don't reset files here as it would only run once for the whole suite
+      resetFiles: false,
+    });
 
-        await createCollectionType(page, {
-          name: 'dog',
-          attributes,
-        });
-        await createCollectionType(page, {
-          name: 'owner',
-          attributes,
-        });
-      },
+    // Reset files and create the same CTs between each test to prevent side effects
+    await createCollectionType(page, {
+      name: ctName,
+      attributes,
+    });
+    await createCollectionType(page, {
+      name: 'dog',
+      attributes,
+    });
+    await createCollectionType(page, {
+      name: 'owner',
+      attributes,
     });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);

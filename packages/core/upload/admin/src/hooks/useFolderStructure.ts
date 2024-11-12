@@ -2,12 +2,11 @@ import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
-import pluginId from '../pluginId';
+import { FolderNode, GetFolderStructure } from '../../../shared/contracts/folders';
+import { pluginId } from '../pluginId';
 import { getTrad } from '../utils';
 
-import { recursiveRenameKeys } from './utils/rename-keys';
-
-import { FolderNode, GetFolderStructure } from '../../../shared/contracts/folders';
+import { recursiveRenameKeys } from './utils/renameKeys';
 
 const FIELD_MAPPING: Record<string, string> = {
   name: 'label',
