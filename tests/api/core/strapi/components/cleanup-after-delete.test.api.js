@@ -188,7 +188,7 @@ describe('Component Deletion and Cleanup Test', () => {
     expect(hasDeletedComponentData).toBe(false);
 
     // Recreate the component
-    const compoResult2 = await rq({
+    const recreatedComponentResult = await rq({
       method: 'POST',
       url: '/content-type-builder/components',
       body: {
@@ -196,8 +196,8 @@ describe('Component Deletion and Cleanup Test', () => {
       },
     });
 
-    expect(compoResult2.statusCode).toBe(201);
-    expect(compoResult2.body).toEqual({
+    expect(recreatedComponentResult.statusCode).toBe(201);
+    expect(recreatedComponentResult.body).toEqual({
       data: {
         uid: componentUID,
       },
@@ -206,7 +206,7 @@ describe('Component Deletion and Cleanup Test', () => {
     await restart();
 
     // Update content type to add it back to confirm it works (no remnants blocking it)
-    const ctResult2 = await rq({
+    const updatedContentTypeResult = await rq({
       method: 'PUT',
       url: `/content-type-builder/content-types/${testCollectionTypeUID}`,
       body: {
@@ -214,8 +214,8 @@ describe('Component Deletion and Cleanup Test', () => {
       },
     });
 
-    expect(ctResult2.statusCode).toBe(201);
-    expect(ctResult2.body).toEqual({
+    expect(updatedContentTypeResult.statusCode).toBe(201);
+    expect(updatedContentTypeResult.body).toEqual({
       data: {
         uid: testCollectionTypeUID,
       },
