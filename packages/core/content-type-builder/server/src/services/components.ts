@@ -90,14 +90,12 @@ export const deleteComponent = async (deleteUid: Internal.UID.Component) => {
   const deletedComponent = await strapi.db.transaction(async ({ trx }) => {
     const builder = createBuilder();
 
-    // Combine components and content types
     const models = [...builder.contentTypes.entries(), ...builder.components.entries()];
 
-    // Iterate over models to delete component data from the database
+    // Find models that include an attribute with this component as a target and delete references to it from the db
     for (const [modelUid] of models) {
       const metadata = strapi.db.metadata.get(modelUid);
 
-      // Find attributes with a target that matches deleteUid
       const matchingAttributes = Object.values(metadata.attributes).filter(
         (attr: any) => attr.target === deleteUid && attr.joinTable?.name
       );
