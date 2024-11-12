@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
-import { File, RawFile, CreateFile } from '../../../shared/contracts/files';
 
-import pluginId from '../pluginId';
+import { File, RawFile, CreateFile } from '../../../shared/contracts/files';
+import { pluginId } from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 

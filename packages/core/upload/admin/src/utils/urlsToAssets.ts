@@ -1,5 +1,4 @@
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetSource } from '../newConstants';
+import { AssetSource } from '../constants';
 
 import { typeFromMime } from './typeFromMime';
 

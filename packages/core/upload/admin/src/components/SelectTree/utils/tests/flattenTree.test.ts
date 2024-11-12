@@ -1,4 +1,4 @@
-import flattenTree from '../flattenTree';
+import { flattenTree } from '../flattenTree';
 
 const FIXTURE = [
   {
