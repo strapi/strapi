@@ -1,3 +1,4 @@
+/* eslint-disable check-file/no-index */
 export * from './appendSearchParamsToUrl';
 export * from './containsAssetFilter';
 export * from './createAssetUrl';

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.0.2",
+  "version": "5.3.0",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -80,8 +80,8 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-rc.11",
-    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/design-system": "2.0.0-rc.12",
+    "@strapi/icons": "2.0.0-rc.12",
     "@strapi/permissions": "workspace:*",
     "@strapi/types": "workspace:*",
     "@strapi/typescript-utils": "workspace:*",

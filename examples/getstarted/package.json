@@ -13,7 +13,7 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/icons": "2.0.0-rc.12",
     "@strapi/plugin-color-picker": "workspace:*",
     "@strapi/plugin-documentation": "workspace:*",
     "@strapi/plugin-graphql": "workspace:*",
@@ -25,7 +25,7 @@
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "11.3.0",
     "lodash": "4.17.21",
-    "mysql2": "3.9.4",
+    "mysql2": "3.9.8",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.11.1",
     "react": "18.3.1",

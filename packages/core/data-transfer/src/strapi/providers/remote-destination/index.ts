@@ -6,7 +6,14 @@ import type { Struct, Utils } from '@strapi/types';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
-import type { IDestinationProvider, IMetadata, ProviderType, IAsset } from '../../../../types';
+import type {
+  IDestinationProvider,
+  IMetadata,
+  ProviderType,
+  IAsset,
+  TransferStage,
+  Protocol,
+} from '../../../../types';
 import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
@@ -37,11 +44,24 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
 
   transferID: string | null;
 
+  stats!: { [TStage in Exclude<TransferStage, 'schemas'>]: { count: number } };
+
   constructor(options: IRemoteStrapiDestinationProviderOptions) {
     this.options = options;
     this.ws = null;
     this.dispatcher = null;
     this.transferID = null;
+
+    this.resetStats();
+  }
+
+  private resetStats() {
+    this.stats = {
+      assets: { count: 0 },
+      entities: { count: 0 },
+      links: { count: 0 },
+      configuration: { count: 0 },
+    };
   }
 
   async initTransfer(): Promise<string> {
@@ -56,6 +76,9 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     if (!res?.transferID) {
       throw new ProviderTransferError('Init failed, invalid response from the server');
     }
+
+    this.resetStats();
+
     return res.transferID;
   }
 
@@ -78,33 +101,48 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       return new ProviderTransferError('Unexpected error');
     }
 
+    this.stats[step] = { count: 0 };
+
     return null;
   }
 
   async #endStep<T extends Client.TransferPushStep>(step: T) {
     try {
-      await this.dispatcher?.dispatchTransferStep({ action: 'end', step });
+      const res = await this.dispatcher?.dispatchTransferStep<{
+        ok: boolean;
+        stats: Protocol.Client.Stats;
+      }>({
+        action: 'end',
+        step,
+      });
+
+      return { stats: res?.stats ?? null, error: null };
     } catch (e) {
       if (e instanceof Error) {
-        return e;
+        return { stats: null, error: e };
       }
 
       if (typeof e === 'string') {
-        return new ProviderTransferError(e);
+        return { stats: null, error: new ProviderTransferError(e) };
       }
 
-      return new ProviderTransferError('Unexpected error');
+      return { stats: null, error: new ProviderTransferError('Unexpected error') };
     }
-
-    return null;
   }
 
   async #streamStep<T extends Client.TransferPushStep>(
     step: T,
-    data: Client.GetTransferPushStreamData<T>
+    message: Client.GetTransferPushStreamData<T>
   ) {
     try {
-      await this.dispatcher?.dispatchTransferStep({ action: 'stream', step, data });
+      if (step === 'assets') {
+        const assetMessage = message as Protocol.Client.TransferAssetFlow[];
+        this.stats[step].count += assetMessage.filter((data) => data.action === 'start').length;
+      } else {
+        this.stats[step].count += message.length;
+      }
+
+      await this.dispatcher?.dispatchTransferStep({ action: 'stream', step, data: message });
     } catch (e) {
       if (e instanceof Error) {
         return e;
@@ -143,9 +181,19 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
             return callback(streamError);
           }
         }
-        const e = await this.#endStep(step);
+        const { error, stats } = await this.#endStep(step);
 
-        callback(e);
+        const { count } = this.stats[step];
+
+        if (stats && (stats.started !== count || stats.finished !== count)) {
+          callback(
+            new Error(
+              `Data missing: sent ${this.stats[step].count} ${step}, recieved ${stats.started} and saved ${stats.finished} ${step}`
+            )
+          );
+        }
+
+        callback(error);
       },
 
       write: async (chunk, _encoding, callback) => {
@@ -316,7 +364,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
         }
 
         if (hasStarted) {
-          const endStepError = await this.#endStep('assets');
+          const { error: endStepError } = await this.#endStep('assets');
 
           if (endStepError) {
             return callback(endStepError);

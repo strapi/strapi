@@ -1,6 +1,6 @@
 {
   "name": "@strapi/review-workflows",
-  "version": "5.0.2",
+  "version": "5.3.0",
   "description": "Review workflows for your content",
   "repository": {
     "type": "git",
@@ -53,8 +53,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-rc.11",
-    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/design-system": "2.0.0-rc.12",
+    "@strapi/icons": "2.0.0-rc.12",
     "@strapi/utils": "workspace:*",
     "fractional-indexing": "3.2.0",
     "react-dnd": "16.0.1",

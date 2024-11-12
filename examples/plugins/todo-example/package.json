@@ -27,8 +27,8 @@
     "@strapi/strapi": "workspace:*"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.11",
-    "@strapi/icons": "2.0.0-rc.11",
+    "@strapi/design-system": "2.0.0-rc.12",
+    "@strapi/icons": "2.0.0-rc.12",
     "eslint": "8.50.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

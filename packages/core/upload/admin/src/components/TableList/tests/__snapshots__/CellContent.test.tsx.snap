@@ -1,0 +1,465 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TableList | CellContent should render "-" by default when no recognized cell type is passed 1`] = `
+.c0 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <span
+    aria-label="This field is empty"
+    class="c0"
+  >
+    -
+  </span>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render date cell type 1`] = `
+.c0 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <span
+    class="c0"
+  >
+    Friday, November 18, 2022
+  </span>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render extension cell type when element type is asset 1`] = `
+.c0 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <span
+    class="c0"
+  >
+    PDF
+  </span>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render extension cell type with "-" when element type is folder 1`] = `
+.c0 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <span
+    aria-label="This field is empty"
+    class="c0"
+  >
+    -
+  </span>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render image cell type when element type is asset and mime does not include image 1`] = `
+.c0 {
+  width: 3.2rem;
+  height: 3.2rem;
+  color: #0c75af;
+  background: #eaf5ff;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    pdf
+  </div>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render image cell type when element type is folder 1`] = `
+.c0 {
+  width: 3.2rem;
+  height: 3.2rem;
+  background: #eaf5ff;
+  border-radius: 50%;
+}
+
+.c1 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c2 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <div
+    class="c0 c1"
+  >
+    <svg
+      aria-label="folder"
+      fill="#66b7f1"
+      height="1.6rem"
+      viewBox="0 0 32 32"
+      width="1.6rem"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
+      />
+    </svg>
+  </div>
+  <span
+    class="c2"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render size cell type when element type is asset 1`] = `
+.c0 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <span
+    class="c0"
+  >
+    21KB
+  </span>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render size cell type with "-" when element type is folder 1`] = `
+.c0 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <span
+    aria-label="This field is empty"
+    class="c0"
+  >
+    -
+  </span>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`TableList | CellContent should render text cell type 1`] = `
+.c0 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c1 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+<div>
+  <span
+    class="c0"
+  >
+    some text
+  </span>
+  <span
+    class="c1"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
