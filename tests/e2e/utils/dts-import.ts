@@ -25,7 +25,7 @@ export const resetDatabaseAndImportDataFromPath = async (
   modifiedContentTypesFn: (cts: string[]) => string[] = (cts) => cts,
   configuration: RestoreConfiguration = { coreStore: true }
 ) => {
-  const filePath = join('./tests/e2e/data/', file);
+  const filePath = resolve(__dirname, '../data/', file);
   const source = createSourceProvider(filePath);
   const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES);
   const destination = createDestinationProvider(includedTypes, configuration);
@@ -37,7 +37,7 @@ export const resetDatabaseAndImportDataFromPath = async (
       links: [
         {
           // only transfer relations to+from requested content types
-          filter(link) {
+          filter(link: any) {
             return (
               includedTypes.includes(link.left.type) &&
               (includedTypes.includes(link.right.type) || link.right.type === undefined)
@@ -48,7 +48,7 @@ export const resetDatabaseAndImportDataFromPath = async (
       entities: [
         {
           // only include entities of requested content types
-          filter(entity) {
+          filter(entity: any) {
             return includedTypes.includes(entity.type);
           },
         },
@@ -60,12 +60,9 @@ export const resetDatabaseAndImportDataFromPath = async (
 
   try {
     // reset the transfer token to allow the transfer if it's been wiped (that is, not included in previous import data)
-    const res = await fetch(
-      `http://127.0.0.1:${process.env.PORT ?? 1337}/api/config/resettransfertoken`,
-      {
-        method: 'POST',
-      }
-    );
+    await fetch(`http://127.0.0.1:${process.env.PORT ?? 1337}/api/config/resettransfertoken`, {
+      method: 'POST',
+    });
   } catch (err) {
     console.error('Token reset failed.' + JSON.stringify(err, null, 2));
     process.exit(1);
@@ -79,14 +76,17 @@ export const resetDatabaseAndImportDataFromPath = async (
   }
 };
 
-const createSourceProvider = (filePath) =>
+const createSourceProvider = (filePath: string) =>
   createLocalFileSourceProvider({
-    file: { path: resolve(filePath) },
+    file: { path: filePath },
     encryption: { enabled: false },
     compression: { enabled: false },
   });
 
-const createDestinationProvider = (includedTypes = [], configuration: RestoreConfiguration) => {
+const createDestinationProvider = (
+  includedTypes: any[] = [],
+  configuration: RestoreConfiguration
+) => {
   return createRemoteStrapiDestinationProvider({
     url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
