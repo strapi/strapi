@@ -207,8 +207,8 @@ describe('Component Deletion and Cleanup Test', () => {
 
     // Update content type to add it back to confirm it works (no remnants blocking it)
     const ctResult2 = await rq({
-      method: 'POST',
-      url: '/content-type-builder/content-types',
+      method: 'PUT',
+      url: `/content-type-builder/content-types/${testCollectionTypeUID}`,
       body: {
         contentType,
       },
