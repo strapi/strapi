@@ -22,7 +22,7 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
     const destination = { pathname: 'history', search: pluginsQueryParams };
     trackUsage('willNavigate', {
       from: pathname,
-      to: `${pathname}/${destination.pathname}?${destination.search}`,
+      to: `${pathname}/${destination.pathname}`,
     });
     navigate(destination);
   };
