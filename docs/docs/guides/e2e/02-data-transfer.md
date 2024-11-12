@@ -17,7 +17,7 @@ We could use custom API endpoints of the application, and whilst this isn't a po
 
 ### Limitations of Data Transfer
 
-The main limitation with data transfer is we cannot version or review changes to the data. Making changes to the data set should be done with care since it is quite easy to export data with unknown changes to the database that could impact other tests. 
+The main limitation with data transfer is we cannot version or review changes to the data. Making changes to the data set should be done with care since it is quite easy to export data with unknown changes to the database that could impact other tests.
 
 ## Updating data for tests
 
@@ -25,7 +25,7 @@ Each test should be isolated and not depend on another test. Data changes from o
 
 ### The data transfer engine
 
-Since the Strapi CLI will use `@strapi/data-transfer` directly it will by default not import or export admin users, API tokens, or any other features that have been included in its exclusion list. 
+Since the Strapi CLI will use `@strapi/data-transfer` directly it will by default not import or export admin users, API tokens, or any other features that have been included in its exclusion list.
 
 For this reason, do NOT use the import or export command on the strapi test instance. A DTS engine has been created specifically for our tests cases. This allows us to redefine what should be included in the import or export for our tests. The scripts can be found in `tests/e2e/scripts/dts-import.ts` and `tests/e2e/scripts/dts-export.ts`.
 
@@ -48,10 +48,8 @@ This script will include admin users and all the content-types specificed in `te
 You should be able to login with the test app instance credentials.
 
 | Email            | Password    |
-|------------------|-------------|
+| ---------------- | ----------- |
 | test@testing.com | Testing123! |
-
-
 
 Now that you have a Strapi instance witht he same data that each e2e starts with, you can modify the data in the CMS to prepare for a new data export.
 
@@ -78,7 +76,6 @@ STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-export
 ```
 
 The script will create a file `updated-data-packet.tar`. You can copy this file over to `tests/e2e/data` so it can be used in the appropriate tests.
-
 
 ### Importing the data packet in test scenarios
 
