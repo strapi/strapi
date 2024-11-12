@@ -51,7 +51,7 @@ You should be able to login with the test app instance credentials.
 | ---------------- | ----------- |
 | test@testing.com | Testing123! |
 
-Now that you have a Strapi instance witht he same data that each e2e starts with, you can modify the data in the CMS to prepare for a new data export.
+Now that you have a Strapi instance with the same data that each e2e starts with, you can modify the data in the CMS to prepare for a new data export.
 
 :::note
 If you change any of the content schemas (including adding new ones) be sure to [update the `app-template`](./01-app-template.md) otherwise DTS will fail to import the data for schemas that do not exist.
