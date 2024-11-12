@@ -34,7 +34,7 @@ const QUERIES = {
     FROM :tableName:
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
     WHERE document_id IS NULL
-    GROUP BY :tableName:.id, :joinColumn:
+    GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
     LIMIT 1;
   `,
       params
@@ -49,7 +49,7 @@ const QUERIES = {
     FROM :tableName:
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
     WHERE document_id IS NULL
-    GROUP BY :tableName:.id, :joinColumn:
+    GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
     LIMIT 1;
   `,
       params
@@ -64,7 +64,7 @@ const QUERIES = {
     FROM :tableName:
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
     WHERE document_id IS NULL
-    GROUP BY :joinColumn:
+    GROUP BY :joinTableName:.:joinColumn:
     LIMIT 1;
     `,
       params

@@ -5,10 +5,11 @@ import { useNotifyAT } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
-import { GetFolders } from '../../../shared/contracts/folders';
-import type { Query } from '../../../shared/contracts/files';
 
-import pluginId from '../pluginId';
+import { GetFolders } from '../../../shared/contracts/folders';
+import { pluginId } from '../pluginId';
+
+import type { Query } from '../../../shared/contracts/files';
 
 interface UseFoldersOptions {
   enabled?: boolean;

@@ -2,11 +2,11 @@ import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
-import pluginId from '../pluginId';
-import { getTrad } from '../utils';
 import { GetFolder } from '../../../shared/contracts/folders';
+import { pluginId } from '../pluginId';
+import { getTrad } from '../utils';
 
-export const useFolder = (id: number, { enabled = true } = {}) => {
+export const useFolder = (id: number | null | undefined, { enabled = true } = {}) => {
   const { toggleNotification } = useNotification();
   const { get } = useFetchClient();
   const { formatMessage } = useIntl();

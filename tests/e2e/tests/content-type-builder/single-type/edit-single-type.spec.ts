@@ -1,15 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import {
-  createSingleType,
-  describeOnCondition,
-  navToHeader,
-  skipCtbTour,
-} from '../../../utils/shared';
+import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
+import { createSingleType } from '../../../utils/content-types';
 
 test.describe('Edit single type', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -17,18 +11,21 @@ test.describe('Edit single type', () => {
 
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
+  const attributes = [{ type: 'text', name: 'testtext' }];
 
   test.beforeEach(async ({ page }) => {
+    await resetFiles();
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       skipTour: true,
-      resetFiles: true,
+      // Don't reset files here as it would only run once for the whole suite
+      resetFiles: false,
       importData: 'with-admin.tar',
-      afterSetup: async () => {
-        await createSingleType(page, {
-          name: ctName,
-        });
-      },
+    });
+
+    await createSingleType(page, {
+      name: ctName,
+      attributes,
     });
 
     // Then go to our content type

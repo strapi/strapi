@@ -101,6 +101,9 @@
   "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Home.pluginHeaderTitle": "Content Manager",
+  "containers.List.draft": "Draft",
+  "containers.List.published": "Published",
+  "containers.List.modified": "Modified",
   "containers.list.displayedFields": "Displayed Fields",
   "containers.list.items": "{number} {number, plural, =0 {items} one {item} other {items}}",
   "containers.list.table.row-actions": "Row actions",
@@ -233,8 +236,11 @@
   "popover.display-relations.label": "Display relations",
   "preview.panel.title": "Preview",
   "preview.panel.button": "Open preview",
+  "preview.page-title": "{contentType} preview",
+  "preview.header.close": "Close preview",
   "preview.copy.label": "Copy preview link",
   "preview.copy.success": "Copied preview link",
+  "preview.tabs.label": "Preview status",
   "relation.add": "Add relation",
   "relation.disconnect": "Remove",
   "relation.error-adding-relation": "An error occurred while trying to add the relation.",
@@ -283,5 +289,6 @@
   "history.restore.success.title": "Version restored.",
   "history.restore.success.message": "The content of the restored version is not published yet.",
   "history.restore.error.message": "Could not restore version.",
-  "validation.error": "There are validation errors in your document. Please fix them before saving."
+  "validation.error": "There are validation errors in your document. Please fix them before saving.",
+  "bulk-publish.edit": "Edit"
 }
