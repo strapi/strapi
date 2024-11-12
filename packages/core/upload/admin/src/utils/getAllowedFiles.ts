@@ -1,4 +1,5 @@
 import { toSingularTypes } from './toSingularTypes';
+
 import type { File } from '../../../shared/contracts/files';
 /**
  * Returns the files that can be added to the media field

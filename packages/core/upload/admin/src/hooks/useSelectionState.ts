@@ -21,11 +21,11 @@ export const useSelectionState = <TValues extends object>(
     }
   };
 
-  const selectAll = (nextSelections: TValues[]) => {
+  const selectAll = (nextSelections?: TValues[]) => {
     if (selections.length > 0) {
       setSelections([]);
     } else {
-      setSelections(nextSelections);
+      setSelections(nextSelections!);
     }
   };
 
