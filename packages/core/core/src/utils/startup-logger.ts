@@ -3,16 +3,6 @@ import CLITable from 'cli-table3';
 import _ from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
-import { Database } from '@strapi/database';
-
-const formatDbInfo = (dbInfo?: ReturnType<Database['getInfo']>) => {
-  if (!dbInfo) {
-    return '';
-  }
-
-  const { displayName, schema } = dbInfo;
-  return schema ? `'${displayName}', schema: '${schema}'` : `'${displayName}'`;
-};
 
 export const createStartupLogger = (app: Core.Strapi) => {
   return {
@@ -37,8 +27,12 @@ export const createStartupLogger = (app: Core.Strapi) => {
         [chalk.blue('Version'), `${app.config.info.strapi} (node ${process.version})`],
         [chalk.blue('Edition'), app.EE ? 'Enterprise' : 'Community'],
         [chalk.blue('Database'), dbInfo?.client],
-        [chalk.blue('Database name'), formatDbInfo(dbInfo)]
+        [chalk.blue('Database name'), dbInfo?.displayName]
       );
+
+      if (dbInfo?.schema) {
+        infoTable.push([chalk.blue('Database Schema'), dbInfo.schema]);
+      }
 
       console.log(infoTable.toString());
       console.log();
