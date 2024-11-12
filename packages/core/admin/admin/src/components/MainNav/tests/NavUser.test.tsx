@@ -1,4 +1,4 @@
-import { screen, render, fireEvent } from '@tests/utils';
+import { screen, render } from '@tests/utils';
 
 import { NavUser } from '../NavUser';
 
@@ -45,14 +45,13 @@ describe('NavUser', () => {
 
   it('shows the logout link with correct hover styles', async () => {
     const { user } = render(<NavUser initials="JD">John Doe</NavUser>);
-    // await screen.findByText('JD');
 
     // Open the menu
     const buttonMenu = screen.getByRole('button');
     await user.click(buttonMenu);
 
     const neutralMenuItem = screen.getByText('Logout');
-    fireEvent.mouseOver(neutralMenuItem);
+    await user.hover(neutralMenuItem);
     expect(neutralMenuItem).toHaveStyle({
       backgroundColor: 'theme.colors.danger100',
     });

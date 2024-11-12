@@ -358,19 +358,19 @@ describe('DocumentActionsMenu', () => {
     await user.click(screen.getByRole('button', { name: 'More document actions' }));
 
     const neutralMenuItem = screen.getByText('Action 1');
-    fireEvent.mouseOver(neutralMenuItem);
+    await user.hover(neutralMenuItem);
     expect(neutralMenuItem).toHaveStyle({
       backgroundColor: 'theme.colors.neutral',
     });
 
     const dangerMenuItem = screen.getByText('Action 2');
-    fireEvent.mouseOver(dangerMenuItem);
+    await user.hover(dangerMenuItem);
     expect(dangerMenuItem).toHaveStyle({
       backgroundColor: 'theme.colors.danger100',
     });
 
     const disabledDangerMenuItem = screen.getByText('Action 3');
-    fireEvent.mouseOver(disabledDangerMenuItem);
+    await user.hover(disabledDangerMenuItem);
     expect(disabledDangerMenuItem).toHaveStyle({
       backgroundColor: 'theme.colors.neutral',
     });
