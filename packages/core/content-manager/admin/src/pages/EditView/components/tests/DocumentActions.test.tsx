@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@tests/utils';
+import { render, screen } from '@tests/utils';
 
 import { DocumentActions, DocumentActionsMenu } from '../DocumentActions';
 
