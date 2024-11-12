@@ -1,5 +1,8 @@
 import React from 'react';
+
 import { Button } from '@strapi/design-system';
+
+import Preview from './preview';
 
 const config = {
   locales: ['it', 'es', 'en', 'en-GB'],
@@ -15,5 +18,8 @@ const bootstrap = (app) => {
 
 export default {
   config,
+  register: (app) => {
+    Preview.register(app);
+  },
   bootstrap,
 };
