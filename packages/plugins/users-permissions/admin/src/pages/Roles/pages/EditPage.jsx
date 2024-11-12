@@ -119,7 +119,7 @@ export const EditPage = () => {
               }
               title={role.name}
               subtitle={role.description}
-              navigationAction={<BackButton />}
+              navigationAction={<BackButton fallback=".." />}
             />
             <Layouts.Content>
               <Flex
