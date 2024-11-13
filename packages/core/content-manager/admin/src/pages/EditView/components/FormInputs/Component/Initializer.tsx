@@ -23,10 +23,10 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
     width: 2.4rem;
     height: 2.4rem;
     > circle {
-      fill: ${({ theme }) => (!disabled ? theme.colors.neutral600 : theme.colors.primary200)};
+      fill: ${({ theme }) => (!disabled ? theme.colors.neutral400 : theme.colors.primary200)};
     }
     > path {
-      fill: ${({ theme }) => (disabled ? theme.colors.neutral600 : theme.colors.primary600)};
+      fill: ${({ theme }) => (disabled ? theme.colors.neutral400 : theme.colors.primary600)};
     }
   `;
 
