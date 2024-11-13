@@ -12,7 +12,7 @@ const PreviewComponent = () => {
     <Layouts.Root>
       <Page.Main>
         <Page.Title>{`Previewing ${uid}`}</Page.Title>
-        <Layouts.Header title={'Static Preview'} subtitle={`Dummy preview for getstarted app`} />
+        <Layouts.Header title="Static Preview" subtitle="Dummy preview for getstarted app" />
         <Layouts.Content>
           <Flex
             direction="column"
