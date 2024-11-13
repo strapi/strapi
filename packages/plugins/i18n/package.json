@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-i18n",
-  "version": "4.25.15",
+  "version": "4.25.16",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -55,9 +55,9 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.19.0",
-    "@strapi/helper-plugin": "4.25.15",
+    "@strapi/helper-plugin": "4.25.16",
     "@strapi/icons": "1.19.0",
-    "@strapi/utils": "4.25.15",
+    "@strapi/utils": "4.25.16",
     "axios": "1.7.4",
     "formik": "2.4.0",
     "immer": "9.0.19",
@@ -70,10 +70,10 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "4.25.15",
+    "@strapi/admin-test-utils": "4.25.16",
     "@strapi/pack-up": "4.23.0",
-    "@strapi/strapi": "4.25.15",
-    "@strapi/types": "4.25.15",
+    "@strapi/strapi": "4.25.16",
+    "@strapi/types": "4.25.16",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "msw": "1.3.0",
