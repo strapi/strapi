@@ -168,7 +168,7 @@
     "vite-plugin-dts": "3.7.3"
   },
   "peerDependencies": {
-    "@strapi/data-transfer": "^5.0.0 ||  ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/data-transfer": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

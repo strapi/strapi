@@ -7158,7 +7158,7 @@ __metadata:
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
   peerDependencies:
-    "@strapi/data-transfer": ^5.0.0 ||  ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/data-transfer": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7255,7 +7255,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7343,7 +7343,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7555,7 +7555,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/admin": ^5.0.0
     koa: 2.13.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -7642,8 +7642,8 @@ __metadata:
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    "@strapi/content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/admin": ^5.0.0
+    "@strapi/content-manager": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7799,7 +7799,7 @@ __metadata:
     tsconfig: "workspace:*"
     typescript: "npm:5.3.2"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7825,7 +7825,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     typescript: "npm:5.3.2"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7876,7 +7876,7 @@ __metadata:
     yaml: "npm:1.10.2"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7921,7 +7921,7 @@ __metadata:
     tsconfig: "workspace:*"
     typescript: "npm:5.3.2"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7944,7 +7944,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7986,7 +7986,7 @@ __metadata:
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -8128,8 +8128,8 @@ __metadata:
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    "@strapi/content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/admin": ^5.0.0
+    "@strapi/content-manager": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -8419,7 +8419,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
