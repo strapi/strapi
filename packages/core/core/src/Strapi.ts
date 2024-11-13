@@ -271,13 +271,14 @@ class Strapi extends Container implements Core.Strapi {
       .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
       .add('documents', () => createDocumentService(this))
       .add('db', () => {
-        const outDir = tsUtils.resolveOutDirSync(this.dirs.app.root) ?? this.dirs.app.root;
+        const tsDir = tsUtils.resolveOutDirSync(this.dirs.app.root);
+        const projectDir = this.config.get('database.settings.useTypescriptMigrations') === true && tsDir ? tsDir : this.dirs.app.root;
         return new Database(
           _.merge(this.config.get('database'), {
             logger,
             settings: {
               migrations: {
-                dir: path.join(outDir, 'database/migrations'),
+                dir: path.join(projectDir, 'database/migrations'),
               },
             },
           })
