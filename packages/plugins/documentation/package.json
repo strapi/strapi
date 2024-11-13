@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
