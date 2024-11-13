@@ -19,17 +19,6 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
 
   const field = useField(name);
 
-  const CircleIcon = styled(PlusCircle)`
-    width: 2.4rem;
-    height: 2.4rem;
-    > circle {
-      fill: ${({ theme }) => (!disabled ? theme.colors.neutral400 : theme.colors.primary200)};
-    }
-    > path {
-      fill: ${({ theme }) => (disabled ? theme.colors.neutral400 : theme.colors.primary600)};
-    }
-  `;
-
   return (
     <>
       <Box
@@ -45,7 +34,7 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
       >
         <Flex direction="column" gap={2}>
           <Flex justifyContent="center">
-            <CircleIcon />
+            <CircleIconWrapper disabled={disabled} />
           </Flex>
           <Flex justifyContent="center">
             <Typography
@@ -63,6 +52,20 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
       </Box>
     </>
   );
+};
+
+export const CircleIconWrapper = ({ disabled }: { disabled?: boolean }) => {
+  const CircleIcon = styled(PlusCircle)`
+    width: 3.2rem;
+    height: 3.2rem;
+    > circle {
+      fill: ${({ theme }) => (!disabled ? theme.colors.neutral400 : theme.colors.primary200)};
+    }
+    > path {
+      fill: ${({ theme }) => (disabled ? theme.colors.neutral400 : theme.colors.primary600)};
+    }
+  `;
+  return <CircleIcon />;
 };
 
 export { Initializer };
