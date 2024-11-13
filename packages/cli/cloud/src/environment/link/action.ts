@@ -66,7 +66,7 @@ export default async (ctx: CLIContext) => {
   });
 
   try {
-    await local.addEnvironment(answer.targetEnvironment);
+    await local.patch({ project: { targetEnvironment: answer.targetEnvironment } });
   } catch (e) {
     await trackEvent(ctx, cloudApiService, 'didNotLinkEnvironment', {
       projectName: project.name,
