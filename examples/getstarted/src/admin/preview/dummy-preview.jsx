@@ -41,7 +41,7 @@ const PreviewComponent = () => {
               </Grid.Item>
               <Grid.Item col={6} s={12} direction="column" alignItems="start">
                 <Typography variant="sigma" textColor="neutral600" tag="dt">
-                  {'Document Id'}
+                  Document Id
                 </Typography>
                 <Flex gap={3} direction="column" alignItems="start" tag="dd">
                   <Typography>{documentId}</Typography>
@@ -49,7 +49,7 @@ const PreviewComponent = () => {
               </Grid.Item>
               <Grid.Item col={6} s={12} direction="column" alignItems="start">
                 <Typography variant="sigma" textColor="neutral600" tag="dt">
-                  {'Status'}
+                  Status
                 </Typography>
                 <Flex gap={3} direction="column" alignItems="start" tag="dd">
                   <Typography>{status}</Typography>
