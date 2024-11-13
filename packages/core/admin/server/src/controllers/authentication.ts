@@ -22,8 +22,16 @@ import type {
   ResetPassword,
 } from '../../../shared/contracts/authentication';
 import { AdminUser } from '../../../shared/contracts/shared';
+import { middlewares as authMiddlewares } from './openid-authentication-utils';
+
 
 const { ApplicationError, ValidationError } = errors;
+
+const openIdAuthenticationFlow = compose([
+  authMiddlewares.authenticate,
+  authMiddlewares.redirectWithAuth,
+]);
+
 
 export default {
   login: compose([
@@ -68,6 +76,14 @@ export default {
       } satisfies Login.Response;
     },
   ]),
+
+  openIdLogin(ctx: Context, next: Next) {
+    return authMiddlewares.login(ctx, next);
+  },
+
+  openIdRedirect(ctx: Context, next: Next) {
+    return openIdAuthenticationFlow(ctx, next);
+  },
 
   async renewToken(ctx: Context) {
     await validateRenewTokenInput(ctx.request.body);

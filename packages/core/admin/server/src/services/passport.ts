@@ -3,6 +3,7 @@ import type { Strategy } from 'passport-local';
 import { isFunction } from 'lodash/fp';
 
 import createLocalStrategy from './passport/local-strategy';
+import createOpenIdStrategy from './passport/openid-strategy';
 
 const authEventsMapper = {
   onConnectionSuccess: 'admin.auth.success',
@@ -14,7 +15,7 @@ const keyIsValidEventName = ([key]: any) => {
   return Object.keys(strapi.service('admin::passport').authEventsMapper).includes(key);
 };
 
-const getPassportStrategies = () => [createLocalStrategy(strapi)] as Strategy[];
+const getPassportStrategies = () => [createLocalStrategy(strapi), createOpenIdStrategy(strapi)] as Strategy[];
 
 const registerAuthEvents = () => {
   // @ts-expect-error - TODO: migrate auth service to TS

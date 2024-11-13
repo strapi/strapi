@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
+import { Box, Button, Flex, Main, Typography, Link, Divider } from '@strapi/design-system';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
@@ -65,6 +65,12 @@ const Login = ({ children }: LoginProps) => {
 
       navigate(redirectUrl);
     }
+  };
+
+  const handleOAuthLogin = async () => {
+    setApiError(undefined);
+
+    window.location.replace('/admin/login-openid');
   };
 
   return (
@@ -145,6 +151,15 @@ const Login = ({ children }: LoginProps) => {
             </Flex>
           </Form>
           {children}
+          <Divider marginTop={4} marginBottom={4} />
+          <Flex direction="column" alignItems="stretch" gap={6}>
+            <Button variant="secondary" fullWidth onClick={handleOAuthLogin}>
+              {formatMessage({
+                id: 'Auth.form.button.login.auth0',
+                defaultMessage: 'Log in with Auth0',
+              })}
+            </Button>
+          </Flex>
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>

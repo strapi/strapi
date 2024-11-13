@@ -7096,6 +7096,7 @@ __metadata:
     "@types/markdown-it-emoji": "npm:2.0.4"
     "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/passport-local": "npm:1.0.36"
+    "@types/passport-openidconnect": "npm:^0"
     "@types/pluralize": "npm:0.0.32"
     "@types/punycode": "npm:2.1.4"
     "@types/react-window": "npm:1.8.8"
@@ -7131,6 +7132,7 @@ __metadata:
     ora: "npm:5.4.1"
     p-map: "npm:4.0.0"
     passport-local: "npm:1.0.0"
+    passport-openidconnect: "npm:0.1.2"
     pluralize: "npm:8.0.0"
     punycode: "npm:2.3.1"
     qs: "npm:6.11.1"
@@ -9622,6 +9624,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/oauth@npm:*":
+  version: 0.9.6
+  resolution: "@types/oauth@npm:0.9.6"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/2f3e4ee1059fd28fc2cb6dd9d0973365a0630ea1fa305ac5455ea9666220b73d8ac42e5bee42367a0f12a1041ef103a16c55bf7803d0a82898319c3e32095b4a
+  languageName: node
+  linkType: hard
+
 "@types/parse-json@npm:^4.0.0":
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
@@ -9637,6 +9648,18 @@ __metadata:
     "@types/passport": "npm:*"
     "@types/passport-strategy": "npm:*"
   checksum: 10c0/01a907beddae422f7dfc70a8a44c67cd7db73b7a1592f8d81a31ee194f5538feeb96a315a18dd95e608b2350065bbca86520affa677e090510b66dfd85e463ec
+  languageName: node
+  linkType: hard
+
+"@types/passport-openidconnect@npm:^0":
+  version: 0.1.3
+  resolution: "@types/passport-openidconnect@npm:0.1.3"
+  dependencies:
+    "@types/express": "npm:*"
+    "@types/oauth": "npm:*"
+    "@types/passport": "npm:*"
+    "@types/passport-strategy": "npm:*"
+  checksum: 10c0/f0621840656a400f67f4fb1ef205b1388811d734a3c1c00ca165912c9cf0f6e3c26fe09878ed45dba529137cfd6dd7d922e7582d842e22b1937ea5e46c07934f
   languageName: node
   linkType: hard
 
@@ -23231,6 +23254,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"oauth@npm:0.10.x":
+  version: 0.10.0
+  resolution: "oauth@npm:0.10.0"
+  checksum: 10c0/76f3e186cfd76cb33e5d5d442861c86680a5c3b71b2db1b854212087532c265a69de1a2ab9db683e6c6df733e17cfc67476527b81b224a19c1917de2bc3f75fa
+  languageName: node
+  linkType: hard
+
 "oauth@npm:0.9.x":
   version: 0.9.15
   resolution: "oauth@npm:0.9.15"
@@ -24075,6 +24105,16 @@ __metadata:
     uid2: "npm:0.0.x"
     utils-merge: "npm:1.x.x"
   checksum: 10c0/b72f71d791dcfe6c2492bf58b899f6ae8e06f09fd12af210ef987ef99d9970921e91435b92dfcf2746a56a0cb5eeaf90183bebeb4837488943993d81328cc896
+  languageName: node
+  linkType: hard
+
+"passport-openidconnect@npm:0.1.2":
+  version: 0.1.2
+  resolution: "passport-openidconnect@npm:0.1.2"
+  dependencies:
+    oauth: "npm:0.10.x"
+    passport-strategy: "npm:1.x.x"
+  checksum: 10c0/4d4662b91e2580baa7cf2f341904c352de9ec776a3897f8bf51a90f248ee7dab26b94e2e3c590d14821b04b0fa95cb8d7cfad6edc095e3966b7666e8779b0b68
   languageName: node
   linkType: hard
 
