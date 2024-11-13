@@ -48,7 +48,7 @@
   "dependencies": {
     "@strapi/design-system": "2.0.0-rc.12",
     "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.4.0",
     "bcryptjs": "2.4.3",
     "formik": "2.4.5",
     "grant-koa": "5.4.8",
@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
-    "@strapi/strapi": "workspace:*",
+    "@strapi/strapi": "5.4.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -95,5 +95,6 @@
     "description": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
     "required": true,
     "kind": "plugin"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

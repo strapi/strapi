@@ -59,9 +59,9 @@
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.0.0-rc.12",
-    "@strapi/generators": "workspace:*",
+    "@strapi/generators": "5.4.0",
     "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.4.0",
     "date-fns": "2.30.0",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
@@ -73,9 +73,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
+    "@strapi/admin": "5.4.0",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "workspace:*",
+    "@strapi/types": "5.4.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -106,5 +106,6 @@
     "description": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",
     "kind": "plugin",
     "required": true
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

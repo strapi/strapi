@@ -40,9 +40,9 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/logger": "workspace:*",
-    "@strapi/types": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/logger": "5.4.0",
+    "@strapi/types": "5.4.0",
+    "@strapi/utils": "5.4.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
@@ -59,7 +59,7 @@
     "ws": "8.17.1"
   },
   "devDependencies": {
-    "@strapi/database": "workspace:*",
+    "@strapi/database": "5.4.0",
     "@strapi/pack-up": "5.0.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
@@ -80,5 +80,6 @@
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

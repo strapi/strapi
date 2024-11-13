@@ -62,8 +62,8 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.0.0-rc.12",
     "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/types": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/types": "5.4.0",
+    "@strapi/utils": "5.4.0",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
@@ -97,8 +97,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
-    "@strapi/database": "workspace:*",
+    "@strapi/admin": "5.4.0",
+    "@strapi/database": "5.4.0",
     "@strapi/pack-up": "5.0.0",
     "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.2",
@@ -128,5 +128,6 @@
     "description": "Quick way to see, edit and delete the data in your database.",
     "required": true,
     "kind": "plugin"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

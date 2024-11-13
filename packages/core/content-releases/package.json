@@ -55,11 +55,11 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/database": "workspace:*",
+    "@strapi/database": "5.4.0",
     "@strapi/design-system": "2.0.0-rc.12",
     "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/types": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/types": "5.4.0",
+    "@strapi/utils": "5.4.0",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
     "formik": "2.4.5",
@@ -71,9 +71,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
-    "@strapi/admin-test-utils": "workspace:*",
-    "@strapi/content-manager": "workspace:*",
+    "@strapi/admin": "5.4.0",
+    "@strapi/admin-test-utils": "5.4.0",
+    "@strapi/content-manager": "5.4.0",
     "@strapi/pack-up": "5.0.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
@@ -106,5 +106,6 @@
     "kind": "plugin",
     "displayName": "Releases",
     "required": true
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

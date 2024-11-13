@@ -57,7 +57,7 @@
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
     "@strapi/sdk-plugin": "^5.0.0",
-    "@strapi/strapi": "workspace:*",
+    "@strapi/strapi": "5.4.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
@@ -79,5 +79,6 @@
     "displayName": "Sentry",
     "description": "Send Strapi error events to Sentry.",
     "kind": "plugin"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

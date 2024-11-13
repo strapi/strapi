@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.0.0",
-    "@strapi/strapi": "workspace:*",
+    "@strapi/strapi": "5.4.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "react": "18.3.1",
@@ -85,5 +85,6 @@
     "description": "Color picker custom field",
     "kind": "plugin",
     "displayName": "Color Picker"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

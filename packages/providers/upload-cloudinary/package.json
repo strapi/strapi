@@ -42,17 +42,18 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.4.0",
     "cloudinary": "^1.41.0",
     "into-stream": "^5.1.0"
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*"
+    "eslint-config-custom": "5.4.0",
+    "tsconfig": "5.4.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }
