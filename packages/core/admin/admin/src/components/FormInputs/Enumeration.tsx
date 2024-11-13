@@ -11,7 +11,7 @@ const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
   ({ name, required, label, hint, labelAction, options = [], ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);
-
+    options = [{ label: 'Choose here', value: '' }, ...options];
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
@@ -20,7 +20,7 @@ const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
         <SingleSelect
           ref={composedRefs}
           onChange={(value) => {
-            field.onChange(name, value);
+            field.onChange(name, value || null);
           }}
           value={field.value}
           {...props}
