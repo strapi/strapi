@@ -27,7 +27,7 @@ import { DefaultTheme } from 'styled-components';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { useGetDraftRelationCountQuery } from '../../../services/documents';
@@ -504,7 +504,7 @@ const PublishAction: DocumentActionComponent = ({
   meta,
   document,
 }) => {
-  const { schema } = useDoc();
+  const { contentType } = useContentManagerContext();
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -610,7 +610,7 @@ const PublishAction: DocumentActionComponent = ({
       meta?.availableStatus.some((doc) => doc[PUBLISHED_AT_ATTRIBUTE_NAME] !== null)) &&
     document?.status !== 'modified';
 
-  if (!schema?.options?.draftAndPublish) {
+  if (!contentType?.options?.draftAndPublish) {
     return null;
   }
 
@@ -880,7 +880,7 @@ const UnpublishAction: DocumentActionComponent = ({
   document,
 }) => {
   const { formatMessage } = useIntl();
-  const { schema } = useDoc();
+  const { contentType } = useContentManagerContext();
   const canPublish = useDocumentRBAC('UnpublishAction', ({ canPublish }) => canPublish);
   const { unpublish } = useDocumentActions();
   const [{ query }] = useQueryParams();
@@ -894,7 +894,7 @@ const UnpublishAction: DocumentActionComponent = ({
     setShouldKeepDraft(value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
   };
 
-  if (!schema?.options?.draftAndPublish) {
+  if (!contentType?.options?.draftAndPublish) {
     return null;
   }
 
@@ -1025,13 +1025,13 @@ const DiscardAction: DocumentActionComponent = ({
   document,
 }) => {
   const { formatMessage } = useIntl();
-  const { schema } = useDoc();
+  const { contentType } = useContentManagerContext();
   const canUpdate = useDocumentRBAC('DiscardAction', ({ canUpdate }) => canUpdate);
   const { discard } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
-  if (!schema?.options?.draftAndPublish) {
+  if (!contentType?.options?.draftAndPublish) {
     return null;
   }
 

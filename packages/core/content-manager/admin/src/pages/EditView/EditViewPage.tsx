@@ -16,8 +16,7 @@ import { styled } from 'styled-components';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { type UseDocument, useDoc } from '../../hooks/useDocument';
-import { useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { type UseDocument, useContentManagerContext } from '../../hooks/useDocument';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
 import { getTranslation } from '../../utils/translations';
@@ -49,14 +48,20 @@ const EditViewPage = () => {
   const {
     document,
     meta,
-    isLoading: isLoadingDocument,
-    schema,
+    isLoading: isLoadingContentManagerContext,
+    contentType: schema,
     components,
     collectionType,
     id,
-    model,
+    isCreatingEntry,
+    layout: {
+      edit: {
+        layout,
+        settings: { mainField },
+      },
+    },
     hasError,
-  } = useDoc();
+  } = useContentManagerContext();
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
@@ -84,19 +89,11 @@ const EditViewPage = () => {
    * we can simply use the update operation to continuously update the same
    * document with varying params.
    */
-  const isCreatingDocument = !id && !isSingleType;
-
-  const {
-    isLoading: isLoadingLayout,
-    edit: {
-      layout,
-      settings: { mainField },
-    },
-  } = useDocumentLayout(model);
+  const isCreatingDocument = isCreatingEntry;
 
   const { isLazyLoading } = useLazyComponents([]);
 
-  const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
+  const isLoading = isLoadingActionsRBAC || isLoadingContentManagerContext || isLazyLoading;
 
   /**
    * Here we prepare the form for editing, we need to:

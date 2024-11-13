@@ -170,14 +170,14 @@ const useDocument: UseDocument = (args, opts) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * useDoc
+ * useContentManagerRoute
  * -----------------------------------------------------------------------------------------------*/
 
 /**
  * @internal this hook uses the router to extract the model, collection type & id from the url.
  * therefore, it shouldn't be used outside of the content-manager because it won't work as intended.
  */
-const useDoc = () => {
+const useContentManagerRoute = () => {
   const { id, slug, collectionType, origin } = useParams<{
     id: string;
     origin: string;
@@ -195,20 +195,13 @@ const useDoc = () => {
     throw new Error('Could not find model in url params');
   }
 
-  const document = useDocument(
-    { documentId: origin || id, model: slug, collectionType, params },
-    {
-      skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
-    }
-  );
-
   const returnId = origin || id === 'create' ? undefined : id;
 
   return {
     collectionType,
     model: slug,
     id: returnId,
-    ...document,
+    params,
   };
 };
 
@@ -219,15 +212,21 @@ const useDoc = () => {
  * Make sure to use this hook inside the content manager.
  */
 const useContentManagerContext = () => {
+  const { collectionType, model, id, params } = useContentManagerRoute();
   const {
-    collectionType,
-    model,
-    id,
     components,
-    isLoading: isLoadingDoc,
+    isLoading: isLoadingDocument,
     schema,
     schemas,
-  } = useDoc();
+    document,
+    meta,
+    hasError,
+  } = useDocument(
+    { documentId: id, model, collectionType, params },
+    {
+      skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
+    }
+  );
 
   const layout = useDocumentLayout(model);
 
@@ -237,14 +236,14 @@ const useContentManagerContext = () => {
   const slug = model;
   const isCreatingEntry = id === 'create';
 
-  const {} = useContentTypeSchema();
-
-  const isLoading = isLoadingDoc || layout.isLoading;
+  const isLoading = isLoadingDocument || layout.isLoading;
   const error = layout.error;
+  const hasAnyError = hasError || layout.error;
 
   return {
     error,
     isLoading,
+    hasError: hasAnyError,
 
     // Base metadata
     model,
@@ -265,8 +264,12 @@ const useContentManagerContext = () => {
 
     // layout infos
     layout,
+
+    // Document
+    document,
+    meta,
   };
 };
 
-export { useDocument, useDoc, useContentManagerContext };
+export { useDocument, useContentManagerContext };
 export type { UseDocument, UseDocumentArgs, Document, Schema, ComponentsDictionary };

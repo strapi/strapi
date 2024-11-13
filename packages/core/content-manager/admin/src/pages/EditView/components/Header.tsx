@@ -32,7 +32,7 @@ import {
 } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { getDisplayName } from '../../../utils/users';
@@ -123,7 +123,7 @@ const HeaderToolbar = () => {
       query: { status = 'draft' },
     },
   ] = useQueryParams<{ status: 'draft' | 'published' }>();
-  const { model, id, document, meta, collectionType } = useDoc();
+  const { model, id, document, meta, collectionType } = useContentManagerContext();
   const plugins = useStrapiApp('HeaderToolbar', (state) => state.plugins);
 
   return (
@@ -191,7 +191,7 @@ interface InformationProps {
 
 const Information = ({ activeTab }: InformationProps) => {
   const { formatMessage } = useIntl();
-  const { document, meta } = useDoc();
+  const { document, meta } = useContentManagerContext();
 
   if (!document || !document.id) {
     return null;

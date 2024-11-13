@@ -6,7 +6,7 @@ import { Schema } from '@strapi/types';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../hooks/useDocument';
+import { useContentManagerContext } from '../../hooks/useDocument';
 import { useTypedSelector } from '../../modules/hooks';
 import {
   prepareTempKeys,
@@ -193,7 +193,7 @@ const VersionContent = () => {
     fieldSizes,
   });
 
-  const { components } = useDoc();
+  const { components } = useContentManagerContext();
 
   /**
    * Transform the data before passing it to the form so that each field

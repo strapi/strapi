@@ -4,7 +4,7 @@ import { useForm, InputRenderer, type InputProps } from '@strapi/admin/strapi-ad
 import { Flex, Grid, Typography, useCollator } from '@strapi/design-system';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
-import { useDoc } from '../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../utils/translations';
 import { type FormData } from '../ListConfigurationPage';
@@ -48,7 +48,7 @@ const Settings = () => {
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-  const { schema } = useDoc();
+  const { contentType: schema } = useContentManagerContext();
 
   const layout = useForm<FormData['layout']>('Settings', (state) => state.values.layout ?? []);
   const currentSortBy = useForm<FormData['settings']['defaultSortBy']>(

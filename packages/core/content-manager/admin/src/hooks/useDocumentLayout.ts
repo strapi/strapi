@@ -14,13 +14,7 @@ import { BaseQueryError } from '../utils/api';
 import { getMainField } from '../utils/attributes';
 
 import { useContentTypeSchema } from './useContentTypeSchema';
-import {
-  type ComponentsDictionary,
-  type Document,
-  type Schema,
-  useDoc,
-  useDocument,
-} from './useDocument';
+import { type ComponentsDictionary, type Document, type Schema, useDocument } from './useDocument';
 
 import type { ComponentConfiguration } from '../../../shared/contracts/components';
 import type {
@@ -201,19 +195,6 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
     edit,
     list: listLayout,
   } satisfies ReturnType<UseDocumentLayout>;
-};
-
-/* -------------------------------------------------------------------------------------------------
- * useDocLayout
- * -----------------------------------------------------------------------------------------------*/
-
-/**
- * @internal this hook uses the internal useDoc hook, as such it shouldn't be used outside of the
- * content-manager because it won't work as intended.
- */
-const useDocLayout = () => {
-  const { model } = useDoc();
-  return useDocumentLayout(model);
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -466,7 +447,6 @@ const convertListLayoutToFieldLayouts = (
 };
 
 export {
-  useDocLayout,
   useDocumentLayout,
   convertListLayoutToFieldLayouts,
   convertEditLayoutToFieldLayouts,

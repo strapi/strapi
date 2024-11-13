@@ -11,7 +11,7 @@ import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
-import { useDoc } from '../../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
@@ -49,7 +49,7 @@ interface BulkActionDescription {
 const BulkActionsRenderer = () => {
   const plugins = useStrapiApp('BulkActionsRenderer', (state) => state.plugins);
 
-  const { model, collectionType } = useDoc();
+  const { model, collectionType } = useContentManagerContext();
   const { selectedRows } = useTable('BulkActionsRenderer', (state) => state);
 
   return (
@@ -76,7 +76,7 @@ const BulkActionsRenderer = () => {
 
 const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
-  const { schema: contentType } = useDoc();
+  const { contentType } = useContentManagerContext();
   const selectRow = useTable('DeleteAction', (state) => state.selectRow);
   const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
@@ -145,11 +145,11 @@ DeleteAction.type = 'delete';
 
 const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
-  const { schema } = useDoc();
+  const { contentType } = useContentManagerContext();
   const selectRow = useTable('UnpublishAction', (state) => state.selectRow);
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
-  const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
-  const hasDraftAndPublishEnabled = Boolean(schema?.options?.draftAndPublish);
+  const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
+  const hasDraftAndPublishEnabled = Boolean(contentType?.options?.draftAndPublish);
   const { unpublishMany: bulkUnpublishAction } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
   const [{ query }] = useQueryParams();

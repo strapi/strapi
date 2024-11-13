@@ -16,7 +16,7 @@ import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import { useDoc } from '../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useTypedSelector } from '../../../modules/hooks';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
@@ -83,7 +83,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
 
-  const { schema, model } = useDoc();
+  const { contentType: schema, model } = useContentManagerContext();
   const { list } = useDocumentLayout(model);
 
   const formatter = useCollator(locale, {

@@ -14,8 +14,7 @@ import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
-import { useDoc } from '../../hooks/useDocument';
-import { useDocLayout } from '../../hooks/useDocumentLayout';
+import { useContentManagerContext } from '../../hooks/useDocument';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useTypedSelector } from '../../modules/hooks';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
@@ -283,7 +282,13 @@ const VersionInputRenderer = ({
   const configuration = useHistoryContext('VersionContent', (state) => state.configuration);
   const fieldSizes = useTypedSelector((state) => state['content-manager'].app.fieldSizes);
 
-  const { id, components } = useDoc();
+  const {
+    id,
+    components,
+    layout: {
+      edit: { components: componentsLayout },
+    },
+  } = useContentManagerContext();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
@@ -308,9 +313,6 @@ const VersionInputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
-  const {
-    edit: { components: componentsLayout },
-  } = useDocLayout();
 
   if (!visible) {
     return null;

@@ -10,8 +10,7 @@ import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
-import { useDocLayout } from '../../../hooks/useDocumentLayout';
+import { useContentManagerContext } from '../../../hooks/useDocument';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
@@ -36,7 +35,14 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
  * components such as Blocks / Relations.
  */
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id, document, collectionType } = useDoc();
+  const {
+    id,
+    document,
+    collectionType,
+    layout: {
+      edit: { components },
+    },
+  } = useContentManagerContext();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
@@ -67,9 +73,6 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
-  const {
-    edit: { components },
-  } = useDocLayout();
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);

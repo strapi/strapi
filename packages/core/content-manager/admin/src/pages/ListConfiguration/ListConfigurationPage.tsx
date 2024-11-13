@@ -14,8 +14,8 @@ import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
 import { SINGLE_TYPES } from '../../constants/collections';
-import { useDoc } from '../../hooks/useDocument';
-import { ListFieldLayout, ListLayout, useDocLayout } from '../../hooks/useDocumentLayout';
+import { useContentManagerContext } from '../../hooks/useDocument';
+import { ListFieldLayout, ListLayout } from '../../hooks/useDocumentLayout';
 import { useTypedSelector } from '../../modules/hooks';
 import { useUpdateContentTypeConfigurationMutation } from '../../services/contentTypes';
 import { setIn } from '../../utils/objects';
@@ -36,9 +36,12 @@ const ListConfiguration = () => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { model, collectionType } = useDoc();
-
-  const { isLoading: isLoadingLayout, list, edit } = useDocLayout();
+  const {
+    model,
+    collectionType,
+    layout: { list, edit },
+    isLoading,
+  } = useContentManagerContext();
 
   const [updateContentTypeConfiguration] = useUpdateContentTypeConfigurationMutation();
   const handleSubmit: FormProps<FormData>['onSubmit'] = async (data) => {
@@ -115,7 +118,7 @@ const ListConfiguration = () => {
     return <Navigate to={`/single-types/${model}`} />;
   }
 
-  if (isLoadingLayout) {
+  if (isLoading) {
     return <Page.Loading />;
   }
 

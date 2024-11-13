@@ -27,7 +27,7 @@ import { InjectionZone } from '../../components/InjectionZone';
 import { HOOKS } from '../../constants/hooks';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { useDoc } from '../../hooks/useDocument';
+import { useContentManagerContext } from '../../hooks/useDocument';
 import {
   ListFieldLayout,
   convertListLayoutToFieldLayouts,
@@ -64,7 +64,7 @@ const ListViewPage = () => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
-  const { collectionType, model, schema } = useDoc();
+  const { collectionType, model, contentType: schema } = useContentManagerContext();
   const { list } = useDocumentLayout(model);
 
   const [displayedHeaders, setDisplayedHeaders] = React.useState<ListFieldLayout[]>([]);
