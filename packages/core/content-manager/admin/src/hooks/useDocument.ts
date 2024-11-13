@@ -105,7 +105,10 @@ const useDocument: UseDocument = (args, opts) => {
     error,
   } = useGetDocumentQuery(args, {
     ...opts,
-    skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
+    skip:
+      (!args.documentId && args.collectionType !== SINGLE_TYPES) ||
+      args.documentId === 'create' ||
+      opts?.skip,
   });
 
   const {
@@ -178,7 +181,12 @@ const useDocument: UseDocument = (args, opts) => {
  * therefore, it shouldn't be used outside of the content-manager because it won't work as intended.
  */
 const useContentManagerRoute = () => {
-  const { id, slug, collectionType, origin } = useParams<{
+  const {
+    id,
+    slug: model,
+    collectionType,
+    origin,
+  } = useParams<{
     id: string;
     origin: string;
     slug: string;
@@ -191,16 +199,15 @@ const useContentManagerRoute = () => {
     throw new Error('Could not find collectionType in url params');
   }
 
-  if (!slug) {
+  if (!model) {
     throw new Error('Could not find model in url params');
   }
 
-  const returnId = origin || id === 'create' ? undefined : id;
-
   return {
     collectionType,
-    model: slug,
-    id: returnId,
+    model,
+    id,
+    origin,
     params,
   };
 };
@@ -212,7 +219,7 @@ const useContentManagerRoute = () => {
  * Make sure to use this hook inside the content manager.
  */
 const useContentManagerContext = () => {
-  const { collectionType, model, id, params } = useContentManagerRoute();
+  const { collectionType, model, id, params, origin } = useContentManagerRoute();
   const {
     components,
     isLoading: isLoadingDocument,
@@ -222,7 +229,7 @@ const useContentManagerContext = () => {
     meta,
     hasError,
   } = useDocument(
-    { documentId: id, model, collectionType, params },
+    { documentId: origin || id, model, collectionType, params },
     {
       skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
     }

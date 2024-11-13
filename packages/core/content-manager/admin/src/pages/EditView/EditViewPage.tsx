@@ -52,7 +52,6 @@ const EditViewPage = () => {
     contentType: schema,
     components,
     collectionType,
-    id,
     isCreatingEntry,
     layout: {
       edit: {
