@@ -64,16 +64,18 @@ const createPreviewConfigService = ({ strapi }: { strapi: Core.Strapi }) => {
       /**
        * Register the allowed origins for CSP, so the preview URL can be displayed
        */
-      extendMiddlewareConfiguration({
-        name: 'strapi::security',
-        config: {
-          contentSecurityPolicy: {
-            directives: {
-              'frame-src': config.config.allowedOrigins,
+      if (config.config?.allowedOrigins) {
+        extendMiddlewareConfiguration({
+          name: 'strapi::security',
+          config: {
+            contentSecurityPolicy: {
+              directives: {
+                'frame-src': config.config.allowedOrigins,
+              },
             },
           },
-        },
-      });
+        });
+      }
     },
 
     isEnabled() {
