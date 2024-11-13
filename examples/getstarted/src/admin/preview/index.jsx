@@ -8,16 +8,14 @@ const Preview = lazy(() =>
   }))
 );
 
-export default {
-  register: (app) => {
-    app.router.addRoute({
-      path: 'preview/*',
-      children: [
-        {
-          path: ':uid/:documentId/:locale/:status',
-          element: <Preview />,
-        },
-      ],
-    });
-  },
+export const registerPreviewRoute = (app) => {
+  app.router.addRoute({
+    path: 'preview/*',
+    children: [
+      {
+        path: ':uid/:documentId/:locale/:status',
+        element: <Preview />,
+      },
+    ],
+  });
 };
