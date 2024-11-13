@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { within } from '@testing-library/react';
-import { fireEvent, render, screen, waitFor } from '@tests/utils';
+import { fireEvent, render, screen } from '@tests/utils';
 
 import { UploadAssetDialog } from '../UploadAssetDialog';
 describe('UploadAssetDialog', () => {
@@ -29,9 +29,12 @@ describe('UploadAssetDialog', () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
 
       const onCloseMock = jest.fn();
-      const { user, getByRole } = render(<UploadAssetDialog open onClose={onCloseMock} />);
+      const { user, getByRole, getByLabelText } = render(
+        <UploadAssetDialog open onClose={onCloseMock} />
+      );
+      const fileInput = getByLabelText('Drag & Drop here or');
 
-      await user.upload(document.querySelector('[type="file"]')!, file);
+      await user.upload(fileInput, file);
 
       await user.click(getByRole('button', { name: 'cancel' }));
 
@@ -47,11 +50,12 @@ describe('UploadAssetDialog', () => {
       it(`shows ${number} valid ${mime} file`, async () => {
         const file = new File(['Some stuff'], `test.${ext}`, { type: mime as string });
 
-        const { user, getByText, getAllByText } = render(
+        const { user, getByText, getAllByText, getByLabelText } = render(
           <UploadAssetDialog open onClose={() => {}} />
         );
 
-        await user.upload(document.querySelector('[type="file"]')!, file);
+        const fileInput = getByLabelText('Drag & Drop here or');
+        await user.upload(fileInput, file);
 
         expect(getByText('1 asset ready to upload')).toBeInTheDocument();
         expect(
@@ -92,7 +96,7 @@ describe('UploadAssetDialog', () => {
        */
       fireEvent.click(getByRole('button', { name: 'Next' }));
 
-      await waitFor(() => expect(screen.getByText('An error occured')).toBeInTheDocument());
+      await screen.findByText('An error occured');
     }, 10000);
 
     /**
@@ -101,7 +105,7 @@ describe('UploadAssetDialog', () => {
      * which are hard to follow.
      */
     it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
-      const { user, getByText, getByRole } = render(<UploadAssetDialog open onClose={() => {}} />);
+      const { user, getByRole, findByText } = render(<UploadAssetDialog open onClose={() => {}} />);
 
       await user.click(getByRole('tab', { name: 'From URL' }));
 
@@ -165,7 +169,7 @@ describe('UploadAssetDialog', () => {
         },
       ];
 
-      await waitFor(() => expect(getByText('4 assets ready to upload')).toBeInTheDocument());
+      await findByText('4 assets ready to upload');
 
       assets.forEach((asset) => {
         const card = within(screen.getByRole('dialog')).getAllByLabelText(asset.name)[0];

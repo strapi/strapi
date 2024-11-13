@@ -96,7 +96,7 @@ yargs
     async handler(argv) {
       try {
         if (await pathExists(path.join(testRoot, '.env'))) {
-          // Run tests with the env variables specified in the e2e/app-template/.env
+          // Run tests with the env variables specified in the e2e/.env file
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 

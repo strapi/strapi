@@ -1,11 +1,14 @@
 import { Flex, DesignSystemProvider, Typography } from '@strapi/design-system';
-import { act, fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, LinkProps } from 'react-router-dom';
 
-import { FolderCard, FolderCardProps } from '../FolderCard';
-import { FolderCardBody } from '../FolderCardBody';
-import { FolderCardBodyAction } from '../FolderCardBodyAction';
-import { FolderCardCheckbox } from '../FolderCardCheckbox';
+import { FolderCard } from '../FolderCard/FolderCard';
+import { FolderCardBody } from '../FolderCardBody/FolderCardBody';
+import { FolderCardBodyAction } from '../FolderCardBodyAction/FolderCardBodyAction';
+import { FolderCardCheckbox } from '../FolderCardCheckbox/FolderCardCheckbox';
+
+import type { FolderCardProps } from '../FolderCard/FolderCard';
 
 const ID_FIXTURE = 'folder';
 
@@ -55,41 +58,39 @@ describe('FolderCard', () => {
     expect(container).toMatchSnapshot();
   });
 
-  test('properly calls the onClick callback', () => {
+  test('properly calls the onClick callback', async () => {
     const callback = jest.fn();
-    const { container } = setup({ onClick: callback });
+    const { getByLabelText } = setup({ onClick: callback });
 
-    act(() => {
-      fireEvent(container.querySelector('button')!, new MouseEvent('click', { bubbles: true }));
-    });
+    const button = getByLabelText('Folder 1');
+    await userEvent.click(button);
 
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
   test('has all required ids set when rendering a start action', () => {
-    const { container } = setup({
+    const { container, getByTestId, getByRole } = setup({
       startAction: <FolderCardCheckbox value={'false'} />,
     });
 
     expect(container).toMatchSnapshot();
-    expect(container.querySelector(`[id="${ID_FIXTURE}-3-title"]`)).toBeInTheDocument();
-    expect(
-      container.querySelector(`[aria-labelledby="${ID_FIXTURE}-3-title"]`)
-    ).toBeInTheDocument();
+    expect(getByTestId(`${ID_FIXTURE}-3-title`)).toBeInTheDocument();
+    expect(getByRole('checkbox', { checked: false })).toBeInTheDocument();
   });
 
   test('renders as a link with to prop', () => {
-    const { container } = setup({
+    const { getByRole } = setup({
       to: '/michka-page',
     });
 
-    const link = container.querySelector('a');
+    const link = getByRole('link');
     expect(link).toHaveAttribute('href', '/michka-page');
   });
 
   test('renders as a button without to prop', () => {
-    const { container } = setup();
+    const { getByRole } = setup();
 
-    expect(container.querySelector('button[aria-hidden=true]')).toBeInTheDocument();
+    const button = getByRole('button');
+    expect(button).toBeInTheDocument();
   });
 });

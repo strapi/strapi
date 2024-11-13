@@ -1,10 +1,10 @@
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
+
 import { File, BulkMoveFiles } from '../../../shared/contracts/files';
 import { Folder, BulkMoveFolders } from '../../../shared/contracts/folders';
-
-import pluginId from '../pluginId';
+import { pluginId } from '../pluginId';
 import { getTrad } from '../utils';
 
 export interface FolderWithType extends Folder {

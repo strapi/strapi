@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system';
 
-interface FolderGridListProps {
+export interface FolderGridListProps {
   children: React.ReactNode;
   title?: string | null;
 }

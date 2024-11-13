@@ -14,6 +14,7 @@ export const FolderCardBody = (props: FlexProps) => {
     <StyledBox
       {...props}
       id={`${id}-title`}
+      data-testid={`${id}-title`}
       alignItems="flex-start"
       direction="column"
       maxWidth="100%"

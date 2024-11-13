@@ -1,12 +1,13 @@
 import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Typography, type BoxProps } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { stringify } from 'qs';
-import { type MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { RelativeTime } from '../../components/RelativeTime';
+import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDisplayName } from '../../utils/users';
 import { useHistoryContext } from '../pages/History';
 
@@ -26,13 +27,6 @@ const BlueText = (children: React.ReactNode) => (
  * VersionCard
  * -----------------------------------------------------------------------------------------------*/
 
-interface StatusData {
-  background: BoxProps['background'];
-  border: BoxProps['borderColor'];
-  text: BoxProps['color'];
-  message: MessageDescriptor;
-}
-
 interface VersionCardProps {
   version: HistoryVersions.HistoryVersionDataResponse;
   isCurrent: boolean;
@@ -41,42 +35,6 @@ interface VersionCardProps {
 const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
   const { formatDate, formatMessage } = useIntl();
   const [{ query }] = useQueryParams<{ id?: string }>();
-
-  const statusData = ((): StatusData => {
-    switch (version.status) {
-      case 'draft':
-        return {
-          background: 'secondary100',
-          border: 'secondary200',
-          text: 'secondary700',
-          message: {
-            id: 'content-manager.containers.List.draft',
-            defaultMessage: 'Draft',
-          },
-        };
-      case 'modified':
-        return {
-          background: 'alternative100',
-          border: 'alternative200',
-          text: 'alternative700',
-          message: {
-            id: 'content-manager.containers.List.modified',
-            defaultMessage: 'Modified',
-          },
-        };
-      case 'published':
-      default:
-        return {
-          background: 'success100',
-          border: 'success200',
-          text: 'success700',
-          message: {
-            id: 'content-manager.containers.List.published',
-            defaultMessage: 'Published',
-          },
-        };
-    }
-  })();
   const isActive = query.id === version.id.toString();
   const author = version.createdBy && getDisplayName(version.createdBy);
 
@@ -122,23 +80,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
           )}
         </Typography>
       </Flex>
-      {version.status && (
-        <Box
-          background={statusData.background}
-          borderStyle="solid"
-          borderWidth="1px"
-          borderColor={statusData.border}
-          hasRadius
-          paddingLeft="6px"
-          paddingRight="6px"
-          paddingTop="2px"
-          paddingBottom="2px"
-        >
-          <Typography variant="pi" fontWeight="bold" textColor={statusData.text}>
-            {formatMessage(statusData.message)}
-          </Typography>
-        </Box>
-      )}
+      {version.status && <DocumentStatus status={version.status} size="XS" />}
     </Flex>
   );
 };
