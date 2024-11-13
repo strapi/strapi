@@ -19,6 +19,17 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
 
   const field = useField(name);
 
+  const CircleIcon = styled(PlusCircle)`
+    width: 2.4rem;
+    height: 2.4rem;
+    > circle {
+      fill: ${({ theme }) => (!disabled ? theme.colors.neutral600 : theme.colors.primary200)};
+    }
+    > path {
+      fill: ${({ theme }) => (disabled ? theme.colors.neutral600 : theme.colors.primary600)};
+    }
+  `;
+
   return (
     <>
       <Box
@@ -37,7 +48,11 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
             <CircleIcon />
           </Flex>
           <Flex justifyContent="center">
-            <Typography textColor="primary600" variant="pi" fontWeight="bold">
+            <Typography
+              textColor={disabled ? `neutral600` : `primary600`}
+              variant="pi"
+              fontWeight="bold"
+            >
               {formatMessage({
                 id: getTranslation('components.empty-repeatable'),
                 defaultMessage: 'No entry yet. Click to add one.',
@@ -49,17 +64,6 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
     </>
   );
 };
-
-const CircleIcon = styled(PlusCircle)`
-  width: 2.4rem;
-  height: 2.4rem;
-  > circle {
-    fill: ${({ theme }) => theme.colors.primary200};
-  }
-  > path {
-    fill: ${({ theme }) => theme.colors.primary600};
-  }
-`;
 
 export { Initializer };
 export type { InitializerProps };
