@@ -73,11 +73,6 @@
       "component": "blog.test-como",
       "required": false,
       "min": 2
-    },
-    "testnum": {
-      "type": "integer",
-      "min": 4,
-      "max": 12
     }
   }
 }
