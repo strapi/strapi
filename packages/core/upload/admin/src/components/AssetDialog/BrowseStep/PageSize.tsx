@@ -6,7 +6,7 @@ interface PageSizeProps {
   pageSize: number;
 }
 
-const PageSize = ({ onChangePageSize, pageSize }: PageSizeProps) => {
+export const PageSize = ({ onChangePageSize, pageSize }: PageSizeProps) => {
   const { formatMessage } = useIntl();
 
   const handleChange = (value: string | number) => {
@@ -40,5 +40,3 @@ const PageSize = ({ onChangePageSize, pageSize }: PageSizeProps) => {
     </Flex>
   );
 };
-
-export default PageSize;

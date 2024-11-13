@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { BulkMoveDialog, BulkMoveDialogProps } from '..';
+import { BulkMoveDialog, BulkMoveDialogProps } from '../BulkMoveDialog';
 
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../hooks/useBulkMove');
@@ -17,7 +17,7 @@ const client = new QueryClient({
   },
 });
 
-function ComponentFixture(props: BulkMoveDialogProps) {
+const ComponentFixture = (props: BulkMoveDialogProps) => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
@@ -31,7 +31,7 @@ function ComponentFixture(props: BulkMoveDialogProps) {
       </IntlProvider>
     </QueryClientProvider>
   );
-}
+};
 
 function setup(props = { onClose: jest.fn(), selected: [] }) {
   return render(<ComponentFixture {...props} />, { container: document.getElementById('app')! });

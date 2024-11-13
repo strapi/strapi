@@ -21,5 +21,6 @@ api:
   - 'tests/api/**'
 e2e:
   - 'tests/e2e/**'
+  - 'playwright.base.config.js'
 cli:
   - 'tests/cli/**'

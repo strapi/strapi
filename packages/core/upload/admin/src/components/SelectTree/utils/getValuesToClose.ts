@@ -3,7 +3,7 @@ interface Option {
   depth: number;
 }
 
-function getValuesToClose(options: Option[], value: number | string | null) {
+export function getValuesToClose(options: Option[], value: number | string | null) {
   const optionForValue = options.find((option) => option.value === value);
 
   if (!optionForValue) {
@@ -14,5 +14,3 @@ function getValuesToClose(options: Option[], value: number | string | null) {
     .filter((option) => option.depth >= optionForValue.depth)
     .map((option) => option.value);
 }
-
-export default getValuesToClose;

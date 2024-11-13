@@ -4,7 +4,7 @@ import { Link, LinkProps } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, type To, useLocation, useNavigate } from 'react-router-dom';
 
 import { createContext } from '../components/Context';
 
@@ -188,43 +188,61 @@ const reducer = (state: HistoryState, action: HistoryActions) =>
 /* -------------------------------------------------------------------------------------------------
  * BackButton
  * -----------------------------------------------------------------------------------------------*/
-interface BackButtonProps extends Pick<LinkProps, 'disabled'> {}
+interface BackButtonProps extends Pick<LinkProps, 'disabled'> {
+  fallback?: To;
+}
 
 /**
  * @beta
  * @description The universal back button for the Strapi application. This uses the internal history
  * context to navigate the user back to the previous location. It can be completely disabled in a
- * specific user case.
+ * specific user case. When no history is available, you can provide a fallback destination,
+ * otherwise the link will be disabled.
  */
-const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(({ disabled }, ref) => {
-  const { formatMessage } = useIntl();
+const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
+  ({ disabled, fallback = '' }, ref) => {
+    const { formatMessage } = useIntl();
+    const navigate = useNavigate();
 
-  const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
-  const goBack = useHistory('BackButton', (state) => state.goBack);
-  const history = useHistory('BackButton', (state) => state.history);
+    const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
+    const goBack = useHistory('BackButton', (state) => state.goBack);
+    const history = useHistory('BackButton', (state) => state.history);
+    const hasFallback = fallback !== '';
+    const shouldBeDisabled = disabled || (!canGoBack && !hasFallback);
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    goBack();
-  };
+    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
 
-  return (
-    <Link
-      ref={ref}
-      tag={NavLink}
-      to={history.at(-1) ?? ''}
-      onClick={handleClick}
-      disabled={disabled || !canGoBack}
-      aria-disabled={disabled || !canGoBack}
-      startIcon={<ArrowLeft />}
-    >
-      {formatMessage({
-        id: 'global.back',
-        defaultMessage: 'Back',
-      })}
-    </Link>
-  );
-});
+      if (canGoBack) {
+        goBack();
+      } else if (hasFallback) {
+        navigate(fallback);
+      }
+    };
+
+    // The link destination from the history. Undefined if there is only 1 location in the history.
+    const historyTo = canGoBack ? history.at(-1) : undefined;
+    // If no link destination from the history, use the fallback.
+    const toWithFallback = historyTo ?? fallback;
+
+    return (
+      <Link
+        ref={ref}
+        tag={NavLink}
+        to={toWithFallback}
+        onClick={handleClick}
+        disabled={shouldBeDisabled}
+        aria-disabled={shouldBeDisabled}
+        startIcon={<ArrowLeft />}
+      >
+        {formatMessage({
+          id: 'global.back',
+          defaultMessage: 'Back',
+        })}
+      </Link>
+    );
+  }
+);
 
 export { BackButton, HistoryProvider, useHistory };
 export type { BackButtonProps, HistoryProviderProps, HistoryContextValue, HistoryState };

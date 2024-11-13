@@ -211,7 +211,7 @@ const EditPage = () => {
                 id: 'Settings.roles.create.description',
                 defaultMessage: 'Define the rights given to the role',
               })}
-              navigationAction={<BackButton />}
+              navigationAction={<BackButton fallback="../roles" />}
             />
             <Layouts.Content>
               <Flex direction="column" alignItems="stretch" gap={6}>
