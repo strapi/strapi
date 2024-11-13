@@ -1,0 +1,17 @@
+{
+  "Plugin.name": "Розгортання",
+  "Homepage.title": "Повністю кероване хмарне хостингування для вашого проекту Strapi",
+  "Homepage.subTitle": "Дотримуйтесь цього процесу з 2 кроків, щоб отримати все необхідне для запуску Strapi на Продукційному середовищі.",
+  "Homepage.githubBox.title.versioned": "Проект завантажено на GitHub",
+  "Homepage.githubBox.title.not-versioned": "Завантажте свій проект на GitHub",
+  "Homepage.githubBox.subTitle.versioned": "Ви це зробили! Ви на один крок ближче до того, щоб ваш проект був розміщений онлайн.",
+  "Homepage.githubBox.subTitle.not-versioned": "Ваш проект має бути версійований на GitHub перед розгортанням на Strapi Cloud.",
+  "Homepage.githubBox.buttonText": "Завантажити на GitHub",
+  "Homepage.cloudBox.title": "Розгорнути на Strapi Cloud",
+  "Homepage.cloudBox.subTitle": "Насолоджуйтесь оптимізованим стеком Strapi, включаючи базу даних, постачальника електронної пошти та CDN.",
+  "Homepage.cloudBox.buttonText": "Розгорнути на Strapi Cloud",
+  "Homepage.textBox.label.versioned": "Спробуйте Strapi Cloud безкоштовно!",
+  "Homepage.textBox.label.not-versioned": "Чому завантажувати мій проект на GitHub?",
+  "Homepage.textBox.text.versioned": "Strapi Cloud пропонує 14-денну безкоштовну пробну версію, щоб ви могли експериментувати зі своїм проектом у хмарі, включаючи всі функції.",
+  "Homepage.textBox.text.not-versioned": "Strapi Cloud буде отримувати та розгортати ваш проект з вашого репозиторію GitHub. Це найкращий спосіб версіонувати, керувати та розгортати ваш проект. Дотримуйтесь кроків на GitHub, щоб успішно завантажити його."
+}
