@@ -240,6 +240,7 @@
   "preview.header.close": "Close preview",
   "preview.copy.label": "Copy preview link",
   "preview.copy.success": "Copied preview link",
+  "preview.tabs.label": "Preview status",
   "relation.add": "Add relation",
   "relation.disconnect": "Remove",
   "relation.error-adding-relation": "An error occurred while trying to add the relation.",

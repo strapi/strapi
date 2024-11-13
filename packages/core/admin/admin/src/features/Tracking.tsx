@@ -148,6 +148,7 @@ interface EventWithoutProperties {
     | 'didSelectContentTypeFieldSettings'
     | 'didSelectContentTypeSettings'
     | 'didEditAuthenticationProvider'
+    | 'didRestoreHistoryVersion'
     | 'hasClickedCTBAddFieldBanner'
     | 'removeComponentFromDynamicZone'
     | 'willAddMoreFieldToContentType'
