@@ -288,5 +288,6 @@
   "history.restore.success.title": "Version restored.",
   "history.restore.success.message": "The content of the restored version is not published yet.",
   "history.restore.error.message": "Could not restore version.",
-  "validation.error": "There are validation errors in your document. Please fix them before saving."
+  "validation.error": "There are validation errors in your document. Please fix them before saving.",
+  "bulk-publish.edit": "Edit"
 }

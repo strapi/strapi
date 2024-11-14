@@ -1,6 +1,6 @@
 {
   "name": "@strapi/permissions",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "Strapi's permission layer.",
   "repository": {
     "type": "git",
@@ -37,18 +37,19 @@
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.4.0",
     "lodash": "4.17.21",
     "qs": "6.11.1",
     "sift": "16.0.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*"
+    "eslint-config-custom": "5.4.0",
+    "tsconfig": "5.4.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

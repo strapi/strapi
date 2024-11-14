@@ -3,13 +3,13 @@ import * as React from 'react';
 import { Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { EditAssetContent } from '../EditAssetDialog';
-
-import type { AllowedFiles } from '../../utils';
+import { EditAssetContent } from '../EditAssetDialog/EditAssetContent';
 
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
+
 import type { File, RawFile } from '../../../../shared/contracts/files';
+import type { AllowedFiles } from '../../utils';
 
 const Steps = {
   AddAsset: 'AddAsset',
