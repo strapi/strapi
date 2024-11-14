@@ -1,7 +1,7 @@
 import { Form } from '@strapi/admin/strapi-admin';
 import { screen, render } from '@tests/utils';
 
-import { MediaLibraryInput } from '../index';
+import { MediaLibraryInput } from '../MediaLibraryInput';
 
 describe('<MediaLibraryInput />', () => {
   it('renders and matches the snapshot', () => {

@@ -1,7 +1,8 @@
 import { Tag } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import type { FilterStructure } from './index';
+
+import type { FilterStructure } from './FilterList';
 
 type FilterTagAttribute = {
   fieldSchema?: {
@@ -25,7 +26,7 @@ interface FilterTagProps {
   onClick: (filter: FilterStructure) => void;
 }
 
-const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagProps) => {
+export const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagProps) => {
   const { formatMessage, formatDate, formatTime } = useIntl();
 
   const handleClick = () => {
@@ -69,5 +70,3 @@ const FilterTag = ({ attribute, filter, onClick, operator, value }: FilterTagPro
     </Tag>
   );
 };
-
-export default FilterTag;

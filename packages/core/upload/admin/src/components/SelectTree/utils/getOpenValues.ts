@@ -7,8 +7,8 @@ interface DefaultValue {
   value?: number | string | null;
 }
 
-function getOpenValues(options: Option[], defaultValue: DefaultValue = {}) {
-  let values: Option['value'][] = [];
+export function getOpenValues(options: Option[], defaultValue: DefaultValue = {}) {
+  const values: Option['value'][] = [];
   const { value } = defaultValue;
   const option = options.find((option) => option.value === value);
 
@@ -33,5 +33,3 @@ function getOpenValues(options: Option[], defaultValue: DefaultValue = {}) {
 
   return values.reverse();
 }
-
-export default getOpenValues;

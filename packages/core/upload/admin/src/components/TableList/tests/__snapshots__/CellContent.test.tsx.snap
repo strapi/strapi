@@ -279,6 +279,7 @@ exports[`TableList | CellContent should render image cell type when element type
     class="c0 c1"
   >
     <svg
+      aria-label="folder"
       fill="#66b7f1"
       height="1.6rem"
       viewBox="0 0 32 32"

@@ -14,5 +14,3 @@ export const RemoveFolderDialog = ({ onClose, onConfirm, open }: RemoveFolderDia
     </Dialog.Root>
   );
 };
-
-export default RemoveFolderDialog;

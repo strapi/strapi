@@ -1,7 +1,7 @@
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 
-import { ContextInfo } from '../index';
+import { ContextInfo } from '../ContextInfo';
 
 describe('ContextInfo', () => {
   it('renders', () => {

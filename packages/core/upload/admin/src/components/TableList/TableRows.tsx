@@ -3,13 +3,13 @@ import { Eye, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { tableHeaders as cells } from '../../newConstants';
+import { tableHeaders as cells } from '../../constants';
 import { getTrad } from '../../utils';
-import type { File } from '../../../../shared/contracts/files';
-import type { Folder } from '../../../../shared/contracts/folders';
 
 import { CellContent } from './CellContent';
+
+import type { File } from '../../../../shared/contracts/files';
+import type { Folder } from '../../../../shared/contracts/folders';
 
 interface FileRow extends File {
   folderURL?: string;

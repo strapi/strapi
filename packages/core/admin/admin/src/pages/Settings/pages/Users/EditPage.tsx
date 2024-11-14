@@ -205,7 +205,7 @@ const EditPage = () => {
                     name: getDisplayName(initialData),
                   }
                 )}
-                navigationAction={<BackButton />}
+                navigationAction={<BackButton fallback="../users" />}
               />
               <Layouts.Content>
                 {user?.registrationToken && (
