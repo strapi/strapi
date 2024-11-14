@@ -60,7 +60,7 @@
     "@strapi/icons": "2.0.0-rc.12",
     "@strapi/utils": "5.4.0",
     "bcryptjs": "2.4.3",
-    "cheerio": "^1.0.0-rc.12",
+    "cheerio": "^1.0.0",
     "formik": "2.4.5",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
