@@ -63,6 +63,7 @@ export interface AssetCardBaseProps {
   selected?: boolean;
   subtitle?: string;
   variant: 'Image' | 'Video' | 'Audio' | 'Doc';
+  className?: string;
 }
 
 export const AssetCardBase = ({
@@ -76,6 +77,7 @@ export const AssetCardBase = ({
   selected = false,
   subtitle = '',
   variant = 'Image',
+  className,
 }: AssetCardBaseProps) => {
   const { formatMessage } = useIntl();
 
@@ -95,7 +97,13 @@ export const AssetCardBase = ({
   };
 
   return (
-    <CardContainer role="button" height="100%" tabIndex={-1} onClick={handleClick}>
+    <CardContainer
+      className={className}
+      role="button"
+      height="100%"
+      tabIndex={-1}
+      onClick={handleClick}
+    >
       <CardHeader>
         {isSelectable && (
           <CardCheckboxWrapper onClick={handlePropagationClick}>
