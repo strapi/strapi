@@ -123,7 +123,7 @@ jobs:
     name: 'typescript (node: ${{ matrix.node }})'
     needs: [conditionals, build]
     runs-on: ubuntu-latest
-    if: ${{ needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.backend == 'true' }}
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.backend == 'true'
     strategy:
       matrix:
         node: [20, 22]
@@ -147,7 +147,7 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
-    if: needs.conditionals.outputs.backend == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [conditionals, build]
     runs-on: ubuntu-latest
@@ -172,7 +172,7 @@ jobs:
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
-    if: needs.conditionals.outputs.frontend == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.frontend == 'true'
     name: 'unit_front (node: ${{ matrix.node }})'
     needs: [conditionals, build]
     runs-on: ubuntu-latest
@@ -196,7 +196,7 @@ jobs:
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
-    if: needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.frontend == 'true' || needs.conditionals.outputs.e2e == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.frontend == 'true' || needs.conditionals.outputs.e2e == 'true'
     timeout-minutes: 60
     needs: [conditionals, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -238,7 +238,7 @@ jobs:
           retention-days: 1
 
   e2e_ee:
-    if: needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.frontend == 'true' || needs.conditionals.outputs.e2e == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.frontend == 'true' || needs.conditionals.outputs.e2e == 'true'
     timeout-minutes: 60
     needs: [conditionals, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -283,7 +283,7 @@ jobs:
           retention-days: 1
 
   cli:
-    if: needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.cli == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.cli == 'true'
     timeout-minutes: 60
     needs: [conditionals, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
@@ -310,7 +310,7 @@ jobs:
         run: yarn test:cli
 
   api_ce_pg:
-    if: needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [conditionals, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -350,7 +350,7 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' ||  needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [conditionals, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -389,7 +389,7 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
-    if: needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
+    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [conditionals, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -416,7 +416,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditionals, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
+    if: (needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -459,7 +459,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditionals, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
+    if: (needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -501,7 +501,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditionals, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
+    if: (needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
