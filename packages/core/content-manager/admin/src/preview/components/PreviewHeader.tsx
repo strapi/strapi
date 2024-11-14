@@ -118,56 +118,6 @@ const PreviewTabs = () => {
   );
 };
 
-const PreviewTabs = () => {
-  const { formatMessage } = useIntl();
-
-  // URL query params
-  const [{ query }, setQuery] = useQueryParams<{ status: 'draft' | 'published' }>();
-
-  // Get status
-  const document = usePreviewContext('PreviewHeader', (state) => state.document);
-  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
-  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
-  const hasDraftAndPublish = schema?.options?.draftAndPublish ?? false;
-  const documentStatus = getDocumentStatus(document, meta);
-
-  const handleTabChange = (status: string) => {
-    if (status === 'published' || status === 'draft') {
-      setQuery({ status }, 'push', true);
-    }
-  };
-
-  if (!hasDraftAndPublish) {
-    return null;
-  }
-
-  return (
-    <>
-      <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
-        <Tabs.List
-          aria-label={formatMessage({
-            id: 'preview.tabs.label',
-            defaultMessage: 'Document status',
-          })}
-        >
-          <StatusTab value="draft">
-            {formatMessage({
-              id: 'content-manager.containers.List.draft',
-              defaultMessage: 'draft',
-            })}
-          </StatusTab>
-          <StatusTab value="published" disabled={documentStatus === 'draft'}>
-            {formatMessage({
-              id: 'content-manager.containers.List.published',
-              defaultMessage: 'published',
-            })}
-          </StatusTab>
-        </Tabs.List>
-      </Tabs.Root>
-    </>
-  );
-};
-
 /* -------------------------------------------------------------------------------------------------
  * PreviewHeader
  * -----------------------------------------------------------------------------------------------*/
