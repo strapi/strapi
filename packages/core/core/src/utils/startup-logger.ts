@@ -31,7 +31,7 @@ export const createStartupLogger = (app: Core.Strapi) => {
       );
 
       if (dbInfo?.schema) {
-        infoTable.push([chalk.blue('Database Schema'), dbInfo.schema]);
+        infoTable.push([chalk.blue('Database schema'), dbInfo.schema]);
       }
 
       console.log(infoTable.toString());
