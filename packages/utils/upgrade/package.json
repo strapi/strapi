@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -59,7 +59,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.4.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
@@ -76,14 +76,15 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "workspace:*",
+    "@strapi/types": "5.4.0",
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "0.11.10",
-    "eslint-config-custom": "workspace:*",
+    "eslint-config-custom": "5.4.0",
     "rimraf": "5.0.5"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }
