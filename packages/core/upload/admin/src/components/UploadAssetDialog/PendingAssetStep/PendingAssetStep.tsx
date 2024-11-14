@@ -4,11 +4,11 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetType } from '../../../newConstants';
+import { AssetType } from '../../../constants';
 import { getTrad } from '../../../utils';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
+
 import type { File, RawFile } from '../../../../../shared/contracts/files';
 
 const Status = {

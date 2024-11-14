@@ -125,7 +125,7 @@ const WebhookForm = ({
                   })
                 : data?.name
             }
-            navigationAction={<BackButton />}
+            navigationAction={<BackButton fallback="../webhooks" />}
           />
           <Layouts.Content>
             <Flex direction="column" alignItems="stretch" gap={4}>

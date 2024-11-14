@@ -9,7 +9,7 @@ interface FilterValueInputProps {
   value?: string;
 }
 
-const FilterValueInput = ({
+export const FilterValueInput = ({
   label = '',
   onChange,
   options = [],
@@ -51,5 +51,3 @@ const FilterValueInput = ({
     </SingleSelect>
   );
 };
-
-export default FilterValueInput;

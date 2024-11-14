@@ -1,6 +1,6 @@
-import type { Query } from '../../../shared/contracts/files';
-
 import { stringify } from 'qs';
+
+import type { Query } from '../../../shared/contracts/files';
 
 export const getFolderURL = (
   pathname: string,

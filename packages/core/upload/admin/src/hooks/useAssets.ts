@@ -4,9 +4,9 @@ import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useNotifyAT } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
-import { Query, GetFiles } from '../../../shared/contracts/files';
 
-import pluginId from '../pluginId';
+import { Query, GetFiles } from '../../../shared/contracts/files';
+import { pluginId } from '../pluginId';
 
 interface UseAssetsOptions {
   skipWhen?: boolean;

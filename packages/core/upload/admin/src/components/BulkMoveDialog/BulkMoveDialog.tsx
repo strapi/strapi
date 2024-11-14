@@ -3,13 +3,14 @@ import { Form, Formik, FormikErrors } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 
+import { File } from '../../../../shared/contracts/files';
 import { useBulkMove } from '../../hooks/useBulkMove';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { getTrad, normalizeAPIError } from '../../utils';
-import SelectTree from '../SelectTree';
-import type { OptionSelectTree } from '../SelectTree/SelectTree';
-import { File } from '../../../../shared/contracts/files';
+import { SelectTree } from '../SelectTree/SelectTree';
+
 import type { Folder } from '../../../../shared/contracts/folders';
+import type { OptionSelectTree } from '../SelectTree/SelectTree';
 import type { FetchError } from '@strapi/admin/strapi-admin';
 
 type InitialFormData = {
@@ -125,7 +126,7 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
 
                     <SelectTree
                       options={folderStructure as OptionSelectTree[]}
-                      onChange={(value: InitialFormData['destination']) => {
+                      onChange={(value: Record<string, string | number>) => {
                         setFieldValue('destination', value);
                       }}
                       defaultValue={
