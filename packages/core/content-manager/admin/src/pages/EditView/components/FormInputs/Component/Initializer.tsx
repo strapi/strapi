@@ -31,6 +31,7 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
         paddingTop={9}
         paddingBottom={9}
         type="button"
+        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
       >
         <Flex direction="column" gap={2}>
           <Flex justifyContent="center">
