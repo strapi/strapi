@@ -6,9 +6,9 @@ import { PlusCircle as PicturePlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetSource } from '../../../newConstants';
+import { AssetSource } from '../../../constants';
 import { getTrad, rawFileToAsset } from '../../../utils';
+
 import type { FileWithRawFile } from './AddAssetStep';
 
 const Wrapper = styled(Flex)`
@@ -149,6 +149,10 @@ export const FromComputerForm = ({
                   type="file"
                   multiple
                   name="files"
+                  aria-label={formatMessage({
+                    id: getTrad('input.label'),
+                    defaultMessage: 'Drag & Drop here or',
+                  })}
                   tabIndex={-1}
                   ref={inputRef}
                   zIndex={1}

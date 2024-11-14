@@ -1,5 +1,6 @@
 import { getFolderURL } from './getFolderURL';
 import { getTrad } from './getTrad';
+
 import type { Query } from '../../../shared/contracts/files';
 import type { Folder } from '../../../shared/contracts/folders';
 import type { MessageDescriptor } from 'react-intl';
@@ -24,7 +25,7 @@ export const getBreadcrumbDataML = (
   folder: GetBreadcrumbDataMLProps['folder'] | null,
   { pathname, query }: GetBreadcrumbDataMLProps['options']
 ) => {
-  let data: BreadcrumbData[] = [
+  const data: BreadcrumbData[] = [
     {
       id: null,
       label: { id: getTrad('plugin.name'), defaultMessage: 'Media Library' },
@@ -56,5 +57,3 @@ export const getBreadcrumbDataML = (
 
   return data;
 };
-
-export default getBreadcrumbDataML;
