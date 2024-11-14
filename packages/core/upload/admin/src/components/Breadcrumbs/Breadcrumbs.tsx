@@ -5,11 +5,11 @@ import {
   BreadcrumbsProps as BaseBreadcrumbsProps,
 } from '@strapi/design-system';
 import { useIntl, MessageDescriptor } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { Link as ReactRouterLink } from 'react-router-dom';
 
 import { CrumbSimpleMenuAsync } from './CrumbSimpleMenuAsync';
 
-type CrumbDefinition = {
+export type CrumbDefinition = {
   id?: number | null;
   label?: MessageDescriptor | string;
   href?: string;
@@ -53,8 +53,6 @@ export const Breadcrumbs = ({
             return (
               <CrumbLink
                 key={`breadcrumb-${crumb?.id ?? 'root'}`}
-                // @ts-ignore - `tag` prop is not defined in the `BaseLinkProps` type
-                tag="button"
                 type="button"
                 onClick={() => onChangeFolder(crumb.id!, crumb.path)}
               >
@@ -67,9 +65,10 @@ export const Breadcrumbs = ({
           return (
             <CrumbLink
               key={`breadcrumb-${crumb?.id ?? 'root'}`}
+              to={crumb.href}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore - `tag` prop is not defined in the `BaseLinkProps` type
-              tag={NavLink}
-              href={crumb.href}
+              tag={ReactRouterLink}
             >
               {typeof crumb.label !== 'string' && crumb.label?.id
                 ? formatMessage(crumb.label)

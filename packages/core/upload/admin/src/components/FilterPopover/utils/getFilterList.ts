@@ -10,7 +10,9 @@ interface GetFilterListProps {
   };
 }
 
-const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }: GetFilterListProps) => {
+export const getFilterList = ({
+  fieldSchema: { type: fieldType, mainField },
+}: GetFilterListProps) => {
   const type = mainField?.schema.type ? mainField.schema.type : fieldType;
 
   switch (type) {
@@ -108,5 +110,3 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }: GetFilte
       ];
   }
 };
-
-export default getFilterList;

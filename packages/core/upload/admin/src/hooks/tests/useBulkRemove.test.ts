@@ -1,9 +1,9 @@
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, screen } from '@tests/utils';
 
-import { useBulkRemove } from '../useBulkRemove';
 import { BulkDeleteFiles } from '../../../../shared/contracts/files';
 import { BulkDeleteFolders } from '../../../../shared/contracts/folders';
+import { useBulkRemove } from '../useBulkRemove';
 
 const FIXTURE_ASSETS = [
   {

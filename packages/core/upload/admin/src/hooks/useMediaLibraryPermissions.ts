@@ -1,9 +1,8 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { PERMISSIONS } from '../newConstants';
+import { PERMISSIONS } from '../constants';
 
-const { main, ...restPermissions } = PERMISSIONS;
+const { main: _main, ...restPermissions } = PERMISSIONS;
 
 type UseRBACReturnType = ReturnType<typeof useRBAC>;
 
