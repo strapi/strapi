@@ -1,6 +1,6 @@
 {
   "name": "@strapi/strapi",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MySQL, MariaDB, PostgreSQL, SQLite",
   "keywords": [
     "strapi",
@@ -109,25 +109,25 @@
   },
   "dependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
-    "@strapi/admin": "workspace:*",
-    "@strapi/cloud-cli": "workspace:*",
-    "@strapi/content-manager": "workspace:*",
-    "@strapi/content-releases": "workspace:*",
-    "@strapi/content-type-builder": "workspace:*",
-    "@strapi/core": "workspace:*",
-    "@strapi/data-transfer": "workspace:*",
-    "@strapi/database": "workspace:*",
-    "@strapi/email": "workspace:*",
-    "@strapi/generators": "workspace:*",
-    "@strapi/i18n": "workspace:*",
-    "@strapi/logger": "workspace:*",
+    "@strapi/admin": "5.4.0",
+    "@strapi/cloud-cli": "5.4.0",
+    "@strapi/content-manager": "5.4.0",
+    "@strapi/content-releases": "5.4.0",
+    "@strapi/content-type-builder": "5.4.0",
+    "@strapi/core": "5.4.0",
+    "@strapi/data-transfer": "5.4.0",
+    "@strapi/database": "5.4.0",
+    "@strapi/email": "5.4.0",
+    "@strapi/generators": "5.4.0",
+    "@strapi/i18n": "5.4.0",
+    "@strapi/logger": "5.4.0",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/permissions": "workspace:*",
-    "@strapi/review-workflows": "workspace:*",
-    "@strapi/types": "workspace:*",
-    "@strapi/typescript-utils": "workspace:*",
-    "@strapi/upload": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/permissions": "5.4.0",
+    "@strapi/review-workflows": "5.4.0",
+    "@strapi/types": "5.4.0",
+    "@strapi/typescript-utils": "5.4.0",
+    "@strapi/upload": "5.4.0",
+    "@strapi/utils": "5.4.0",
     "@types/nodemon": "1.19.6",
     "@vitejs/plugin-react-swc": "3.6.0",
     "boxen": "5.1.2",
@@ -182,11 +182,11 @@
     "@types/node": "18.19.24",
     "@types/webpack-bundle-analyzer": "4.7.0",
     "@types/webpack-hot-middleware": "2.25.9",
-    "eslint-config-custom": "workspace:*",
+    "eslint-config-custom": "5.4.0",
     "jest": "29.6.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "tsconfig": "workspace:*"
+    "tsconfig": "5.4.0"
   },
   "peerDependencies": {
     "react": "^17.0.0 || ^18.0.0",
@@ -197,5 +197,6 @@
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

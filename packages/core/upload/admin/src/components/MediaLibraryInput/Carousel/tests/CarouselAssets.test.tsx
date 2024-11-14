@@ -2,6 +2,8 @@ import { render, waitFor } from '@tests/utils';
 
 import { CarouselAssets } from '../CarouselAssets';
 
+import type { CarouselAssetsProps } from '../CarouselAssets';
+
 const ASSET_FIXTURES = [
   {
     alternativeText: 'alternative text',
@@ -18,10 +20,11 @@ const ASSET_FIXTURES = [
     size: 11.79,
     updatedAt: '2021-10-18T08:04:56.326Z',
     url: '/uploads/michka.jpg',
+    hash: 'hash',
   },
 ];
 
-const setup = (props?: any) =>
+const setup = (props?: Partial<CarouselAssetsProps>) =>
   render(
     <CarouselAssets
       assets={ASSET_FIXTURES}

@@ -1,6 +1,6 @@
 import { DesignSystemProvider } from '@strapi/design-system';
-import { render as renderRTL, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render as renderRTL } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 
 import { AssetCardBase, AssetCardBaseProps } from '../AssetCardBase';
@@ -32,7 +32,7 @@ describe('AssetCardBase', () => {
       /**
        * If we don't wait for a single tick the assertion will fail.
        */
-      waitFor(() => expect(onSelect).toHaveBeenNthCalledWith(1, true));
+      expect(onSelect).toHaveBeenNthCalledWith(1, true);
     });
 
     it('should call onEdit when the edit button is clicked', async () => {

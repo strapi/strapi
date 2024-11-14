@@ -37,15 +37,15 @@ const getEnvBool = (envVar, defaultValue) => {
 const createConfig = ({ port, testDir, appDir }) => ({
   testDir,
 
-  /* default timeout for a jest test to 30s */
-  timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 30 * 1000),
+  /* default timeout for a jest test */
+  timeout: getEnvNum(process.env.PLAYWRIGHT_TIMEOUT, 90 * 1000),
 
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 20 * 1000),
+    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 10 * 1000),
   },
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -65,8 +65,8 @@ const createConfig = ({ port, testDir, appDir }) => ({
     /** Set timezone for consistency across any machine*/
     timezoneId: 'Europe/Paris',
 
-    /* Default time each action such as `click()` can take to 20s */
-    actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 20 * 1000),
+    /* Default time each action such as `click()` can take */
+    actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 10 * 1000),
     // Only record trace when retrying a test to optimize test performance
     trace: 'on-first-retry',
     video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)

@@ -4,7 +4,7 @@ const config: Config = defineConfig({
   bundles: [
     {
       types: './dist/admin/src/index.d.ts',
-      source: './admin/src/index.js', // TODO: change it with the .ts file
+      source: './admin/src/index.ts',
       import: './dist/admin/index.mjs',
       require: './dist/admin/index.js',
       tsconfig: './admin/tsconfig.build.json',

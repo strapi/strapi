@@ -1073,6 +1073,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
             <input
               accept="image/png"
               aria-hidden="true"
+              data-testid="file-input"
               name="file"
               tabindex="-1"
               type="file"

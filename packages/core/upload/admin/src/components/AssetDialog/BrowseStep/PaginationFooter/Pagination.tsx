@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Box, Flex } from '@strapi/design-system';
 
-import { PaginationContext } from './PaginationContext';
+const PaginationContext = React.createContext({ activePage: 1, pageCount: 1 });
+export const usePagination = () => React.useContext(PaginationContext);
 
 interface PaginationProps {
   activePage: number;
