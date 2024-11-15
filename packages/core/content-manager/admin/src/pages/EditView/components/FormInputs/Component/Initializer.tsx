@@ -23,7 +23,7 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
     <>
       <Box
         tag="button"
-        background="neutral100"
+        background={disabled ? 'neutral150' : 'neutral100'}
         borderColor={field.error ? 'danger600' : 'neutral200'}
         hasRadius
         disabled={disabled}
@@ -34,12 +34,12 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
       >
         <Flex direction="column" gap={2}>
-          <Flex justifyContent="center" color={disabled ? 'neutral400' : 'primary600'}>
+          <Flex justifyContent="center" color={disabled ? 'neutral500' : 'primary600'}>
             <PlusCircle width="3.2rem" height="3.2rem" />
           </Flex>
           <Flex justifyContent="center">
             <Typography
-              textColor={disabled ? 'neutral400' : 'primary600'}
+              textColor={disabled ? 'neutral600' : 'primary600'}
               variant="pi"
               fontWeight="bold"
             >
