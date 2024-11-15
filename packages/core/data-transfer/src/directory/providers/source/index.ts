@@ -8,7 +8,7 @@ import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
-import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
+import type { IAsset, IMetadata, ISourceProvider, ProviderType } from '../../../../types';
 
 import * as utils from '../../../utils';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
