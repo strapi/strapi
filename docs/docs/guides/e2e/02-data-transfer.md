@@ -77,6 +77,10 @@ STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-export
 
 The script will create a file `updated-data-packet.tar`. You can extract this file to `tests/e2e/data` so it can be used in the appropriate tests.
 
+:::note
+Before committing, please ensure that all image files have been highly compressed to avoid adding large files to git. Nobody will look at these images, it doesn't matter if they are potato quality.
+:::
+
 ### Importing the data packet in test scenarios
 
 There's an abstraction for importing the data programmatically during tests named `resetDatabaseAndImportDataFromPath` found in `tests/e2e/utils/dts-import.ts`. Typically, you'll want to run this **before** each test:
