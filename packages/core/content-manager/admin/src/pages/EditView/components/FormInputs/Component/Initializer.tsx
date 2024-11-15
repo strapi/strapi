@@ -34,12 +34,12 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
         style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
       >
         <Flex direction="column" gap={2}>
-          <Flex justifyContent="center">
-            <CircleIconWrapper disabled={disabled} />
+          <Flex justifyContent="center" color={disabled ? 'neutral400' : 'primary600'}>
+            <PlusCircle width="3.2rem" height="3.2rem" />
           </Flex>
           <Flex justifyContent="center">
             <Typography
-              textColor={disabled ? `neutral600` : `primary600`}
+              textColor={disabled ? 'neutral400' : 'primary600'}
               variant="pi"
               fontWeight="bold"
             >
@@ -50,37 +50,10 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
             </Typography>
           </Flex>
         </Flex>
+        ;
       </Box>
     </>
   );
-};
-
-{/* <Flex direction="column" gap={2}>
-  <Flex justifyContent="center" color={disabled ? 'neutral400' : 'primary600'}>
-    <PlusCircle width="2.4rem" height="2.4rem" />
-  </Flex>
-  <Flex justifyContent="center">
-    <Typography textColor={disabled ? 'neutral400' : 'primary600'} variant="pi" fontWeight="bold">
-      {formatMessage({
-        id: getTranslation('components.empty-repeatable'),
-        defaultMessage: 'No entry yet. Click to add one.',
-      })}
-    </Typography>
-  </Flex>
-</Flex>; */}
-
-export const CircleIconWrapper = ({ disabled }: { disabled?: boolean }) => {
-  const CircleIcon = styled(PlusCircle)`
-    width: 3.2rem;
-    height: 3.2rem;
-    > circle {
-      fill: ${({ theme }) => (!disabled ? theme.colors.neutral400 : theme.colors.primary200)};
-    }
-    > path {
-      fill: ${({ theme }) => (disabled ? theme.colors.neutral400 : theme.colors.primary600)};
-    }
-  `;
-  return <CircleIcon />;
 };
 
 export { Initializer };
