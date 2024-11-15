@@ -1,4 +1,4 @@
-# This file runs the given workflows when an affected file is found, otherwise it passes as skipped
+# This file determines when jobs should run or skipped based on which files were modified
 
 backend:
   - 'packages/**/server/**/*.(js|ts)'
