@@ -125,9 +125,12 @@ export const deleteComponent = async (deleteUid: Internal.UID.Component) => {
   });
 
   if (failedDeletes.length > 0) {
-    strapi.log.warn(
-      `Failed to delete component data for ${deleteUid} from ${failedDeletes.map((attr) => attr.table)}`
-    );
+    strapi.log.warn(`
+Component '${deleteUid}' was deleted, but references remain in the following database tables:
+${failedDeletes.map((attr) => attr.table).join('\r\n')}
+
+You may need to manually remove references to this component from those tables to avoid issues caused by orphaned data.
+`);
   }
 
   // Emit delete event after transaction completes
