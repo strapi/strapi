@@ -39,7 +39,7 @@ test.describe('Edit collection type', () => {
   });
 
   // Tests for GH#21398
-  test.only('Can update relation of type manyToOne to oneToOne', async ({ page }) => {
+  test('Can update relation of type manyToOne to oneToOne', async ({ page }) => {
     // Create relation in Content-Type Builder
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
     await page.getByRole('button', { name: /add another field to this/i }).click();
