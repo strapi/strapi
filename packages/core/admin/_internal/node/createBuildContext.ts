@@ -174,7 +174,7 @@ const createBuildContext = async ({
 
   const buildContext = {
     appDir,
-    basePath: `${adminPath}/`,
+    basePath: `${adminPath}`,
     bundler,
     customisations,
     cwd,
