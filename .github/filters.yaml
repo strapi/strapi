@@ -8,6 +8,7 @@ backend:
   - 'packages/core/*/{lib,bin,ee,src}/**'
   - 'packages/core/database/**'
   - 'yarn.lock'
+  - 'package.json'
 frontend:
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'
@@ -17,6 +18,7 @@ frontend:
   - 'packages/**/strapi-admin.js'
   - 'packages/admin-test-utils/**'
   - 'yarn.lock'
+  - 'package.json'
 api:
   - 'tests/api/**'
 e2e:
