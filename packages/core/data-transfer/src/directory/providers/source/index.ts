@@ -76,10 +76,6 @@ class LocalDirectorySourceProvider implements ISourceProvider {
     this.#metadata = await this.#readJSONFile<IMetadata>(metadataPath);
   }
 
-  async #loadAssetMetadata(filePath: string) {
-    return this.#readJSONFile<IFile>(filePath);
-  }
-
   async getMetadata() {
     if (!this.#metadata) {
       await this.#loadMetadata();
