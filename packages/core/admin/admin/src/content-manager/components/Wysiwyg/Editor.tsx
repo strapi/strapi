@@ -89,16 +89,16 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
     React.useEffect(() => {
       if (editorRef.current) {
         const editor = editorRef.current;
-    
+
         // Capture the initial scroll position
         let scrollInfo = editor.getScrollInfo();
-    
+
         // Event listener for before content change
         editor.on('beforeChange', (instance, changeObj) => {
           // Store the scroll position before making changes
           scrollInfo = editor.getScrollInfo();
         });
-    
+
         // Event listener for after content changes
         editor.on('change', () => {
           // Restore the scroll position after changes
