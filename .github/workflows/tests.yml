@@ -169,7 +169,7 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run tests
-        run: yarn nx affected --target=test:front --nx-ignore-cycles
+        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
