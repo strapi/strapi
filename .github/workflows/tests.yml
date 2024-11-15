@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 jobs:
-  conditionals:
+  conditions:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -60,8 +60,8 @@ jobs:
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
-    needs: [conditionals]
-    if: ${{ needs.conditionals.outputs.docs == 'true' }}
+    needs: [conditions]
+    if: ${{ needs.conditions.outputs.docs == 'true' }}
     strategy:
       matrix:
         node: [20, 22]
@@ -121,9 +121,9 @@ jobs:
 
   typescript:
     name: 'typescript (node: ${{ matrix.node }})'
-    needs: [conditionals, build]
+    needs: [conditions, build]
     runs-on: ubuntu-latest
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.backend == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.backend == 'true'
     strategy:
       matrix:
         node: [20, 22]
@@ -147,9 +147,9 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [conditionals, build]
+    needs: [conditions, build]
     runs-on: ubuntu-latest
     env:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
@@ -172,9 +172,9 @@ jobs:
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.frontend == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.frontend == 'true'
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [conditionals, build]
+    needs: [conditions, build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -196,9 +196,9 @@ jobs:
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.frontend == 'true' || needs.conditionals.outputs.e2e == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
@@ -238,9 +238,9 @@ jobs:
           retention-days: 1
 
   e2e_ee:
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.frontend == 'true' || needs.conditionals.outputs.e2e == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
@@ -283,9 +283,9 @@ jobs:
           retention-days: 1
 
   cli:
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.cli == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
     timeout-minutes: 60
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:
@@ -310,9 +310,9 @@ jobs:
         run: yarn test:cli
 
   api_ce_pg:
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -350,9 +350,9 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.conditionals.outputs.all_tests == 'true' ||  needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' ||  needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -389,9 +389,9 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
-    if: needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true'
+    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
@@ -414,9 +414,9 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
+    if: (needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -457,9 +457,9 @@ jobs:
 
   api_ee_mysql:
     runs-on: ubuntu-latest
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
+    if: (needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -499,9 +499,9 @@ jobs:
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [conditionals, build]
+    needs: [conditions, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditionals.outputs.all_tests == 'true' || needs.conditionals.outputs.backend == 'true' || needs.conditionals.outputs.api == 'true') && needs.conditionals.outputs.is_local == 'true'
+    if: (needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
