@@ -9,10 +9,10 @@ import packageJson from '../../package.json';
 
 export const VERSION = 'v1';
 
-export type ProjectInfos = {
+export type ProjectInfo = {
   id: string;
   name: string;
-  selectedEnvironment?: string;
+  targetEnvironment?: string;
   displayName?: string;
   nodeVersion?: string;
   region?: string;
@@ -22,7 +22,7 @@ export type ProjectInfos = {
 
 export type EnvironmentInfo = Record<string, unknown>;
 
-export type ProjectInput = Omit<ProjectInfos, 'id'>;
+export type ProjectInput = Omit<ProjectInfo, 'id'>;
 
 export type DeployResponse = {
   build_id: string;
@@ -43,7 +43,13 @@ export type ListEnvironmentsResponse = {
 
 export type ListLinkProjectsResponse = {
   data: {
-    data: ProjectInfos[] | Record<string, never>;
+    data: ProjectInfo[] | Record<string, never>;
+  };
+};
+
+export type ListLinkEnvironmentsResponse = {
+  data: {
+    data: EnvironmentInfo[] | Record<string, never>;
   };
 };
 
@@ -89,6 +95,10 @@ export interface CloudApiService {
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
 
   listEnvironments(project: { name: string }): Promise<AxiosResponse<ListEnvironmentsResponse>>;
+
+  listLinkEnvironments(project: {
+    name: string;
+  }): Promise<AxiosResponse<ListLinkEnvironmentsResponse>>;
 
   getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
@@ -212,6 +222,23 @@ export async function cloudApiFactory(
     async listEnvironments({ name }): Promise<AxiosResponse<ListEnvironmentsResponse>> {
       try {
         const response = await axiosCloudAPI.get(`/projects/${name}/environments`);
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud environments from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's environments from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async listLinkEnvironments({ name }): Promise<AxiosResponse<ListLinkEnvironmentsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}/environments-linkable`);
 
         if (response.status !== 200) {
           throw new Error('Error fetching cloud environments from the server.');

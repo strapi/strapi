@@ -1,6 +1,6 @@
 {
   "name": "@strapi/i18n",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "Create read and update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -55,7 +55,7 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.0.0-rc.12",
     "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.4.0",
     "lodash": "4.17.21",
     "qs": "6.11.1",
     "react-intl": "6.6.2",
@@ -63,11 +63,11 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
-    "@strapi/admin-test-utils": "workspace:*",
-    "@strapi/content-manager": "workspace:*",
+    "@strapi/admin": "5.4.0",
+    "@strapi/admin-test-utils": "5.4.0",
+    "@strapi/content-manager": "5.4.0",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "workspace:*",
+    "@strapi/types": "5.4.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "msw": "1.3.0",
@@ -78,8 +78,8 @@
     "styled-components": "6.1.8"
   },
   "peerDependencies": {
-    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
-    "@strapi/content-manager": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/admin": "^5.0.0",
+    "@strapi/content-manager": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
@@ -95,5 +95,6 @@
     "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API.",
     "required": false,
     "kind": "plugin"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

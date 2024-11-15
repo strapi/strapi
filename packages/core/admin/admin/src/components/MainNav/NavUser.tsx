@@ -40,6 +40,13 @@ const MenuItem = styled(Menu.Item)`
   }
 `;
 
+const MenuItemDanger = styled(MenuItem)`
+  &:hover {
+  ${({ theme }) => `
+    background: ${theme.colors.danger100};
+  `}
+`;
+
 export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -67,13 +74,13 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
             })}
           </MenuItem>
 
-          <MenuItem onSelect={handleLogout} color="danger600">
+          <MenuItemDanger onSelect={handleLogout} color="danger600">
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
               defaultMessage: 'Logout',
             })}
             <SignOut />
-          </MenuItem>
+          </MenuItemDanger>
         </MenuContent>
       </Menu.Root>
     </Flex>

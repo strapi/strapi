@@ -159,7 +159,7 @@ const PreviewHeader = () => {
         <Typography tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
           {title}
         </Typography>
-        <DocumentStatus />
+        <Status />
       </Grid.Item>
       {/* Tabs */}
       <Grid.Item xs={1} marginBottom="-1px" alignItems="end" margin="auto">
