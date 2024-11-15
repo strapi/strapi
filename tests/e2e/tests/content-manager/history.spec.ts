@@ -44,7 +44,7 @@ const goToContentTypeBuilder = async (page: Page) => {
 
 describeOnCondition(edition === 'EE')('History', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
+    await resetDatabaseAndImportDataFromPath('with-admin', (cts) => cts, { coreStore: false });
     await resetFiles();
     await page.goto('/admin');
     await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));

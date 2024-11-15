@@ -40,7 +40,7 @@ Navigate to one of the test-apps and run `yarn install && yarn develop`
 Leave the development server running, and then run the following command to reset and seed the database with the current e2e data packet. The script expects the name of the data packet you want to import found in `tests/e2e/data`.
 
 ```shell
-STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-import.ts with-admin.tar
+STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-import.ts with-admin
 ```
 
 This script will include admin users and all the content-types specificed in `tests/e2e/constants.ts`
@@ -75,7 +75,7 @@ If you are exporting data for an EE feature you will need to run the script with
 STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-export.ts updated-data-packet
 ```
 
-The script will create a file `updated-data-packet.tar`. You can copy this file over to `tests/e2e/data` so it can be used in the appropriate tests.
+The script will create a file `updated-data-packet.tar`. You can extract this file to `tests/e2e/data` so it can be used in the appropriate tests.
 
 ### Importing the data packet in test scenarios
 
@@ -87,7 +87,7 @@ import { resetDatabaseAndImportDataFromPath } from './utils/dts-import';
 
 test.describe('Strapi Application', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('backup.tar');
+    await resetDatabaseAndImportDataFromPath('backup');
     await page.goto('/admin');
   });
 

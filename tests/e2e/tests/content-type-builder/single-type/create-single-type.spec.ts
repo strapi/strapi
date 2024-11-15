@@ -11,7 +11,7 @@ test.describe('Create collection type', () => {
 
   test.beforeEach(async ({ page }) => {
     await resetFiles();
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
 

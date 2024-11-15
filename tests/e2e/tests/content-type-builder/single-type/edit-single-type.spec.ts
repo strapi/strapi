@@ -20,7 +20,7 @@ test.describe('Edit single type', () => {
       skipTour: true,
       // Don't reset files here as it would only run once for the whole suite
       resetFiles: false,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     await createSingleType(page, {
