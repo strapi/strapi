@@ -40,7 +40,7 @@ Navigate to one of the test-apps and run `yarn install && yarn develop`
 Leave the development server running, and then run the following command to reset and seed the database with the current e2e data packet. The script expects the name of the data packet you want to import found in `tests/e2e/data`.
 
 ```shell
-STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-import.ts with-admin
+STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-import.ts with-admin.tar
 ```
 
 This script will include admin users and all the content-types specificed in `tests/e2e/constants.ts`
