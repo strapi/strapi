@@ -50,7 +50,6 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
             </Typography>
           </Flex>
         </Flex>
-        ;
       </Box>
     </>
   );
