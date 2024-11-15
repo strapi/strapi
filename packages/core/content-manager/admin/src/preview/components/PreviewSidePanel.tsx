@@ -5,7 +5,7 @@ import { Button, Flex } from '@strapi/design-system';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useGetPreviewUrlQuery } from '../services/preview';
 
@@ -14,6 +14,7 @@ import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
 
   /**
@@ -36,9 +37,10 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     return null;
   }
 
-  const handleClick = () => {
-    // TODO: delete this event and use willNavigate instead
-    trackUsage('willOpenPreview');
+  const trackNavigation = () => {
+    // Append /preview to the current URL
+    const destinationPathname = pathname.replace(/\/$/, '') + '/preview';
+    trackUsage('willNavigate', { from: pathname, to: destinationPathname });
   };
 
   return {
@@ -49,7 +51,7 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
           variant="tertiary"
           tag={Link}
           to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
-          onClick={handleClick}
+          onClick={trackNavigation}
           flex="auto"
         >
           {formatMessage({

@@ -4,6 +4,7 @@ import {
   ConfirmDialog,
   useNotification,
   useQueryParams,
+  useTracking,
   useRBAC,
   Layouts,
 } from '@strapi/admin/strapi-admin';
@@ -26,6 +27,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = React.useState(false);
   const navigate = useNavigate();
   const { formatMessage, formatDate } = useIntl();
+  const { trackUsage } = useTracking();
   const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
@@ -79,6 +81,8 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
             defaultMessage: 'The content of the restored version is not published yet.',
           }),
         });
+
+        trackUsage('didRestoreHistoryVersion');
       }
 
       if ('error' in response) {

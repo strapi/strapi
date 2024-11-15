@@ -1,8 +1,8 @@
-import { useQueryParams } from '@strapi/admin/strapi-admin';
+import { useQueryParams, useTracking } from '@strapi/admin/strapi-admin';
 import { ClockCounterClockwise } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import type { DocumentActionComponent } from '../../content-manager';
 
@@ -10,11 +10,22 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
   const navigate = useNavigate();
+  const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   if (!window.strapi.features.isEnabled('cms-content-history')) {
     return null;
   }
+
+  const handleOnClick = () => {
+    const destination = { pathname: 'history', search: pluginsQueryParams };
+    trackUsage('willNavigate', {
+      from: pathname,
+      to: `${pathname}/${destination.pathname}`,
+    });
+    navigate(destination);
+  };
 
   return {
     icon: <ClockCounterClockwise />,
@@ -22,7 +33,7 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
       id: 'content-manager.history.document-action',
       defaultMessage: 'Content History',
     }),
-    onClick: () => navigate({ pathname: 'history', search: pluginsQueryParams }),
+    onClick: handleOnClick,
     disabled:
       /**
        * The user is creating a new document.
