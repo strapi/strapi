@@ -29,9 +29,9 @@ export const useEditFolder = () => {
     UpdateFolder.Response['error'] | CreateFolders.Response['error'],
     EditFolderRequestParams
   >((...args) => editFolderRequest(put, post, ...args), {
-    onSuccess() {
-      queryClient.refetchQueries([pluginId, 'folders'], { active: true });
-      queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
+    async onSuccess() {
+      await queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+      await queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
     },
   });
 
