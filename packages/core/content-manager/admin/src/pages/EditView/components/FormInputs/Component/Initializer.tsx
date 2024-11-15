@@ -55,5 +55,7 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
   );
 };
 
+<div>test</div>;
+
 export { Initializer };
 export type { InitializerProps };
