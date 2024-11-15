@@ -110,6 +110,12 @@ export const deleteComponent = async (deleteUid: Internal.UID.Component) => {
 
         // Deleting component data is not critical
         try {
+          /**
+           * TODO: fix hardcoded component_type to use centralized naming method, but:
+           * - the name isn't exported anywhere
+           * - it's unlikely to change
+           * - it's hardcoded elsewhere, so they should all be cleaned up together
+           *  */
           await trx.delete().from(attr.joinTable.name).where('component_type', deleteUid);
         } catch (error) {
           failedDeletes.push({ table: attr.joinTable.name, error });
