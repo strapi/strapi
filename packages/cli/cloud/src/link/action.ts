@@ -9,6 +9,7 @@ import { LocalSave } from '../services/strapi-info-save';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { promptLogin } from '../login/action';
 import { trackEvent } from '../utils/analytics';
+import { getLocalConfig } from '../utils/get-local-config';
 
 const QUIT_OPTION = 'Quit';
 
@@ -38,16 +39,6 @@ type Project = {
   displayName: string;
   isMaintainer: boolean;
 };
-
-async function getExistingConfig(ctx: CLIContext) {
-  try {
-    return await local.retrieve();
-  } catch (e) {
-    ctx.logger.debug('Failed to get project config', e);
-    ctx.logger.error('An error occurred while retrieving config data from your local project.');
-    return null;
-  }
-}
 
 async function promptForRelink(
   ctx: CLIContext,
@@ -93,7 +84,7 @@ async function getProjectsList(
     spinner.succeed();
 
     if (!Array.isArray(projectList)) {
-      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud");
+      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud.");
       return null;
     }
     const projects: ProjectsList = (projectList as unknown as Project[])
@@ -108,7 +99,7 @@ async function getProjectsList(
         };
       });
     if (projects.length === 0) {
-      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud");
+      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud.");
       return null;
     }
     return projects;
@@ -157,7 +148,7 @@ export default async (ctx: CLIContext) => {
 
   const cloudApiService = await cloudApiFactory(ctx, token);
 
-  const existingConfig: LocalSave | null = await getExistingConfig(ctx);
+  const existingConfig: LocalSave | null = await getLocalConfig(ctx);
   const shouldRelink = await promptForRelink(ctx, cloudApiService, existingConfig);
 
   if (!shouldRelink) {
@@ -201,7 +192,9 @@ export default async (ctx: CLIContext) => {
     }
 
     await local.save({ project: answer.linkProject });
-    logger.log(`Project ${chalk.cyan(answer.linkProject.displayName)} linked successfully.`);
+    logger.log(
+      ` You have successfully linked your project to ${chalk.cyan(answer.linkProject.displayName)}. You are now able to deploy your project.`
+    );
     await trackEvent(ctx, cloudApiService, 'didLinkProject', {
       projectInternalName: answer.linkProject,
     });
