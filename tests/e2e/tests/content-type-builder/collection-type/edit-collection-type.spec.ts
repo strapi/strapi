@@ -1,15 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import {
-  createCollectionType,
-  describeOnCondition,
-  navToHeader,
-  skipCtbTour,
-} from '../../../utils/shared';
+import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
+import { createCollectionType } from '../../../utils/content-types';
 
 test.describe('Edit collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
@@ -17,28 +11,30 @@ test.describe('Edit collection type', () => {
 
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
-
-  let dependentTestsInitialized = false;
+  const attributes = [{ type: 'text', name: 'testtext' }];
 
   test.beforeEach(async ({ page }) => {
+    await resetFiles();
     await sharedSetup('ctb-edit-ct', page, {
-      resetFiles: true,
       importData: 'with-admin.tar',
       login: true,
       skipTour: true,
-      afterSetup: async () => {
-        // create a collection type to be used
-        await createCollectionType(page, {
-          name: ctName,
-        });
+      // Don't reset files here as it would only run once for the whole suite
+      resetFiles: false,
+    });
 
-        await createCollectionType(page, {
-          name: 'dog',
-        });
-        await createCollectionType(page, {
-          name: 'owner',
-        });
-      },
+    // Reset files and create the same CTs between each test to prevent side effects
+    await createCollectionType(page, {
+      name: ctName,
+      attributes,
+    });
+    await createCollectionType(page, {
+      name: 'dog',
+      attributes,
+    });
+    await createCollectionType(page, {
+      name: 'owner',
+      attributes,
     });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
@@ -102,6 +98,7 @@ test.describe('Edit collection type', () => {
 
   test('Can add a field with default value', async ({ page }) => {
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
+
     await page
       .getByRole('button', { name: 'Text Small or long text like title or description' })
       .click();

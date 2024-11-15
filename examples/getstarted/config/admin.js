@@ -22,7 +22,7 @@ module.exports = ({ env }) => ({
     enabled: env.bool('PREVIEW_ENABLED', true),
     config: {
       handler: (uid, { documentId, locale, status }) => {
-        return `/preview/${uid}/${documentId}/${locale}/${status}`;
+        return `/admin/preview/${uid}/${documentId}/${locale}/${status}`;
       },
     },
   },

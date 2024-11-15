@@ -1,4 +1,5 @@
 import fse from 'fs-extra';
+import inquirer from 'inquirer';
 import path from 'path';
 import chalk from 'chalk';
 import { AxiosError } from 'axios';
@@ -6,7 +7,7 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
-import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfos } from '../types';
+import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfo } from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { notificationServiceFactory } from '../services/notification';
@@ -22,14 +23,47 @@ type PackageJson = {
   };
 };
 
+interface CmdOptions {
+  env?: string;
+}
+
+const QUIT_OPTION = 'Quit';
+
+async function promptForEnvironment(environments: string[]): Promise<string> {
+  const choices = environments.map((env) => ({ name: env, value: env }));
+  const { selectedEnvironment } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'selectedEnvironment',
+      message: 'Select the environment to deploy:',
+      choices: [...choices, { name: chalk.grey(`(${QUIT_OPTION})`), value: null }],
+    },
+  ]);
+  if (selectedEnvironment === null) {
+    process.exit(1);
+  }
+
+  const { confirm } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: `Do you want to proceed with deployment to ${chalk.cyan(selectedEnvironment)}?`,
+    },
+  ]);
+
+  if (!confirm) {
+    process.exit(1);
+  }
+  return selectedEnvironment;
+}
+
 async function upload(
   ctx: CLIContext,
-  project: ProjectInfos,
+  project: ProjectInfo,
   token: string,
   maxProjectFileSize: number
 ) {
   const cloudApi = await cloudApiFactory(ctx, token);
-  // * Upload project
   try {
     const storagePath = await getTmpStoragePath();
     const projectFolder = path.resolve(process.cwd());
@@ -143,7 +177,36 @@ async function getConfig({
   }
 }
 
-export default async (ctx: CLIContext) => {
+function validateEnvironment(ctx: CLIContext, environment: string, environments: string[]): void {
+  if (!environments.includes(environment)) {
+    ctx.logger.error(`Environment ${environment} does not exist.`);
+    process.exit(1);
+  }
+}
+
+async function getTargetEnvironment(
+  ctx: CLIContext,
+  opts: CmdOptions,
+  project: ProjectInfo,
+  environments: string[]
+): Promise<string> {
+  if (opts.env) {
+    validateEnvironment(ctx, opts.env, environments);
+    return opts.env;
+  }
+
+  if (project.targetEnvironment) {
+    return project.targetEnvironment;
+  }
+
+  if (environments.length > 1) {
+    return promptForEnvironment(environments);
+  }
+
+  return environments[0];
+}
+
+export default async (ctx: CLIContext, opts: CmdOptions) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
   if (!token) {
@@ -156,6 +219,7 @@ export default async (ctx: CLIContext) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx, token);
+  let environments: string[];
 
   try {
     const {
@@ -163,6 +227,7 @@ export default async (ctx: CLIContext) => {
     } = await cloudApiService.getProject({ name: project.name });
 
     const isProjectSuspended = projectData.suspendedAt;
+    environments = projectData.environments;
 
     if (isProjectSuspended) {
       ctx.logger.log(
@@ -214,6 +279,8 @@ export default async (ctx: CLIContext) => {
     maxSize = 100000000;
   }
 
+  project.targetEnvironment = await getTargetEnvironment(ctx, opts, project, environments);
+
   const buildId = await upload(ctx, project, token, maxSize);
 
   if (!buildId) {
@@ -221,6 +288,9 @@ export default async (ctx: CLIContext) => {
   }
 
   try {
+    ctx.logger.log(
+      `🚀 Deploying project to ${chalk.cyan(project.targetEnvironment ?? `production`)} environment...`
+    );
     notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
     await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
 

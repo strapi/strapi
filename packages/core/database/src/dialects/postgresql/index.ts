@@ -36,6 +36,9 @@ export default class PostgresDialect extends Dialect {
     );
 
     // If we're using a schema, set the default path for all table names in queries to use that schema
+    // Ideally we would rely on Knex config.searchPath to do this for us
+    // However, createConnection must remain synchronous and if the user is using a connection function,
+    // we do not know what their schema is until after the connection is resolved
     const schemaName = this.db.getSchemaName();
     if (schemaName) {
       await this.db.connection

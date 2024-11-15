@@ -184,7 +184,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       entriesToClone,
       async.pipe(
         validateParams,
-        omit('id'),
+        omit(['id', 'createdAt', 'updatedAt']),
         // assign new documentId
         assoc('documentId', createDocumentId()),
         // Merge new data into it
