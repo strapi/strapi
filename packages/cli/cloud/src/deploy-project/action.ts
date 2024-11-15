@@ -211,10 +211,10 @@ async function getTargetEnvironment(
   return environments[0];
 }
 
-async function hasPendingOrLiveDeployment(
+function hasPendingOrLiveDeployment(
   environments: EnvironmentDetails[],
   targetEnvironment: string
-): Promise<boolean> {
+): boolean {
   const environment = environments.find((env) => env.name === targetEnvironment);
   if (!environment) {
     throw new Error(`Environment details ${targetEnvironment} not found.`);
@@ -301,7 +301,7 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
   project.targetEnvironment = await getTargetEnvironment(ctx, opts, project, environments);
 
   if (!opts.force) {
-    const shouldDisplayWarning = await hasPendingOrLiveDeployment(
+    const shouldDisplayWarning = hasPendingOrLiveDeployment(
       environmentsDetails,
       project.targetEnvironment
     );

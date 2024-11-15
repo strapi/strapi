@@ -55,7 +55,7 @@ export type ListLinkProjectsResponse = {
 
 export type ListLinkEnvironmentsResponse = {
   data: {
-    data: EnvironmentInfo[] | Record<string, never>;
+    data: EnvironmentDetails[] | Record<string, never>;
   };
 };
 

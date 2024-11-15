@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import inquirer, { type Answers } from 'inquirer';
-import { ProjectInput } from '../../services/cli-api';
+import { EnvironmentDetails, ProjectInput } from '../../services/cli-api';
 import type { CLIContext, CloudApiService } from '../../types';
 import { cloudApiFactory, tokenServiceFactory, local } from '../../services';
 import { promptLogin } from '../../login/action';
@@ -17,13 +17,7 @@ interface LinkEnvironmentInput extends Answers {
   targetEnvironment: string;
 }
 
-export type Environment = {
-  name: string;
-  hasLiveDeployment: boolean;
-  hasPendingDeployment: boolean;
-};
-
-type EnvironmentsList = Environment[];
+type EnvironmentsList = EnvironmentDetails[];
 
 export default async (ctx: CLIContext) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
@@ -135,7 +129,7 @@ async function getEnvironmentsList(
     }
     spinner.succeed();
     return environmentsList.filter(
-      (environment: Environment) => environment.name !== project.targetEnvironment
+      (environment: EnvironmentDetails) => environment.name !== project.targetEnvironment
     );
   } catch (e: any) {
     if (e.response && e.response.status === 404) {
