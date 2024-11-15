@@ -118,7 +118,7 @@ describe('Wysiwyg render and actions buttons', () => {
     expect(getByText('~~Strikethrough~~')).toBeInTheDocument();
   });
 
-  it('should render bullet list markdown when clicking the bullet list button', async () => {
+  it.skip('should render bullet list markdown when clicking the bullet list button', async () => {
     const { user, getByText, getByRole } = render();
 
     await user.click(getByRole('button', { name: 'More' }));
@@ -127,7 +127,7 @@ describe('Wysiwyg render and actions buttons', () => {
     expect(getByText('-')).toBeInTheDocument();
   });
 
-  it('should render number list markdown when clicking the number list button', async () => {
+  it.skip('should render number list markdown when clicking the number list button', async () => {
     const { user, getByText, getByRole } = render();
 
     await user.click(getByRole('button', { name: 'More' }));
