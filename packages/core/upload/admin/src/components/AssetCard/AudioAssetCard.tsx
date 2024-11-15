@@ -11,6 +11,8 @@ const AudioPreviewWrapper = styled(Box)`
     max-width: 100%;
     max-height: ${({ size }) => (size === 'M' ? 16.4 : 8.8)}rem;
   }
+  display: flex;
+  align-items: center;
 `;
 
 interface AudioAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children'> {
