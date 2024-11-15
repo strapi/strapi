@@ -29,6 +29,7 @@ all_tests:
   - '.github/workflows/**'
   - 'yarn.lock'
   - 'jest.config.js'
+  - 'package.json'
 
 # note that docs only runs on this, it doesn't include all_tests above
 docs:
