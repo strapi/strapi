@@ -7,7 +7,11 @@ import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 
 const CardAsset = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
+  background: linear-gradient(
+    180deg,
+    ${({ theme }) => theme.colors.neutral0} 0%, 
+    ${({ theme }) => theme.colors.neutral100} 121.48%
+  );
 `;
 
 interface DocAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children'> {
@@ -32,14 +36,14 @@ export const DocAssetCard = ({
       variant="Doc"
     >
       <CardAsset width="100%" height={size === 'S' ? `8.8rem` : `16.4rem`} justifyContent="center">
-        <Flex gap={1} direction="column" alignItems="center">
+        <Flex gap={2} direction="column" alignItems="center">
           {extension === 'pdf' ? (
             <FilePdf aria-label={name} fill="neutral500" width={24} height={24} />
           ) : (
             <File aria-label={name} fill="neutral500" width={24} height={24} />
           )}
 
-          <Typography textColor="neutral500">
+          <Typography textColor="neutral500" variant="pi">
             {formatMessage({
               id: 'noPreview',
               defaultMessage: 'No preview available',

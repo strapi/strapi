@@ -10,8 +10,13 @@ import { AssetType } from '../../../constants';
 import { usePersistentState } from '../../../hooks/usePersistentState';
 
 const CardAsset = styled(Flex)`
+  min-height: 26.4rem;
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
+  background: linear-gradient(
+    180deg,
+    ${({ theme }) => theme.colors.neutral0} 0%, 
+    ${({ theme }) => theme.colors.neutral100} 121.48%
+  );
 `;
 
 interface AssetPreviewProps {
@@ -55,10 +60,10 @@ export const AssetPreview = React.forwardRef<
 
   if (mime.includes('pdf')) {
     return (
-      <CardAsset width="100%" height="100%" margin="5" justifyContent="center" {...props}>
+      <CardAsset width="100%" justifyContent="center" {...props}>
         <Flex gap={2} direction="column" alignItems="center">
-          <FilePdf aria-label={name} fill="neutral500" width={100} height={100} />
-          <Typography textColor="neutral500" variant="delta" padding="5">
+          <FilePdf aria-label={name} fill="neutral500" width={24} height={24} />
+          <Typography textColor="neutral500" variant="pi">
             {formatMessage({
               id: 'noPreview',
               defaultMessage: 'No preview available',
@@ -70,11 +75,11 @@ export const AssetPreview = React.forwardRef<
   }
 
   return (
-    <CardAsset width="100%" height="100%" margin="5" justifyContent="center" {...props}>
+    <CardAsset width="100%" justifyContent="center" {...props}>
       <Flex gap={2} direction="column" alignItems="center">
-        <File aria-label={name} fill="neutral500" width={100} height={100} />
+        <File aria-label={name} fill="neutral500" width={24} height={24}/>
 
-        <Typography textColor="neutral500" variant="delta" padding="5">
+        <Typography textColor="neutral500" variant="pi">
           {formatMessage({
             id: 'noPreview',
             defaultMessage: 'No preview available',
