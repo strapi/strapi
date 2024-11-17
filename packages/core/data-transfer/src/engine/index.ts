@@ -200,7 +200,7 @@ class TransferEngine<
   reportInfo(message: string, params?: unknown) {
     this.diagnostics.report({
       kind: 'info',
-      details: { createdAt: new Date(), message, params },
+      details: { createdAt: new Date(), message, params, source: 'engine' },
     });
   }
 

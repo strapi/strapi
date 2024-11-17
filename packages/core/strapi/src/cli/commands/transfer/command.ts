@@ -36,7 +36,7 @@ const command = () => {
       .addOption(
         new Option('--to-token <token>', `Transfer token for the remote Strapi destination`)
       )
-      .addOption(new Option('-i, --info', 'log information about the export process'))
+      .addOption(new Option('-v, --verbose', 'Enable verbose logs'))
       .addOption(forceOption)
       .addOption(excludeOption)
       .addOption(onlyOption)

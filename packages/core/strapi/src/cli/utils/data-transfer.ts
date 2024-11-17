@@ -240,9 +240,9 @@ const formatDiagnostic = (
         getLogger().error(errorMessage);
       }
       if (kind === 'info' && info) {
-        const { message, params } = details;
+        const { message, params, source } = details;
 
-        const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
+        const msg = `[${source}] ${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
 
         getLogger().info(msg);
       }

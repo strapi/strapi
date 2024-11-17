@@ -357,7 +357,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `${chalk.magenta(`[remote-source-provider]`)} ${message}`,
+        message,
+        source: 'remote-source-provider',
       },
       kind: 'info',
     });

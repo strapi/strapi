@@ -73,7 +73,8 @@ class LocalFileDestinationProvider implements IDestinationProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `${chalk.cyan(`[file-destination-provider]`)} ${message}`,
+        message,
+        source: 'file-destination-provider',
       },
       kind: 'info',
     });

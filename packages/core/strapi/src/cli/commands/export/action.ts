@@ -35,7 +35,7 @@ const BYTES_IN_MB = 1024 * 1024;
 interface CmdOptions {
   file?: string;
   encrypt?: boolean;
-  info?: boolean;
+  verbose?: boolean;
   key?: string;
   compress?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
@@ -89,7 +89,7 @@ export default async (opts: CmdOptions) => {
     },
   });
 
-  engine.diagnostics.onDiagnostic(formatDiagnostic('export', opts.info));
+  engine.diagnostics.onDiagnostic(formatDiagnostic('export', opts.verbose));
 
   const progress = engine.progress.stream;
 

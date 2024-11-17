@@ -46,7 +46,8 @@ class LocalStrapiSourceProvider implements ISourceProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `${chalk.magenta(`[local-source]`)} ${message}`,
+        message,
+        source: 'local-source-provider',
       },
       kind: 'info',
     });

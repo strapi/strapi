@@ -93,7 +93,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `${chalk.cyan(`[local-destination]`)} ${message}`,
+        message,
+        source: 'local-destination-provider',
       },
       kind: 'info',
     });

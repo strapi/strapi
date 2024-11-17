@@ -227,7 +227,8 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `${chalk.cyan(`[remote-destination-provider]`)} ${message}`,
+        message,
+        source: 'remote-destination-provider',
       },
       kind: 'info',
     });

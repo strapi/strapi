@@ -31,8 +31,8 @@ interface CmdOptions {
   from?: URL;
   fromToken: string;
   to: URL;
-  info: boolean;
   toToken: string;
+  verbose?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   throttle?: number;
@@ -135,7 +135,7 @@ export default async (opts: CmdOptions) => {
     },
   });
 
-  engine.diagnostics.onDiagnostic(formatDiagnostic('transfer', opts.info));
+  engine.diagnostics.onDiagnostic(formatDiagnostic('transfer', opts.verbose));
 
   const progress = engine.progress.stream;
 

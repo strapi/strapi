@@ -71,7 +71,8 @@ class LocalFileSourceProvider implements ISourceProvider {
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
-        message: `[file-source-provider] ${message}`,
+        message,
+        source: 'file-source-provider',
       },
       kind: 'info',
     });
