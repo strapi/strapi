@@ -164,6 +164,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
     this.#reportInfo('creating assets read stream');
+    
     pipeline(
       [
         inStream,
