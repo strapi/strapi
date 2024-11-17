@@ -1,6 +1,5 @@
 import { Readable } from 'stream';
 import { chain } from 'stream-chain';
-import chalk from 'chalk';
 import type { Core, Struct } from '@strapi/types';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';

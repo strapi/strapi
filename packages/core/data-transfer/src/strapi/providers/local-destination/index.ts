@@ -1,5 +1,4 @@
 import { Writable, Readable } from 'stream';
-import chalk from 'chalk';
 import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';

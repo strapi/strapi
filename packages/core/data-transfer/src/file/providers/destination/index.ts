@@ -5,7 +5,6 @@ import { rm, createWriteStream } from 'fs-extra';
 import tar from 'tar-stream';
 import { stringer } from 'stream-json/jsonl/Stringer';
 import { chain } from 'stream-chain';
-import chalk from 'chalk';
 
 import { createEncryptionCipher } from '../../../utils/encryption';
 import type {
