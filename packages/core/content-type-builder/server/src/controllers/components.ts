@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
 import type { UID } from '@strapi/types';
+import { MigrationBuilder } from '../services/migration-builder';
 import { getService } from '../utils';
 import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
@@ -134,6 +135,10 @@ export default {
       const componentService = getService('components');
 
       const component = await componentService.deleteComponent(uid);
+
+      const migrationBuilder = new MigrationBuilder();
+      migrationBuilder.addDeleteComponent(uid);
+      await migrationBuilder.writeFiles();
 
       setImmediate(() => strapi.reload());
 
