@@ -94,5 +94,6 @@ export const deleteComponent = async (uid: Internal.UID.Component) => {
   await builder.writeFiles();
 
   strapi.eventHub.emit('component.delete', { component: deletedComponent });
+
   return deletedComponent;
 };
