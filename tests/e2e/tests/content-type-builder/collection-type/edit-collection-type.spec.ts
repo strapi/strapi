@@ -28,14 +28,6 @@ test.describe('Edit collection type', () => {
       name: ctName,
       attributes,
     });
-    await createCollectionType(page, {
-      name: 'dog',
-      attributes,
-    });
-    await createCollectionType(page, {
-      name: 'owner',
-      attributes,
-    });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
@@ -48,29 +40,29 @@ test.describe('Edit collection type', () => {
 
   // Tests for GH#21398
   test('Can update relation of type manyToOne to oneToOne', async ({ page }) => {
-    // Create dog owner relation in Content-Type Builder
-    await navToHeader(page, ['Content-Type Builder', 'Dog'], 'Dog');
+    // Create relation in Content-Type Builder
+    await navToHeader(page, ['Content-Type Builder', ctName], ctName);
     await page.getByRole('button', { name: /add another field to this/i }).click();
     await page.getByRole('button', { name: /relation/i }).click();
     await page.getByLabel('Basic settings').getByRole('button').nth(3).click();
     await page.getByRole('button', { name: /article/i }).click();
-    await page.getByRole('menuitem', { name: /owner/i }).click();
+    await page.getByRole('menuitem', { name: /author/i }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('cell', { name: 'owner', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'author', exact: true })).toBeVisible();
 
-    // update dog owner relation in Content-Type Builder to oneToOne
-    await page.getByRole('button', { name: /edit owner/i }).click();
+    // update relation in Content-Type Builder to oneToOne
+    await page.getByRole('button', { name: /edit author/i }).click();
     await page.getByLabel('Basic settings').getByRole('button').nth(0).click();
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('cell', { name: 'owner', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'author', exact: true })).toBeVisible();
   });
 
   test('Can toggle internationalization', async ({ page }) => {
@@ -81,7 +73,7 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can toggle draft&publish', async ({ page }) => {
@@ -93,7 +85,7 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can add a field with default value', async ({ page }) => {
@@ -110,7 +102,7 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   /**
@@ -157,6 +149,6 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 });
