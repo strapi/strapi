@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
+import { toLower } from 'lodash/fp';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 import type { AdminUser } from '../../../shared/contracts/shared';
@@ -46,6 +47,20 @@ const checkCredentials = async ({ email, password }: { email: string; password: 
 
   return [null, user];
 };
+
+const checkOpenIdCredentials = async (profile: any) => {
+  const email = toLower(profile.emails[0].value);
+  const firstname = profile.name.givenName;
+  const lastname = profile.name.familyName;
+  const username = profile.displayName;
+
+  if (!email || !firstname || !lastname || !username) {
+    return [null, false, { message: 'Invalid credentials' }];
+  }
+
+  return [null, { email, firstname, lastname, username }];
+};
+
 
 /**
  * Send an email to the user if it exists or do nothing
@@ -110,4 +125,4 @@ const resetPassword = async (
   });
 };
 
-export default { checkCredentials, validatePassword, hashPassword, forgotPassword, resetPassword };
+export default { checkCredentials, checkOpenIdCredentials, validatePassword, hashPassword, forgotPassword, resetPassword };

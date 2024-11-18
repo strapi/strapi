@@ -9,6 +9,24 @@ export default [
     },
   },
   {
+    method: 'GET',
+    path: '/login-openid',
+    handler: 'authentication.openIdLogin',
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/login-openid/redirect',
+    handler: 'authentication.openIdRedirect',
+    config: {
+      auth: false,
+      middlewares: ['admin::rateLimit'],
+    },
+  },
+  {
     method: 'POST',
     path: '/renew-token',
     handler: 'authentication.renewToken',

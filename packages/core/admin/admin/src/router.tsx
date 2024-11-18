@@ -25,6 +25,16 @@ const getImmutableRoutes = (): RouteObject[] => [
   // this needs to go before auth/:authType because otherwise it won't match the route
   ...getBaseEERoutes(),
   {
+    path: 'openid/:authResponse',
+    lazy: async () => {
+      const { AuthResponse } = await import('./pages/Auth/AuthResponse');
+
+      return {
+        Component: AuthResponse,
+      };
+    },
+  },
+  {
     path: 'auth/:authType',
     element: <AuthPage />,
   },

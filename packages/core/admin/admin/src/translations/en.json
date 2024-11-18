@@ -9,6 +9,7 @@
   "Auth.form.button.login": "Login",
   "Auth.form.button.login.providers.error": "We cannot connect you through the selected provider.",
   "Auth.form.button.login.strapi": "Log in via Strapi",
+  "Auth.form.button.login.auth0": "Log in with Auth0",
   "Auth.form.button.password-recovery": "Password Recovery",
   "Auth.form.button.register": "Let's start",
   "Auth.form.confirmPassword.label": "Confirm Password",
