@@ -851,13 +851,13 @@ describe('Attributes', () => {
 
           expect(sortedMembers).toHaveLength(2);
 
-          // Min
+          // Max
           expect(sortedMembers[0].kind).toBe(ts.SyntaxKind.PropertyDeclaration);
           expect(sortedMembers[0].name.escapedText).toBe('maxLength');
           expect(sortedMembers[0].type.kind).toBe(ts.SyntaxKind.NumericLiteral);
           expect(sortedMembers[0].type.text).toBe('12');
 
-          // Max
+          // Min
           expect(sortedMembers[1].kind).toBe(ts.SyntaxKind.PropertyDeclaration);
           expect(sortedMembers[1].name.escapedText).toBe('minLength');
           expect(sortedMembers[1].type.kind).toBe(ts.SyntaxKind.NumericLiteral);
