@@ -1,4 +1,4 @@
-const useModalQueryParams = jest.fn().mockReturnValue([
+export const useModalQueryParams = jest.fn().mockReturnValue([
   {
     queryObject: {
       page: 1,
@@ -18,5 +18,3 @@ const useModalQueryParams = jest.fn().mockReturnValue([
     onChangeFolder: jest.fn(),
   },
 ]);
-
-export default useModalQueryParams;

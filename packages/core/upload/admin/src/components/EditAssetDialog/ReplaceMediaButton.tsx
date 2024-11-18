@@ -51,6 +51,7 @@ export const ReplaceMediaButton = ({
           accept={acceptedMime}
           type="file"
           name="file"
+          data-testid="file-input"
           tabIndex={-1}
           ref={inputRef}
           onChange={handleChange}

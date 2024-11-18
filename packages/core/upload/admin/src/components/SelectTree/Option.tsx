@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { components, OptionProps as ReactSelectOptionProps } from 'react-select';
 import { styled } from 'styled-components';
+
 import type { Folder } from '../../../../shared/contracts/folders';
 
 const ToggleButton = styled(Flex)`
@@ -33,7 +34,7 @@ interface OptionProps extends ReactSelectOptionProps<FolderWithDepth, false> {
   selectProps: SelectProps & ReactSelectOptionProps<FolderWithDepth, false>['selectProps'];
 }
 
-const Option = ({ children, data, selectProps, ...props }: OptionProps) => {
+export const Option = ({ children, data, selectProps, ...props }: OptionProps) => {
   const { formatMessage } = useIntl();
   const { depth, value, children: options } = data;
   const { maxDisplayDepth, openValues, onOptionToggle } = selectProps;
@@ -75,5 +76,3 @@ const Option = ({ children, data, selectProps, ...props }: OptionProps) => {
     </components.Option>
   );
 };
-
-export default Option;

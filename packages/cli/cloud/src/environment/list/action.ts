@@ -1,21 +1,9 @@
 import chalk from 'chalk';
 import type { CLIContext } from '../../types';
-import { cloudApiFactory, local, tokenServiceFactory } from '../../services';
+import { cloudApiFactory, tokenServiceFactory } from '../../services';
 import { promptLogin } from '../../login/action';
 import { trackEvent } from '../../utils/analytics';
-
-async function getProject(ctx: CLIContext) {
-  const { project } = await local.retrieve();
-  if (!project) {
-    ctx.logger.warn(
-      `\nWe couldn't find a valid local project config.\nPlease link your local project to an existing Strapi Cloud project using the ${chalk.cyan(
-        'link'
-      )} command`
-    );
-    process.exit(1);
-  }
-  return project;
-}
+import { getLocalProject } from '../../utils/get-local-config';
 
 export default async (ctx: CLIContext) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
@@ -26,7 +14,7 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  const project = await getProject(ctx);
+  const project = await getLocalProject(ctx);
   if (!project) {
     ctx.logger.debug(`No valid local project configuration was found.`);
     return;

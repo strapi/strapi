@@ -148,6 +148,7 @@ interface EventWithoutProperties {
     | 'didSelectContentTypeFieldSettings'
     | 'didSelectContentTypeSettings'
     | 'didEditAuthenticationProvider'
+    | 'didRestoreHistoryVersion'
     | 'hasClickedCTBAddFieldBanner'
     | 'removeComponentFromDynamicZone'
     | 'willAddMoreFieldToContentType'
@@ -186,7 +187,6 @@ interface EventWithoutProperties {
     | 'willSaveComponent'
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
-    | 'willOpenPreview'
     | 'didEditFieldNameOnContentType'
     | 'didCreateRelease';
   properties?: never;

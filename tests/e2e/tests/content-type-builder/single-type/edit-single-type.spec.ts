@@ -14,17 +14,18 @@ test.describe('Edit single type', () => {
   const attributes = [{ type: 'text', name: 'testtext' }];
 
   test.beforeEach(async ({ page }) => {
+    await resetFiles();
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       skipTour: true,
-      resetFiles: true,
+      // Don't reset files here as it would only run once for the whole suite
+      resetFiles: false,
       importData: 'with-admin.tar',
-      afterSetup: async () => {
-        await createSingleType(page, {
-          name: ctName,
-          attributes,
-        });
-      },
+    });
+
+    await createSingleType(page, {
+      name: ctName,
+      attributes,
     });
 
     // Then go to our content type
@@ -45,7 +46,7 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can toggle draft&publish', async ({ page }) => {
@@ -57,7 +58,7 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can add a field with default value', async ({ page }) => {
@@ -73,6 +74,6 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 });
