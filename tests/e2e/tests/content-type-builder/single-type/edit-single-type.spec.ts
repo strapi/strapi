@@ -46,7 +46,7 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can toggle draft&publish', async ({ page }) => {
@@ -58,7 +58,7 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can add a field with default value', async ({ page }) => {
@@ -74,6 +74,6 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 });
