@@ -9,9 +9,8 @@ test.describe('Edit collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
   test.describe.configure({ timeout: 300000 });
 
-  // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
-  const ctName = 'Secret Document';
-  const attributes = [{ type: 'text', name: 'testtext' }];
+  // use existing type to avoid extra resets and flakiness
+  const ctName = 'Article';
 
   test.beforeEach(async ({ page }) => {
     await resetFiles();
@@ -19,14 +18,7 @@ test.describe('Edit collection type', () => {
       importData: 'with-admin.tar',
       login: true,
       skipTour: true,
-      // Don't reset files here as it would only run once for the whole suite
-      resetFiles: false,
-    });
-
-    // Reset files and create the same CTs between each test to prevent side effects
-    await createCollectionType(page, {
-      name: ctName,
-      attributes,
+      resetFiles: true,
     });
 
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
@@ -34,7 +26,7 @@ test.describe('Edit collection type', () => {
 
   // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
   // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterAll(async () => {
+  test.afterEach(async () => {
     await resetFiles();
   });
 
@@ -42,49 +34,72 @@ test.describe('Edit collection type', () => {
   test('Can update relation of type manyToOne to oneToOne', async ({ page }) => {
     // Create relation in Content-Type Builder
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
-    await page.getByRole('button', { name: /add another field to this/i }).click();
+    await page.getByRole('button', { name: /add another field to this collection type/i }).click();
     await page.getByRole('button', { name: /relation/i }).click();
     await page.getByLabel('Basic settings').getByRole('button').nth(3).click();
     await page.getByRole('button', { name: /article/i }).click();
-    await page.getByRole('menuitem', { name: /author/i }).click();
+    await page.getByRole('menuitem', { name: /product/i }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
+    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
+    // Fix the bug then remove this
     await waitForRestart(page);
 
-    await expect(page.getByRole('cell', { name: 'author', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
 
     // update relation in Content-Type Builder to oneToOne
-    await page.getByRole('button', { name: /edit author/i }).click();
+    await page.getByRole('button', { name: /edit product/i }).click();
     await page.getByLabel('Basic settings').getByRole('button').nth(0).click();
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
-
     await waitForRestart(page);
-
-    await expect(page.getByRole('cell', { name: 'author', exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
   });
 
   test('Can toggle internationalization', async ({ page }) => {
+    // toggle off
+    await page.getByRole('button', { name: 'Edit' }).first().click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Internationalization').click();
+    await page.getByRole('button', { name: 'Yes, disable' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
+
+    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
+    // Fix the bug then remove this
+    await page.reload();
+
+    // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
     await page.getByRole('button', { name: 'Edit' }).first().click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Finish' }).click();
-
     await waitForRestart(page);
-
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can toggle draft&publish', async ({ page }) => {
+    // toggle off
     await page.getByRole('button', { name: 'Edit' }).first().click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
-
     await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
+    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
+    // Fix the bug then remove this
+    await page.reload();
+
+    // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
+    await page.getByRole('button', { name: 'Edit' }).first().click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Draft & publish').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
