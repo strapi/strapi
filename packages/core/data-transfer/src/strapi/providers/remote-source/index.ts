@@ -352,7 +352,6 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   #reportInfo(message: string) {
-    console.log(this.#diagnostics);
     this.#diagnostics?.report({
       details: {
         createdAt: new Date(),
