@@ -1,5 +1,6 @@
 import fse from 'fs-extra';
 import inquirer from 'inquirer';
+import boxen from 'boxen';
 import path from 'path';
 import chalk from 'chalk';
 import { AxiosError } from 'axios';
@@ -7,7 +8,13 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
-import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfo } from '../types';
+import type {
+  CLIContext,
+  CloudApiService,
+  CloudCliConfig,
+  EnvironmentDetails,
+  ProjectInfo,
+} from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { notificationServiceFactory } from '../services/notification';
@@ -25,7 +32,16 @@ type PackageJson = {
 
 interface CmdOptions {
   env?: string;
+  force?: boolean;
 }
+
+const boxenOptions: boxen.Options = {
+  padding: 1,
+  margin: 1,
+  align: 'center',
+  borderColor: 'yellow',
+  borderStyle: 'round',
+};
 
 const QUIT_OPTION = 'Quit';
 
@@ -43,17 +59,6 @@ async function promptForEnvironment(environments: string[]): Promise<string> {
     process.exit(1);
   }
 
-  const { confirm } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: `Do you want to proceed with deployment to ${chalk.cyan(selectedEnvironment)}?`,
-    },
-  ]);
-
-  if (!confirm) {
-    process.exit(1);
-  }
   return selectedEnvironment;
 }
 
@@ -206,6 +211,17 @@ async function getTargetEnvironment(
   return environments[0];
 }
 
+function hasPendingOrLiveDeployment(
+  environments: EnvironmentDetails[],
+  targetEnvironment: string
+): boolean {
+  const environment = environments.find((env) => env.name === targetEnvironment);
+  if (!environment) {
+    throw new Error(`Environment details ${targetEnvironment} not found.`);
+  }
+  return environment.hasPendingDeployment || environment.hasLiveDeployment || false;
+}
+
 export default async (ctx: CLIContext, opts: CmdOptions) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
@@ -219,15 +235,18 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx, token);
+  let projectData;
   let environments: string[];
+  let environmentsDetails: EnvironmentDetails[];
 
   try {
     const {
-      data: { data: projectData, metadata },
+      data: { data, metadata },
     } = await cloudApiService.getProject({ name: project.name });
-
-    const isProjectSuspended = projectData.suspendedAt;
+    projectData = data;
     environments = projectData.environments;
+    environmentsDetails = projectData.environmentsDetails;
+    const isProjectSuspended = projectData.suspendedAt;
 
     if (isProjectSuspended) {
       ctx.logger.log(
@@ -280,6 +299,26 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
   }
 
   project.targetEnvironment = await getTargetEnvironment(ctx, opts, project, environments);
+
+  if (!opts.force) {
+    const shouldDisplayWarning = hasPendingOrLiveDeployment(
+      environmentsDetails,
+      project.targetEnvironment
+    );
+    if (shouldDisplayWarning) {
+      ctx.logger.log(boxen(cliConfig.projectDeployment.confirmationText, boxenOptions));
+      const { confirm } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: `Do you want to proceed with deployment to ${chalk.cyan(projectData.displayName)} on ${chalk.cyan(project.targetEnvironment)} environment?`,
+        },
+      ]);
+      if (!confirm) {
+        process.exit(1);
+      }
+    }
+  }
 
   const buildId = await upload(ctx, project, token, maxSize);
 

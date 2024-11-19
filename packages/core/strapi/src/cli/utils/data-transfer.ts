@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
-import { configs, createLogger, type winston } from '@strapi/logger';
+import { configs, createLogger, type winston, formats } from '@strapi/logger';
 import { createStrapi, compileStrapi } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
@@ -210,14 +210,18 @@ const errorColors = {
 } as const;
 
 const formatDiagnostic = (
-  operation: string
+  operation: string,
+  info?: boolean
 ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
   // Create log file for all incoming diagnostics
   let logger: undefined | winston.Logger;
   const getLogger = () => {
     if (!logger) {
       logger = createLogger(
-        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, { level: 'info' })
+        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, {
+          level: 'info',
+          format: formats?.detailedLogs,
+        })
       );
     }
     return logger;
@@ -235,10 +239,10 @@ const formatDiagnostic = (
 
         getLogger().error(errorMessage);
       }
-      if (kind === 'info') {
-        const { message, params } = details;
+      if (kind === 'info' && info) {
+        const { message, params, source } = details;
 
-        const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
+        const msg = `[${source}] ${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
 
         getLogger().info(msg);
       }
