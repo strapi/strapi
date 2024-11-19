@@ -11,7 +11,7 @@ import type {
   ProviderType,
   Transaction,
 } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';

@@ -41,7 +41,7 @@ import {
   createDiagnosticReporter,
   IDiagnosticReporter,
   ErrorDiagnosticSeverity,
-} from './diagnostic';
+} from '../utils/diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
 import { ProviderTransferError } from '../errors/providers';
