@@ -22,7 +22,7 @@ function createSearchTest(testFunction, description, searchTerm) {
     const tableWithProduct = page.locator('table:has-text("' + searchTerm + '")');
     const rows = tableWithProduct.locator('tr');
 
-    // Note that there is already an item in there, so if search didn't work this would be 3
+    // Note that there is already an item in there, so if search didn't filter this would be 3 or more
     await expect(rows).toHaveCount(2);
   });
 }
@@ -35,9 +35,11 @@ test.describe('Search', () => {
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
   });
 
+  // TODO: Test clearing the search box
+
+  // The testFn is necessary so that we can skip tests
   const testCases = [
-    // TODO: Extremely long search string
-    // TODO: Clearing the search box
+    // TODO: Test extremely long search string
     { testFn: test, description: 'ASCII (no spaces)', searchTerm: 'TestMe' },
     { testFn: test.fixme, description: 'ASCII (spaces)', searchTerm: 'Product 2' },
     { testFn: test.fixme, description: 'extended ASCII', searchTerm: 'Café' },
