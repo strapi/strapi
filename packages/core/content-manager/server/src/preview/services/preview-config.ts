@@ -33,14 +33,17 @@ const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) =>
     // @ts-expect-error - currentMiddleware is not a string
     if (currentMiddleware.name === middleware.name) {
       // Deep merge (+ concat arrays) the new config with the current middleware config
-      // @ts-expect-error - fix
-      return mergeWith(currentMiddleware, middleware, (objValue, srcValue) => {
-        if (Array.isArray(objValue)) {
-          return objValue.concat(srcValue);
-        }
+      return mergeWith(
+        (objValue, srcValue) => {
+          if (Array.isArray(objValue)) {
+            return objValue.concat(srcValue);
+          }
 
-        return objValue;
-      });
+          return undefined;
+        },
+        currentMiddleware,
+        middleware
+      );
     }
 
     return currentMiddleware;
