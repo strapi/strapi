@@ -9,23 +9,15 @@ test.describe('Edit single type', () => {
   // very long timeout for these tests because they restart the server multiple times
   test.describe.configure({ timeout: 300000 });
 
-  // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
-  const ctName = 'Secret Document';
-  const attributes = [{ type: 'text', name: 'testtext' }];
+  // Use the existing single-type from our test data
+  const ctName = 'Homepage';
 
   test.beforeEach(async ({ page }) => {
-    await resetFiles();
     await sharedSetup('ctb-edit-st', page, {
       login: true,
       skipTour: true,
-      // Don't reset files here as it would only run once for the whole suite
-      resetFiles: false,
+      resetFiles: true,
       importData: 'with-admin.tar',
-    });
-
-    await createSingleType(page, {
-      name: ctName,
-      attributes,
     });
 
     // Then go to our content type
@@ -34,30 +26,53 @@ test.describe('Edit single type', () => {
 
   // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
   // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterAll(async () => {
+  test.afterEach(async ({ page }) => {
     await resetFiles();
   });
 
   test('Can toggle internationalization', async ({ page }) => {
+    // toggle off
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Internationalization').click();
+    await page.getByRole('button', { name: 'Yes, disable' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
+
+    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
+    // Fix the bug then remove this
+    await page.reload();
+
+    // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
     await page.getByRole('button', { name: 'Edit', exact: true }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Finish' }).click();
-
     await waitForRestart(page);
-
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can toggle draft&publish', async ({ page }) => {
+    // toggle off
     await page.getByRole('button', { name: 'Edit', exact: true }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
-
     await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
+    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
+    // Fix the bug then remove this
+    await page.reload();
+
+    // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Draft & publish').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
