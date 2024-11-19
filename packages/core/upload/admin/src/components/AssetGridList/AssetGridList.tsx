@@ -11,11 +11,7 @@ import type { AllowedTypes } from '../AssetCard/AssetCard';
 
 const DraggableAssetCard = styled(AssetCard)`
   && {
-    cursor: grab;
-
-    &:active {
-      cursor: grabbing;
-    }
+    cursor: inherit;
   }
 `;
 
