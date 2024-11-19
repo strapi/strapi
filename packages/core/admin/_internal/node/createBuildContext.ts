@@ -177,7 +177,7 @@ const createBuildContext = async ({
   const buildContext = {
     appDir,
     // If serveAdminPanel is false, use relative paths for separate deployment
-    basePath: serveAdminPanel ? adminPath : '',
+    basePath: serveAdminPanel ? `${adminPath}/` : '',
     bundler,
     customisations,
     cwd,
