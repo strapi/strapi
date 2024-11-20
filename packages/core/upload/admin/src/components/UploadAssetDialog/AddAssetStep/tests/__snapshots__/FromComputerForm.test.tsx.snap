@@ -1,0 +1,302 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FromComputerForm snapshots the component 1`] = `
+.c0 {
+  padding-block-start: 24px;
+  padding-block-end: 24px;
+  padding-inline-start: 40px;
+  padding-inline-end: 40px;
+}
+
+.c1 {
+  padding-block-start: 64px;
+  padding-block-end: 64px;
+  background: #f6f6f9;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #c0c0cf;
+  position: relative;
+}
+
+.c7 {
+  padding-block-start: 12px;
+  padding-block-end: 20px;
+}
+
+.c9 {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1;
+  position: absolute;
+}
+
+.c11 {
+  position: relative;
+}
+
+.c12 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c16 {
+  padding-block-start: 16px;
+  padding-inline-end: 20px;
+  padding-block-end: 16px;
+  padding-inline-start: 20px;
+  background: #f6f6f9;
+}
+
+.c3 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c4 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c13 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c17 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c8 {
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  color: #666687;
+}
+
+.c15 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c20 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c14 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+  color: #ffffff;
+}
+
+.c14:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c14:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c14[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c19 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+}
+
+.c19:hover {
+  background-color: #f6f6f9;
+}
+
+.c19:active {
+  background-color: #eaeaef;
+}
+
+.c19[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c18 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
+}
+
+.c5 {
+  flex-direction: column;
+}
+
+.c6 {
+  font-size: 6rem;
+}
+
+.c6 svg path {
+  fill: #4945ff;
+}
+
+.c2 {
+  border-style: dashed;
+}
+
+.c10 {
+  opacity: 0;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c14 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c19 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+<div>
+  <form>
+    <div
+      class="c0"
+    >
+      <label>
+        <div
+          class="c1 c2"
+          justifycontent="center"
+        >
+          <div
+            class="c3"
+          >
+            <div
+              class="c4 c5"
+            >
+              <div
+                class="c6"
+              >
+                <svg
+                  aria-hidden="true"
+                  fill="currentColor"
+                  height="3.2rem"
+                  viewBox="0 0 32 32"
+                  width="3.2rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M16 3a13 13 0 1 0 13 13A13.016 13.016 0 0 0 16 3m5 14h-4v4a1 1 0 0 1-2 0v-4h-4a1 1 0 0 1 0-2h4v-4a1 1 0 0 1 2 0v4h4a1 1 0 0 1 0 2"
+                  />
+                </svg>
+              </div>
+              <div
+                class="c7"
+              >
+                <span
+                  class="c8"
+                >
+                  Drag & Drop here or
+                </span>
+              </div>
+              <input
+                aria-label="Drag & Drop here or"
+                class="c9 c10"
+                multiple=""
+                name="files"
+                tabindex="-1"
+                type="file"
+              />
+              <div
+                class="c11"
+              >
+                <button
+                  aria-disabled="false"
+                  class="c12 c13 c14"
+                  type="button"
+                >
+                  <span
+                    class="c15"
+                  >
+                    Browse files
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </label>
+    </div>
+    <footer
+      class="c16 c17 c18"
+    >
+      <button
+        aria-disabled="false"
+        class="c12 c13 c19"
+      >
+        <span
+          class="c15"
+        >
+          cancel
+        </span>
+      </button>
+    </footer>
+  </form>
+  <span
+    class="c20"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

@@ -4,9 +4,10 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 import { stringify } from 'qs';
 
 import { useConfig } from './useConfig';
+
 import type { Query, FilterCondition } from '../../../shared/contracts/files';
 
-const useModalQueryParams = (initialState?: Partial<Query>) => {
+export const useModalQueryParams = (initialState?: Partial<Query>) => {
   const { trackUsage } = useTracking();
   const {
     config: { data: config },
@@ -64,7 +65,7 @@ const useModalQueryParams = (initialState?: Partial<Query>) => {
     }
   };
 
-  const handleChangeSearch = (_q: Query['_q']) => {
+  const handleChangeSearch = (_q: Query['_q'] | null) => {
     if (_q) {
       setQueryObject((prev) => ({ ...prev, _q, page: 1 }));
     } else {
@@ -72,8 +73,9 @@ const useModalQueryParams = (initialState?: Partial<Query>) => {
 
       Object.keys(queryObject).forEach((key) => {
         if (!['page', '_q'].includes(key)) {
-          // @ts-ignore
-          newState[key] = queryObject[key];
+          (newState as Record<string, string | number | undefined>)[key] = (
+            queryObject as Record<string, string | number | undefined>
+          )[key];
         }
       });
 
@@ -97,5 +99,3 @@ const useModalQueryParams = (initialState?: Partial<Query>) => {
     },
   ];
 };
-
-export default useModalQueryParams;

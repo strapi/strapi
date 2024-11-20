@@ -22,6 +22,9 @@ export type CloudCliConfig = {
     defaults: Partial<ProjectAnswers>;
     introText: string;
   };
+  projectDeployment: {
+    confirmationText: string;
+  };
   buildLogsConnectionTimeout: string;
   buildLogsMaxRetries: string;
   notificationsConnectionTimeout: string;

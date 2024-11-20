@@ -1,3 +1,4 @@
+/* eslint-disable check-file/filename-naming-convention */
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, waitFor, RenderHookResult } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -43,7 +44,7 @@ const client = new QueryClient({
 });
 
 // eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }: { children: React.ReactNode }) {
+const ComponentFixture = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
@@ -51,7 +52,7 @@ function ComponentFixture({ children }: { children: React.ReactNode }) {
       </IntlProvider>
     </QueryClientProvider>
   );
-}
+};
 
 function setup(
   ...args: Parameters<typeof useFolderStructure>

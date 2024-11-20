@@ -1,8 +1,8 @@
 import { useFetchClient, FetchClient } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
-import { CreateFolders, UpdateFolder } from '../../../shared/contracts/folders';
 
-import pluginId from '../pluginId';
+import { CreateFolders, UpdateFolder } from '../../../shared/contracts/folders';
+import { pluginId } from '../pluginId';
 
 interface EditFolderRequestParams {
   attrs: CreateFolders.Request['body'] | UpdateFolder.Request['body'];
@@ -29,9 +29,9 @@ export const useEditFolder = () => {
     UpdateFolder.Response['error'] | CreateFolders.Response['error'],
     EditFolderRequestParams
   >((...args) => editFolderRequest(put, post, ...args), {
-    onSuccess() {
-      queryClient.refetchQueries([pluginId, 'folders'], { active: true });
-      queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
+    async onSuccess() {
+      await queryClient.refetchQueries([pluginId, 'folders'], { active: true });
+      await queryClient.refetchQueries([pluginId, 'folder', 'structure'], { active: true });
     },
   });
 
