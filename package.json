@@ -58,7 +58,7 @@
     "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
     "test:e2e": "node tests/scripts/run-e2e-tests.js",
     "test:e2e:clean": "node tests/scripts/run-e2e-tests.js clean",
-    "test:front": "cross-env IS_EE=true jest --config jest.config.front.js",
+    "test:front": "cross-env IS_EE=true jest --config jest.config.front.js --runInBand",
     "test:front:all": "cross-env IS_EE=true nx run-many --target=test:front --nx-ignore-cycles",
     "test:front:all:ce": "cross-env IS_EE=false nx run-many --target=test:front:ce --nx-ignore-cycles",
     "test:front:ce": "cross-env IS_EE=false run test:front",

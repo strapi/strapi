@@ -11,6 +11,7 @@ import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
 import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../engine/diagnostic';
 
 import * as utils from '../../../utils';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
@@ -54,6 +55,8 @@ class LocalFileSourceProvider implements ISourceProvider {
 
   #metadata?: IMetadata;
 
+  #diagnostics?: IDiagnosticReporter;
+
   constructor(options: ILocalFileSourceProviderOptions) {
     this.options = options;
 
@@ -64,10 +67,22 @@ class LocalFileSourceProvider implements ISourceProvider {
     }
   }
 
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        source: 'file-source-provider',
+      },
+      kind: 'info',
+    });
+  }
+
   /**
    * Pre flight checks regarding the provided options, making sure that the file can be opened (decrypted, decompressed), etc.
    */
-  async bootstrap() {
+  async bootstrap(diagnostics: IDiagnosticReporter) {
+    this.#diagnostics = diagnostics;
     const { path: filePath } = this.options.file;
 
     try {
@@ -99,6 +114,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getMetadata() {
+    this.#reportInfo('getting metadata');
     if (!this.#metadata) {
       await this.#loadMetadata();
     }
@@ -107,6 +123,7 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
+    this.#reportInfo('getting schemas');
     const schemaCollection = await utils.stream.collect<Struct.Schema>(
       this.createSchemasReadStream()
     );
@@ -123,18 +140,22 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   createEntitiesReadStream(): Readable {
+    this.#reportInfo('creating entities read stream');
     return this.#streamJsonlDirectory('entities');
   }
 
   createSchemasReadStream(): Readable {
+    this.#reportInfo('creating schemas read stream');
     return this.#streamJsonlDirectory('schemas');
   }
 
   createLinksReadStream(): Readable {
+    this.#reportInfo('creating links read stream');
     return this.#streamJsonlDirectory('links');
   }
 
   createConfigurationReadStream(): Readable {
+    this.#reportInfo('creating configuration read stream');
     // NOTE: TBD
     return this.#streamJsonlDirectory('configuration');
   }
@@ -143,6 +164,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     const inStream = this.#getBackupStream();
     const outStream = new PassThrough({ objectMode: true });
     const loadAssetMetadata = this.#loadAssetMetadata.bind(this);
+    this.#reportInfo('creating assets read stream');
 
     pipeline(
       [

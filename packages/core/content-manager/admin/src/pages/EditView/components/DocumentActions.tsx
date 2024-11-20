@@ -773,7 +773,7 @@ const UpdateAction: DocumentActionComponent = ({
      */
     disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
     label: formatMessage({
-      id: 'content-manager.containers.Edit.save',
+      id: 'global.save',
       defaultMessage: 'Save',
     }),
     onClick: async () => {

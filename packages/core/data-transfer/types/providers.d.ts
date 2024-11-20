@@ -6,6 +6,7 @@ import type {
   MaybePromise,
 } from './utils';
 import type { IMetadata } from './common-entities';
+import type { IDiagnosticReporter } from '../src/engine/diagnostic';
 
 export type ProviderType = 'source' | 'destination';
 
@@ -18,7 +19,7 @@ export interface IProvider {
    * bootstrap() is called during transfer engine bootstrap
    * It is used for initialization operations such as making a database connection, opening a file, checking authorization, etc
    */
-  bootstrap?(): MaybePromise<void>;
+  bootstrap?(diagnostics?: IDiagnosticReporter): MaybePromise<void>;
   close?(): MaybePromise<void>; // called during transfer engine close
 
   getMetadata(): MaybePromise<IMetadata | null>; // returns the transfer metadata to be used for version validation
