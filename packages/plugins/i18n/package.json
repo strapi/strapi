@@ -53,8 +53,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-rc.12",
-    "@strapi/icons": "2.0.0-rc.12",
+    "@strapi/design-system": "2.0.0-rc.13",
+    "@strapi/icons": "2.0.0-rc.13",
     "@strapi/utils": "5.4.0",
     "lodash": "4.17.21",
     "qs": "6.11.1",
