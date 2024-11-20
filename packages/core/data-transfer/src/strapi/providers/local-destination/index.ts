@@ -370,7 +370,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               return callback();
             }
             const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { id: fileEntitiesMapper[uploadData.id] },
+              where: { id: fileEntitiesMapper?.[uploadData.id] },
             });
             entry.url = uploadData.url;
             await strapi.db.query('plugin::upload.file').update({

@@ -9,6 +9,8 @@ const write = jest.fn((_chunk, _encoding, callback) => {
   callback();
 });
 
+const uploadStream = jest.fn(() => null);
+
 const createWriteStreamMock = jest.fn(() => {
   return new Writable({
     objectMode: true,
@@ -30,9 +32,14 @@ const createStrapi = getStrapiFactory({
       public: 'static/public/assets',
     },
   },
-  db: { transaction },
+  db: {
+    transaction,
+    query() {
+      return {};
+    },
+  },
   config: {
-    get(service) {
+    get(service: string) {
       if (service === 'plugin::upload') {
         return {
           provider: 'local',
@@ -40,6 +47,15 @@ const createStrapi = getStrapiFactory({
       }
       return {};
     },
+  },
+  plugin(plugin: string) {
+    if (plugin === 'upload') {
+      return {
+        provider: {
+          uploadStream,
+        },
+      };
+    }
   },
 });
 
@@ -93,6 +109,14 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
       filepath: 'strapi-import-folder/assets',
       stats: { size: 200 },
       stream: Readable.from(['test', 'test-2']),
+      metadata: {
+        hash: 'hash',
+        name: 'test-photo',
+        id: 1,
+        url: 'test-photo.jpg',
+        size: 200,
+        mime: 'test-photo.jpg',
+      },
     };
     const provider = createLocalStrapiDestinationProvider({
       getStrapi: () =>
@@ -100,6 +124,26 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
           dirs: {
             static: {
               public: assetsDirectory,
+            },
+          },
+          db: {
+            transaction,
+            query() {
+              return {
+                findOne() {
+                  return {
+                    hash: 'hash',
+                    name: 'test-photo',
+                    id: 1,
+                    url: 'test-photo.jpg',
+                    size: 200,
+                    mime: 'test-photo.jpg',
+                  };
+                },
+                update() {
+                  return null;
+                },
+              };
             },
           },
         }),
@@ -118,9 +162,6 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
 
     expect(error).not.toBeInstanceOf(Error);
 
-    expect(write).toHaveBeenCalled();
-    expect(createWriteStreamMock).toHaveBeenCalledWith(
-      `${assetsDirectory}/uploads/${file.filename}`
-    );
+    expect(uploadStream).toHaveBeenCalled();
   });
 });
