@@ -70,14 +70,14 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await expect(page.getByText(/^Published$/)).toBeDisabled();
   });
 
-  test.only('Iframe should be present and load the correct URL', async ({ page }) => {
+  test('Iframe should be present and load the correct URL', async ({ page }) => {
     // Open an edit view for a content type that has preview
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
     // Publish the document
-    await clickAndWait(page, page.getByRole('button', { name: /publish/i }));
+    await page.getByRole('button', { name: /publish/i }).click();
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
