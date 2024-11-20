@@ -17,6 +17,7 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
 ) => {
   const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
     where: {
+      releasedAt: null,
       actions: {
         contentType,
         entryDocumentId: entry.documentId,
@@ -27,7 +28,7 @@ const updateActionsStatusAndUpdateReleaseStatus = async (
 
   const entryStatus = await isEntryValid(contentType, entry, { strapi });
 
-  await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+  await strapi.db.query(RELEASE_ACTION_MODEL_UID).updateMany({
     where: {
       contentType,
       entryDocumentId: entry.documentId,

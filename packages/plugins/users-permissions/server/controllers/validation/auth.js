@@ -7,11 +7,27 @@ const callbackSchema = yup.object({
   password: yup.string().required(),
 });
 
-const registerSchema = yup.object({
-  email: yup.string().email().required(),
-  username: yup.string().required(),
-  password: yup.string().required(),
-});
+const createRegisterSchema = (config) =>
+  yup.object({
+    email: yup.string().email().required(),
+    username: yup.string().required(),
+    password: yup
+      .string()
+      .required()
+      .test(async function (value) {
+        if (typeof config?.validatePassword === 'function') {
+          try {
+            const isValid = await config.validatePassword(value);
+            if (!isValid) {
+              return this.createError({ message: 'Password validation failed.' });
+            }
+          } catch (error) {
+            return this.createError({ message: error.message || 'An error occurred.' });
+          }
+        }
+        return true;
+      }),
+  });
 
 const sendEmailConfirmationSchema = yup.object({
   email: yup.string().email().required(),
@@ -27,31 +43,71 @@ const forgotPasswordSchema = yup
   })
   .noUnknown();
 
-const resetPasswordSchema = yup
-  .object({
-    password: yup.string().required(),
-    passwordConfirmation: yup.string().required(),
-    code: yup.string().required(),
-  })
-  .noUnknown();
+const createResetPasswordSchema = (config) =>
+  yup
+    .object({
+      password: yup
+        .string()
+        .required()
+        .test(async function (value) {
+          if (typeof config?.validatePassword === 'function') {
+            try {
+              const isValid = await config.validatePassword(value);
+              if (!isValid) {
+                return this.createError({ message: 'Password validation failed.' });
+              }
+            } catch (error) {
+              return this.createError({ message: error.message || 'An error occurred.' });
+            }
+          }
+          return true;
+        }),
 
-const changePasswordSchema = yup
-  .object({
-    password: yup.string().required(),
-    passwordConfirmation: yup
-      .string()
-      .required()
-      .oneOf([yup.ref('password')], 'Passwords do not match'),
-    currentPassword: yup.string().required(),
-  })
-  .noUnknown();
+      passwordConfirmation: yup
+        .string()
+        .required()
+        .oneOf([yup.ref('password')], 'Passwords do not match'),
+
+      code: yup.string().required(),
+    })
+    .noUnknown();
+
+const createChangePasswordSchema = (config) =>
+  yup
+    .object({
+      password: yup
+        .string()
+        .required()
+        .test(async function (value) {
+          if (typeof config?.validatePassword === 'function') {
+            try {
+              const isValid = await config.validatePassword(value);
+              if (!isValid) {
+                return this.createError({ message: 'Password validation failed.' });
+              }
+            } catch (error) {
+              return this.createError({ message: error.message || 'An error occurred.' });
+            }
+          }
+          return true;
+        }),
+      passwordConfirmation: yup
+        .string()
+        .required()
+        .oneOf([yup.ref('password')], 'Passwords do not match'),
+      currentPassword: yup.string().required(),
+    })
+    .noUnknown();
 
 module.exports = {
   validateCallbackBody: validateYupSchema(callbackSchema),
-  validateRegisterBody: validateYupSchema(registerSchema),
+  validateRegisterBody: (payload, config) =>
+    validateYupSchema(createRegisterSchema(config))(payload),
   validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationSchema),
   validateEmailConfirmationBody: validateYupSchema(validateEmailConfirmationSchema),
   validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
-  validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
-  validateChangePasswordBody: validateYupSchema(changePasswordSchema),
+  validateResetPasswordBody: (payload, config) =>
+    validateYupSchema(createResetPasswordSchema(config))(payload),
+  validateChangePasswordBody: (payload, config) =>
+    validateYupSchema(createChangePasswordSchema(config))(payload),
 };

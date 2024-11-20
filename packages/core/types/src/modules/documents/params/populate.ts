@@ -1,7 +1,17 @@
 import type * as Schema from '../../../schema';
 
 import type * as UID from '../../../uid';
-import type { Constants, Guard, If, And, DoesNotExtends, IsNotNever, XOR } from '../../../utils';
+import type {
+  Constants,
+  Guard,
+  If,
+  And,
+  DoesNotExtends,
+  IsNotNever,
+  XOR,
+  Intersect,
+  Extends,
+} from '../../../utils';
 
 import type { Params } from '..';
 
@@ -67,9 +77,31 @@ type PopulateClause<
   TSchemaUID extends UID.Schema,
   TKeys extends Schema.PopulatableAttributeNames<TSchemaUID>,
 > = {
-  [TKey in TKeys]?:
-    | boolean
-    | NestedParams<Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TKey>>>;
+  [TKey in TKeys]?: Schema.Attribute.Target<
+    Schema.AttributeByName<TSchemaUID, TKey>
+  > extends infer TTarget extends UID.Schema
+    ?
+        | boolean
+        | Intersect<
+            [
+              NestedParams<TTarget>,
+              // Only add the count clause to content types links, ignore components
+              If<Extends<TTarget, UID.ContentType>, CountClause, unknown>,
+            ]
+          >
+    : never;
+};
+
+type CountClause = { count?: boolean };
+
+// TODO: Remove support in v6
+type DeprecatedSharedPopulateClauseForPolymorphicLinks = {
+  /**
+   * Enables the population of all first-level links using a wildcard.
+   *
+   * @deprecated The support is going to be dropped in Strapi v6
+   */
+  populate?: WildcardNotation;
 };
 
 /**
@@ -92,31 +124,39 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = [
       And<
         Constants.AreSchemaRegistriesExtended,
         // If TSchemaUID === UID.Schema, then ignore it and move to loose types
-        // Note: Currently, this only ignores TSchemaUID when it is equal to UID.Schema, it won't work if UID.(ContentType|Component) is passed as parameter
+        // Note: Currently, this only ignores TSchemaUID when it's equal to UID.Schema, it won't work if UID.(ContentType|Component) is passed as parameter
         DoesNotExtends<UID.Schema, TSchemaUID>
       >,
       // Populatable keys with a target
       | If<IsNotNever<TKeysWithTarget>, PopulateClause<TSchemaUID, TKeysWithTarget>>
-      // Populatable keys with either zero or multiple target(s)
+      // Populatable keys with either zero or multiple targets
       | If<
           IsNotNever<TKeysWithoutTarget>,
           {
             [TKey in TKeysWithoutTarget]?:
               | boolean
-              | Fragment<
-                  Guard.Never<
-                    Schema.Attribute.MorphTargets<Schema.AttributeByName<TSchemaUID, TKey>>,
-                    UID.Schema
-                  >
+              | Intersect<
+                  [
+                    Fragment<
+                      Guard.Never<
+                        Schema.Attribute.MorphTargets<Schema.AttributeByName<TSchemaUID, TKey>>,
+                        UID.Schema
+                      >
+                    >,
+                    DeprecatedSharedPopulateClauseForPolymorphicLinks,
+                  ]
                 >;
           }
         >,
-      // Loose fallback when registries are not extended
+      // Loose fallback when registries aren't extended
       {
         [key: string]:
           | boolean
           // We can't have both populate fragments and nested params, hence the xor
-          | XOR<NestedParams<UID.Schema>, Fragment<UID.Schema>>;
+          | XOR<
+              Intersect<[NestedParams<UID.Schema>, CountClause]>,
+              Intersect<[Fragment<UID.Schema>, DeprecatedSharedPopulateClauseForPolymorphicLinks]>
+            >;
       }
     >
   : never;

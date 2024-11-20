@@ -42,4 +42,18 @@ describe('NavUser', () => {
     const logoutLink = screen.getByText('Logout');
     expect(logoutLink).toBeInTheDocument();
   });
+
+  it('shows the logout link with correct hover styles', async () => {
+    const { user } = render(<NavUser initials="JD">John Doe</NavUser>);
+
+    // Open the menu
+    const buttonMenu = screen.getByRole('button');
+    await user.click(buttonMenu);
+
+    const neutralMenuItem = screen.getByText('Logout');
+    await user.hover(neutralMenuItem);
+    expect(neutralMenuItem).toHaveStyle({
+      backgroundColor: 'theme.colors.danger100',
+    });
+  });
 });

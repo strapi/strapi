@@ -26,7 +26,8 @@ export const createDispatcher = (
   retryMessageOptions = {
     retryMessageMaxRetries: 5,
     retryMessageTimeout: 30000,
-  }
+  },
+  reportInfo?: (message: string) => void
 ) => {
   const state: IDispatcherState = {};
 
@@ -49,6 +50,16 @@ export const createDispatcher = (
         Object.assign(payload, { transferID: state.transfer?.id });
       }
 
+      if (message.type === 'command') {
+        reportInfo?.(
+          `dispatching message command:${(message as Client.CommandMessage).command} uuid:${uuid} sent:${numberOfTimesMessageWasSent}`
+        );
+      } else if (message.type === 'transfer') {
+        const messageToSend = message as Client.TransferMessage;
+        reportInfo?.(
+          `dispatching message action:${messageToSend.action} ${messageToSend.kind === 'step' ? `step:${messageToSend.step}` : ''} uuid:${uuid} sent:${numberOfTimesMessageWasSent}`
+        );
+      }
       const stringifiedPayload = JSON.stringify(payload);
       ws.send(stringifiedPayload, (error) => {
         if (error) {
@@ -72,6 +83,16 @@ export const createDispatcher = (
 
       const onResponse = (raw: RawData) => {
         const response: Server.Message<U> = JSON.parse(raw.toString());
+        if (message.type === 'command') {
+          reportInfo?.(
+            `recieved response to message command: ${(message as Client.CommandMessage).command} uuid: ${uuid} sent: ${numberOfTimesMessageWasSent}`
+          );
+        } else if (message.type === 'transfer') {
+          const messageToSend = message as Client.TransferMessage;
+          reportInfo?.(
+            `recieved response to message action:${messageToSend.action} ${messageToSend.kind === 'step' ? `step:${messageToSend.step}` : ''} uuid:${uuid} sent:${numberOfTimesMessageWasSent}`
+          );
+        }
         if (response.uuid === uuid) {
           clearInterval(interval);
           if (response.error) {

@@ -96,7 +96,7 @@ yargs
     async handler(argv) {
       try {
         if (await pathExists(path.join(testRoot, '.env'))) {
-          // Run tests with the env variables specified in the e2e/app-template/.env
+          // Run tests with the env variables specified in the e2e/.env file
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 
@@ -286,7 +286,7 @@ module.exports = config
         const currentTestApps = await fs.readdir(testAppDirectory);
 
         if (currentTestApps.length === 0) {
-          console.log('No test apps to clean');
+          console.log('No e2e test apps to clean');
           return;
         }
 

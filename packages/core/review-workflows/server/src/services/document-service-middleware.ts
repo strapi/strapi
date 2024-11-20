@@ -1,4 +1,5 @@
 import { Modules } from '@strapi/types';
+import { errors } from '@strapi/utils';
 
 import { isNil } from 'lodash/fp';
 import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
@@ -122,7 +123,34 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
   return next();
 };
 
+/**
+ * Check if the entity is at the required stage before publish
+ */
+const checkStageBeforePublish: Middleware = async (ctx, next) => {
+  if (ctx.action !== 'publish') {
+    return next();
+  }
+
+  const workflow = await getService('workflows').getAssignedWorkflow(ctx.contentType.uid, {
+    populate: 'stageRequiredToPublish',
+  });
+
+  if (!workflow || !workflow.stageRequiredToPublish) {
+    return next();
+  }
+
+  const { documentId } = ctx.params;
+  const entryStage = await getEntityStage(ctx.contentType.uid, documentId, ctx.params);
+
+  if (entryStage.id !== workflow.stageRequiredToPublish.id) {
+    throw new errors.ValidationError('Entry is not at the required stage to publish');
+  }
+
+  return next();
+};
+
 export default () => ({
   assignStageOnCreate,
   handleStageOnUpdate,
+  checkStageBeforePublish,
 });
