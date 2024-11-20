@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Writable, PassThrough } from 'stream';
-import { UID, type Core } from '@strapi/types';
+import { type Core } from '@strapi/types';
 
 import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';
@@ -10,7 +10,6 @@ import { createLocalStrapiDestinationProvider } from '../../providers';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
 import { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
-import { createDiagnosticReporter } from '../../../utils/diagnostic';
 
 const VALID_TRANSFER_ACTIONS = [
   'bootstrap',
