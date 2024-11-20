@@ -80,10 +80,7 @@ export const skipCtbTour = async (page: Page) => {
  */
 export const clickAndWait = async (page: Page, locator: Locator) => {
   await locator.click();
-
-  if (page.context().browser()?.browserType().name() === 'webkit') {
-    await page.waitForLoadState('networkidle');
-  }
+  await page.waitForLoadState('networkidle');
 };
 
 /**
