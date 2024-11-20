@@ -22,6 +22,12 @@ export type ProjectInfo = {
 
 export type EnvironmentInfo = Record<string, unknown>;
 
+export type EnvironmentDetails = {
+  name: string;
+  hasLiveDeployment: boolean;
+  hasPendingDeployment: boolean;
+};
+
 export type ProjectInput = Omit<ProjectInfo, 'id'>;
 
 export type DeployResponse = {
@@ -49,16 +55,18 @@ export type ListLinkProjectsResponse = {
 
 export type ListLinkEnvironmentsResponse = {
   data: {
-    data: EnvironmentInfo[] | Record<string, never>;
+    data: EnvironmentDetails[] | Record<string, never>;
   };
 };
 
 export type GetProjectResponse = {
   data: {
+    displayName: string;
     updatedAt: string;
     suspendedAt?: string;
     isTrial: boolean;
     environments: string[];
+    environmentsDetails: EnvironmentDetails[];
   };
   metadata: {
     dashboardUrls: {

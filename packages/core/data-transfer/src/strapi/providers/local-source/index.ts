@@ -3,6 +3,7 @@ import { chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../engine/diagnostic';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
@@ -29,12 +30,26 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   strapi?: Core.Strapi;
 
+  #diagnostics?: IDiagnosticReporter;
+
   constructor(options: ILocalStrapiSourceProviderOptions) {
     this.options = options;
   }
 
-  async bootstrap(): Promise<void> {
+  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
+    this.#diagnostics = diagnostics;
     this.strapi = await this.options.getStrapi();
+  }
+
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        source: 'local-source-provider',
+      },
+      kind: 'info',
+    });
   }
 
   async close(): Promise<void> {
@@ -47,6 +62,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   }
 
   getMetadata(): IMetadata {
+    this.#reportInfo('getting metadata');
     const strapiVersion = strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
 
@@ -60,7 +76,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   async createEntitiesReadStream(): Promise<Readable> {
     assertValidStrapi(this.strapi, 'Not able to stream entities');
-
+    this.#reportInfo('creating entities read stream');
     return chain([
       // Entities stream
       createEntitiesStream(this.strapi),
@@ -72,19 +88,20 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   createLinksReadStream(): Readable {
     assertValidStrapi(this.strapi, 'Not able to stream links');
+    this.#reportInfo('creating links read stream');
 
     return createLinksStream(this.strapi);
   }
 
   createConfigurationReadStream(): Readable {
     assertValidStrapi(this.strapi, 'Not able to stream configuration');
-
+    this.#reportInfo('creating configuration read stream');
     return createConfigurationStream(this.strapi);
   }
 
   getSchemas(): Record<string, Struct.Schema> {
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
-
+    this.#reportInfo('getting schemas');
     const schemas = utils.schema.schemasToValidJSON({
       ...this.strapi.contentTypes,
       ...this.strapi.components,
@@ -99,7 +116,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   createAssetsReadStream(): Readable {
     assertValidStrapi(this.strapi, 'Not able to stream assets');
-
+    this.#reportInfo('creating assets read stream');
     return createAssetsStream(this.strapi);
   }
 }
