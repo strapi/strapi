@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-sentry",
-  "version": "5.3.0",
+  "version": "5.4.0",
   "description": "Send Strapi error events to Sentry",
   "repository": {
     "type": "git",
@@ -57,14 +57,14 @@
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
     "@strapi/sdk-plugin": "^5.0.0",
-    "@strapi/strapi": "workspace:*",
+    "@strapi/strapi": "5.4.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/strapi": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
@@ -79,5 +79,6 @@
     "displayName": "Sentry",
     "description": "Send Strapi error events to Sentry.",
     "kind": "plugin"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

@@ -23,7 +23,7 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
     <>
       <Box
         tag="button"
-        background="neutral100"
+        background={disabled ? 'neutral150' : 'neutral100'}
         borderColor={field.error ? 'danger600' : 'neutral200'}
         hasRadius
         disabled={disabled}
@@ -31,13 +31,18 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
         paddingTop={9}
         paddingBottom={9}
         type="button"
+        style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
       >
         <Flex direction="column" gap={2}>
-          <Flex justifyContent="center">
-            <CircleIcon />
+          <Flex justifyContent="center" color={disabled ? 'neutral500' : 'primary600'}>
+            <PlusCircle width="3.2rem" height="3.2rem" />
           </Flex>
           <Flex justifyContent="center">
-            <Typography textColor="primary600" variant="pi" fontWeight="bold">
+            <Typography
+              textColor={disabled ? 'neutral600' : 'primary600'}
+              variant="pi"
+              fontWeight="bold"
+            >
               {formatMessage({
                 id: getTranslation('components.empty-repeatable'),
                 defaultMessage: 'No entry yet. Click to add one.',
@@ -49,17 +54,6 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
     </>
   );
 };
-
-const CircleIcon = styled(PlusCircle)`
-  width: 2.4rem;
-  height: 2.4rem;
-  > circle {
-    fill: ${({ theme }) => theme.colors.primary200};
-  }
-  > path {
-    fill: ${({ theme }) => theme.colors.primary600};
-  }
-`;
 
 export { Initializer };
 export type { InitializerProps };
