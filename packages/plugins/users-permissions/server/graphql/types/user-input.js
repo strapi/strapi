@@ -14,7 +14,7 @@ module.exports = ({ nexus, strapi }) => {
     definition(t) {
       // Manually add the private password field back to the data
       // input type as it is used for CRUD operations on users
-      t.nonNull.string('password');
+      t.string('password');
     },
   });
 };
