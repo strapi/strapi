@@ -170,10 +170,10 @@ const LocalePickerAction = ({
 
   const displayedLocales = locales.filter((locale) => {
     /**
-     * If you can create and read we allow you to see the locale exists
+     * If you can read we allow you to see the locale exists
      * otherwise the locale is hidden.
      */
-    return canCreate.includes(locale.code) && canRead.includes(locale.code);
+    return canRead.includes(locale.code);
   });
 
   return {
