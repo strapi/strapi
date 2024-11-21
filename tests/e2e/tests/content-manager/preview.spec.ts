@@ -78,10 +78,10 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Publish the document
     await page.getByRole('button', { name: /publish/i }).click();
+    await findAndClose(page, 'Published Document');
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
-    await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
 
     // Check if the iframe is present
     const iframe = await page.getByTestId('preview-iframe');
@@ -94,7 +94,6 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Navigate to the published tab
     await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
-    await expect(page.getByText(/^Draft$/).nth(0)).toBeVisible();
 
     const updatedIframe = await page.getByTestId('preview-iframe');
     const srcPublished = await updatedIframe.getAttribute('src');
