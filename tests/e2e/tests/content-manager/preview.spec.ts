@@ -78,7 +78,6 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Publish the document
     await page.getByRole('button', { name: /publish/i }).click();
-    await findAndClose(page, 'Published Document');
 
     // Check that preview opens in its own page
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
