@@ -156,9 +156,9 @@ const PreviewHeader = () => {
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <Typography tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
           {title}
-        </Typography>
+        </PreviewTitle>
         <Status />
       </Grid.Item>
       {/* Tabs */}
@@ -181,6 +181,12 @@ const PreviewHeader = () => {
     </Grid.Root>
   );
 };
+
+const PreviewTitle = styled(Typography)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
