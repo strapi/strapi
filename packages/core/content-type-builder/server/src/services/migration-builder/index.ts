@@ -1,12 +1,23 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import createBuilder from '../schema-builder';
+import { snakeCase } from 'lodash/fp';
+
+type RenameObject = { oldName: string; newName: string };
 
 export class MigrationBuilder {
   steps: Array<any>;
 
   constructor() {
     this.steps = [];
+  }
+
+  addRenameAttribute(uid: string, names: RenameObject): void {
+    this.steps.push({
+      action: 'renameAttribute',
+      uid,
+      names,
+    });
   }
 
   addDeleteComponent(uid: string): void {
@@ -35,6 +46,9 @@ export class MigrationBuilder {
           if (step.action === 'deleteComponent') {
             return this.generateDeleteComponentKnex(step.uid);
           }
+          if (step.action === 'renameAttribute') {
+            return this.generateRenameAttributeKnex(step.uid, step.names);
+          }
           return '';
         })
         .filter(Boolean)
@@ -60,6 +74,28 @@ export class MigrationBuilder {
     } catch (error) {
       console.error('Error writing migration files:', error);
     }
+  }
+
+  private generateRenameAttributeKnex(uid: string, names: RenameObject): string {
+    const builder = createBuilder();
+
+    // Find the table name for the content type
+    const metadata = strapi.db.metadata.get(uid);
+    if (!metadata) {
+      throw new Error(`Content type with uid ${uid} not found.`);
+    }
+
+    const tableName = metadata.tableName;
+
+    if (!tableName) {
+      throw new Error(`Table name for content type ${uid} not found.`);
+    }
+
+    // Generate SQL for renaming the column
+    // In real version, instead of snakeCase we would used Database.identifiers to get the true expected name of the table
+    return `    await knex.schema.table('${tableName}', (table) => {
+      table.renameColumn('${snakeCase(names.oldName)}', '${snakeCase(names.newName)}');
+    });`;
   }
 
   // This returns the knex statements necessary for a delete components action

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import type { Context } from 'koa';
 import type {} from 'koa-body';
 import type { Internal } from '@strapi/types';
+import { MigrationBuilder } from '../services/migration-builder';
 import { getService } from '../utils';
 import {
   validateContentTypeInput,
@@ -112,6 +113,26 @@ export default {
       strapi.reload.isWatching = false;
 
       const contentTypeService = getService('content-types');
+
+      // TODO: pull this from ctx instead of only finding _renamed attributes
+      const renamedAttributes = Object.entries(body.contentType.attributes || {})
+        .filter(([key]) => key.endsWith('_renamed'))
+        .map(([key]) => {
+          const oldName = key.replace('_renamed', '');
+          const newName = key;
+          return { oldName, newName };
+        });
+
+      if (
+        renamedAttributes.length &&
+        strapi.config.get('database.settings.automigrate.attributes', true)
+      ) {
+        const migrationBuilder = new MigrationBuilder();
+        renamedAttributes.forEach((attr: { oldName: string; newName: string }) => {
+          migrationBuilder.addRenameAttribute(uid, attr);
+        });
+        await migrationBuilder.writeFiles();
+      }
 
       const component = await contentTypeService.editContentType(uid, {
         contentType: body.contentType,
