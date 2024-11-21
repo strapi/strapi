@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-graphql",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "description": "Adds GraphQL endpoint with default API methods.",
   "repository": {
     "type": "git",
@@ -55,7 +55,7 @@
     "@koa/cors": "5.0.0",
     "@strapi/design-system": "2.0.0-rc.12",
     "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/utils": "5.4.0",
+    "@strapi/utils": "5.4.1",
     "graphql": "^16.8.1",
     "graphql-depth-limit": "^1.1.0",
     "graphql-playground-middleware-koa": "^1.6.21",
@@ -68,19 +68,19 @@
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.0.0",
-    "@strapi/strapi": "5.4.0",
-    "@strapi/types": "5.4.0",
+    "@strapi/strapi": "5.4.1",
+    "@strapi/types": "5.4.1",
     "@types/graphql-depth-limit": "1.1.5",
     "@types/koa-bodyparser": "4.3.12",
     "@types/koa__cors": "5.0.0",
     "cross-env": "^7.0.3",
-    "eslint-config-custom": "5.4.0",
+    "eslint-config-custom": "5.4.1",
     "koa": "2.15.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "tsconfig": "5.4.0",
+    "tsconfig": "5.4.1",
     "typescript": "5.3.2"
   },
   "peerDependencies": {
