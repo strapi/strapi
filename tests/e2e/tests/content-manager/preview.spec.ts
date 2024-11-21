@@ -84,6 +84,8 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Check if the iframe is present
     const iframe = await page.getByTestId('preview-iframe');
+    // Wait for the iframe to be attached to the DOM
+    await iframe.waitFor({ state: 'attached', timeout: 20000 });
     expect(iframe).not.toBeNull();
 
     // Check if the iframe is loading the correct URL
@@ -95,6 +97,9 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
 
     const updatedIframe = await page.getByTestId('preview-iframe');
+    // Wait for the iframe to be attached to the DOM
+    await updatedIframe.waitFor({ state: 'attached', timeout: 20000 });
+
     const srcPublished = await updatedIframe.getAttribute('src');
     expect(srcPublished).toContain('/preview/api::article.article/');
     expect(srcPublished).toContain('/en/published');
