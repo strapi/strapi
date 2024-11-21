@@ -168,12 +168,20 @@ const LocalePickerAction = ({
     return null;
   }
 
+  const displayedLocales = locales.filter((locale) => {
+    /**
+     * If you can create or read we allow you to see the locale exists
+     * otherwise the locale is hidden.
+     */
+    return canCreate.includes(locale.code) || canRead.includes(locale.code);
+  });
+
   return {
     label: formatMessage({
       id: getTranslation('Settings.locales.modal.locales.label'),
       defaultMessage: 'Locales',
     }),
-    options: locales.map((locale) => {
+    options: displayedLocales.map((locale) => {
       const entryWithLocaleExists = allCurrentLocales.some((doc) => doc.locale === locale.code);
 
       const currentLocaleDoc = allCurrentLocales.find((doc) =>
