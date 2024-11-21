@@ -593,7 +593,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, toggleNotification, trackUsage]
+    [createDocument, formatAPIError, formatMessage, toggleNotification, trackUsage, setCurrentStep]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();

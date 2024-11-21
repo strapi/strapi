@@ -1086,5 +1086,11 @@ DiscardAction.type = 'discard';
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
-export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
+export {
+  DocumentActions,
+  DocumentActionsMenu,
+  DocumentActionButton,
+  DEFAULT_ACTIONS,
+  transformData,
+};
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };
