@@ -21,7 +21,6 @@ const PreviewContent = () => {
       height="100%"
       borderWidth={0}
       tag="iframe"
-      data-testid="preview-iframe"
     />
   );
 };

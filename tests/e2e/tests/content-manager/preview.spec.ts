@@ -83,7 +83,7 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
 
     // Check if the iframe is present
-    const iframe = await page.getByTestId('preview-iframe');
+    const iframe = await page.getByTitle('Preview');
     expect(iframe).not.toBeNull();
 
     // Check if the iframe is loading the correct URL
@@ -94,7 +94,7 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     // Navigate to the published tab
     await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
 
-    const updatedIframe = await page.getByTestId('preview-iframe');
+    const updatedIframe = await page.getByTitle('Preview');
     const srcPublished = await updatedIframe.getAttribute('src');
     expect(srcPublished).toContain('/preview/api::article.article/');
     expect(srcPublished).toContain('/en/published');
