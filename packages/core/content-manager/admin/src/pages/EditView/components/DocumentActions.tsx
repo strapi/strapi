@@ -520,7 +520,6 @@ const PublishAction: DocumentActionComponent = ({
   const isListView = useMatch(LIST_PATH) !== null;
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { id } = useParams();
-
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { publish } = useDocumentActions();
