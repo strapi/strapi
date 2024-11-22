@@ -218,17 +218,9 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Will Kitman').click();
       await page.getByRole('combobox', { name: 'Authors' }).click();
-
-      // Wait for the relation response before saving, otherwise the document might save without the added relation
-      const relationResponsePromise = page.waitForResponse(async (response) => {
-        return (
-          response.status() === 200 &&
-          response.url().includes('content-manager/relations/api::article.article/authors')
-        );
-      });
       await page.getByText('Coach Beard').click();
-      await relationResponsePromise;
-
+      // Make sure the relation was added before proceeding to save, otherwise we risk saving too quickly without the relation
+      await expect(page.getByRole('link', { name: 'Coach Beard' })).toBeVisible();
       await page.getByRole('button', { name: 'Save' }).click();
       // Confirm the save was succesful before proceeding, otherwise we may end up on the related page before the relation is established
       await findAndClose(page, 'Saved Document');
