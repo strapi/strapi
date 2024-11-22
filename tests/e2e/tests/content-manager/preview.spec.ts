@@ -88,7 +88,7 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Check if the iframe is loading the correct URL
     const src = await iframe.getAttribute('src');
-    expect(src).toContain('/preview/api::article.article/');
+    expect(src).toContain('/preview/api::adrticle.article/');
     expect(src).toContain('/en/draft');
 
     // Navigate to the published tab
