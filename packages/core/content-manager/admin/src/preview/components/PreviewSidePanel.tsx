@@ -13,7 +13,7 @@ import { WarningCircle } from '@strapi/icons';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import { type PanelComponent } from '../../content-manager';
 import { useDoc } from '../../hooks/useDocument';
@@ -192,22 +192,28 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     return null;
   }
 
-  const navigateToPreview = () => {
-    // For tracking, append /preview to the current URL
+  const trackNavigation = () => {
+    // Append /preview to the current URL
     const destinationPathname = pathname.replace(/\/$/, '') + '/preview';
     trackUsage('willNavigate', { from: pathname, to: destinationPathname });
-
-    // Actually do the navigation
-    navigate({ pathname: 'preview', search: stringify(query, { encode: false }) });
   };
 
-  const handleClick = () => {
+  const linkDestination = { pathname: 'preview', search: stringify(query, { encode: false }) };
+
+  const navigateToPreview = () => {
+    trackNavigation();
+    navigate(linkDestination);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
     if (isModified) {
-      // Prevent opening the preview if there are unsaved changes.
-      // Go through the dialog instead to have the option to save before leaving the page.
+      // Prevent default link behavior if there are unsaved changes
+      e.preventDefault();
+      // Instead go through the dialog instead to have the option to save before leaving the page.
       setIsDialogOpen(true);
     } else {
-      navigateToPreview();
+      // Rely on the default link behavior, but add tracking event
+      trackNavigation();
     }
   };
 
@@ -216,7 +222,13 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     content: (
       <>
         <Flex gap={2} width="100%">
-          <Button variant="tertiary" onClick={handleClick} flex="auto">
+          <Button
+            variant="tertiary"
+            tag={Link}
+            to={linkDestination}
+            onClick={handleClick}
+            flex="auto"
+          >
             {formatMessage({
               id: 'content-manager.preview.panel.button',
               defaultMessage: 'Open preview',
