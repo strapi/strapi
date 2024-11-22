@@ -21,17 +21,16 @@ e2e:
   - 'playwright.base.config.js'
 cli:
   - 'tests/cli/**'
+docs:
+  - 'docs/**'
+  - '**.mdx?'
 
+# Changes to these files cause all jobs to run
 # TODO: this needs a lot more in it
-all_tests:
+global:
   - 'packages/**/package.json'
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'
   - 'yarn.lock'
   - 'jest.config.js'
   - 'package.json'
-
-# note that docs only runs on this, it doesn't include all_tests above
-docs:
-  - 'docs/**'
-  - '**.mdx?'

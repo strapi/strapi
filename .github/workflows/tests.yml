@@ -28,12 +28,12 @@ jobs:
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
       docs: ${{ steps.filter.outputs.docs }}
-      all_tests: ${{ steps.filter.outputs.all_tests }}
+      global: ${{ steps.filter.outputs.global }}
       is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2 # need to check out previous 2 commits to see what has changed
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -67,8 +67,6 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -86,8 +84,6 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -106,8 +102,6 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -123,14 +117,12 @@ jobs:
     name: 'typescript (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ubuntu-latest
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.backend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.backend == 'true'
     strategy:
       matrix:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -147,7 +139,7 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ubuntu-latest
@@ -158,8 +150,6 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -172,7 +162,7 @@ jobs:
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.frontend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.frontend == 'true'
     name: 'unit_front (node: ${{ matrix.node }})'
     needs: [conditions, build]
     runs-on: ubuntu-latest
@@ -182,8 +172,6 @@ jobs:
         node: [20]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -196,7 +184,7 @@ jobs:
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
     needs: [conditions, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -208,8 +196,6 @@ jobs:
         shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -238,7 +224,7 @@ jobs:
           retention-days: 1
 
   e2e_ee:
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
     needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
@@ -252,8 +238,6 @@ jobs:
         shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -283,7 +267,7 @@ jobs:
           retention-days: 1
 
   cli:
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
     timeout-minutes: 60
     needs: [conditions, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
@@ -293,8 +277,6 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -310,7 +292,7 @@ jobs:
         run: yarn test:cli
 
   api_ce_pg:
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -350,7 +332,7 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.conditions.outputs.all_tests == 'true' ||  needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
+    if: needs.conditions.outputs.global == 'true' ||  needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -389,7 +371,7 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
-    if: needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
@@ -416,7 +398,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -459,7 +441,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -501,7 +483,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [conditions, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.conditions.outputs.all_tests == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
