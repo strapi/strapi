@@ -70,6 +70,29 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await expect(page.getByText(/^Published$/)).toBeDisabled();
   });
 
+  test('Dialog should offer to save unsaved changes before opening preview', async ({ page }) => {
+    // Navigate to the Content Manager and open the edit view of a content type with D&P enabled
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    // Make a change without saving
+    const titleInput = page.getByRole('textbox', { name: 'title' });
+    await titleInput.fill('New title');
+
+    // Try to open preview, dialog should appear
+    await page.getByRole('link', { name: /open preview/i }).click();
+    const dialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+    await expect(dialog).toBeVisible();
+
+    // Selecting the save and open option should save the updates before opening the preview
+    await expect(dialog.getByRole('radio', { name: /open preview without saving/i })).toBeVisible();
+    await dialog.getByRole('radio', { name: /save and open/i }).click();
+    await dialog.getByRole('button', { name: /confirm/i }).click();
+    await findAndClose(page, 'Saved document');
+    await expect(page.getByTitle('Preview')).toBeVisible();
+  });
+
   test('Iframe should be present and load the correct URL', async ({ page }) => {
     // Open an edit view for a content type that has preview
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
