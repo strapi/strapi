@@ -32,9 +32,11 @@ const command = () => {
           `URL of the remote Strapi instance to send data to`
         ).argParser(parseURL)
       )
+
       .addOption(
         new Option('--to-token <token>', `Transfer token for the remote Strapi destination`)
       )
+      .addOption(new Option('--verbose', 'Enable verbose logs'))
       .addOption(forceOption)
       .addOption(excludeOption)
       .addOption(onlyOption)
