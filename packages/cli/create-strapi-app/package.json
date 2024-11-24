@@ -64,7 +64,7 @@
     "tar": "7.4.3"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/async-retry": "^1",
     "@types/fs-extra": "11.0.4",
     "@types/inquirer": "8.2.5",
