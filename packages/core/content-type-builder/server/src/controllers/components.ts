@@ -102,6 +102,8 @@ export default {
 
       const componentService = getService('components');
 
+      // TODO: renaming component attributes is slightly different than renaming normal attributes
+
       const component = (await componentService.editComponent(uid, {
         component: body.component,
         components: body.components,
