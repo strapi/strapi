@@ -59,6 +59,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
+    // Junit reporter for Trunk flaky test CI upload
     [
       'junit',
       {
