@@ -70,7 +70,7 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await expect(page.getByText(/^Published$/)).toBeDisabled();
   });
 
-  test.only('Iframe should be present and load the correct URL', async ({ page }) => {
+  test('Iframe should be present and load the correct URL', async ({ page }) => {
     // Open an edit view for a content type that has preview
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
