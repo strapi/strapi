@@ -14,6 +14,7 @@ import { validateDatabase } from './validations';
 import type { Model } from './types';
 import type { Migration } from './migrations';
 import { type Identifiers } from './utils/identifiers';
+import { removeOrphanMorphTypes } from './utils/remove-orphan-morph-types';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -36,6 +37,10 @@ export interface DatabaseConfig {
   settings: Settings;
   logger?: Logger;
 }
+
+type RepairOptions = {
+  removeOrphanMorphTypes: string[];
+};
 
 const afterCreate =
   (db: Database) =>
@@ -117,6 +122,15 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+  }
+
+  async repair(options: RepairOptions) {
+    // We only clean up components on startup
+    if (options.removeOrphanMorphTypes) {
+      for (const type of options.removeOrphanMorphTypes) {
+        await removeOrphanMorphTypes(this, type);
+      }
+    }
   }
 
   async init({ models }: { models: Model[] }) {

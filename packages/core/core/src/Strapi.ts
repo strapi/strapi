@@ -441,6 +441,11 @@ class Strapi extends Container implements Core.Strapi {
 
     await this.db.schema.sync();
 
+    // Remove orphaned components (entire types, not ids)
+    await this.db.repair({
+      removeOrphanMorphTypes: ['component_type'],
+    });
+
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });
     }
