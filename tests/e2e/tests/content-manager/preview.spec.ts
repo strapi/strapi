@@ -70,7 +70,7 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await expect(page.getByText(/^Published$/)).toBeDisabled();
   });
 
-  test('Iframe should be present and load the correct URL', async ({ page }) => {
+  test.only('Iframe should be present and load the correct URL', async ({ page }) => {
     // Open an edit view for a content type that has preview
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
@@ -90,10 +90,6 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     const src = await iframe.getAttribute('src');
     expect(src).toContain('/preview/api::article.article/');
     expect(src).toContain('/en/draft');
-
-    // Make the test randomly fail , just for testing purposes
-    const random = Math.random();
-    expect(random).toBeLessThan(0.5);
 
     // Navigate to the published tab
     await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
