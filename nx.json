@@ -75,17 +75,17 @@
             "title": "💅 Enhancement"
           }
         },
-        "feat":{
+        "feat": {
           "changelog": {
             "title": "🚀 New feature"
           }
         },
-        "fix":{
+        "fix": {
           "changelog": {
             "title": "🔥 Bug fix"
           }
         },
-        "security":{
+        "security": {
           "semverBump": "patch",
           "changelog": {
             "title": "🚨 Security"
