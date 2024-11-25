@@ -27,7 +27,7 @@ export default class Dialect {
   }
 
   getTables() {
-    return false;
+    throw new Error('getTables not implemented for this dialect');
   }
 
   getSqlType(type: unknown) {
