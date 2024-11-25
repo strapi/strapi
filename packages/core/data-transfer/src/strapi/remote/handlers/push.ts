@@ -129,7 +129,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.diagnostics?.report({
       details: {
         message,
-        source: 'push-handler',
+        origin: 'push-handler',
         createdAt: new Date(),
       },
       kind: 'info',
@@ -242,7 +242,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     // Regular command message (init, end, status)
     if (type === 'command') {
       const { command } = msg;
-      this.onInfo(`recieved command:${command} uuid:${uuid}`);
+      this.onInfo(`received command:${command} uuid:${uuid}`);
       await this.executeAndRespond(uuid, () => {
         this.assertValidTransferCommand(command);
 
@@ -256,7 +256,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
     // Transfer message (the transfer must be init first)
     else if (type === 'transfer') {
-      this.onInfo(`recieved transfer action:${msg.action} step:${msg.kind} uuid:${uuid}`);
+      this.onInfo(`received transfer action:${msg.action} step:${msg.kind} uuid:${uuid}`);
       await this.executeAndRespond(uuid, async () => {
         await this.verifyAuth();
 

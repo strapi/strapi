@@ -229,26 +229,9 @@ export const connectToWebsocket = (
     server.on('message', (raw: RawData) => {
       const response: Server.Message = JSON.parse(raw.toString());
       if (response.diagnostic) {
-        if (response.diagnostic.kind === 'info') {
-          diagnostics?.report({
-            details: response.diagnostic.details,
-            kind: response.diagnostic.kind,
-          });
-        }
-
-        if (response.diagnostic.kind === 'warning') {
-          diagnostics?.report({
-            details: response.diagnostic.details,
-            kind: response.diagnostic.kind,
-          });
-        }
-
-        if (response.diagnostic.kind === 'error') {
-          diagnostics?.report({
-            details: response.diagnostic.details,
-            kind: response.diagnostic.kind,
-          });
-        }
+        diagnostics?.report({
+          ...response.diagnostic,
+        });
       }
     });
 

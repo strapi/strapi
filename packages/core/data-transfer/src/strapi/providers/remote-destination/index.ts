@@ -227,7 +227,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'remote-destination-provider',
+        origin: 'remote-destination-provider',
       },
       kind: 'info',
     });

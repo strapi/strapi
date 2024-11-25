@@ -72,7 +72,7 @@ class LocalFileSourceProvider implements ISourceProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'file-source-provider',
+        origin: 'file-source-provider',
       },
       kind: 'info',
     });

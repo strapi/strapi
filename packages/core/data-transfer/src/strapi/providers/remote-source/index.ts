@@ -356,7 +356,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'remote-source-provider',
+        origin: 'remote-source-provider',
       },
       kind: 'info',
     });

@@ -73,7 +73,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'file-destination-provider',
+        origin: 'file-destination-provider',
       },
       kind: 'info',
     });

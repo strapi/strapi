@@ -93,7 +93,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'local-destination-provider',
+        origin: 'local-destination-provider',
       },
       kind: 'info',
     });

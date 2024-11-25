@@ -51,7 +51,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     this.diagnostics?.report({
       details: {
         message,
-        source: 'pull-handler',
+        origin: 'pull-handler',
         createdAt: new Date(),
       },
       kind: 'info',

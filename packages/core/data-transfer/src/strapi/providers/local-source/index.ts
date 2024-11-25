@@ -46,7 +46,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'local-source-provider',
+        origin: 'local-source-provider',
       },
       kind: 'info',
     });
