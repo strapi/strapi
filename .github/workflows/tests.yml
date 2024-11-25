@@ -224,8 +224,7 @@ jobs:
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
-        # project: ['chromium', 'webkit', 'firefox']
-        project: ['chromium']
+        project: ['chromium', 'webkit', 'firefox']
         shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v4
