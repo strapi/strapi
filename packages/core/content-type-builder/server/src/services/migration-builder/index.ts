@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import createBuilder from '../schema-builder';
 import { snakeCase } from 'lodash/fp';
+import createBuilder from '../schema-builder';
 
 type RenameObject = { oldName: string; newName: string };
 
@@ -77,8 +77,6 @@ export class MigrationBuilder {
   }
 
   private generateRenameAttributeKnex(uid: string, names: RenameObject): string {
-    const builder = createBuilder();
-
     // Find the table name for the content type
     const metadata = strapi.db.metadata.get(uid);
     if (!metadata) {
