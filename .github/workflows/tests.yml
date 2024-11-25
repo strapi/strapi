@@ -193,7 +193,7 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
 
@@ -235,7 +235,7 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
 
@@ -299,7 +299,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
         image: postgres
@@ -339,7 +339,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -378,7 +378,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -404,7 +404,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
         image: postgres
@@ -447,7 +447,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -489,7 +489,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
