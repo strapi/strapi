@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
-import { Code } from '@strapi/icons';
+import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
@@ -95,7 +95,7 @@ const CodeEditor = (props: RenderElementProps) => {
 const codeBlocks: Pick<BlocksStore, 'code'> = {
   code: {
     renderElement: (props) => <CodeEditor {...props} />,
-    icon: Code,
+    icon: CodeBlockIcon,
     label: {
       id: 'components.Blocks.blocks.code',
       defaultMessage: 'Code block',

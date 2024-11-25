@@ -1,5 +1,6 @@
 import type { Knex } from 'knex';
 
+import path from 'node:path';
 import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
@@ -212,6 +213,34 @@ class Database {
     const schema = this.getSchemaName();
     const connection = tableName ? this.connection(tableName) : this.connection;
     return schema ? connection.withSchema(schema) : connection;
+  }
+
+  // Returns basic info about the database connection
+  getInfo() {
+    const connectionSettings = this.connection?.client?.connectionSettings || {};
+    const client = this.dialect?.client || '';
+
+    let displayName = '';
+    let schema;
+
+    // For SQLite, get the relative filename
+    if (client === 'sqlite') {
+      const absolutePath = connectionSettings?.filename;
+      if (absolutePath) {
+        displayName = path.relative(process.cwd(), absolutePath);
+      }
+    }
+    // For other dialects, get the database name
+    else {
+      displayName = connectionSettings?.database;
+      schema = connectionSettings?.schema;
+    }
+
+    return {
+      displayName,
+      schema,
+      client,
+    };
   }
 
   getSchemaConnection(trx = this.connection) {

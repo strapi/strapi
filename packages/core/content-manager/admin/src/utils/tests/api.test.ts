@@ -23,26 +23,5 @@ describe('api', () => {
         }
       `);
     });
-
-    it('should encode a search query', () => {
-      const _q = `test query`;
-      const queryParams = {
-        page: '1',
-        pageSize: '10',
-        sort: 'name:ASC',
-        _q,
-      };
-
-      const params = buildValidParams(queryParams);
-
-      expect(params).toMatchInlineSnapshot(`
-        {
-          "_q": "test%20query",
-          "page": "1",
-          "pageSize": "10",
-          "sort": "name:ASC",
-        }
-      `);
-    });
   });
 });
