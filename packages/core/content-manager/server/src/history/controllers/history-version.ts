@@ -3,8 +3,8 @@ import type { Core, UID } from '@strapi/types';
 import { pick } from 'lodash/fp';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
-import { HistoryVersions } from '../../../../shared/contracts';
-import { RestoreHistoryVersion } from '../../../../shared/contracts/history-versions';
+import type { HistoryVersions } from '../../../../shared/contracts';
+import type { RestoreHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { validateRestoreVersion } from './validation/history-version';
 
 /**

@@ -39,6 +39,7 @@ import type { RelationsFieldProps } from '../../pages/EditView/components/FormIn
 import type { RelationResult } from '../../services/relations';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
+import { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
 
 const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {}, shadow: 'none' })`
   button {
@@ -175,17 +176,49 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
 
 const CustomMediaInput = (props: VersionInputRendererProps) => {
   const { value } = useField(props.name);
-  const results = value ? value.results : [];
-  const meta = value ? value.meta : { missingCount: 0 };
+  const results = value?.results ?? [];
+  const meta = value?.meta ?? { missingCount: 0 };
+
   const { formatMessage } = useIntl();
 
   const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
   const MediaLibrary = fields.media as React.ComponentType<
     VersionInputRendererProps & { multiple: boolean }
   >;
+
+  /**
+   * Create an object with value at key path (i.e. 'a.b.c')
+   */
+  const createInitialValuesForPath = (keyPath: string, value: any) => {
+    const keys = keyPath.split('.');
+    // The root level object
+    const root: Record<string, any> = {};
+
+    // Point the first node to the root
+    let node = root;
+    keys.forEach((key, index) => {
+      // If it's the last key, set the node value
+      if (index === keys.length - 1) {
+        node[key] = value;
+      } else {
+        // Ensure the key exists and is an object
+        node[key] = node[key] || {};
+      }
+
+      // Traverse down the tree
+      node = node[key];
+    });
+
+    return root;
+  };
+
   return (
     <Flex direction="column" gap={2} alignItems="stretch">
-      <Form method="PUT" disabled={true} initialValues={{ [props.name]: results }}>
+      <Form
+        method="PUT"
+        disabled={true}
+        initialValues={createInitialValuesForPath(props.name, results)}
+      >
         <MediaLibrary {...props} disabled={true} multiple={results.length > 1} />
       </Form>
       {meta.missingCount > 0 && (

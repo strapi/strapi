@@ -1,10 +1,11 @@
 import type { Core, Data, Schema, Struct } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import { omit } from 'lodash/fp';
+import _, { omit } from 'lodash/fp';
+import type { AnyDocument } from '@strapi/types/dist/modules/documents';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
-import {
+import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
@@ -59,15 +60,43 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         serviceUtils.getLocaleDictionary(),
       ]);
       const populateEntryRelations = async (
-        entry: HistoryVersionQueryResult
+        entry: Pick<HistoryVersionQueryResult, 'data' | 'schema'>,
+        initialData: Promise<AnyDocument> = Promise.resolve(entry.data),
+        componentKeyPath: string[] = []
       ): Promise<CreateHistoryVersion['data']> => {
         const entryWithRelations = await Object.entries(entry.schema).reduce(
           async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
             const attributeValue = entry.data[attributeKey];
-
             const attributeValues = Array.isArray(attributeValue)
               ? attributeValue
               : [attributeValue];
+
+            if (attributeSchema.type === 'component' && attributeValue) {
+              const keyPath = [...componentKeyPath];
+              if (!keyPath.includes(attributeKey)) {
+                // When the attribute key is not already in the keyPath, add it
+                keyPath.push(attributeKey);
+              }
+              // Get the component's schema
+              const component = strapi.getModel(attributeSchema.component);
+              // Loop each attribute in the component schema
+              for (const [key, val] of Object.entries(component.attributes)) {
+                if (val.type === 'component') {
+                  // When it's a nested component, update the keyPath to the nested component
+                  keyPath.push(key);
+                } else {
+                  // Otherwise, recurse for component at keyPath
+                  return populateEntryRelations(
+                    {
+                      data: attributeValue,
+                      schema: component.attributes,
+                    },
+                    currentDataWithRelations,
+                    keyPath
+                  );
+                }
+              }
+            }
 
             if (attributeSchema.type === 'media') {
               const permissionChecker = getContentManagerService('permission-checker').create({
@@ -80,13 +109,18 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                 response.results.map((media) => permissionChecker.sanitizeOutput(media))
               );
 
-              return {
-                ...(await currentDataWithRelations),
-                [attributeKey]: {
-                  results: sanitizedResults,
-                  meta: response.meta,
-                },
-              };
+              const keyPathToUpdate = componentKeyPath.length
+                ? `${componentKeyPath.join('.')}.${attributeKey}`
+                : attributeKey;
+              const currentData = { ...(await currentDataWithRelations) };
+
+              const updatedData = _.set(
+                keyPathToUpdate,
+                { results: sanitizedResults, meta: response.meta },
+                currentData
+              );
+
+              return updatedData;
             }
 
             // TODO: handle relations that are inside components
@@ -153,7 +187,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             // Not a media or relation, nothing to change
             return currentDataWithRelations;
           },
-          Promise.resolve(entry.data)
+          initialData
         );
 
         return entryWithRelations;
