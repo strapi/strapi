@@ -3,6 +3,7 @@ import type { Schema } from '../schema';
 
 export interface SchemaInspector {
   getSchema(): Promise<Schema>;
+  getTables(): Promise<string[]>;
 }
 
 export default class Dialect {
@@ -23,6 +24,10 @@ export default class Dialect {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async initialize(_nativeConnection?: unknown) {
     // noop
+  }
+
+  getTables() {
+    return false;
   }
 
   getSqlType(type: unknown) {

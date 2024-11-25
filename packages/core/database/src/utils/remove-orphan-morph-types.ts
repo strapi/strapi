@@ -15,6 +15,8 @@ import type { Database } from '..';
  * @param pivot - The name of the column in the join table representing the morph type.
  */
 export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
+  const allTables = await db.dialect.schemaInspector.getTables();
+
   for (const model of db.metadata.values()) {
     const attributes = Object.values(model.attributes || {}).filter(
       (attribute) =>
@@ -30,37 +32,25 @@ export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
       if (!('joinTable' in attribute)) {
         continue;
       }
-
       const joinTableName = attribute.joinTable.name;
 
-      // Query distinct component types from the join table
+      // Query distinct morph types from the join table
       const morphTypes = await db.connection(joinTableName).distinct(pivot).pluck(pivot);
 
       for (const morphType of morphTypes) {
-        let deleteComponentType = false;
-        let morphMetadata;
-
-        try {
-          morphMetadata = db.metadata.get(morphType);
-        } catch {
-          db.logger.debug(
-            `Metadata for morph type "${morphType}" in table "${joinTableName}" not found`
-          );
-          deleteComponentType = true;
-        }
-
-        if (!deleteComponentType && morphMetadata) {
-          // Check if the tableName exists in the database
-          const tableExists = await db.connection.schema.hasTable(morphMetadata.tableName);
-          if (!tableExists) {
+        // Determine whether to delete based on metadata or table existence
+        const deleteComponentType = await (async () => {
+          try {
+            const morphMetadata = db.metadata.get(morphType);
+            return !allTables.includes(morphMetadata.tableName);
+          } catch {
             db.logger.debug(
-              `Table "${morphMetadata.tableName}" does not exist. Removing morph type "${morphType}" from table "${joinTableName}".`
+              `Metadata for morph type "${morphType}" in table "${joinTableName}" not found`
             );
-            deleteComponentType = true;
+            return true;
           }
-        }
+        })();
 
-        // Delete rows where pivot column value matches invalid value
         if (deleteComponentType) {
           db.logger.warn(
             `Removing invalid morph type "${morphType}" from table "${joinTableName}".`
