@@ -680,17 +680,17 @@ describe('Attributes', () => {
           expect(definition.kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(definition.members).toHaveLength(2);
 
-          const [min, max] = definition.members;
-
-          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
-          expect(min.name.escapedText).toBe('min');
-          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
-          expect(min.type.text).toBe('4');
+          const [max, min] = definition.members;
 
           expect(max.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
           expect(max.name.escapedText).toBe('max');
           expect(max.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
           expect(max.type.text).toBe('12');
+
+          expect(min.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(min.name.escapedText).toBe('min');
+          expect(min.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(min.type.text).toBe('4');
 
           // Check for number keyword on the second typeArgument
           expect(typeofMinMax.kind).toBe(ts.SyntaxKind.NumberKeyword);
@@ -830,24 +830,19 @@ describe('Attributes', () => {
           expect(modifiers[0].typeArguments[0].kind).toBe(ts.SyntaxKind.TypeLiteral);
           expect(modifiers[0].typeArguments[0].members).toHaveLength(2);
 
-          // Min
-          expect(modifiers[0].typeArguments[0].members[0].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[0].name.escapedText).toBe('minLength');
-          expect(modifiers[0].typeArguments[0].members[0].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[0].type.text).toBe('4');
+          const [maxLength, minLength] = modifiers[0].typeArguments[0].members;
 
-          expect(modifiers[0].typeArguments[0].members[1].kind).toBe(
-            ts.SyntaxKind.PropertyDeclaration
-          );
-          expect(modifiers[0].typeArguments[0].members[1].name.escapedText).toBe('maxLength');
-          expect(modifiers[0].typeArguments[0].members[1].type.kind).toBe(
-            ts.SyntaxKind.NumericLiteral
-          );
-          expect(modifiers[0].typeArguments[0].members[1].type.text).toBe('12');
+          // Max
+          expect(maxLength.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(maxLength.name.escapedText).toBe('maxLength');
+          expect(maxLength.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(maxLength.type.text).toBe('12');
+
+          // Min
+          expect(minLength.kind).toBe(ts.SyntaxKind.PropertyDeclaration);
+          expect(minLength.name.escapedText).toBe('minLength');
+          expect(minLength.type.kind).toBe(ts.SyntaxKind.NumericLiteral);
+          expect(minLength.type.text).toBe('4');
         });
       });
 
