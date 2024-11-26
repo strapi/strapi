@@ -79,19 +79,15 @@ const createBuildContext = async <TOptions extends BaseOptions>({
       serveAdminPanel: false,
     });
 
-  const serverUrl = strapiInstance.config.get<string>('server.url');
   const serverAbsoluteUrl = strapiInstance.config.get<string>('server.absoluteUrl');
-  const adminUrl = strapiInstance.config.get<string>('admin.url');
   const adminAbsoluteUrl = strapiInstance.config.get<string>('admin.absoluteUrl');
+  const adminPath = strapiInstance.config.get<string>('admin.path');
 
   // NOTE: Checks that both the server and admin will be served from the same origin (protocol, host, port)
   const sameOrigin = new URL(adminAbsoluteUrl).origin === new URL(serverAbsoluteUrl).origin;
 
   const adminPublicPath = new URL(adminAbsoluteUrl).pathname;
-
-  const adminPath = sameOrigin
-    ? adminUrl.replace(strings.getCommonPath(serverUrl, adminUrl), '')
-    : new URL(adminUrl).pathname;
+  const serverPublicPath = new URL(serverAbsoluteUrl).pathname;
 
   const appDir = strapiInstance.dirs.app.root;
 
@@ -99,7 +95,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
 
   const env = getStrapiAdminEnvVars({
     ADMIN_PATH: adminPublicPath,
-    STRAPI_ADMIN_BACKEND_URL: serverAbsoluteUrl,
+    STRAPI_ADMIN_BACKEND_URL: sameOrigin ? serverPublicPath : serverAbsoluteUrl,
     STRAPI_TELEMETRY_DISABLED: String(strapiInstance.telemetry.isDisabled),
   });
 
