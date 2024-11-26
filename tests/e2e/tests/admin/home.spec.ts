@@ -13,6 +13,7 @@ test.describe('Home', () => {
   test('a user should be greeted by their name', async ({ page }) => {
     // "test" is the user fist name in the database
     await expect(page.getByText('Hello test')).toBeVisible();
+    await expect(page).toHaveTitle(/homepage/i);
 
     // Change the name and make sure it's reflected in the homepage
     await page.getByRole('button', { name: 'test' }).click();

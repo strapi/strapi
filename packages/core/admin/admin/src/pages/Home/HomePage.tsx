@@ -20,15 +20,15 @@ const HomePageCE = () => {
   return (
     <Main>
       <Page.Title>
-        {formatMessage({ id: 'admin.pages.HomePage.title', defaultMessage: 'Home' })}
+        {formatMessage({ id: 'HomePage.head.title', defaultMessage: 'Homepage' })}
       </Page.Title>
       <Layouts.Header
         title={formatMessage(
-          { id: 'admin.pages.HomePage.header.title', defaultMessage: 'Hello {name}' },
+          { id: 'HomePage.header.title', defaultMessage: 'Hello {name}' },
           { name: displayName }
         )}
         subtitle={formatMessage({
-          id: 'admin.pages.HomePage.header.subtitle',
+          id: 'HomePage.header.subtitle',
           defaultMessage: 'Welcome to your administration panel',
         })}
       />
