@@ -62,7 +62,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       details: {
         message,
         createdAt: new Date(),
-        origin: 'push-handler',
+        origin: 'pull-handler',
       },
       kind: 'warning',
     });
