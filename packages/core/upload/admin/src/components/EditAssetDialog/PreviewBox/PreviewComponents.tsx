@@ -30,7 +30,15 @@ export const Wrapper = styled.div`
   }
 
   mux-player {
+    --play-button: inline-flex;
+    --mute-button: inline-flex;
     --pip-button: inline-flex;
+    --fullscreen-button: inline-flex;
+    --playback-rate-button: inline-flex;
+    --volume-range: inline-flex;
+    --time-range: inline-flex;
+    --time-display: inline-flex;
+    --duration-display: inline-flex;
   }
 `;
 
