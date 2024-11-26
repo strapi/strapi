@@ -472,14 +472,13 @@ interface ExtendedDocumentActionProps extends DocumentActionProps {
  * -----------------------------------------------------------------------------------------------*/
 
 const BulkLocaleAction: DocumentActionComponent = ({
-  document: baseDocument,
+  document,
   documentId,
   model,
   collectionType,
   action,
 }: ExtendedDocumentActionProps) => {
-  const baseLocale = baseDocument?.locale ?? null;
-
+  const locale = document?.locale ?? null;
   const [{ query }] = useQueryParams<{ status: 'draft' | 'published' }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -497,22 +496,18 @@ const BulkLocaleAction: DocumentActionComponent = ({
   const { publishMany: publishManyAction, unpublishMany: unpublishManyAction } =
     useDocumentActions();
 
-  const {
-    document,
-    meta: documentMeta,
-    schema,
-    validate,
-  } = useDocument(
+  const { schema, validate } = useDocument(
     {
       model,
       collectionType,
       documentId,
       params: {
-        locale: baseLocale,
+        locale,
       },
     },
     {
-      skip: !hasI18n || !baseLocale,
+      // No need to fetch the document, the data is already available in the `document` prop
+      skip: true,
     }
   );
 
@@ -545,7 +540,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
   // Extract the rows for the bulk locale publish modal and any validation
   // errors per locale
   const [rows, validationErrors] = React.useMemo(() => {
-    if (!document || !documentMeta?.availableLocales) {
+    if (!document || !document.localizations?.length) {
       // If we don't have a document or available locales, we return empty rows
       // and no validation errors
       return [[], {}];
@@ -553,9 +548,8 @@ const BulkLocaleAction: DocumentActionComponent = ({
 
     // Build the rows for the bulk locale publish modal by combining the current
     // document with all the available locales from the document meta
-    const rowsFromMeta: LocaleStatus[] = documentMeta?.availableLocales.map((doc) => {
+    const rowsFromMeta: LocaleStatus[] = document.localizations.map((doc: any) => {
       const { locale, status } = doc;
-
       return { locale, status };
     });
 
@@ -565,7 +559,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     });
 
     // Build the validation errors for each locale.
-    const allDocuments = [document, ...(documentMeta?.availableLocales ?? [])];
+    const allDocuments = [document, ...(document?.localizations ?? [])];
     const errors = allDocuments.reduce<FormErrors>((errs, document) => {
       if (!document) {
         return errs;
@@ -580,7 +574,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     }, {});
 
     return [rowsFromMeta, errors];
-  }, [document, documentMeta?.availableLocales, validate]);
+  }, [document, validate]);
 
   const isBulkPublish = action === 'bulk-publish';
   const localesForAction = selectedRows.reduce((acc: string[], selectedRow: LocaleStatus) => {
