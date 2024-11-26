@@ -9,37 +9,25 @@ import { useGetLocalesQuery } from '../services/locales';
 interface LocaleListCellProps {
   documentId: string;
   collectionType: string;
+  localizations: any;
   locale: string;
   model: string;
 }
 
 const LocaleListCell = ({
-  documentId,
   locale: currentLocale,
-  collectionType,
-  model,
+  localizations: availableLocales,
 }: LocaleListCellProps) => {
-  // TODO: avoid loading availableLocales for each row but get that from the BE
-  const { meta, isLoading } = useDocument({
-    documentId,
-    collectionType,
-    model,
-    params: {
-      locale: currentLocale,
-    },
-  });
-
   const { locale: language } = useIntl();
   const { data: locales = [] } = useGetLocalesQuery();
   const formatter = useCollator(language, {
     sensitivity: 'base',
   });
 
-  if (!Array.isArray(locales) || isLoading) {
+  if (!Array.isArray(locales) || !availableLocales) {
     return null;
   }
 
-  const availableLocales = meta?.availableLocales.map((doc) => doc.locale) ?? [];
   const localesForDocument = locales
     .reduce<Locale[]>((acc, locale) => {
       const createdLocale = [currentLocale, ...availableLocales].find((loc) => {
