@@ -9,24 +9,23 @@ import { useGetLocalesQuery } from '../services/locales';
 interface LocaleListCellProps {
   documentId: string;
   collectionType: string;
-  localizations: any;
+  localizations: { locale: string }[];
   locale: string;
   model: string;
 }
 
-const LocaleListCell = ({
-  locale: currentLocale,
-  localizations: availableLocales,
-}: LocaleListCellProps) => {
+const LocaleListCell = ({ locale: currentLocale, localizations }: LocaleListCellProps) => {
   const { locale: language } = useIntl();
   const { data: locales = [] } = useGetLocalesQuery();
   const formatter = useCollator(language, {
     sensitivity: 'base',
   });
 
-  if (!Array.isArray(locales) || !availableLocales) {
+  if (!Array.isArray(locales) || !localizations) {
     return null;
   }
+
+  const availableLocales = localizations.map((loc) => loc.locale);
 
   const localesForDocument = locales
     .reduce<Locale[]>((acc, locale) => {
