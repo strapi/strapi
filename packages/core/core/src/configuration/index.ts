@@ -11,6 +11,7 @@ import loadConfigDir from './config-loader';
 import { getDirs } from './get-dirs';
 
 import type { StrapiOptions } from '../Strapi';
+import { strings } from '@strapi/utils';
 
 dotenv.config({ path: process.env.ENV_PATH });
 
@@ -78,10 +79,16 @@ export const loadConfiguration = (opts: StrapiOptions) => {
 
   const config = _.merge(rootConfig, defaultConfig, baseConfig, envConfig);
 
-  const { serverUrl, adminUrl, adminPath } = getConfigUrls(config);
+  const { serverUrl, adminUrl } = getConfigUrls(config);
 
   const serverAbsoluteUrl = getAbsoluteServerUrl(config);
   const adminAbsoluteUrl = getAbsoluteAdminUrl(config);
+
+  const sameOrigin = new URL(adminAbsoluteUrl).origin === new URL(serverAbsoluteUrl).origin;
+
+  const adminPath = sameOrigin
+    ? adminUrl.replace(strings.getCommonPath(serverUrl, adminUrl), '')
+    : new URL(adminUrl).pathname;
 
   _.set(config, 'server.url', serverUrl);
   _.set(config, 'server.absoluteUrl', serverAbsoluteUrl);
