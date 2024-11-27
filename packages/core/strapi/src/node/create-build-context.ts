@@ -135,10 +135,11 @@ const createBuildContext = async <TOptions extends BaseOptions>({
   const features = strapiInstance.config.get('features', undefined);
 
   const { bundler = 'vite', ...restOptions } = options;
+  const serveAdminPanel = strapiInstance.config.get('admin.serveAdminPanel', true);
 
   const buildContext = {
     appDir,
-    basePath: `${adminPath}/`,
+    basePath: serveAdminPanel ? `${adminPath}/` : '/',
     bundler,
     customisations,
     cwd,
