@@ -34,7 +34,17 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Should go back to the edit view on close
     await clickAndWait(page, page.getByRole('link', { name: /close preview/i }));
-    await expect(page.getByRole('textbox', { name: /title/i })).toBeVisible();
+    const titleInput = page.getByRole('textbox', { name: /title/i });
+    await expect(titleInput).toBeVisible();
+
+    // Preview link should be disabled when there are unsaved changes
+    await titleInput.fill('New title');
+    const previewLink = page.getByRole('link', { name: /open preview/i });
+    await expect(previewLink).toBeDisabled();
+    await previewLink.hover();
+    await expect(
+      page.getByRole('tooltip', { name: /please save to open the preview/i })
+    ).toBeVisible();
   });
 
   test('Preview button should not appear for content types without preview config', async ({

@@ -27,7 +27,7 @@ export interface MediaLibraryInputProps {
   label?: string;
   hint?: string;
   disabled?: boolean;
-  attribute: {
+  attribute?: {
     allowedTypes?: AllowedTypes[];
     multiple?: boolean;
   };
@@ -36,7 +36,7 @@ export interface MediaLibraryInputProps {
 export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibraryInputProps>(
   (
     {
-      attribute: { allowedTypes = ['videos', 'files', 'images', 'audios'], multiple = false },
+      attribute: { allowedTypes = ['videos', 'files', 'images', 'audios'], multiple = false } = {},
       label,
       hint,
       disabled = false,
@@ -204,7 +204,7 @@ export const MediaLibraryInput = React.forwardRef<CarouselAssetsProps, MediaLibr
 
         {step === STEPS.AssetSelect && (
           <AssetDialog
-            allowedTypes={fieldAllowedTypes}
+            allowedTypes={fieldAllowedTypes as AllowedTypes[]}
             initiallySelectedAssets={initiallySelectedAssets}
             folderId={folderId}
             onClose={() => {
