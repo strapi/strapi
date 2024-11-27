@@ -7,9 +7,6 @@ on:
       - develop
       - v4
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.mdx?'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -20,7 +17,7 @@ permissions:
   actions: read
 
 jobs:
-  changes:
+  conditions:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -30,56 +27,20 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       e2e: ${{ steps.filter.outputs.e2e }}
       cli: ${{ steps.filter.outputs.cli }}
+      docs: ${{ steps.filter.outputs.docs }}
+      global: ${{ steps.filter.outputs.global }}
+      is_local: ${{ github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]') }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2 # need to check out previous 2 commits to see what has changed
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: .github/filters.yaml
 
-  pretty:
-    name: 'pretty (node: ${{ matrix.node }})'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20, 22]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Run lint
-        run: yarn prettier:check
-
-  lint:
-    name: 'lint (node: ${{ matrix.node }})'
-    needs: [build]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20, 22]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
-      - name: Run lint
-        run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
-
+  # Always run build in case an unrecognized file change could affect it
+  # Build must complete before any other step that uses build, so that it gets cached here and doesn't build multiple times
   build:
     name: 'build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
@@ -96,17 +57,72 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
-  typescript:
-    name: 'typescript (node: ${{ matrix.node }})'
-    needs: [changes, build]
+  docs_build:
+    name: 'docs build (node: ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    needs: [conditions]
+    if: ${{ needs.conditions.outputs.docs == 'true' }}
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: nrwl/nx-set-shas@v4
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Run docs build
+        run: cd docs && yarn build
+
+  pretty:
+    name: 'pretty (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: ${{ matrix.node }}
+      - uses: nrwl/nx-set-shas@v4
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Run lint
+        run: yarn prettier:check
+
+  lint:
+    name: 'lint (node: ${{ matrix.node }})'
+    needs: [build] # build is needed so that imports can be verified
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: nrwl/nx-set-shas@v4
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Run lint
+        run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
+
+  typescript:
+    name: 'typescript (node: ${{ matrix.node }})'
+    needs: [conditions, build]
+    runs-on: ubuntu-latest
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.backend == 'true'
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -123,9 +139,9 @@ jobs:
         run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
-    if: needs.changes.outputs.backend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true'
     name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [changes, build]
+    needs: [conditions, build]
     runs-on: ubuntu-latest
     env:
       YARN_ENABLE_IMMUTABLE_INSTALLS: false
@@ -134,8 +150,6 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -148,9 +162,9 @@ jobs:
         run: yarn nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
-    if: needs.changes.outputs.frontend == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.frontend == 'true'
     name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [changes, build]
+    needs: [conditions, build]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
@@ -158,8 +172,6 @@ jobs:
         node: [20]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -172,20 +184,18 @@ jobs:
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -214,9 +224,9 @@ jobs:
           retention-days: 1
 
   e2e_ee:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' || needs.changes.outputs.e2e == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
@@ -225,11 +235,9 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -258,10 +266,20 @@ jobs:
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
+      # Add the Trunk Analytics Uploader step
+      - name: Upload results to trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@main
+        with:
+          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+        continue-on-error: true
+
   cli:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.cli == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
     timeout-minutes: 60
-    needs: [changes, build]
+    needs: [conditions, build]
     name: 'CLI Tests (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:
@@ -269,8 +287,6 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -286,14 +302,14 @@ jobs:
         run: yarn test:cli
 
   api_ce_pg:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
         image: postgres
@@ -326,14 +342,14 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_mysql:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
+    if: needs.conditions.outputs.global == 'true' ||  needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[CE] API Integration (mysql:latest, package: mysql2}, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -365,14 +381,14 @@ jobs:
           jestOptions: '--shard=${{ matrix.shard }}'
 
   api_ce_sqlite:
-    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true'
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true'
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -390,15 +406,15 @@ jobs:
   # EE
   api_ee_pg:
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
         image: postgres
@@ -433,15 +449,15 @@ jobs:
 
   api_ee_mysql:
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -475,15 +491,15 @@ jobs:
 
   api_ee_sqlite:
     runs-on: ubuntu-latest
-    needs: [changes, build]
+    needs: [conditions, build]
     name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
-    if: (needs.changes.outputs.backend == 'true' || needs.changes.outputs.api == 'true') && github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
+    if: (needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.api == 'true') && needs.conditions.outputs.is_local == 'true'
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -508,6 +524,7 @@ jobs:
         pretty,
         lint,
         build,
+        docs_build,
         typescript,
         unit_back,
         unit_front,

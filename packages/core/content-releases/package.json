@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.4.1",
+  "version": "5.4.2",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -55,11 +55,11 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/database": "5.4.1",
-    "@strapi/design-system": "2.0.0-rc.12",
-    "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/types": "5.4.1",
-    "@strapi/utils": "5.4.1",
+    "@strapi/database": "5.4.2",
+    "@strapi/design-system": "2.0.0-rc.13",
+    "@strapi/icons": "2.0.0-rc.13",
+    "@strapi/types": "5.4.2",
+    "@strapi/utils": "5.4.2",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
     "formik": "2.4.5",
@@ -71,9 +71,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.4.1",
-    "@strapi/admin-test-utils": "5.4.1",
-    "@strapi/content-manager": "5.4.1",
+    "@strapi/admin": "5.4.2",
+    "@strapi/admin-test-utils": "5.4.2",
+    "@strapi/content-manager": "5.4.2",
     "@strapi/pack-up": "5.0.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",

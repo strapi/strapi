@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.4.1",
+  "version": "5.4.2",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -40,9 +40,9 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/logger": "5.4.1",
-    "@strapi/types": "5.4.1",
-    "@strapi/utils": "5.4.1",
+    "@strapi/logger": "5.4.2",
+    "@strapi/types": "5.4.2",
+    "@strapi/utils": "5.4.2",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
@@ -59,7 +59,7 @@
     "ws": "8.17.1"
   },
   "devDependencies": {
-    "@strapi/database": "5.4.1",
+    "@strapi/database": "5.4.2",
     "@strapi/pack-up": "5.0.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
