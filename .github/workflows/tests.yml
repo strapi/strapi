@@ -16,6 +16,9 @@ permissions:
   contents: read # to fetch code (actions/checkout)
   actions: read
 
+# IMPORTANT
+# Jobs using `nx affected` require nrwl/nx-set-shas, which in turn requires actions/checkout fetch-depth:0 (meaning unlimited)
+
 jobs:
   conditions:
     runs-on: ubuntu-latest
@@ -70,7 +73,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run docs build
@@ -87,7 +89,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run lint
@@ -102,6 +103,8 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -123,6 +126,8 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -150,6 +155,8 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -172,6 +179,8 @@ jobs:
         node: [20]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
