@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 # IMPORTANT
-# The jobs using nx need nrwl/nx-set-shas to set the correct base HEAD and sha, which in turn requires checkout depth to be 0
+# Jobs using `nx affected` require nrwl/nx-set-shas, which in turn requires actions/checkout fetch-depth:0 (meaning unlimited)
 
 jobs:
   conditions:

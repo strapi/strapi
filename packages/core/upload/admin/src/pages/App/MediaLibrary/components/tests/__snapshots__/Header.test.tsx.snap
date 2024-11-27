@@ -166,6 +166,10 @@ exports[`Header renders 1`] = `
   color: #7b79ff;
 }
 
+.c4:hover svg path {
+  fill: #7b79ff;
+}
+
 .c4:active {
   color: #271fe0;
 }
