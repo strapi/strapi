@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.4.1",
+  "version": "5.4.2",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -82,10 +82,10 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.0.0-rc.13",
     "@strapi/icons": "2.0.0-rc.13",
-    "@strapi/permissions": "5.4.1",
-    "@strapi/types": "5.4.1",
-    "@strapi/typescript-utils": "5.4.1",
-    "@strapi/utils": "5.4.1",
+    "@strapi/permissions": "5.4.2",
+    "@strapi/types": "5.4.2",
+    "@strapi/typescript-utils": "5.4.2",
+    "@strapi/utils": "5.4.2",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -140,8 +140,8 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "5.4.1",
-    "@strapi/data-transfer": "5.4.1",
+    "@strapi/admin-test-utils": "5.4.2",
+    "@strapi/data-transfer": "5.4.2",
     "@strapi/pack-up": "5.0.0",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",
