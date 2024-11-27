@@ -12,6 +12,8 @@ import { codeLanguages } from '../utils/constants';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
+// Import the PrismJS theme to highlight the code
+import 'prismjs/themes/prism-solarizedlight.css';
 
 const CodeBlock = styled.pre`
   border-radius: ${({ theme }) => theme.borderRadius};
