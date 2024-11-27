@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "testhistorycompos",
+  "info": {
+    "singularName": "testhistorycompo",
+    "pluralName": "testhistorycompos",
+    "displayName": "testhistorycompo",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "compo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "tests.root-compo"
+    },
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "blocks"
+    }
+  }
+}

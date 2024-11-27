@@ -168,7 +168,6 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
       const { component: componentUID, repeatable = false } = attribute;
 
       const componentValue = data[attributeName as keyof TData] as ComponentValue;
-
       await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue);
 
       if (repeatable === true) {
@@ -253,6 +252,7 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
   const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
 
+  // below here
   idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
       throw new errors.ApplicationError(

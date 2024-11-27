@@ -327,7 +327,6 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
             if (!entry) {
               return currentRelationData;
             }
-
             const relatedEntry = await strapi
               .documents(attributeSchema.target)
               .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });

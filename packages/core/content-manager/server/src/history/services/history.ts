@@ -1,4 +1,4 @@
-import type { Core, Data, Schema, Struct } from '@strapi/types';
+import type { Core, Data, Schema, Struct, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import _, { omit } from 'lodash/fp';
 import type { AnyDocument } from '@strapi/types/dist/modules/documents';
@@ -232,45 +232,107 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Clone to avoid mutating the original version data
         structuredClone(version.data)
       );
-      const sanitizedSchemaAttributes = omit(
-        FIELDS_TO_IGNORE,
-        contentTypeSchemaAttributes
-      ) as Struct.SchemaAttributes;
 
-      // Set all deleted relation values to null
-      const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
-      const dataWithoutMissingRelations = await reducer(
-        async (
-          previousRelationAttributes: Record<string, unknown>,
-          [name, attribute]: [string, Schema.Attribute.AnyAttribute]
-        ) => {
-          const versionRelationData = version.data[name];
-          if (!versionRelationData) {
+      const getDataWithoutMissingRelations = async (
+        entry: Pick<HistoryVersionQueryResult, 'data' | 'schema'> & {
+          component?: UID.Component;
+        } = version,
+        initialData: Record<string, unknown> = structuredClone(dataWithoutAddedAttributes),
+        componentKeyPath: string[] = []
+      ) => {
+        /**
+         * When a component uid is provided, we get the attributes for that component
+         * Otherwise, we assume we are at the root level of the version,
+         * so we can use the attributes we already got for version.contentType
+         */
+        const schemaAttributes = entry.component
+          ? strapi.getModel(entry.component).attributes
+          : contentTypeSchemaAttributes;
+        const sanitizedSchemaAttributes = omit(
+          FIELDS_TO_IGNORE,
+          schemaAttributes
+        ) as Struct.SchemaAttributes;
+
+        // Create the reducer for the provided schema attributes
+        const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
+        const stuff = await reducer(
+          async (
+            previousRelationAttributes: Record<string, unknown>,
+            [attributeKey, attributeSchema]: [string, Schema.Attribute.AnyAttribute]
+          ) => {
+            const versionRelationData = entry.data[attributeKey];
+            if (!versionRelationData) {
+              return previousRelationAttributes;
+            }
+
+            if (attributeSchema.type === 'component' && versionRelationData) {
+              const keyPath = [...componentKeyPath];
+              if (!keyPath.includes(attributeKey)) {
+                // When the attribute key is not already in the keyPath, add it
+                keyPath.push(attributeKey);
+              }
+              // Get the component's schema
+              const component = strapi.getModel(attributeSchema.component);
+              // Loop each attribute in the component schema
+              for (const [key, val] of Object.entries(component.attributes)) {
+                if (val.type === 'component') {
+                  // When it's a nested component, update the keyPath to the nested component
+                  keyPath.push(key);
+                } else {
+                  // Otherwise, recurse for component at keyPath
+                  const plop = await getDataWithoutMissingRelations(
+                    {
+                      data: versionRelationData,
+                      schema: component.attributes,
+                      component: component.uid,
+                    },
+                    previousRelationAttributes,
+                    keyPath
+                  );
+
+                  return plop;
+                }
+              }
+            }
+
+            if (
+              attributeSchema.type === 'relation' &&
+              // TODO: handle polymorphic relations
+              attributeSchema.relation !== 'morphToOne' &&
+              attributeSchema.relation !== 'morphToMany'
+            ) {
+              const data = await serviceUtils.getRelationRestoreValue(
+                versionRelationData,
+                attributeSchema
+              );
+              previousRelationAttributes[attributeKey] = data;
+            }
+
+            if (attributeSchema.type === 'media') {
+              const data = await serviceUtils.getMediaRestoreValue(
+                versionRelationData,
+                attributeSchema
+              );
+
+              const keyPathToUpdate = componentKeyPath.length
+                ? `${componentKeyPath.join('.')}.${attributeKey}`
+                : attributeKey;
+
+              return _.set(keyPathToUpdate, data, previousRelationAttributes);
+            }
+
             return previousRelationAttributes;
-          }
+          },
+          initialData
+        );
 
-          if (
-            attribute.type === 'relation' &&
-            // TODO: handle polymorphic relations
-            attribute.relation !== 'morphToOne' &&
-            attribute.relation !== 'morphToMany'
-          ) {
-            const data = await serviceUtils.getRelationRestoreValue(versionRelationData, attribute);
-            previousRelationAttributes[name] = data;
-          }
+        return stuff;
+      };
 
-          if (attribute.type === 'media') {
-            const data = await serviceUtils.getMediaRestoreValue(versionRelationData, attribute);
-            previousRelationAttributes[name] = data;
-          }
-
-          return previousRelationAttributes;
-        },
-        // Clone to avoid mutating the original version data
-        structuredClone(dataWithoutAddedAttributes)
+      const data = omit(
+        ['id', ...Object.keys(schemaDiff.removed)],
+        await getDataWithoutMissingRelations()
       );
-
-      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
         locale: version.locale,

@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_tests_second_level_compos",
+  "info": {
+    "displayName": "secondLevelCompo",
+    "icon": "arrowDown"
+  },
+  "options": {},
+  "attributes": {
+    "secondLevelCompoWord": {
+      "type": "string"
+    },
+    "secondLevelCompoImage": {
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ],
+      "type": "media",
+      "multiple": true
+    }
+  }
+}
