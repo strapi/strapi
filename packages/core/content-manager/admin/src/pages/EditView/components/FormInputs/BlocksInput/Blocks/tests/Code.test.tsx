@@ -31,7 +31,6 @@ describe('Code', () => {
 
     expect(screen.getByRole('code')).toBeInTheDocument();
     expect(screen.getByText('Some code')).toBeInTheDocument();
-    screen.debug();
   });
 
   it('handles enter key on a code block', () => {
