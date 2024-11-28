@@ -8752,6 +8752,7 @@ __metadata:
     markdown-it-sup: "npm:1.0.0"
     msw: "npm:1.3.0"
     node-schedule: "npm:2.1.1"
+    prismjs: "npm:1.29.0"
     qs: "npm:6.11.1"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
@@ -26507,6 +26508,13 @@ __metadata:
   dependencies:
     parse-ms: "npm:^4.0.0"
   checksum: 10c0/fd111aad8800a04dfd654e6016da69bdaa6fc6a4c280f8e727cffd8b5960558e94942f1a94d4aa6e4d179561a0fbb0366a9ebe0ccefbbb0f8ff853b129cdefb9
+  languageName: node
+  linkType: hard
+
+"prismjs@npm:1.29.0":
+  version: 1.29.0
+  resolution: "prismjs@npm:1.29.0"
+  checksum: 10c0/d906c4c4d01b446db549b4f57f72d5d7e6ccaca04ecc670fb85cea4d4b1acc1283e945a9cbc3d81819084a699b382f970e02f9d1378e14af9808d366d9ed7ec6
   languageName: node
   linkType: hard
 
