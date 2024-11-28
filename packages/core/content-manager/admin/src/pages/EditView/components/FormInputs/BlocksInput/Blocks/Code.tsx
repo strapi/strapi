@@ -1,6 +1,6 @@
 import * as React from 'react';
 // Import the PrismJS theme to highlight the code
-import 'highlight.js/styles/solarized-dark.css';
+import 'prismjs/themes/prism.css';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
