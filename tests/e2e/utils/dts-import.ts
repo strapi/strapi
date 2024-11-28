@@ -56,7 +56,9 @@ export const resetDatabaseAndImportDataFromPath = async (
     },
   });
 
-  engine.diagnostics.onDiagnostic(console.log);
+  engine.diagnostics.onDiagnostic((diagnostic) => {
+    if (diagnostic.kind !== 'info') console.log(diagnostic);
+  });
 
   try {
     // reset the transfer token to allow the transfer if it's been wiped (that is, not included in previous import data)

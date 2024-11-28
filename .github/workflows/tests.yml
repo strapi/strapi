@@ -16,6 +16,9 @@ permissions:
   contents: read # to fetch code (actions/checkout)
   actions: read
 
+# IMPORTANT
+# Jobs using `nx affected` require nrwl/nx-set-shas, which in turn requires actions/checkout fetch-depth:0 (meaning unlimited)
+
 jobs:
   conditions:
     runs-on: ubuntu-latest
@@ -70,7 +73,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run docs build
@@ -87,7 +89,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run lint
@@ -102,6 +103,8 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -123,6 +126,8 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -150,6 +155,8 @@ jobs:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -172,6 +179,8 @@ jobs:
         node: [20]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed for nx-set-shas
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -193,7 +202,7 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
 
@@ -235,7 +244,7 @@ jobs:
       fail-fast: false # remove once tests aren't flaky
       matrix:
         project: ['chromium', 'webkit', 'firefox']
-        shard: [1/2, 2/2]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
 
@@ -265,6 +274,16 @@ jobs:
           name: ee-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
+
+      # Add the Trunk Analytics Uploader step
+      - name: Upload results to trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@main
+        with:
+          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+        continue-on-error: true
 
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
@@ -299,7 +318,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
         image: postgres
@@ -339,7 +358,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -378,7 +397,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -404,7 +423,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       postgres:
         image: postgres
@@ -447,7 +466,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     services:
       mysql:
         image: bitnami/mysql:latest
@@ -489,7 +508,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

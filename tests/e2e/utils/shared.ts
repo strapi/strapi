@@ -58,11 +58,9 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
  * Skip the tour if the modal is visible
  */
 export const skipCtbTour = async (page: Page) => {
-  const modalSelector = 'role=button[name="Skip the tour"]';
-
   try {
-    await page.waitForSelector(modalSelector, { timeout: 1000 });
-    const modal = page.locator(modalSelector);
+    const modal = await page.getByRole('button', { name: 'Skip the tour' });
+
     if (await modal.isVisible()) {
       await modal.click();
       await expect(modal).not.toBeVisible();
