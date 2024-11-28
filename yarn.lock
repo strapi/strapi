@@ -5803,22 +5803,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/pluginutils@npm:^5.1.3":
-  version: 5.1.3
-  resolution: "@rollup/pluginutils@npm:5.1.3"
-  dependencies:
-    "@types/estree": "npm:^1.0.0"
-    estree-walker: "npm:^2.0.2"
-    picomatch: "npm:^4.0.2"
-  peerDependencies:
-    rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
-  peerDependenciesMeta:
-    rollup:
-      optional: true
-  checksum: 10c0/ba46ad588733fb01d184ee3bc7a127d626158bc840b5874a94c129ff62689d12f16f537530709c54da6f3b71f67d705c4e09235b1dc9542e9d47ee8f2d0b8b9e
-  languageName: node
-  linkType: hard
-
 "@rollup/rollup-android-arm-eabi@npm:4.19.1":
   version: 4.19.1
   resolution: "@rollup/rollup-android-arm-eabi@npm:4.19.1"
@@ -7267,7 +7251,6 @@ __metadata:
     react-redux: "npm:8.1.3"
     react-router-dom: "npm:6.22.3"
     react-window: "npm:1.8.10"
-    rollup-plugin-import-css: "npm:3.5.7"
     sanitize-html: "npm:2.13.0"
     slate: "npm:0.94.1"
     slate-history: "npm:0.93.0"
@@ -24434,13 +24417,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"picomatch@npm:^4.0.2":
-  version: 4.0.2
-  resolution: "picomatch@npm:4.0.2"
-  checksum: 10c0/7c51f3ad2bb42c776f49ebf964c644958158be30d0a510efd5a395e8d49cb5acfed5b82c0c5b365523ce18e6ab85013c9ebe574f60305892ec3fa8eee8304ccc
-  languageName: node
-  linkType: hard
-
 "pidtree@npm:~0.6.0":
   version: 0.6.0
   resolution: "pidtree@npm:0.6.0"
@@ -26244,17 +26220,6 @@ __metadata:
     semver-compare: "npm:^1.0.0"
     sprintf-js: "npm:^1.1.2"
   checksum: 10c0/7d01d4c14513c461778dd673a8f9e53255221f8d04173aafeb8e11b23d8b659bb83f1c90cfe81af7f9c213b8084b404b918108fd792bda76678f555340cc64ec
-  languageName: node
-  linkType: hard
-
-"rollup-plugin-import-css@npm:3.5.7":
-  version: 3.5.7
-  resolution: "rollup-plugin-import-css@npm:3.5.7"
-  dependencies:
-    "@rollup/pluginutils": "npm:^5.1.3"
-  peerDependencies:
-    rollup: ^2.x.x || ^3.x.x || ^4.x.x
-  checksum: 10c0/a6669ef3b8708d3204fc102bfa35de4eefd56401de459f5b26710ff9fc1248b5e247b09aa95a58a4b66d1eaec37a952e24648258f36479e328d13b4385851cfb
   languageName: node
   linkType: hard
 

@@ -1,5 +1,4 @@
 import { Config, defineConfig } from '@strapi/pack-up';
-import css from 'rollup-plugin-import-css';
 
 const config: Config = defineConfig({
   bundles: [
@@ -35,7 +34,6 @@ const config: Config = defineConfig({
    * what they look like in the package.json
    */
   exports: {},
-  plugins: [css()],
 });
 
 export default config;
