@@ -51,7 +51,9 @@ export const exportData = async (): Promise<void> => {
     },
   });
 
-  engine.diagnostics.onDiagnostic(console.log);
+  engine.diagnostics.onDiagnostic((diagnostic) => {
+    if (diagnostic.kind !== 'info') console.log(diagnostic);
+  });
 
   try {
     const results = await engine.transfer();

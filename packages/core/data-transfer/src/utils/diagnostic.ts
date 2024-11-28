@@ -51,6 +51,7 @@ export type WarningDiagnostic = GenericDiagnostic<
 export type InfoDiagnostic<T = unknown> = GenericDiagnostic<
   'info',
   {
+    origin?: string;
     params?: T;
   }
 >;
