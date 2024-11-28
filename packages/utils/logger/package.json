@@ -43,8 +43,8 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.2",
-    "eslint-config-custom": "5.4.2",
-    "tsconfig": "5.4.2"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

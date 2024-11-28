@@ -55,11 +55,11 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/database": "5.4.2",
+    "@strapi/database": "workspace:*",
     "@strapi/design-system": "2.0.0-rc.14",
     "@strapi/icons": "2.0.0-rc.14",
-    "@strapi/types": "5.4.2",
-    "@strapi/utils": "5.4.2",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
     "formik": "2.4.5",
@@ -71,9 +71,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.4.2",
-    "@strapi/admin-test-utils": "5.4.2",
-    "@strapi/content-manager": "5.4.2",
+    "@strapi/admin": "workspace:*",
+    "@strapi/admin-test-utils": "workspace:*",
+    "@strapi/content-manager": "workspace:*",
     "@strapi/pack-up": "5.0.2",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
