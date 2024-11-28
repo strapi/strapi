@@ -1,4 +1,5 @@
-import * as Prism from 'prismjs';
+// eslint-disable-next-line import/default
+import Prism from 'prismjs';
 import { BaseRange, Element, Node, NodeEntry } from 'slate';
 import './prismLanguages';
 
