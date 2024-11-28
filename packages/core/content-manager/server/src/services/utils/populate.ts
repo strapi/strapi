@@ -46,6 +46,14 @@ function getPopulateForRelation(
     return initialPopulate;
   }
 
+  // If populating localizations attribute, also include validatable fields
+  // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
+  if (attributeName === 'localizations') {
+    return {
+      populate: getValidatableFieldsPopulate(model.uid as UID.Schema),
+    };
+  }
+
   // always populate createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
     return true;
