@@ -182,7 +182,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const status = documents[0].publishedAt !== null ? 'published' : 'draft';
     const locales = documents.map((d) => d.locale).filter(Boolean);
 
-
     return strapi.query(uid).findMany({
       where: {
         documentId: { $in: documents.map((d) => d.documentId).filter(Boolean) },
