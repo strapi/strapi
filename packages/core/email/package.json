@@ -63,7 +63,7 @@
   },
   "devDependencies": {
     "@strapi/admin": "workspace:*",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/types": "workspace:*",
     "@testing-library/react": "15.0.7",
     "@types/koa": "2.13.4",
@@ -78,7 +78,7 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
-    "koa": "2.13.4",
+    "koa": "^2.15.2",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

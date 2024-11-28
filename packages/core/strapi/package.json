@@ -121,7 +121,7 @@
     "@strapi/generators": "workspace:*",
     "@strapi/i18n": "workspace:*",
     "@strapi/logger": "workspace:*",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/permissions": "workspace:*",
     "@strapi/review-workflows": "workspace:*",
     "@strapi/types": "workspace:*",

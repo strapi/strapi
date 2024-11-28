@@ -52,7 +52,7 @@
     "lodash": "4.17.21"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/jest": "29.5.2",
     "eslint-config-custom": "5.4.2",
     "tsconfig": "5.4.2"

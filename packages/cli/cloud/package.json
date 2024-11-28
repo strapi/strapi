@@ -67,7 +67,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.23.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
     "@types/lodash": "^4.14.191",

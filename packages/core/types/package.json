@@ -59,7 +59,7 @@
     "typedoc-plugin-markdown": "3.17.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",

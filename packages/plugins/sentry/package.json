@@ -55,7 +55,7 @@
     "@strapi/icons": "2.0.0-rc.14"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/sdk-plugin": "^5.0.0",
     "@strapi/strapi": "5.4.2",
     "react": "18.3.1",
