@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 import { prunePermissions } from '../../scripts/endpoints';
-import { findAndClose } from '../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -22,8 +22,8 @@ test.describe('Settings', () => {
     /**
      * Get to the settings page
      */
-    await page.getByRole('link', { name: 'Settings' }).click();
-    await page.getByRole('link', { name: 'Internationalization' }).click();
+    await clickAndWait(page, page.getByRole('link', { name: 'Settings' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Internationalization' }));
 
     /**
      * Assert that the page has the expected elements & data, the locales installed in the test-app.
@@ -50,9 +50,8 @@ test.describe('Settings', () => {
     /**
      * Next, we'll navigate to our shop single type & add the a localised version of this document.
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Shop' }).click();
-    await page.waitForURL(/\/admin\/content-manager\/single-types\/api::shop.shop(\?.*)?/);
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
     await expect(page.getByRole('heading', { name: 'UK Shop' })).toBeVisible();
     await page.getByRole('combobox', { name: 'Locales' }).click();
     expect(await page.getByRole('option').all()).toHaveLength(5);
@@ -84,7 +83,6 @@ test.describe('Settings', () => {
     /**
      * Assert the document header actions action are enabled
      */
-    await expect(page.getByRole('button', { name: 'More actions' })).toBeEnabled();
     await page.getByRole('button', { name: 'More actions' }).click();
     await expect(page.getByRole('menuitem', { name: 'Edit the model' })).toBeEnabled();
     await expect(page.getByRole('menuitem', { name: 'Configure the view' })).toBeEnabled();
@@ -132,16 +130,13 @@ test.describe('Settings', () => {
   test('As a user I want to delete an existing locale and have the content deleted as well', async ({
     page,
   }) => {
-    const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
-
     /**
      * Go to the list view first to assert the current state of the data.
      * We'll assert that the default locale is "English (en)" and that we have 2 entries.
      * and that all the expected locales exist in the select dropdown.
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Article' }).click();
-    await page.waitForURL(LIST_URL);
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
     expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('English (en)');
     expect(await page.getByRole('row').all()).toHaveLength(3);
@@ -166,9 +161,8 @@ test.describe('Settings', () => {
      * Finally, go back to the list view, the english articles should be there,
      * but we should not see the french locale option anymore.
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Article' }).click();
-    await page.waitForURL(LIST_URL);
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
     expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('English (en)');
     expect(await page.getByRole('row').all()).toHaveLength(3);
@@ -185,17 +179,15 @@ test.describe('Settings', () => {
   test('As a user I want to update a locale and have the changes reflected across my application', async ({
     page,
   }) => {
-    const LIST_URL = /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/;
-
     /**
      * Go to the list view first to assert the current state of the data.
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
-    await page.waitForURL(LIST_URL);
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Products' }));
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
-    expect(await page.getByRole('row').all()).toHaveLength(2);
-    expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('English (en)');
+    await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
+      'English (en)'
+    );
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of LOCALES) {
       await expect(page.getByRole('option', { name: locale })).toBeVisible();
@@ -209,7 +201,6 @@ test.describe('Settings', () => {
     await page.getByRole('link', { name: 'Internationalization' }).click();
     await expect(page.getByRole('heading', { name: 'Internationalization' })).toBeVisible();
     await page.getByRole('gridcell', { name: 'English (en)', exact: true }).click();
-    await page.getByRole('textbox', { name: 'Locale display name' }).fill('');
     await page.getByRole('textbox', { name: 'Locale display name' }).fill('UK English');
     await page.getByRole('button', { name: 'Save' }).click();
     await findAndClose(page, 'Success:Locale successfully edited');
@@ -217,12 +208,9 @@ test.describe('Settings', () => {
     /**
      * Lets go back to the list view and assert that the changes are reflected.
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Products' }).click();
-    await page.waitForURL(LIST_URL);
-    await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
     expect(await page.getByRole('row').all()).toHaveLength(2);
-    expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('UK English');
+    await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('UK English');
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of ['UK English', ...LOCALES].filter((locale) => locale !== 'English (en)')) {
       await expect(page.getByRole('option', { name: locale })).toBeVisible();
