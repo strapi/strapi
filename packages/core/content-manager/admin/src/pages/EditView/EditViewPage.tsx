@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-// Import the PrismJS theme to highlight the code
-import 'prismjs/themes/prism-solarizedlight.css';
 import {
   Page,
   Blocker,
@@ -162,6 +160,8 @@ const EditViewPage = () => {
 
     return yupSchema.validateSync(values, { abortEarly: false });
   };
+
+  console.log('EditViewPage', layout);
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
