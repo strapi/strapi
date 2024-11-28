@@ -1,4 +1,3 @@
-import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
 import { Box, Flex, Popover, Typography, useCollator, Button } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -7,11 +6,8 @@ import { Locale } from '../../../shared/contracts/locales';
 import { useGetLocalesQuery } from '../services/locales';
 
 interface LocaleListCellProps {
-  documentId: string;
-  collectionType: string;
   localizations: { locale: string }[];
   locale: string;
-  model: string;
 }
 
 const LocaleListCell = ({ locale: currentLocale, localizations }: LocaleListCellProps) => {
