@@ -49,7 +49,7 @@
     "mailgun.js": "10.2.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "eslint-config-custom": "5.4.2",
     "tsconfig": "5.4.2"
   },

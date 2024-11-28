@@ -142,7 +142,7 @@
   "devDependencies": {
     "@strapi/admin-test-utils": "5.4.2",
     "@strapi/data-transfer": "5.4.2",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",
     "@types/invariant": "2.2.36",

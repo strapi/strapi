@@ -51,7 +51,7 @@
     "umzug": "3.8.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/fs-extra": "11.0.4",
     "eslint-config-custom": "5.4.2",
     "tsconfig": "5.4.2"

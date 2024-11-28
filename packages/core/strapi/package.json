@@ -121,7 +121,7 @@
     "@strapi/generators": "5.4.2",
     "@strapi/i18n": "5.4.2",
     "@strapi/logger": "5.4.2",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/permissions": "5.4.2",
     "@strapi/review-workflows": "5.4.2",
     "@strapi/types": "5.4.2",

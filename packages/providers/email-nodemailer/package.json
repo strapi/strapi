@@ -59,7 +59,7 @@
     "nodemailer": "6.9.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/nodemailer": "6.4.7",
     "eslint-config-custom": "5.4.2",
     "tsconfig": "5.4.2"

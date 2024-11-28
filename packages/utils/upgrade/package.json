@@ -75,7 +75,7 @@
     "simple-git": "3.21.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/types": "5.4.2",
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "0.11.10",

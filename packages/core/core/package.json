@@ -59,7 +59,7 @@
     "@strapi/database": "5.4.2",
     "@strapi/generators": "5.4.2",
     "@strapi/logger": "5.4.2",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/permissions": "5.4.2",
     "@strapi/types": "5.4.2",
     "@strapi/typescript-utils": "5.4.2",
@@ -107,7 +107,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/ts-zen": "^0.2.0",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",

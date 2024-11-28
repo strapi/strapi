@@ -99,7 +99,7 @@
   "devDependencies": {
     "@strapi/admin": "5.4.2",
     "@strapi/database": "5.4.2",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
