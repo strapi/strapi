@@ -1,10 +1,12 @@
 import { TransferKind } from '../client';
 import type { ServerError } from './error';
+import type { Diagnostic } from '../../../../src/utils/diagnostic';
 
 export type Message<T = unknown> = {
   uuid?: string;
   data?: T | null;
   error?: ServerError | null;
+  diagnostic?: Diagnostic;
 };
 
 // Successful

@@ -32,12 +32,6 @@ const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery
     ),
   };
 
-  if ('_q' in validQueryParams) {
-    // Encode the search query here since the paramsSerializer will not
-    // @ts-expect-error – TODO: fix this type error
-    validQueryParams._q = encodeURIComponent(validQueryParams._q);
-  }
-
   return validQueryParams;
 };
 

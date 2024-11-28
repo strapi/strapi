@@ -21,8 +21,8 @@ import {
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
 import { useIntl } from 'react-intl';
-import { useMatch, useNavigate } from 'react-router-dom';
-import { DefaultTheme } from 'styled-components';
+import { useMatch, useNavigate, useParams } from 'react-router-dom';
+import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
@@ -225,6 +225,13 @@ interface DocumentActionsMenuProps {
   variant?: 'ghost' | 'tertiary';
 }
 
+const MenuItem = styled(Menu.Item)<{ isVariantDanger?: boolean; isDisabled?: boolean }>`
+  &:hover {
+    background: ${({ theme, isVariantDanger, isDisabled }) =>
+      isVariantDanger && !isDisabled ? theme.colors.danger100 : 'neutral'};
+  }
+`;
+
 const DocumentActionsMenu = ({
   actions,
   children,
@@ -288,12 +295,14 @@ const DocumentActionsMenu = ({
       <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
-            <Menu.Item
+            <MenuItem
               disabled={action.disabled}
               /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
               onSelect={handleClick(action)}
               display="block"
               key={action.id}
+              isVariantDanger={action.variant === 'danger'}
+              isDisabled={action.disabled}
             >
               <Flex justifyContent="space-between" gap={4}>
                 <Flex
@@ -312,7 +321,7 @@ const DocumentActionsMenu = ({
                   {action.label}
                 </Flex>
               </Flex>
-            </Menu.Item>
+            </MenuItem>
           );
         })}
         {children}
@@ -510,6 +519,7 @@ const PublishAction: DocumentActionComponent = ({
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const isListView = useMatch(LIST_PATH) !== null;
   const isCloning = useMatch(CLONE_PATH) !== null;
+  const { id } = useParams();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { publish } = useDocumentActions();
@@ -649,10 +659,12 @@ const PublishAction: DocumentActionComponent = ({
         /**
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
-        navigate({
-          pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-          search: rawQuery,
-        });
+        if (id === 'create') {
+          navigate({
+            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+            search: rawQuery,
+          });
+        }
       } else if (
         'error' in res &&
         isBaseQueryError(res.error) &&
@@ -764,7 +776,7 @@ const UpdateAction: DocumentActionComponent = ({
      */
     disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
     label: formatMessage({
-      id: 'content-manager.containers.Edit.save',
+      id: 'global.save',
       defaultMessage: 'Save',
     }),
     onClick: async () => {

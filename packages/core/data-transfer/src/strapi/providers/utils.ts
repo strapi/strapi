@@ -10,6 +10,7 @@ import {
   ProviderValidationError,
   ProviderErrorDetails,
 } from '../../errors/providers';
+import { IDiagnosticReporter } from '../../utils/diagnostic';
 
 interface IDispatcherState {
   transfer?: { kind: Client.TransferKind; id: string };
@@ -26,7 +27,8 @@ export const createDispatcher = (
   retryMessageOptions = {
     retryMessageMaxRetries: 5,
     retryMessageTimeout: 30000,
-  }
+  },
+  reportInfo?: (message: string) => void
 ) => {
   const state: IDispatcherState = {};
 
@@ -49,6 +51,16 @@ export const createDispatcher = (
         Object.assign(payload, { transferID: state.transfer?.id });
       }
 
+      if (message.type === 'command') {
+        reportInfo?.(
+          `dispatching message command:${(message as Client.CommandMessage).command} uuid:${uuid} sent:${numberOfTimesMessageWasSent}`
+        );
+      } else if (message.type === 'transfer') {
+        const messageToSend = message as Client.TransferMessage;
+        reportInfo?.(
+          `dispatching message action:${messageToSend.action} ${messageToSend.kind === 'step' ? `step:${messageToSend.step}` : ''} uuid:${uuid} sent:${numberOfTimesMessageWasSent}`
+        );
+      }
       const stringifiedPayload = JSON.stringify(payload);
       ws.send(stringifiedPayload, (error) => {
         if (error) {
@@ -72,6 +84,16 @@ export const createDispatcher = (
 
       const onResponse = (raw: RawData) => {
         const response: Server.Message<U> = JSON.parse(raw.toString());
+        if (message.type === 'command') {
+          reportInfo?.(
+            `received response to message command: ${(message as Client.CommandMessage).command} uuid: ${uuid} sent: ${numberOfTimesMessageWasSent}`
+          );
+        } else if (message.type === 'transfer') {
+          const messageToSend = message as Client.TransferMessage;
+          reportInfo?.(
+            `received response to message action:${messageToSend.action} ${messageToSend.kind === 'step' ? `step:${messageToSend.step}` : ''} uuid:${uuid} sent:${numberOfTimesMessageWasSent}`
+          );
+        }
         if (response.uuid === uuid) {
           clearInterval(interval);
           if (response.error) {
@@ -161,7 +183,11 @@ type WebsocketParams = ConstructorParameters<typeof WebSocket>;
 type Address = WebsocketParams[0];
 type Options = WebsocketParams[2];
 
-export const connectToWebsocket = (address: Address, options?: Options): Promise<WebSocket> => {
+export const connectToWebsocket = (
+  address: Address,
+  options?: Options,
+  diagnostics?: IDiagnosticReporter
+): Promise<WebSocket> => {
   return new Promise((resolve, reject) => {
     const server = new WebSocket(address, options);
     server.once('open', () => {
@@ -198,6 +224,15 @@ export const connectToWebsocket = (address: Address, options?: Options): Promise
           `Failed to initialize the connection: Unexpected server response ${res.statusCode}`
         )
       );
+    });
+
+    server.on('message', (raw: RawData) => {
+      const response: Server.Message = JSON.parse(raw.toString());
+      if (response.diagnostic) {
+        diagnostics?.report({
+          ...response.diagnostic,
+        });
+      }
     });
 
     server.once('error', (err) => {
