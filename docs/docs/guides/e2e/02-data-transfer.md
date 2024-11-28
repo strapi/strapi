@@ -75,7 +75,11 @@ If you are exporting data for an EE feature you will need to run the script with
 STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-export.ts updated-data-packet
 ```
 
-The script will create a file `updated-data-packet.tar`. You can copy this file over to `tests/e2e/data` so it can be used in the appropriate tests.
+The script will create a file `updated-data-packet.tar`. You can extract this file to `tests/e2e/data` so it can be used in the appropriate tests.
+
+:::note
+Before committing, please ensure that all image files have been highly compressed to avoid adding large files to git. Nobody will look at these images, it doesn't matter if they are potato quality.
+:::
 
 ### Importing the data packet in test scenarios
 
@@ -87,7 +91,7 @@ import { resetDatabaseAndImportDataFromPath } from './utils/dts-import';
 
 test.describe('Strapi Application', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('backup.tar');
+    await resetDatabaseAndImportDataFromPath('backup');
     await page.goto('/admin');
   });
 
