@@ -161,7 +161,7 @@ const LocalePickerAction = ({
 
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
-    ...(meta?.availableLocales ?? []),
+    ...(document?.localizations ?? []),
   ];
 
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {

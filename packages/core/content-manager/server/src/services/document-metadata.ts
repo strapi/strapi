@@ -10,6 +10,7 @@ export interface DocumentVersion {
   id: string | number;
   documentId: Modules.Documents.ID;
   locale?: string;
+  localizations?: DocumentVersion[];
   updatedAt?: string | null | Date;
   publishedAt?: string | null | Date;
 }
@@ -167,6 +168,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // Pick status fields (at fields, status, by fields), use lodash fp
     return pick(AVAILABLE_STATUS_FIELDS, availableStatus);
   },
+
   /**
    * Get the available status of many documents, useful for batch operations
    * @param uid
@@ -178,17 +180,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     // The status and locale of all documents should be the same
     const status = documents[0].publishedAt !== null ? 'published' : 'draft';
-    const locale = documents[0]?.locale;
-    const otherStatus = status === 'published' ? 'draft' : 'published';
+    const locales = documents.map((d) => d.locale).filter(Boolean);
 
-    return strapi.documents(uid).findMany({
-      filters: {
+
+    return strapi.query(uid).findMany({
+      where: {
         documentId: { $in: documents.map((d) => d.documentId).filter(Boolean) },
+        // NOTE: find the "opposite" status
+        publishedAt: { $null: status === 'published' },
+        locale: { $in: locales },
       },
-      status: otherStatus,
-      locale,
-      fields: ['documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
-    }) as unknown as DocumentMetadata['availableStatus'];
+      select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
+    });
   },
 
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
@@ -287,6 +290,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     const meta = await this.getMetadata(uid, document, opts);
+
+    // Populate localization statuses
+    if (document.localizations) {
+      const otherStatus = await this.getManyAvailableStatus(uid, document.localizations);
+
+      document.localizations = document.localizations.map((d) => {
+        const status = otherStatus.find((s) => s.documentId === d.documentId);
+        return {
+          ...d,
+          status: this.getStatus(d, status ? [status] : []),
+        };
+      });
+    }
 
     return {
       data: {
