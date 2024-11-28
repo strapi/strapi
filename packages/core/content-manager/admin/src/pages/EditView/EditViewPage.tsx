@@ -161,8 +161,6 @@ const EditViewPage = () => {
     return yupSchema.validateSync(values, { abortEarly: false });
   };
 
-  console.log('EditViewPage', layout);
-
   return (
     <Main paddingLeft={10} paddingRight={10}>
       <Page.Title>{documentTitle}</Page.Title>
