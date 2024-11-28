@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+// Import the PrismJS theme to highlight the code
+import 'prismjs/themes/prism-solarizedlight.css';
 import {
   Page,
   Blocker,
