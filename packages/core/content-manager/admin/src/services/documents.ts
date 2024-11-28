@@ -1,6 +1,7 @@
 /**
  * Related to fetching the actual content of a collection type or single type.
  */
+import { stringify } from 'qs';
 
 import { SINGLE_TYPES } from '../constants/collections';
 
@@ -169,7 +170,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         url: `/content-manager/collection-types/${model}`,
         method: 'GET',
         config: {
-          params,
+          params: stringify(params, { encode: true }),
         },
       }),
       providesTags: (result, _error, arg) => {
