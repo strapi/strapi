@@ -119,7 +119,7 @@
     "p-map": "4.0.0",
     "passport-local": "1.0.0",
     "pluralize": "8.0.0",
-    "prismjs": "^1.29.0",
+    "prismjs": "1.29.0",
     "punycode": "2.3.1",
     "qs": "6.11.1",
     "react-dnd": "16.0.1",
