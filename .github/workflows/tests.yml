@@ -63,24 +63,20 @@ jobs:
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
-    needs: [conditions, build]
+    needs: [conditions]
     if: ${{ needs.conditions.outputs.docs == 'true' }}
     strategy:
       matrix:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Monorepo build
-        uses: ./.github/actions/run-build
       - name: Run docs build
-        run: cd docs && yarn build
+        run: cd docs && yarn install && yarn build
 
   pretty:
     name: 'pretty (node: ${{ matrix.node }})'
