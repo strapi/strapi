@@ -63,7 +63,7 @@ jobs:
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
-    needs: [conditions]
+    needs: [conditions, build]
     if: ${{ needs.conditions.outputs.docs == 'true' }}
     strategy:
       matrix:
@@ -77,6 +77,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
       - name: Run docs build
         run: cd docs && yarn build
 
