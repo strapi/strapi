@@ -11,6 +11,8 @@ import {
   validateKind,
 } from './validation/content-type';
 
+type RenamedAttribute = { oldName: string; newName: string };
+
 export default {
   async getContentTypes(ctx: Context) {
     const { kind } = ctx.query;
@@ -126,13 +128,13 @@ export default {
           const newName = key; // New name is the current key
           return { oldName, newName };
         })
-        .filter((item) => item);
+        .filter((item) => item) as RenamedAttribute[];
       if (
         renamedAttributes.length &&
         strapi.config.get('database.settings.automigrate.attributes', true)
       ) {
         const migrationBuilder = new MigrationBuilder();
-        renamedAttributes.forEach((attr: { oldName: string; newName: string }) => {
+        renamedAttributes.forEach((attr: RenamedAttribute) => {
           migrationBuilder.addRenameAttribute(uid, attr);
         });
         await migrationBuilder.writeFiles();
