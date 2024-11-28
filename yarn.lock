@@ -7097,6 +7097,7 @@ __metadata:
     "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
+    "@types/prismjs": "npm:1.26.5"
     "@types/punycode": "npm:2.1.4"
     "@types/react-window": "npm:1.8.8"
     "@types/sanitize-html": "npm:2.13.0"

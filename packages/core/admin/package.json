@@ -156,6 +156,7 @@
     "@types/markdown-it-footnote": "3.0.3",
     "@types/passport-local": "1.0.36",
     "@types/pluralize": "0.0.32",
+    "@types/prismjs": "1.26.5",
     "@types/punycode": "2.1.4",
     "@types/react-window": "1.8.8",
     "@types/sanitize-html": "2.13.0",
