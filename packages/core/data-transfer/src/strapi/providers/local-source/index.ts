@@ -3,7 +3,7 @@ import { chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
@@ -46,7 +46,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'local-source-provider',
+        origin: 'local-source-provider',
       },
       kind: 'info',
     });
