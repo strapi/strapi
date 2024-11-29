@@ -63,7 +63,7 @@ jobs:
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
-    needs: [conditions, build, build]
+    needs: [conditions, build]
     if: ${{ needs.conditions.outputs.docs == 'true' || needs.conditions.outputs.global == 'true' }}
     strategy:
       matrix:
