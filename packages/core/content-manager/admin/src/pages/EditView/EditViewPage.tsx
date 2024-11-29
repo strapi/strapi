@@ -121,6 +121,18 @@ const EditViewPage = () => {
     return transformDocument(schema, components)(form);
   }, [document, isCreatingDocument, isSingleType, schema, components]);
 
+  const validate = React.useCallback(
+    (values: Record<string, unknown>, options: Record<string, string>) => {
+      const yupSchema = createYupSchema(schema?.attributes, components, {
+        status,
+        ...options,
+      });
+
+      return yupSchema.validate(values, { abortEarly: false });
+    },
+    [components, schema?.attributes, status]
+  );
+
   if (hasError) {
     return <Page.Error />;
   }
@@ -168,14 +180,7 @@ const EditViewPage = () => {
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
-        validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-          const yupSchema = createYupSchema(schema?.attributes, components, {
-            status,
-            ...options,
-          });
-
-          return yupSchema.validate(values, { abortEarly: false });
-        }}
+        validate={validate}
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
         {({ resetForm }) => (
