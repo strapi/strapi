@@ -1,18 +1,10 @@
 import * as React from 'react';
 
 import { useClipboard, useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  type BoxProps,
-  Flex,
-  IconButton,
-  Tabs,
-  Typography,
-  Grid,
-} from '@strapi/design-system';
+import { IconButton, Tabs, Typography, Grid } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
-import { type MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -156,7 +148,7 @@ const PreviewHeader = () => {
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={title}>
           {title}
         </PreviewTitle>
         <Status />
