@@ -34,7 +34,17 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Should go back to the edit view on close
     await clickAndWait(page, page.getByRole('link', { name: /close preview/i }));
-    await expect(page.getByRole('textbox', { name: /title/i })).toBeVisible();
+    const titleInput = page.getByRole('textbox', { name: /title/i });
+    await expect(titleInput).toBeVisible();
+
+    // Preview link should be disabled when there are unsaved changes
+    await titleInput.fill('New title');
+    const previewLink = page.getByRole('link', { name: /open preview/i });
+    await expect(previewLink).toBeDisabled();
+    await previewLink.hover();
+    await expect(
+      page.getByRole('tooltip', { name: /please save to open the preview/i })
+    ).toBeVisible();
   });
 
   test('Preview button should not appear for content types without preview config', async ({
@@ -68,5 +78,35 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Expect the preview tab to be disabled (since the document is in draft status)
     await expect(page.getByText(/^Published$/)).toBeDisabled();
+  });
+
+  test('Iframe should be present and load the correct URL', async ({ page }) => {
+    // Open an edit view for a content type that has preview
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    // Publish the document
+    await page.getByRole('button', { name: /publish/i }).click();
+
+    // Check that preview opens in its own page
+    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+
+    // Check if the iframe is present
+    const iframe = await page.getByTitle('Preview');
+    expect(iframe).not.toBeNull();
+
+    // Check if the iframe is loading the correct URL
+    const src = await iframe.getAttribute('src');
+    expect(src).toContain('/preview/api::article.article/');
+    expect(src).toContain('/en/draft');
+
+    // Navigate to the published tab
+    await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
+
+    const updatedIframe = await page.getByTitle('Preview');
+    const srcPublished = await updatedIframe.getAttribute('src');
+    expect(srcPublished).toContain('/preview/api::article.article/');
+    expect(srcPublished).toContain('/en/published');
   });
 });

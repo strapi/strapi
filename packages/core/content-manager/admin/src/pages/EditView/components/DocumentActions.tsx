@@ -21,7 +21,7 @@ import {
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
 import { useIntl } from 'react-intl';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { useMatch, useNavigate, useParams } from 'react-router-dom';
 import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
@@ -519,6 +519,7 @@ const PublishAction: DocumentActionComponent = ({
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const isListView = useMatch(LIST_PATH) !== null;
   const isCloning = useMatch(CLONE_PATH) !== null;
+  const { id } = useParams();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { publish } = useDocumentActions();
@@ -658,10 +659,12 @@ const PublishAction: DocumentActionComponent = ({
         /**
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
-        navigate({
-          pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-          search: rawQuery,
-        });
+        if (id === 'create') {
+          navigate({
+            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+            search: rawQuery,
+          });
+        }
       } else if (
         'error' in res &&
         isBaseQueryError(res.error) &&

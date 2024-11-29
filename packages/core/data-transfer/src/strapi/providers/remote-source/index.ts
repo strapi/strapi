@@ -13,7 +13,7 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
@@ -356,7 +356,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'remote-source-provider',
+        origin: 'remote-source-provider',
       },
       kind: 'info',
     });
@@ -375,13 +375,13 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = await connectToWebsocket(wsUrl);
+      ws = await connectToWebsocket(wsUrl, undefined, this.#diagnostics);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = await connectToWebsocket(wsUrl, { headers });
+      ws = await connectToWebsocket(wsUrl, { headers }, this.#diagnostics);
     }
 
     // Invalid auth method provided
