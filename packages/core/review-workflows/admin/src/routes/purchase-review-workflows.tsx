@@ -32,7 +32,7 @@ const PurchaseReviewWorkflows = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://bit.ly/4d3rLjB"
+                href="https://strapi.io/enterprise?utm_campaign=In-Product-CTA&utm_source=Review-workflows"
                 isExternal
                 target="_blank"
               >

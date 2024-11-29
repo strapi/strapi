@@ -33,7 +33,7 @@ const PurchaseContentHistory = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://bit.ly/3Bbv1w4"
+                href="https://strapi.io/features/content-history?utm_campaign=In-Product-CTA&utm_source=Content-History"
                 isExternal
                 target="_blank"
               >
