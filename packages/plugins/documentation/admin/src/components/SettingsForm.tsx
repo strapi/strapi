@@ -75,7 +75,12 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
         setFieldValue,
         setFieldError,
         dirty,
+        initialValues,
       }) => {
+        // Check if restrictedAccess has changed from its initial value
+        const hasRestrictedAccessChanged = 
+          values.restrictedAccess !== initialValues.restrictedAccess;
+
         return (
           <Form noValidate onSubmit={handleSubmit}>
             <Layouts.Header
@@ -149,7 +154,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                         <Field.Hint />
                       </Field.Root>
                     </Grid.Item>
-                    {values.restrictedAccess && (
+                    {hasRestrictedAccessChanged && (
                       <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                         <Field.Root
                           name="password"
