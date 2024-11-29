@@ -8,8 +8,9 @@ updates:
           - '@babel/*'
           - 'babel-*'
 
-      eslint:
+      eslint-prettier:
         patterns:
+          - 'prettier'
           - 'eslint'
           - 'eslint-*'
           - '@eslint/*'
@@ -23,12 +24,6 @@ updates:
       playwright:
         patterns:
           - '@playwright/*'
-
-      prettier:
-        patterns:
-          - 'prettier'
-          - 'eslint-config-prettier'
-          - 'eslint-plugin-prettier'
 
       react:
         patterns:
