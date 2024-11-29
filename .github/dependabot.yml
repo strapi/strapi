@@ -12,17 +12,30 @@ updates:
         patterns:
           - 'eslint'
           - 'eslint-*'
-          - '@typescript-eslint/*'
+          - '@eslint/*'
 
       jest:
         patterns:
           - 'jest'
           - 'jest-*'
+          - 'supertest'
+
+      playwright:
+        patterns:
+          - '@playwright/*'
+
+      prettier:
+        patterns:
+          - 'prettier'
+          - 'eslint-config-prettier'
+          - 'eslint-plugin-prettier'
 
       react:
         patterns:
           - 'react'
           - 'react-dom'
+          - 'react-router'
+          - 'react-router-dom'
 
       react-dnd:
         patterns:
@@ -43,16 +56,31 @@ updates:
         patterns:
           - 'storybook'
           - '@storybook/*'
+          - '@storybook/addon-*'
+
+      swc:
+        patterns:
+          - '@swc/*'
+        exclude-patterns:
+          - '@swc/jest'
 
       testing-library:
         patterns:
           - '@testing-library/*'
+
+      typescript:
+        patterns:
+          - 'typescript'
+          - 'ts-jest'
+          - '@typescript-eslint/*'
 
       webpack:
         patterns:
           - 'webpack'
           - 'webpack-cli'
           - 'webpack-dev-server'
+          - 'html-webpack-plugin'
+          - 'webpack-bundle-analyzer'
 
     commit-message:
       prefix: 'chore'
@@ -61,18 +89,14 @@ updates:
       interval: weekly
       day: sunday
       time: '22:00'
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 5
     versioning-strategy: increase
     ignore:
-      # Only allow patch as minor babel versions need to be upgraded all together
-      - dependency-name: '@babel/*'
-        update-types:
-          - 'version-update:semver-major'
-          - 'version-update:semver-minor'
-
+      # only accept security updates
       - dependency-name: '*'
         update-types:
           - 'version-update:semver-patch'
+          - 'version-update:semver-minor'
           - 'version-update:semver-major'
 
     labels:
@@ -80,7 +104,7 @@ updates:
       - 'pr: chore'
 
   - package-ecosystem: github-actions
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 5
     directory: /
     commit-message:
       prefix: 'chore'
