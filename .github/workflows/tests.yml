@@ -63,8 +63,8 @@ jobs:
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
-    needs: [conditions]
-    if: ${{ needs.conditions.outputs.docs == 'true' }}
+    needs: [conditions, build]
+    if: ${{ needs.conditions.outputs.docs == 'true' || needs.conditions.outputs.global == 'true' }}
     strategy:
       matrix:
         node: [20, 22]
@@ -73,10 +73,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+      - name: Install docs dependencies
+        working-directory: docs
+        run: yarn install --frozen-lockfile
       - name: Run docs build
-        run: cd docs && yarn build
+        working-directory: docs
+        run: yarn build
 
   pretty:
     name: 'pretty (node: ${{ matrix.node }})'
