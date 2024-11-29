@@ -17,6 +17,7 @@ updates:
 
       jest:
         patterns:
+          - '@swc/jest'
           - 'jest'
           - 'jest-*'
           - 'supertest'
