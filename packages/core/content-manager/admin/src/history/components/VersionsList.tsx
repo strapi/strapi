@@ -1,12 +1,13 @@
 import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Typography, type BoxProps } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { stringify } from 'qs';
-import { type MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 import { RelativeTime } from '../../components/RelativeTime';
+import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDisplayName } from '../../utils/users';
 import { useHistoryContext } from '../pages/History';
 
@@ -17,19 +18,14 @@ import type { HistoryVersions } from '../../../../shared/contracts';
  * -----------------------------------------------------------------------------------------------*/
 
 const BlueText = (children: React.ReactNode) => (
-  <Typography textColor="primary600">{children}</Typography>
+  <Typography textColor="primary600" variant="pi">
+    {children}
+  </Typography>
 );
 
 /* -------------------------------------------------------------------------------------------------
  * VersionCard
  * -----------------------------------------------------------------------------------------------*/
-
-interface StatusData {
-  background: BoxProps['background'];
-  border: BoxProps['borderColor'];
-  text: BoxProps['color'];
-  message: MessageDescriptor;
-}
 
 interface VersionCardProps {
   version: HistoryVersions.HistoryVersionDataResponse;
@@ -39,43 +35,6 @@ interface VersionCardProps {
 const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
   const { formatDate, formatMessage } = useIntl();
   const [{ query }] = useQueryParams<{ id?: string }>();
-
-  const statusData = ((): StatusData => {
-    switch (version.status) {
-      case 'draft':
-        return {
-          background: 'secondary100',
-          border: 'secondary200',
-          text: 'secondary700',
-          message: {
-            id: 'content-manager.containers.List.draft',
-            defaultMessage: 'Draft',
-          },
-        };
-      case 'modified':
-        return {
-          background: 'alternative100',
-          border: 'alternative200',
-          text: 'alternative700',
-          message: {
-            // TODO: check the translation key once D&P v5 is done
-            id: 'content-manager.containers.List.modified',
-            defaultMessage: 'Modified',
-          },
-        };
-      case 'published':
-      default:
-        return {
-          background: 'success100',
-          border: 'success200',
-          text: 'success700',
-          message: {
-            id: 'content-manager.containers.List.published',
-            defaultMessage: 'Published',
-          },
-        };
-    }
-  })();
   const isActive = query.id === version.id.toString();
   const author = version.createdBy && getDisplayName(version.createdBy);
 
@@ -89,10 +48,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       borderStyle="solid"
       borderColor={isActive ? 'primary600' : 'neutral200'}
       color="neutral800"
-      paddingTop={4}
-      paddingBottom={4}
-      paddingLeft={5}
-      paddingRight={5}
+      padding={5}
       tag={Link}
       to={`?${stringify({ ...query, id: version.id })}`}
       style={{ textDecoration: 'none' }}
@@ -124,23 +80,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
           )}
         </Typography>
       </Flex>
-      {version.status && (
-        <Box
-          background={statusData.background}
-          borderStyle="solid"
-          borderWidth="1px"
-          borderColor={statusData.border}
-          hasRadius
-          paddingLeft="6px"
-          paddingRight="6px"
-          paddingTop="2px"
-          paddingBottom="2px"
-        >
-          <Typography variant="pi" fontWeight="bold" textColor={statusData.text}>
-            {formatMessage(statusData.message)}
-          </Typography>
-        </Box>
-      )}
+      {version.status && <DocumentStatus status={version.status} size="XS" />}
     </Flex>
   );
 };
@@ -226,16 +166,7 @@ const VersionsList = () => {
             </PaginationButton>
           </Box>
         )}
-        <Flex
-          direction="column"
-          gap={3}
-          paddingTop={5}
-          paddingBottom={5}
-          paddingLeft={4}
-          paddingRight={4}
-          tag="ul"
-          alignItems="stretch"
-        >
+        <Flex direction="column" gap={3} padding={4} tag="ul" alignItems="stretch">
           {versions.data.map((version, index) => (
             <li
               key={version.id}
@@ -249,7 +180,7 @@ const VersionsList = () => {
           ))}
         </Flex>
         {versions.meta.pagination.page < versions.meta.pagination.pageCount && (
-          <Box paddingBottom={5} textAlign="center">
+          <Box paddingBottom={4} textAlign="center">
             <PaginationButton page={page + 1}>
               {formatMessage({
                 id: 'content-manager.history.sidebar.show-older',

@@ -10,6 +10,7 @@ import toLower from 'lodash/toLower';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../hooks/useDataManager';
 import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
@@ -67,6 +68,11 @@ import type { Internal } from '@strapi/types';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
+
+const FormComponent = styled.form`
+  overflow: auto;
+`;
+
 export const FormModal = () => {
   const {
     onCloseModal,
@@ -190,20 +196,16 @@ export const FormModal = () => {
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const {
-          displayName,
-          draftAndPublish,
-          kind,
-          pluginOptions,
-          pluralName,
-          reviewWorkflows,
-          singularName,
-        } = get(allDataSchema, [...pathToSchema, 'schema'], {
-          displayName: null,
-          pluginOptions: {},
-          singularName: null,
-          pluralName: null,
-        });
+        const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } = get(
+          allDataSchema,
+          [...pathToSchema, 'schema'],
+          {
+            displayName: null,
+            pluginOptions: {},
+            singularName: null,
+            pluralName: null,
+          }
+        );
 
         dispatch({
           type: SET_DATA_TO_EDIT,
@@ -215,10 +217,6 @@ export const FormModal = () => {
             kind,
             pluginOptions,
             pluralName,
-            // because review-workflows is an EE feature the attribute does
-            // not always exist, but the component prop-types expect a boolean,
-            // so we have to ensure undefined is casted to false
-            reviewWorkflows: reviewWorkflows ?? false,
             singularName,
           },
         });
@@ -1008,7 +1006,7 @@ export const FormModal = () => {
           />
         )}
         {!isPickingAttribute && (
-          <form onSubmit={handleSubmit}>
+          <FormComponent onSubmit={handleSubmit}>
             <Modal.Body>
               <Tabs.Root
                 variant="simple"
@@ -1112,7 +1110,7 @@ export const FormModal = () => {
                 onClickFinish={handleClickFinish}
               />
             </Modal.Footer>
-          </form>
+          </FormComponent>
         )}
       </Modal.Content>
     </Modal.Root>

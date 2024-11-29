@@ -6,24 +6,46 @@ export type SortKey = 'createdAt' | 'name' | 'updatedAt';
 
 import type { File } from './files';
 
+export interface FolderDefinition extends Omit<Folder, 'children' | 'files' | 'parent'> {
+  children?: {
+    count: number;
+  };
+  createdAt?: string;
+  documentId?: string;
+  files?: {
+    count: number;
+  };
+  folderUrl?: string;
+  isSelectable?: boolean;
+  locale?: string | null;
+  publishedAt?: string;
+  type: string;
+  updatedAt?: string;
+}
+
 export interface Folder {
   id: number;
   name: string;
-  pathId: number;
+  pathId?: number;
   /**
    * parent id
    */
-  parent?: number;
+  parent?: number | null | Folder;
   /**
    * children ids
    */
   children?: number[];
-  path: string;
+  path?: string;
   files?: File[];
 }
 
-type FolderNode = Partial<Folder> & {
+export type FolderNode = Partial<Omit<Folder, 'children'>> & {
   children: FolderNode[];
+};
+
+type FolderNodeWithValue = Omit<FolderNode, 'children'> & {
+  value: string | number | null;
+  children: FolderNodeWithValue[];
 };
 
 /**
@@ -98,14 +120,14 @@ export declare namespace UpdateFolder {
  *
  * Return the structure of a folder.
  */
-export declare namespace FolderStructureNamespace {
+export declare namespace GetFolderStructure {
   export interface Request {
     query?: {};
   }
 
   export interface Response {
     data: {
-      data: number[] & FolderNode[];
+      data: number[] & FolderNodeWithValue[];
     };
     error?: errors.ApplicationError | errors.NotFoundError;
   }
@@ -125,7 +147,7 @@ export declare namespace BulkDeleteFolders {
     data: {
       data: {
         files: [];
-        folders: Folder[];
+        folders: FolderDefinition[];
       };
     };
     error?: errors.ApplicationError | errors.ValidationError;

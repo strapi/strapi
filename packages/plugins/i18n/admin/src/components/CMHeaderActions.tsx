@@ -95,7 +95,6 @@ const LocaleOption = ({
           paddingRight="6px"
           paddingTop="2px"
           paddingBottom="2px"
-          showBullet={false}
           size="S"
           variant={statusVariants[status]}
         >
@@ -241,6 +240,7 @@ const FillFromAnotherLocaleAction = ({
 }: HeaderActionProps) => {
   const { formatMessage } = useIntl();
   const [{ query }] = useQueryParams<I18nBaseQuery>();
+  const { hasI18n } = useI18n();
   const currentDesiredLocale = query.plugins?.i18n?.locale;
   const [localeSelected, setLocaleSelected] = React.useState<string | null>(null);
   const setValues = useForm('FillFromAnotherLocale', (state) => state.setValues);
@@ -277,6 +277,10 @@ const FillFromAnotherLocaleAction = ({
 
     onClose();
   };
+
+  if (!hasI18n) {
+    return null;
+  }
 
   return {
     type: 'icon',

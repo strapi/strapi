@@ -22,7 +22,7 @@ import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import { DefaultTheme } from 'styled-components';
+import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
@@ -225,6 +225,13 @@ interface DocumentActionsMenuProps {
   variant?: 'ghost' | 'tertiary';
 }
 
+const MenuItem = styled(Menu.Item)<{ isVariantDanger?: boolean; isDisabled?: boolean }>`
+  &:hover {
+    background: ${({ theme, isVariantDanger, isDisabled }) =>
+      isVariantDanger && !isDisabled ? theme.colors.danger100 : 'neutral'};
+  }
+`;
+
 const DocumentActionsMenu = ({
   actions,
   children,
@@ -288,12 +295,14 @@ const DocumentActionsMenu = ({
       <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
-            <Menu.Item
+            <MenuItem
               disabled={action.disabled}
               /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
               onSelect={handleClick(action)}
               display="block"
               key={action.id}
+              isVariantDanger={action.variant === 'danger'}
+              isDisabled={action.disabled}
             >
               <Flex justifyContent="space-between" gap={4}>
                 <Flex
@@ -311,27 +320,8 @@ const DocumentActionsMenu = ({
                   </Flex>
                   {action.label}
                 </Flex>
-                {/* TODO: remove this in 5.1 release */}
-                {action.id.startsWith('HistoryAction') && (
-                  <Flex
-                    alignItems="center"
-                    background="alternative100"
-                    borderStyle="solid"
-                    borderColor="alternative200"
-                    borderWidth="1px"
-                    height={5}
-                    paddingLeft={2}
-                    paddingRight={2}
-                    hasRadius
-                    color="alternative600"
-                  >
-                    <Typography variant="sigma" fontWeight="bold" lineHeight={1}>
-                      {formatMessage({ id: 'global.new', defaultMessage: 'New' })}
-                    </Typography>
-                  </Flex>
-                )}
               </Flex>
-            </Menu.Item>
+            </MenuItem>
           );
         })}
         {children}
@@ -685,7 +675,6 @@ const PublishAction: DocumentActionComponent = ({
   };
 
   const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
-
   // TODO skipping this for now as there is a bug with the draft relation count that will be worked on separately
   // see RFC "Count draft relations" in Notion
   const enableDraftRelationsCount = false;
@@ -784,7 +773,7 @@ const UpdateAction: DocumentActionComponent = ({
      */
     disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
     label: formatMessage({
-      id: 'content-manager.containers.Edit.save',
+      id: 'global.save',
       defaultMessage: 'Save',
     }),
     onClick: async () => {

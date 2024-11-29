@@ -2,28 +2,87 @@ import { errors } from '@strapi/utils';
 
 type SortOrder = 'ASC' | 'DESC';
 
-type SortKey = 'createdAt' | 'name';
+type SortKey = 'createdAt' | 'name' | 'updatedAt';
+
+// Abstract type for comparison operators where the keys are generic strings
+type ComparisonOperators<T> = {
+  [operator: string]: T | T[] | boolean; // Any string can be used as an operator key
+};
+
+// Abstract type for filter conditions with dynamic field names
+export type FilterCondition<T> = {
+  [field: string]: T | ComparisonOperators<T> | FilterCondition<T>; // Field names are dynamic and values are comparison operators
+};
+
+// Abstract type for filters where the logical operator (like $and) is a generic string
+type Filters<T> = {
+  [logicOperator: string]: FilterCondition<T>[]; // Logical operator key is a generic string
+};
+
+export type Query = {
+  _q?: string;
+  folderPath?: string;
+  folder?:
+    | null
+    | number
+    | {
+        id: number;
+      };
+  page?:
+    | string
+    | number
+    | {
+        id: string | number;
+      };
+  pageSize?: string | number;
+  pagination?: {
+    pageSize: number;
+  };
+  sort?: `${SortKey}:${SortOrder}`;
+  filters?: Filters<string | number | boolean>;
+  state?: boolean;
+};
+
+type FileFormat = {
+  name: string;
+  hash: string;
+  ext: string;
+  mime: string;
+  path: null | string;
+  width: number;
+  height: number;
+  size: number;
+  sizeInBytes: number;
+  url: string;
+};
 
 export interface File {
   id: number;
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
-  width?: number;
-  height?: number;
-  formats?: Record<string, unknown>;
+  width?: number | null;
+  height?: number | null;
+  formats?:
+    | Record<string, FileFormat>
+    | {
+        thumbnail: {
+          url: string;
+        };
+      }
+    | null;
   hash: string;
   ext?: string;
   mime?: string;
   size?: number;
   sizeInBytes?: number;
   url?: string;
-  previewUrl?: string;
+  previewUrl?: string | null;
   path?: string | null;
   provider?: string;
-  provider_metadata?: Record<string, unknown>;
+  provider_metadata?: Record<string, unknown> | null;
   isUrlSigned?: boolean;
-  folder?: number;
+  folder?: number | string | null;
   folderPath?: string;
   related?: {
     id: string | number;
@@ -33,12 +92,11 @@ export interface File {
   createdAt?: string;
   updatedAt?: string;
   createdBy?: number;
+  publishedAt?: string;
   updatedBy?: number;
+  isLocal?: boolean;
 }
 
-/**
- * GET /upload/files - Get files
- */
 export interface RawFile extends Blob {
   size: number;
   lastModified: number;
@@ -53,6 +111,9 @@ export interface Pagination {
   total: number;
 }
 
+/**
+ * GET /upload/files - Get files
+ */
 export declare namespace GetFiles {
   export interface Request {
     body: {};

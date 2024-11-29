@@ -9,9 +9,10 @@ import packageJson from '../../package.json';
 
 export const VERSION = 'v1';
 
-export type ProjectInfos = {
+export type ProjectInfo = {
   id: string;
   name: string;
+  targetEnvironment?: string;
   displayName?: string;
   nodeVersion?: string;
   region?: string;
@@ -19,7 +20,15 @@ export type ProjectInfos = {
   url?: string;
 };
 
-export type ProjectInput = Omit<ProjectInfos, 'id'>;
+export type EnvironmentInfo = Record<string, unknown>;
+
+export type EnvironmentDetails = {
+  name: string;
+  hasLiveDeployment: boolean;
+  hasPendingDeployment: boolean;
+};
+
+export type ProjectInput = Omit<ProjectInfo, 'id'>;
 
 export type DeployResponse = {
   build_id: string;
@@ -32,17 +41,32 @@ export type ListProjectsResponse = {
   };
 };
 
+export type ListEnvironmentsResponse = {
+  data: {
+    data: EnvironmentInfo[] | Record<string, never>;
+  };
+};
+
 export type ListLinkProjectsResponse = {
   data: {
-    data: ProjectInfos[] | Record<string, never>;
+    data: ProjectInfo[] | Record<string, never>;
+  };
+};
+
+export type ListLinkEnvironmentsResponse = {
+  data: {
+    data: EnvironmentDetails[] | Record<string, never>;
   };
 };
 
 export type GetProjectResponse = {
   data: {
+    displayName: string;
     updatedAt: string;
     suspendedAt?: string;
     isTrial: boolean;
+    environments: string[];
+    environmentsDetails: EnvironmentDetails[];
   };
   metadata: {
     dashboardUrls: {
@@ -56,7 +80,7 @@ export interface CloudApiService {
   deploy(
     deployInput: {
       filePath: string;
-      project: { name: string };
+      project: { name: string; targetEnvironment?: string };
     },
     {
       onUploadProgress,
@@ -77,6 +101,12 @@ export interface CloudApiService {
   listProjects(): Promise<AxiosResponse<ListProjectsResponse>>;
 
   listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
+
+  listEnvironments(project: { name: string }): Promise<AxiosResponse<ListEnvironmentsResponse>>;
+
+  listLinkEnvironments(project: {
+    name: string;
+  }): Promise<AxiosResponse<ListLinkEnvironmentsResponse>>;
 
   getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
@@ -112,7 +142,7 @@ export async function cloudApiFactory(
     deploy({ filePath, project }, { onUploadProgress }) {
       return axiosCloudAPI.post(
         `/deploy/${project.name}`,
-        { file: fse.createReadStream(filePath) },
+        { file: fse.createReadStream(filePath), targetEnvironment: project.targetEnvironment },
         {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -192,6 +222,40 @@ export async function cloudApiFactory(
       } catch (error) {
         logger.debug(
           "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async listEnvironments({ name }): Promise<AxiosResponse<ListEnvironmentsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}/environments`);
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud environments from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's environments from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async listLinkEnvironments({ name }): Promise<AxiosResponse<ListLinkEnvironmentsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get(`/projects/${name}/environments-linkable`);
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud environments from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's environments from the server. Please try again."
         );
         throw error;
       }

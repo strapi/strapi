@@ -274,7 +274,7 @@ yargs
         const currentTestApps = await fs.readdir(testAppDirectory);
 
         if (currentTestApps.length === 0) {
-          console.log('No test apps to clean');
+          console.log('No CLI test apps to clean');
           return;
         }
 

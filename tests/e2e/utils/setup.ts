@@ -32,12 +32,11 @@ const setupRegistry: Record<string, boolean> = {};
  *
  * WARNING:
  * Using `sharedSetup` in this way introduces a risk of tests becoming dependent
- * on the order in which they are executed. Since certain setup steps run only once
- * per suite, subsequent tests may rely on the state left by previous tests.
+ * on the order in which they are executed. This could be dangerous because the execution order
+ * is not guaranteed during retries in the CI.
  *
- * This approach should primarily be used when the setup time is significant,
- * or in test suites that follow a user story flow where later tests are
- * intended to be dependent on the previous ones.
+ * This approach should primarily be used when the setup time is significant and the tests don't
+ * depend on each other's side effects.
  */
 export const sharedSetup = async (
   id: string,

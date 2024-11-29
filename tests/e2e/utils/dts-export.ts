@@ -1,4 +1,8 @@
-'use strict';
+import type { Core } from '@strapi/strapi';
+
+import dts from '@strapi/data-transfer';
+import { createStrapi } from '@strapi/strapi';
+import { ALLOWED_CONTENT_TYPES } from '../constants';
 
 const {
   file: {
@@ -8,18 +12,10 @@ const {
     providers: { createLocalStrapiSourceProvider },
   },
   engine: { createTransferEngine },
-} = require('@strapi/data-transfer');
-const { createStrapi } = require('@strapi/strapi');
-const { ALLOWED_CONTENT_TYPES } = require('../constants');
+} = dts;
 
-/**
- * Export the data from a strapi project.
- * This script should be run as `node <path-to>/dts-export.js [exportFilePath]` from the
- * root directory of a strapi project e.g. `/examples/kitchensink`. Remember to import
- * the `with-admin` tar file into the project first because the tests rely on the data.
- */
-const exportData = async () => {
-  let args = process.argv.slice(2);
+export const exportData = async (): Promise<void> => {
+  const args = process.argv.slice(2);
 
   if (args.length !== 1) {
     console.error('Please provide the export file name as a parameter.');
@@ -69,29 +65,25 @@ const exportData = async () => {
   process.exit(0);
 };
 
-const createSourceProvider = (strapi) =>
+const createSourceProvider = (strapi: Core.Strapi) =>
   createLocalStrapiSourceProvider({
     async getStrapi() {
       return strapi;
     },
   });
 
-const createDestinationProvider = (filePath) =>
+const createDestinationProvider = (filePath: string) =>
   createLocalFileDestinationProvider({
     file: { path: filePath },
     encryption: { enabled: false },
     compression: { enabled: false },
   });
 
-const createStrapiInstance = async (logLevel = 'error') => {
+const createStrapiInstance = async (logLevel = 'error'): Promise<Core.Strapi> => {
   const app = createStrapi();
 
   app.log.level = logLevel;
   const loadedApp = await app.load();
 
   return loadedApp;
-};
-
-module.exports = {
-  exportData,
 };

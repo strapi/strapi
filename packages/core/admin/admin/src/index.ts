@@ -37,6 +37,7 @@ export {
 } from './features/Notifications';
 export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
 export { type Permission, useAuth, type AuthContextValue } from './features/Auth';
+export { useHistory } from './features/BackButton';
 
 /**
  * Hooks
@@ -47,6 +48,7 @@ export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC } from './hooks/useRBAC';
+export { useClipboard } from './hooks/useClipboard';
 export { useAdminUsers } from './services/users';
 
 /**

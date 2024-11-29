@@ -16,7 +16,11 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      nonDoc: ${{ steps.filter.outputs.nonDoc }}
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      api: ${{ steps.filter.outputs.api }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      cli: ${{ steps.filter.outputs.cli }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,110 +32,158 @@ jobs:
           filters: .github/filters.yaml
 
   pretty:
-    name: 'pretty (node: 20)'
+    name: 'pretty (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20]
+        node: [20, 22]
     steps:
       - run: echo "Skipped"
 
   lint:
     name: 'lint (node: ${{ matrix.node }})'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20]
-    steps:
-      - run: echo "Skipped"
-
-  typescript:
-    runs-on: ubuntu-latest
     needs: [build]
-    name: 'typescript'
-    steps:
-      - run: echo "Skipped"
-
-  unit_back:
-    name: 'unit_back (node: ${{ matrix.node }})'
-    needs: [lint]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20]
-    steps:
-      - run: echo "Skipped"
-
-  unit_front:
-    name: 'unit_front (node: ${{ matrix.node }})'
-    needs: [lint]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [20]
+        node: [20, 22]
     steps:
       - run: echo "Skipped"
 
   build:
     name: 'build (node: ${{ matrix.node }})'
-    needs: [changes, lint, unit_front]
+    needs: [changes]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
     steps:
       - run: echo "Skipped"
 
-  cli:
-    name: 'CLI Tests'
+  typescript:
+    name: 'typescript (node: ${{ matrix.node }})'
     needs: [changes, build]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - run: echo "Skipped"
+
+  unit_back:
+    name: 'unit_back (node: ${{ matrix.node }})'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - run: echo "Skipped"
+
+  unit_front:
+    name: 'unit_front (node: ${{ matrix.node }})'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20]
     steps:
       - run: echo "Skipped"
 
   e2e_ce:
+    name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
+    needs: [changes, build]
     runs-on: ubuntu-latest
-    needs: [lint, unit_back, unit_front]
-    name: '[CE] e2e (browser: ${{ matrix.project }})'
     strategy:
       matrix:
         project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
     steps:
       - run: echo "Skipped"
 
   e2e_ee:
+    name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
+    needs: [changes, build]
     runs-on: ubuntu-latest
-    needs: [lint, unit_back, unit_front]
-    name: '[EE] e2e (browser: ${{ matrix.project }})'
     strategy:
       matrix:
         project: ['chromium', 'webkit', 'firefox']
+        shard: [1/2, 2/2]
+    steps:
+      - run: echo "Skipped"
+
+  cli:
+    name: 'CLI Tests (node: ${{ matrix.node }})'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
     steps:
       - run: echo "Skipped"
 
   api_ce_pg:
+    name: '[CE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    needs: [changes, build]
     runs-on: ubuntu-latest
-    needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (postgres, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - run: echo "Skipped"
 
   api_ce_mysql:
+    name: '[CE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    needs: [changes, build]
     runs-on: ubuntu-latest
-    needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (mysql, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [18, 20]
+        node: [20, 22]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - run: echo "Skipped"
 
   api_ce_sqlite:
+    name: '[CE] API Integration (sqlite, package: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    needs: [changes, build]
     runs-on: ubuntu-latest
-    needs: [lint, unit_back, unit_front]
-    name: '[CE] API Integration (sqlite: ${{ matrix.sqlite_pkg }}, node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [20, 22]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+    steps:
+      - run: echo "Skipped"
+
+  api_ee_pg:
+    name: '[EE] API Integration (postgres, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+    steps:
+      - run: echo "Skipped"
+
+  api_ee_mysql:
+    name: '[EE] API Integration (mysql:latest, package: mysql2, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
+    steps:
+      - run: echo "Skipped"
+
+  api_ee_sqlite:
+    name: '[EE] API Integration (sqlite, client: better-sqlite3, node: ${{ matrix.node }}, shard: ${{ matrix.shard }})'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - run: echo "Skipped"

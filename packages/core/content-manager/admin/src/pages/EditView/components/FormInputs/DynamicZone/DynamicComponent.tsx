@@ -244,6 +244,14 @@ const DynamicComponent = ({
                             {row.map(({ size, ...field }) => {
                               const fieldName = `${name}.${index}.${field.name}`;
 
+                              const fieldWithTranslatedLabel = {
+                                ...field,
+                                label: formatMessage({
+                                  id: `content-manager.components.${componentUid}.${field.name}`,
+                                  defaultMessage: field.label,
+                                }),
+                              };
+
                               return (
                                 <Grid.Item
                                   col={size}
@@ -253,7 +261,7 @@ const DynamicComponent = ({
                                   direction="column"
                                   alignItems="stretch"
                                 >
-                                  <InputRenderer {...field} name={fieldName} />
+                                  <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
                                 </Grid.Item>
                               );
                             })}

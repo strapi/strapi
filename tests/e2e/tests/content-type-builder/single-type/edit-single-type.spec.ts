@@ -1,22 +1,16 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import {
-  createSingleType,
-  describeOnCondition,
-  navToHeader,
-  skipCtbTour,
-} from '../../../utils/shared';
+import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
+import { createSingleType } from '../../../utils/content-types';
 
 test.describe('Edit single type', () => {
   // very long timeout for these tests because they restart the server multiple times
   test.describe.configure({ timeout: 300000 });
 
-  // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
-  const ctName = 'Secret Document';
+  // Use the existing single-type from our test data
+  const ctName = 'Homepage';
 
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {
@@ -24,11 +18,6 @@ test.describe('Edit single type', () => {
       skipTour: true,
       resetFiles: true,
       importData: 'with-admin.tar',
-      afterSetup: async () => {
-        await createSingleType(page, {
-          name: ctName,
-        });
-      },
     });
 
     // Then go to our content type
@@ -37,31 +26,54 @@ test.describe('Edit single type', () => {
 
   // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
   // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterAll(async () => {
+  test.afterEach(async ({ page }) => {
     await resetFiles();
   });
 
   test('Can toggle internationalization', async ({ page }) => {
+    // toggle off
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Internationalization').click();
+    await page.getByRole('button', { name: 'Yes, disable' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
+
+    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
+    // Fix the bug then remove this
+    await page.reload();
+
+    // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
     await page.getByRole('button', { name: 'Edit', exact: true }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Finish' }).click();
-
     await waitForRestart(page);
-
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can toggle draft&publish', async ({ page }) => {
+    // toggle off
     await page.getByRole('button', { name: 'Edit', exact: true }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
-
     await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
+    // Fix the bug then remove this
+    await page.reload();
+
+    // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Draft & publish').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 
   test('Can add a field with default value', async ({ page }) => {
@@ -77,6 +89,6 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 });

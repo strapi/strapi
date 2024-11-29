@@ -14,9 +14,7 @@ import {
   isFetchError,
   useStrapiApp,
   Layouts,
-  FormErrors,
 } from '@strapi/admin/strapi-admin';
-import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Button,
   Flex,
@@ -27,21 +25,13 @@ import {
   Badge,
   SingleSelect,
   SingleSelectOption,
-  Tooltip,
   EmptyStateLayout,
   LinkButton,
   Dialog,
   SimpleMenu,
   MenuItem,
 } from '@strapi/design-system';
-import {
-  CheckCircle,
-  More,
-  Pencil,
-  Trash,
-  CrossCircle,
-  ArrowsCounterClockwise,
-} from '@strapi/icons';
+import { More, Pencil, Trash } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
@@ -49,6 +39,7 @@ import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { EntryValidationPopover } from '../components/EntryValidationPopover';
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
@@ -74,9 +65,7 @@ import { getBadgeProps } from './ReleasesPage';
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
-  ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-import type { Struct, Internal } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -120,159 +109,6 @@ const TrashIcon = styled(Trash)`
   }
 `;
 
-const TypographyMaxWidth = styled(Typography)`
-  max-width: 300px;
-`;
-
-interface EntryValidationTextProps {
-  action: ReleaseAction['type'];
-  schema?: Struct.ContentTypeSchema;
-  components: { [key: Internal.UID.Component]: Struct.ComponentSchema };
-  entry: ReleaseActionEntry;
-  status: ReleaseAction['status'];
-}
-
-const EntryValidationText = ({ action, schema, entry, status }: EntryValidationTextProps) => {
-  const { formatMessage } = useIntl();
-
-  const { validate, isLoading } = unstable_useDocument(
-    {
-      collectionType: schema?.kind ?? '',
-      model: schema?.uid ?? '',
-    },
-    {
-      // useDocument makes a request to get more data about the entry, but we only want to have the validation function so we skip the request
-      skip: true,
-    }
-  );
-
-  const errorsToString = (errors: FormErrors, prefix: string = ''): string => {
-    if (Object.keys(errors).length === 0) {
-      return '';
-    }
-
-    return Object.entries(errors)
-      .map(([key, value]) => {
-        if (value === undefined || value === null) {
-          return '';
-        }
-
-        if (typeof value === 'string') {
-          return formatMessage(
-            { id: value, defaultMessage: value },
-            { field: prefix ? `${prefix}.${key}` : key }
-          );
-        }
-
-        if (
-          typeof value === 'object' &&
-          value !== null &&
-          'id' in value &&
-          'defaultMessage' in value
-        ) {
-          return formatMessage(
-            // @ts-expect-error – TODO: default message will be a string
-            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-            { field: prefix ? `${prefix}.${key}` : key }
-          );
-        }
-
-        return errorsToString(value as FormErrors, key);
-      })
-      .join(' ');
-  };
-
-  if (isLoading) {
-    return null;
-  }
-
-  const errors = validate(entry) ?? {};
-
-  if (action === 'publish') {
-    if (Object.keys(errors).length > 0) {
-      const validationErrorsMessages = errorsToString(errors);
-
-      return (
-        <Flex gap={2}>
-          <CrossCircle fill="danger600" />
-          <Tooltip description={validationErrorsMessages}>
-            <TypographyMaxWidth
-              textColor="danger600"
-              variant="omega"
-              fontWeight="semiBold"
-              ellipsis
-            >
-              {validationErrorsMessages}
-            </TypographyMaxWidth>
-          </Tooltip>
-        </Flex>
-      );
-    }
-
-    if (status === 'draft') {
-      return (
-        <Flex gap={2}>
-          <CheckCircle fill="success600" />
-          <Typography>
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
-              defaultMessage: 'Ready to publish',
-            })}
-          </Typography>
-        </Flex>
-      );
-    }
-
-    if (status === 'modified') {
-      return (
-        <Flex gap={2}>
-          <ArrowsCounterClockwise fill="alternative600" />
-          <Typography>
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
-              defaultMessage: 'Ready to publish changes',
-            })}
-          </Typography>
-        </Flex>
-      );
-    }
-
-    if (status === 'published') {
-      return (
-        <Flex gap={2}>
-          <CheckCircle fill="success600" />
-          <Typography>
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
-              defaultMessage: 'Already published',
-            })}
-          </Typography>
-        </Flex>
-      );
-    }
-  }
-
-  return (
-    <Flex gap={2}>
-      <CheckCircle fill="success600" />
-      {!entry.publishedAt ? (
-        <Typography textColor="success600" fontWeight="bold">
-          {formatMessage({
-            id: 'content-releases.pages.ReleaseDetails.entry-validation.already-unpublished',
-            defaultMessage: 'Already unpublished',
-          })}
-        </Typography>
-      ) : (
-        <Typography>
-          {formatMessage({
-            id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-unpublish',
-            defaultMessage: 'Ready to unpublish',
-          })}
-        </Typography>
-      )}
-    </Flex>
-  );
-};
 interface ReleaseDetailsLayoutProps {
   toggleEditReleaseModal: () => void;
   toggleWarningSubmit: () => void;
@@ -435,7 +271,7 @@ const ReleaseDetailsLayout = ({
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
         }
-        navigationAction={<BackButton />}
+        navigationAction={<BackButton fallback=".." />}
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
@@ -843,10 +679,9 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                         {!release.releasedAt && (
                           <>
                             <Td width="20%" minWidth="200px">
-                              <EntryValidationText
+                              <EntryValidationPopover
                                 action={type}
                                 schema={contentTypes?.[contentType.uid]}
-                                components={components}
                                 entry={entry}
                                 status={status}
                               />

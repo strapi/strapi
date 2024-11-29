@@ -30,7 +30,7 @@ describe('codemods task', () => {
     target: Version.ReleaseType.Major,
     logger,
     dry: false,
-    selectCodemods: (options) => Promise.resolve(options),
+    selectCodemods: <T>(options: T) => Promise.resolve(options),
   };
 
   (codemodRunnerFactory as jest.Mock).mockReturnValue({
