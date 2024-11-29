@@ -20,29 +20,31 @@ const merge = mergeWith((a, b) => {
   }
 });
 
-export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
-  // Generate the GraphQL schema for the content API
-  const schema = strapi.plugin('graphql').service('content-api').buildSchema();
-
-  if (isEmpty(schema)) {
-    strapi.log.warn('The GraphQL schema has not been generated because it is empty');
-
-    return;
-  }
-
+export const determineLandingPage = (strapi: Core.Strapi) => {
   const { config } = strapi.plugin('graphql');
+  const utils = strapi.plugin('graphql').service('utils');
 
-  const path: string = config('endpoint');
+  /**
+   * configLanding page may be one of the following:
+   *
+   * - true: always use "playground" even in production
+   * - false: never show "playground" even in non-production
+   * - undefined: default Apollo behavior (hide playground on production)
+   * - a function that returns an Apollo plugin that implements renderLandingPage
+   ** */
+  const configLandingPage = config('landingPage');
 
   const isProduction = process.env.NODE_ENV === 'production';
 
   const localLanding = () => {
     strapi.log.debug('Apollo landing page: local');
+    utils.playground.setEnabled(true);
     return ApolloServerPluginLandingPageLocalDefault();
   };
 
   const prodLanding = () => {
     strapi.log.debug('Apollo landing page: production');
+    utils.playground.setEnabled(false);
     return ApolloServerPluginLandingPageProductionDefault();
   };
 
@@ -59,57 +61,60 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     return result;
   };
 
-  const determineLandingPage = () => {
-    /**
-     * configLanding page may be one of the following:
-     *
-     * - true: always use "playground" even in production
-     * - false: never show "playground" even in non-production
-     * - undefined: default Apollo behavior (hide playground on production)
-     * - a function that returns an Apollo plugin that implements renderLandingPage
-     ** */
-    const configLandingPage = config('landingPage');
-
-    // DEPRECATED, remove in Strapi v6
-    const playgroundAlways = config('playgroundAlways');
-    if (playgroundAlways !== undefined) {
-      strapi.log.warn(
-        'The graphql config playgroundAlways is deprecated. This will be removed in Strapi 6. Please use landingPage instead. '
-      );
-    }
-    if (playgroundAlways === false) {
-      strapi.log.warn(
-        'graphql config playgroundAlways:false has no effect, please use landingPage:false to disable Graphql Playground in all environments'
-      );
-    }
-
-    if (playgroundAlways || configLandingPage === true) {
-      return localLanding();
-    }
-
-    // if landing page has been disabled, use production
-    if (configLandingPage === false) {
-      return prodLanding();
-    }
-
-    // If user did not define any settings, use our defaults
-    if (configLandingPage === undefined) {
-      return isProduction ? prodLanding() : localLanding();
-    }
-
-    // if user provided a landing page function, return that
-    if (isFunction(configLandingPage)) {
-      return userLanding(configLandingPage);
-    }
-
-    // If no other setting could be found, default to production settings
+  // DEPRECATED, remove in Strapi v6
+  const playgroundAlways = config('playgroundAlways');
+  if (playgroundAlways !== undefined) {
     strapi.log.warn(
-      'Your Graphql landing page has been disabled because there is a problem with your Graphql settings'
+      'The graphql config playgroundAlways is deprecated. This will be removed in Strapi 6. Please use landingPage instead. '
     );
-    return prodLanding();
-  };
+  }
+  if (playgroundAlways === false) {
+    strapi.log.warn(
+      'graphql config playgroundAlways:false has no effect, please use landingPage:false to disable Graphql Playground in all environments'
+    );
+  }
 
-  const landingPage = determineLandingPage();
+  if (playgroundAlways || configLandingPage === true) {
+    return localLanding();
+  }
+
+  // if landing page has been disabled, use production
+  if (configLandingPage === false) {
+    return prodLanding();
+  }
+
+  // If user did not define any settings, use our defaults
+  if (configLandingPage === undefined) {
+    return isProduction ? prodLanding() : localLanding();
+  }
+
+  // if user provided a landing page function, return that
+  if (isFunction(configLandingPage)) {
+    return userLanding(configLandingPage);
+  }
+
+  // If no other setting could be found, default to production settings
+  strapi.log.warn(
+    'Your Graphql landing page has been disabled because there is a problem with your Graphql settings'
+  );
+  return prodLanding();
+};
+
+export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
+  // Generate the GraphQL schema for the content API
+  const schema = strapi.plugin('graphql').service('content-api').buildSchema();
+
+  if (isEmpty(schema)) {
+    strapi.log.warn('The GraphQL schema has not been generated because it is empty');
+
+    return;
+  }
+
+  const { config } = strapi.plugin('graphql');
+
+  const path: string = config('endpoint');
+
+  const landingPage = determineLandingPage(strapi);
 
   type CustomOptions = {
     cors: boolean;
