@@ -339,6 +339,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
           const provider = strapi.config.get<{ provider: string }>('plugin::upload').provider;
 
+          const fileId = fileEntitiesMapper?.[uploadData.id];
+          if (!fileId) {
+            callback(new Error(`File ID not found for ID: ${uploadData.id}`));
+          }
+
           try {
             await strapi.plugin('upload').provider.uploadStream(uploadData);
 
@@ -349,13 +354,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
-              // Support usage of main hash for older versions
-              const condition = uploadData?.id
-                ? { id: fileEntitiesMapper[uploadData.id] }
-                : { hash: uploadData.mainHash };
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: condition,
+                where: { id: fileId },
               });
+              if (!entry) {
+                throw new Error('file not found');
+              }
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
                 specificFormat.url = uploadData.url;
@@ -369,9 +373,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               });
               return callback();
             }
+
             const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { id: fileEntitiesMapper?.[uploadData.id] },
+              where: { id: fileId },
             });
+            if (!entry) {
+              throw new Error('file not found');
+            }
             entry.url = uploadData.url;
             await strapi.db.query('plugin::upload.file').update({
               where: { id: entry.id },

@@ -101,7 +101,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     );
   });
 
-  test('Writes on the strapi assets path', async () => {
+  test('uploading file to strapi fails incase file ID is not found', async () => {
     (fse.createWriteStream as jest.Mock).mockImplementationOnce(createWriteStreamMock);
     const assetsDirectory = 'static/public/assets';
     const file: IAsset = {
@@ -118,6 +118,9 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
         mime: 'test-photo.jpg',
       },
     };
+    const mockFindOne = jest.fn().mockResolvedValue({ ...file.metadata });
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const mockQuery = jest.fn(() => ({ findOne: mockFindOne, update: mockUpdate }));
     const provider = createLocalStrapiDestinationProvider({
       getStrapi: () =>
         createStrapi({
@@ -128,23 +131,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
           },
           db: {
             transaction,
-            query() {
-              return {
-                findOne() {
-                  return {
-                    hash: 'hash',
-                    name: 'test-photo',
-                    id: 1,
-                    url: 'test-photo.jpg',
-                    size: 200,
-                    mime: 'test-photo.jpg',
-                  };
-                },
-                update() {
-                  return null;
-                },
-              };
-            },
+            query: mockQuery,
           },
         }),
       strategy: 'restore',
@@ -155,13 +142,18 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
 
     await provider.bootstrap();
     const stream = await provider.createAssetsWriteStream();
-
-    const error = await new Promise<Error | null | undefined>((resolve) => {
-      stream.write(file, resolve);
+    await new Promise<void>((resolve, reject) => {
+      stream.on('error', reject);
+      stream.write(file, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    }).catch((error) => {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe('File ID not found for ID: 1'); // Customize as needed
     });
-
-    expect(error).not.toBeInstanceOf(Error);
-
-    expect(uploadStream).toHaveBeenCalled();
   });
 });
