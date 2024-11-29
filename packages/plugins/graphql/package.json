@@ -67,7 +67,7 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
-    "@strapi/sdk-plugin": "^5.0.0",
+    "@strapi/sdk-plugin": "^5.2.0",
     "@strapi/strapi": "5.4.2",
     "@strapi/types": "5.4.2",
     "@types/graphql-depth-limit": "1.1.5",
