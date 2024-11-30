@@ -149,7 +149,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                         <Field.Hint />
                       </Field.Root>
                     </Grid.Item>
-                    {values.restrictedAccess && (
+                    {dirty && (
                       <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                         <Field.Root
                           name="password"
