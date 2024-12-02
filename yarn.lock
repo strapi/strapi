@@ -8735,6 +8735,7 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/prismjs": "npm:1.26.5"
+    babel-plugin-prismjs: "npm:2.1.0"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
     fractional-indexing: "npm:3.2.0"
@@ -13400,6 +13401,15 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.4.0 || ^8.0.0-0 <8.0.0
   checksum: 10c0/40164432e058e4b5c6d56feecacdad22692ae0534bd80c92d5399ed9e1a6a2b6797c8fda837995daddd4ca391f9aa2d58c74ad465164922e0f73631eaf9c4f76
+  languageName: node
+  linkType: hard
+
+"babel-plugin-prismjs@npm:2.1.0":
+  version: 2.1.0
+  resolution: "babel-plugin-prismjs@npm:2.1.0"
+  peerDependencies:
+    prismjs: ^1.18.0
+  checksum: 10c0/826c89fad2f372da668712cbffef762e4bc4427e41789fa18d579d43e1eb5767af7efbe3e71bb99f07c612140f4425426d4bb63b0a0a731f9c909317896355cc
   languageName: node
   linkType: hard
 

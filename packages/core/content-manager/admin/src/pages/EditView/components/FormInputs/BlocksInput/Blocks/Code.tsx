@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
-import Prism from 'prismjs';
 // Import the PrismJS theme to highlight the code
 import 'prismjs/themes/prism-okaidia.css';
 import { useIntl } from 'react-intl';

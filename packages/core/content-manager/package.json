@@ -64,6 +64,7 @@
     "@strapi/icons": "2.0.0-rc.14",
     "@strapi/types": "5.4.2",
     "@strapi/utils": "5.4.2",
+    "babel-plugin-prismjs": "2.1.0",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
@@ -131,5 +132,13 @@
     "required": true,
     "kind": "plugin"
   },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd",
+  "plugins": [
+    "prismjs", {
+      "languages": ["javascript", "css", "markup"],
+      "plugins": ["show-language"],
+      "theme": "okaidia",
+      "css": true
+    }
+  ]
 }
