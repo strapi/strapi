@@ -98,16 +98,15 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     expect(iframe).not.toBeNull();
 
     // Check if the iframe is loading the correct URL
-    const src = await iframe.getAttribute('src');
-    expect(src).toContain('/preview/api::article.article/');
-    expect(src).toContain('/en/draft');
+    await expect(iframe).toHaveAttribute('src', /\/preview\/api::article\.article\/.+\/en\/draft$/);
 
     // Navigate to the published tab
     await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
 
     const updatedIframe = page.getByTitle('Preview');
-    const srcPublished = await updatedIframe.getAttribute('src');
-    expect(srcPublished).toContain('/preview/api::article.article/');
-    expect(srcPublished).toContain('/en/published');
+    await expect(updatedIframe).toHaveAttribute(
+      'src',
+      /\/preview\/api::article\.article\/.+\/en\/published$/
+    );
   });
 });
