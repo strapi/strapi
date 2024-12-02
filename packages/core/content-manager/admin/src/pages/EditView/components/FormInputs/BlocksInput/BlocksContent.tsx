@@ -22,7 +22,6 @@ import { getTranslation } from '../../../../../utils/translations';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-// import { decorateCode } from './utils/decorateCode';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
 const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
@@ -288,11 +287,7 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
   );
 };
 
-interface ExtendedRenderLeafProps extends RenderLeafProps {
-  leaf: RenderLeafProps['leaf'] & { className: string };
-}
-
-const baseRenderLeaf = (props: ExtendedRenderLeafProps, modifiers: ModifiersStore) => {
+const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
   // Recursively wrap the children for each active modifier
   const wrappedChildren = getEntries(modifiers).reduce((currentChildren, modifierEntry) => {
     const [name, modifier] = modifierEntry;
@@ -304,11 +299,7 @@ const baseRenderLeaf = (props: ExtendedRenderLeafProps, modifiers: ModifiersStor
     return currentChildren;
   }, props.children);
 
-  return (
-    <span {...props.attributes} className={props.leaf.className}>
-      {wrappedChildren}
-    </span>
-  );
+  return <span {...props.attributes}>{wrappedChildren}</span>;
 };
 
 type BaseRenderElementProps = Direction & {
@@ -367,7 +358,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
-    (props: RenderLeafProps) => baseRenderLeaf(props as ExtendedRenderLeafProps, modifiers),
+    (props: RenderLeafProps) => baseRenderLeaf(props, modifiers),
     [modifiers]
   );
 
@@ -600,7 +591,6 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         readOnly={disabled}
         placeholder={placeholder}
         isExpandedMode={isExpandedMode}
-        // decorate={decorateCode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}

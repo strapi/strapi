@@ -2,8 +2,6 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
-// Import the PrismJS theme to highlight the code
-import 'prismjs/themes/prism-okaidia.css';
 import { useIntl } from 'react-intl';
 import { Editor, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
@@ -15,7 +13,9 @@ import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
 
-const CodeBlock = styled.pre`
+import { PrismBlock } from './Prism';
+
+const CodeBlock = styled(PrismBlock)`
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: ${({ theme }) => theme.colors.neutral100};
   max-width: 100%;

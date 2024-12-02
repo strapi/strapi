@@ -1114,7 +1114,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.15.5, @babel/core@npm:^7.20.12, @babel/core@npm:^7.23.0, @babel/core@npm:^7.23.2, @babel/core@npm:^7.23.5":
+"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.20.12, @babel/core@npm:^7.23.0, @babel/core@npm:^7.23.2, @babel/core@npm:^7.23.5":
   version: 7.26.0
   resolution: "@babel/core@npm:7.26.0"
   dependencies:
@@ -8135,7 +8135,6 @@ __metadata:
     "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
-    "@types/prismjs": "npm:1.26.5"
     "@types/punycode": "npm:2.1.4"
     "@types/react-window": "npm:1.8.8"
     "@types/sanitize-html": "npm:2.13.0"
@@ -8171,7 +8170,6 @@ __metadata:
     p-map: "npm:4.0.0"
     passport-local: "npm:1.0.0"
     pluralize: "npm:8.0.0"
-    prismjs: "npm:1.29.0"
     punycode: "npm:2.3.1"
     qs: "npm:6.11.1"
     react: "npm:18.3.1"
@@ -8195,7 +8193,6 @@ __metadata:
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.2.14"
     vite-plugin-dts: "npm:^4.3.0"
-    vite-plugin-prismjs: "npm:0.0.11"
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
   peerDependencies:
@@ -8259,8 +8256,6 @@ __metadata:
     "@testing-library/react": "npm:15.0.7"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
-    "@types/prismjs": "npm:1.26.5"
-    babel-plugin-prismjs: "npm:2.1.0"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
     fractional-indexing: "npm:3.2.0"
@@ -8281,7 +8276,6 @@ __metadata:
     markdown-it-sup: "npm:1.0.0"
     msw: "npm:1.3.0"
     node-schedule: "npm:2.1.1"
-    prismjs: "npm:1.29.0"
     qs: "npm:6.11.1"
     react: "npm:18.3.1"
     react-dnd: "npm:16.0.1"
@@ -10861,13 +10855,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prismjs@npm:1.26.5":
-  version: 1.26.5
-  resolution: "@types/prismjs@npm:1.26.5"
-  checksum: 10c0/5619cb449e0d8df098c8759d6f47bf8fdd510abf5dbdfa999e55c6a2545efbd1e209cc85a33d8d9f4ff2898089a1a6d9a70737c9baffaae635c46852c40d384a
-  languageName: node
-  linkType: hard
-
 "@types/prompts@npm:2.4.9":
   version: 2.4.9
   resolution: "@types/prompts@npm:2.4.9"
@@ -12860,15 +12847,6 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.4.0 || ^8.0.0-0 <8.0.0
   checksum: 10c0/40164432e058e4b5c6d56feecacdad22692ae0534bd80c92d5399ed9e1a6a2b6797c8fda837995daddd4ca391f9aa2d58c74ad465164922e0f73631eaf9c4f76
-  languageName: node
-  linkType: hard
-
-"babel-plugin-prismjs@npm:2.1.0, babel-plugin-prismjs@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "babel-plugin-prismjs@npm:2.1.0"
-  peerDependencies:
-    prismjs: ^1.18.0
-  checksum: 10c0/826c89fad2f372da668712cbffef762e4bc4427e41789fa18d579d43e1eb5767af7efbe3e71bb99f07c612140f4425426d4bb63b0a0a731f9c909317896355cc
   languageName: node
   linkType: hard
 
@@ -25740,13 +25718,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prismjs@npm:1.29.0":
-  version: 1.29.0
-  resolution: "prismjs@npm:1.29.0"
-  checksum: 10c0/d906c4c4d01b446db549b4f57f72d5d7e6ccaca04ecc670fb85cea4d4b1acc1283e945a9cbc3d81819084a699b382f970e02f9d1378e14af9808d366d9ed7ec6
-  languageName: node
-  linkType: hard
-
 "proc-log@npm:^3.0.0":
   version: 3.0.0
   resolution: "proc-log@npm:3.0.0"
@@ -30414,16 +30385,6 @@ __metadata:
     vite:
       optional: true
   checksum: 10c0/e200fa54b985e99b64b882380bb1f669d7f0a05ba9f5f2de717b5d1b7d35921344e12e03bce3aadb455c706879ae10c8997ebe79bd0aa47e9dc51ca79d040372
-  languageName: node
-  linkType: hard
-
-"vite-plugin-prismjs@npm:0.0.11":
-  version: 0.0.11
-  resolution: "vite-plugin-prismjs@npm:0.0.11"
-  dependencies:
-    "@babel/core": "npm:^7.15.5"
-    babel-plugin-prismjs: "npm:^2.1.0"
-  checksum: 10c0/029d59502dde25e3321a8e9e455e65c063747b3b36a4207cd628dd0d0f42429c1cd078fe35dd134ec2b0dbee10173079a5e29596d996029f2cb6c9ef3162b55a
   languageName: node
   linkType: hard
 
