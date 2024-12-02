@@ -288,7 +288,11 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
   );
 };
 
-const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
+interface ExtendedRenderLeafProps extends RenderLeafProps {
+  leaf: RenderLeafProps['leaf'] & { className: string };
+}
+
+const baseRenderLeaf = (props: ExtendedRenderLeafProps, modifiers: ModifiersStore) => {
   // Recursively wrap the children for each active modifier
   const wrappedChildren = getEntries(modifiers).reduce((currentChildren, modifierEntry) => {
     const [name, modifier] = modifierEntry;
@@ -363,7 +367,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
-    (props: RenderLeafProps) => baseRenderLeaf(props, modifiers),
+    (props: RenderLeafProps) => baseRenderLeaf(props as ExtendedRenderLeafProps, modifiers),
     [modifiers]
   );
 
