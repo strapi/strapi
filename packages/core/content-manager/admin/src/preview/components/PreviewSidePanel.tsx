@@ -61,33 +61,31 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   return {
     title: formatMessage({ id: 'content-manager.preview.panel.title', defaultMessage: 'Preview' }),
     content: (
-      <Flex gap={2} width="100%">
-        <ConditionalTooltip
-          label={formatMessage({
-            id: 'content-manager.preview.panel.button-disabled-tooltip',
-            defaultMessage: 'Please save to open the preview',
-          })}
-          isShown={isModified}
-        >
-          <Box cursor="not-allowed" flex="auto">
-            <Button
-              variant="tertiary"
-              tag={Link}
-              to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
-              onClick={trackNavigation}
-              width="100%"
-              disabled={isModified}
-              pointerEvents={isModified ? 'none' : undefined}
-              tabIndex={isModified ? -1 : undefined}
-            >
-              {formatMessage({
-                id: 'content-manager.preview.panel.button',
-                defaultMessage: 'Open preview',
-              })}
-            </Button>
-          </Box>
-        </ConditionalTooltip>
-      </Flex>
+      <ConditionalTooltip
+        label={formatMessage({
+          id: 'content-manager.preview.panel.button-disabled-tooltip',
+          defaultMessage: 'Please save to open the preview',
+        })}
+        isShown={isModified}
+      >
+        <Box cursor="not-allowed" width="100%">
+          <Button
+            variant="tertiary"
+            tag={Link}
+            to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
+            onClick={trackNavigation}
+            width="100%"
+            disabled={isModified}
+            pointerEvents={isModified ? 'none' : undefined}
+            tabIndex={isModified ? -1 : undefined}
+          >
+            {formatMessage({
+              id: 'content-manager.preview.panel.button',
+              defaultMessage: 'Open preview',
+            })}
+          </Button>
+        </Box>
+      </ConditionalTooltip>
     ),
   };
 };

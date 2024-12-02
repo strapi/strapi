@@ -41,7 +41,8 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await titleInput.fill('New title');
     const previewLink = page.getByRole('link', { name: /open preview/i });
     await expect(previewLink).toBeDisabled();
-    await previewLink.hover();
+    // Can't hover the link directly because of pointer-events:none, so hover the div parent
+    await previewLink.locator('..').hover();
     await expect(
       page.getByRole('tooltip', { name: /please save to open the preview/i })
     ).toBeVisible();
