@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useQueryParams, useTracking, useForm } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Tooltip, type TooltipProps } from '@strapi/design-system';
+import { Box, Button, Flex, Tooltip, type TooltipProps } from '@strapi/design-system';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -58,6 +58,8 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     trackUsage('willNavigate', { from: pathname, to: destinationPathname });
   };
 
+  const isDisabled = isModified;
+
   return {
     title: formatMessage({ id: 'content-manager.preview.panel.title', defaultMessage: 'Preview' }),
     content: (
@@ -69,19 +71,23 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
           })}
           isShown={isModified}
         >
-          <Button
-            variant="tertiary"
-            tag={Link}
-            to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
-            onClick={trackNavigation}
-            flex="auto"
-            disabled={isModified}
-          >
-            {formatMessage({
-              id: 'content-manager.preview.panel.button',
-              defaultMessage: 'Open preview',
-            })}
-          </Button>
+          <Box cursor="not-allowed" flex="auto">
+            <Button
+              variant="tertiary"
+              tag={Link}
+              to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
+              onClick={trackNavigation}
+              width="100%"
+              disabled={isDisabled}
+              pointerEvents={isDisabled ? 'none' : undefined}
+              tabIndex={isDisabled ? -1 : undefined}
+            >
+              {formatMessage({
+                id: 'content-manager.preview.panel.button',
+                defaultMessage: 'Open preview',
+              })}
+            </Button>
+          </Box>
         </ConditionalTooltip>
       </Flex>
     ),
