@@ -887,22 +887,8 @@ const UpdateAction: DocumentActionComponent = ({
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux
   React.useEffect(() => {
-    const keysToListenTo = ['Enter'];
-
-    /**
-     * Detect the Arc browser specifically, because it registers CMD-S/CTRL-S for the quite common
-     * toggle sidebar action. So ignore that shortcut for it to avoid conflicts.
-     */
-    const isArcBrowser =
-      getComputedStyle(window.document.documentElement).getPropertyValue('--arc-palette-title')
-        .length > 0;
-
-    if (!isArcBrowser) {
-      keysToListenTo.push('s');
-    }
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (keysToListenTo.includes(e.key) && (e.metaKey || e.ctrlKey)) {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         handleUpdate();
       }
@@ -913,7 +899,7 @@ const UpdateAction: DocumentActionComponent = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleUpdate, document.documentElement]);
+  }, [handleUpdate]);
 
   return {
     /**
