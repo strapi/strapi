@@ -41,6 +41,7 @@ export default defineConfig({
         const builtinModulesWithNodePrefix = [
           ...builtinModules,
           ...builtinModules.map((modName) => `node:${modName}`),
+          'prismjs',
         ];
 
         if (
