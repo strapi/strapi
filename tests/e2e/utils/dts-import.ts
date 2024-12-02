@@ -56,7 +56,7 @@ export const resetDatabaseAndImportDataFromPath = async (
     },
   });
 
-  engine.diagnostics.onDiagnostic((diagnostic) => {
+  engine.diagnostics.onDiagnostic((diagnostic: any) => {
     if (diagnostic.kind !== 'info') console.log(diagnostic);
   });
 
