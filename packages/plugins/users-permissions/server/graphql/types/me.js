@@ -6,6 +6,7 @@ module.exports = ({ nexus }) => {
 
     definition(t) {
       t.nonNull.id('id');
+      t.nonNull.id('documentId');
       t.nonNull.string('username');
       t.string('email');
       t.boolean('confirmed');
