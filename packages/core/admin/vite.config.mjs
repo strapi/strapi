@@ -29,30 +29,7 @@ export default defineConfig({
       },
     },
     rollupOptions: {
-      external(id) {
-        const external = [
-          ...(pkg.dependencies ? Object.keys(pkg.dependencies) : []),
-          ...(pkg.peerDependencies ? Object.keys(pkg.peerDependencies) : []),
-        ];
-
-        const idParts = id.split('/');
-
-        const name = idParts[0].startsWith('@') ? `${idParts[0]}/${idParts[1]}` : idParts[0];
-
-        const builtinModulesWithNodePrefix = [
-          ...builtinModules,
-          ...builtinModules.map((modName) => `node:${modName}`),
-        ];
-
-        if (
-          (name && external.includes(name)) ||
-          (name && builtinModulesWithNodePrefix.includes(name))
-        ) {
-          return true;
-        }
-
-        return false;
-      },
+      external: ['prism'],
       output: {
         interop: 'auto',
       },
