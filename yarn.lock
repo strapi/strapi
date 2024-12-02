@@ -1114,7 +1114,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.20.12, @babel/core@npm:^7.23.0, @babel/core@npm:^7.23.2, @babel/core@npm:^7.23.5":
+"@babel/core@npm:^7.11.6, @babel/core@npm:^7.12.3, @babel/core@npm:^7.15.5, @babel/core@npm:^7.20.12, @babel/core@npm:^7.23.0, @babel/core@npm:^7.23.2, @babel/core@npm:^7.23.5":
   version: 7.26.0
   resolution: "@babel/core@npm:7.26.0"
   dependencies:
@@ -8195,6 +8195,7 @@ __metadata:
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.2.14"
     vite-plugin-dts: "npm:^4.3.0"
+    vite-plugin-prismjs: "npm:0.0.11"
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
   peerDependencies:
@@ -12862,7 +12863,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-prismjs@npm:2.1.0":
+"babel-plugin-prismjs@npm:2.1.0, babel-plugin-prismjs@npm:^2.1.0":
   version: 2.1.0
   resolution: "babel-plugin-prismjs@npm:2.1.0"
   peerDependencies:
@@ -30413,6 +30414,16 @@ __metadata:
     vite:
       optional: true
   checksum: 10c0/e200fa54b985e99b64b882380bb1f669d7f0a05ba9f5f2de717b5d1b7d35921344e12e03bce3aadb455c706879ae10c8997ebe79bd0aa47e9dc51ca79d040372
+  languageName: node
+  linkType: hard
+
+"vite-plugin-prismjs@npm:0.0.11":
+  version: 0.0.11
+  resolution: "vite-plugin-prismjs@npm:0.0.11"
+  dependencies:
+    "@babel/core": "npm:^7.15.5"
+    babel-plugin-prismjs: "npm:^2.1.0"
+  checksum: 10c0/029d59502dde25e3321a8e9e455e65c063747b3b36a4207cd628dd0d0f42429c1cd078fe35dd134ec2b0dbee10173079a5e29596d996029f2cb6c9ef3162b55a
   languageName: node
   linkType: hard
 

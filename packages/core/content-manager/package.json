@@ -132,13 +132,5 @@
     "required": true,
     "kind": "plugin"
   },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd",
-  "plugins": [
-    "prismjs", {
-      "languages": ["javascript", "css", "markup"],
-      "plugins": ["show-language"],
-      "theme": "okaidia",
-      "css": true
-    }
-  ]
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }
