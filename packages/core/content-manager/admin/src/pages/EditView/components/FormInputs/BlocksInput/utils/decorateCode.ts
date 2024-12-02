@@ -1,27 +1,22 @@
+import * as Prism from 'prismjs';
 import { BaseRange, Element, Node, NodeEntry } from 'slate';
 
 import { codeLanguages } from './constants';
-import { Prism } from './prism';
 
 type BaseRangeCustom = BaseRange & { className: string };
 
-interface PrismLanguages {
-  [key: string]: unknown;
-}
-
 export const decorateCode = ([node, path]: NodeEntry) => {
   const ranges: BaseRangeCustom[] = [];
-
   // make sure it is an Slate Element
   if (!Element.isElement(node) || node.type !== 'code') return ranges;
   // transform the Element into a string
   const text = Node.string(node);
   const decorateKey = codeLanguages.find((lang) => lang.value === node.language)?.decorate;
 
-  const selectedLanguage = (Prism?.languages as PrismLanguages)[decorateKey || 'plaintext'];
+  const selectedLanguage = Prism?.languages?.[decorateKey || 'plaintext'];
 
   // create "tokens" with "prismjs" and put them in "ranges"
-  const tokens = Prism.tokenize(text, selectedLanguage);
+  const tokens = Prism?.tokenize(text, selectedLanguage);
   let start = 0;
   for (const token of tokens) {
     const length = token.length;
