@@ -22,6 +22,7 @@ import { getTranslation } from '../../../../../utils/translations';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
+import { decorateCode } from './utils/decorateCode';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
 const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
@@ -299,7 +300,11 @@ const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
     return currentChildren;
   }, props.children);
 
-  return <span {...props.attributes}>{wrappedChildren}</span>;
+  return (
+    <span {...props.attributes} className={props.leaf.className}>
+      {wrappedChildren}
+    </span>
+  );
 };
 
 type BaseRenderElementProps = Direction & {
@@ -591,6 +596,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         readOnly={disabled}
         placeholder={placeholder}
         isExpandedMode={isExpandedMode}
+        decorate={decorateCode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}

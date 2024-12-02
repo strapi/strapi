@@ -19,7 +19,7 @@ const _self =
  * @namespace
  * @public
  */
-const Prism = (function (_self) {
+export const Prism = (function (_self) {
   // Private helper vars
   var lang = /(?:^|\s)lang(?:uage)?-([\w-]+)(?=\s|$)/i;
   var uniqueId = 0;
