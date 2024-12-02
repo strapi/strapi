@@ -49,9 +49,7 @@ function getPopulateForRelation(
   // If populating localizations attribute, also include validatable fields
   // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
   if (attributeName === 'localizations') {
-    return {
-      populate: getValidatableFieldsPopulate(model.uid as UID.Schema),
-    };
+    return { populate: getPopulateForValidation(model.uid as UID.Schema) };
   }
 
   // always populate createdBy, updatedBy, localizations etc.
@@ -188,49 +186,63 @@ const getDeepPopulate = (
  * @param options - Options to apply while populating
  * @param level - Current level of nested call
  */
-const getValidatableFieldsPopulate = (
-  uid: UID.Schema,
-  {
-    initialPopulate = {} as any,
-    countMany = false,
-    countOne = false,
-    maxLevel = Infinity,
-  }: PopulateOptions = {},
-  level = 1
-) => {
-  if (level > maxLevel) {
+export const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
+  const model = strapi.getModel(uid);
+  if (!model) {
     return {};
   }
 
-  const model = strapi.getModel(uid);
-
-  return Object.entries(model.attributes).reduce((populateAcc, [attributeName, attribute]) => {
-    if (!getDoesAttributeRequireValidation(attribute)) {
-      // If the attribute does not require validation, skip it
+  return Object.entries(model.attributes).reduce((populateAcc: any, [attributeName, attribute]) => {
+    if (isScalarAttribute(attribute)) {
+      // If the scalar attribute requires validation, add it to the fields array
+      if (getDoesAttributeRequireValidation(attribute)) {
+        populateAcc.fields = populateAcc.fields || [];
+        populateAcc.fields.push(attributeName);
+      }
       return populateAcc;
     }
 
-    if (isScalarAttribute(attribute)) {
-      return merge(populateAcc, {
-        [attributeName]: true,
-      });
+    if (isComponent(attribute)) {
+      // @ts-expect-error - fix
+      const component = attribute.component;
+
+      // Get the validation result for this component
+      const componentResult = getPopulateForValidation(component);
+
+      if (Object.keys(componentResult).length > 0) {
+        populateAcc.populate = populateAcc.populate || {};
+        populateAcc.populate[attributeName] = componentResult;
+      }
+
+      return populateAcc;
     }
 
-    return merge(
-      populateAcc,
-      getPopulateFor(
-        attributeName,
-        model,
-        {
-          // @ts-expect-error - improve types
-          initialPopulate: initialPopulate?.[attributeName],
-          countMany,
-          countOne,
-          maxLevel,
+    if (isDynamicZone(attribute)) {
+      const components = (attribute as Schema.Attribute.DynamicZone).components;
+      // Handle dynamic zone components
+      const componentsResult = (components || []).reduce(
+        (acc, componentUID) => {
+          // Get validation populate for this component
+          const componentResult = getPopulateForValidation(componentUID);
+
+          // Only include component if it has fields requiring validation
+          if (Object.keys(componentResult).length > 0) {
+            acc[componentUID] = componentResult;
+          }
+
+          return acc;
         },
-        level
-      )
-    );
+        {} as Record<string, any>
+      );
+
+      // Only add to populate if we have components requiring validation
+      if (Object.keys(componentsResult).length > 0) {
+        populateAcc.populate = populateAcc.populate || {};
+        populateAcc.populate[attributeName] = { on: componentsResult };
+      }
+    }
+
+    return populateAcc;
   }, {});
 };
 
@@ -346,10 +358,4 @@ const buildDeepPopulate = (uid: UID.CollectionType) => {
   return getService('populate-builder')(uid).populateDeep(Infinity).countRelations().build();
 };
 
-export {
-  getDeepPopulate,
-  getDeepPopulateDraftCount,
-  getQueryPopulate,
-  buildDeepPopulate,
-  getValidatableFieldsPopulate,
-};
+export { getDeepPopulate, getDeepPopulateDraftCount, getQueryPopulate, buildDeepPopulate };

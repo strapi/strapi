@@ -4,7 +4,7 @@ import { async, contentTypes, traverseEntity } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
-import { getValidatableFieldsPopulate } from './utils/populate';
+import { getPopulateForValidation } from './utils/populate';
 
 export interface DocumentVersion {
   id: string | number;
@@ -231,7 +231,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ) {
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
-    const populate = getValidatableFieldsPopulate(uid);
+    const populate = getPopulateForValidation(uid);
     const versions = await strapi.db.query(uid).findMany({
       where: { documentId: version.documentId },
       populate: {
