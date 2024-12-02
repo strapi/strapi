@@ -58,8 +58,6 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     trackUsage('willNavigate', { from: pathname, to: destinationPathname });
   };
 
-  const isDisabled = isModified;
-
   return {
     title: formatMessage({ id: 'content-manager.preview.panel.title', defaultMessage: 'Preview' }),
     content: (
@@ -78,9 +76,9 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
               to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
               onClick={trackNavigation}
               width="100%"
-              disabled={isDisabled}
-              pointerEvents={isDisabled ? 'none' : undefined}
-              tabIndex={isDisabled ? -1 : undefined}
+              disabled={isModified}
+              pointerEvents={isModified ? 'none' : undefined}
+              tabIndex={isModified ? -1 : undefined}
             >
               {formatMessage({
                 id: 'content-manager.preview.panel.button',
