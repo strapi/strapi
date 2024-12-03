@@ -5,6 +5,7 @@ import json from '@rollup/plugin-json';
 
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import { basePlugins } from '../../../rollup.utils.mjs';
 
 export default defineConfig([
   {
@@ -28,27 +29,7 @@ export default defineConfig([
         sourcemap: true,
       },
     ],
-    plugins: [
-      json(),
-      nodeResolve({
-        extensions: ['.ts'],
-      }),
-      commonjs({
-        ignoreDynamicRequires: true,
-      }),
-      swc({
-        swc: {
-          jsc: {
-            parser: {
-              syntax: 'typescript',
-              tsx: false, // Set to true if using TSX
-            },
-            target: 'es2020',
-          },
-          sourceMaps: true,
-        },
-      }),
-    ],
+    plugins: [...basePlugins(import.meta.dirname)],
   },
   {
     input: import.meta.dirname + '/admin/src/index.ts',
@@ -71,26 +52,6 @@ export default defineConfig([
         sourcemap: true,
       },
     ],
-    plugins: [
-      json(),
-      nodeResolve({
-        extensions: ['.ts', '.tsx'],
-      }),
-      commonjs({
-        ignoreDynamicRequires: true,
-      }),
-      swc({
-        swc: {
-          jsc: {
-            parser: {
-              syntax: 'typescript',
-              tsx: false, // Set to true if using TSX
-            },
-            target: 'es2020',
-          },
-          sourceMaps: true,
-        },
-      }),
-    ],
+    plugins: [...basePlugins(import.meta.dirname)],
   },
 ]);

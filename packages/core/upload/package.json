@@ -45,7 +45,6 @@
   ],
   "scripts": {
     "build": "run -T rollup -c",
-    "type-gen": "run -T tsc -p admin/tsconfig.build.json",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",

@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "build": "nx run-many --target=build --nx-ignore-cycles",
+    "watch": "nx watch --all -- 'nx run --excludeTaskDependencies $NX_PROJECT_NAME:build'",
     "build:size": "cd examples/getstarted && yarn build",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "build:watch": "nx watch --all --nx-ignore-cycles -- nx run \\$NX_PROJECT_NAME:build --nx-ignore-cycles",
@@ -142,7 +143,8 @@
     "lerna": "8.1.2",
     "lint-staged": "15.2.10",
     "lodash": "4.17.21",
-    "nx": "18.2.2",
+    "npm-run-all": "4.1.5",
+    "nx": "20.1.4",
     "plop": "4.0.1",
     "prettier": "3.3.3",
     "prettier-2": "npm:prettier@^2",
