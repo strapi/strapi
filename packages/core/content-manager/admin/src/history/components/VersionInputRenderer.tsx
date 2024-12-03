@@ -12,6 +12,7 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -39,7 +40,6 @@ import type { RelationsFieldProps } from '../../pages/EditView/components/FormIn
 import type { RelationResult } from '../../services/relations';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
-import { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
 
 const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {}, shadow: 'none' })`
   button {
