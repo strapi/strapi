@@ -252,7 +252,6 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
   const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
 
-  // below here
   idsToKeep.forEach((id) => {
     if (!allIds.includes(id)) {
       throw new errors.ApplicationError(

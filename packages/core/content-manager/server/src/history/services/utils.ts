@@ -374,12 +374,15 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     // Get the component's schema
     const component = strapi.getModel(componentSchema.component);
 
+    // Initialize the next component as the current component
     let nextComponent = component;
+
     // Loop each attribute in the component schema
     for (const [key, val] of Object.entries(component.attributes)) {
       if (val.type === 'component') {
         // When it's a nested component, update the keyPath to the nested component
         keyPath.push(key);
+        // Traverse to that component
         nextComponent = strapi.getModel(val.component);
       } else {
         // Exit with the next component
