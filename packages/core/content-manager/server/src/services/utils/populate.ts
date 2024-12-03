@@ -48,9 +48,9 @@ function getPopulateForRelation(
 
   // If populating localizations attribute, also include validatable fields
   // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
-  if (attributeName === 'localizations') {
-    return getPopulateForValidation(model.uid as UID.Schema);
-  }
+  // if (attributeName === 'localizations') {
+  // return getPopulateForValidation(model.uid as UID.Schema);
+  // }
 
   // always populate createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
@@ -190,7 +190,7 @@ const getDeepPopulate = (
  * @param options - Options to apply while populating
  * @param level - Current level of nested call
  */
-export const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
+const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
   const model = strapi.getModel(uid);
   if (!model) {
     return {};
@@ -370,4 +370,10 @@ const buildDeepPopulate = (uid: UID.CollectionType) => {
   return getService('populate-builder')(uid).populateDeep(Infinity).countRelations().build();
 };
 
-export { getDeepPopulate, getDeepPopulateDraftCount, getQueryPopulate, buildDeepPopulate };
+export {
+  getDeepPopulate,
+  getDeepPopulateDraftCount,
+  getPopulateForValidation,
+  getQueryPopulate,
+  buildDeepPopulate,
+};
