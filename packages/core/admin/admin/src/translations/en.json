@@ -639,8 +639,6 @@
   "components.Blocks.popover.link": "Link",
   "components.Blocks.popover.link.placeholder": "Paste link",
   "components.Blocks.popover.link.error": "Please enter valid link",
-  "components.Blocks.popover.save": "Save",
-  "components.Blocks.popover.cancel": "Cancel",
   "components.Blocks.popover.remove": "Remove",
   "components.Blocks.popover.edit": "Edit",
   "components.Blocks.blocks.selectBlock": "Select a block",

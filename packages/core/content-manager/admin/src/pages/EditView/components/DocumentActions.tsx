@@ -768,6 +768,139 @@ const UpdateAction: DocumentActionComponent = ({
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
+  const handleUpdate = React.useCallback(async () => {
+    setSubmitting(true);
+
+    try {
+      if (!modified) {
+        return;
+      }
+
+      const { errors } = await validate(true, {
+        status: 'draft',
+      });
+
+      if (errors) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: 'content-manager.validation.error',
+            defaultMessage:
+              'There are validation errors in your document. Please fix them before saving.',
+          }),
+        });
+
+        return;
+      }
+
+      if (isCloning) {
+        const res = await clone(
+          {
+            model,
+            documentId: cloneMatch.params.origin!,
+            params,
+          },
+          transformData(document)
+        );
+
+        if ('data' in res) {
+          navigate(
+            {
+              pathname: `../${res.data.documentId}`,
+              search: rawQuery,
+            },
+            { relative: 'path' }
+          );
+        } else if (
+          'error' in res &&
+          isBaseQueryError(res.error) &&
+          res.error.name === 'ValidationError'
+        ) {
+          setErrors(formatValidationErrors(res.error));
+        }
+      } else if (documentId || collectionType === SINGLE_TYPES) {
+        const res = await update(
+          {
+            collectionType,
+            model,
+            documentId,
+            params,
+          },
+          transformData(document)
+        );
+
+        if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          setErrors(formatValidationErrors(res.error));
+        } else {
+          resetForm();
+        }
+      } else {
+        const res = await create(
+          {
+            model,
+            params,
+          },
+          transformData(document)
+        );
+
+        if ('data' in res && collectionType !== SINGLE_TYPES) {
+          navigate(
+            {
+              pathname: `../${res.data.documentId}`,
+              search: rawQuery,
+            },
+            { replace: true, relative: 'path' }
+          );
+        } else if (
+          'error' in res &&
+          isBaseQueryError(res.error) &&
+          res.error.name === 'ValidationError'
+        ) {
+          setErrors(formatValidationErrors(res.error));
+        }
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }, [
+    clone,
+    cloneMatch?.params.origin,
+    collectionType,
+    create,
+    document,
+    documentId,
+    formatMessage,
+    formatValidationErrors,
+    isCloning,
+    model,
+    modified,
+    navigate,
+    params,
+    rawQuery,
+    resetForm,
+    setErrors,
+    setSubmitting,
+    toggleNotification,
+    update,
+    validate,
+  ]);
+
+  // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleUpdate();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleUpdate]);
+
   return {
     /**
      * Disabled when:
@@ -780,101 +913,7 @@ const UpdateAction: DocumentActionComponent = ({
       id: 'global.save',
       defaultMessage: 'Save',
     }),
-    onClick: async () => {
-      setSubmitting(true);
-
-      try {
-        const { errors } = await validate(true, {
-          status: 'draft',
-        });
-
-        if (errors) {
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: 'content-manager.validation.error',
-              defaultMessage:
-                'There are validation errors in your document. Please fix them before saving.',
-            }),
-          });
-
-          return;
-        }
-
-        if (isCloning) {
-          const res = await clone(
-            {
-              model,
-              documentId: cloneMatch.params.origin!,
-              params,
-            },
-            transformData(document)
-          );
-
-          if ('data' in res) {
-            navigate(
-              {
-                pathname: `../${res.data.documentId}`,
-                search: rawQuery,
-              },
-              { relative: 'path' }
-            );
-          } else if (
-            'error' in res &&
-            isBaseQueryError(res.error) &&
-            res.error.name === 'ValidationError'
-          ) {
-            setErrors(formatValidationErrors(res.error));
-          }
-        } else if (documentId || collectionType === SINGLE_TYPES) {
-          const res = await update(
-            {
-              collectionType,
-              model,
-              documentId,
-              params,
-            },
-            transformData(document)
-          );
-
-          if (
-            'error' in res &&
-            isBaseQueryError(res.error) &&
-            res.error.name === 'ValidationError'
-          ) {
-            setErrors(formatValidationErrors(res.error));
-          } else {
-            resetForm();
-          }
-        } else {
-          const res = await create(
-            {
-              model,
-              params,
-            },
-            transformData(document)
-          );
-
-          if ('data' in res && collectionType !== SINGLE_TYPES) {
-            navigate(
-              {
-                pathname: `../${res.data.documentId}`,
-                search: rawQuery,
-              },
-              { replace: true, relative: 'path' }
-            );
-          } else if (
-            'error' in res &&
-            isBaseQueryError(res.error) &&
-            res.error.name === 'ValidationError'
-          ) {
-            setErrors(formatValidationErrors(res.error));
-          }
-        }
-      } finally {
-        setSubmitting(false);
-      }
-    },
+    onClick: handleUpdate,
   };
 };
 
