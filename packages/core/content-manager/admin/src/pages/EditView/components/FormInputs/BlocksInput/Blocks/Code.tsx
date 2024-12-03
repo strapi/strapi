@@ -12,10 +12,10 @@ import { codeLanguages } from '../utils/constants';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
+// Import the PrismJS theme to highlight the code
+import 'prismjs/themes/prism-solarizedlight.css';
 
-import { PrismBlock } from './Prism';
-
-const CodeBlock = styled(PrismBlock)`
+const CodeBlock = styled.pre`
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: ${({ theme }) => theme.colors.neutral100};
   max-width: 100%;
