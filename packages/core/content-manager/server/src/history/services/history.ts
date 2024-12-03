@@ -1,7 +1,6 @@
-import type { Core, Data, Schema, Struct, UID } from '@strapi/types';
+import type { Core, Data, Modules, Schema, Struct, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import _, { omit } from 'lodash/fp';
-import type { AnyDocument } from '@strapi/types/dist/modules/documents';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -61,41 +60,42 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       ]);
       const populateEntryRelations = async (
         entry: Pick<HistoryVersionQueryResult, 'data' | 'schema'>,
-        initialData: Promise<AnyDocument> = Promise.resolve(entry.data),
+        initialData: Promise<Modules.Documents.AnyDocument> = Promise.resolve(entry.data),
         componentKeyPath: string[] = []
       ): Promise<CreateHistoryVersion['data']> => {
         const entryWithRelations = await Object.entries(entry.schema).reduce(
-          async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
+          async (
+            currentDataWithRelations,
+            [attributeKey, attributeSchema]
+          ): Promise<Modules.Documents.AnyDocument> => {
             const attributeValue = entry.data[attributeKey];
             const attributeValues = Array.isArray(attributeValue)
               ? attributeValue
               : [attributeValue];
 
             if (attributeSchema.type === 'component' && attributeValue) {
-              const keyPath = [...componentKeyPath];
-              if (!keyPath.includes(attributeKey)) {
-                // When the attribute key is not already in the keyPath, add it
-                keyPath.push(attributeKey);
+              const updatedComponent =
+                await serviceUtils.updateComponents<Modules.Documents.AnyDocument>(
+                  componentKeyPath,
+                  attributeKey,
+                  attributeSchema,
+                  async (keyPath, componentAttributesSchema) => {
+                    return populateEntryRelations(
+                      {
+                        data: attributeValue,
+                        schema: componentAttributesSchema,
+                      },
+                      currentDataWithRelations,
+                      keyPath
+                    );
+                  }
+                );
+
+              if (updatedComponent) {
+                return updatedComponent;
               }
-              // Get the component's schema
-              const component = strapi.getModel(attributeSchema.component);
-              // Loop each attribute in the component schema
-              for (const [key, val] of Object.entries(component.attributes)) {
-                if (val.type === 'component') {
-                  // When it's a nested component, update the keyPath to the nested component
-                  keyPath.push(key);
-                } else {
-                  // Otherwise, recurse for component at keyPath
-                  return populateEntryRelations(
-                    {
-                      data: attributeValue,
-                      schema: component.attributes,
-                    },
-                    currentDataWithRelations,
-                    keyPath
-                  );
-                }
-              }
+
+              return currentDataWithRelations;
             }
 
             if (attributeSchema.type === 'media') {
@@ -255,7 +255,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         // Create the reducer for the provided schema attributes
         const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
-        const stuff = await reducer(
+        const dataWithoutMisisingRelations = await reducer(
           async (
             previousRelationAttributes: Record<string, unknown>,
             [attributeKey, attributeSchema]: [string, Schema.Attribute.AnyAttribute]
@@ -266,33 +266,30 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             }
 
             if (attributeSchema.type === 'component' && versionRelationData) {
-              const keyPath = [...componentKeyPath];
-              if (!keyPath.includes(attributeKey)) {
-                // When the attribute key is not already in the keyPath, add it
-                keyPath.push(attributeKey);
-              }
-              // Get the component's schema
-              const component = strapi.getModel(attributeSchema.component);
-              // Loop each attribute in the component schema
-              for (const [key, val] of Object.entries(component.attributes)) {
-                if (val.type === 'component') {
-                  // When it's a nested component, update the keyPath to the nested component
-                  keyPath.push(key);
-                } else {
-                  // Otherwise, recurse for component at keyPath
-                  const plop = await getDataWithoutMissingRelations(
+              return serviceUtils.updateComponents<Record<string, unknown>>(
+                componentKeyPath,
+                attributeKey,
+                attributeSchema,
+                async (keyPath, componentAttributesSchema) => {
+                  const currentComponent = strapi.getModel(attributeSchema.component);
+
+                  const updatedComponent = await getDataWithoutMissingRelations(
                     {
                       data: versionRelationData,
-                      schema: component.attributes,
-                      component: component.uid,
+                      schema: componentAttributesSchema,
+                      component: currentComponent.uid,
                     },
                     previousRelationAttributes,
                     keyPath
                   );
 
-                  return plop;
+                  if (updatedComponent) {
+                    return updatedComponent;
+                  }
+
+                  return previousRelationAttributes;
                 }
-              }
+              );
             }
 
             if (
@@ -326,7 +323,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           initialData
         );
 
-        return stuff;
+        return dataWithoutMisisingRelations;
       };
 
       const data = omit(
