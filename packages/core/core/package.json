@@ -38,10 +38,10 @@
     "resources/"
   ],
   "scripts": {
-    "type-gen": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
-    "build": "run -T rollup -c",
+    "build": "run -T run-p build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "watch": "run -T rollup -c -w",
-    "build:strict": "yarn type-check && yarn build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
@@ -56,7 +56,6 @@
     "@strapi/database": "5.4.1",
     "@strapi/generators": "5.4.1",
     "@strapi/logger": "5.4.1",
-    "@strapi/pack-up": "5.0.0",
     "@strapi/permissions": "5.4.1",
     "@strapi/types": "5.4.1",
     "@strapi/typescript-utils": "5.4.1",
@@ -104,7 +103,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
     "@strapi/ts-zen": "^0.2.0",
     "@swc/core": "1.9.3",
     "@types/bcryptjs": "2.4.3",

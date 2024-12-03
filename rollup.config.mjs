@@ -6,19 +6,12 @@ export default async function () {
     ignore: ['**/node_modules/**'],
   });
 
-  const config = await Promise.all(
-    files.map((file) => {
-      console.log(file);
-
-      return import(path.resolve(import.meta.dirname, file)).then(({ default: config }) => {
-        return config;
-      });
+  const configs = await Promise.all(
+    files.map(async (file) => {
+      const { default: config } = await import(path.resolve(file));
+      return config;
     })
   );
 
-  console.log(config);
-
-  return (await config).reduce((acc, c) => {
-    return acc.concat(c);
-  }, []);
+  return configs.flatMap((config) => config);
 }

@@ -20,9 +20,11 @@
     "packageManager": "yarn"
   },
   "targetDefaults": {
-    "build": {
-      "inputs": ["production", "^production"],
-      "dependsOn": ["^build"],
+    "build:code": {
+      "cache": true
+    },
+    "build:types": {
+      "dependsOn": ["^build:types"],
       "cache": true
     },
     "test:unit": {
@@ -45,5 +47,6 @@
       "cache": true
     }
   },
-  "useInferencePlugins": false
+  "useInferencePlugins": false,
+  "parallel": 5
 }

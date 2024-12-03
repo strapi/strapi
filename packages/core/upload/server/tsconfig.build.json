@@ -3,10 +3,8 @@
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": ".",
-    "outDir": "./dist",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "noEmit": false,
+    "outDir": "../dist",
+    "noEmit": false
   },
   "include": ["./src"],
   "exclude": ["node_modules", "**/*.test.ts"]

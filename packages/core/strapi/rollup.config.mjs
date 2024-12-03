@@ -1,10 +1,6 @@
+import path from 'node:path';
 import { defineConfig } from 'rollup';
-import path from 'path';
-import swc from '@rollup/plugin-swc';
-import json from '@rollup/plugin-json';
-
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
+import { basePlugins } from '../../../rollup.utils.mjs';
 
 export default defineConfig([
   {
@@ -20,7 +16,7 @@ export default defineConfig([
         dir: import.meta.dirname + '/dist',
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
-        exports: 'named',
+        exports: 'auto',
         format: 'cjs',
         sourcemap: true,
       },
@@ -28,31 +24,11 @@ export default defineConfig([
         dir: import.meta.dirname + '/dist',
         entryFileNames: '[name].mjs',
         chunkFileNames: 'chunks/[name]-[hash].js',
-        exports: 'named',
+        exports: 'auto',
         format: 'esm',
         sourcemap: true,
       },
     ],
-    plugins: [
-      json(),
-      nodeResolve({
-        extensions: ['.ts'],
-      }),
-      commonjs({
-        ignoreDynamicRequires: true,
-      }),
-      swc({
-        swc: {
-          jsc: {
-            parser: {
-              syntax: 'typescript',
-              tsx: false, // Set to true if using TSX
-            },
-            target: 'es2020',
-          },
-          sourceMaps: true,
-        },
-      }),
-    ],
+    plugins: basePlugins(import.meta.dirname),
   },
 ]);

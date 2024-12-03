@@ -1,4 +1,4 @@
-import { ASSIGNEE_ATTRIBUTE_NAME, STAGE_ATTRIBUTE_NAME } from './[id]/components/constants';
+import { ASSIGNEE_ATTRIBUTE_NAME, STAGE_ATTRIBUTE_NAME } from './id/components/constants';
 import { AssigneeFilter } from './components/AssigneeFilter';
 import { StageFilter } from './components/StageFilter';
 import { AssigneeColumn, StageColumn } from './components/TableColumns';
