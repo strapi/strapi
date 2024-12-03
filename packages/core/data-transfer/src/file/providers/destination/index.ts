@@ -15,7 +15,7 @@ import type {
   ProviderType,
   Stream,
 } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createFilePathFactory, createTarEntryStream } from './utils';
 import { ProviderTransferError } from '../../../errors/providers';
 
@@ -73,7 +73,7 @@ class LocalFileDestinationProvider implements IDestinationProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'file-destination-provider',
+        origin: 'file-destination-provider',
       },
       kind: 'info',
     });
