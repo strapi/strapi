@@ -49,7 +49,7 @@ function getPopulateForRelation(
   // If populating localizations attribute, also include validatable fields
   // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
   if (attributeName === 'localizations') {
-    return { populate: getPopulateForValidation(model.uid as UID.Schema) };
+    return getPopulateForValidation(model.uid as UID.Schema);
   }
 
   // always populate createdBy, updatedBy, localizations etc.
@@ -159,6 +159,10 @@ const getDeepPopulate = (
 
   const model = strapi.getModel(uid);
 
+  if (!model) {
+    return {};
+  }
+
   return Object.keys(model.attributes).reduce(
     (populateAcc, attributeName: string) =>
       merge(
@@ -209,6 +213,7 @@ export const getPopulateForValidation = (uid: UID.Schema): Record<string, any> =
       // Get the validation result for this component
       const componentResult = getPopulateForValidation(component);
 
+      // FIX: Fields can not be selected inside components
       if (Object.keys(componentResult).length > 0) {
         populateAcc.populate = populateAcc.populate || {};
         populateAcc.populate[attributeName] = componentResult;
@@ -240,6 +245,13 @@ export const getPopulateForValidation = (uid: UID.Schema): Record<string, any> =
         populateAcc.populate = populateAcc.populate || {};
         populateAcc.populate[attributeName] = { on: componentsResult };
       }
+    }
+
+    // return populate if no fields
+    if (populateAcc.populate) {
+      return {
+        populate: populateAcc.populate,
+      };
     }
 
     return populateAcc;
