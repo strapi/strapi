@@ -74,28 +74,24 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
               : [attributeValue];
 
             if (attributeSchema.type === 'component' && attributeValue) {
-              const updatedComponent =
-                await serviceUtils.updateComponents<Modules.Documents.AnyDocument>(
-                  componentKeyPath,
-                  attributeKey,
-                  attributeSchema,
-                  async (keyPath, componentAttributesSchema) => {
-                    return populateEntryRelations(
-                      {
-                        data: attributeValue,
-                        schema: componentAttributesSchema,
-                      },
-                      currentDataWithRelations,
-                      keyPath
-                    );
-                  }
-                );
+              const nextComponent = serviceUtils.getNextComponent(
+                componentKeyPath,
+                attributeKey,
+                attributeSchema
+              );
 
-              if (updatedComponent) {
-                return updatedComponent;
+              if (!nextComponent) {
+                return currentDataWithRelations;
               }
 
-              return currentDataWithRelations;
+              return populateEntryRelations(
+                {
+                  data: attributeValue,
+                  schema: nextComponent.schema.attributes,
+                },
+                currentDataWithRelations,
+                nextComponent.keyPath
+              );
             }
 
             if (attributeSchema.type === 'media') {
@@ -266,29 +262,24 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             }
 
             if (attributeSchema.type === 'component' && versionRelationData) {
-              return serviceUtils.updateComponents<Record<string, unknown>>(
+              const nextComponent = serviceUtils.getNextComponent(
                 componentKeyPath,
                 attributeKey,
-                attributeSchema,
-                async (keyPath, componentAttributesSchema) => {
-                  const currentComponent = strapi.getModel(attributeSchema.component);
+                attributeSchema
+              );
 
-                  const updatedComponent = await getDataWithoutMissingRelations(
-                    {
-                      data: versionRelationData,
-                      schema: componentAttributesSchema,
-                      component: currentComponent.uid,
-                    },
-                    previousRelationAttributes,
-                    keyPath
-                  );
+              if (!nextComponent) {
+                return previousRelationAttributes;
+              }
 
-                  if (updatedComponent) {
-                    return updatedComponent;
-                  }
-
-                  return previousRelationAttributes;
-                }
+              return getDataWithoutMissingRelations(
+                {
+                  data: versionRelationData,
+                  schema: nextComponent.schema.attributes,
+                  component: nextComponent.schema.uid,
+                },
+                previousRelationAttributes,
+                nextComponent.keyPath
               );
             }
 

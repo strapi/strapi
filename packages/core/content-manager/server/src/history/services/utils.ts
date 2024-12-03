@@ -351,14 +351,16 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
-  const updateComponents = async <T>(
+  /**
+   * @description
+   * Builds a key path to the next nested component (fieldA.component.fieldB.componentB...)
+   * @returns
+   * The updated key path and the next component's schema
+   */
+  const getNextComponent = (
     componentKeyPath: string[],
     componentName: string,
-    componentSchema: Schema.Attribute.AnyAttribute,
-    callback: (
-      componentKeypath: string[],
-      componentAttributesSchema: Record<string, Schema.Attribute.AnyAttribute>
-    ) => Promise<T>
+    componentSchema: Schema.Attribute.AnyAttribute
   ) => {
     if (componentSchema.type !== 'component') return;
 
@@ -371,18 +373,17 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
     // Get the component's schema
     const component = strapi.getModel(componentSchema.component);
-    // If there are no attributes, return undefined
-    if (!component.attributes || Object.keys(component.attributes).length === 0) {
-      return;
-    }
+
+    let nextComponent = component;
     // Loop each attribute in the component schema
     for (const [key, val] of Object.entries(component.attributes)) {
       if (val.type === 'component') {
         // When it's a nested component, update the keyPath to the nested component
         keyPath.push(key);
+        nextComponent = strapi.getModel(val.component);
       } else {
-        // Otherwise, do something with the current component
-        return callback(keyPath, component.attributes);
+        // Exit with the next component
+        return { keyPath, schema: nextComponent };
       }
     }
   };
@@ -399,6 +400,6 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getDeepPopulate,
     buildMediaResponse,
     buildRelationReponse,
-    updateComponents,
+    getNextComponent,
   };
 };
