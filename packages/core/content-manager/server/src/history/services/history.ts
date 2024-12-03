@@ -1,6 +1,6 @@
 import type { Core, Data, Modules, Schema, Struct, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import _, { omit } from 'lodash/fp';
+import { omit, set } from 'lodash/fp';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
@@ -110,13 +110,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                 : attributeKey;
               const currentData = { ...(await currentDataWithRelations) };
 
-              const updatedData = _.set(
+              return set(
                 keyPathToUpdate,
                 { results: sanitizedResults, meta: response.meta },
                 currentData
               );
-
-              return updatedData;
             }
 
             // TODO: handle relations that are inside components
@@ -235,7 +233,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         } = version,
         initialData: Record<string, unknown> = structuredClone(dataWithoutAddedAttributes),
         componentKeyPath: string[] = []
-      ) => {
+      ): Promise<Record<string, unknown> | undefined> => {
         /**
          * When a component uid is provided, we get the attributes for that component
          * Otherwise, we assume we are at the root level of the version,
@@ -306,7 +304,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                 ? `${componentKeyPath.join('.')}.${attributeKey}`
                 : attributeKey;
 
-              return _.set(keyPathToUpdate, data, previousRelationAttributes);
+              return set(keyPathToUpdate, data, previousRelationAttributes);
             }
 
             return previousRelationAttributes;
