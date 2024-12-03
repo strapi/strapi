@@ -21,11 +21,12 @@ import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
-import { ContextInfo } from '../ContextInfo';
-import SelectTree from '../SelectTree';
+import { ContextInfo } from '../ContextInfo/ContextInfo';
+import { SelectTree } from '../SelectTree/SelectTree';
 
-import { EditFolderModalHeader } from './ModalHeader';
-import RemoveFolderDialog from './RemoveFolderDialog';
+import { EditFolderModalHeader } from './ModalHeader/ModalHeader';
+import { RemoveFolderDialog } from './RemoveFolderDialog';
+
 import type { FolderDefinition } from '../../../../shared/contracts/folders';
 import type { FetchError } from '@strapi/admin/strapi-admin';
 
@@ -49,7 +50,7 @@ export interface EditFolderDialogProps {
   location?: string;
   folder?: FolderDefinition;
   open?: boolean;
-  onClose: (arg?: any) => void;
+  onClose: (payload?: { created?: boolean | undefined } | boolean) => void;
 }
 
 export const EditFolderContent = ({

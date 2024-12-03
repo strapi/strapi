@@ -5,7 +5,7 @@ import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 import { clickAndWait } from '../../../utils/shared';
 
-test.describe('Create collection type', () => {
+test.describe('Create single type', () => {
   // very long timeout for these tests because they restart the server multiple times
   test.describe.configure({ timeout: 300000 });
 

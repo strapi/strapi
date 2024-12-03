@@ -105,8 +105,7 @@ const renderCompo = (handleCloseSpy = jest.fn()) => {
           </NotificationsProvider>
         </IntlProvider>
       </DesignSystemProvider>
-    </QueryClientProvider>,
-    { container: document.getElementById('app') as HTMLElement }
+    </QueryClientProvider>
   );
 };
 

@@ -1,20 +1,36 @@
 import * as React from 'react';
 
-import { useQueryParams, useTracking } from '@strapi/admin/strapi-admin';
-import { Button, Flex } from '@strapi/design-system';
+import { useQueryParams, useTracking, useForm } from '@strapi/admin/strapi-admin';
+import { Button, Flex, Tooltip, type TooltipProps } from '@strapi/design-system';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useGetPreviewUrlQuery } from '../services/preview';
 
 import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 
+interface ConditionalTooltipProps {
+  isShown: boolean;
+  label: TooltipProps['label'];
+  children: React.ReactNode;
+}
+
+const ConditionalTooltip = ({ isShown, label, children }: ConditionalTooltipProps) => {
+  if (isShown) {
+    return <Tooltip label={label}>{children}</Tooltip>;
+  }
+
+  return children;
+};
+
 const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
   const [{ query }] = useQueryParams();
+  const isModified = useForm('PreviewSidePanel', (state) => state.modified);
 
   /**
    * The preview URL isn't used in this component, we just fetch it to know if preview is enabled
@@ -36,27 +52,37 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
     return null;
   }
 
-  const handleClick = () => {
-    // TODO: delete this event and use willNavigate instead
-    trackUsage('willOpenPreview');
+  const trackNavigation = () => {
+    // Append /preview to the current URL
+    const destinationPathname = pathname.replace(/\/$/, '') + '/preview';
+    trackUsage('willNavigate', { from: pathname, to: destinationPathname });
   };
 
   return {
     title: formatMessage({ id: 'content-manager.preview.panel.title', defaultMessage: 'Preview' }),
     content: (
       <Flex gap={2} width="100%">
-        <Button
-          variant="tertiary"
-          tag={Link}
-          to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
-          onClick={handleClick}
-          flex="auto"
-        >
-          {formatMessage({
-            id: 'content-manager.preview.panel.button',
-            defaultMessage: 'Open preview',
+        <ConditionalTooltip
+          label={formatMessage({
+            id: 'content-manager.preview.panel.button-disabled-tooltip',
+            defaultMessage: 'Please save to open the preview',
           })}
-        </Button>
+          isShown={isModified}
+        >
+          <Button
+            variant="tertiary"
+            tag={Link}
+            to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
+            onClick={trackNavigation}
+            flex="auto"
+            disabled={isModified}
+          >
+            {formatMessage({
+              id: 'content-manager.preview.panel.button',
+              defaultMessage: 'Open preview',
+            })}
+          </Button>
+        </ConditionalTooltip>
       </Flex>
     ),
   };

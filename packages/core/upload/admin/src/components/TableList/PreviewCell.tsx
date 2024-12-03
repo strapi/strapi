@@ -1,11 +1,17 @@
 import { Avatar, Box, Flex } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-// TODO: replace this import with the import from constants file when it will be migrated to TS
-import { AssetType } from '../../newConstants';
-import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
+import { AssetType } from '../../constants';
+import {
+  createAssetUrl,
+  getFileExtension,
+  getTrad,
+  prefixFileUrlWithBackendUrl,
+} from '../../utils';
 import { VideoPreview } from '../AssetCard/VideoPreview';
+
 import type { File } from '../../../../shared/contracts/files';
 
 const VideoPreviewWrapper = styled(Box)`
@@ -29,6 +35,7 @@ interface PreviewCellProps {
 }
 
 export const PreviewCell = ({ type, content }: PreviewCellProps) => {
+  const { formatMessage } = useIntl();
   if (type === 'folder') {
     return (
       <Flex
@@ -38,7 +45,15 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
         height="3.2rem"
         borderRadius="50%"
       >
-        <Folder fill="secondary500" width="1.6rem" height="1.6rem" />
+        <Folder
+          aria-label={formatMessage({
+            id: getTrad('header.actions.add-assets.folder'),
+            defaultMessage: 'folder',
+          })}
+          fill="secondary500"
+          width="1.6rem"
+          height="1.6rem"
+        />
       </Flex>
     );
   }

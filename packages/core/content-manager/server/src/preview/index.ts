@@ -21,13 +21,12 @@ const getFeature = (): Partial<Plugin.LoadedPlugin> => {
   // }
 
   return {
-    bootstrap() {
-      // eslint-disable-next-line no-console -- TODO remove when we have real functionality
-      console.log('Bootstrapping preview server');
-
+    register() {
       const config = getService(strapi, 'preview-config');
       config.validate();
+      config.register();
     },
+    bootstrap() {},
     routes,
     controllers,
     services,

@@ -5,5 +5,3 @@ export const toSingularTypes = (types?: string[]) => {
 
   return types.map((type) => type.substring(0, type.length - 1));
 };
-
-export default toSingularTypes;
