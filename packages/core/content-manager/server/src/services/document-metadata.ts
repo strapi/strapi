@@ -231,7 +231,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ) {
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
-    const populate = getPopulateForValidation(uid);
+    const { populate } = getPopulateForValidation(uid);
     const versions = await strapi.db.query(uid).findMany({
       where: { documentId: version.documentId },
       populate: {
