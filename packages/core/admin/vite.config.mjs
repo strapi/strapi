@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import { builtinModules } from 'node:module';
 import dts from 'vite-plugin-dts';
+import prismjs from 'vite-plugin-prismjs';
 
 import pkg from './package.json';
 
@@ -59,6 +60,9 @@ export default defineConfig({
     },
   },
   plugins: [
+    prismjs({
+      languages: 'all',
+    }),
     dts({
       outDir: './dist',
       tsconfigPath: './admin/tsconfig.build.json',

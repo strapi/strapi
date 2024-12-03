@@ -6,6 +6,8 @@ import { codeLanguages } from './constants';
 
 type BaseRangeCustom = BaseRange & { className: string };
 
+Prism.manual = true;
+
 export const decorateCode = ([node, path]: NodeEntry) => {
   const ranges: BaseRangeCustom[] = [];
   // make sure it is an Slate Element
