@@ -207,7 +207,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ) {
     // TODO: Ignore publishedAt aif availableStatus=false, and ignore locale if
     // i18n is disabled
-    const { populate, fields } = getPopulateForValidation(uid);
+    const { populate = {}, fields = [] } = getPopulateForValidation(uid);
 
     const params = {
       populate: {
