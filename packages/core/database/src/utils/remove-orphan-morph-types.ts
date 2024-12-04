@@ -6,9 +6,7 @@ import { Attribute, RelationalAttribute } from '../types';
  *
  * This function iterates over the database metadata to identify morph relationships
  * (relations with a `joinTable` containing the specified pivot column) and removes
- * any entries in the relation's join table where the morph type is invalid:
- * - Morph types without corresponding metadata.
- * - Morph types pointing to tables that no longer exist in the database.
+ * any entries in the relation's join table where the morph type is invalid.
  *
  * Note: This function does not check for orphaned IDs, only orphaned morph types.
  *
@@ -16,8 +14,6 @@ import { Attribute, RelationalAttribute } from '../types';
  * @param pivot - The name of the column in the join table representing the morph type.
  */
 export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
-  const allTables = await db.dialect.schemaInspector.getTables();
-
   const isRelationWithJoinTable = (
     attribute: Attribute
   ): attribute is RelationalAttribute & { joinTable: { name: string; pivotColumns: string[] } } => {
@@ -42,16 +38,15 @@ export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
       const morphTypes = await db.connection(joinTableName).distinct(pivot).pluck(pivot);
 
       for (const morphType of morphTypes) {
-        // Determine whether to delete based on metadata or table existence
+        // Check if metadata for the morph type exists
         const deleteComponentType = await (async () => {
           try {
-            const morphMetadata = db.metadata.get(morphType);
-            return !allTables.includes(morphMetadata.tableName);
+            return !db.metadata.get(morphType); // If no metadata found, mark for deletion
           } catch {
             db.logger.debug(
               `Metadata for morph type "${morphType}" in table "${joinTableName}" not found`
             );
-            return true;
+            return true; // Return true to delete if metadata is missing
           }
         })();
 
