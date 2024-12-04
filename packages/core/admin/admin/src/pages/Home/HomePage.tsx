@@ -8,6 +8,8 @@ import { Page } from '../../components/PageHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 
+import { GuidedTour } from './components/GuidedTour';
+
 /* -------------------------------------------------------------------------------------------------
  * HomePageCE
  * -----------------------------------------------------------------------------------------------*/
@@ -32,6 +34,9 @@ const HomePageCE = () => {
           defaultMessage: 'Welcome to your administration panel',
         })}
       />
+      <Layouts.Content>
+        <GuidedTour />
+      </Layouts.Content>
     </Main>
   );
 };
