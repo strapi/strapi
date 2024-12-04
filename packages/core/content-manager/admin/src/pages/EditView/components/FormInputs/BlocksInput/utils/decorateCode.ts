@@ -13,7 +13,8 @@ export const decorateCode = ([node, path]: NodeEntry) => {
   if (!Element.isElement(node) || node.type !== 'code') return ranges;
   // transform the Element into a string
   const text = Node.string(node);
-  const decorateKey = codeLanguages.find((lang) => lang.value === node.language)?.decorate;
+  const language = codeLanguages.find((lang) => lang.value === node.language);
+  const decorateKey = language?.decorate ?? language?.value;
 
   const selectedLanguage = Prism.languages[decorateKey || 'plaintext'];
 
