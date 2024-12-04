@@ -69,7 +69,7 @@
     "@strapi/content-manager": "5.5.0",
     "@strapi/pack-up": "5.0.2",
     "@strapi/types": "5.5.0",
-    "@strapi/utils": "workspace:*",
+    "@strapi/utils": "5.5.0",
     "@testing-library/react": "15.0.7",
     "msw": "1.3.0",
     "react": "18.3.1",
