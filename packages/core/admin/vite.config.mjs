@@ -3,7 +3,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import { builtinModules } from 'node:module';
 import dts from 'vite-plugin-dts';
-import prismjs from 'vite-plugin-prismjs';
 
 import pkg from './package.json';
 
@@ -42,7 +41,6 @@ export default defineConfig({
         const builtinModulesWithNodePrefix = [
           ...builtinModules,
           ...builtinModules.map((modName) => `node:${modName}`),
-          'prismjs',
         ];
 
         if (
@@ -60,67 +58,6 @@ export default defineConfig({
     },
   },
   plugins: [
-    prismjs({
-      languages: [
-        'markup',
-        'css',
-        'clike',
-        'javascript',
-        'armasm',
-        'bash',
-        'basic',
-        'c',
-        'csharp',
-        'cpp',
-        'clojure',
-        'cobol',
-        'dart',
-        'docker',
-        'elixir',
-        'erlang',
-        'fsharp',
-        'fortran',
-        'go',
-        'graphql',
-        'groovy',
-        'haskell',
-        'haxe',
-        'ini',
-        'java',
-        'json',
-        'julia',
-        'kotlin',
-        'latex',
-        'lua',
-        'makefile',
-        'markdown-templating',
-        'mata',
-        'matlab',
-        'objectivec',
-        'perl',
-        'php',
-        'powershell',
-        'python',
-        'r',
-        'jsx',
-        'tsx',
-        'ruby',
-        'rust',
-        'sas',
-        'scala',
-        'scheme',
-        'shell-session',
-        'sql',
-        'stata',
-        'swift',
-        'typescript',
-        'vbnet',
-        'xml-doc',
-        'yaml',
-      ],
-      theme: 'solarizedlight',
-      css: true,
-    }),
     dts({
       outDir: './dist',
       tsconfigPath: './admin/tsconfig.build.json',
