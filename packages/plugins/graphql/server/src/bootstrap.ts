@@ -4,7 +4,6 @@ import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default';
-import { koaMiddleware } from '@as-integrations/koa';
 import depthLimit from 'graphql-depth-limit';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
@@ -12,6 +11,7 @@ import cors from '@koa/cors';
 import type { Core } from '@strapi/types';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
+import { koaMiddleware } from './middlewares/koaMiddleware';
 import { formatGraphqlError } from './format-graphql-error';
 
 const merge = mergeWith((a, b) => {
