@@ -11,7 +11,7 @@ import { parser } from 'stream-json/jsonl/Parser';
 import type { Struct } from '@strapi/types';
 
 import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import * as utils from '../../../utils';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
@@ -72,7 +72,7 @@ class LocalFileSourceProvider implements ISourceProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'file-source-provider',
+        origin: 'file-source-provider',
       },
       kind: 'info',
     });
@@ -185,9 +185,7 @@ class LocalFileSourceProvider implements ISourceProvider {
             try {
               metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
             } catch (error) {
-              console.warn(
-                ` Failed to read metadata for ${file}, Strapi will try to fix this issue automatically`
-              );
+              throw new Error(`Failed to read metadata for ${file}`);
             }
             const asset: IAsset = {
               metadata,
