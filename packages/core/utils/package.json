@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "5.4.1",
+  "version": "5.4.2",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -56,14 +56,14 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/http-errors": "2.0.4",
     "@types/koa": "2.13.4",
     "@types/node": "18.19.24",
-    "eslint-config-custom": "5.4.1",
+    "eslint-config-custom": "5.4.2",
     "koa": "2.15.2",
     "koa-body": "6.0.1",
-    "tsconfig": "5.4.1"
+    "tsconfig": "5.4.2"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
