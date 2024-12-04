@@ -439,11 +439,12 @@ class Strapi extends Container implements Core.Strapi {
       contentTypes: this.contentTypes,
     });
 
-    await this.db.schema.sync();
+    const status = await this.db.schema.sync();
 
-    // TODO: this shouldn't run every startup, only when a problem is detected. could also add options to db sync to run this only when change is detected? but that wouldn't solve problem for existing cases
-    // Remove orphaned components (entire types, not ids)
-    await this.db.repair.removeOrphanMorphTypes('component_type');
+    // if schemas have changed, run repairs
+    if (status === 'CHANGED') {
+      await this.db.repair.removeOrphanMorphTypes('component_type');
+    }
 
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });
