@@ -51,7 +51,7 @@ function getPopulateForRelation(
   if (attributeName === 'localizations') {
     const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
     return {
-      populate: validationPopulate,
+      populate: validationPopulate.populate,
     };
   }
 
