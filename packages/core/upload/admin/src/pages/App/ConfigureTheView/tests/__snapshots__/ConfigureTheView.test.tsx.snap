@@ -226,6 +226,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   color: #7b79ff;
 }
 
+.c8:hover svg path {
+  fill: #7b79ff;
+}
+
 .c8:active {
   color: #271fe0;
 }
