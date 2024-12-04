@@ -88,12 +88,11 @@ updates:
     open-pull-requests-limit: 5
     versioning-strategy: increase
     ignore:
-      # only accept security updates
-      - dependency-name: '*'
+      # Only allow patch as minor babel versions need to be upgraded all together
+      - dependency-name: '@babel/*'
         update-types:
-          - 'version-update:semver-patch'
-          - 'version-update:semver-minor'
           - 'version-update:semver-major'
+          - 'version-update:semver-minor'
 
     labels:
       - 'source: dependencies'
