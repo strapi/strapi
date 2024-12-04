@@ -1,6 +1,6 @@
-import { groupBy, pick } from 'lodash/fp';
+import { groupBy, pick, uniq } from 'lodash/fp';
 
-import { async, contentTypes, traverseEntity } from '@strapi/utils';
+import { async, contentTypes } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
@@ -30,7 +30,6 @@ const AVAILABLE_LOCALES_FIELDS = [
   'locale',
   'updatedAt',
   'createdAt',
-  'status',
   'publishedAt',
   'documentId',
 ];
@@ -80,8 +79,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getAvailableLocales(
     uid: UID.ContentType,
     version: DocumentVersion,
-    allVersions: DocumentVersion[],
-    validatableFields: string[] = []
+    allVersions: DocumentVersion[]
   ) {
     // Group all versions by locale
     const versionsByLocale = groupBy('locale', allVersions);
@@ -95,38 +93,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // There will not be a draft and a version counterpart if the content
     // type does not have draft and publish
     const model = strapi.getModel(uid);
-    const keysToKeep = [...AVAILABLE_LOCALES_FIELDS, ...validatableFields];
-
-    const traversalFunction = async (localeVersion: DocumentVersion) =>
-      traverseEntity(
-        ({ key }, { remove }) => {
-          if (keysToKeep.includes(key)) {
-            // Keep the value if it is a field to pick
-            return;
-          }
-
-          // Otherwise remove this key from the data
-          remove(key);
-        },
-        { schema: model, getModel: strapi.getModel.bind(strapi) },
-        // @ts-expect-error fix types DocumentVersion incompatible with Data
-        localeVersion
-      );
 
     const mappingResult = await async.map(
       Object.values(versionsByLocale),
       async (localeVersions: DocumentVersion[]) => {
-        const mappedLocaleVersions: DocumentVersion[] = await async.map(
-          localeVersions,
-          traversalFunction
-        );
-
         if (!contentTypes.hasDraftAndPublish(model)) {
-          return mappedLocaleVersions[0];
+          return localeVersions[0];
         }
 
-        const draftVersion = mappedLocaleVersions.find((v) => v.publishedAt === null);
-        const otherVersions = mappedLocaleVersions.filter((v) => v.id !== draftVersion?.id);
+        const draftVersion = localeVersions.find((v) => v.publishedAt === null);
+        const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
 
         if (!draftVersion) {
           return;
@@ -229,13 +205,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
-    // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
+    // TODO: Ignore publishedAt aif availableStatus=false, and ignore locale if
     // i18n is disabled
-    const { populate = {} } = getPopulateForValidation(uid);
-    const versions = await strapi.db.query(uid).findMany({
-      where: { documentId: version.documentId },
+    const { populate, fields } = getPopulateForValidation(uid);
+
+    const params = {
       populate: {
-        // Populate only fields that require validation for bulk locale actions
         ...populate,
         // NOTE: creator fields are selected in this way to avoid exposing sensitive data
         createdBy: {
@@ -245,10 +220,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           select: ['id', 'firstname', 'lastname', 'email'],
         },
       },
-    });
+      fields: uniq([...AVAILABLE_LOCALES_FIELDS, ...fields]),
+      filters: {
+        documentId: version.documentId,
+      },
+    };
 
+    const dbParams = strapi.get('query-params').transform(uid, params);
+    const versions = await strapi.db.query(uid).findMany(dbParams);
+
+    // TODO: Remove use of available locales and use localizations instead
     const availableLocalesResult = availableLocales
-      ? await this.getAvailableLocales(uid, version, versions, Object.keys(populate))
+      ? await this.getAvailableLocales(uid, version, versions)
       : [];
 
     const availableStatusResult = availableStatus

@@ -49,7 +49,10 @@ function getPopulateForRelation(
   // If populating localizations attribute, also include validatable fields
   // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
   if (attributeName === 'localizations') {
-    return getPopulateForValidation(model.uid as UID.Schema);
+    const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
+    return {
+      populate: validationPopulate,
+    };
   }
 
   // always populate createdBy, updatedBy, localizations etc.
@@ -244,13 +247,6 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
         populateAcc.populate = populateAcc.populate || {};
         populateAcc.populate[attributeName] = { on: componentsResult };
       }
-    }
-
-    // return populate if no fields
-    if (populateAcc.populate) {
-      return {
-        populate: populateAcc.populate,
-      };
     }
 
     return populateAcc;
