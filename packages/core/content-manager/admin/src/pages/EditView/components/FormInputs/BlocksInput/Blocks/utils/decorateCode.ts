@@ -2,7 +2,7 @@ import * as Prism from 'prismjs';
 import { BaseRange, Element, Node, NodeEntry } from 'slate';
 import './prismLanguages';
 
-import { codeLanguages } from './constants';
+import { codeLanguages } from '../../utils/constants';
 
 type BaseRangeCustom = BaseRange & { className: string };
 

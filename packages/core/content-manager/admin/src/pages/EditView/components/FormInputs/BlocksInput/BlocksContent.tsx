@@ -19,10 +19,10 @@ import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';
 import { getTranslation } from '../../../../../utils/translations';
 
+import { decorateCode } from './Blocks/utils/decorateCode';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-import { decorateCode } from './utils/decorateCode';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
 const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
