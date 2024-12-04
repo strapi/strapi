@@ -241,7 +241,6 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
     };
 
     // The link destination from the history. Undefined if there is only 1 location in the history.
-    // const historyTo = canGoBack ? history.at(-2) : undefined;
     const historyTo = canGoBack ? history.at(currentLocationIndex - 2) : undefined;
     // If no link destination from the history, use the fallback.
     const toWithFallback = historyTo ?? fallback;
