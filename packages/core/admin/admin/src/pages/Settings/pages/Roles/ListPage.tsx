@@ -221,7 +221,7 @@ const ListPage = () => {
             <Tbody>
               {roles?.map((role, index) => (
                 <RoleRow
-                  cursor={'pointer'}
+                  cursor='pointer'
                   key={role.id}
                   id={role.id}
                   name={role.name}
