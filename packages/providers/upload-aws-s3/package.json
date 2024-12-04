@@ -54,8 +54,8 @@
   "devDependencies": {
     "@strapi/pack-up": "5.0.2",
     "@types/jest": "29.5.2",
-    "eslint-config-custom": "5.5.0",
-    "tsconfig": "5.5.0"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
