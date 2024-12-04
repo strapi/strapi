@@ -1,5 +1,5 @@
-import type { Database } from '..';
-import { Attribute, RelationalAttribute } from '../types';
+import type { Database } from '../..';
+import { Attribute, RelationalAttribute } from '../../types';
 
 /**
  * Removes morph relation data with invalid or non-existent morph types.
@@ -14,13 +14,13 @@ import { Attribute, RelationalAttribute } from '../types';
  * @param pivot - The name of the column in the join table representing the morph type.
  */
 export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
+  db.logger.debug(`Removing orphaned morph types: ${JSON.stringify(pivot)}`);
   const isRelationWithJoinTable = (
     attribute: Attribute
   ): attribute is RelationalAttribute & { joinTable: { name: string; pivotColumns: string[] } } => {
     return (
       attribute.type === 'relation' &&
       'joinTable' in attribute &&
-      attribute.joinTable !== undefined &&
       'target' in attribute &&
       'name' in attribute.joinTable &&
       'pivotColumns' in attribute.joinTable &&
@@ -28,7 +28,8 @@ export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
     );
   };
 
-  for (const model of db.metadata.values()) {
+  const mdValues = db.metadata.values();
+  for (const model of mdValues) {
     const attributes = Object.values(model.attributes || {}).filter(isRelationWithJoinTable);
 
     for (const attribute of attributes) {
@@ -51,7 +52,7 @@ export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
         })();
 
         if (deleteComponentType) {
-          db.logger.warn(
+          db.logger.debug(
             `Removing invalid morph type "${morphType}" from table "${joinTableName}".`
           );
           try {

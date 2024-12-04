@@ -5,16 +5,15 @@ import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider } from './migrations';
+import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
-import type { Migration } from './migrations';
-import { type Identifiers } from './utils/identifiers';
-import { removeOrphanMorphTypes } from './utils/remove-orphan-morph-types';
+import type { Identifiers } from './utils/identifiers';
+import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -37,10 +36,6 @@ export interface DatabaseConfig {
   settings: Settings;
   logger?: Logger;
 }
-
-type RepairOptions = {
-  removeOrphanMorphTypes: string[];
-};
 
 const afterCreate =
   (db: Database) =>
@@ -70,6 +65,8 @@ class Database {
   lifecycles: LifecycleProvider;
 
   entityManager: EntityManager;
+
+  repair: RepairManager;
 
   logger: Logger;
 
@@ -122,15 +119,8 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
-  }
 
-  async repair(options: RepairOptions) {
-    // We only clean up components on startup
-    if (options.removeOrphanMorphTypes) {
-      for (const type of options.removeOrphanMorphTypes) {
-        await removeOrphanMorphTypes(this, type);
-      }
-    }
+    this.repair = createRepairManager(this);
   }
 
   async init({ models }: { models: Model[] }) {
