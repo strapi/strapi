@@ -742,6 +742,7 @@ const PublishAction: DocumentActionComponent = ({
 };
 
 PublishAction.type = 'publish';
+PublishAction.position = 'panel';
 
 const UpdateAction: DocumentActionComponent = ({
   activeTab,
@@ -878,6 +879,7 @@ const UpdateAction: DocumentActionComponent = ({
 };
 
 UpdateAction.type = 'update';
+UpdateAction.position = 'panel';
 
 const UNPUBLISH_DRAFT_OPTIONS = {
   KEEP: 'keep',
@@ -1028,6 +1030,7 @@ const UnpublishAction: DocumentActionComponent = ({
 };
 
 UnpublishAction.type = 'unpublish';
+UnpublishAction.position = 'panel';
 
 const DiscardAction: DocumentActionComponent = ({
   activeTab,
@@ -1086,8 +1089,15 @@ const DiscardAction: DocumentActionComponent = ({
 };
 
 DiscardAction.type = 'discard';
+DiscardAction.position = 'panel';
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
 export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
-export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };
+export type {
+  DocumentActionDescription,
+  DocumentActionPosition,
+  DialogOptions,
+  NotificationOptions,
+  ModalOptions,
+};

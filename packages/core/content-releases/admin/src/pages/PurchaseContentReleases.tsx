@@ -32,7 +32,7 @@ const PurchaseContentReleases = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://strapi.io/pricing-self-hosted?utm_campaign=Growth-Experiments&utm_source=In-Product&utm_medium=Releases"
+                href="https://strapi.io/enterprise?utm_campaign=In-Product-CTA&utm_source=Releases"
                 isExternal
                 target="_blank"
               >

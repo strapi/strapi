@@ -11,7 +11,7 @@ import type {
   ProviderType,
   Transaction,
 } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';
@@ -93,7 +93,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'local-destination-provider',
+        origin: 'local-destination-provider',
       },
       kind: 'info',
     });
@@ -318,7 +318,6 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
     const strapi = this.strapi;
     const transaction = this.transaction;
-    const backupDirectory = this.uploadsBackupDirectoryName;
     const fileEntitiesMapper = this.#entitiesMapper['plugin::upload.file'];
 
     const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
@@ -332,41 +331,6 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       },
       async write(chunk: IAsset, _encoding, callback) {
         await transaction?.attach(async () => {
-          // TODO: Remove this logic in V5
-          if (!chunk.metadata) {
-            // If metadata does not exist is because it is an old backup file
-            const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
-            const entryPath = path.join(assetsDirectory, chunk.filename);
-            const writableStream = fse.createWriteStream(entryPath);
-            chunk.stream
-              .pipe(writableStream)
-              .on('close', () => {
-                callback(null);
-              })
-              .on('error', async (error: NodeJS.ErrnoException) => {
-                const errorMessage =
-                  error.code === 'ENOSPC'
-                    ? " Your server doesn't have space to proceed with the import. "
-                    : ' ';
-
-                try {
-                  await fse.rm(assetsDirectory, { recursive: true, force: true });
-                  this.destroy(
-                    new ProviderTransferError(
-                      `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
-                    )
-                  );
-                } catch (err) {
-                  throw new ProviderTransferError(
-                    `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
-                  );
-                } finally {
-                  callback(error);
-                }
-              });
-            return;
-          }
-
           const uploadData = {
             ...chunk.metadata,
             stream: Readable.from(chunk.stream),
@@ -374,6 +338,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
           };
 
           const provider = strapi.config.get<{ provider: string }>('plugin::upload').provider;
+
+          const fileId = fileEntitiesMapper?.[uploadData.id];
+          if (!fileId) {
+            callback(new Error(`File ID not found for ID: ${uploadData.id}`));
+          }
 
           try {
             await strapi.plugin('upload').provider.uploadStream(uploadData);
@@ -385,13 +354,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
-              // Support usage of main hash for older versions
-              const condition = uploadData?.id
-                ? { id: fileEntitiesMapper[uploadData.id] }
-                : { hash: uploadData.mainHash };
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: condition,
+                where: { id: fileId },
               });
+              if (!entry) {
+                throw new Error('file not found');
+              }
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
                 specificFormat.url = uploadData.url;
@@ -405,9 +373,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               });
               return callback();
             }
+
             const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { id: fileEntitiesMapper[uploadData.id] },
+              where: { id: fileId },
             });
+            if (!entry) {
+              throw new Error('file not found');
+            }
             entry.url = uploadData.url;
             await strapi.db.query('plugin::upload.file').update({
               where: { id: entry.id },
