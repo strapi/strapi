@@ -173,7 +173,7 @@ const ListPage = () => {
             rowCount={rowCount}
             footer={
               canCreate ? (
-                <TFooter cursor={'pointer'} onClick={handleNewRoleClick} icon={<Plus />}>
+                <TFooter cursor='pointer' onClick={handleNewRoleClick} icon={<Plus />}>
                   {formatMessage({
                     id: 'Settings.roles.list.button.add',
                     defaultMessage: 'Add new role',
