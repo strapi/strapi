@@ -1,4 +1,5 @@
 import type { Database } from '..';
+import { Attribute, RelationalAttribute } from '../types';
 
 /**
  * Removes morph relation data with invalid or non-existent morph types.
@@ -17,21 +18,24 @@ import type { Database } from '..';
 export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
   const allTables = await db.dialect.schemaInspector.getTables();
 
-  for (const model of db.metadata.values()) {
-    const attributes = Object.values(model.attributes || {}).filter(
-      (attribute) =>
-        attribute.type === 'relation' &&
-        'joinTable' in attribute &&
-        'name' in attribute.joinTable &&
-        'target' in attribute &&
-        'pivotColumns' in attribute.joinTable &&
-        attribute.joinTable.pivotColumns.includes(pivot)
+  const isRelationWithJoinTable = (
+    attribute: Attribute
+  ): attribute is RelationalAttribute & { joinTable: { name: string; pivotColumns: string[] } } => {
+    return (
+      attribute.type === 'relation' &&
+      'joinTable' in attribute &&
+      attribute.joinTable !== undefined &&
+      'target' in attribute &&
+      'name' in attribute.joinTable &&
+      'pivotColumns' in attribute.joinTable &&
+      attribute.joinTable.pivotColumns.includes(pivot)
     );
+  };
+
+  for (const model of db.metadata.values()) {
+    const attributes = Object.values(model.attributes || {}).filter(isRelationWithJoinTable);
 
     for (const attribute of attributes) {
-      if (!('joinTable' in attribute)) {
-        continue;
-      }
       const joinTableName = attribute.joinTable.name;
 
       // Query distinct morph types from the join table
