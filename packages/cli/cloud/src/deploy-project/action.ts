@@ -1,5 +1,6 @@
 import fse from 'fs-extra';
 import inquirer from 'inquirer';
+import boxen from 'boxen';
 import path from 'path';
 import chalk from 'chalk';
 import { AxiosError } from 'axios';
@@ -7,7 +8,13 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
-import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfos } from '../types';
+import type {
+  CLIContext,
+  CloudApiService,
+  CloudCliConfig,
+  EnvironmentDetails,
+  ProjectInfo,
+} from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { notificationServiceFactory } from '../services/notification';
@@ -24,8 +31,17 @@ type PackageJson = {
 };
 
 interface CmdOptions {
-  environment?: string;
+  env?: string;
+  force?: boolean;
 }
+
+const boxenOptions: boxen.Options = {
+  padding: 1,
+  margin: 1,
+  align: 'center',
+  borderColor: 'yellow',
+  borderStyle: 'round',
+};
 
 const QUIT_OPTION = 'Quit';
 
@@ -43,28 +59,16 @@ async function promptForEnvironment(environments: string[]): Promise<string> {
     process.exit(1);
   }
 
-  const { confirm } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: `Do you want to proceed with deployment to ${chalk.cyan(selectedEnvironment)}?`,
-    },
-  ]);
-
-  if (!confirm) {
-    process.exit(1);
-  }
   return selectedEnvironment;
 }
 
 async function upload(
   ctx: CLIContext,
-  project: ProjectInfos,
+  project: ProjectInfo,
   token: string,
   maxProjectFileSize: number
 ) {
   const cloudApi = await cloudApiFactory(ctx, token);
-  // * Upload project
   try {
     const storagePath = await getTmpStoragePath();
     const projectFolder = path.resolve(process.cwd());
@@ -178,6 +182,46 @@ async function getConfig({
   }
 }
 
+function validateEnvironment(ctx: CLIContext, environment: string, environments: string[]): void {
+  if (!environments.includes(environment)) {
+    ctx.logger.error(`Environment ${environment} does not exist.`);
+    process.exit(1);
+  }
+}
+
+async function getTargetEnvironment(
+  ctx: CLIContext,
+  opts: CmdOptions,
+  project: ProjectInfo,
+  environments: string[]
+): Promise<string> {
+  if (opts.env) {
+    validateEnvironment(ctx, opts.env, environments);
+    return opts.env;
+  }
+
+  if (project.targetEnvironment) {
+    return project.targetEnvironment;
+  }
+
+  if (environments.length > 1) {
+    return promptForEnvironment(environments);
+  }
+
+  return environments[0];
+}
+
+function hasPendingOrLiveDeployment(
+  environments: EnvironmentDetails[],
+  targetEnvironment: string
+): boolean {
+  const environment = environments.find((env) => env.name === targetEnvironment);
+  if (!environment) {
+    throw new Error(`Environment details ${targetEnvironment} not found.`);
+  }
+  return environment.hasPendingDeployment || environment.hasLiveDeployment || false;
+}
+
 export default async (ctx: CLIContext, opts: CmdOptions) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
@@ -191,15 +235,18 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx, token);
+  let projectData;
   let environments: string[];
+  let environmentsDetails: EnvironmentDetails[];
 
   try {
     const {
-      data: { data: projectData, metadata },
+      data: { data, metadata },
     } = await cloudApiService.getProject({ name: project.name });
-
-    const isProjectSuspended = projectData.suspendedAt;
+    projectData = data;
     environments = projectData.environments;
+    environmentsDetails = projectData.environmentsDetails;
+    const isProjectSuspended = projectData.suspendedAt;
 
     if (isProjectSuspended) {
       ctx.logger.log(
@@ -251,20 +298,27 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
     maxSize = 100000000;
   }
 
-  let targetEnvironment: string;
+  project.targetEnvironment = await getTargetEnvironment(ctx, opts, project, environments);
 
-  if (opts.environment) {
-    if (!environments.includes(opts.environment)) {
-      ctx.logger.error(`Environment ${opts.environment} does not exist.`);
-      return;
+  if (!opts.force) {
+    const shouldDisplayWarning = hasPendingOrLiveDeployment(
+      environmentsDetails,
+      project.targetEnvironment
+    );
+    if (shouldDisplayWarning) {
+      ctx.logger.log(boxen(cliConfig.projectDeployment.confirmationText, boxenOptions));
+      const { confirm } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: `Do you want to proceed with deployment to ${chalk.cyan(projectData.displayName)} on ${chalk.cyan(project.targetEnvironment)} environment?`,
+        },
+      ]);
+      if (!confirm) {
+        process.exit(1);
+      }
     }
-    targetEnvironment = opts.environment;
-  } else {
-    targetEnvironment =
-      environments.length > 1 ? await promptForEnvironment(environments) : environments[0];
   }
-
-  project.targetEnvironment = targetEnvironment;
 
   const buildId = await upload(ctx, project, token, maxSize);
 
@@ -273,6 +327,9 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
   }
 
   try {
+    ctx.logger.log(
+      `🚀 Deploying project to ${chalk.cyan(project.targetEnvironment ?? `production`)} environment...`
+    );
     notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
     await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
 

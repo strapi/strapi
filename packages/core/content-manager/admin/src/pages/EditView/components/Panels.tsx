@@ -115,7 +115,7 @@ const ActionsPanelContent = () => {
         props={props}
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-        ).getDocumentActions()}
+        ).getDocumentActions('panel')}
       >
         {(actions) => <DocumentActions actions={actions} />}
       </DescriptionComponentRenderer>

@@ -38,9 +38,15 @@ export default ({ strapi }: Context) => {
             return extension.shadowCRUD(contentType.uid).field(fieldName).hasInputEnabled();
           };
 
-          const validAttributes = Object.entries(attributes).filter(([attributeName]) => {
-            return isWritableAttribute(contentType, attributeName) && isFieldEnabled(attributeName);
-          });
+          const validAttributes = Object.entries(attributes)
+            // Remove private attributes
+            .filter(
+              ([attributeName]) => !contentTypes.isPrivateAttribute(contentType, attributeName)
+            )
+            // Remove non-writable attributes
+            .filter(([attributeName]) => isWritableAttribute(contentType, attributeName))
+            // Remove filters that have been disabled using the shadow CRUD extension API
+            .filter(([attributeName]) => isFieldEnabled(attributeName));
 
           // Add the ID for the component to enable inplace updates
           if (modelType === 'component' && isFieldEnabled('id')) {

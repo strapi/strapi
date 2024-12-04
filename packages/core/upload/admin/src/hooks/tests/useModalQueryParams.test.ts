@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@tests/utils';
 
-import useModalQueryParams from '../useModalQueryParams';
+import { useModalQueryParams } from '../useModalQueryParams';
 
 const FIXTURE_QUERY = {
   page: 1,

@@ -17,7 +17,7 @@ const ComponentFixture = () => {
   );
 };
 
-const setup = (props?: any) => render(<ComponentFixture {...props} />);
+const setup = () => render(<ComponentFixture />);
 
 describe('FolderGridList', () => {
   it('renders and match snapshots', () => {

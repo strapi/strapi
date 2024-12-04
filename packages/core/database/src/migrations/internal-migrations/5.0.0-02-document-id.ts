@@ -33,8 +33,8 @@ const QUERIES = {
     SELECT :tableName:.id as id, string_agg(DISTINCT :inverseJoinColumn:::character varying, ',') as other_ids
     FROM :tableName:
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
-    WHERE document_id IS NULL
-    GROUP BY :tableName:.id, :joinColumn:
+    WHERE :tableName:.document_id IS NULL
+    GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
     LIMIT 1;
   `,
       params
@@ -48,8 +48,8 @@ const QUERIES = {
     SELECT :tableName:.id as id, group_concat(DISTINCT :inverseJoinColumn:) as other_ids
     FROM :tableName:
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
-    WHERE document_id IS NULL
-    GROUP BY :tableName:.id, :joinColumn:
+    WHERE :tableName:.document_id IS NULL
+    GROUP BY :tableName:.id, :joinTableName:.:joinColumn:
     LIMIT 1;
   `,
       params
@@ -63,8 +63,8 @@ const QUERIES = {
     SELECT :tableName:.id as id, group_concat(DISTINCT :inverseJoinColumn:) as other_ids
     FROM :tableName:
     LEFT JOIN :joinTableName: ON :tableName:.id = :joinTableName:.:joinColumn:
-    WHERE document_id IS NULL
-    GROUP BY :joinColumn:
+    WHERE :tableName:.document_id IS NULL
+    GROUP BY :joinTableName:.:joinColumn:
     LIMIT 1;
     `,
       params
