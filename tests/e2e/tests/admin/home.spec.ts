@@ -10,8 +10,10 @@ test.describe('Home', () => {
     await login({ page });
   });
 
-  test('a user should be greeted by their name', async ({ page }) => {
-    // "test" is the user fist name in the database
+  test('a user should have a personalized homepage', async ({ page }) => {
+    /**
+     * Assert the user is greeted with their name
+     */
     await expect(page.getByText('Hello test')).toBeVisible();
     await expect(page).toHaveTitle(/homepage/i);
 
@@ -22,5 +24,17 @@ test.describe('Home', () => {
     await page.getByRole('button', { name: /save/i }).click();
     await clickAndWait(page, page.getByRole('link', { name: 'Home' }));
     await expect(page.getByText('Hello Rebecca')).toBeVisible();
+
+    /**
+     * Assert the user can see and dismiss the guided tour
+     */
+    const skipTheTourButton = page.getByRole('button', { name: 'Skip the tour' });
+    await expect(skipTheTourButton).toBeVisible();
+
+    await skipTheTourButton.click();
+    await expect(skipTheTourButton).not.toBeVisible();
+    // Reload to ensure the update persisted
+    await page.reload();
+    await expect(skipTheTourButton).not.toBeVisible();
   });
 });
