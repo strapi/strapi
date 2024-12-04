@@ -149,7 +149,20 @@ const PreviewHeader = () => {
   // Get main field
   const mainField = usePreviewContext('PreviewHeader', (state) => state.mainField);
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
-  const title = document[mainField];
+  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+
+  /**
+   * We look to see what the mainField is from the configuration, if it's an id
+   * we don't use it because it's a uuid format and not very user friendly.
+   * Instead, we display the schema name for single-type documents
+   * or "Untitled".
+   */
+  let documentTitle = 'Untitled';
+  if (mainField !== 'id' && document?.[mainField]) {
+    documentTitle = document[mainField];
+  } else if (schema.kind === 'singleType' && schema?.info.displayName) {
+    documentTitle = schema.info.displayName;
+  }
 
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -179,8 +192,8 @@ const PreviewHeader = () => {
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
-          {title}
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={documentTitle}>
+          {documentTitle}
         </PreviewTitle>
         <Status />
       </Grid.Item>

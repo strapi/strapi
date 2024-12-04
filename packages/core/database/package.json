@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "5.4.2",
+  "version": "5.5.0",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
