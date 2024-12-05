@@ -1,12 +1,36 @@
 import type { Database } from '../..';
-import { Attribute, RelationalAttribute } from '../../types';
+import type { Attribute, MorphRelationalAttribute } from '../../types';
 
 export interface RemoveOrphanMorphTypeOptions {
   pivot: string;
 }
 
+const isMorphRelationWithPivot = (
+  attribute: Attribute,
+  pivot: string
+): attribute is MorphRelationalAttribute => {
+  return (
+    attribute.type === 'relation' &&
+    'relation' in attribute &&
+    'joinTable' in attribute &&
+    'target' in attribute &&
+    'name' in attribute.joinTable &&
+    'pivotColumns' in attribute.joinTable &&
+    attribute.joinTable.pivotColumns.includes(pivot)
+  );
+};
+
+const filterMorphRelationalAttributes = (
+  attributes: Record<string, Attribute>,
+  pivot: string
+): MorphRelationalAttribute[] => {
+  return Object.values(attributes).filter((attribute): attribute is MorphRelationalAttribute =>
+    isMorphRelationWithPivot(attribute, pivot)
+  );
+};
+
 /**
- * Removes morph relation data with invalid or non-existent morph types.
+ * Removes morph relation data with invalid or non-existent morph type.
  *
  * This function iterates over the database metadata to identify morph relationships
  * (relations with a `joinTable` containing the specified pivot column) and removes
@@ -15,32 +39,20 @@ export interface RemoveOrphanMorphTypeOptions {
  * Note: This function does not check for orphaned IDs, only orphaned morph types.
  *
  * @param db - The database object containing metadata and a Knex connection.
- * @param pivot - The name of the column in the join table representing the morph type.
+ * @param options.pivot - The name of the column in the join table representing the morph type.
  */
 export const removeOrphanMorphType = async (
   db: Database,
   { pivot }: RemoveOrphanMorphTypeOptions
 ) => {
   db.logger.debug(`Removing orphaned morph type: ${JSON.stringify(pivot)}`);
-  const isRelationWithJoinTable = (
-    attribute: Attribute
-  ): attribute is RelationalAttribute & { joinTable: { name: string; pivotColumns: string[] } } => {
-    return (
-      attribute.type === 'relation' &&
-      'joinTable' in attribute &&
-      'target' in attribute &&
-      'name' in attribute.joinTable &&
-      'pivotColumns' in attribute.joinTable &&
-      attribute.joinTable.pivotColumns.includes(pivot)
-    );
-  };
 
   const mdValues = db.metadata.values();
   for (const model of mdValues) {
-    const attributes = Object.values(model.attributes || {}).filter(isRelationWithJoinTable);
+    const attributes = filterMorphRelationalAttributes(model.attributes || {}, pivot);
 
     for (const attribute of attributes) {
-      const joinTableName = attribute.joinTable.name;
+      const joinTableName = attribute.joinTable.name; // Now TypeScript knows this is safe
 
       // Query distinct morph types from the join table
       const morphTypes = await db.connection(joinTableName).distinct(pivot).pluck(pivot);
