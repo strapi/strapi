@@ -14,7 +14,7 @@ const CardAsset = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
   background: linear-gradient(
     180deg,
-    ${({ theme }) => theme.colors.neutral0} 0%, 
+    ${({ theme }) => theme.colors.neutral0} 0%,
     ${({ theme }) => theme.colors.neutral100} 121.48%
   );
 `;
@@ -73,7 +73,7 @@ export const AssetPreview = React.forwardRef<
   return (
     <CardAsset width="100%" justifyContent="center" {...props}>
       <Flex gap={2} direction="column" alignItems="center">
-        <File aria-label={name} fill="neutral500" width={24} height={24}/>
+        <File aria-label={name} fill="neutral500" width={24} height={24} />
 
         <Typography textColor="neutral500" variant="pi">
           {formatMessage({

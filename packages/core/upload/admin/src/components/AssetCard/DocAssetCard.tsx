@@ -1,4 +1,4 @@
-import { Flex, Typography, Box } from '@strapi/design-system';
+import { Flex, Typography } from '@strapi/design-system';
 import { File, FilePdf } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -9,7 +9,7 @@ const CardAsset = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
   background: linear-gradient(
     180deg,
-    ${({ theme }) => theme.colors.neutral0} 0%, 
+    ${({ theme }) => theme.colors.neutral0} 0%,
     ${({ theme }) => theme.colors.neutral100} 121.48%
   );
 `;
