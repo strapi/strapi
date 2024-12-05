@@ -1,10 +1,10 @@
-import { curry } from 'lodash/fp';
 import type { Database } from '..';
 import { removeOrphanMorphType as removeOrphanMorphTypeFunc } from './operations/remove-orphan-morph-types';
+import { asyncCurry } from '../utils/async-curry';
 
 export const createRepairManager = (db: Database) => {
   return {
-    removeOrphanMorphType: curry(removeOrphanMorphTypeFunc)(db),
+    removeOrphanMorphType: asyncCurry(removeOrphanMorphTypeFunc)(db),
   };
 };
 
