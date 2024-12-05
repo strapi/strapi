@@ -205,7 +205,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
-    // TODO: Ignore publishedAt aif availableStatus=false, and ignore locale if
+    // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
     // i18n is disabled
     const { populate = {}, fields = [] } = getPopulateForValidation(uid);
 
