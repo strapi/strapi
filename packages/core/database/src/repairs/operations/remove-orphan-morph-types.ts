@@ -52,7 +52,7 @@ export const removeOrphanMorphType = async (
     const attributes = filterMorphRelationalAttributes(model.attributes || {}, pivot);
 
     for (const attribute of attributes) {
-      const joinTableName = attribute.joinTable.name; // Now TypeScript knows this is safe
+      const joinTableName = attribute.joinTable.name;
 
       // Query distinct morph types from the join table
       const morphTypes = await db.connection(joinTableName).distinct(pivot).pluck(pivot);
