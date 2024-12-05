@@ -1,6 +1,6 @@
 // lodash/fp curry does not handle async functions properly, and creates very "ugly" types,
 // so we will use our own version to ensure curried functions are typed correctly
-// TODO: Make this a @strapi/util so we don't have copies of it between packages
+// TODO: Export this from root @strapi/utils so we don't have copies of it between packages
 
 /**
  * @internal
