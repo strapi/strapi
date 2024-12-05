@@ -540,20 +540,19 @@ const BulkLocaleAction: DocumentActionComponent = ({
   // Extract the rows for the bulk locale publish modal and any validation
   // errors per locale
   const [rows, validationErrors] = React.useMemo(() => {
-    if (!document || !document.localizations?.length) {
-      // If we don't have a document or available locales, we return empty rows
-      // and no validation errors
+    if (!document) {
       return [[], {}];
     }
 
     // Build the rows for the bulk locale publish modal by combining the current
     // document with all the available locales from the document meta
-    const rowsFromMeta: LocaleStatus[] = document.localizations.map((doc: any) => {
+    const locales: LocaleStatus[] = document.localizations.map((doc: any) => {
       const { locale, status } = doc;
       return { locale, status };
     });
 
-    rowsFromMeta.unshift({
+    // Add the current document locale
+    locales.unshift({
       locale: document.locale,
       status: document.status,
     });
@@ -573,7 +572,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
       return errs;
     }, {});
 
-    return [rowsFromMeta, errors];
+    return [locales, errors];
   }, [document, validate]);
 
   const isBulkPublish = action === 'bulk-publish';
