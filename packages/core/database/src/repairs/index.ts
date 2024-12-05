@@ -5,16 +5,14 @@ import type { Operation, RepairManager } from './types';
 export type * from './types';
 
 export const createRepairManager = (db: Database): RepairManager => {
-  // List of operations to be registered dynamically, typed according to the Operation type
+  // List of operations to be registered dynamically
   const operations: Record<string, Operation<any>> = {
     removeOrphanMorphTypes: {
       method: removeOrphanMorphTypes,
       logMessage: 'Running removeOrphanMorphTypes with options: ',
     },
-    // Add more operations here if needed
   };
 
-  // This is the handler for executing operations
   const handleOperation = async <TOptions>(
     operationName: string,
     options: TOptions
@@ -30,7 +28,8 @@ export const createRepairManager = (db: Database): RepairManager => {
 
     db.logger.debug(`${operation.logMessage} ${JSON.stringify(options)}`);
     try {
-      const result = operation.method(db, options); // Call the operation's method
+      // Call the repair operation
+      const result = operation.method(db, options);
       db.logger.debug(`Operation ${operationName} succeeded`);
       return { success: true, data: result };
     } catch (error) {
@@ -40,9 +39,9 @@ export const createRepairManager = (db: Database): RepairManager => {
     }
   };
 
-  // Dynamically add methods to RepairManager
   const repairManager: RepairManager = {};
 
+  // Dynamically add methods to RepairManager
   for (const [operationName] of Object.entries(operations)) {
     repairManager[operationName] = async <TOptions>(options: TOptions): Promise<any> => {
       return handleOperation(operationName, options);
