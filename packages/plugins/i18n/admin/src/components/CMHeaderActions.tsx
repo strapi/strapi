@@ -544,9 +544,11 @@ const BulkLocaleAction: DocumentActionComponent = ({
       return [[], {}];
     }
 
+    const localizations = document.localizations ?? [];
+
     // Build the rows for the bulk locale publish modal by combining the current
     // document with all the available locales from the document meta
-    const locales: LocaleStatus[] = document.localizations.map((doc: any) => {
+    const locales: LocaleStatus[] = localizations.map((doc: any) => {
       const { locale, status } = doc;
       return { locale, status };
     });
@@ -558,7 +560,7 @@ const BulkLocaleAction: DocumentActionComponent = ({
     });
 
     // Build the validation errors for each locale.
-    const allDocuments = [document, ...(document?.localizations ?? [])];
+    const allDocuments = [document, ...localizations];
     const errors = allDocuments.reduce<FormErrors>((errs, document) => {
       if (!document) {
         return errs;
