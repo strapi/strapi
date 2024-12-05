@@ -1,6 +1,10 @@
 import type { Database } from '../..';
 import { Attribute, RelationalAttribute } from '../../types';
 
+export interface RemoveOrphanMorphTypeOptions {
+  pivot: string;
+}
+
 /**
  * Removes morph relation data with invalid or non-existent morph types.
  *
@@ -13,8 +17,11 @@ import { Attribute, RelationalAttribute } from '../../types';
  * @param db - The database object containing metadata and a Knex connection.
  * @param pivot - The name of the column in the join table representing the morph type.
  */
-export const removeOrphanMorphTypes = async (db: Database, pivot: string) => {
-  db.logger.debug(`Removing orphaned morph types: ${JSON.stringify(pivot)}`);
+export const removeOrphanMorphType = async (
+  db: Database,
+  { pivot }: RemoveOrphanMorphTypeOptions
+) => {
+  db.logger.debug(`Removing orphaned morph type: ${JSON.stringify(pivot)}`);
   const isRelationWithJoinTable = (
     attribute: Attribute
   ): attribute is RelationalAttribute & { joinTable: { name: string; pivotColumns: string[] } } => {

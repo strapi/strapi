@@ -443,7 +443,7 @@ class Strapi extends Container implements Core.Strapi {
 
     // if schemas have changed, run repairs
     if (status === 'CHANGED') {
-      await this.db.repair.removeOrphanMorphTypes('component_type');
+      await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
     }
 
     if (this.EE) {
