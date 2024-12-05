@@ -1,6 +1,6 @@
 {
   "name": "@strapi/core",
-  "version": "5.4.2",
+  "version": "5.5.0",
   "description": "Core of Strapi",
   "homepage": "https://strapi.io",
   "bugs": {

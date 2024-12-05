@@ -572,5 +572,12 @@
   "global.table.header.username": "Nombre de usuario",
   "global.type": "Tipo",
   "global.users": "Usuarios",
-  "notification.warning.404": "404 - No Encontrado"
+  "notification.warning.404": "404 - No Encontrado",
+  "components.Blocks.blocks.heading1": "Título 1",
+  "components.Blocks.blocks.heading2": "Título 2",
+  "components.Blocks.blocks.heading3": "Título 3",
+  "components.Blocks.blocks.heading4": "Título 4",
+  "components.Blocks.blocks.heading5": "Título 5",
+  "components.Blocks.blocks.heading6": "Título 6",
+  "components.Blocks.blocks.image": "Imagen"
 }
