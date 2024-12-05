@@ -7,3 +7,5 @@ export const createRepairManager = (db: Database) => {
     removeOrphanMorphType: curry(removeOrphanMorphTypeFunc)(db),
   };
 };
+
+export type RepairManager = ReturnType<typeof createRepairManager>;
