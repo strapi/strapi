@@ -2,16 +2,17 @@ import type { Core } from '@strapi/types';
 import * as yup from 'yup';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
+import type { GetRecentDocuments } from '../../../shared/contracts/homepage';
 
 const createHomepageController = () => {
   const homepageService = getService('homepage');
 
   const recentDocumentParamsSchema = yup.object().shape({
-    action: yup.mixed<'update'>().oneOf(['update']).required(),
+    action: yup.mixed<GetRecentDocuments.Request['query']['action']>().oneOf(['update']).required(),
   });
 
   return {
-    async getRecentDocuments(ctx) {
+    async getRecentDocuments(ctx): Promise<GetRecentDocuments.Response> {
       let action;
 
       try {
@@ -26,6 +27,9 @@ const createHomepageController = () => {
       if (action === 'update') {
         return { data: await homepageService.getRecentUpdates() };
       }
+
+      // Just making TS happy until we manage the other actions here
+      return { data: [] };
     },
   } satisfies Core.Controller;
 };

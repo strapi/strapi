@@ -1,6 +1,6 @@
 import type { Core, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
-import { omit } from 'lodash/fp';
+import type { GetRecentDocuments } from '../../../shared/contracts/homepage';
 
 const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
@@ -15,7 +15,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const coreStore = strapi.db.query('strapi::core-store');
 
   return {
-    async getRecentUpdates() {
+    async getRecentUpdates(): Promise<GetRecentDocuments.Response['data']> {
       // Get all the content types the user has permissions to read
       const readPermissions = await permissionService.findMany({
         where: {
@@ -71,24 +71,34 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
             fields,
           });
 
-          return documents.map((document) => ({
-            data: {
-              ...omit(mainField ? [mainField] : [], document),
-              title: document[mainField ?? 'documentId'],
-            },
-            meta: {
-              model: contentTypeName,
-              kind: contentType.kind,
-              hasDraftAndPublish,
-            },
-          }));
+          return documents.map((document) => {
+            /**
+             * Save the main field value before deleting it so we can use the common
+             * title key instead across all content types. Use the delete operator instead of
+             * destructuring or lodash omit for better type inference.
+             */
+            const mainFieldValue = document[mainField ?? 'documentId'];
+            delete document[mainField];
+
+            return {
+              data: {
+                ...document,
+                updatedAt: new Date(document.updatedAt),
+                title: mainFieldValue,
+              },
+              meta: {
+                model: contentTypeName,
+                kind: contentType.kind,
+                hasDraftAndPublish,
+              },
+            };
+          });
         })
       );
 
       const overallRecentDocuments = recentDocuments
         .flat()
-        // @ts-expect-error document service does not infer updatedAt
-        .sort((a, b) => new Date(b.data.updatedAt) - new Date(a.data.updatedAt))
+        .sort((a, b) => b.data.updatedAt.valueOf() - a.data.updatedAt.valueOf())
         .slice(0, MAX_DOCUMENTS);
 
       return Promise.all(
