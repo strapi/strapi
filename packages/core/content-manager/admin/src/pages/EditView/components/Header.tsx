@@ -20,6 +20,7 @@ import {
 import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { RelativeTime } from '../../../components/RelativeTime';
 import {
@@ -343,6 +344,10 @@ interface HeaderActionsProps {
   actions: Array<HeaderActionDescription & { id: string }>;
 }
 
+const PointerSingleSelectOption = styled(SingleSelectOption)`
+  cursor: pointer;
+`;
+
 const HeaderActions = ({ actions }: HeaderActionsProps) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
 
@@ -378,9 +383,9 @@ const HeaderActions = ({ actions }: HeaderActionsProps) => {
               {...action}
             >
               {action.options.map(({ label, ...option }) => (
-                <SingleSelectOption key={option.value} {...option}>
+                <PointerSingleSelectOption key={option.value} {...option}>
                   {label}
-                </SingleSelectOption>
+                </PointerSingleSelectOption>
               ))}
             </SingleSelect>
           );
