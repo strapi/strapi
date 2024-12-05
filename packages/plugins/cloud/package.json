@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-cloud",
-  "version": "5.4.2",
+  "version": "5.5.0",
   "description": "Instructions to deploy your local project to Strapi Cloud",
   "license": "MIT",
   "author": {
@@ -41,7 +41,7 @@
     "react-intl": "6.6.2"
   },
   "devDependencies": {
-    "@strapi/sdk-plugin": "^5.0.0",
+    "@strapi/sdk-plugin": "^5.2.0",
     "@strapi/strapi": "workspace:*",
     "eslint-config-custom": "workspace:*",
     "react": "18.3.1",
