@@ -2380,11 +2380,11 @@ exports[`ISO locales getIsoLocales 1`] = `
   },
   {
     "code": "wo",
-    "name": "Wolof (wo)"
+    "name": "Wolof (wo)",
   },
   {
     "code": "xh",
-    "name": "Xhosa (xh)"
+    "name": "Xhosa (xh)",
   },
   {
     "code": "yav",
