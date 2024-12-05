@@ -19,7 +19,7 @@ import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';
 import { getTranslation } from '../../../../../utils/translations';
 
-import { decorateCode } from './Blocks/utils/decorateCode';
+import { decorateCode } from './Blocks/Code';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
@@ -289,7 +289,7 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
 };
 
 interface ExtendedRenderLeafProps extends RenderLeafProps {
-  leaf: RenderLeafProps['leaf'] & { className: string };
+  leaf: RenderLeafProps['leaf'] & { className?: string };
 }
 
 const baseRenderLeaf = (props: ExtendedRenderLeafProps, modifiers: ModifiersStore) => {
@@ -367,7 +367,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
-    (props: RenderLeafProps) => baseRenderLeaf(props as ExtendedRenderLeafProps, modifiers),
+    (props: ExtendedRenderLeafProps) => baseRenderLeaf(props, modifiers),
     [modifiers]
   );
 
