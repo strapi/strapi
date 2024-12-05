@@ -3,11 +3,13 @@ import * as yup from 'yup';
 import { errors } from '@strapi/utils';
 import { getService } from '../utils';
 
-const recentDocumentParamsSchema = yup.object().shape({
-  action: yup.mixed<'update'>().oneOf(['update']).required(),
-});
+const createHomepageController = () => {
+  const homepageService = getService('homepage');
 
-const createHomepageController = ({ strapi }: { strapi: Core.Strapi }) => {
+  const recentDocumentParamsSchema = yup.object().shape({
+    action: yup.mixed<'update'>().oneOf(['update']).required(),
+  });
+
   return {
     async getRecentDocuments(ctx) {
       let action;
@@ -22,7 +24,7 @@ const createHomepageController = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       if (action === 'update') {
-        return getService('homepage').getRecentUpdates();
+        return { data: await homepageService.getRecentUpdates() };
       }
     },
   } satisfies Core.Controller;
