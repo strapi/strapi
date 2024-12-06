@@ -77,7 +77,7 @@ const checkRequiredDependencies = async ({
         throw new Error(`Could not find dependencies in package.json at path: ${cwd}`);
       }
 
-      const declaredVersion = pkg.packageJson.dependencies[name];
+      const declaredVersion = pkg.packageJson.dependencies[name] ?? pkg.packageJson.devDependencies[name];
 
       if (!declaredVersion) {
         acc.install.push({
