@@ -2,12 +2,16 @@ import _ from 'lodash';
 import type { Context } from 'koa';
 import type {} from 'koa-body';
 import type { Internal } from '@strapi/types';
+import { isObject } from 'lodash/fp';
+import { MigrationBuilder } from '../services/migration-builder';
 import { getService } from '../utils';
 import {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
   validateKind,
 } from './validation/content-type';
+
+type RenamedAttribute = { oldName: string; newName: string };
 
 export default {
   async getContentTypes(ctx: Context) {
@@ -112,6 +116,29 @@ export default {
       strapi.reload.isWatching = false;
 
       const contentTypeService = getService('content-types');
+
+      // Find attributes with a `renamed` field that contains the original name
+      const renamedAttributes = Object.entries(body.contentType.attributes || {})
+        .filter(([, value]) => value && typeof value === 'object' && 'renamed' in value) // Check for `renamed` field
+        .map(([key, value]) => {
+          if (!isObject(value) || !('renamed' in value)) {
+            return undefined;
+          }
+          const oldName = value.renamed; // Original name is in the `renamed` field
+          const newName = key; // New name is the current key
+          return { oldName, newName };
+        })
+        .filter((item) => item) as RenamedAttribute[];
+      if (
+        renamedAttributes.length &&
+        strapi.config.get('database.settings.automigrate.attributes', true)
+      ) {
+        const migrationBuilder = new MigrationBuilder();
+        renamedAttributes.forEach((attr: RenamedAttribute) => {
+          migrationBuilder.addRenameAttribute(uid, attr);
+        });
+        await migrationBuilder.writeFiles();
+      }
 
       const component = await contentTypeService.editContentType(uid, {
         contentType: body.contentType,

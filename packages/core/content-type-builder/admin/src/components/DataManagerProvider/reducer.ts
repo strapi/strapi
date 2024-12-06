@@ -319,12 +319,25 @@ const reducer = (state = initialState, action: Action) =>
         const isEditingRelation = rest.type === 'relation';
 
         if (!isEditingRelation) {
+          const originalAttribute = get(state, [
+            'contentTypes',
+            targetUid,
+            'schema',
+            'attributes',
+            initialAttributeIndex,
+          ]);
+
+          const attributeToSet = {
+            ...action.attributeToSet,
+            renamed: originalAttribute.name,
+          };
+          // console.log('before action.attributeToSet', attributeToSet);
           set(
             draftState,
             ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
-            action.attributeToSet
+            attributeToSet
           );
-
+          // console.log('after action.attributeToSet', attributeToSet);
           break;
         }
 
