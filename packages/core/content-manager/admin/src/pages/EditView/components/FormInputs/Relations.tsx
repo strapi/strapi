@@ -36,7 +36,7 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
-import { useDoc } from '../../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
@@ -143,7 +143,7 @@ export interface RelationsFormValue {
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
     const [currentPage, setCurrentPage] = React.useState(1);
-    const { document, model: documentModel } = useDoc();
+    const { document, model: documentModel } = useContentManagerContext();
     const documentId = document?.documentId;
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();

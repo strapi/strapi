@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 import { useMatch } from 'react-router-dom';
 
 import { InjectionZone } from '../../../components/InjectionZone';
-import { useDoc } from '../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../hooks/useDocument';
 import { CLONE_PATH } from '../../../router';
 
 import { DocumentActions } from './DocumentActions';
@@ -40,7 +40,7 @@ const Panels = () => {
   ] = useQueryParams<{ status: 'draft' | 'published' }>({
     status: 'draft',
   });
-  const { model, id, document, meta, collectionType } = useDoc();
+  const { model, id, document, meta, collectionType } = useContentManagerContext();
   const plugins = useStrapiApp('Panels', (state) => state.plugins);
 
   const props = {
@@ -97,7 +97,7 @@ const ActionsPanelContent = () => {
       query: { status = 'draft' },
     },
   ] = useQueryParams<{ status: 'draft' | 'published' }>();
-  const { model, id, document, meta, collectionType } = useDoc();
+  const { model, id, document, meta, collectionType } = useContentManagerContext();
   const plugins = useStrapiApp('ActionsPanel', (state) => state.plugins);
 
   const props = {
