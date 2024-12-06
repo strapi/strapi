@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Main } from '@strapi/design-system';
+import { Box, Main } from '@strapi/design-system';
+import { House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../components/Layouts/Layout';
@@ -9,6 +10,7 @@ import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 
 import { GuidedTour } from './components/GuidedTour';
+import { Widget } from './components/Widget';
 
 /* -------------------------------------------------------------------------------------------------
  * HomePageCE
@@ -36,6 +38,15 @@ const HomePageCE = () => {
       />
       <Layouts.Content>
         <GuidedTour />
+        {/* TODO remove this fake widget when we add the first real one */}
+        <Widget
+          title={{ defaultMessage: 'Dummy widget', id: 'notarealid' }}
+          icon={<House fill="neutral500" />}
+        >
+          <Box background="danger200" height="2000px">
+            This is a widget!
+          </Box>
+        </Widget>
       </Layouts.Content>
     </Main>
   );
