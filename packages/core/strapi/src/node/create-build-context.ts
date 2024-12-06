@@ -5,7 +5,6 @@ import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
 import { Core, Modules } from '@strapi/types';
 import type { Server } from 'node:http';
-import { strings } from '@strapi/utils';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';

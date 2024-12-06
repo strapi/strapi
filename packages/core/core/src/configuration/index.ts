@@ -5,13 +5,13 @@ import _ from 'lodash';
 import { omit } from 'lodash/fp';
 import dotenv from 'dotenv';
 import type { Core } from '@strapi/types';
+import { strings } from '@strapi/utils';
 
 import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from './urls';
 import loadConfigDir from './config-loader';
 import { getDirs } from './get-dirs';
 
 import type { StrapiOptions } from '../Strapi';
-import { strings } from '@strapi/utils';
 
 dotenv.config({ path: process.env.ENV_PATH });
 
