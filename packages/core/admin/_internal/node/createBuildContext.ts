@@ -177,7 +177,7 @@ const createBuildContext = async ({
   const buildContext = {
     appDir,
     // If serveAdminPanel is false, use relative paths for separate deployment
-    basePath: serveAdminPanel ? `${adminPath}/` : strapiInstance.config.get('admin.url', ''),
+    basePath: serveAdminPanel ? `${adminPath}/` : strapiInstance.config.get('admin.url', `${adminPath}/`),
     bundler,
     customisations,
     cwd,
