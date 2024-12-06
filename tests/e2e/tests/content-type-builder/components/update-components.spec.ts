@@ -60,7 +60,7 @@ test.describe('Update a new component', () => {
   test.beforeEach(async ({ page }) => {
     await sharedSetup('update-component', page, {
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
       login: true,
       skipTour: true,
       afterSetup: async () => {

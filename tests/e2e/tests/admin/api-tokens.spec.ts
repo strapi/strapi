@@ -23,7 +23,7 @@ const createAPIToken = async (page, tokenName, duration, type) => {
 
 test.describe('API Tokens', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });

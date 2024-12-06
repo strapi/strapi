@@ -1,14 +1,14 @@
 const { resolve } = require('path');
-const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('../constants');
 const {
   file: {
-    providers: { createLocalFileSourceProvider },
+    providers: { createLocalDirectorySourceProvider },
   },
   strapi: {
     providers: { createRemoteStrapiDestinationProvider },
   },
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
+const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('../constants');
 
 /**
  * Reset the DB and import data from a DTS dataset
@@ -35,10 +35,8 @@ const resetDatabaseAndImportDataFromPath = async (filePath) => {
 };
 
 const createSourceProvider = (filePath) =>
-  createLocalFileSourceProvider({
-    file: { path: resolve(filePath) },
-    encryption: { enabled: false },
-    compression: { enabled: true },
+  createLocalDirectorySourceProvider({
+    dir: { path: resolve(filePath) },
   });
 
 const createDestinationProvider = () => {

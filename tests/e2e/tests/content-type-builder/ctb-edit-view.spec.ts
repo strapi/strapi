@@ -5,7 +5,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 
 test.describe('Edit View CTB', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin');
     await page.goto('/admin');
     await login({ page });
   });
