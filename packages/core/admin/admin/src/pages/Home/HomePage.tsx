@@ -39,10 +39,7 @@ const HomePageCE = () => {
       <Layouts.Content>
         <GuidedTour />
         {/* TODO remove this fake widget when we add the first real one */}
-        <Widget
-          title={{ defaultMessage: 'Dummy widget', id: 'notarealid' }}
-          icon={<House fill="neutral500" />}
-        >
+        <Widget title={{ defaultMessage: 'Dummy widget', id: 'notarealid' }} icon={House}>
           <Box background="danger200" height="2000px">
             This is a widget!
           </Box>
