@@ -106,6 +106,7 @@ const WORKFLOW_SCHEMA = yup.object({
       })
     )
     .min(1),
+  stageRequiredToPublish: yup.string().nullable(),
 });
 
 const EditPage = () => {
@@ -150,17 +151,28 @@ const EditPage = () => {
     name: string;
     stages: WorkflowStage[];
     contentTypes: string[];
+    stageRequiredToPublish: string | null;
   }
 
   const submitForm = async (data: FormValues, helpers: Pick<FormHelpers, 'setErrors'>) => {
     try {
+      const { stageRequiredToPublish, ...rest } = data;
+      const stageRequiredToPublishName =
+        stageRequiredToPublish === ''
+          ? null
+          : rest.stages.find(
+              (stage) =>
+                stage.id === Number(stageRequiredToPublish) ||
+                stage.__temp_key__ === stageRequiredToPublish
+            )?.name;
+
       if (!isCreatingWorkflow) {
         const res = await update(id, {
-          ...data,
+          ...rest,
           // compare permissions of stages and only submit them if at least one has
           // changed; this enables partial updates e.g. for users who don't have
           // permissions to see roles
-          stages: data.stages.map((stage) => {
+          stages: rest.stages.map((stage) => {
             let hasUpdatedPermissions = true;
             const serverStage = currentWorkflow?.stages?.find(
               (serverStage) => serverStage.id === stage?.id
@@ -180,13 +192,17 @@ const EditPage = () => {
               permissions: hasUpdatedPermissions ? stage.permissions : undefined,
             } satisfies Stage;
           }),
+          stageRequiredToPublishName,
         });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         }
       } else {
-        const res = await create(data);
+        const res = await create({
+          ...rest,
+          stageRequiredToPublishName,
+        });
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
@@ -298,12 +314,14 @@ const EditPage = () => {
         name: '',
         stages: [],
         contentTypes: [],
+        stageRequiredToPublish: '',
       };
     } else {
       return {
         name: currentWorkflow.name,
         stages: addTmpKeysToStages(currentWorkflow.stages),
         contentTypes: currentWorkflow.contentTypes,
+        stageRequiredToPublish: currentWorkflow.stageRequiredToPublish?.id.toString() ?? '',
       };
     }
   }, [currentWorkflow, isCreatingWorkflow]);
@@ -329,7 +347,7 @@ const EditPage = () => {
         {({ modified, isSubmitting, values, setErrors }) => (
           <>
             <Layout.Header
-              navigationAction={<BackButton />}
+              navigationAction={<BackButton fallback=".." />}
               primaryAction={
                 canUpdate || canCreate ? (
                   <Button

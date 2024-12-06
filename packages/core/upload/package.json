@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upload",
-  "version": "5.1.0",
+  "version": "5.5.0",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -18,7 +18,7 @@
   "exports": {
     "./strapi-admin": {
       "types": "./dist/admin/src/index.d.ts",
-      "source": "./admin/src/index.js",
+      "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
@@ -56,8 +56,9 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.11",
-    "@strapi/icons": "2.0.0-rc.11",
+    "@mux/mux-player-react": "3.1.0",
+    "@strapi/design-system": "2.0.0-rc.14",
+    "@strapi/icons": "2.0.0-rc.14",
     "@strapi/provider-upload-local": "workspace:*",
     "@strapi/utils": "workspace:*",
     "byte-size": "8.1.1",
@@ -82,7 +83,7 @@
   },
   "devDependencies": {
     "@strapi/admin": "workspace:*",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/types": "workspace:*",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
@@ -102,7 +103,7 @@
     "styled-components": "6.1.8"
   },
   "peerDependencies": {
-    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/admin": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
@@ -118,5 +119,6 @@
     "description": "Media file management.",
     "required": true,
     "kind": "plugin"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

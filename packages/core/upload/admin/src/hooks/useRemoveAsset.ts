@@ -1,9 +1,10 @@
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
-import type { DeleteFile } from '../../../shared/contracts/files';
 
-import pluginId from '../pluginId';
+import { pluginId } from '../pluginId';
+
+import type { DeleteFile } from '../../../shared/contracts/files';
 
 export const useRemoveAsset = (onSuccess: () => void) => {
   const { toggleNotification } = useNotification();

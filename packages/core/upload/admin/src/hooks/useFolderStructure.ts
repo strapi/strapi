@@ -2,17 +2,22 @@ import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
-import pluginId from '../pluginId';
+import { FolderNode, GetFolderStructure } from '../../../shared/contracts/folders';
+import { pluginId } from '../pluginId';
 import { getTrad } from '../utils';
 
-import { recursiveRenameKeys } from './utils/rename-keys';
-
-import { FolderNode, GetFolderStructure } from '../../../shared/contracts/folders';
+import { recursiveRenameKeys } from './utils/renameKeys';
 
 const FIELD_MAPPING: Record<string, string> = {
   name: 'label',
   id: 'value',
 };
+
+interface FolderNodeWithChildren extends Omit<FolderNode, 'children'> {
+  children: FolderNodeWithChildren[];
+  label?: string;
+  value: string | number | null;
+}
 
 export const useFolderStructure = ({ enabled = true } = {}) => {
   const { formatMessage } = useIntl();
@@ -22,8 +27,7 @@ export const useFolderStructure = ({ enabled = true } = {}) => {
     const {
       data: { data },
     } = await get<GetFolderStructure.Response['data']>('/upload/folder-structure');
-
-    const children = data.map((f: FolderNode) =>
+    const children = data.map((f: FolderNodeWithChildren) =>
       recursiveRenameKeys(f, (key) => FIELD_MAPPING?.[key] ?? key)
     );
 

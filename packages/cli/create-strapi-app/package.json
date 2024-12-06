@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-app",
-  "version": "5.1.0",
+  "version": "5.5.0",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-app",
@@ -64,7 +64,7 @@
     "tar": "7.4.3"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@types/async-retry": "^1",
     "@types/fs-extra": "11.0.4",
     "@types/inquirer": "8.2.5",
@@ -74,5 +74,6 @@
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

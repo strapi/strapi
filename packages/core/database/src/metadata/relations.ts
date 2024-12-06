@@ -27,6 +27,7 @@ const hasMappedBy = (
   attr: RelationalAttribute
 ): attr is RelationalAttribute & { inversedBy: boolean } => 'mappedBy' in attr;
 
+// TODO: use strapi/utils relations for all of these
 export const isPolymorphic = (attribute: RelationalAttribute): attribute is Relation.Morph =>
   ['morphOne', 'morphMany', 'morphToOne', 'morphToMany'].includes(attribute.relation);
 

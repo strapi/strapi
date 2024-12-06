@@ -1,6 +1,6 @@
 {
   "name": "@strapi/core",
-  "version": "5.1.0",
+  "version": "5.5.0",
   "description": "Core of Strapi",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -59,7 +59,7 @@
     "@strapi/database": "workspace:*",
     "@strapi/generators": "workspace:*",
     "@strapi/logger": "workspace:*",
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/permissions": "workspace:*",
     "@strapi/types": "workspace:*",
     "@strapi/typescript-utils": "workspace:*",
@@ -107,7 +107,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
+    "@strapi/pack-up": "5.0.2",
     "@strapi/ts-zen": "^0.2.0",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
@@ -133,5 +133,6 @@
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
 }

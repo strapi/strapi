@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { NavLink, useLocation } from 'react-router-dom';
 
-import { BackButton, HistoryProvider } from '../BackButton';
+import { BackButton, type BackButtonProps, HistoryProvider } from '../BackButton';
 
 const LocationDisplay = () => {
   const location = useLocation();
@@ -19,8 +19,8 @@ const RandomNavLink = () => {
   return <NavLink to={to}>Navigate</NavLink>;
 };
 
-const render = () =>
-  renderRTL(<BackButton />, {
+const render = (props: BackButtonProps = {}) =>
+  renderRTL(<BackButton {...props} />, {
     renderOptions: {
       wrapper({ children }) {
         return (
@@ -35,10 +35,16 @@ const render = () =>
   });
 
 describe('BackButton', () => {
-  it('should be disabled if there is no history', () => {
+  it('should be disabled if there is no history and no fallback', () => {
     render();
 
     expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('should be enabled if there is a fallback', () => {
+    render({ fallback: '..' });
+
+    expect(screen.getByRole('link', { name: 'Back' })).toHaveAttribute('aria-disabled', 'false');
   });
 
   it('should be enabled if there is history', async () => {

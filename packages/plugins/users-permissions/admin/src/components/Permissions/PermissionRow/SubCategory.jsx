@@ -103,7 +103,7 @@ const SubCategory = ({ subCategory }) => {
                         }
                       )}
                     </VisuallyHidden>
-                    <Cog id="cog" />
+                    <Cog id="cog" cursor="pointer" />
                   </button>
                 </CheckboxWrapper>
               </Grid.Item>

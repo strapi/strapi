@@ -1,12 +1,14 @@
 import { curry } from 'lodash/fp';
 
 import { UID } from '@strapi/types';
-
+import { relations } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { LongHandDocument } from '../utils/types';
+
+const { isPolymorphic } = relations;
 
 interface Options {
   uid: UID.Schema;
@@ -18,7 +20,7 @@ interface Options {
  * Load a relation documentId into the idMap.
  */
 const addRelationDocId = curry(
-  (idMap: IdMap, targetUid: UID.Schema, source: Options, relation: LongHandDocument) => {
+  (idMap: IdMap, source: Options, targetUid: UID.Schema, relation: LongHandDocument) => {
     const targetLocale = getRelationTargetLocale(relation, {
       targetUid,
       sourceUid: source.uid,
@@ -52,26 +54,35 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
       if (!attribute) {
         return;
       }
-
-      const targetUid = attribute.target!;
-      const addDocId = addRelationDocId(idMap, targetUid, source);
+      const isPolymorphicRelation = isPolymorphic(attribute);
+      const addDocId = addRelationDocId(idMap, source);
 
       return mapRelation((relation) => {
         if (!relation || !relation.documentId) {
           return relation;
         }
 
-        addDocId(relation);
+        // Regular relations will always target the same target
+        // if its a polymorphic relation we need to get it from the data itself
+        const targetUid = isPolymorphicRelation ? relation.__type : attribute.target;
+
+        addDocId(targetUid, relation);
 
         // Handle positional arguments
         const position = relation.position;
 
+        // The positional relation target uid can be different for polymorphic relations
+        let positionTargetUid = targetUid;
+        if (isPolymorphicRelation && position?.__type) {
+          positionTargetUid = position.__type;
+        }
+
         if (position?.before) {
-          addDocId({ ...relation, ...position, documentId: position.before });
+          addDocId(positionTargetUid, { ...relation, ...position, documentId: position.before });
         }
 
         if (position?.after) {
-          addDocId({ ...relation, ...position, documentId: position.after });
+          addDocId(positionTargetUid, { ...relation, ...position, documentId: position.after });
         }
 
         return relation;

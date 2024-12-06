@@ -100,21 +100,10 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const queryString = React.useMemo(
-    () => stringify(params, { encode: true, encodeValuesOnly: true }),
-    [params]
-  );
-  const paramObject = React.useMemo(() => {
-    const pairs = queryString.split('&').map((param) => {
-      const [key, value] = param.split('=');
-      return { [key]: value };
-    });
-    return Object.assign({}, ...pairs);
-  }, [queryString]);
 
   const { data, error, isFetching } = useGetAllDocumentsQuery({
     model,
-    params: paramObject,
+    params,
   });
 
   /**
@@ -160,9 +149,23 @@ const ListViewPage = () => {
     });
 
     const formattedHeaders = headers.displayedHeaders.map<ListFieldLayout>((header) => {
+      /**
+       * When the header label is a string, it is an attribute on the current content-type:
+       * Use the attribute name value to compute the translation.
+       * Otherwise, it should be a  translation object coming from a plugin that injects into the table (ie i18n, content-releases, review-workflows):
+       * Use the translation object as is.
+       */
+      const translation =
+        typeof header.label === 'string'
+          ? {
+              id: `content-manager.content-types.${model}.${header.name}`,
+              defaultMessage: header.label,
+            }
+          : header.label;
+
       return {
         ...header,
-        label: typeof header.label === 'string' ? header.label : formatMessage(header.label),
+        label: formatMessage(translation),
         name: `${header.name}${header.mainField?.name ? `.${header.mainField.name}` : ''}`,
       };
     });
@@ -183,7 +186,14 @@ const ListViewPage = () => {
     }
 
     return formattedHeaders;
-  }, [displayedHeaders, formatMessage, list, runHookWaterfall, schema?.options?.draftAndPublish]);
+  }, [
+    displayedHeaders,
+    formatMessage,
+    list,
+    runHookWaterfall,
+    schema?.options?.draftAndPublish,
+    model,
+  ]);
 
   if (isFetching) {
     return <Page.Loading />;

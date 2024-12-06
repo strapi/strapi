@@ -1,0 +1,267 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
+.c3 {
+  cursor: pointer;
+}
+
+.c6 {
+  padding-inline-start: 4px;
+  padding-inline-end: 4px;
+}
+
+.c8 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c13 {
+  padding-block-start: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 8px;
+  padding-inline-end: 8px;
+}
+
+.c0 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c2 {
+  align-items: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c9 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c7 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c12 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c14 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #32324d;
+  font-weight: 600;
+}
+
+.c15 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c4 {
+  text-decoration: none;
+}
+
+.c4:visited {
+  color: inherit;
+}
+
+.c1>*:first-child {
+  margin-left: calc(-1*8px);
+}
+
+.c5 {
+  border-radius: 4px;
+  color: #666687;
+  font-size: 1.2rem;
+  line-height: 1.43;
+  padding: 4px 8px;
+  text-decoration: none;
+}
+
+.c5 :hover,
+.c5 :focus {
+  background-color: #dcdce4;
+  color: #4a4a6a;
+}
+
+.c10 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #32324d;
+}
+
+.c10 svg {
+  fill: #8e8ea9;
+}
+
+.c10:hover {
+  background-color: #f6f6f9;
+}
+
+.c10:active {
+  background-color: #eaeaef;
+}
+
+.c10[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c11 {
+  padding: 4px 8px;
+  height: unset;
+}
+
+.c11 :hover,
+.c11 :focus {
+  background-color: #dcdce4;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c10 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+<div>
+  <nav
+    aria-label="Navigation"
+    class=""
+  >
+    <ol
+      class="c0 c1"
+    >
+      <li
+        class="c2"
+      >
+        <a
+          aria-disabled="false"
+          class="c3 c4 c5"
+          href="/"
+        >
+          Media Library
+        </a>
+        <div
+          aria-hidden="true"
+          class="c6"
+        >
+          <span
+            class="c7"
+          >
+            /
+          </span>
+        </div>
+      </li>
+      <li
+        class="c2"
+      >
+        <button
+          aria-disabled="false"
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="Get more ascendants folders"
+          class="c8 c9 c10 c11"
+          data-state="closed"
+          id="radix-:r1:"
+          type="button"
+        >
+          <span
+            class="c12"
+          >
+            ...
+          </span>
+        </button>
+        <div
+          aria-hidden="true"
+          class="c6"
+        >
+          <span
+            class="c7"
+          >
+            /
+          </span>
+        </div>
+      </li>
+      <li
+        class="c2"
+      >
+        <a
+          aria-disabled="false"
+          class="c3 c4 c5"
+          href="/"
+        >
+          parent folder
+        </a>
+        <div
+          aria-hidden="true"
+          class="c6"
+        >
+          <span
+            class="c7"
+          >
+            /
+          </span>
+        </div>
+      </li>
+      <li
+        class="c2"
+      >
+        <div
+          class="c13"
+        >
+          <span
+            aria-current="true"
+            class="c14"
+          >
+            current folder
+          </span>
+        </div>
+      </li>
+    </ol>
+  </nav>
+  <span
+    class="c15"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

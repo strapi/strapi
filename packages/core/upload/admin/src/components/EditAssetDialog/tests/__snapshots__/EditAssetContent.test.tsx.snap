@@ -1,0 +1,1114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
+.c0 {
+  margin-inline-start: -250px;
+  top: 4.6rem;
+  left: 50%;
+  width: 50rem;
+  z-index: 700;
+  position: fixed;
+}
+
+.c5 {
+  padding-block-start: 16px;
+  padding-inline-end: 20px;
+  padding-block-end: 16px;
+  padding-inline-start: 20px;
+  background: #f6f6f9;
+}
+
+.c9 {
+  border-radius: 4px;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.c18 {
+  background: #eaeaef;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #dcdce4;
+}
+
+.c20 {
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+}
+
+.c25 {
+  padding-inline-start: 8px;
+  padding-inline-end: 8px;
+}
+
+.c27 {
+  padding-block-start: 16px;
+  padding-block-end: 16px;
+  padding-inline-start: 24px;
+  padding-inline-end: 24px;
+  background: #f6f6f9;
+  border-radius: 4px;
+}
+
+.c37 {
+  padding-inline-end: 12px;
+}
+
+.c41 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.c1 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c6 {
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c10 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c16 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c21 {
+  align-items: center;
+  justify-content: flex-end;
+  flex-direction: row;
+  display: flex;
+}
+
+.c23 {
+  gap: 4px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c26 {
+  gap: 12px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c28 {
+  gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c33 {
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+  display: flex;
+}
+
+.c42 {
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c45 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c8 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c29 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c30 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+}
+
+.c31 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+  font-weight: 600;
+}
+
+.c36 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c44 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c2 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c43 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+}
+
+.c43:hover {
+  background-color: #f6f6f9;
+}
+
+.c43:active {
+  background-color: #eaeaef;
+}
+
+.c43[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c46 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
+  color: #271fe0;
+}
+
+.c46:hover {
+  background-color: #ffffff;
+}
+
+.c46:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+  color: #4945ff;
+}
+
+.c46[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c47 {
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+  color: #ffffff;
+}
+
+.c47:hover {
+  border: 1px solid #7b79ff;
+  background: #7b79ff;
+}
+
+.c47:active {
+  border: 1px solid #4945ff;
+  background: #4945ff;
+}
+
+.c47[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c11 {
+  text-decoration: none;
+  padding-block: 0.7rem;
+  padding-inline: 0.7rem;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+  color: #8e8ea9;
+}
+
+.c11:hover {
+  background-color: #f6f6f9;
+  color: #666687;
+}
+
+.c11:active {
+  background-color: #eaeaef;
+}
+
+.c11[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c32 {
+  display: flex;
+}
+
+.c35 {
+  border: none;
+  border-radius: 4px;
+  color: #32324d;
+  font-weight: 400;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
+  display: block;
+  width: 100%;
+  background: inherit;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  padding-block: 8px;
+}
+
+.c35 ::placeholder {
+  color: #8e8ea9;
+  opacity: 1;
+}
+
+.c35[aria-disabled='true'] {
+  color: inherit;
+}
+
+.c35:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.c34 {
+  border: 1px solid #dcdce4;
+  border-radius: 4px;
+  background: #ffffff;
+  padding-inline-start: 0;
+  position: relative;
+  outline: none;
+  box-shadow: none;
+  transition-property: border-color,box-shadow,fill;
+  transition-duration: 0.2s;
+}
+
+.c34:focus-within {
+  border: 1px solid #4945ff;
+  box-shadow: #4945ff 0px 0px 0px 2px;
+}
+
+.c12 {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+}
+
+.c14 {
+  min-width: 100%;
+  padding-inline: 4px;
+}
+
+.c3 {
+  background: #32324d33;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+}
+
+.c4 {
+  max-width: 83rem;
+  max-height: 90vh;
+  height: auto;
+  width: 60%;
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
+  z-index: 310;
+}
+
+.c7 {
+  border-bottom: solid 1px #eaeaef;
+}
+
+.c13 {
+  padding-inline: 40px;
+}
+
+.c13>div {
+  padding-block: 40px;
+}
+
+.c13>div>div {
+  display: block!important;
+}
+
+.c40 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
+}
+
+.c15 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c17 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
+.c38 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c38 svg {
+  height: 1.1rem;
+  width: 1.1rem;
+}
+
+.c38 svg path {
+  fill: #666687;
+}
+
+.c39 {
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c39 svg {
+  width: 0.9rem;
+}
+
+.c19 {
+  position: relative;
+}
+
+.c24 {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  background: repeating-conic-gradient(       #f6f6f9 0% 25%,       transparent 0% 50%     ) 50%/20px 20px;
+}
+
+.c24 svg {
+  height: 26px;
+}
+
+.c24 img,
+.c24 mux-player {
+  margin: 0;
+  padding: 0;
+  max-height: 26.4rem;
+  max-width: 100%;
+}
+
+.c24 mux-player {
+  --play-button: inline-flex;
+  --mute-button: inline-flex;
+  --pip-button: inline-flex;
+  --fullscreen-button: inline-flex;
+  --playback-rate-button: inline-flex;
+  --volume-range: inline-flex;
+  --time-range: inline-flex;
+  --time-display: inline-flex;
+  --duration-display: inline-flex;
+}
+
+.c22 {
+  height: 5.2rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c43 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c46 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c47 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c11 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c3 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c4[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c4[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
+  }
+}
+
+@media (min-width: 520px) {
+  .c17 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 768px) {
+  .c17 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c17 {
+    grid-column: span 6;
+  }
+}
+
+<body
+  data-scroll-locked="1"
+  style="pointer-events: none;"
+>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
+  <div>
+    <div
+      aria-hidden="true"
+      class="c0 c1"
+      data-aria-hidden="true"
+    />
+    <span
+      class="c2"
+    >
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-log"
+        role="log"
+      />
+      <p
+        aria-live="polite"
+        aria-relevant="all"
+        id="live-region-status"
+        role="status"
+      />
+      <p
+        aria-live="assertive"
+        aria-relevant="all"
+        id="live-region-alert"
+        role="alert"
+      />
+    </span>
+  </div>
+  <div
+    class="c3"
+    data-state="open"
+    style="pointer-events: auto;"
+  >
+    <div
+      aria-describedby="radix-:r2:"
+      aria-labelledby="radix-:r1:"
+      class="c4"
+      data-state="open"
+      id="radix-:r0:"
+      role="dialog"
+      style="pointer-events: auto;"
+      tabindex="-1"
+    >
+      <header
+        class="c5 c6 c7"
+      >
+        <h2
+          class="c8"
+          id="radix-:r1:"
+        >
+          Details
+        </h2>
+        <button
+          aria-disabled="false"
+          class="c9 c10 c11"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            fill="currentColor"
+            focusable="false"
+            height="16"
+            viewBox="0 0 32 32"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+            />
+          </svg>
+          <span
+            class="c2"
+          >
+            Close modal
+          </span>
+        </button>
+      </header>
+      <div
+        class="c12 c13"
+        dir="ltr"
+        style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
+      >
+        <style>
+          [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+        </style>
+        <div
+          class="c14"
+          data-radix-scroll-area-viewport=""
+          style="overflow-x: scroll; overflow-y: scroll;"
+        >
+          <div
+            style="min-width: 100%; display: table;"
+          >
+            <div
+              class="c15"
+            >
+              <div
+                class="c16 c17"
+              >
+                <div
+                  class="c18 c19"
+                >
+                  <div
+                    class="c20 c21 c22"
+                  >
+                    <div
+                      class="c23"
+                    >
+                      <button
+                        aria-disabled="false"
+                        class="c9 c10 c11"
+                        data-state="closed"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          fill="currentColor"
+                          focusable="false"
+                          height="16"
+                          viewBox="0 0 32 32"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+                          />
+                        </svg>
+                        <span
+                          class="c2"
+                        >
+                          Delete
+                        </span>
+                      </button>
+                      <button
+                        aria-disabled="false"
+                        class="c9 c10 c11"
+                        data-state="closed"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          fill="currentColor"
+                          focusable="false"
+                          height="16"
+                          viewBox="0 0 32 32"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M28.5 19v7a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 26v-7a1.5 1.5 0 0 1 3 0v6.5h19V19a1.5 1.5 0 1 1 3 0m-13.561 1.061a1.5 1.5 0 0 0 2.125 0l5-5a1.502 1.502 0 1 0-2.125-2.125L17.5 15.375V5a1.5 1.5 0 1 0-3 0v10.375l-2.439-2.436a1.502 1.502 0 1 0-2.125 2.125z"
+                          />
+                        </svg>
+                        <span
+                          class="c2"
+                        >
+                          Download
+                        </span>
+                      </button>
+                      <button
+                        aria-disabled="false"
+                        class="c9 c10 c11"
+                        data-state="closed"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          fill="currentColor"
+                          focusable="false"
+                          height="16"
+                          viewBox="0 0 32 32"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M17.046 23.441a1.5 1.5 0 0 1 0 2.125l-.742.743a7.502 7.502 0 1 1-10.61-10.61l3.015-3.014A7.5 7.5 0 0 1 19 12.375a1.506 1.506 0 0 1-2 2.25 4.5 4.5 0 0 0-6.171.184l-3.013 3.01a4.5 4.5 0 0 0 6.365 6.365l.743-.743a1.5 1.5 0 0 1 2.122 0m9.26-17.75a7.51 7.51 0 0 0-10.61 0l-.742.743a1.503 1.503 0 1 0 2.125 2.125l.742-.743a4.5 4.5 0 0 1 6.365 6.365l-3.014 3.015a4.5 4.5 0 0 1-6.172.179 1.506 1.506 0 1 0-2 2.25 7.5 7.5 0 0 0 10.288-.304l3.014-3.014a7.51 7.51 0 0 0 .004-10.613z"
+                          />
+                        </svg>
+                        <span
+                          class="c2"
+                        >
+                          Copy link
+                        </span>
+                      </button>
+                      <button
+                        aria-disabled="false"
+                        class="c9 c10 c11"
+                        data-state="closed"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          fill="currentColor"
+                          focusable="false"
+                          height="16"
+                          viewBox="0 0 32 32"
+                          width="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M30.5 24a1.5 1.5 0 0 1-1.5 1.5h-3.5V29a1.5 1.5 0 1 1-3 0v-3.5H8A1.5 1.5 0 0 1 6.5 24V9.5H3a1.5 1.5 0 0 1 0-3h3.5V3a1.5 1.5 0 0 1 3 0v19.5H29a1.5 1.5 0 0 1 1.5 1.5M13 9.5h9.5V19a1.5 1.5 0 1 0 3 0V8A1.5 1.5 0 0 0 24 6.5H13a1.5 1.5 0 0 0 0 3"
+                          />
+                        </svg>
+                        <span
+                          class="c2"
+                        >
+                          Crop
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="c24"
+                  >
+                    <img
+                      alt="Screenshot 2.png"
+                      src="http://localhost:1337/uploads/thumbnail_Screenshot_2_5d4a574d61.png"
+                    />
+                  </div>
+                  <div
+                    class="c25 c21 c22"
+                  />
+                </div>
+              </div>
+              <div
+                class="c16 c17"
+              >
+                <form
+                  action="#"
+                  novalidate=""
+                >
+                  <div
+                    class="c26"
+                  >
+                    <div
+                      class="c27"
+                    >
+                      <div
+                        class="c15"
+                      >
+                        <div
+                          class="c16 c17"
+                        >
+                          <div
+                            class="c28"
+                          >
+                            <span
+                              class="c29"
+                            >
+                              Size
+                            </span>
+                            <span
+                              class="c30"
+                            >
+                              102KB
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          class="c16 c17"
+                        >
+                          <div
+                            class="c28"
+                          >
+                            <span
+                              class="c29"
+                            >
+                              Dimensions
+                            </span>
+                            <span
+                              class="c30"
+                            >
+                              1476✕780
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          class="c16 c17"
+                        >
+                          <div
+                            class="c28"
+                          >
+                            <span
+                              class="c29"
+                            >
+                              Date
+                            </span>
+                            <span
+                              class="c30"
+                            >
+                              10/4/2021
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          class="c16 c17"
+                        >
+                          <div
+                            class="c28"
+                          >
+                            <span
+                              class="c29"
+                            >
+                              Extension
+                            </span>
+                            <span
+                              class="c30"
+                            >
+                              png
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          class="c16 c17"
+                        >
+                          <div
+                            class="c28"
+                          >
+                            <span
+                              class="c29"
+                            >
+                              Asset ID
+                            </span>
+                            <span
+                              class="c30"
+                            >
+                              8
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="c28"
+                    >
+                      <label
+                        class="c31 c32"
+                        for=":ra:"
+                        id=":ra:-label"
+                      >
+                        File name
+                      </label>
+                      <div
+                        class="c33 c34"
+                      >
+                        <input
+                          aria-disabled="false"
+                          class="c35"
+                          id=":ra:"
+                          name="name"
+                          value="Screenshot 2.png"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="c28"
+                    >
+                      <label
+                        class="c31 c32"
+                        for=":rb:"
+                        id=":rb:-label"
+                      >
+                        Alternative text
+                      </label>
+                      <div
+                        class="c33 c34"
+                      >
+                        <input
+                          aria-describedby=":rb:-hint"
+                          aria-disabled="false"
+                          class="c35"
+                          id=":rb:"
+                          name="alternativeText"
+                        />
+                      </div>
+                      <p
+                        class="c36"
+                        id=":rb:-hint"
+                      >
+                        This text will be displayed if the asset can’t be shown.
+                      </p>
+                    </div>
+                    <div
+                      class="c28"
+                    >
+                      <label
+                        class="c31 c32"
+                        for=":rc:"
+                        id=":rc:-label"
+                      >
+                        Caption
+                      </label>
+                      <div
+                        class="c33 c34"
+                      >
+                        <input
+                          aria-disabled="false"
+                          class="c35"
+                          id=":rc:"
+                          name="caption"
+                        />
+                      </div>
+                    </div>
+                    <div
+                      class="c28"
+                    >
+                      <div
+                        class="c28"
+                      >
+                        <label
+                          class="c31 c32"
+                          for="asset-folder"
+                          id="asset-folder-label"
+                        >
+                          Location
+                        </label>
+                        <div
+                          class=" css-1iyvlxg-container"
+                        >
+                          <span
+                            class="css-1f43avz-a11yText-A11yText"
+                            id="react-select-2-live-region"
+                          />
+                          <span
+                            aria-atomic="false"
+                            aria-live="polite"
+                            aria-relevant="additions text"
+                            class="css-1f43avz-a11yText-A11yText"
+                            role="log"
+                          />
+                          <div
+                            class=" css-oe0cnm-control"
+                          >
+                            <div
+                              class=" css-onz4xi-ValueContainer"
+                            >
+                              <div
+                                class=" css-1ryi7up-singleValue"
+                              >
+                                Media Library
+                              </div>
+                              <input
+                                aria-activedescendant=""
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-invalid="false"
+                                aria-readonly="true"
+                                class="css-mohuvp-dummyInput-DummyInput"
+                                id="asset-folder"
+                                inputmode="none"
+                                role="combobox"
+                                tabindex="0"
+                                value=""
+                              />
+                            </div>
+                            <div
+                              class=" css-1hm8yhz-IndicatorsContainer"
+                            >
+                              <div
+                                aria-hidden="true"
+                                class="c37 c38 c39"
+                              >
+                                <svg
+                                  fill="currentColor"
+                                  height="16"
+                                  viewBox="0 0 32 32"
+                                  width="16"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                          <input
+                            name="parent"
+                            type="hidden"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    class="c2"
+                  >
+                    <button
+                      tabindex="-1"
+                      type="submit"
+                    >
+                      Submit
+                    </button>
+                  </span>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer
+        class="c5 c6 c40"
+      >
+        <button
+          aria-disabled="false"
+          class="c41 c42 c43"
+        >
+          <span
+            class="c44"
+          >
+            Cancel
+          </span>
+        </button>
+        <div
+          class="c45"
+        >
+          <button
+            aria-disabled="false"
+            class="c41 c42 c46"
+          >
+            <span
+              class="c44"
+            >
+              Replace media
+            </span>
+          </button>
+          <span
+            class="c2"
+          >
+            <input
+              accept="image/png"
+              aria-hidden="true"
+              data-testid="file-input"
+              name="file"
+              tabindex="-1"
+              type="file"
+            />
+          </span>
+          <button
+            aria-disabled="false"
+            class="c41 c42 c47"
+          >
+            <span
+              class="c44"
+            >
+              Finish
+            </span>
+          </button>
+        </div>
+      </footer>
+    </div>
+  </div>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
+</body>
+`;
