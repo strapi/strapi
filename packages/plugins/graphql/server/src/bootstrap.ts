@@ -118,6 +118,17 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       },
     };
 
+    const isPlaygroundRequest =
+      ctx.request.method === 'GET' &&
+      ctx.request.url === path && // Matches the GraphQL endpoint
+      playgroundEnabled && // Only allow if the Playground is enabled
+      ctx.request.header.accept?.includes('text/html'); // Specific to Playground UI loading
+
+    // Skip authentication for the GraphQL Playground UI
+    if (isPlaygroundRequest) {
+      return next();
+    }
+
     return strapi.auth.authenticate(ctx, next);
   });
 

@@ -26,23 +26,23 @@ exports[`DocAssetCard snapshots the component 1`] = `
   height: 8.8rem;
 }
 
-.c18 {
+.c19 {
   padding-block-start: 8px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
   padding-inline-end: 12px;
 }
 
-.c21 {
+.c22 {
   padding-block-start: 4px;
 }
 
-.c26 {
+.c27 {
   padding-block-start: 4px;
   flex-grow: 1;
 }
 
-.c29 {
+.c30 {
   padding-inline-start: 8px;
   padding-inline-end: 8px;
   min-width: 20px;
@@ -63,45 +63,58 @@ exports[`DocAssetCard snapshots the component 1`] = `
   display: flex;
 }
 
-.c19 {
+.c17 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+}
+
+.c20 {
   align-items: flex-start;
   flex-direction: row;
   display: flex;
 }
 
-.c27 {
+.c28 {
   align-items: center;
   flex-direction: row;
   display: flex;
 }
 
-.c30 {
+.c31 {
   align-items: center;
   justify-content: center;
   flex-direction: row;
   display: inline-flex;
 }
 
-.c22 {
+.c18 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c23 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
 }
 
-.c23 {
+.c24 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #32324d;
   font-weight: 600;
 }
 
-.c24 {
+.c25 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c33 {
+.c34 {
   font-weight: 600;
   font-size: 1.1rem;
   line-height: 1.45;
@@ -121,7 +134,7 @@ exports[`DocAssetCard snapshots the component 1`] = `
   width: 1px;
 }
 
-.c31 {
+.c32 {
   border-radius: 4px;
   padding-block: 0.7rem;
 }
@@ -164,12 +177,12 @@ exports[`DocAssetCard snapshots the component 1`] = `
   right: 12px;
 }
 
-.c28 {
+.c29 {
   margin-left: auto;
   flex-shrink: 0;
 }
 
-.c32 {
+.c33 {
   margin-left: 4px;
 }
 
@@ -216,7 +229,7 @@ exports[`DocAssetCard snapshots the component 1`] = `
   cursor: pointer;
 }
 
-.c20 {
+.c21 {
   word-break: break-all;
 }
 
@@ -224,7 +237,7 @@ exports[`DocAssetCard snapshots the component 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c25 {
+.c26 {
   text-transform: uppercase;
 }
 
@@ -244,13 +257,9 @@ exports[`DocAssetCard snapshots the component 1`] = `
   opacity: 1;
 }
 
-.c17 svg {
-  font-size: 4.8rem;
-}
-
 .c16 {
   border-radius: 4px 4px 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
+  background: linear-gradient(     180deg,     #ffffff 0%,     #f6f6f9 121.48%   );
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -321,41 +330,44 @@ exports[`DocAssetCard snapshots the component 1`] = `
       <div
         class="c15 c3 c16"
       >
-        <span
+        <div
           class="c17"
         >
           <svg
             aria-label="hello.png"
-            fill="currentColor"
-            height="16"
+            fill="#8e8ea9"
+            height="24"
             viewBox="0 0 32 32"
-            width="16"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
               d="m26.708 10.293-7-7A1 1 0 0 0 19 3H7a2 2 0 0 0-2 2v22a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V11a1 1 0 0 0-.293-.707M19 11V5.5l5.5 5.5z"
             />
           </svg>
-        </span>
+          <span
+            class="c18"
+          />
+        </div>
       </div>
     </div>
     <div
-      class="c18"
+      class="c19"
     >
       <div
-        class="c19"
+        class="c20"
       >
         <div
-          class="c20"
+          class="c21"
         >
           <div
-            class="c21"
+            class="c22"
           >
             <h2
-              class="c22"
+              class="c23"
             >
               <span
-                class="c23"
+                class="c24"
                 id=":r0:-title"
               >
                 hello.png
@@ -363,26 +375,26 @@ exports[`DocAssetCard snapshots the component 1`] = `
             </h2>
           </div>
           <div
-            class="c24"
+            class="c25"
           >
             <span
-              class="c25"
+              class="c26"
             >
               png
             </span>
           </div>
         </div>
         <div
-          class="c26 c27"
+          class="c27 c28"
         >
           <div
-            class="c28"
+            class="c29"
           >
             <div
-              class="c29 c30 c31 c32"
+              class="c30 c31 c32 c33"
             >
               <span
-                class="c33"
+                class="c34"
               >
                 Doc
               </span>

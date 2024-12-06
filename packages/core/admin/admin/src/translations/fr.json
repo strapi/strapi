@@ -271,6 +271,7 @@
   "admin.pages.MarketPlacePage.subtitle": "Tirez le meilleur de Strapi",
   "anErrorOccurred": "Oups ! Une erreur s'est produite. Veuillez réessayer.",
   "app.component.CopyToClipboard.label": "Copier dans le presse-papier",
+  "noPreview": "Aucun aperçu disponible",
   "app.component.search.label": "Rechercher {target}",
   "app.component.table.duplicate": "Dupliquer {target}",
   "app.component.table.edit": "Modifier {target}",

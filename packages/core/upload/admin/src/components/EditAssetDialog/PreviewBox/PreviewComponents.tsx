@@ -17,8 +17,7 @@ export const Wrapper = styled.div`
     50% / 20px 20px;
 
   svg {
-    font-size: 4.8rem;
-    height: 26.4rem;
+    height: 26px;
   }
 
   img,
