@@ -45,5 +45,60 @@
       "cache": true
     }
   },
-  "useInferencePlugins": false
+  "useInferencePlugins": false,
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": false
+    }
+  },
+  "release": {
+    "projects": ["packages/**/*"],
+    "changelog": {
+      "workspaceChangelog": {
+        "file": false,
+        "createRelease": "github"
+      }
+    },
+    "version": {
+      "conventionalCommits": false
+    },
+    "git": {
+      "commitMessage": "release: {version}"
+    },
+    "conventionalCommits": {
+      "types": {
+        "docs": {
+          "changelog": {
+            "title": "📚 Documentation Changes"
+          }
+        },
+        "enhancement": {
+          "changelog": {
+            "title": "💅 Enhancement"
+          }
+        },
+        "feat": {
+          "changelog": {
+            "title": "🚀 New feature"
+          }
+        },
+        "fix": {
+          "changelog": {
+            "title": "🔥 Bug fix"
+          }
+        },
+        "security": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "🚨 Security"
+          }
+        },
+        "chore": {
+          "changelog": {
+            "title": "⚙️ Chore"
+          }
+        }
+      }
+    }
+  }
 }
