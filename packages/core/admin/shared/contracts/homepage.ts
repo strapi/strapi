@@ -1,7 +1,8 @@
 import type { errors } from '@strapi/utils';
 import type { Struct, UID } from '@strapi/types';
 
-interface RecentDocument {
+// Export required to avoid "cannot be named" TS build error
+export interface RecentDocument {
   kind: Struct.ContentTypeKind;
   model: UID.ContentType;
   documentId: string;
