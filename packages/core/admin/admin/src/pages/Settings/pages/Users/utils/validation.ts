@@ -10,7 +10,7 @@ const COMMON_USER_SCHEMA = {
     id: translatedErrors.required.id,
     defaultMessage: 'This field is required',
   }),
-  lastname: yup.string(),
+  lastname: yup.string().nullable(),
   email: yup.string().email(translatedErrors.email).lowercase().required({
     id: translatedErrors.required.id,
     defaultMessage: 'This field is required',
