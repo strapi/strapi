@@ -8542,6 +8542,7 @@ __metadata:
     "@radix-ui/react-toolbar": "npm:1.0.4"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin-test-utils": "workspace:*"
+    "@strapi/content-manager": "workspace:*"
     "@strapi/data-transfer": "workspace:*"
     "@strapi/design-system": "npm:2.0.0-rc.14"
     "@strapi/icons": "npm:2.0.0-rc.14"
@@ -8626,6 +8627,7 @@ __metadata:
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
   peerDependencies:
+    "@strapi/content-manager": ^5.0.0
     "@strapi/data-transfer": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0

@@ -140,6 +140,7 @@
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "workspace:*",
+    "@strapi/content-manager": "workspace:*",
     "@strapi/data-transfer": "workspace:*",
     "@strapi/pack-up": "5.0.2",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
@@ -168,6 +169,7 @@
     "vite-plugin-dts": "^4.3.0"
   },
   "peerDependencies": {
+    "@strapi/content-manager": "^5.0.0",
     "@strapi/data-transfer": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",

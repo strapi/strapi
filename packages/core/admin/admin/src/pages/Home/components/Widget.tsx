@@ -24,6 +24,7 @@ const Widget = ({ title, icon = PuzzlePiece, isLoading = false, children }: Widg
       padding={6}
       shadow="tableShadow"
       hasRadius
+      width="100%"
     >
       <Flex direction="row" alignItems="center" gap={2}>
         <Icon fill="neutral500" />

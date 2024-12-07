@@ -88,6 +88,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
               },
               meta: {
                 model: contentTypeName,
+                modelDisplayName: contentType.info.displayName,
                 kind: contentType.kind,
                 hasDraftAndPublish,
               },

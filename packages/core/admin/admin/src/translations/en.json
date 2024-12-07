@@ -65,6 +65,8 @@
   "HomePage.header.title": "Hello {name}",
   "HomePage.header.subtitle": "Welcome to your administration panel",
   "HomePage.widget.loader": "Loading widget content",
+  "HomePage.widget.last-edited.title": "Last edited entries",
+  "HomePage.widget.last-edited.single-type": "Single-Type",
   "Media Library": "Media Library",
   "New entry": "New entry",
   "Password": "Password",

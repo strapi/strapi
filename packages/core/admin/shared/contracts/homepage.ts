@@ -5,6 +5,7 @@ import type { Struct, UID } from '@strapi/types';
 export interface RecentDocument {
   kind: Struct.ContentTypeKind;
   model: UID.ContentType;
+  modelDisplayName: string;
   documentId: string;
   locale?: string;
   status?: 'draft' | 'published' | 'modified';
