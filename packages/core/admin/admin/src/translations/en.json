@@ -382,6 +382,7 @@
   "admin.pages.MarketPlacePage.subtitle": "Get more out of Strapi",
   "admin.pages.MarketPlacePage.tab-group.label": "Plugins and Providers for Strapi",
   "anErrorOccurred": "Woops! Something went wrong. Please, try again.",
+  "noPreview": "No preview available",
   "app.component.CopyToClipboard.label": "Copy to clipboard",
   "app.component.search.label": "Search for {target}",
   "app.component.table.duplicate": "Duplicate {target}",
