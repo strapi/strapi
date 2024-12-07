@@ -8,16 +8,20 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-type FetchResponse<TData = any> = {
-  data: TData;
-  status?: number;
-};
+type FetchResponse<TData = any> =
+  | {
+      data: TData;
+      status?: number;
+    }
+  | string
+  | Blob;
 
 type FetchOptions = {
   params?: any;
   signal?: AbortSignal;
   headers?: Record<string, string>;
   validateStatus?: ((status: number) => boolean) | null;
+  responseType?: 'json' | 'text' | 'blob';
 };
 
 type FetchConfig = {
@@ -117,9 +121,17 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   // Add a response interceptor to return the response
   const responseInterceptor = async <TData = any>(
     response: Response,
-    validateStatus?: FetchOptions['validateStatus']
+    validateStatus?: FetchOptions['validateStatus'],
+    responseType: FetchOptions['responseType'] = 'json'
   ): Promise<FetchResponse<TData>> => {
     try {
+      if (responseType === 'text') {
+        return response.text();
+      }
+      if (responseType === 'blob') {
+        return response.blob();
+      }
+
       const result = await response.json();
 
       /**
@@ -195,7 +207,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         headers,
       });
 
-      return responseInterceptor<TData>(response, options?.validateStatus);
+      return responseInterceptor<TData>(response, options?.validateStatus, options?.responseType);
     },
     post: async <TData, TSend = any>(
       url: string,
@@ -223,7 +235,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         headers,
         body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
       });
-      return responseInterceptor<TData>(response, options?.validateStatus);
+      return responseInterceptor<TData>(response, options?.validateStatus, options?.responseType);
     },
     put: async <TData, TSend = any>(
       url: string,
@@ -252,7 +264,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
       });
 
-      return responseInterceptor<TData>(response, options?.validateStatus);
+      return responseInterceptor<TData>(response, options?.validateStatus, options?.responseType);
     },
     del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const headers = new Headers({
@@ -266,7 +278,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         method: 'DELETE',
         headers,
       });
-      return responseInterceptor<TData>(response, options?.validateStatus);
+      return responseInterceptor<TData>(response, options?.validateStatus, options?.responseType);
     },
   };
 
