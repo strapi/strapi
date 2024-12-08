@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@radix-ui/react-toolbar": "1.0.4",
-    "@reduxjs/toolkit": "1.9.7",
+    "@reduxjs/toolkit": "2.4.0",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.0.0-rc.14",
     "@strapi/icons": "2.0.0-rc.14",

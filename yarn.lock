@@ -7086,23 +7086,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reduxjs/toolkit@npm:1.9.7":
-  version: 1.9.7
-  resolution: "@reduxjs/toolkit@npm:1.9.7"
+"@reduxjs/toolkit@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@reduxjs/toolkit@npm:2.4.0"
   dependencies:
-    immer: "npm:^9.0.21"
-    redux: "npm:^4.2.1"
-    redux-thunk: "npm:^2.4.2"
-    reselect: "npm:^4.1.8"
+    immer: "npm:^10.0.3"
+    redux: "npm:^5.0.1"
+    redux-thunk: "npm:^3.1.0"
+    reselect: "npm:^5.1.0"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18
-    react-redux: ^7.2.1 || ^8.0.2
+    react-redux: ^7.2.1 || ^8.1.3 || ^9.0.0
   peerDependenciesMeta:
     react:
       optional: true
     react-redux:
       optional: true
-  checksum: 10c0/fa0aa4b7c6973ac87ce0ac7e45faa02c73b66c4ee0bc950d178494539a42a1bb908d109297102458b7ea14d5e7dae356e7a7ce9a1b9849b0e8451e6dd70fca9c
+  checksum: 10c0/8752f18ded06727386662e2b6ea626008c5eb79630bd67ed911b7958375d25882cf2c8703f10e9c56df12c0b4123eb495aead10b0e31072196478221a9f92a74
   languageName: node
   linkType: hard
 
@@ -8515,7 +8515,7 @@ __metadata:
   resolution: "@strapi/admin-test-utils@workspace:packages/admin-test-utils"
   dependencies:
     "@juggle/resize-observer": "npm:3.4.0"
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@strapi/pack-up": "npm:5.0.2"
     "@testing-library/jest-dom": "npm:6.4.5"
     eslint-config-custom: "workspace:*"
@@ -8540,7 +8540,7 @@ __metadata:
     "@internationalized/date": "npm:3.5.4"
     "@radix-ui/react-context": "npm:1.0.1"
     "@radix-ui/react-toolbar": "npm:1.0.4"
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@strapi/admin-test-utils": "workspace:*"
     "@strapi/data-transfer": "workspace:*"
     "@strapi/design-system": "npm:2.0.0-rc.14"
@@ -8674,7 +8674,7 @@ __metadata:
   resolution: "@strapi/content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@radix-ui/react-toolbar": "npm:1.0.4"
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/admin": "workspace:*"
     "@strapi/database": "workspace:*"
@@ -8736,7 +8736,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
   dependencies:
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@strapi/admin": "workspace:*"
     "@strapi/admin-test-utils": "workspace:*"
     "@strapi/content-manager": "workspace:*"
@@ -8781,7 +8781,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/content-type-builder@workspace:packages/core/content-type-builder"
   dependencies:
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/admin": "workspace:*"
     "@strapi/design-system": "npm:2.0.0-rc.14"
@@ -9088,7 +9088,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/i18n@workspace:packages/plugins/i18n"
   dependencies:
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@strapi/admin": "workspace:*"
     "@strapi/admin-test-utils": "workspace:*"
     "@strapi/content-manager": "workspace:*"
@@ -9245,7 +9245,7 @@ __metadata:
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
     "@apidevtools/swagger-parser": "npm:^10.1.0"
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@strapi/admin": "workspace:*"
     "@strapi/admin-test-utils": "workspace:*"
     "@strapi/design-system": "npm:2.0.0-rc.14"
@@ -9513,7 +9513,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/review-workflows@workspace:packages/core/review-workflows"
   dependencies:
-    "@reduxjs/toolkit": "npm:1.9.7"
+    "@reduxjs/toolkit": "npm:2.4.0"
     "@strapi/admin": "workspace:*"
     "@strapi/content-manager": "workspace:*"
     "@strapi/design-system": "npm:2.0.0-rc.14"
@@ -20040,10 +20040,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:9.0.21, immer@npm:^9.0.21, immer@npm:^9.0.6":
+"immer@npm:9.0.21, immer@npm:^9.0.6":
   version: 9.0.21
   resolution: "immer@npm:9.0.21"
   checksum: 10c0/03ea3ed5d4d72e8bd428df4a38ad7e483ea8308e9a113d3b42e0ea2cc0cc38340eb0a6aca69592abbbf047c685dbda04e3d34bf2ff438ab57339ed0a34cc0a05
+  languageName: node
+  linkType: hard
+
+"immer@npm:^10.0.3":
+  version: 10.1.1
+  resolution: "immer@npm:10.1.1"
+  checksum: 10c0/b749e10d137ccae91788f41bd57e9387f32ea6d6ea8fd7eb47b23fd7766681575efc7f86ceef7fe24c3bc9d61e38ff5d2f49c2663b2b0c056e280a4510923653
   languageName: node
   linkType: hard
 
@@ -27343,21 +27350,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"redux-thunk@npm:^2.4.2":
-  version: 2.4.2
-  resolution: "redux-thunk@npm:2.4.2"
+"redux-thunk@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "redux-thunk@npm:3.1.0"
   peerDependencies:
-    redux: ^4
-  checksum: 10c0/e202d6ef7dfa7df08ed24cb221aa89d6c84dbaa7d65fe90dbd8e826d0c10d801f48388f9a7598a4fd970ecbc93d335014570a61ca7bc8bf569eab5de77b31a3c
+    redux: ^5.0.0
+  checksum: 10c0/21557f6a30e1b2e3e470933247e51749be7f1d5a9620069a3125778675ce4d178d84bdee3e2a0903427a5c429e3aeec6d4df57897faf93eb83455bc1ef7b66fd
   languageName: node
   linkType: hard
 
-"redux@npm:^4.2.0, redux@npm:^4.2.1":
+"redux@npm:^4.2.0":
   version: 4.2.1
   resolution: "redux@npm:4.2.1"
   dependencies:
     "@babel/runtime": "npm:^7.9.2"
   checksum: 10c0/136d98b3d5dbed1cd6279c8c18a6a74c416db98b8a432a46836bdd668475de6279a2d4fd9d1363f63904e00f0678a8a3e7fa532c897163340baf1e71bb42c742
+  languageName: node
+  linkType: hard
+
+"redux@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "redux@npm:5.0.1"
+  checksum: 10c0/b10c28357194f38e7d53b760ed5e64faa317cc63de1fb95bc5d9e127fab956392344368c357b8e7a9bedb0c35b111e7efa522210cfdc3b3c75e5074718e9069c
   languageName: node
   linkType: hard
 
@@ -27610,10 +27624,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reselect@npm:^4.1.8":
-  version: 4.1.8
-  resolution: "reselect@npm:4.1.8"
-  checksum: 10c0/06a305a504affcbb67dd0561ddc8306b35796199c7e15b38934c80606938a021eadcf68cfd58e7bb5e17786601c37602a3362a4665c7bf0a96c1041ceee9d0b7
+"reselect@npm:^5.1.0":
+  version: 5.1.1
+  resolution: "reselect@npm:5.1.1"
+  checksum: 10c0/219c30da122980f61853db3aebd173524a2accd4b3baec770e3d51941426c87648a125ca08d8c57daa6b8b086f2fdd2703cb035dd6231db98cdbe1176a71f489
   languageName: node
   linkType: hard
 
