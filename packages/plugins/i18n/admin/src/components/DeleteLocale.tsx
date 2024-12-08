@@ -28,7 +28,7 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
     try {
       const res = await deleteLocale(id);
 
-      if ('error' in res) {
+      if (res.error) {
         toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
         return;

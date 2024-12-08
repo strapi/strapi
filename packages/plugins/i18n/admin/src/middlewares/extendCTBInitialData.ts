@@ -5,7 +5,7 @@ const extendCTBInitialDataMiddleware: () => Middleware<
   object,
   ReturnType<Store['getState']>
 > = () => {
-  return () => (next) => (action) => {
+  return () => (next) => (action: any) => {
     if (
       action.type === 'ContentTypeBuilder/FormModal/SET_DATA_TO_EDIT' &&
       action.modalType === 'contentType'

@@ -116,7 +116,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
     try {
       const res = await createLocale(values);
 
-      if ('error' in res) {
+      if (res.error) {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else {

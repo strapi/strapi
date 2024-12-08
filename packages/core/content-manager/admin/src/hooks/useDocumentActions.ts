@@ -209,7 +209,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(res.error),
@@ -256,7 +256,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(res.error),
@@ -302,7 +302,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(res.error),
@@ -346,7 +346,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
           return { error: res.error };
         }
@@ -385,7 +385,7 @@ const useDocumentActions: UseDocumentActions = () => {
           documentIds,
           params,
         });
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
           return { error: res.error };
         }
@@ -430,7 +430,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           trackUsage('didNotEditEntry', { error: res.error, ...trackerProperty });
@@ -478,7 +478,7 @@ const useDocumentActions: UseDocumentActions = () => {
           },
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           return { error: res.error };
@@ -519,7 +519,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           return { error: res.error };
@@ -561,7 +561,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           trackUsage('didNotCreateEntry', { error: res.error, ...trackerProperty });
@@ -593,7 +593,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, toggleNotification, trackUsage]
+    [createDocument, formatAPIError, formatMessage, toggleNotification, trackUsage, setCurrentStep]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
@@ -605,7 +605,7 @@ const useDocumentActions: UseDocumentActions = () => {
           sourceId,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           return { error: res.error };
         }
 
@@ -648,7 +648,7 @@ const useDocumentActions: UseDocumentActions = () => {
           params,
         });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           trackUsage('didNotCreateEntry', { error: res.error, ...trackerProperty });

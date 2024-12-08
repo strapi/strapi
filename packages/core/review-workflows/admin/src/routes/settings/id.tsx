@@ -195,7 +195,7 @@ const EditPage = () => {
           stageRequiredToPublishName,
         });
 
-        if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+        if (res.error && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         }
       } else {
@@ -204,9 +204,9 @@ const EditPage = () => {
           stageRequiredToPublishName,
         });
 
-        if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+        if (res.error && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
-        } else if ('data' in res) {
+        } else if (res.data) {
           navigate(`../${res.data.id}`, { replace: true });
         }
       }
