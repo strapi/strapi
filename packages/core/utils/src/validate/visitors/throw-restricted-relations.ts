@@ -1,6 +1,7 @@
 import * as contentTypeUtils from '../../content-types';
 import { throwInvalidParam } from '../utils';
 import type { Visitor } from '../../traverse/factory';
+import { VALID_RELATION_ORDERING_KEYS } from '../../relations';
 
 const ACTIONS_TO_VERIFY = ['find'];
 const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypeUtils.constants;
@@ -20,7 +21,41 @@ export default (auth: unknown): Visitor =>
     }
 
     const handleMorphRelation = async () => {
-      for (const element of (data as Record<string, MorphArray>)[key]) {
+      const elements: any = (data as Record<string, MorphArray>)[key];
+
+      if ('connect' in elements || 'set' in elements || 'disconnect' in elements) {
+        await handleMorphElements(elements.connect || []);
+        await handleMorphElements(elements.set || []);
+        await handleMorphElements(elements.disconnect || []);
+
+        if ('options' in elements) {
+          if (elements.options === null || elements.options === undefined) {
+            return;
+          }
+
+          if (typeof elements.options !== 'object') {
+            throwInvalidParam({ key });
+          }
+
+          const optionKeys = Object.keys(elements.options);
+
+          // Validate each key based on its validator function
+          for (const key of optionKeys) {
+            if (!(key in VALID_RELATION_ORDERING_KEYS)) {
+              throwInvalidParam({ key });
+            }
+            if (!VALID_RELATION_ORDERING_KEYS[key](elements.options[key])) {
+              throwInvalidParam({ key });
+            }
+          }
+        }
+      } else {
+        await handleMorphElements(elements);
+      }
+    };
+
+    const handleMorphElements = async (elements: any[]) => {
+      for (const element of elements) {
         const scopes = ACTIONS_TO_VERIFY.map((action) => `${element.__type}.${action}`);
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
