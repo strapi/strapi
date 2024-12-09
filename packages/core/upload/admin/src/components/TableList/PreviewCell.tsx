@@ -1,5 +1,13 @@
 import { Avatar, Box, Flex } from '@strapi/design-system';
-import { Folder } from '@strapi/icons';
+import {
+  File as FileIcon,
+  FileCsv,
+  FilePdf,
+  FileXls,
+  FileZip,
+  Folder,
+  VolumeUp,
+} from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -60,6 +68,8 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
 
   const { alternativeText, ext, formats, mime, name, url } = content;
 
+  const fileExtension = getFileExtension(ext);
+
   if (mime?.includes(AssetType.Image)) {
     const mediaURL =
       prefixFileUrlWithBackendUrl(formats?.thumbnail?.url) ?? prefixFileUrlWithBackendUrl(url);
@@ -86,9 +96,51 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
     );
   }
 
+  if (mime?.includes(AssetType.Audio)) {
+    return (
+      <Flex
+        background="neutral100"
+        borderRadius="100%"
+        color="neutral500"
+        width="3.2rem"
+        height="3.2rem"
+        justifyContent="center"
+      >
+        <VolumeUp width={16} height={16} />
+      </Flex>
+    );
+  }
+
+  let DocIcon;
+
+  switch (fileExtension) {
+    case 'pdf':
+      DocIcon = FilePdf;
+      break;
+    case 'csv':
+      DocIcon = FileCsv;
+      break;
+    case 'xls':
+      DocIcon = FileXls;
+      break;
+    case 'zip':
+      DocIcon = FileZip;
+      break;
+    default:
+      DocIcon = FileIcon;
+      break;
+  }
+
   return (
-    <Box background="secondary100" color="secondary600" width="3.2rem" height="3.2rem">
-      {getFileExtension(ext)}
-    </Box>
+    <Flex
+      justifyContent="center"
+      borderRadius="100%"
+      background="neutral100"
+      color="neutral500"
+      width="3.2rem"
+      height="3.2rem"
+    >
+      <DocIcon width={16} height={16} />
+    </Flex>
   );
 };
