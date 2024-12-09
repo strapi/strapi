@@ -50,8 +50,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 
   const generateFileName = (name: string) => {
+    const config = strapi.config.get<Config>('plugin::upload');
     const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
-
+    if (config.randomSuffix === false) {
+      return baseName;
+    }
     return `${baseName}_${randomSuffix()}`;
   };
 
