@@ -63,7 +63,7 @@ export interface AssetCardBaseProps {
 export const AssetCardBase = ({
   children,
   extension,
-  isSelectable = true,
+  isSelectable = false,
   name,
   onSelect,
   onRemove,
