@@ -12,15 +12,26 @@ export interface AddAttribute {
   media?: { multiple: boolean };
   enumeration?: { values: string[] };
   component?: { useExisting?: string; options: Partial<AddComponentOptions> };
+  dz?: {
+    components: AddComponentAttribute[];
+    options: Partial<AddDynamicZoneOptions>;
+  };
 }
 
 interface AddComponentAttribute extends AddAttribute {
   type: 'component';
 }
 
+interface AddDynamicZoneAttribute extends AddAttribute {
+  type: 'dz';
+}
+
 // Type guard function to check if an attribute is a ComponentAttribute
 function isComponentAttribute(attribute: AddAttribute): attribute is AddComponentAttribute {
   return attribute.type === 'component';
+}
+function isDynamicZoneAttribute(attribute: AddAttribute): attribute is AddDynamicZoneAttribute {
+  return attribute.type === 'dz';
 }
 
 // Enumeration needs "values"
@@ -57,6 +68,8 @@ type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
 
+type AddDynamicZoneOptions = {};
+
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
@@ -79,6 +92,7 @@ const typeMap = {
   markdown: { buttonName: 'Rich text (Markdown)', listLabel: 'Rich text (Markdown)' },
   component: { buttonName: 'Component', listLabel: 'Component' },
   component_repeatable: { buttonName: 'Component', listLabel: 'Component (repeatable)' },
+  dz: { buttonName: 'Dynamic Zone', listLabel: 'Dynamic Zone' },
 };
 
 const getAttributeIdentifiers = (attribute: AddAttribute) => {
@@ -156,7 +170,9 @@ export const fillAddComponentAttribute = async (
     // open the list
     await page.getByRole('combobox', { name: 'component' }).click();
     // select the item
-    const item = page.getByText(new RegExp(component.useExisting, 'i')).nth(1);
+    const item = page
+      .locator('[role="presentation"] [role="option"]')
+      .filter({ hasText: new RegExp(component.useExisting, 'i') });
 
     await item.scrollIntoViewIfNeeded();
     await item.click();
@@ -171,46 +187,71 @@ function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export const addComponentAttribute = async (page: Page, attribute: AddComponentAttribute) => {
+export const addComponentAttribute = async (
+  page: Page,
+  attribute: AddComponentAttribute,
+  inOptions: any = {}
+) => {
   const options = attribute.component.options;
   await fillCreateComponent(page, { ...options, name: attribute.name });
 
   const useExisting = attribute.component.useExisting ? 'false' : 'true';
   await page.click(`label[for="${useExisting}"]`);
 
-  if (attribute.component.useExisting) {
-    await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
-  } else {
-    await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
-  }
+  if (!inOptions?.fromDz) {
+    if (attribute.component.useExisting) {
+      await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
+    } else {
+      await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
+    }
 
-  await fillAddComponentAttribute(page, attribute.component);
+    await fillAddComponentAttribute(page, attribute.component);
+  }
 
   if (options.attributes) {
     await clickAndWait(
       page,
       page.getByRole('button', { name: new RegExp('Add first field to the component', 'i') })
     );
-    await addAttributes(page, options.attributes, { clickFinish: false });
+    await addAttributes(page, options.attributes, { clickFinish: false, ...inOptions });
   }
 };
 
-export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
-  // find the tabpanel with attributes by looking for text we know it contains
-  const tabPanel = page.getByRole('tabpanel');
+export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZoneAttribute) => {
+  const options = attribute.dz.options;
 
-  // Target a button within tabPanel that contains a span with the exact text of attribute.type
+  await page.getByLabel('Name', { exact: true }).fill(attribute.name);
+
   await clickAndWait(
     page,
-    tabPanel.locator(`button:has(span)`, {
-      hasText: new RegExp(`^${escapeRegExp(getAttributeIdentifiers(attribute).buttonName)}`, 'i'),
-    })
+    page.getByRole('button', { name: new RegExp('Add components to the zone', 'i') })
   );
+
+  await addAttributes(page, attribute.dz.components, { clickFinish: false, fromDz: true });
+};
+
+export const fillAttribute = async (page: Page, attribute: AddAttribute, options?: any) => {
+  // check if we need to click the attribute button or if we're already on the attribute to fill
+  const onFieldTypeSelection = await page
+    .getByRole('heading', { name: /Select a field for your/i })
+    .isVisible({ timeout: 0 });
+
+  if (onFieldTypeSelection) {
+    const tabPanel = page.getByRole('tabpanel');
+    // Target a button within tabPanel that contains a span with the exact text of attribute.type
+    await clickAndWait(
+      page,
+      tabPanel.locator(`button:has(span)`, {
+        hasText: new RegExp(`^${escapeRegExp(getAttributeIdentifiers(attribute).buttonName)}`, 'i'),
+      })
+    );
+  }
 
   // components are handled separately
   if (isComponentAttribute(attribute)) {
-    await addComponentAttribute(page, attribute);
-    return;
+    return await addComponentAttribute(page, attribute, options);
+  } else if (isDynamicZoneAttribute(attribute)) {
+    return await addDynamicZoneAttribute(page, attribute);
   }
 
   // Fill the input with the exact label "Name"
@@ -254,7 +295,7 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute) => {
 export const addAttributes = async (page: Page, attributes: AddAttribute[], options?: any) => {
   for (let i = 0; i < attributes.length; i++) {
     const attribute = attributes[i];
-    await fillAttribute(page, attribute);
+    await fillAttribute(page, attribute, options);
 
     if (i < attributes.length - 1) {
       // Not the last attribute, click 'Add Another Field'

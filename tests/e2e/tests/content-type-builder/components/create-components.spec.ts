@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { resetFiles } from '../../../utils/file-reset';
 import { sharedSetup } from '../../../utils/setup';
 import { createComponent, type AddAttribute } from '../../../utils/content-types';
@@ -83,7 +83,7 @@ test.describe('Create a new component', () => {
           options: {
             repeatable: true,
             name: 'testnewcomponent3',
-            icon: 'alien',
+            icon: 'moon',
             categorySelect: 'testcategory',
             attributes: [{ type: 'text', name: 'testcompotext' }],
           },
@@ -98,7 +98,7 @@ test.describe('Create a new component', () => {
           options: {
             repeatable: false,
             name: 'testexistingcomponentexistingcategory',
-            icon: 'alien',
+            icon: 'leaf',
             categorySelect: 'testcategory',
           },
         },
