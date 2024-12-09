@@ -9,6 +9,7 @@ import * as token from '../services/token';
 import * as apiToken from '../services/api-token';
 import * as projectSettings from '../services/project-settings';
 import * as transfer from '../services/transfer';
+import { createHomepageService } from '../services/homepage';
 
 type S = {
   role: typeof role;
@@ -22,6 +23,7 @@ type S = {
   'api-token': typeof apiToken;
   'project-settings': typeof projectSettings;
   transfer: typeof transfer;
+  homepage: ReturnType<typeof createHomepageService>;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };
