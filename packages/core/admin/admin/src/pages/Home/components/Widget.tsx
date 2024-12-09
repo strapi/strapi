@@ -1,17 +1,16 @@
 import * as React from 'react';
 
 import { Box, Flex, Loader, Typography } from '@strapi/design-system';
-import { PuzzlePiece } from '@strapi/icons';
+import { PuzzlePiece, WarningCircle } from '@strapi/icons';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
-interface WidgetProps {
+interface RootProps {
   title: MessageDescriptor;
   icon?: typeof import('@strapi/icons').PuzzlePiece;
   children: React.ReactNode;
-  isLoading?: boolean;
 }
 
-const Widget = ({ title, icon = PuzzlePiece, isLoading = false, children }: WidgetProps) => {
+const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
   const { formatMessage } = useIntl();
   const Icon = icon;
 
@@ -32,21 +31,64 @@ const Widget = ({ title, icon = PuzzlePiece, isLoading = false, children }: Widg
         </Typography>
       </Flex>
       <Box width="100%" height="256px" overflow="auto">
-        {isLoading ? (
-          <Flex direction="column" height="100%" justifyContent="center" alignItems="center">
-            <Loader>
-              {formatMessage({
-                id: 'HomePage.widget.loader',
-                defaultMessage: 'Loading widget content',
-              })}
-            </Loader>
-          </Flex>
-        ) : (
-          children
-        )}
+        {children}
       </Box>
     </Flex>
   );
+};
+
+interface LoadingProps {
+  children?: React.ReactNode;
+}
+
+const Loading = ({ children }: LoadingProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex direction="column" height="100%" justifyContent="center" alignItems="center">
+      <Loader>
+        {children ??
+          formatMessage({
+            id: 'HomePage.widget.loading',
+            defaultMessage: 'Loading widget content',
+          })}
+      </Loader>
+    </Flex>
+  );
+};
+
+interface ErrorProps {
+  children?: React.ReactNode;
+}
+
+const Error = ({ children }: ErrorProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={2}>
+      <WarningCircle width="3.2rem" height="3.2rem" fill="danger600" />
+      <Typography variant="delta">
+        {formatMessage({
+          id: 'global.error',
+          defaultMessage: 'Something went wrong',
+        })}
+      </Typography>
+      {children ?? (
+        <Typography textColor="neutral600">
+          {formatMessage({
+            id: 'HomePage.widget.error',
+            defaultMessage: "Couldn't load widget content.",
+          })}
+        </Typography>
+      )}
+    </Flex>
+  );
+};
+
+const Widget = {
+  Root,
+  Loading,
+  Error,
 };
 
 export { Widget };
