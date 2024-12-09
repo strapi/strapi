@@ -15,7 +15,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const coreStore = strapi.db.query('strapi::core-store');
 
   return {
-    async getRecentUpdates(): Promise<GetRecentDocuments.Response['data']> {
+    async getActivityForAction(
+      action: 'update' | 'publish'
+    ): Promise<GetRecentDocuments.Response['data']> {
       // Get all the content types the user has permissions to read
       const readPermissions = await permissionService.findMany({
         where: {
@@ -23,9 +25,18 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
           action: 'plugin::content-manager.explorer.read',
         },
       });
-      const allowedContentTypeNames = readPermissions
+      const permittedContentTypeNames = readPermissions
         .map((permission) => permission.subject)
         .filter(Boolean) as UID.ContentType[];
+
+      // Setup for the provided action
+      const allowedContentTypeNames =
+        action === 'publish'
+          ? permittedContentTypeNames.filter((contentType) => {
+              return contentTypes.hasDraftAndPublish(strapi.contentType(contentType));
+            })
+          : permittedContentTypeNames;
+      const actionColumn = action === 'publish' ? 'publishedAt' : 'updatedAt';
 
       // Fetch the configuration for each content type in a single query
       const rawConfigurations = await coreStore.findMany({
@@ -37,10 +48,10 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
           },
         },
       });
+
       const configurations = rawConfigurations.map((rawConfiguration) => {
         return JSON.parse(rawConfiguration.value);
       });
-
       const recentDocuments = await Promise.all(
         allowedContentTypeNames.map(async (contentTypeName) => {
           const configuration = configurations.find((config) => config.uid === contentTypeName);
@@ -67,8 +78,10 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           const documents = await strapi.documents(contentTypeName).findMany({
             limit: MAX_DOCUMENTS,
-            sort: 'updatedAt:desc',
+            // Won't updatedAt always be the same as publishedAt if we are fetching the published document?
+            sort: `${actionColumn}:desc`,
             fields,
+            status: action === 'publish' ? 'published' : undefined,
           });
 
           return documents.map((document) => {
@@ -83,6 +96,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
             return {
               data: {
                 ...document,
+                ...(document.publishedAt && { publishedAt: new Date(document.publishedAt) }),
                 updatedAt: new Date(document.updatedAt),
                 title: mainFieldValue,
               },
@@ -98,7 +112,9 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const overallRecentDocuments = recentDocuments
         .flat()
-        .sort((a, b) => b.data.updatedAt.valueOf() - a.data.updatedAt.valueOf())
+        .sort((a, b) => {
+          return b.data[actionColumn].valueOf() - a.data[actionColumn].valueOf();
+        })
         .slice(0, MAX_DOCUMENTS);
 
       return Promise.all(

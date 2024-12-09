@@ -16,8 +16,7 @@ export declare namespace GetRecentDocuments {
   export interface Request {
     body: {};
     query: {
-      // TODO union with "publish"
-      action: 'update';
+      action: 'update' | 'publish';
     };
   }
 
