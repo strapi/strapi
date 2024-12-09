@@ -1,10 +1,10 @@
-import type { Core, Data, Schema, Struct } from '@strapi/types';
+import type { Core, Data, Modules, Schema, Struct, UID } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
-import { omit } from 'lodash/fp';
+import { omit, set } from 'lodash/fp';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
-import {
+import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
@@ -59,15 +59,40 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         serviceUtils.getLocaleDictionary(),
       ]);
       const populateEntryRelations = async (
-        entry: HistoryVersionQueryResult
+        entry: Pick<HistoryVersionQueryResult, 'data' | 'schema'>,
+        initialData: Promise<Modules.Documents.AnyDocument> = Promise.resolve(entry.data),
+        componentKeyPath: string[] = []
       ): Promise<CreateHistoryVersion['data']> => {
         const entryWithRelations = await Object.entries(entry.schema).reduce(
-          async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
+          async (
+            currentDataWithRelations,
+            [attributeKey, attributeSchema]
+          ): Promise<Modules.Documents.AnyDocument> => {
             const attributeValue = entry.data[attributeKey];
-
             const attributeValues = Array.isArray(attributeValue)
               ? attributeValue
               : [attributeValue];
+
+            if (attributeSchema.type === 'component' && attributeValue) {
+              const nextComponent = serviceUtils.getNextComponent(
+                componentKeyPath,
+                attributeKey,
+                attributeSchema
+              );
+
+              if (!nextComponent) {
+                return currentDataWithRelations;
+              }
+
+              return populateEntryRelations(
+                {
+                  data: attributeValue,
+                  schema: nextComponent.schema.attributes,
+                },
+                currentDataWithRelations,
+                nextComponent.keyPath
+              );
+            }
 
             if (attributeSchema.type === 'media') {
               const permissionChecker = getContentManagerService('permission-checker').create({
@@ -80,13 +105,16 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                 response.results.map((media) => permissionChecker.sanitizeOutput(media))
               );
 
-              return {
-                ...(await currentDataWithRelations),
-                [attributeKey]: {
-                  results: sanitizedResults,
-                  meta: response.meta,
-                },
-              };
+              const keyPathToUpdate = componentKeyPath.length
+                ? `${componentKeyPath.join('.')}.${attributeKey}`
+                : attributeKey;
+              const currentData = { ...(await currentDataWithRelations) };
+
+              return set(
+                keyPathToUpdate,
+                { results: sanitizedResults, meta: response.meta },
+                currentData
+              );
             }
 
             // TODO: handle relations that are inside components
@@ -153,7 +181,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             // Not a media or relation, nothing to change
             return currentDataWithRelations;
           },
-          Promise.resolve(entry.data)
+          initialData
         );
 
         return entryWithRelations;
@@ -198,45 +226,99 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Clone to avoid mutating the original version data
         structuredClone(version.data)
       );
-      const sanitizedSchemaAttributes = omit(
-        FIELDS_TO_IGNORE,
-        contentTypeSchemaAttributes
-      ) as Struct.SchemaAttributes;
 
-      // Set all deleted relation values to null
-      const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
-      const dataWithoutMissingRelations = await reducer(
-        async (
-          previousRelationAttributes: Record<string, unknown>,
-          [name, attribute]: [string, Schema.Attribute.AnyAttribute]
-        ) => {
-          const versionRelationData = version.data[name];
-          if (!versionRelationData) {
+      const getDataWithoutMissingRelations = async (
+        entry: Pick<HistoryVersionQueryResult, 'data' | 'schema'> & {
+          component?: UID.Component;
+        } = version,
+        initialData: Record<string, unknown> = structuredClone(dataWithoutAddedAttributes),
+        componentKeyPath: string[] = []
+      ): Promise<Record<string, unknown> | undefined> => {
+        /**
+         * When a component uid is provided, we get the attributes for that component
+         * Otherwise, we assume we are at the root level of the version,
+         * so we can use the attributes we already got for version.contentType
+         */
+        const schemaAttributes = entry.component
+          ? strapi.getModel(entry.component).attributes
+          : contentTypeSchemaAttributes;
+        const sanitizedSchemaAttributes = omit(
+          FIELDS_TO_IGNORE,
+          schemaAttributes
+        ) as Struct.SchemaAttributes;
+
+        // Create the reducer for the provided schema attributes
+        const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
+        const dataWithoutMisisingRelations = await reducer(
+          async (
+            previousRelationAttributes: Record<string, unknown>,
+            [attributeKey, attributeSchema]: [string, Schema.Attribute.AnyAttribute]
+          ) => {
+            const versionRelationData = entry.data[attributeKey];
+            if (!versionRelationData) {
+              return previousRelationAttributes;
+            }
+
+            if (attributeSchema.type === 'component' && versionRelationData) {
+              const nextComponent = serviceUtils.getNextComponent(
+                componentKeyPath,
+                attributeKey,
+                attributeSchema
+              );
+
+              if (!nextComponent) {
+                return previousRelationAttributes;
+              }
+
+              return getDataWithoutMissingRelations(
+                {
+                  data: versionRelationData,
+                  schema: nextComponent.schema.attributes,
+                  component: nextComponent.schema.uid,
+                },
+                previousRelationAttributes,
+                nextComponent.keyPath
+              );
+            }
+
+            if (
+              attributeSchema.type === 'relation' &&
+              // TODO: handle polymorphic relations
+              attributeSchema.relation !== 'morphToOne' &&
+              attributeSchema.relation !== 'morphToMany'
+            ) {
+              const data = await serviceUtils.getRelationRestoreValue(
+                versionRelationData,
+                attributeSchema
+              );
+              previousRelationAttributes[attributeKey] = data;
+            }
+
+            if (attributeSchema.type === 'media') {
+              const data = await serviceUtils.getMediaRestoreValue(
+                versionRelationData,
+                attributeSchema
+              );
+
+              const keyPathToUpdate = componentKeyPath.length
+                ? `${componentKeyPath.join('.')}.${attributeKey}`
+                : attributeKey;
+
+              return set(keyPathToUpdate, data, previousRelationAttributes);
+            }
+
             return previousRelationAttributes;
-          }
+          },
+          initialData
+        );
 
-          if (
-            attribute.type === 'relation' &&
-            // TODO: handle polymorphic relations
-            attribute.relation !== 'morphToOne' &&
-            attribute.relation !== 'morphToMany'
-          ) {
-            const data = await serviceUtils.getRelationRestoreValue(versionRelationData, attribute);
-            previousRelationAttributes[name] = data;
-          }
+        return dataWithoutMisisingRelations;
+      };
 
-          if (attribute.type === 'media') {
-            const data = await serviceUtils.getMediaRestoreValue(versionRelationData, attribute);
-            previousRelationAttributes[name] = data;
-          }
-
-          return previousRelationAttributes;
-        },
-        // Clone to avoid mutating the original version data
-        structuredClone(dataWithoutAddedAttributes)
+      const data = omit(
+        ['id', ...Object.keys(schemaDiff.removed)],
+        await getDataWithoutMissingRelations()
       );
-
-      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
         locale: version.locale,
