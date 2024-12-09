@@ -98,7 +98,7 @@ test.describe('Create a new component', () => {
           options: {
             repeatable: false,
             name: 'testexistingcomponentexistingcategory',
-            icon: 'leaf',
+            icon: 'globe',
             categorySelect: 'testcategory',
           },
         },
@@ -109,7 +109,7 @@ test.describe('Create a new component', () => {
 
     const options = {
       name: 'ArticlesComponent',
-      categorySelect: 'BlogPosts', // this time we select the previously created category
+      categorySelect: 'product', // use a category we know exists in the test data
       icon: 'paint',
       attributes,
     };
