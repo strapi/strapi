@@ -5,8 +5,7 @@ import { useIntl } from 'react-intl';
 
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';
-import { useDoc } from '../hooks/useDocument';
-import { useDocLayout } from '../hooks/useDocumentLayout';
+import { useContentManagerContext } from '../hooks/useDocument';
 import { useTypedSelector } from '../modules/hooks';
 import { useUpdateContentTypeConfigurationMutation } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
@@ -19,8 +18,13 @@ const EditConfigurationPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const { isLoading: isLoadingSchema, schema, model } = useDoc();
-  const { isLoading: isLoadingLayout, error, list, edit } = useDocLayout();
+  const {
+    isLoading: isLoadingContentManagerContext,
+    contentType: schema,
+    model,
+    error,
+    layout: { list, edit },
+  } = useContentManagerContext();
 
   const {
     fieldSizes,
@@ -55,8 +59,7 @@ const EditConfigurationPage = () => {
     }
   }, [errorFieldSizes, formatAPIError, toggleNotification]);
 
-  const isLoading =
-    isLoadingSchema || isLoadingLayout || isLoadingFieldSizes || isFetchingFieldSizes;
+  const isLoading = isLoadingContentManagerContext || isLoadingFieldSizes || isFetchingFieldSizes;
 
   const [updateConfiguration] = useUpdateContentTypeConfigurationMutation();
   const handleSubmit: ConfigurationFormProps['onSubmit'] = async (data) => {
