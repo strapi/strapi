@@ -17,7 +17,7 @@ test.describe('Edit single type', () => {
       login: true,
       skipTour: true,
       resetFiles: true,
-      importData: 'with-admin.tar',
+      importData: 'with-admin',
     });
 
     // Then go to our content type

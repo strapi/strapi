@@ -1,9 +1,9 @@
-import { resolve, join } from 'path';
+import { resolve } from 'path';
 import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../constants';
 
 const {
-  file: {
-    providers: { createLocalFileSourceProvider },
+  directory: {
+    providers: { createLocalDirectorySourceProvider },
   },
   strapi: {
     providers: { createRemoteStrapiDestinationProvider },
@@ -79,10 +79,8 @@ export const resetDatabaseAndImportDataFromPath = async (
 };
 
 const createSourceProvider = (filePath: string) =>
-  createLocalFileSourceProvider({
-    file: { path: filePath },
-    encryption: { enabled: false },
-    compression: { enabled: false },
+  createLocalDirectorySourceProvider({
+    directory: { path: filePath },
   });
 
 const createDestinationProvider = (
