@@ -24,6 +24,7 @@ import {
   LANGUAGE_LOCAL_STORAGE_KEY,
   ThemeName,
   getStoredToken,
+  initialize,
 } from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
@@ -436,24 +437,21 @@ class StrapiApp {
     const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
       'en') as keyof typeof localeNames;
 
-    this.store = configureStore(
-      {
-        admin_app: {
-          permissions: merge({}, ADMIN_PERMISSIONS_CE, ADMIN_PERMISSIONS_EE),
-          theme: {
-            availableThemes: [],
-            currentTheme: (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system') as ThemeName,
-          },
-          language: {
-            locale: localeNames[locale] ? locale : 'en',
-            localeNames,
-          },
-          token: getStoredToken(),
+    this.store = configureStore(this.middlewares, this.reducers) as Store;
+    this.store.dispatch(
+      initialize({
+        permissions: merge({}, ADMIN_PERMISSIONS_CE, ADMIN_PERMISSIONS_EE),
+        theme: {
+          availableThemes: [],
+          currentTheme: (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system') as ThemeName,
         },
-      },
-      this.middlewares,
-      this.reducers
-    ) as Store;
+        language: {
+          locale: localeNames[locale] ? locale : 'en',
+          localeNames,
+        },
+        token: getStoredToken(),
+      })
+    );
 
     const router = this.router.createRouter(this, {
       basename: getBasename(),

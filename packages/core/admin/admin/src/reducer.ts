@@ -55,6 +55,9 @@ const adminSlice = createSlice({
     } as AppState;
   },
   reducers: {
+    initialize(state, action: PayloadAction<AppState>) {
+      state = action.payload;
+    },
     setAppTheme(state, action: PayloadAction<ThemeName>) {
       state.theme.currentTheme = action.payload;
       window.localStorage.setItem(THEME_LOCAL_STORAGE_KEY, action.payload);
@@ -94,8 +97,8 @@ const adminSlice = createSlice({
 
 const reducer = adminSlice.reducer;
 
-export const { setAppTheme, setAvailableThemes, setLocale, setToken, logout, login } =
+export const { initialize, setAppTheme, setAvailableThemes, setLocale, setToken, logout, login } =
   adminSlice.actions;
 
-export { reducer, THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY };
+export { adminSlice, reducer, THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY };
 export type { AppState, ThemeName };

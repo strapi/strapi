@@ -6,9 +6,10 @@ import {
   combineReducers,
   MiddlewareAPI,
   isRejected,
+  combineSlices,
 } from '@reduxjs/toolkit';
 
-import { reducer as appReducer, AppState, logout } from '../../reducer';
+import { reducer as appReducer, adminSlice, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
 
 /**
@@ -47,12 +48,13 @@ type PreloadState = Partial<{
   admin_app: AppState;
 }>;
 
+const rootReducer = combineSlices(adminApi, adminSlice);
+
 /**
  * @description This is the main store configuration function, injected Reducers use our legacy app.addReducer API,
  * which we're trying to phase out. App Middlewares could potentially be improved...?
  */
 const configureStoreImpl = (
-  preloadedState: PreloadState = {},
   appMiddlewares: Array<() => Middleware> = [],
   injectedReducers: Record<string, Reducer> = {}
 ) => {
@@ -68,9 +70,6 @@ const configureStoreImpl = (
   }
 
   const store = configureStore({
-    preloadedState: {
-      admin_app: preloadedState.admin_app,
-    },
     reducer: coreReducers,
     devTools: process.env.NODE_ENV !== 'production',
     middleware: (getDefaultMiddleware) => [
