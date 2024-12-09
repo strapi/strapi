@@ -154,8 +154,8 @@ export interface IAsset {
   filepath: string;
   stream: Readable;
   stats: IAssetStats;
+  metadata: IFile;
   buffer?: Buffer;
-  metadata?: IFile;
 }
 
 export interface IAssetStats {
