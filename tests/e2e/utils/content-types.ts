@@ -190,15 +190,15 @@ function escapeRegExp(string: string) {
 export const addComponentAttribute = async (
   page: Page,
   attribute: AddComponentAttribute,
-  inOptions: any = {}
+  options: any = {}
 ) => {
-  const options = attribute.component.options;
-  await fillCreateComponent(page, { ...options, name: attribute.name });
+  const attrCompOptions = attribute.component.options;
+  await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
 
   const useExisting = attribute.component.useExisting ? 'false' : 'true';
   await page.click(`label[for="${useExisting}"]`);
 
-  if (!inOptions?.fromDz) {
+  if (!options?.fromDz) {
     if (attribute.component.useExisting) {
       await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
     } else {
@@ -208,12 +208,12 @@ export const addComponentAttribute = async (
     await fillAddComponentAttribute(page, attribute.component);
   }
 
-  if (options.attributes) {
+  if (attrCompOptions.attributes) {
     await clickAndWait(
       page,
       page.getByRole('button', { name: new RegExp('Add first field to the component', 'i') })
     );
-    await addAttributes(page, options.attributes, { clickFinish: false, ...inOptions });
+    await addAttributes(page, attrCompOptions.attributes, { clickFinish: false, ...options });
   }
 };
 
