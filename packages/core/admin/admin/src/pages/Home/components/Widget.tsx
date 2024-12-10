@@ -97,7 +97,7 @@ const NoData = ({ children }: NoDataProps) => {
     <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={6}>
       <EmptyDocuments width="16rem" height="8.8rem" />
       <Typography textColor="neutral600">
-        {children ||
+        {children ??
           formatMessage({
             id: 'HomePage.widget.no-data',
             defaultMessage: 'No content found.',
