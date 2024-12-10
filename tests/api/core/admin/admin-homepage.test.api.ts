@@ -175,13 +175,13 @@ describe('Homepage API', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toHaveLength(4);
     expect(response.body.data[0].title).toBe('tag-8');
-    expect(response.body.data[0].model).toBe('api::tag.tag');
+    expect(response.body.data[0].contentTypeUid).toBe('api::tag.tag');
     expect(response.body.data[1].title).toBe('global-7');
-    expect(response.body.data[1].model).toBe('api::global.global');
+    expect(response.body.data[1].contentTypeUid).toBe('api::global.global');
     expect(response.body.data[2].title).toBe('Article 6');
-    expect(response.body.data[2].model).toBe('api::article.article');
+    expect(response.body.data[2].contentTypeUid).toBe('api::article.article');
     expect(response.body.data[3].title).toBe('tag-5');
-    expect(response.body.data[3].model).toBe('api::tag.tag');
+    expect(response.body.data[3].contentTypeUid).toBe('api::tag.tag');
   });
 
   it('finds the most recently published documents', async () => {

@@ -9,11 +9,11 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const permissionService = strapi.admin.services.permission as typeof import('./permission');
 
   type ContentTypeConfiguration = {
-    uid: RecentDocument['model'];
+    uid: RecentDocument['contentTypeUid'];
     settings: { mainField: string };
   };
   const getConfiguration = async (
-    contentTypeUids: RecentDocument['model'][]
+    contentTypeUids: RecentDocument['contentTypeUid'][]
   ): Promise<ContentTypeConfiguration[]> => {
     /**
      * Don't use the strapi.store util because we need to make
@@ -45,7 +45,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     return readPermissions
       .map((permission) => permission.subject)
-      .filter(Boolean) as RecentDocument['model'][];
+      .filter(Boolean) as RecentDocument['contentTypeUid'][];
   };
 
   type DocumentMeta = {
@@ -53,11 +53,11 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     mainField: string;
     contentType: Schema.ContentType;
     hasDraftAndPublish: boolean;
-    uid: RecentDocument['model'];
+    uid: RecentDocument['contentTypeUid'];
   };
 
   const getDocumentsMetaData = (
-    allowedContentTypeUids: RecentDocument['model'][],
+    allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
   ): DocumentMeta[] => {
     return allowedContentTypeUids.map((uid) => {
@@ -100,7 +100,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         updatedAt: new Date(document.updatedAt),
         title: document[meta.mainField ?? 'documentId'],
         publishedAt: meta.hasDraftAndPublish ? new Date(document.publishedAt) : null,
-        model: meta.uid,
+        contentTypeUid: meta.uid,
         kind: meta.contentType.kind,
       };
     });
@@ -110,14 +110,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     return Promise.all(
       documents.map(async (recentDocument) => {
         const hasDraftAndPublish = contentTypes.hasDraftAndPublish(
-          strapi.contentType(recentDocument.model)
+          strapi.contentType(recentDocument.contentTypeUid)
         );
         /**
          * Tries to query the other version of the document if draft and publish is enabled,
          * so that we know when to give the "modified" status.
          */
         const { availableStatus } = await metadataService.getMetadata(
-          recentDocument.model,
+          recentDocument.contentTypeUid,
           recentDocument,
           {
             availableStatus: hasDraftAndPublish,
