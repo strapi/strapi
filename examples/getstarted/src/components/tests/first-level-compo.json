@@ -1,0 +1,24 @@
+{
+  "collectionName": "components_tests_first_level_compos",
+  "info": {
+    "displayName": "firstLevelCompo",
+    "icon": "apps"
+  },
+  "options": {},
+  "attributes": {
+    "firstLevelCompoWord": {
+      "type": "string"
+    },
+    "firstLevelCompoImage": {
+      "allowedTypes": ["images", "files", "videos", "audios"],
+      "type": "media",
+      "multiple": false
+    },
+    "secondLevelCompo": {
+      "displayName": "secondLevelCompo",
+      "type": "component",
+      "repeatable": false,
+      "component": "tests.second-level-compo"
+    }
+  }
+}

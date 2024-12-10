@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "testhistorycompos",
+  "info": {
+    "singularName": "testhistorycompo",
+    "pluralName": "testhistorycompos",
+    "displayName": "testhistorycompo",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "compo": {
+      "type": "component",
+      "repeatable": false,
+      "component": "tests.root-compo",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "title": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "content": {
+      "type": "blocks",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}

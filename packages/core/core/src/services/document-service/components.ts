@@ -248,7 +248,6 @@ const deleteOldComponents = async <TUID extends UID.Schema>(
   const previousValue = (await strapi.db
     .query(uid)
     .load(entityToUpdate, attributeName)) as ComponentValue;
-
   const idsToKeep = _.castArray(componentValue).filter(has('id')).map(pickStringifiedId);
   const allIds = _.castArray(previousValue).filter(has('id')).map(pickStringifiedId);
 

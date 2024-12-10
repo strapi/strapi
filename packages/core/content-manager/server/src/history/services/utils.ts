@@ -1,6 +1,6 @@
 import { difference, omit } from 'lodash/fp';
 
-import type { Core, Data, Modules, Schema, Struct, UID } from '@strapi/types';
+import type { Core, Modules, Schema, Data, Struct, UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { FIELDS_TO_IGNORE } from '../constants';
@@ -65,7 +65,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    * The relation if it exists or null
    */
   const getRelationRestoreValue = async (
-    versionRelationData: Data.Entity,
+    versionRelationData: Modules.Documents.AnyDocument | Modules.Documents.AnyDocument[],
     attribute: Schema.Attribute.RelationWithTarget
   ) => {
     if (Array.isArray(versionRelationData)) {
@@ -80,9 +80,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
         })
       );
 
-      return existingAndMissingRelations.filter(
-        (relation) => relation !== null
-      ) as Modules.Documents.AnyDocument[];
+      return existingAndMissingRelations.filter((relation) => relation !== null);
     }
 
     return strapi.documents(attribute.target).findOne({
@@ -98,12 +96,10 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    * The media asset if it exists or null
    */
   const getMediaRestoreValue = async (
-    versionRelationData: Data.Entity,
-    attribute: Schema.Attribute.Media<any, boolean>
+    versionRelationData: Modules.Documents.AnyDocument | Modules.Documents.AnyDocument[]
   ) => {
-    if (attribute.multiple) {
+    if (Array.isArray(versionRelationData)) {
       const existingAndMissingMedias = await Promise.all(
-        // @ts-expect-error Fix the type definitions so this isn't any
         versionRelationData.map((media) => {
           return strapi.db.query('plugin::upload.file').findOne({ where: { id: media.id } });
         })

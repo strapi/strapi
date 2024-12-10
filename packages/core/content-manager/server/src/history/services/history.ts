@@ -1,5 +1,5 @@
-import type { Core, Data, Modules, Schema, Struct, UID } from '@strapi/types';
-import { async, errors } from '@strapi/utils';
+import type { Core, Data, Modules, Schema } from '@strapi/types';
+import { errors, traverseEntity } from '@strapi/utils';
 import { omit, set } from 'lodash/fp';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
@@ -86,7 +86,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
               return populateEntryRelations(
                 {
-                  data: attributeValue,
+                  data: omit('id', attributeValue),
                   schema: nextComponent.schema.attributes,
                 },
                 currentDataWithRelations,
@@ -227,109 +227,69 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         structuredClone(version.data)
       );
 
-      const getDataWithoutMissingRelations = async (
-        entry: Pick<HistoryVersionQueryResult, 'data' | 'schema'> & {
-          component?: UID.Component;
-        } = version,
-        initialData: Record<string, unknown> = structuredClone(dataWithoutAddedAttributes),
-        componentKeyPath: string[] = []
-      ): Promise<Record<string, unknown> | undefined> => {
-        /**
-         * When a component uid is provided, we get the attributes for that component
-         * Otherwise, we assume we are at the root level of the version,
-         * so we can use the attributes we already got for version.contentType
-         */
-        const schemaAttributes = entry.component
-          ? strapi.getModel(entry.component).attributes
-          : contentTypeSchemaAttributes;
-        const sanitizedSchemaAttributes = omit(
-          FIELDS_TO_IGNORE,
-          schemaAttributes
-        ) as Struct.SchemaAttributes;
+      // Remove the schema attributes history should ignore
+      const schema = structuredClone(version.schema);
+      schema.attributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
 
-        // Create the reducer for the provided schema attributes
-        const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
-        const dataWithoutMisisingRelations = await reducer(
-          async (
-            previousRelationAttributes: Record<string, unknown>,
-            [attributeKey, attributeSchema]: [string, Schema.Attribute.AnyAttribute]
-          ) => {
-            const versionRelationData = entry.data[attributeKey];
-            if (!versionRelationData) {
-              return previousRelationAttributes;
-            }
+      const dataWithoutMissingRelations = await traverseEntity(
+        async (options, utils) => {
+          if (!options.attribute) return;
 
-            if (attributeSchema.type === 'component' && versionRelationData) {
-              const nextComponent = serviceUtils.getNextComponent(
-                componentKeyPath,
-                attributeKey,
-                attributeSchema
-              );
+          if (options.attribute.type === 'component') {
+            // Ids on components cause issues when restoring
+            // TODO: Ask Marc to explain the real reason
+            utils.remove('id');
+          }
 
-              if (!nextComponent) {
-                return previousRelationAttributes;
-              }
+          if (
+            options.attribute.type === 'relation' &&
+            // TODO: handle polymorphic relations
+            options.attribute.relation !== 'morphToOne' &&
+            options.attribute.relation !== 'morphToMany'
+          ) {
+            if (!options.value) return;
 
-              return getDataWithoutMissingRelations(
-                {
-                  data: versionRelationData,
-                  schema: nextComponent.schema.attributes,
-                  component: nextComponent.schema.uid,
-                },
-                previousRelationAttributes,
-                nextComponent.keyPath
-              );
-            }
+            const data = await serviceUtils.getRelationRestoreValue(
+              options.value as Modules.Documents.AnyDocument,
+              options.attribute as Schema.Attribute.RelationWithTarget
+            );
 
-            if (
-              attributeSchema.type === 'relation' &&
-              // TODO: handle polymorphic relations
-              attributeSchema.relation !== 'morphToOne' &&
-              attributeSchema.relation !== 'morphToMany'
-            ) {
-              const data = await serviceUtils.getRelationRestoreValue(
-                versionRelationData,
-                attributeSchema
-              );
-              previousRelationAttributes[attributeKey] = data;
-            }
+            utils.set(options.key, data as Modules.Documents.AnyDocument);
+          }
 
-            if (attributeSchema.type === 'media') {
-              const data = await serviceUtils.getMediaRestoreValue(
-                versionRelationData,
-                attributeSchema
-              );
+          if (options.attribute.type === 'media') {
+            if (!options.value) return;
 
-              const keyPathToUpdate = componentKeyPath.length
-                ? `${componentKeyPath.join('.')}.${attributeKey}`
-                : attributeKey;
+            const data = await serviceUtils.getMediaRestoreValue(
+              options.value as Modules.Documents.AnyDocument
+            );
 
-              return set(keyPathToUpdate, data, previousRelationAttributes);
-            }
-
-            return previousRelationAttributes;
-          },
-          initialData
-        );
-
-        return dataWithoutMisisingRelations;
-      };
-
-      const data = omit(
-        ['id', ...Object.keys(schemaDiff.removed)],
-        await getDataWithoutMissingRelations()
+            utils.set(options.key, data);
+          }
+        },
+        {
+          schema,
+          getModel: strapi.getModel.bind(strapi),
+        },
+        dataWithoutAddedAttributes
       );
-      const restoredDocument = await strapi.documents(version.contentType).update({
-        documentId: version.relatedDocumentId,
-        locale: version.locale,
-        data,
-      });
 
-      if (!restoredDocument) {
-        throw new errors.ApplicationError('Failed to restore version');
+      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
+      try {
+        const restoredDocument = await strapi.documents(version.contentType).update({
+          documentId: version.relatedDocumentId,
+          locale: version.locale,
+          data,
+        });
+
+        if (!restoredDocument) {
+          throw new errors.ApplicationError('Failed to restore version');
+        }
+
+        return restoredDocument;
+      } catch (error) {
+        console.error(error);
       }
-
-      return restoredDocument;
     },
   };
 };
