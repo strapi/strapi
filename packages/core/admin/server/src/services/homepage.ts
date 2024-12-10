@@ -1,6 +1,6 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
-import type { GetRecentDocuments } from '../../../shared/contracts/homepage';
+import type { GetRecentDocuments, RecentDocument } from '../../../shared/contracts/homepage';
 
 const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
@@ -8,138 +8,211 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
   const permissionService = strapi.admin.services.permission as typeof import('./permission');
 
-  /**
-   * Don't use the strapi.store util because we need to make
-   * more precise queries than exact key matches, in order to make as few queries as possible.
-   */
-  const coreStore = strapi.db.query('strapi::core-store');
+  type ContentTypeConfiguration = {
+    uid: RecentDocument['model'];
+    settings: { mainField: string };
+  };
+  const getConfiguration = async (
+    contentTypeUids: RecentDocument['model'][]
+  ): Promise<ContentTypeConfiguration[]> => {
+    /**
+     * Don't use the strapi.store util because we need to make
+     * more precise queries than exact key matches, in order to make as few queries as possible.
+     */
+    const coreStore = strapi.db.query('strapi::core-store');
+    const rawConfigurations = await coreStore.findMany({
+      where: {
+        key: {
+          $in: contentTypeUids.map(
+            (contentType) => `plugin_content_manager_configuration_content_types::${contentType}`
+          ),
+        },
+      },
+    });
+
+    return rawConfigurations.map((rawConfiguration) => {
+      return JSON.parse(rawConfiguration.value);
+    });
+  };
+
+  const getPermittedContentTypes = async () => {
+    const readPermissions = await permissionService.findMany({
+      where: {
+        role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
+        action: 'plugin::content-manager.explorer.read',
+      },
+    });
+
+    return readPermissions
+      .map((permission) => permission.subject)
+      .filter(Boolean) as RecentDocument['model'][];
+  };
+
+  type DocumentMeta = {
+    fields: string[];
+    mainField: string;
+    contentType: Schema.ContentType;
+    hasDraftAndPublish: boolean;
+    uid: RecentDocument['model'];
+  };
+
+  const getDocumentsMetaData = (
+    allowedContentTypeUids: RecentDocument['model'][],
+    configurations: ContentTypeConfiguration[]
+  ): DocumentMeta[] => {
+    return allowedContentTypeUids.map((uid) => {
+      const configuration = configurations.find((config) => config.uid === uid);
+      const contentType = strapi.contentType(uid);
+      const fields = ['documentId', 'updatedAt'];
+
+      // Add fields required to get the status if D&P is enabled
+      const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
+      if (hasDraftAndPublish) {
+        fields.push('publishedAt');
+      }
+
+      // Only add the main field if it's defined
+      if (configuration?.settings.mainField) {
+        fields.push(configuration.settings.mainField);
+      }
+
+      // Only add locale if it's localized
+      const isLocalized = (contentType.pluginOptions?.i18n as any)?.localized;
+      if (isLocalized) {
+        fields.push('locale');
+      }
+
+      return {
+        fields,
+        mainField: configuration!.settings.mainField,
+        contentType,
+        hasDraftAndPublish,
+        uid,
+      };
+    });
+  };
+
+  const formatDocuments = (documents: Modules.Documents.AnyDocument[], meta: DocumentMeta) => {
+    return documents.map((document) => {
+      /**
+       * Save the main field value before deleting it so we can use the common
+       * title key instead across all content types. Use the delete operator instead of
+       * destructuring or lodash omit for better type inference.
+       */
+      const mainFieldValue = document[meta.mainField ?? 'documentId'];
+      delete document[meta.mainField];
+
+      return {
+        data: {
+          ...document,
+          ...(document.publishedAt && { publishedAt: new Date(document.publishedAt) }),
+          updatedAt: new Date(document.updatedAt),
+          title: mainFieldValue,
+        },
+        meta: {
+          model: meta.uid,
+          kind: meta.contentType.kind,
+          hasDraftAndPublish: meta.hasDraftAndPublish,
+        },
+      };
+    });
+  };
+
+  const addStatusToDocuments = async (
+    documents: {
+      data: RecentDocument[];
+      meta: {
+        model: RecentDocument['model'];
+        kind: RecentDocument['kind'];
+        hasDraftAndPublish: boolean;
+      };
+    }[]
+  ): Promise<RecentDocument[]> => {
+    return Promise.all(
+      documents.map(async (document) => {
+        /**
+         * Tries to query the other version of the document if draft and publish is enabled,
+         * so that we know when to give the "modified" status.
+         */
+        const { availableStatus } = await metadataService.getMetadata(
+          document.meta.model,
+          document.data,
+          {
+            availableStatus: document.meta.hasDraftAndPublish,
+            availableLocales: false,
+          }
+        );
+        const status = metadataService.getStatus(document.data, availableStatus);
+
+        return {
+          ...document.data,
+          ...document.meta,
+          status,
+        } as unknown as RecentDocument;
+      })
+    );
+  };
 
   return {
-    async getActivityForAction(
-      action: 'update' | 'publish'
-    ): Promise<GetRecentDocuments.Response['data']> {
-      // Get all the content types the user has permissions to read
-      const readPermissions = await permissionService.findMany({
-        where: {
-          role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
-          action: 'plugin::content-manager.explorer.read',
-        },
+    async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
+      const permittedContentTypes = await getPermittedContentTypes();
+      const allowedContentTypeUids = permittedContentTypes.filter((contentType) => {
+        return contentTypes.hasDraftAndPublish(strapi.contentType(contentType));
       });
-      const permittedContentTypeNames = readPermissions
-        .map((permission) => permission.subject)
-        .filter(Boolean) as UID.ContentType[];
-
-      // Setup for the provided action
-      const allowedContentTypeNames =
-        action === 'publish'
-          ? permittedContentTypeNames.filter((contentType) => {
-              return contentTypes.hasDraftAndPublish(strapi.contentType(contentType));
-            })
-          : permittedContentTypeNames;
-      const actionColumn = action === 'publish' ? 'publishedAt' : 'updatedAt';
-
       // Fetch the configuration for each content type in a single query
-      const rawConfigurations = await coreStore.findMany({
-        where: {
-          key: {
-            $in: allowedContentTypeNames.map(
-              (contentType) => `plugin_content_manager_configuration_content_types::${contentType}`
-            ),
-          },
-        },
-      });
-
-      const configurations = rawConfigurations.map((rawConfiguration) => {
-        return JSON.parse(rawConfiguration.value);
-      });
+      const configurations = await getConfiguration(allowedContentTypeUids);
+      // Get the necessary metadata for the documents
+      const documentsMeta = await getDocumentsMetaData(allowedContentTypeUids, configurations);
+      // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
-        allowedContentTypeNames.map(async (contentTypeName) => {
-          const configuration = configurations.find((config) => config.uid === contentTypeName);
-          const contentType = strapi.contentType(contentTypeName);
-          const fields = ['documentId', 'updatedAt'];
-
-          // Add fields required to get the status if D&P is enabled
-          const hasDraftAndPublish = contentTypes.hasDraftAndPublish(contentType);
-          if (hasDraftAndPublish) {
-            fields.push('publishedAt');
-          }
-
-          // Only add the main field if it's defined
-          const { mainField } = configuration.settings;
-          if (mainField) {
-            fields.push(mainField);
-          }
-
-          // Only add locale if it's localized
-          const isLocalized = (contentType.pluginOptions?.i18n as any)?.localized;
-          if (isLocalized) {
-            fields.push('locale');
-          }
-
-          const documents = await strapi.documents(contentTypeName).findMany({
+        documentsMeta.map(async (meta) => {
+          const docs = await strapi.documents(meta.uid).findMany({
             limit: MAX_DOCUMENTS,
-            // Won't updatedAt always be the same as publishedAt if we are fetching the published document?
-            sort: `${actionColumn}:desc`,
-            fields,
-            status: action === 'publish' ? 'published' : undefined,
+            sort: 'publishedAt:desc',
+            fields: meta.fields,
+            status: 'published',
           });
 
-          return documents.map((document) => {
-            /**
-             * Save the main field value before deleting it so we can use the common
-             * title key instead across all content types. Use the delete operator instead of
-             * destructuring or lodash omit for better type inference.
-             */
-            const mainFieldValue = document[mainField ?? 'documentId'];
-            delete document[mainField];
-
-            return {
-              data: {
-                ...document,
-                ...(document.publishedAt && { publishedAt: new Date(document.publishedAt) }),
-                updatedAt: new Date(document.updatedAt),
-                title: mainFieldValue,
-              },
-              meta: {
-                model: contentTypeName,
-                kind: contentType.kind,
-                hasDraftAndPublish,
-              },
-            };
-          });
+          return formatDocuments(docs, meta);
         })
       );
 
       const overallRecentDocuments = recentDocuments
         .flat()
         .sort((a, b) => {
-          return b.data[actionColumn].valueOf() - a.data[actionColumn].valueOf();
+          return b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf();
         })
         .slice(0, MAX_DOCUMENTS);
 
-      return Promise.all(
-        overallRecentDocuments.map(async (document) => {
-          /**
-           * Tries to query the other version of the document if draft and publish is enabled,
-           * so that we know when to give the "modified" status.
-           */
-          const { availableStatus } = await metadataService.getMetadata(
-            document.meta.model,
-            document.data,
-            {
-              availableStatus: document.meta.hasDraftAndPublish,
-              availableLocales: false,
-            }
-          );
-          const status = metadataService.getStatus(document.data, availableStatus);
+      return addStatusToDocuments(overallRecentDocuments);
+    },
+    async getRecentlyUpdatedDocuments(): Promise<GetRecentDocuments.Response['data']> {
+      const allowedContentTypeNames = await getPermittedContentTypes();
+      // Fetch the configuration for each content type in a single query
+      const configurations = await getConfiguration(allowedContentTypeNames);
+      // Get the necessary metadata for the documents
+      const documentsMeta = await getDocumentsMetaData(allowedContentTypeNames, configurations);
+      // Now actually fetch and format the documents
+      const recentDocuments = await Promise.all(
+        documentsMeta.map(async (meta) => {
+          const docs = await strapi.documents(meta.uid).findMany({
+            limit: MAX_DOCUMENTS,
+            sort: 'updatedAt:desc',
+            fields: meta.fields,
+          });
 
-          return {
-            ...document.data,
-            ...document.meta,
-            status,
-          };
+          return formatDocuments(docs, meta);
         })
       );
+
+      const overallRecentDocuments = recentDocuments
+        .flat()
+        .sort((a, b) => {
+          return b.data.updatedAt.valueOf() - a.data.updatedAt.valueOf();
+        })
+        .slice(0, MAX_DOCUMENTS);
+
+      return addStatusToDocuments(overallRecentDocuments);
     },
   };
 };

@@ -27,7 +27,11 @@ const createHomepageController = () => {
         throw error;
       }
 
-      return { data: await homepageService.getActivityForAction(action) };
+      if (action === 'publish') {
+        return { data: await homepageService.getRecentlyPublishedDocuments() };
+      }
+
+      return { data: await homepageService.getRecentlyUpdatedDocuments() };
     },
   } satisfies Core.Controller;
 };
