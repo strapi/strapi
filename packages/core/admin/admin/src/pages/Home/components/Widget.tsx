@@ -40,7 +40,7 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
 };
 
 interface LoadingProps {
-  children?: React.ReactNode;
+  children?: string;
 }
 
 const Loading = ({ children }: LoadingProps) => {
@@ -60,7 +60,7 @@ const Loading = ({ children }: LoadingProps) => {
 };
 
 interface ErrorProps {
-  children?: React.ReactNode;
+  children?: string;
 }
 
 const Error = ({ children }: ErrorProps) => {
@@ -75,14 +75,13 @@ const Error = ({ children }: ErrorProps) => {
           defaultMessage: 'Something went wrong',
         })}
       </Typography>
-      {children ?? (
-        <Typography textColor="neutral600">
-          {formatMessage({
+      <Typography textColor="neutral600">
+        {children ??
+          formatMessage({
             id: 'HomePage.widget.error',
             defaultMessage: "Couldn't load widget content.",
           })}
-        </Typography>
-      )}
+      </Typography>
     </Flex>
   );
 };
