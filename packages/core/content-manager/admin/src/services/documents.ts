@@ -86,6 +86,7 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'Document', id: `${model}_LIST` },
         'Relations',
         { type: 'UidAvailability', id: model },
+        'RecentDocumentList',
       ],
     }),
     deleteDocument: builder.mutation<
@@ -346,6 +347,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           'Relations',
           { type: 'UidAvailability', id: model },
+          'RecentDocumentList',
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {

@@ -4,6 +4,7 @@ import { adminApi } from './api';
 
 const homepageService = adminApi
   .enhanceEndpoints({
+    // TODO: remove when the CM widgets are moved to the CM package, the type already exists there
     addTagTypes: ['RecentDocumentList'],
   })
   .injectEndpoints({
