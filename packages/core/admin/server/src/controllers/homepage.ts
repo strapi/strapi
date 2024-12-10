@@ -8,7 +8,10 @@ const createHomepageController = () => {
   const homepageService = getService('homepage');
 
   const recentDocumentParamsSchema = yup.object().shape({
-    action: yup.mixed<GetRecentDocuments.Request['query']['action']>().oneOf(['update']).required(),
+    action: yup
+      .mixed<GetRecentDocuments.Request['query']['action']>()
+      .oneOf(['update', 'publish'])
+      .required(),
   });
 
   return {
@@ -24,12 +27,11 @@ const createHomepageController = () => {
         throw error;
       }
 
-      if (action === 'update') {
-        return { data: await homepageService.getRecentUpdates() };
+      if (action === 'publish') {
+        return { data: await homepageService.getRecentlyPublishedDocuments() };
       }
 
-      // Just making TS happy until we manage the other actions here
-      return { data: [] };
+      return { data: await homepageService.getRecentlyUpdatedDocuments() };
     },
   } satisfies Core.Controller;
 };
