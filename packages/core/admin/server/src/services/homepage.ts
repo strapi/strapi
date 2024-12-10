@@ -171,6 +171,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       return addStatusToDocuments(overallRecentDocuments);
     },
+
     async getRecentlyUpdatedDocuments(): Promise<GetRecentDocuments.Response['data']> {
       const allowedContentTypeUids = await getPermittedContentTypes();
       // Fetch the configuration for each content type in a single query
