@@ -17,7 +17,7 @@ const getEditViewLink = (document: RecentDocument): string => {
   // TODO: import the constants for this once the code is moved to the CM package
   const kindPath = document.kind === 'singleType' ? 'single-types' : 'collection-types';
 
-  return `/content-manager/${kindPath}/${document.model}/${document.documentId}`;
+  return `/content-manager/${kindPath}/${document.contentTypeUid}/${document.documentId}`;
 };
 
 const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'inline-block' })`
@@ -79,7 +79,7 @@ const LastEditedContent = () => {
                       defaultMessage: 'Single-Type',
                     })
                   : // TODO check how to localize display name
-                    document.modelDisplayName}
+                    document.contentTypeDisplayName}
               </CellTypography>
             </Td>
             <Td>
