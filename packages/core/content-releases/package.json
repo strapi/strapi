@@ -106,6 +106,5 @@
     "kind": "plugin",
     "displayName": "Releases",
     "required": true
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }

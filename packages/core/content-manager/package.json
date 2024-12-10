@@ -128,6 +128,5 @@
     "description": "Quick way to see, edit and delete the data in your database.",
     "required": true,
     "kind": "plugin"
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }
