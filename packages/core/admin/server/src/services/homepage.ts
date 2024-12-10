@@ -94,20 +94,14 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const formatDocuments = (documents: Modules.Documents.AnyDocument[], meta: DocumentMeta) => {
     return documents.map((document) => {
-      /**
-       * Save the main field value before deleting it so we can use the common
-       * title key instead across all content types. Use the delete operator instead of
-       * destructuring or lodash omit for better type inference.
-       */
-      const mainFieldValue = document[meta.mainField ?? 'documentId'];
-      delete document[meta.mainField];
+      const { mainField, ...restDocument } = document;
 
       return {
         data: {
-          ...document,
-          ...(document.publishedAt && { publishedAt: new Date(document.publishedAt) }),
+          ...restDocument,
+          ...(restDocument.publishedAt && { publishedAt: new Date(restDocument.publishedAt) }),
           updatedAt: new Date(document.updatedAt),
-          title: mainFieldValue,
+          title: document[meta.mainField ?? 'documentId'],
         },
         meta: {
           model: meta.uid,
