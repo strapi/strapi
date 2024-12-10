@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { PuzzlePiece, WarningCircle } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
 interface RootProps {
@@ -23,6 +24,7 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
       padding={6}
       shadow="tableShadow"
       hasRadius
+      width="100%"
     >
       <Flex direction="row" alignItems="center" gap={2}>
         <Icon fill="neutral500" />
@@ -38,7 +40,7 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
 };
 
 interface LoadingProps {
-  children?: React.ReactNode;
+  children?: string;
 }
 
 const Loading = ({ children }: LoadingProps) => {
@@ -58,7 +60,7 @@ const Loading = ({ children }: LoadingProps) => {
 };
 
 interface ErrorProps {
-  children?: React.ReactNode;
+  children?: string;
 }
 
 const Error = ({ children }: ErrorProps) => {
@@ -73,14 +75,34 @@ const Error = ({ children }: ErrorProps) => {
           defaultMessage: 'Something went wrong',
         })}
       </Typography>
-      {children ?? (
-        <Typography textColor="neutral600">
-          {formatMessage({
+      <Typography textColor="neutral600">
+        {children ??
+          formatMessage({
             id: 'HomePage.widget.error',
             defaultMessage: "Couldn't load widget content.",
           })}
-        </Typography>
-      )}
+      </Typography>
+    </Flex>
+  );
+};
+
+interface NoDataProps {
+  children?: string;
+}
+
+const NoData = ({ children }: NoDataProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={6}>
+      <EmptyDocuments width="16rem" height="8.8rem" />
+      <Typography textColor="neutral600">
+        {children ??
+          formatMessage({
+            id: 'HomePage.widget.no-data',
+            defaultMessage: 'No content found.',
+          })}
+      </Typography>
     </Flex>
   );
 };
@@ -89,6 +111,7 @@ const Widget = {
   Root,
   Loading,
   Error,
+  NoData,
 };
 
 export { Widget };

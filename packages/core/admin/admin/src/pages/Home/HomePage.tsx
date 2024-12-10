@@ -45,6 +45,7 @@ const HomePageCE = () => {
           </Box>
           {/* <Widget.Error /> */}
           {/* <Widget.Loading /> */}
+          {/* <Widget.NoData /> */}
         </Widget.Root>
       </Layouts.Content>
     </Main>

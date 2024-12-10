@@ -37,4 +37,36 @@ describe('Homepage Widget component', () => {
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
     expect(screen.getByText(/couldn't load widget content/i)).toBeInTheDocument();
   });
+
+  it('should render a custom error message when provided', () => {
+    render(
+      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+        <Widget.Error>Custom error message</Widget.Error>
+      </Widget.Root>
+    );
+
+    expect(screen.getByText(/custom error message/i)).toBeInTheDocument();
+    expect(screen.queryByText(/couldn't load widget content/i)).not.toBeInTheDocument();
+  });
+
+  it('should render a no data message when a widget has no data', () => {
+    render(
+      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+        <Widget.NoData />
+      </Widget.Root>
+    );
+
+    expect(screen.getByText(/no content found/i)).toBeInTheDocument();
+  });
+
+  it('should render a custom no data message when provided', () => {
+    render(
+      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+        <Widget.NoData>Custom no data message</Widget.NoData>
+      </Widget.Root>
+    );
+
+    expect(screen.getByText(/custom no data message/i)).toBeInTheDocument();
+    expect(screen.queryByText(/no content found/i)).not.toBeInTheDocument();
+  });
 });
