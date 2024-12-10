@@ -1,5 +1,4 @@
-import { DocumentStatus } from '@strapi/content-manager/strapi-admin';
-import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { Box, IconButton, Status, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
@@ -8,6 +7,7 @@ import { styled } from 'styled-components';
 import { RelativeTime } from '../../../components/RelativeTime';
 import { useTracking } from '../../../features/Tracking';
 import { useGetRecentDocumentsQuery } from '../../../services/homepage';
+import { capitalise } from '../../../utils/strings';
 
 import { Widget } from './Widget';
 
@@ -25,6 +25,28 @@ const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+interface DocumentStatusProps {
+  status: RecentDocument['status'];
+}
+
+const DocumentStatus = ({ status = 'draft' }: DocumentStatusProps) => {
+  const statusVariant =
+    status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
+
+  const { formatMessage } = useIntl();
+
+  return (
+    <Status variant={statusVariant} size="XS">
+      <Typography tag="span" variant="omega" fontWeight="bold">
+        {formatMessage({
+          id: `content-manager.containers.List.${status}`,
+          defaultMessage: capitalise(status),
+        })}
+      </Typography>
+    </Status>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * LastEditedWidget
