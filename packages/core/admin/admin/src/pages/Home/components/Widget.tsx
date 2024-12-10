@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { PuzzlePiece, WarningCircle } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
 interface RootProps {
@@ -86,10 +87,32 @@ const Error = ({ children }: ErrorProps) => {
   );
 };
 
+interface NoDataProps {
+  children?: string;
+}
+
+const NoData = ({ children }: NoDataProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={6}>
+      <EmptyDocuments width="16rem" height="8.8rem" />
+      <Typography textColor="neutral600">
+        {children ||
+          formatMessage({
+            id: 'HomePage.widget.no-data',
+            defaultMessage: 'No content found.',
+          })}
+      </Typography>
+    </Flex>
+  );
+};
+
 const Widget = {
   Root,
   Loading,
   Error,
+  NoData,
 };
 
 export { Widget };
