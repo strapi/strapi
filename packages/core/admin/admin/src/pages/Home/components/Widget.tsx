@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { PuzzlePiece, WarningCircle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -11,6 +13,7 @@ interface RootProps {
 
 const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
   const { formatMessage } = useIntl();
+  const id = React.useId();
   const Icon = icon;
 
   return (
@@ -23,14 +26,16 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
       shadow="tableShadow"
       hasRadius
       width="100%"
+      tag="section"
+      aria-labelledby={id}
     >
-      <Flex direction="row" alignItems="center" gap={2}>
-        <Icon fill="neutral500" />
-        <Typography textColor="neutral500" variant="sigma">
+      <Flex direction="row" alignItems="center" gap={2} tag="header">
+        <Icon fill="neutral500" aria-hidden />
+        <Typography textColor="neutral500" variant="sigma" tag="h2" id={id}>
           {formatMessage(title)}
         </Typography>
       </Flex>
-      <Box width="100%" height="261px" overflow="auto">
+      <Box width="100%" height="261px" overflow="auto" tag="main">
         {children}
       </Box>
     </Flex>
