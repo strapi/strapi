@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { Box, Flex, Loader, Typography } from '@strapi/design-system';
 import { PuzzlePiece, WarningCircle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -32,7 +30,7 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
           {formatMessage(title)}
         </Typography>
       </Flex>
-      <Box width="100%" height="256px" overflow="auto">
+      <Box width="100%" height="261px" overflow="auto">
         {children}
       </Box>
     </Flex>

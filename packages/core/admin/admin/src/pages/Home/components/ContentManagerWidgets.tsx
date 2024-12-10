@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { DocumentStatus } from '@strapi/content-manager/strapi-admin';
 import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
@@ -55,7 +53,7 @@ const LastEditedContent = () => {
   }
 
   return (
-    <Table colCount={5} rowCount={data?.length ?? 4}>
+    <Table colCount={5} rowCount={data?.length ?? 0}>
       <Tbody>
         {data?.map((document) => (
           <Tr key={document.documentId}>
