@@ -232,7 +232,7 @@ describe('Homepage API', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toHaveLength(2);
-    expect(response.body.data.every((doc) => doc.hasDraftAndPublish)).toBe(true);
+    expect(response.body.data.every((doc) => doc.publishedAt)).not.toBe(null);
     expect(response.body.data[0].title).toBe('Tag 1');
     expect(response.body.data[0].status).toBe('published');
     // Assert the data is the published data, but the status should be modified

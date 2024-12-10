@@ -10,6 +10,7 @@ export interface RecentDocument {
   status?: 'draft' | 'published' | 'modified';
   title: string;
   updatedAt: Date;
+  publishedAt?: Date | null;
 }
 
 export declare namespace GetRecentDocuments {

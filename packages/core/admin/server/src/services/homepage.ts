@@ -94,55 +94,45 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const formatDocuments = (documents: Modules.Documents.AnyDocument[], meta: DocumentMeta) => {
     return documents.map((document) => {
-      const { mainField, ...restDocument } = document;
-
       return {
-        data: {
-          ...restDocument,
-          ...(restDocument.publishedAt && { publishedAt: new Date(restDocument.publishedAt) }),
-          updatedAt: new Date(document.updatedAt),
-          title: document[meta.mainField ?? 'documentId'],
-        },
-        meta: {
-          model: meta.uid,
-          kind: meta.contentType.kind,
-          hasDraftAndPublish: meta.hasDraftAndPublish,
-        },
+        documentId: document.documentId,
+        locale: document.locale,
+        updatedAt: new Date(document.updatedAt),
+        title: document[meta.mainField ?? 'documentId'],
+        publishedAt: meta.hasDraftAndPublish ? new Date(document.publishedAt) : null,
+        model: meta.uid,
+        kind: meta.contentType.kind,
       };
     });
   };
 
-  const addStatusToDocuments = async (
-    documents: {
-      data: RecentDocument[];
-      meta: {
-        model: RecentDocument['model'];
-        kind: RecentDocument['kind'];
-        hasDraftAndPublish: boolean;
-      };
-    }[]
-  ): Promise<RecentDocument[]> => {
+  const addStatusToDocuments = async (documents: RecentDocument[]): Promise<RecentDocument[]> => {
     return Promise.all(
-      documents.map(async (document) => {
+      documents.map(async (recentDocument) => {
+        const hasDraftAndPublish = contentTypes.hasDraftAndPublish(
+          strapi.contentType(recentDocument.model)
+        );
         /**
          * Tries to query the other version of the document if draft and publish is enabled,
          * so that we know when to give the "modified" status.
          */
         const { availableStatus } = await metadataService.getMetadata(
-          document.meta.model,
-          document.data,
+          recentDocument.model,
+          recentDocument,
           {
-            availableStatus: document.meta.hasDraftAndPublish,
+            availableStatus: hasDraftAndPublish,
             availableLocales: false,
           }
         );
-        const status = metadataService.getStatus(document.data, availableStatus);
+        const status: RecentDocument['status'] = metadataService.getStatus(
+          recentDocument,
+          availableStatus
+        );
 
         return {
-          ...document.data,
-          ...document.meta,
+          ...recentDocument,
           status,
-        } as unknown as RecentDocument;
+        };
       })
     );
   };
@@ -150,8 +140,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
       const permittedContentTypes = await getPermittedContentTypes();
-      const allowedContentTypeUids = permittedContentTypes.filter((contentType) => {
-        return contentTypes.hasDraftAndPublish(strapi.contentType(contentType));
+      const allowedContentTypeUids = permittedContentTypes.filter((uid) => {
+        return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
       });
       // Fetch the configuration for each content type in a single query
       const configurations = await getConfiguration(allowedContentTypeUids);
@@ -174,18 +164,19 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const overallRecentDocuments = recentDocuments
         .flat()
         .sort((a, b) => {
-          return b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf();
+          if (!a.publishedAt || !b.publishedAt) return 0;
+          return b.publishedAt.valueOf() - a.publishedAt.valueOf();
         })
         .slice(0, MAX_DOCUMENTS);
 
       return addStatusToDocuments(overallRecentDocuments);
     },
     async getRecentlyUpdatedDocuments(): Promise<GetRecentDocuments.Response['data']> {
-      const allowedContentTypeNames = await getPermittedContentTypes();
+      const allowedContentTypeUids = await getPermittedContentTypes();
       // Fetch the configuration for each content type in a single query
-      const configurations = await getConfiguration(allowedContentTypeNames);
+      const configurations = await getConfiguration(allowedContentTypeUids);
       // Get the necessary metadata for the documents
-      const documentsMeta = await getDocumentsMetaData(allowedContentTypeNames, configurations);
+      const documentsMeta = await getDocumentsMetaData(allowedContentTypeUids, configurations);
       // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
         documentsMeta.map(async (meta) => {
@@ -202,7 +193,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       const overallRecentDocuments = recentDocuments
         .flat()
         .sort((a, b) => {
-          return b.data.updatedAt.valueOf() - a.data.updatedAt.valueOf();
+          return b.updatedAt.valueOf() - a.updatedAt.valueOf();
         })
         .slice(0, MAX_DOCUMENTS);
 
