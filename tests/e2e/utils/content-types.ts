@@ -2,11 +2,12 @@ import { kebabCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
-import { clickAndWait, findByRowColumn } from './shared';
+import { clickAndWait, findByRowColumn, navToHeader } from './shared';
 
 export interface AddAttribute {
   type: string;
   name: string;
+  advanced?: AdvancedAttributeSettings;
   number?: { format: numberFormat };
   date?: { format: dateFormat };
   media?: { multiple: boolean };
@@ -14,8 +15,19 @@ export interface AddAttribute {
   component?: { useExisting?: string; options: Partial<AddComponentOptions> };
   dz?: {
     components: AddComponentAttribute[];
-    options: Partial<AddDynamicZoneOptions>;
   };
+}
+
+// Advanced Settings for all types
+// TODO: split this into settings based on the attribute type
+interface AdvancedAttributeSettings {
+  required?: boolean;
+  unique?: boolean;
+  maximum?: number;
+  minimum?: number;
+  private?: boolean;
+  default?: any;
+  regexp?: string;
 }
 
 interface AddComponentAttribute extends AddAttribute {
@@ -68,14 +80,12 @@ type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
 
-type AddDynamicZoneOptions = {};
-
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
 // This is necessary because the labels used for each attribute type differ based on
 // their other attribute options
-const typeMap = {
+export const typeMap = {
   text: { buttonName: 'Text', listLabel: 'Text' },
   boolean: { buttonName: 'Boolean', listLabel: 'Boolean' },
   blocks: { buttonName: 'Rich text (blocks)', listLabel: 'Rich text (blocks)' },
@@ -218,8 +228,6 @@ export const addComponentAttribute = async (
 };
 
 export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZoneAttribute) => {
-  const options = attribute.dz.options;
-
   await page.getByLabel('Name', { exact: true }).fill(attribute.name);
 
   await clickAndWait(
@@ -432,6 +440,22 @@ export const addAttributeToComponent = async (
     name: componentName,
     attributes: [attribute],
   });
+};
+
+export const addAttributesToContentType = async (
+  page: Page,
+  ctName: string,
+  attributes: AddAttribute[]
+) => {
+  await navToHeader(page, ['Content-Type Builder', ctName], ctName);
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add another field', exact: true }));
+
+  await addAttributes(page, attributes);
+
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  await waitForRestart(page);
 };
 
 export const removeAttributeFromComponent = async (
