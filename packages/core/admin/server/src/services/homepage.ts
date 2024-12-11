@@ -99,7 +99,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         locale: document.locale,
         updatedAt: new Date(document.updatedAt),
         title: document[meta.mainField ?? 'documentId'],
-        publishedAt: meta.hasDraftAndPublish ? new Date(document.publishedAt) : null,
+        publishedAt:
+          meta.hasDraftAndPublish && document.publishedAt ? new Date(document.publishedAt) : null,
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
