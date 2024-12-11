@@ -8,7 +8,7 @@ import { Page } from '../../components/PageHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 
-import { LastEditedWidget } from './components/ContentManagerWidgets';
+import { LastEditedWidget, LastPublishedWidget } from './components/ContentManagerWidgets';
 import { GuidedTour } from './components/GuidedTour';
 
 /* -------------------------------------------------------------------------------------------------
@@ -41,6 +41,9 @@ const HomePageCE = () => {
           <Grid.Root gap={5}>
             <Grid.Item col={6} s={12}>
               <LastEditedWidget />
+            </Grid.Item>
+            <Grid.Item col={6} s={12}>
+              <LastPublishedWidget />
             </Grid.Item>
           </Grid.Root>
         </Flex>

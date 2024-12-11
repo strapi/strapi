@@ -58,4 +58,43 @@ test.describe('Home', () => {
       mostRecentEntry.getByRole('gridcell', { name: /nike mens newer!/i })
     ).toBeVisible();
   });
+
+  test('a user should see the last published entries', async ({ page }) => {
+    const recentlyPublishedWidget = page.getByLabel(/last published entries/i);
+    await expect(recentlyPublishedWidget).toBeVisible();
+
+    // Make content update in the CM
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+    await page.getByRole('button', { name: /publish/i }).click();
+    await findAndClose(page, 'Published document');
+
+    // Go back to the home page, the published entry should be the first in the table with published status
+    await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+    const mostRecentPublishedEntry = recentlyPublishedWidget.getByRole('row').nth(0);
+    await expect(mostRecentPublishedEntry).toBeVisible();
+    await expect(
+      mostRecentPublishedEntry.getByRole('gridcell', { name: 'West Ham post match analysis' })
+    ).toBeVisible();
+    await expect(
+      mostRecentPublishedEntry.getByRole('gridcell', { name: 'Published' })
+    ).toBeVisible();
+
+    // Now go modify the published entry
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+    const title = page.getByLabel(/title/i);
+    await title.fill('West Ham pre match pep talk');
+    await page.getByRole('button', { name: /save/i }).click();
+    await findAndClose(page, 'Saved document');
+
+    // Go back to the home page, the published entry should be the first in the table with modified status
+    await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+    const mostRecentModifiedEntry = recentlyPublishedWidget.getByRole('row').nth(0);
+    await expect(
+      // It should still be the published data, not the modified draft data
+      mostRecentModifiedEntry.getByRole('gridcell', { name: 'West Ham post match analysis' })
+    ).toBeVisible();
+    await expect(mostRecentModifiedEntry.getByRole('gridcell', { name: 'Modified' })).toBeVisible();
+  });
 });
