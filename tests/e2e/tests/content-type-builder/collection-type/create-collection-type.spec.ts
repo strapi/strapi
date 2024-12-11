@@ -3,7 +3,6 @@ import { resetFiles } from '../../../utils/file-reset';
 import { createCollectionType, type AddAttribute } from '../../../utils/content-types';
 import { sharedSetup } from '../../../utils/setup';
 import { clickAndWait } from '../../../utils/shared';
-import { waitForRestart } from '../../../utils/restart';
 
 test.describe('Create collection type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
