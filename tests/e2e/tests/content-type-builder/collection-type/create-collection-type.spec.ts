@@ -26,33 +26,102 @@ test.describe('Create collection type with all field types', () => {
     await resetFiles();
   });
 
-  test('Can create a collection type', async ({ page, browserName }) => {
-    await clickAndWait(page, page.getByRole('button', { name: 'Create new collection type' }));
+  test('Can create a collection type with all field types (except relations)', async ({ page }) => {
+    const attributes: AddAttribute[] = [
+      { type: 'text', name: 'testtext' },
+      { type: 'boolean', name: 'testboolean' },
+      { type: 'blocks', name: 'testblocks' },
+      { type: 'json', name: 'testjson' },
+      { type: 'number', name: 'testinteger', number: { format: 'integer' } },
+      { type: 'number', name: 'testbiginteger', number: { format: 'big integer' } },
+      { type: 'number', name: 'testdecimal', number: { format: 'decimal' } },
+      { type: 'email', name: 'testemail' },
+      { type: 'date', name: 'testdateonlydate', date: { format: 'date' } },
+      { type: 'date', name: 'testdatetime', date: { format: 'time' } },
+      { type: 'date', name: 'testdatedatetime', date: { format: 'datetime' } },
+      { type: 'password', name: 'testpassword' },
+      { type: 'media', name: 'testmediasingle', media: { multiple: false } },
+      { type: 'media', name: 'testmediamultiple', media: { multiple: true } },
+      {
+        type: 'enumeration',
+        name: 'testenumeration',
+        enumeration: { values: ['first', 'second', 'third'] },
+      },
+      { type: 'markdown', name: 'testmarkdown' },
+      // New single component with a new category
+      {
+        type: 'component',
+        name: 'testnewcomponentnewcategory',
+        component: {
+          options: {
+            repeatable: false,
+            name: 'testnewcomponentnewcategory',
+            icon: 'alien',
+            categoryCreate: 'testcategory',
+            attributes: [{ type: 'text', name: 'testcompotext' }],
+          },
+        },
+      },
+      // New repeatable component with existing category
+      {
+        type: 'component',
+        name: 'testnewcomponentexistingcategory',
+        component: {
+          options: {
+            repeatable: true,
+            name: 'testnewcomponentrepeatable',
+            icon: 'moon',
+            categorySelect: 'testcategory',
+            attributes: [{ type: 'text', name: 'testcompotext' }],
+          },
+        },
+      },
+      // Existing component with existing category
+      {
+        type: 'component',
+        name: 'testexistingcomponentexistingcategory',
+        component: {
+          useExisting: 'testnewcomponentnewcategory',
+          options: {
+            repeatable: false,
+            name: 'testexistingcomponent',
+            icon: 'globe',
+            categorySelect: 'testcategory',
+          },
+        },
+      },
+      // Dynamic zone
+      {
+        type: 'dz',
+        name: 'testdynamiczone',
+        dz: {
+          options: {},
+          components: [
+            {
+              type: 'component',
+              name: 'testdznewcomponentnewcategory',
+              component: {
+                options: {
+                  repeatable: false,
+                  name: 'testnewcomponentnewcategory',
+                  icon: 'paint',
+                  categoryCreate: 'testcategory',
+                  attributes: [{ type: 'text', name: 'testcompotext' }],
+                },
+              },
+            },
+          ],
+        },
+      },
+    ];
 
-    await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
+    const options = {
+      name: 'Secret Document',
+      singularId: 'secret-document',
+      pluralId: 'secret-documents',
+      attributes,
+    };
 
-    const displayName = page.getByLabel('Display name');
-    await displayName.fill('Secret Document');
-
-    const singularId = page.getByLabel('API ID (Singular)');
-    await expect(singularId).toHaveValue('secret-document');
-
-    const pluralId = page.getByLabel('API ID (Plural)');
-    await expect(pluralId).toHaveValue('secret-documents');
-
-    // TODO: refactor using the utilities for adding attributes
-    await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-
-    await expect(page.getByText('Select a field for your collection type')).toBeVisible();
-
-    await clickAndWait(page, page.getByText('Small or long text'));
-
-    await page.getByLabel('Name', { exact: true }).fill('myattribute');
-    await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-
-    await waitForRestart(page);
-
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await createCollectionType(page, options);
   });
 });
