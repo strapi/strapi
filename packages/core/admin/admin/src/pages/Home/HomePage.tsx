@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Box, Main } from '@strapi/design-system';
-import { House } from '@strapi/icons';
+import { Flex, Grid, Main } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../components/Layouts/Layout';
@@ -9,8 +8,8 @@ import { Page } from '../../components/PageHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
 
+import { LastEditedWidget } from './components/ContentManagerWidgets';
 import { GuidedTour } from './components/GuidedTour';
-import { Widget } from './components/Widget';
 
 /* -------------------------------------------------------------------------------------------------
  * HomePageCE
@@ -37,16 +36,14 @@ const HomePageCE = () => {
         })}
       />
       <Layouts.Content>
-        <GuidedTour />
-        {/* TODO remove this fake widget when we add the first real one */}
-        <Widget.Root title={{ defaultMessage: 'Dummy widget', id: 'notarealid' }} icon={House}>
-          <Box background="danger200" height="2000px">
-            This is a widget!
-          </Box>
-          {/* <Widget.Error /> */}
-          {/* <Widget.Loading /> */}
-          {/* <Widget.NoData /> */}
-        </Widget.Root>
+        <Flex direction="column" alignItems="stretch" gap={5}>
+          <GuidedTour />
+          <Grid.Root gap={5}>
+            <Grid.Item col={6} s={12}>
+              <LastEditedWidget />
+            </Grid.Item>
+          </Grid.Root>
+        </Flex>
       </Layouts.Content>
     </Main>
   );

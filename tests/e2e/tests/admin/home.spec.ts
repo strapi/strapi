@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait } from '../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
 
 test.describe('Home', () => {
   test.beforeEach(async ({ page }) => {
@@ -36,5 +36,26 @@ test.describe('Home', () => {
     // Reload to ensure the update persisted
     await page.reload();
     await expect(skipTheTourButton).not.toBeVisible();
+  });
+
+  test('a user should see the last edited entries', async ({ page }) => {
+    const recentlyEditedWidget = page.getByLabel(/last edited entries/i);
+    await expect(recentlyEditedWidget).toBeVisible();
+
+    // Make content update in the CM
+    await navToHeader(page, ['Content Manager', 'Products'], 'Products');
+    await clickAndWait(page, page.getByRole('gridcell', { name: /^nike mens/i }));
+    const nameBox = page.getByLabel(/name/i);
+    await nameBox.fill('Nike Mens newer!');
+    await page.getByRole('button', { name: /save/i }).click();
+    await findAndClose(page, 'Saved document');
+
+    // Go back to the home page, the updated entry should be the first in the table
+    await clickAndWait(page, page.getByRole('link', { name: /^home$/i }));
+    const mostRecentEntry = recentlyEditedWidget.getByRole('row').nth(0);
+    await expect(mostRecentEntry).toBeVisible();
+    await expect(
+      mostRecentEntry.getByRole('gridcell', { name: /nike mens newer!/i })
+    ).toBeVisible();
   });
 });

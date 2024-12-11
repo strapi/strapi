@@ -99,8 +99,10 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         locale: document.locale,
         updatedAt: new Date(document.updatedAt),
         title: document[meta.mainField ?? 'documentId'],
-        publishedAt: meta.hasDraftAndPublish ? new Date(document.publishedAt) : null,
+        publishedAt:
+          meta.hasDraftAndPublish && document.publishedAt ? new Date(document.publishedAt) : null,
         contentTypeUid: meta.uid,
+        contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
       };
     });
@@ -146,7 +148,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Fetch the configuration for each content type in a single query
       const configurations = await getConfiguration(allowedContentTypeUids);
       // Get the necessary metadata for the documents
-      const documentsMeta = await getDocumentsMetaData(allowedContentTypeUids, configurations);
+      const documentsMeta = getDocumentsMetaData(allowedContentTypeUids, configurations);
       // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
         documentsMeta.map(async (meta) => {
@@ -177,7 +179,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Fetch the configuration for each content type in a single query
       const configurations = await getConfiguration(allowedContentTypeUids);
       // Get the necessary metadata for the documents
-      const documentsMeta = await getDocumentsMetaData(allowedContentTypeUids, configurations);
+      const documentsMeta = getDocumentsMetaData(allowedContentTypeUids, configurations);
       // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
         documentsMeta.map(async (meta) => {

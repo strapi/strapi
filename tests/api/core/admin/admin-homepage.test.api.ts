@@ -93,6 +93,7 @@ const globalModel = {
   pluralName: 'globals',
   displayName: 'Global',
   description: '',
+  draftAndPublish: true,
   attributes: {
     siteName: {
       type: 'string',
@@ -137,6 +138,9 @@ describe('Homepage API', () => {
         siteName: 'a cool site name',
       },
     });
+    await strapi.documents(globalUid).publish({
+      documentId: globalDoc.documentId,
+    });
 
     /**
      * Create content in different content types. Use a loop with the modulo operator to alternate
@@ -154,6 +158,7 @@ describe('Homepage API', () => {
       } else if (i % 3 === 1) {
         await strapi.documents(globalUid).update({
           documentId: globalDoc.documentId,
+          status: 'draft',
           data: {
             siteName: `global-${i}`,
           },
@@ -178,6 +183,7 @@ describe('Homepage API', () => {
     expect(response.body.data[0].contentTypeUid).toBe('api::tag.tag');
     expect(response.body.data[1].title).toBe('global-7');
     expect(response.body.data[1].contentTypeUid).toBe('api::global.global');
+    expect(response.body.data[1].status).toBe('draft');
     expect(response.body.data[2].title).toBe('Article 6');
     expect(response.body.data[2].contentTypeUid).toBe('api::article.article');
     expect(response.body.data[3].title).toBe('tag-5');
@@ -196,7 +202,7 @@ describe('Homepage API', () => {
         slug: 'Tag 1',
       },
     });
-    // Create non raft and publish document
+    // Create non draft and publish document
     const author = await strapi.documents(authorUid).create({
       data: {
         name: 'Paul McCartney',
@@ -231,7 +237,7 @@ describe('Homepage API', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.body.data).toHaveLength(2);
+    expect(response.body.data).toHaveLength(3);
     expect(response.body.data.every((doc) => doc.publishedAt)).not.toBe(null);
     expect(response.body.data[0].title).toBe('Tag 1');
     expect(response.body.data[0].status).toBe('published');
