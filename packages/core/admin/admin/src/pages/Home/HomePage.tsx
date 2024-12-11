@@ -36,7 +36,7 @@ const HomePageCE = () => {
         })}
       />
       <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={5}>
+        <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTour />
           <Grid.Root gap={5}>
             <Grid.Item col={6} s={12}>

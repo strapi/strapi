@@ -62,7 +62,7 @@ const WidgetContent = ({ document }: { document: RecentDocument }) => {
   return (
     <Tr onClick={handleRowClick(document)} key={document.documentId}>
       <Td>
-        <CellTypography variant="omega" textColor="neutral800">
+        <CellTypography title={document.documentId} variant="omega" textColor="neutral800">
           {document.title}
         </CellTypography>
       </Td>
@@ -73,8 +73,10 @@ const WidgetContent = ({ document }: { document: RecentDocument }) => {
                 id: 'content-manager.widget.last-edited.single-type',
                 defaultMessage: 'Single-Type',
               })
-            : // TODO check how to localize display name
-              document.contentTypeDisplayName}
+            : formatMessage({
+                id: document.contentTypeDisplayName,
+                defaultMessage: document.contentTypeDisplayName,
+              })}
         </CellTypography>
       </Td>
       <Td>
@@ -128,7 +130,7 @@ const LastEditedWidget = () => {
       <Widget.NoData>
         {formatMessage({
           id: 'content-manager.widget.last-edited.no-data',
-          defaultMessage: 'No edited entry',
+          defaultMessage: 'No edited entries',
         })}
       </Widget.NoData>
     );
