@@ -41,6 +41,7 @@ interface YupFormattedError {
   path: string[];
   message: string;
   name: string;
+  value: string;
 }
 
 class YupValidationError<TMessage extends string = string> extends ValidationError<
