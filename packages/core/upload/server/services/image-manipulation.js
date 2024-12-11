@@ -12,9 +12,18 @@ const {
 } = require('@strapi/utils');
 const { getService } = require('../utils');
 
-const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
-const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
-const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
+
+const getFormatsToResize = () => {
+  return ['jpeg', 'jpg', 'png', 'webp', 'tiff', 'gif'];
+}
+
+const getFormatsToProcess  = () => {
+  return ['jpeg', 'jpg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
+}
+
+const getFormatsToOptimize = () => {
+  return ['jpeg', 'jpg', 'png', 'webp', 'tiff', 'avif'];
+}
 
 const writeStreamToFile = (stream, path) =>
   new Promise((resolve, reject) => {
@@ -250,7 +259,7 @@ const isOptimizableImage = async (file) => {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_OPTIMIZE.includes(format);
+  return format && getFormatsToOptimize().includes(format);
 };
 
 const isResizableImage = async (file) => {
@@ -262,7 +271,7 @@ const isResizableImage = async (file) => {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_RESIZE.includes(format);
+  return format && getFormatsToResize().includes(format);
 };
 
 const isImage = async (file) => {
@@ -274,7 +283,7 @@ const isImage = async (file) => {
     // throw when the file is not a supported image
     return false;
   }
-  return format && FORMATS_TO_PROCESS.includes(format);
+  return format && getFormatsToProcess().includes(format);
 };
 
 module.exports = () => ({
@@ -287,4 +296,7 @@ module.exports = () => ({
   generateResponsiveFormats,
   generateThumbnail,
   optimize,
+  getFormatsToResize,
+  getFormatsToProcess,
+  getFormatsToOptimize,
 });
