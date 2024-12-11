@@ -294,5 +294,7 @@
   "bulk-publish.edit": "Edit",
   "widget.last-edited.title": "Last edited entries",
   "widget.last-edited.single-type": "Single-Type",
-  "widget.last-edited.no-data": "No edited entry"
+  "widget.last-edited.no-data": "No edited entries",
+  "widget.last-published.title": "Last published entries",
+  "widget.last-published.no-data": "No published entries"
 }
