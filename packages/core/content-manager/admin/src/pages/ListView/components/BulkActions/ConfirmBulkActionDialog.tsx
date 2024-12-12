@@ -10,7 +10,7 @@ import { Button, Flex, Dialog, Typography } from '@strapi/design-system';
 import { Check, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 
@@ -90,7 +90,7 @@ const ConfirmDialogPublishAll = ({
   const selectedEntries = useTable('ConfirmDialogPublishAll', (state) => state.selectedRows);
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
-  const { model, schema } = useDoc();
+  const { model, contentType: schema } = useContentManagerContext();
   const [{ query }] = useQueryParams<{
     plugins?: {
       i18n?: {
