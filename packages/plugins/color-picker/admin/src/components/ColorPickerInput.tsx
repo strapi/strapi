@@ -143,7 +143,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     style={{ textTransform: 'uppercase' }}
                     value={value}
                     placeholder="#000000"
-                    onChange={onChange}
+                    onChange={(e) => onChange(name, e.target.value)}
                   />
                 </Field.Root>
               </Flex>
