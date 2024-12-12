@@ -1,0 +1,146 @@
+import { expect, type Page } from '@playwright/test';
+import { typeMap } from './content-types';
+import { clickAndWait, findAndClose, navToHeader } from './shared';
+
+export type FieldValueValue = string | number | boolean | null | Array<ComponentValue>;
+
+export interface ComponentValue {
+  category: string; // Category the component belongs to
+  name: string; // Name of the component
+  fields: FieldValue[]; // Nested fields within the component
+}
+
+export interface FieldValue {
+  type: keyof typeof typeMap;
+  name: string;
+  value: FieldValueValue; // Use the extracted type here
+}
+
+export interface CreateContentOptions {
+  publish?: boolean;
+}
+
+/**
+ * Fill a single field based on its type.
+ */
+export const fillField = async (page: Page, field: FieldValue): Promise<void> => {
+  const { name, type, value } = field;
+
+  switch (type) {
+    case 'boolean':
+      if (typeof value === 'boolean') {
+        const isChecked = await page.getByLabel(name).isChecked();
+        if (isChecked !== value) {
+          await page.getByLabel(name).click(); // Toggle checkbox
+        }
+      }
+      break;
+
+    case 'dz':
+      if (Array.isArray(value)) {
+        for (const component of value) {
+          const { fields: componentFields } = component;
+
+          // Click "Add a component to {name}"
+          await page.getByRole('button', { name: `Add a component to ${name}` }).click();
+
+          // Expand component category if not open
+          const categoryButton = page.getByRole('button', { name: component.category });
+          if ((await categoryButton.getAttribute('data-state')) !== 'open') {
+            await categoryButton.click();
+          }
+
+          // Select the component to add it to the dz
+          const componentButton = page.getByRole('button', { name: component.name });
+          if ((await componentButton.getAttribute('data-state')) !== 'open') {
+            await componentButton.click();
+          }
+
+          // check if we need to expand it now that it has been added
+          const expandButton = page.getByRole('button', { name: component.name });
+          if ((await expandButton.getAttribute('data-state')) !== 'open') {
+            await expandButton.click();
+          }
+
+          // Fill component fields
+          if (componentFields && Array.isArray(componentFields)) {
+            for (const field of componentFields) {
+              await fillField(page, field);
+            }
+          }
+        }
+      }
+      break;
+
+    // all other cases can be handled as text fills
+    default:
+      await page.getByLabel(name).fill(String(value));
+      break;
+  }
+};
+
+/**
+ * Validate that fields have been saved correctly by checking their values on the page.
+ */
+export const validateFields = async (page: Page, fields: FieldValue[]): Promise<void> => {
+  for (const field of fields) {
+    const { name, type, value } = field;
+
+    switch (type) {
+      case 'boolean':
+        const isChecked = await page.getByLabel(name).isChecked();
+        expect(isChecked).toBe(value);
+        break;
+      case 'dz':
+        // TODO - and ensure that it includes order
+        break;
+      default:
+        const fieldValue = await page.getByLabel(name).inputValue();
+        expect(fieldValue).toBe(String(value)); // Verify text/numeric input values
+        break;
+    }
+  }
+};
+
+/**
+ * Fill all fields in the provided order.
+ */
+export const fillFields = async (page: Page, fields: FieldValue[]): Promise<void> => {
+  for (const field of fields) {
+    await fillField(page, field);
+  }
+};
+
+/**
+ * Main function to create content by filling fields and optionally publishing it.
+ */
+export const createContent = async (
+  page: Page,
+  contentType: string,
+  fields: FieldValue[],
+  options: CreateContentOptions = {}
+): Promise<void> => {
+  await navToHeader(page, ['Content Manager', contentType], contentType);
+
+  await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }));
+
+  await fillFields(page, fields);
+
+  if (options.publish) {
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await findAndClose(page, 'Published Document');
+  } else {
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+    await findAndClose(page, 'Saved Document');
+  }
+
+  // validate that data has been created successfully by refreshing page and checking that each field still has the value
+  await page.reload();
+  await validateFields(page, fields);
+
+  // TODO: remove after testing
+  const elementExists = await page
+    .getByRole('link', { name: 'i dont exist' })
+    .isVisible({ timeout: 0 });
+  expect(elementExists).toBeTruthy(); // This will fail, triggering trace capture
+};

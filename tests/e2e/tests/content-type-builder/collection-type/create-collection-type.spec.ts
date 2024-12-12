@@ -94,7 +94,6 @@ test.describe('Create collection type with all field types', () => {
         type: 'dz',
         name: 'testdynamiczone',
         dz: {
-          options: {},
           components: [
             {
               type: 'component',
