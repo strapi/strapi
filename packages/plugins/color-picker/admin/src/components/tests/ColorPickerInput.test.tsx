@@ -6,7 +6,7 @@ import { IntlProvider } from 'react-intl';
 
 import { ColorPickerInput } from '../ColorPickerInput';
 
-const render = () => ({
+const render = (onChange = () => {}) => ({
   ...renderRTL(
     <ColorPickerInput
       name="color"
@@ -14,7 +14,7 @@ const render = () => ({
       type="string"
       initialValue=""
       value=""
-      onChange={() => {}}
+      onChange={onChange}
     />,
     {
       wrapper: ({ children }) => {
@@ -49,5 +49,19 @@ describe('<ColorPickerInput />', () => {
     expect(getByRole('slider', { name: 'Color' })).toBeVisible();
     expect(getByRole('slider', { name: 'Hue' })).toBeVisible();
     expect(getByRole('textbox', { name: 'Color picker input' })).toBeVisible();
+  });
+
+  it('calls onChange when value is entered into the input field', async () => {
+    const handleChange = jest.fn();
+    const { user, getByRole } = render(handleChange);
+    await user.click(getByRole('button', { name: 'Color picker toggle' }));
+
+    const colorInput = getByRole('textbox', { name: 'Color picker input' });
+    await user.clear(colorInput);
+    await user.click(colorInput);
+    await user.paste('#ff5733');
+
+    expect(handleChange).toHaveBeenCalledTimes(1);
+    expect(handleChange).toHaveBeenCalledWith('color', '#ff5733');
   });
 });
