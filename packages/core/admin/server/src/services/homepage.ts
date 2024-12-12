@@ -96,7 +96,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     return documents.map((document) => {
       return {
         documentId: document.documentId,
-        locale: document.locale,
+        locale: document.locale ?? null,
         updatedAt: new Date(document.updatedAt),
         title: document[meta.mainField ?? 'documentId'],
         publishedAt:
