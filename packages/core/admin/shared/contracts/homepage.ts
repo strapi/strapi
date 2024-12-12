@@ -7,7 +7,7 @@ export interface RecentDocument {
   contentTypeUid: UID.ContentType;
   contentTypeDisplayName: string;
   documentId: string;
-  locale?: string;
+  locale: string | null;
   status?: 'draft' | 'published' | 'modified';
   title: string;
   updatedAt: Date;

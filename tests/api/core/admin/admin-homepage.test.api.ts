@@ -149,6 +149,7 @@ describe('Homepage API', () => {
      **/
     for (let i = 0; i < 9; i++) {
       if (i % 3 === 0) {
+        // When index is 0, 3, 6
         await strapi.documents(articleUid).create({
           data: {
             title: `Article ${i}`,
@@ -156,6 +157,7 @@ describe('Homepage API', () => {
           },
         });
       } else if (i % 3 === 1) {
+        // When index is 1, 4, 7
         await strapi.documents(globalUid).update({
           documentId: globalDoc.documentId,
           status: 'draft',
@@ -164,6 +166,7 @@ describe('Homepage API', () => {
           },
         });
       } else {
+        // When index is 2, 5, 8
         await strapi.documents(tagUid).create({
           data: {
             slug: `tag-${i}`,
@@ -183,7 +186,8 @@ describe('Homepage API', () => {
     expect(response.body.data[0].contentTypeUid).toBe('api::tag.tag');
     expect(response.body.data[1].title).toBe('global-7');
     expect(response.body.data[1].contentTypeUid).toBe('api::global.global');
-    expect(response.body.data[1].status).toBe('draft');
+    // Document with globalUid was published and then updated, assert the modified status
+    expect(response.body.data[1].status).toBe('modified');
     expect(response.body.data[2].title).toBe('Article 6');
     expect(response.body.data[2].contentTypeUid).toBe('api::article.article');
     expect(response.body.data[3].title).toBe('tag-5');
