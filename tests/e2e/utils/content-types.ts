@@ -226,13 +226,10 @@ export const addComponentAttribute = async (
   const useExistingLabel = attribute.component.useExisting ? 'false' : 'true';
   await page.click(`label[for="${useExistingLabel}"]`);
 
-  // if (attribute.component.useExisting) {
   if (await page.getByRole('button', { name: 'Select a component' }).isVisible({ timeout: 0 })) {
     await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
     await fillAddComponentAttribute(page, attribute.component);
-  }
-  // } else {
-  else if (
+  } else if (
     await page.getByRole('button', { name: 'Configure the component' }).isVisible({ timeout: 0 })
   ) {
     await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
@@ -242,16 +239,21 @@ export const addComponentAttribute = async (
   } else {
     await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
   }
-  // }
-
-  // await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
-  // await fillAddComponentAttribute(page, attribute.component);
 
   if (attrCompOptions.attributes) {
-    await clickAndWait(
-      page,
-      page.getByRole('button', { name: new RegExp('Add first field to the component', 'i') })
-    );
+    const addFirstFieldButton = page.getByRole('button', {
+      name: new RegExp('Add first field to the component', 'i'),
+    });
+    const addAnotherFieldButton = page.getByRole('button', {
+      name: new RegExp('Add another field', 'i'),
+    });
+
+    if (await addFirstFieldButton.isVisible({ timeout: 0 })) {
+      await clickAndWait(page, addFirstFieldButton);
+    } else if (await addAnotherFieldButton.isVisible({ timeout: 0 })) {
+      await clickAndWait(page, addAnotherFieldButton);
+    }
+
     await addAttributes(page, attrCompOptions.attributes, { clickFinish: false, ...options });
   }
 };

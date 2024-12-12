@@ -2,10 +2,18 @@ import { expect, type Page } from '@playwright/test';
 import { typeMap } from './content-types';
 import { clickAndWait, findAndClose, navToHeader } from './shared';
 
+export type FieldValueValue = string | number | boolean | null | Array<ComponentValue>;
+
+export interface ComponentValue {
+  category: string; // Category the component belongs to
+  name: string; // Name of the component
+  fields: FieldValue[]; // Nested fields within the component
+}
+
 export interface FieldValue {
   type: keyof typeof typeMap;
   name: string;
-  value: string | number | boolean | null; // Supports common data types
+  value: FieldValueValue; // Use the extracted type here
 }
 
 export interface CreateContentOptions {
@@ -28,6 +36,42 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       }
       break;
 
+    case 'dz':
+      if (Array.isArray(value)) {
+        for (const component of value) {
+          const { fields: componentFields } = component;
+
+          // Click "Add a component to {name}"
+          await page.getByRole('button', { name: `Add a component to ${name}` }).click();
+
+          // Expand component category if not open
+          const categoryButton = page.getByRole('button', { name: component.category });
+          if ((await categoryButton.getAttribute('data-state')) !== 'open') {
+            await categoryButton.click();
+          }
+
+          // Select the component to add it to the dz
+          const componentButton = page.getByRole('button', { name: component.name });
+          if ((await componentButton.getAttribute('data-state')) !== 'open') {
+            await componentButton.click();
+          }
+
+          // check if we need to expand it now that it has been added
+          const expandButton = page.getByRole('button', { name: component.name });
+          if ((await expandButton.getAttribute('data-state')) !== 'open') {
+            await expandButton.click();
+          }
+
+          // Fill component fields
+          if (componentFields && Array.isArray(componentFields)) {
+            for (const field of componentFields) {
+              await fillField(page, field);
+            }
+          }
+        }
+      }
+      break;
+
     // all other cases can be handled as text fills
     default:
       await page.getByLabel(name).fill(String(value));
@@ -44,12 +88,12 @@ export const validateFields = async (page: Page, fields: FieldValue[]): Promise<
 
     switch (type) {
       case 'boolean':
-        if (typeof value === 'boolean') {
-          const isChecked = await page.getByLabel(name).isChecked();
-          expect(isChecked).toBe(value); // Verify checkbox state
-        }
+        const isChecked = await page.getByLabel(name).isChecked();
+        expect(isChecked).toBe(value);
         break;
-
+      case 'dz':
+        // TODO - and ensure that it includes order
+        break;
       default:
         const fieldValue = await page.getByLabel(name).inputValue();
         expect(fieldValue).toBe(String(value)); // Verify text/numeric input values
