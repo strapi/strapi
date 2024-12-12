@@ -136,15 +136,24 @@ export const selectComponentIcon = async (page: Page, icon: string) => {
 };
 
 // open the component builder
-const openComponentBuilder = async (page: Page) => {
+export const openComponentBuilder = async (page: Page) => {
   await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   await clickAndWait(page, page.getByRole('button', { name: 'Create new component' }));
 };
 
 // The initial "create a component" screen from the content type builder nav
+// also supports "create a component" from within a dz
 export const fillCreateComponent = async (page: Page, options: Partial<CreateComponentOptions>) => {
   if (options.name) {
-    await page.getByLabel('Display name').fill(options.name);
+    const displayNameLocator = page.getByLabel('Display name');
+    if (await displayNameLocator.isVisible({ timeout: 0 })) {
+      await displayNameLocator.fill(options.name);
+    } else {
+      const nameLocator = page.getByLabel('Name', { exact: true });
+      if (await nameLocator.isVisible({ timeout: 0 })) {
+        await nameLocator.fill(options.name);
+      }
+    }
   }
 
   if (options.icon) {
@@ -174,7 +183,15 @@ export const fillAddComponentAttribute = async (
   component: AddAttribute['component']
 ) => {
   if (component.options.name) {
-    await page.getByLabel('Name').fill(component.options.name);
+    const displayNameLocator = page.getByLabel('Display name');
+    if (await displayNameLocator.isVisible({ timeout: 0 })) {
+      await displayNameLocator.fill(component.options.name);
+    } else {
+      const nameLocator = page.getByLabel('Name', { exact: true });
+      if (await nameLocator.isVisible({ timeout: 0 })) {
+        await nameLocator.fill(component.options.name);
+      }
+    }
   }
 
   // if existing component, select it
@@ -205,20 +222,30 @@ export const addComponentAttribute = async (
   options: any = {}
 ) => {
   const attrCompOptions = attribute.component.options;
-  await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
 
-  const useExisting = attribute.component.useExisting ? 'false' : 'true';
-  await page.click(`label[for="${useExisting}"]`);
+  const useExistingLabel = attribute.component.useExisting ? 'false' : 'true';
+  await page.click(`label[for="${useExistingLabel}"]`);
 
-  if (!options?.fromDz) {
-    if (attribute.component.useExisting) {
-      await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
-    } else {
-      await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
-    }
-
+  // if (attribute.component.useExisting) {
+  if (await page.getByRole('button', { name: 'Select a component' }).isVisible({ timeout: 0 })) {
+    await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
     await fillAddComponentAttribute(page, attribute.component);
   }
+  // } else {
+  else if (
+    await page.getByRole('button', { name: 'Configure the component' }).isVisible({ timeout: 0 })
+  ) {
+    await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
+    await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
+  } else if (attribute.component.useExisting) {
+    await fillAddComponentAttribute(page, attribute.component);
+  } else {
+    await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
+  }
+  // }
+
+  // await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
+  // await fillAddComponentAttribute(page, attribute.component);
 
   if (attrCompOptions.attributes) {
     await clickAndWait(
@@ -315,8 +342,8 @@ export const addAttributes = async (page: Page, attributes: AddAttribute[], opti
         page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
       );
     } else {
-      // Last attribute, click 'Finish'
-      // TODO: ...but only if it's visible; this covers a bug (in the test utils or in strapi) where modal gets closed from a previous finish
+      // Last attribute, click 'Finish' only if it's visible
+      // TODO: fix; only necessary because of a bug (either in the test utils or in strapi) where modal gets closed from a previous finish
       if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
         await page.getByRole('button', { name: 'Finish' }).click({ force: true });
       }
@@ -394,7 +421,7 @@ const createContentType = async (
   await page.getByRole('button', { name: buttonName }).click();
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
-  const displayName = page.getByLabel('Display name');
+  const displayName = page.getByLabel('Name');
   await displayName.fill(name);
 
   const singularIdField = page.getByLabel('API ID (Singular)');
