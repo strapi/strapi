@@ -1,21 +1,22 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { navToHeader } from '../../utils/shared';
+import { clickAndWait, navToHeader } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { sharedSetup } from '../../utils/setup';
 
 const createAPIToken = async (page, tokenName, duration, type) => {
   await navToHeader(page, ['Settings', 'API Tokens', 'Create new API Token'], 'Create API Token');
 
-  await page.getByLabel('Name*').click();
+  await clickAndWait(page, page.getByLabel('Name*'));
   await page.getByLabel('Name*').fill(tokenName);
 
-  await page.getByLabel('Token duration').click();
-  await page.getByRole('option', { name: duration }).click();
+  await clickAndWait(page, page.getByLabel('Token duration'));
+  await clickAndWait(page, page.getByRole('option', { name: duration }));
 
-  await page.getByLabel('Token type').click();
-  await page.getByRole('option', { name: type }).click();
+  await clickAndWait(page, page.getByLabel('Token type'));
+  await clickAndWait(page, page.getByRole('option', { name: type }));
 
-  await page.getByRole('button', { name: 'Save' }).click();
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 
   await expect(page.getByText('Make sure to copy this token')).toBeVisible();
   await expect(page.getByText('Expiration date:')).toBeVisible();
@@ -23,9 +24,12 @@ const createAPIToken = async (page, tokenName, duration, type) => {
 
 test.describe('API Tokens', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
-    await login({ page });
+    await sharedSetup('ctb-edit-st', page, {
+      login: true,
+      skipTour: true,
+      resetFiles: true,
+      importData: 'with-admin.tar',
+    });
   });
 
   // Test token creation
