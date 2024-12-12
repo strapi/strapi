@@ -18,15 +18,24 @@ import type { Api, ApiInfo } from '../../types';
  * @param {string} routePath - The route's path property
  * @returns {string}
  */
-const parsePathWithVariables = (routePath: string) => {
-  return pathToRegexp
-    .parse(routePath)
-    .map((token) => {
-      if (_.isObject(token)) {
-        return `${token.prefix}{${token.name}}`;
-      }
+const parsePathWithVariables = (routePath: string): string => {
+  const { tokens } = pathToRegexp.parse(routePath);
 
-      return token;
+  return tokens
+    .map((token) => {
+      switch (token.type) {
+        case 'text':
+          return token.value;
+        case 'param':
+          return `{${token.name}}`;
+        case 'wildcard':
+          return `{${token.name}}`;
+        case 'group':
+          // Handle group tokens by mapping them within the same function context
+          return `(${parsePathWithVariables(token.tokens.map((t) => t satisfies pathToRegexp.Token).join(''))})`;
+        default:
+          throw new Error(`Unknown token type: ${(token as any).type}`);
+      }
     })
     .join('');
 };
@@ -39,8 +48,11 @@ const parsePathWithVariables = (routePath: string) => {
  * @returns {object } Swagger path params object
  */
 const getPathParams = (routePath: string): OpenAPIV3.ParameterObject[] => {
-  return pathToRegexp.parse(routePath).reduce((acc, param) => {
-    if (!(typeof param === 'object')) {
+  const { tokens } = pathToRegexp.parse(routePath);
+
+  return tokens.reduce((acc, param) => {
+    // Skip non-parameter tokens
+    if (param.type !== 'param') {
       return acc;
     }
 
@@ -68,6 +80,7 @@ const getPathWithPrefix = (prefix: string | undefined, route: Core.Route) => {
   // Otherwise just return path
   return route.path;
 };
+
 /**
  * @description Gets all paths based on routes
  *
