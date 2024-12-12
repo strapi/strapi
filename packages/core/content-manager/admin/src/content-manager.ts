@@ -1,4 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
+
 import { INJECTION_ZONES } from './components/InjectionZone';
 import { PLUGIN_ID } from './constants/plugin';
 import {
@@ -6,6 +7,8 @@ import {
   type DocumentActionPosition,
   type DocumentActionDescription,
 } from './pages/EditView/components/DocumentActions';
+import { RichTextBlocksStore } from './pages/EditView/components/FormInputs/BlocksInput/BlocksEditor';
+import { defaultBlocksStore } from './pages/EditView/components/FormInputs/BlocksInput/DefaultBlocksStore';
 import {
   DEFAULT_HEADER_ACTIONS,
   type HeaderActionDescription,
@@ -26,6 +29,7 @@ import type { DescriptionComponent, PluginConfig } from '@strapi/admin/strapi-ad
  * -----------------------------------------------------------------------------------------------*/
 
 type DescriptionReducer<Config extends object> = (prev: Config[]) => Config[];
+type DescriptionObjReducer<Config extends object> = (prev: Config) => Config;
 
 interface EditViewContext {
   /**
@@ -121,6 +125,7 @@ class ContentManagerPlugin {
    * application, so instead we collate them and run them later with the complete list incl.
    * ones already registered & the context of the view.
    */
+  richTextBlocksStore: RichTextBlocksStore = { ...defaultBlocksStore };
   bulkActions: BulkActionComponent[] = [...DEFAULT_BULK_ACTIONS];
   documentActions: DocumentActionComponent[] = [
     ...DEFAULT_ACTIONS,
@@ -131,6 +136,22 @@ class ContentManagerPlugin {
   headerActions: HeaderActionComponent[] = [];
 
   constructor() {}
+
+  addRichTextBlocks(blocks: RichTextBlocksStore): void;
+  addRichTextBlocks(blocks: DescriptionObjReducer<RichTextBlocksStore>): void;
+  addRichTextBlocks(blocks: RichTextBlocksStore | DescriptionObjReducer<RichTextBlocksStore>) {
+    if (typeof blocks === 'function') {
+      this.richTextBlocksStore = blocks(this.richTextBlocksStore);
+    } else if (typeof blocks === 'object') {
+      this.richTextBlocksStore = { ...this.richTextBlocksStore, ...blocks };
+    } else {
+      throw new Error(
+        `Expected the \`blocks\` passed to \`addRichTextBlocks\` to be an object or a function, but received ${getPrintableType(
+          blocks
+        )}`
+      );
+    }
+  }
 
   addEditViewSidePanel(panels: DescriptionReducer<PanelComponent>): void;
   addEditViewSidePanel(panels: PanelComponent[]): void;
@@ -210,6 +231,7 @@ class ContentManagerPlugin {
         addDocumentAction: this.addDocumentAction.bind(this),
         addDocumentHeaderAction: this.addDocumentHeaderAction.bind(this),
         addEditViewSidePanel: this.addEditViewSidePanel.bind(this),
+        addRichTextBlocks: this.addRichTextBlocks.bind(this),
         getBulkActions: () => this.bulkActions,
         getDocumentActions: (position?: DocumentActionPosition) => {
           /**
@@ -230,6 +252,7 @@ class ContentManagerPlugin {
         },
         getEditViewSidePanels: () => this.editViewSidePanels,
         getHeaderActions: () => this.headerActions,
+        getRichTextBlocks: () => this.richTextBlocksStore,
       },
     } satisfies PluginConfig;
   }
