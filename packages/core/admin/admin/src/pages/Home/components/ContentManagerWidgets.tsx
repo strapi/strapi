@@ -81,7 +81,7 @@ const WidgetContent = ({ document }: { document: RecentDocument }) => {
       </Td>
       <Td>
         <Box display="inline-block">
-          <DocumentStatus status={document.status} />
+          {document.status && <DocumentStatus status={document.status} />}
         </Box>
       </Td>
       <Td>

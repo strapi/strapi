@@ -167,9 +167,9 @@ describe('Homepage API', () => {
         });
       } else {
         // When index is 2, 5, 8
-        await strapi.documents(tagUid).create({
+        await strapi.documents(authorUid).create({
           data: {
-            slug: `tag-${i}`,
+            name: `author-${i}`,
           },
         });
       }
@@ -180,18 +180,24 @@ describe('Homepage API', () => {
       url: '/admin/homepage/recent-documents?action=update',
     });
 
+    // Assert the response
     expect(response.statusCode).toBe(200);
     expect(response.body.data).toHaveLength(4);
-    expect(response.body.data[0].title).toBe('tag-8');
-    expect(response.body.data[0].contentTypeUid).toBe('api::tag.tag');
+    // Assert the document titles
+    expect(response.body.data[0].title).toBe('author-8');
     expect(response.body.data[1].title).toBe('global-7');
-    expect(response.body.data[1].contentTypeUid).toBe('api::global.global');
-    // Document with globalUid was published and then updated, assert the modified status
-    expect(response.body.data[1].status).toBe('modified');
     expect(response.body.data[2].title).toBe('Article 6');
+    expect(response.body.data[3].title).toBe('author-5');
+    // Assert the document content type uids
+    expect(response.body.data[0].contentTypeUid).toBe('api::author.author');
+    expect(response.body.data[1].contentTypeUid).toBe('api::global.global');
     expect(response.body.data[2].contentTypeUid).toBe('api::article.article');
-    expect(response.body.data[3].title).toBe('tag-5');
-    expect(response.body.data[3].contentTypeUid).toBe('api::tag.tag');
+    expect(response.body.data[3].contentTypeUid).toBe('api::author.author');
+    // Assert the document statuses
+    expect(response.body.data[0].status).toBe(undefined);
+    expect(response.body.data[1].status).toBe('modified');
+    expect(response.body.data[2].status).toBe('draft');
+    expect(response.body.data[3].status).toBe(undefined);
   });
 
   it('finds the most recently published documents', async () => {

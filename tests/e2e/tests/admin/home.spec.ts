@@ -57,6 +57,7 @@ test.describe('Home', () => {
     await expect(
       mostRecentEntry.getByRole('gridcell', { name: /nike mens newer!/i })
     ).toBeVisible();
+    await expect(mostRecentEntry.getByRole('gridcell', { name: /draft/i })).toBeVisible();
   });
 
   test('a user should see the last published entries', async ({ page }) => {
