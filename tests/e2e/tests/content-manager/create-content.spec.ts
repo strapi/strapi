@@ -64,49 +64,11 @@ test.describe('Adding content', () => {
 
     // Add the content
     await createContent(page, 'Article', [
-      // {
-      //   name: 'testdz',
-      //   type: 'dz',
-      //   value: undefined,
-      // },
       {
         name: 'title',
         type: 'text',
         value: 'testname',
       },
     ]);
-
-    // await
-    // await createContent('')
-    // await page.getByLabel('Content Manager').click();
-    // await page.getByRole('link', { name: 'Create new entry' }).click();
-    // // Wait for the URL to match the CREATE_URL pattern
-    // await page.waitForURL(CREATE_URL);
-    // // Add a new relation to the entry
-    // await page.getByRole('combobox', { name: 'authors' }).click();
-    // await page.getByLabel('Coach BeardDraft').click();
-    // // Attempt to publish the entry
-    // await page.getByRole('button', { name: 'Publish' }).click();
-    // // Verify that a warning about a single draft relation is displayed
-    // await expect(page.getByText('This entry is related to 1')).toBeVisible();
-    // await page.getByRole('button', { name: 'Cancel' }).click();
-    // // Save the current state of the entry
-    // await page.getByRole('button', { name: 'Save' }).click();
-    // await findAndClose(page, 'Saved Document');
-    // // Add another relation to the entry
-    // await page.getByRole('combobox', { name: 'authors' }).click();
-    // await page.getByLabel('Led TassoDraft').click();
-    // // Attempt to publish the entry again
-    // await page.getByRole('button', { name: 'Publish' }).click();
-    // // Verify that a warning about two draft relations is displayed
-    // await expect(page.getByText('This entry is related to 2')).toBeVisible();
-    // await page.getByRole('button', { name: 'Cancel' }).click();
-    // // Save the current state of the entry
-    // await page.getByRole('button', { name: 'Save' }).click();
-    // await findAndClose(page, 'Saved Document');
-    // // Attempt to publish the entry once more
-    // await page.getByRole('button', { name: 'Publish' }).click();
-    // // Verify that the warning about three draft relations is still displayed
-    // await expect(page.getByText('This entry is related to 3')).toBeVisible();
   });
 });
