@@ -18,6 +18,9 @@ const models = {
       title: {
         type: 'string',
       },
+      one_to_one: { type: 'relation', relation: 'oneToOne', target: 'api::dog.dog' },
+      cpa: { type: 'component', component: 'default.cpa' },
+      cpb: { type: 'component', component: 'default.cpb' },
       dz: { type: 'dynamiczone', components: ['default.cpa', 'default.cpb'] },
       morph_to_one: { type: 'relation', relation: 'morphToOne' },
       morph_to_many: { type: 'relation', relation: 'morphToMany' },
@@ -90,6 +93,34 @@ describe('convert-query-params', () => {
   test.todo('convertLimitQueryParams');
 
   describe('convertPopulateQueryParams', () => {
+    describe('Fields selection', () => {
+      test('should not select documentId when selecting fields for components', () => {
+        const populate = {
+          cpa: { fields: ['field'] },
+          cpb: { fields: ['field'] },
+        };
+
+        const newPopulate = private_convertPopulateQueryParams(populate, models['api::dog.dog']);
+
+        expect(newPopulate).toStrictEqual({
+          cpa: { select: ['id', 'field'] },
+          cpb: { select: ['id', 'field'] },
+        });
+      });
+
+      test('should select documentId for non-component populate', () => {
+        const populate = {
+          one_to_one: { fields: ['title'] },
+        };
+
+        const newPopulate = private_convertPopulateQueryParams(populate, models['api::dog.dog']);
+
+        expect(newPopulate).toStrictEqual({
+          one_to_one: { select: ['id', 'documentId', 'title'] },
+        });
+      });
+    });
+
     describe('Morph-Like Attributes', () => {
       test.each<[label: string, key: string]>([
         ['dynamic zone', 'dz'],
