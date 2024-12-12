@@ -62,7 +62,7 @@ const WidgetContent = ({ document }: { document: RecentDocument }) => {
   return (
     <Tr onClick={handleRowClick(document)} key={document.documentId}>
       <Td>
-        <CellTypography title={document.documentId} variant="omega" textColor="neutral800">
+        <CellTypography title={document.title} variant="omega" textColor="neutral800">
           {document.title}
         </CellTypography>
       </Td>
