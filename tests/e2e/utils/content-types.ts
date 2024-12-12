@@ -80,8 +80,6 @@ type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
 
-type AddDynamicZoneOptions = {};
-
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
@@ -205,11 +203,18 @@ export const fillAddComponentAttribute = async (
 
     await item.scrollIntoViewIfNeeded();
     await item.click();
+
+    // close the select menu
+    if (await page.getByText('component selected').isVisible({ timeout: 0 })) {
+      await page.getByText('component selected').click({ force: true });
+    }
   }
 
   // Select repeatable or single
-  const repeatableValue = component.options.repeatable ? 'true' : 'false';
-  await page.click(`label[for="${repeatableValue}"]`);
+  if (await page.locator('text=repeatable').isVisible({ timeout: 0 })) {
+    const repeatableValue = component.options.repeatable ? 'true' : 'false';
+    await page.click(`label[for="${repeatableValue}"]`);
+  }
 };
 
 function escapeRegExp(string: string) {
@@ -259,14 +264,25 @@ export const addComponentAttribute = async (
 };
 
 export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZoneAttribute) => {
+  // Fill the name of the dynamic zone
   await page.getByLabel('Name', { exact: true }).fill(attribute.name);
 
+  // Click the "Add components to the zone" button to start adding components
   await clickAndWait(
     page,
     page.getByRole('button', { name: new RegExp('Add components to the zone', 'i') })
   );
 
-  await addAttributes(page, attribute.dz.components, { clickFinish: false, fromDz: true });
+  // Add the components to the dynamic zone
+  await addAttributes(page, attribute.dz.components, {
+    fromDz: attribute.name, // Pass the DZ name to ensure subsequent components are added to the DZ
+  });
+
+  // Finish the dynamic zone creation
+  const finishButton = page.getByRole('button', { name: 'Finish' });
+  if (await finishButton.isVisible({ timeout: 0 })) {
+    await finishButton.click();
+  }
 };
 
 export const fillAttribute = async (page: Page, attribute: AddAttribute, options?: any) => {
@@ -331,28 +347,41 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
   // TODO: add support for advanced options
 };
 
-export const addAttributes = async (page: Page, attributes: AddAttribute[], options?: any) => {
+export const addAttributes = async (
+  page: Page,
+  attributes: AddAttribute[],
+  options?: { fromDz?: string } // fromDz is now a string for DZ name
+) => {
   for (let i = 0; i < attributes.length; i++) {
     const attribute = attributes[i];
     await fillAttribute(page, attribute, options);
 
     if (i < attributes.length - 1) {
-      // Not the last attribute, click 'Add Another Field'
-      // NOTE: Fields after components only work because 'Add Another Field' is the button text on both the page Add and the modal Add button
-      await clickAndWait(
-        page,
-        page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
-      );
+      if (options?.fromDz) {
+        // Locate the row containing the DZ name
+        const dzRow = page.locator('tr').filter({ hasText: options.fromDz }).first();
+
+        // Locate the next sibling row and find the "Add a component" button
+        const nextRow = dzRow.locator('xpath=following-sibling::tr[1]');
+        const addComponentButton = nextRow.locator('button:has-text("Add a component")');
+
+        // Click the button
+        await clickAndWait(page, addComponentButton);
+      } else {
+        // Regular attribute: click 'Add Another Field'
+        await clickAndWait(
+          page,
+          page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
+        );
+      }
     } else {
       // Last attribute, click 'Finish' only if it's visible
-      // TODO: fix; only necessary because of a bug (either in the test utils or in strapi) where modal gets closed from a previous finish
       if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
         await page.getByRole('button', { name: 'Finish' }).click({ force: true });
       }
     }
   }
 };
-
 // attempt to submit a component but don't check for errors so that they can be checked by the caller
 export const submitComponent = async (page: Page, options: CreateComponentOptions) => {
   await openComponentBuilder(page);

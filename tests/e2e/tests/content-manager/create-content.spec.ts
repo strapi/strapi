@@ -34,18 +34,18 @@ test.describe('Adding content', () => {
                     },
                   },
                 },
+                // NOTE:
                 // Existing component with existing category
                 {
                   type: 'component',
                   name: 'testexistingcomponentexistingcategory',
                   component: {
-                    useExisting: 'testnewcomponentexistingcategory',
+                    useExisting: 'variations',
                     options: {
                       repeatable: false,
-                      name: 'testexistingcomponent',
+                      name: 'testvariations',
                       icon: 'globe',
                       categorySelect: 'testcategory',
-                      attributes: [{ type: 'text', name: 'testexistingcompotext' }],
                     },
                   },
                 },
@@ -57,7 +57,6 @@ test.describe('Adding content', () => {
     });
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
-    await navToHeader(page, ['Content-Type Builder', 'Articles'], 'Articlesasdf');
   });
 
   test.afterAll(async () => {
