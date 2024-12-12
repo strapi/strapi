@@ -601,11 +601,11 @@ export const createEntityManager = (db: Database): EntityManager => {
           )
             .connect(
               // Merge id & __type to get a single id key
-              dataset.map(encodePolymorphicRelation({ idColumn: 'id', typeColumn: '__type' }))
+              dataset.map(encodePolymorphicRelation({ idColumn: 'id', typeColumn: typeField }))
             )
             .get()
             // set the order based on the order of the ids
-            .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx }), {} as Record<ID, number>);
+            .reduce((acc, rel, idx) => ({ ...acc, [rel.id]: idx + 1 }), {} as Record<ID, number>);
 
           rows.forEach((row: Record<string, unknown>) => {
             const rowId = row[morphColumn.idColumn.name] as ID;
