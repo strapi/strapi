@@ -168,7 +168,6 @@ const updateComponents = async <TUID extends UID.Schema, TData extends Partial<I
       const { component: componentUID, repeatable = false } = attribute;
 
       const componentValue = data[attributeName as keyof TData] as ComponentValue;
-
       await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue);
 
       if (repeatable === true) {

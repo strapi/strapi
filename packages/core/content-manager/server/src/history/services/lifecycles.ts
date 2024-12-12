@@ -8,7 +8,7 @@ import { scheduleJob } from 'node-schedule';
 import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
-import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
+import type { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { createServiceUtils } from './utils';
 
 /**
