@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "birthdays",
+  "info": {
+    "singularName": "birthday",
+    "pluralName": "birthdays",
+    "displayName": "birthday"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "birthday": {
+      "type": "date"
+    }
+  }
+}
