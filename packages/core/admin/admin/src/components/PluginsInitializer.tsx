@@ -1,8 +1,5 @@
 import * as React from 'react';
 
-import { produce } from 'immer';
-import set from 'lodash/set';
-
 import { Page } from '../components/PageHelpers';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 
@@ -90,17 +87,16 @@ type SetPluginReadyAction = {
 
 type Action = SetPluginReadyAction;
 
-const reducer: React.Reducer<State, Action> = (state = initialState, action: Action): State =>
-  produce(state, (draftState) => {
-    switch (action.type) {
-      case 'SET_PLUGIN_READY': {
-        set(draftState, ['plugins', action.pluginId, 'isReady'], true);
-        break;
-      }
-      default:
-        return draftState;
+const reducer: React.Reducer<State, Action> = (state = initialState, action: Action): State => {
+  switch (action.type) {
+    case 'SET_PLUGIN_READY': {
+      const newState = { ...state };
+      newState.plugins[action.pluginId].isReady = true;
+
+      return newState;
     }
-  });
+  }
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Init state
