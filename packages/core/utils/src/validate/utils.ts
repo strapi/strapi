@@ -1,3 +1,7 @@
+// lodash/fp curry does not handle async functions properly, and creates very "ugly" types,
+// so we will use our own version to ensure curried functions are typed correctly
+// TODO: Export this from root @strapi/utils so we don't have copies of it between packages
+
 import { ValidationError } from '../errors';
 
 export const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }): never => {
@@ -9,7 +13,6 @@ export const throwInvalidKey = ({ key, path }: { key: string; path?: string | nu
   });
 };
 
-// lodash/fp curry does not detect async methods, so we'll use our own that is typed correctly
 export const asyncCurry = <A extends unknown[], R>(
   fn: (...args: A) => Promise<R>
 ): ((...args: Partial<A>) => any) => {

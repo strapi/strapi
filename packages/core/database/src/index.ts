@@ -5,15 +5,15 @@ import { Dialect, getDialect } from './dialects';
 import { createSchemaProvider, SchemaProvider } from './schema';
 import { createMetadata, Metadata } from './metadata';
 import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider } from './migrations';
+import { createMigrationsProvider, MigrationProvider, type Migration } from './migrations';
 import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
-import type { Migration } from './migrations';
-import { type Identifiers } from './utils/identifiers';
+import type { Identifiers } from './utils/identifiers';
+import { createRepairManager, type RepairManager } from './repairs';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -66,6 +66,8 @@ class Database {
 
   entityManager: EntityManager;
 
+  repair: RepairManager;
+
   logger: Logger;
 
   constructor(config: DatabaseConfig) {
@@ -117,6 +119,8 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+
+    this.repair = createRepairManager(this);
   }
 
   async init({ models }: { models: Model[] }) {
