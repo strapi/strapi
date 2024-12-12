@@ -12,7 +12,7 @@ interface DocumentStatusProps extends Omit<StatusProps, 'children' | 'variant'> 
 }
 
 /**
- * @internal
+ * @public
  * @description Displays the status of a document (draft, published, etc.)
  * and automatically calculates the appropriate variant for the status.
  */

@@ -6,6 +6,7 @@
 
 export { buildValidParams } from './utils/api';
 
+export { DocumentStatus } from './pages/EditView/components/DocumentStatus';
 export {
   useDocument as unstable_useDocument,
   useContentManagerContext as unstable_useContentManagerContext,
