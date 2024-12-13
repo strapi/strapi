@@ -26,8 +26,10 @@ import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
+width: 100%;
   &[aria-disabled='true'] {
     cursor: not-allowed;
+    background: ${({ theme }) => theme.colors.neutral150};
   }
 `;
 
@@ -41,6 +43,7 @@ const FlexButton = styled<FlexComponent<'button'>>(Flex)`
   // Inherit the not-allowed cursor from ToolbarWrapper when disabled
   &[aria-disabled] {
     cursor: inherit;
+    cursor: not-allowed;
   }
 
   &[aria-disabled='false'] {
