@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useQueryParams, useTracking, useForm } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Tooltip, type TooltipProps } from '@strapi/design-system';
+import { Box, Button, Tooltip, type TooltipProps } from '@strapi/design-system';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -61,29 +61,31 @@ const PreviewSidePanel: PanelComponent = ({ model, documentId, document }) => {
   return {
     title: formatMessage({ id: 'content-manager.preview.panel.title', defaultMessage: 'Preview' }),
     content: (
-      <Flex gap={2} width="100%">
-        <ConditionalTooltip
-          label={formatMessage({
-            id: 'content-manager.preview.panel.button-disabled-tooltip',
-            defaultMessage: 'Please save to open the preview',
-          })}
-          isShown={isModified}
-        >
+      <ConditionalTooltip
+        label={formatMessage({
+          id: 'content-manager.preview.panel.button-disabled-tooltip',
+          defaultMessage: 'Please save to open the preview',
+        })}
+        isShown={isModified}
+      >
+        <Box cursor="not-allowed" width="100%">
           <Button
             variant="tertiary"
             tag={Link}
             to={{ pathname: 'preview', search: stringify(query, { encode: false }) }}
             onClick={trackNavigation}
-            flex="auto"
+            width="100%"
             disabled={isModified}
+            pointerEvents={isModified ? 'none' : undefined}
+            tabIndex={isModified ? -1 : undefined}
           >
             {formatMessage({
               id: 'content-manager.preview.panel.button',
               defaultMessage: 'Open preview',
             })}
           </Button>
-        </ConditionalTooltip>
-      </Flex>
+        </Box>
+      </ConditionalTooltip>
     ),
   };
 };

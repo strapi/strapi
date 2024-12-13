@@ -185,9 +185,7 @@ class LocalFileSourceProvider implements ISourceProvider {
             try {
               metadata = await loadAssetMetadata(`assets/metadata/${file}.json`);
             } catch (error) {
-              console.warn(
-                ` Failed to read metadata for ${file}, Strapi will try to fix this issue automatically`
-              );
+              throw new Error(`Failed to read metadata for ${file}`);
             }
             const asset: IAsset = {
               metadata,
