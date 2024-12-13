@@ -2379,6 +2379,14 @@ exports[`ISO locales getIsoLocales 1`] = `
     "name": "Welsh (United Kingdom) (cy-GB)",
   },
   {
+    "code": "wo",
+    "name": "Wolof (wo)",
+  },
+  {
+    "code": "xh",
+    "name": "Xhosa (xh)",
+  },
+  {
     "code": "yav",
     "name": "Yangben (yav)",
   },

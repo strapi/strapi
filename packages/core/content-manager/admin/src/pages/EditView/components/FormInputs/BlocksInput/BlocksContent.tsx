@@ -19,6 +19,7 @@ import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';
 import { getTranslation } from '../../../../../utils/translations';
 
+import { decorateCode } from './Blocks/Code';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
@@ -287,7 +288,11 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
   );
 };
 
-const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
+interface ExtendedRenderLeafProps extends RenderLeafProps {
+  leaf: RenderLeafProps['leaf'] & { className?: string };
+}
+
+const baseRenderLeaf = (props: ExtendedRenderLeafProps, modifiers: ModifiersStore) => {
   // Recursively wrap the children for each active modifier
   const wrappedChildren = getEntries(modifiers).reduce((currentChildren, modifierEntry) => {
     const [name, modifier] = modifierEntry;
@@ -299,7 +304,11 @@ const baseRenderLeaf = (props: RenderLeafProps, modifiers: ModifiersStore) => {
     return currentChildren;
   }, props.children);
 
-  return <span {...props.attributes}>{wrappedChildren}</span>;
+  return (
+    <span {...props.attributes} className={props.leaf.className}>
+      {wrappedChildren}
+    </span>
+  );
 };
 
 type BaseRenderElementProps = Direction & {
@@ -358,7 +367,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
 
   // Create renderLeaf function based on the modifiers store
   const renderLeaf = React.useCallback(
-    (props: RenderLeafProps) => baseRenderLeaf(props, modifiers),
+    (props: ExtendedRenderLeafProps) => baseRenderLeaf(props, modifiers),
     [modifiers]
   );
 
@@ -591,6 +600,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
         readOnly={disabled}
         placeholder={placeholder}
         isExpandedMode={isExpandedMode}
+        decorate={decorateCode}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         onKeyDown={handleKeyDown}

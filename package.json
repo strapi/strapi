@@ -74,6 +74,7 @@
     "test:ts:front": "nx run-many --target=test:ts:front --nx-ignore-cycles",
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
     "test:unit": "jest --config jest.config.js",
+    "test:unit:update": "jest --config jest.config.js -u",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
     "test:unit:watch": "run test:unit --watch"
   },
