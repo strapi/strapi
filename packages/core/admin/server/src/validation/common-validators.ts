@@ -22,10 +22,11 @@ export const username = yup.string().min(1);
 
 export const password = yup
   .string()
+  .min(8)
   .test(
     'required-byte-size',
     'Password must be between 8 and 70 bytes',
-    (value:string) => {
+    (value) => {
       if (!value) return false;
       const byteSize = new TextEncoder().encode(value).length;
       return byteSize >= 8 && byteSize <= 70;

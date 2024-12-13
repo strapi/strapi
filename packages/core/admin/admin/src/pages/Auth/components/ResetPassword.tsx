@@ -29,10 +29,15 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
-    .max(70,{
-      id: translatedErrors.maxLength.id,
-      defaultMessage: "Password should be less than 70 characters"
-    })
+    .test(
+      'required-byte-size',
+      'Password must be between 8 and 70 bytes',
+      (value) => {
+        if (!value) return false;
+        const byteSize = new TextEncoder().encode(value).length;
+        return byteSize >= 8 && byteSize <= 70;
+      }
+    )
     .matches(/[a-z]/, {
       message: {
         id: 'components.Input.error.contain.lowercase',
@@ -114,9 +119,9 @@ const ResetPassword = () => {
                 {isBaseQueryError(error)
                   ? formatAPIError(error)
                   : formatMessage({
-                      id: 'notification.error',
-                      defaultMessage: 'An error occurred',
-                    })}
+                    id: 'notification.error',
+                    defaultMessage: 'An error occurred',
+                  })}
               </Typography>
             ) : null}
           </Column>
