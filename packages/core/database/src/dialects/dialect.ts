@@ -1,8 +1,10 @@
 import type { Database } from '..';
-import type { Schema } from '../schema';
+import type { ForeignKey, Index, Schema } from '../schema';
 
 export interface SchemaInspector {
   getSchema(): Promise<Schema>;
+  getIndexes(tableName: string): Promise<Index[]>;
+  getForeignKeys(tableName: string): Promise<ForeignKey[]>;
 }
 
 export default class Dialect {

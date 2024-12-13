@@ -111,8 +111,21 @@ const createHelpers = (db: Database) => {
   /**
    *  Creates a foreign key on a table
    */
-  const createForeignKey = (tableBuilder: Knex.TableBuilder, foreignKey: ForeignKey) => {
+  const createForeignKey = (
+    tableBuilder: Knex.TableBuilder,
+    foreignKey: ForeignKey,
+    existingForeignKeys?: ForeignKey[]
+  ) => {
     const { name, columns, referencedColumns, referencedTable, onDelete, onUpdate } = foreignKey;
+
+    // Check if it already exists, and if so drop it before creating
+    // Note that it is safe to drop multiple times with TableBuilder because it only uses it to define the schema
+    const existingForeignKey = existingForeignKeys?.find((fk) => fk.name === name);
+    const forceMigration = db.config.settings?.forceMigration;
+    if (existingForeignKey && forceMigration) {
+      debug(`Dropping existing foreign key ${name}`);
+      tableBuilder.dropForeign(existingForeignKey.columns, name);
+    }
 
     const constraint = tableBuilder
       .foreign(columns, name)
@@ -140,15 +153,27 @@ const createHelpers = (db: Database) => {
   /**
    * Creates an index on a table
    */
-  const createIndex = (tableBuilder: Knex.TableBuilder, index: Index) => {
+  const createIndex = (
+    tableBuilder: Knex.TableBuilder,
+    index: Index,
+    existingIndexes?: Index[]
+  ) => {
     const { type, columns, name } = index;
+
+    // Check if it already exists, and if so drop it before creating
+    // Note that it is safe to drop multiple times with TableBuilder because it only uses it to define the schema
+    const existingIndex = existingIndexes?.find((existing) => existing.name === name);
+    const forceMigration = db.config.settings?.forceMigration;
+    if (forceMigration && existingIndex) {
+      dropIndex(tableBuilder, index);
+    }
 
     switch (type) {
       case 'primary': {
-        return tableBuilder.primary(columns, name);
+        return tableBuilder.primary(columns, { constraintName: name });
       }
       case 'unique': {
-        return tableBuilder.unique(columns, name);
+        return tableBuilder.unique(columns, { indexName: name });
       }
       default: {
         return tableBuilder.index(columns, name, type);
@@ -245,10 +270,13 @@ const createHelpers = (db: Database) => {
   };
 
   const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff['diff']) => {
-    await schemaBuilder.alterTable(table.name, (tableBuilder) => {
-      // Delete indexes / fks / columns
+    await schemaBuilder.alterTable(table.name, async (tableBuilder) => {
+      // Fetch existing indexes and foreign keys for the table so we can safely delete/create
+      const existingIndexes = (await db.dialect.schemaInspector.getIndexes(table.name)) || [];
+      const existingForeignKeys =
+        (await db.dialect.schemaInspector.getForeignKeys(table.name)) || [];
 
-      // Drop foreign keys first to avoid foreign key errors in the following steps
+      // Pre-delete foreign keys to avoid conflicts when modifying or dropping columns
       for (const removedForeignKey of table.foreignKeys.removed) {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, removedForeignKey);
@@ -259,30 +287,18 @@ const createHelpers = (db: Database) => {
         dropForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
-      // for mysql only, dropForeignKey also removes the index, so don't drop it twice
-      const isMySQL = db.config.connection.client === 'mysql';
-      const ignoreForeignKeyNames = isMySQL
-        ? [
-            ...table.foreignKeys.removed.map((fk) => fk.name),
-            ...table.foreignKeys.updated.map((fk) => fk.name),
-          ]
-        : [];
-
+      // NOTE: regular index drops shouldn't be necessary and can probably be deleted
       for (const removedIndex of table.indexes.removed) {
-        if (!ignoreForeignKeyNames.includes(removedIndex.name)) {
-          debug(`Dropping index ${removedIndex.name} on ${table.name}`);
-          dropIndex(tableBuilder, removedIndex);
-        }
+        debug(`Dropping index ${removedIndex.name} on ${table.name}`);
+        dropIndex(tableBuilder, removedIndex);
       }
 
       for (const updatedIndex of table.indexes.updated) {
-        if (!ignoreForeignKeyNames.includes(updatedIndex.name)) {
-          debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
-          dropIndex(tableBuilder, updatedIndex.object);
-        }
+        debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
+        dropIndex(tableBuilder, updatedIndex.object);
       }
 
-      // We drop columns after indexes to ensure that it doesn't cascade delete any indexes we expect to exist
+      // Drop columns after FKs have been removed to avoid FK errors
       for (const removedColumn of table.columns.removed) {
         debug(`Dropping column ${removedColumn.name} on ${table.name}`);
         dropColumn(tableBuilder, removedColumn);
@@ -316,22 +332,22 @@ const createHelpers = (db: Database) => {
       // once the columns have all been updated, we can create indexes again
       for (const updatedForeignKey of table.foreignKeys.updated) {
         debug(`Recreating updated foreign key ${updatedForeignKey.name} on ${table.name}`);
-        createForeignKey(tableBuilder, updatedForeignKey.object);
+        createForeignKey(tableBuilder, updatedForeignKey.object, existingForeignKeys);
       }
 
       for (const updatedIndex of table.indexes.updated) {
         debug(`Recreating updated index ${updatedIndex.name} on ${table.name}`);
-        createIndex(tableBuilder, updatedIndex.object);
+        createIndex(tableBuilder, updatedIndex.object, existingIndexes);
       }
 
       for (const addedForeignKey of table.foreignKeys.added) {
-        debug(`Creating foreign keys ${addedForeignKey.name} on ${table.name}`);
-        createForeignKey(tableBuilder, addedForeignKey);
+        debug(`Creating foreign key ${addedForeignKey.name} on ${table.name}`);
+        createForeignKey(tableBuilder, addedForeignKey, existingForeignKeys);
       }
 
       for (const addedIndex of table.indexes.added) {
         debug(`Creating index ${addedIndex.name} on ${table.name}`);
-        createIndex(tableBuilder, addedIndex);
+        createIndex(tableBuilder, addedIndex, existingIndexes);
       }
     });
   };
