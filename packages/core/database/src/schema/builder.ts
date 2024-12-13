@@ -276,7 +276,7 @@ const createHelpers = (db: Database) => {
       const existingForeignKeys =
         (await db.dialect.schemaInspector.getForeignKeys(table.name)) || [];
 
-      // Pre-delete foreign keys to avoid conflicts when modifying or dropping columns
+      // Drop foreign keys first to avoid foreign key errors in the following steps
       for (const removedForeignKey of table.foreignKeys.removed) {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, removedForeignKey);
@@ -287,7 +287,10 @@ const createHelpers = (db: Database) => {
         dropForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
-      // NOTE: regular index drops shouldn't be necessary and can probably be deleted
+      /**
+       *  NOTE: regular index drops shouldn't be necessary because creates include dropping existing
+       * but since it doesn't result in any additional queries, we can keep the code for safety
+       *  */
       for (const removedIndex of table.indexes.removed) {
         debug(`Dropping index ${removedIndex.name} on ${table.name}`);
         dropIndex(tableBuilder, removedIndex);
