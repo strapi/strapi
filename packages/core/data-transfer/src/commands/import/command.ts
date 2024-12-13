@@ -24,6 +24,7 @@ const command = ({ command }: { command: Command }) => {
         'Provide encryption key in command instead of using the prompt'
       )
     )
+    .addOption(new Option('--verbose', 'Enable verbose logs'))
     .addOption(forceOption)
     .addOption(excludeOption)
     .addOption(onlyOption)

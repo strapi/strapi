@@ -2,6 +2,7 @@ import type { WebSocket, RawData } from 'ws';
 
 import type { ValidTransferCommand } from './constants';
 import type { TransferMethod } from '../constants';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 type BufferLike = Parameters<WebSocket['send']>[0];
 
@@ -26,6 +27,8 @@ export interface Handler {
 
   get response(): TransferState['response'];
   set response(response: TransferState['response']);
+
+  get diagnostics(): IDiagnosticReporter;
 
   // Add message UUIDs
   addUUID(uuid: string): void;
@@ -98,4 +101,6 @@ export interface Handler {
   onMessage(message: RawData, isBinary: boolean): Promise<void> | void;
   onClose(code: number, reason: Buffer): Promise<void> | void;
   onError(err: Error): Promise<void> | void;
+  onInfo(message: string): Promise<void> | void;
+  onWarning(message: string): Promise<void> | void;
 }
