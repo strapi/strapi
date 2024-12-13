@@ -42,56 +42,30 @@ const AddComponentButton = ({
   );
 };
 
-const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolean }>`
+const StyledAddIcon = styled(PlusCircle) <{ $isOpen?: boolean; $hasError?: boolean }>`
   height: ${({ theme }) => theme.spaces[6]};
   width: ${({ theme }) => theme.spaces[6]};
   transform: ${({ $isOpen }) => ($isOpen ? 'rotate(45deg)' : 'rotate(0deg)')};
 
   > circle {
     fill: ${({ theme, $hasError }) =>
-      $hasError ? theme.colors.danger200 : theme.colors.neutral150};
+    $hasError ? theme.colors.danger200 : theme.colors.neutral150};
   }
   > path {
     fill: ${({ theme, $hasError }) =>
-      $hasError ? theme.colors.danger600 : theme.colors.neutral600};
+    $hasError ? theme.colors.danger600 : theme.colors.neutral500};
   }
 `;
 
-const AddComponentTitle = styled<TypographyComponent>(Typography)``;
+const AddComponentTitle = styled<TypographyComponent>(Typography)`
+  color: ${({ theme }) => theme.colors.neutral600};
+`;
 
 const StyledButton = styled(Button)`
+  padding-left: ${({ theme }) => theme.spaces[3]};
   border-radius: 26px;
-  border-color: ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
   height: 5rem;
-
-  &:hover {
-    ${AddComponentTitle} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
-
-    ${StyledAddIcon} {
-      > circle {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-      > path {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-    }
-  }
-  &:active {
-    ${AddComponentTitle} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
-    ${StyledAddIcon} {
-      > circle {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-      > path {
-        fill: ${({ theme }) => theme.colors.neutral100};
-      }
-    }
-  }
 `;
 
 export { AddComponentButton };
