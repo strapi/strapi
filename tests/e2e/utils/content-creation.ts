@@ -92,7 +92,21 @@ export const validateFields = async (page: Page, fields: FieldValue[]): Promise<
         expect(isChecked).toBe(value);
         break;
       case 'dz':
-        // TODO - and ensure that it includes order
+        for (const component of value as ComponentValue[]) {
+          const { fields: componentFields, name: compName } = component;
+
+          // Validate each field within the component
+          for (const componentField of componentFields) {
+            // Ensure the category is expanded
+            const categoryButton = page.getByRole('button', { name: compName });
+            if ((await categoryButton.getAttribute('data-state')) !== 'open') {
+              await categoryButton.click();
+            }
+
+            // TODO: make this only check within the dz box so we don't have to use unique names for each field
+            await validateFields(page, [componentField]);
+          }
+        }
         break;
       default:
         const fieldValue = await page.getByLabel(name).inputValue();

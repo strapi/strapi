@@ -29,7 +29,7 @@ test.describe('Adding content', () => {
                       repeatable: true,
                       name: 'testnewcomponentrepeatable',
                       icon: 'moon',
-                      categoryCreate: 'testcategory',
+                      categorySelect: 'product',
                       attributes: [{ type: 'text', name: 'testnewcompotext' }],
                     },
                   },
@@ -38,14 +38,13 @@ test.describe('Adding content', () => {
                 // Existing component with existing category
                 {
                   type: 'component',
-                  name: 'testexistingcomponentexistingcategory',
+                  name: 'testexistingcomponentexistingcategory', // TODO: is this used?
                   component: {
                     useExisting: 'variations',
                     options: {
                       repeatable: false,
                       name: 'testvariations',
                       icon: 'globe',
-                      categorySelect: 'testcategory',
                     },
                   },
                 },
@@ -70,18 +69,16 @@ test.describe('Adding content', () => {
         type: 'dz',
         value: [
           {
-            category: 'testcategory',
+            category: 'product',
             name: 'testnewcomponentexistingcategory',
             fields: [
               { type: 'text', name: 'testnewcompotext', value: 'First component text value' },
             ],
           },
           {
-            category: 'testcategory',
-            name: 'testexistingcomponentexistingcategory',
-            fields: [
-              { type: 'text', name: 'testexistingcompotext', value: 'Second component text value' },
-            ],
+            category: 'product',
+            name: 'variations',
+            fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
           },
         ],
       },
