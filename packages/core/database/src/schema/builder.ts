@@ -73,6 +73,16 @@ export default (db: Database) => {
       const forceMigration = db.config.settings?.forceMigration;
 
       await db.dialect.startSchemaUpdate();
+
+      // Pre-fetch metadata for all updated tables
+      const existingMetadata: Record<string, { indexes: Index[]; foreignKeys: ForeignKey[] }> = {};
+      for (const table of schemaDiff.tables.updated) {
+        existingMetadata[table.name] = {
+          indexes: await db.dialect.schemaInspector.getIndexes(table.name),
+          foreignKeys: await db.dialect.schemaInspector.getForeignKeys(table.name),
+        };
+      }
+
       await db.connection.transaction(async (trx) => {
         await this.createTables(schemaDiff.tables.added, trx);
 
@@ -98,7 +108,8 @@ export default (db: Database) => {
           // alter table
           const schemaBuilder = this.getSchemaBuilder(trx);
 
-          await helpers.alterTable(schemaBuilder, table);
+          const { indexes, foreignKeys } = existingMetadata[table.name];
+          await helpers.alterTable(schemaBuilder, table, { indexes, foreignKeys });
         }
       });
 
@@ -269,13 +280,17 @@ const createHelpers = (db: Database) => {
     });
   };
 
-  const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff['diff']) => {
-    await schemaBuilder.alterTable(table.name, async (tableBuilder) => {
-      // Fetch existing indexes and foreign keys for the table so we can safely delete/create
-      const existingIndexes = (await db.dialect.schemaInspector.getIndexes(table.name)) || [];
-      const existingForeignKeys =
-        (await db.dialect.schemaInspector.getForeignKeys(table.name)) || [];
+  const alterTable = async (
+    schemaBuilder: Knex.SchemaBuilder,
+    table: TableDiff['diff'],
+    existingMetadata: { indexes: Index[]; foreignKeys: ForeignKey[] } = {
+      indexes: [],
+      foreignKeys: [],
+    }
+  ) => {
+    const { indexes: existingIndexes, foreignKeys: existingForeignKeys } = existingMetadata;
 
+    await schemaBuilder.alterTable(table.name, async (tableBuilder) => {
       // Drop foreign keys first to avoid foreign key errors in the following steps
       for (const removedForeignKey of table.foreignKeys.removed) {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
