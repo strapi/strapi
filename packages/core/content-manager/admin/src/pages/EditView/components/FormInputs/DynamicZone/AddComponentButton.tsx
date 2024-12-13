@@ -30,13 +30,13 @@ const AddComponentButton = ({
     >
       <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
-        <AddComponentTitle
+        <Typography
           variant="pi"
           fontWeight="bold"
-          textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
+          textColor={hasError && !isOpen ? 'danger600' : 'neutral600'}
         >
           {children}
-        </AddComponentTitle>
+        </Typography>
       </Flex>
     </StyledButton>
   );
@@ -55,10 +55,6 @@ const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolea
     fill: ${({ theme, $hasError }) =>
       $hasError ? theme.colors.danger600 : theme.colors.neutral500};
   }
-`;
-
-const AddComponentTitle = styled<TypographyComponent>(Typography)`
-  color: ${({ theme }) => theme.colors.neutral600};
 `;
 
 const StyledButton = styled(Button)`
