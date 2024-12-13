@@ -42,18 +42,18 @@ const AddComponentButton = ({
   );
 };
 
-const StyledAddIcon = styled(PlusCircle) <{ $isOpen?: boolean; $hasError?: boolean }>`
+const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolean }>`
   height: ${({ theme }) => theme.spaces[6]};
   width: ${({ theme }) => theme.spaces[6]};
   transform: ${({ $isOpen }) => ($isOpen ? 'rotate(45deg)' : 'rotate(0deg)')};
 
   > circle {
     fill: ${({ theme, $hasError }) =>
-    $hasError ? theme.colors.danger200 : theme.colors.neutral150};
+      $hasError ? theme.colors.danger200 : theme.colors.neutral150};
   }
   > path {
     fill: ${({ theme, $hasError }) =>
-    $hasError ? theme.colors.danger600 : theme.colors.neutral500};
+      $hasError ? theme.colors.danger600 : theme.colors.neutral500};
   }
 `;
 
