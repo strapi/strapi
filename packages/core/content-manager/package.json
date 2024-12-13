@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.5.0",
+  "version": "5.5.1",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -62,8 +62,8 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.0.0-rc.14",
     "@strapi/icons": "2.0.0-rc.14",
-    "@strapi/types": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/types": "5.5.1",
+    "@strapi/utils": "5.5.1",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
@@ -82,6 +82,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
     "node-schedule": "2.1.1",
+    "prismjs": "^1.29.0",
     "qs": "6.11.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
@@ -97,12 +98,13 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
-    "@strapi/database": "workspace:*",
+    "@strapi/admin": "5.5.1",
+    "@strapi/database": "5.5.1",
     "@strapi/pack-up": "5.0.2",
     "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
+    "@types/prismjs": "1.26.5",
     "koa-body": "6.0.1",
     "msw": "1.3.0",
     "react": "18.3.1",
