@@ -72,6 +72,11 @@ const SearchInput = ({
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onClear={handleClear}
           placeholder={placeholder}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+              setIsOpen(false);
+            }
+          }}
         >
           {label}
         </Searchbar>
