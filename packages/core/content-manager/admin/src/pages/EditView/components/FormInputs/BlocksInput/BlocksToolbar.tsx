@@ -26,7 +26,7 @@ import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
-width: 100%;
+  width: 100%;
   &[aria-disabled='true'] {
     cursor: not-allowed;
     background: ${({ theme }) => theme.colors.neutral150};
