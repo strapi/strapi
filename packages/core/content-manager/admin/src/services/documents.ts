@@ -87,6 +87,24 @@ const documentApi = contentManagerApi.injectEndpoints({
         'Relations',
         { type: 'UidAvailability', id: model },
       ],
+      transformResponse: (response: Create.Response, meta, arg): Create.Response => {
+        /**
+         * TODO v6
+         * Adapt plugin:users-permissions.user to return the same response
+         * shape as all other requests. The error is returned as expected.
+         */
+        if (!('data' in response) && arg.model === 'plugin::users-permissions.user') {
+          return {
+            data: response,
+            meta: {
+              availableStatus: [],
+              availableLocales: [],
+            },
+          };
+        }
+
+        return response;
+      },
     }),
     deleteDocument: builder.mutation<
       Delete.Response,
