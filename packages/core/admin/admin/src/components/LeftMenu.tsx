@@ -88,6 +88,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
       mainNavElement.addEventListener('mouseenter', handleMouseEnter);
       mainNavElement.addEventListener('mouseleave', handleMouseLeave);
 
+      const isCursorOverMainNav = mainNavElement.matches(':hover');
+      if (isCursorOverMainNav) {
+        toggleScroll(true);
+      }
+
       return () => {
         mainNavElement.removeEventListener('mouseenter', handleMouseEnter);
         mainNavElement.removeEventListener('mouseleave', handleMouseLeave);
