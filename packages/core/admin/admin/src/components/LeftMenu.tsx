@@ -71,6 +71,31 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   );
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
+  // Prevent scrolling the page when the cursor hovers over the MainNav
+  React.useEffect(() => {
+    const preventScroll = (event: WheelEvent) => event.preventDefault();
+    const toggleScroll = (enable: boolean) => {
+      window[enable ? 'addEventListener' : 'removeEventListener']('wheel', preventScroll, {
+        passive: false,
+      });
+    };
+
+    const mainNavElement = document.querySelector('nav');
+    if (mainNavElement) {
+      const handleMouseEnter = () => toggleScroll(true);
+      const handleMouseLeave = () => toggleScroll(false);
+
+      mainNavElement.addEventListener('mouseenter', handleMouseEnter);
+      mainNavElement.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        mainNavElement.removeEventListener('mouseenter', handleMouseEnter);
+        mainNavElement.removeEventListener('mouseleave', handleMouseLeave);
+        toggleScroll(false);
+      };
+    }
+  }, [pathname]);
+
   return (
     <MainNav>
       <NavBrand />
