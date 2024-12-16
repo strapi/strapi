@@ -297,9 +297,6 @@ const createHelpers = (db: Database) => {
     let existingIndexes = [...existingMetadata.indexes];
     const existingForeignKeys = [...existingMetadata.foreignKeys];
 
-    // In MySQL, dropping a foreign key can also implicitly drop an index with the same name
-    const isMySQL = db.config.connection.client === 'mysql';
-
     // Track dropped foreign keys
     const droppedForeignKeyNames: string[] = [];
 
@@ -309,22 +306,19 @@ const createHelpers = (db: Database) => {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, removedForeignKey);
 
-        if (isMySQL) {
-          droppedForeignKeyNames.push(removedForeignKey.name);
-        }
+        droppedForeignKeyNames.push(removedForeignKey.name);
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
         debug(`Dropping updated foreign key ${updatedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, updatedForeignKey.object);
 
-        if (isMySQL) {
-          droppedForeignKeyNames.push(updatedForeignKey.object.name);
-        }
+        droppedForeignKeyNames.push(updatedForeignKey.object.name);
       }
 
+      // In MySQL, dropping a foreign key can also implicitly drop an index with the same name
       // Remove dropped foreign keys from existingIndexes for MySQL
-      if (isMySQL) {
+      if (db.config.connection.client === 'mysql') {
         existingIndexes = existingIndexes.filter(
           (index) => !droppedForeignKeyNames.includes(index.name)
         );
