@@ -1,9 +1,28 @@
 import * as React from 'react';
 
-import { Box, Flex, Loader, Typography } from '@strapi/design-system';
+import { Box, Flex, type FlexProps, Loader, Typography } from '@strapi/design-system';
 import { PuzzlePiece, WarningCircle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { type MessageDescriptor, useIntl } from 'react-intl';
+
+const WidgetCard = (props: FlexProps) => {
+  return (
+    <Flex
+      hasRadius
+      direction="column"
+      alignItems="flex-start"
+      width="100%"
+      background="neutral0"
+      shadow="tableShadow"
+      tag="section"
+      gap={4}
+      padding={6}
+      {...props}
+    >
+      {props.children}
+    </Flex>
+  );
+};
 
 interface RootProps {
   title: MessageDescriptor;
@@ -17,18 +36,7 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
   const Icon = icon;
 
   return (
-    <Flex
-      direction="column"
-      alignItems="flex-start"
-      gap={4}
-      background="neutral0"
-      padding={6}
-      shadow="tableShadow"
-      hasRadius
-      width="100%"
-      tag="section"
-      aria-labelledby={id}
-    >
+    <WidgetCard aria-labelledby={id}>
       <Flex direction="row" alignItems="center" gap={2} tag="header">
         <Icon fill="neutral500" aria-hidden />
         <Typography textColor="neutral500" variant="sigma" tag="h2" id={id}>
@@ -38,7 +46,7 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
       <Box width="100%" height="261px" overflow="auto" tag="main">
         {children}
       </Box>
-    </Flex>
+    </WidgetCard>
   );
 };
 
@@ -50,7 +58,7 @@ const Loading = ({ children }: LoadingProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Flex direction="column" height="100%" justifyContent="center" alignItems="center">
+    <WidgetCard height="100%" justifyContent="center" alignItems="center">
       <Loader>
         {children ??
           formatMessage({
@@ -58,7 +66,7 @@ const Loading = ({ children }: LoadingProps) => {
             defaultMessage: 'Loading widget content',
           })}
       </Loader>
-    </Flex>
+    </WidgetCard>
   );
 };
 
@@ -70,7 +78,7 @@ const Error = ({ children }: ErrorProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={2}>
+    <WidgetCard height="100%" justifyContent="center" alignItems="center" gap={2}>
       <WarningCircle width="3.2rem" height="3.2rem" fill="danger600" />
       <Typography variant="delta">
         {formatMessage({
@@ -85,7 +93,7 @@ const Error = ({ children }: ErrorProps) => {
             defaultMessage: "Couldn't load widget content.",
           })}
       </Typography>
-    </Flex>
+    </WidgetCard>
   );
 };
 
@@ -97,7 +105,7 @@ const NoData = ({ children }: NoDataProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={6}>
+    <WidgetCard height="100%" justifyContent="center" alignItems="center" gap={6}>
       <EmptyDocuments width="16rem" height="8.8rem" />
       <Typography textColor="neutral600">
         {children ??
@@ -106,7 +114,7 @@ const NoData = ({ children }: NoDataProps) => {
             defaultMessage: 'No content found.',
           })}
       </Typography>
-    </Flex>
+    </WidgetCard>
   );
 };
 
