@@ -439,7 +439,12 @@ class Strapi extends Container implements Core.Strapi {
       contentTypes: this.contentTypes,
     });
 
-    await this.db.schema.sync();
+    const status = await this.db.schema.sync();
+
+    // if schemas have changed, run repairs
+    if (status === 'CHANGED') {
+      await this.db.repair.removeOrphanMorphType({ pivot: 'component_type' });
+    }
 
     if (this.EE) {
       await utils.ee.checkLicense({ strapi: this });
