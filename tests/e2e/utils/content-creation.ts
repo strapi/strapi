@@ -18,6 +18,8 @@ export interface FieldValue {
 
 export interface CreateContentOptions {
   publish?: boolean;
+  save?: boolean;
+  verify?: boolean;
 }
 
 /**
@@ -140,21 +142,19 @@ export const createContent = async (
 
   await fillFields(page, fields);
 
-  if (options.publish) {
-    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
-    await findAndClose(page, 'Published Document');
-  } else {
+  if (options.save) {
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await findAndClose(page, 'Saved Document');
   }
 
-  // validate that data has been created successfully by refreshing page and checking that each field still has the value
-  await page.reload();
-  await validateFields(page, fields);
+  if (options.publish) {
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await findAndClose(page, 'Published Document');
+  }
 
-  // TODO: remove after testing
-  const elementExists = await page
-    .getByRole('link', { name: 'i dont exist' })
-    .isVisible({ timeout: 0 });
-  expect(elementExists).toBeTruthy(); // This will fail, triggering trace capture
+  if (options.verify) {
+    // validate that data has been created successfully by refreshing page and checking that each field still has the value
+    await page.reload();
+    await validateFields(page, fields);
+  }
 };

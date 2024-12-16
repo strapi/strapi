@@ -63,30 +63,35 @@ test.describe('Adding content', () => {
   });
 
   test('as a user I want to be able to create content ', async ({ page }) => {
-    await createContent(page, 'Article', [
-      {
-        name: 'testdz',
-        type: 'dz',
-        value: [
-          {
-            category: 'product',
-            name: 'testnewcomponentexistingcategory',
-            fields: [
-              { type: 'text', name: 'testnewcompotext', value: 'First component text value' },
-            ],
-          },
-          {
-            category: 'product',
-            name: 'variations',
-            fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
-          },
-        ],
-      },
-      {
-        name: 'title',
-        type: 'text',
-        value: 'testname',
-      },
-    ]);
+    await createContent(
+      page,
+      'Article',
+      [
+        {
+          name: 'testdz',
+          type: 'dz',
+          value: [
+            {
+              category: 'product',
+              name: 'testnewcomponentexistingcategory',
+              fields: [
+                { type: 'text', name: 'testnewcompotext', value: 'First component text value' },
+              ],
+            },
+            {
+              category: 'product',
+              name: 'variations',
+              fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
+            },
+          ],
+        },
+        {
+          name: 'title',
+          type: 'text',
+          value: 'testname',
+        },
+      ],
+      { save: true, verify: true }
+    );
   });
 });
