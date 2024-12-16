@@ -197,8 +197,14 @@ const createHelpers = (db: Database) => {
    * @param {Knex.TableBuilder} tableBuilder
    * @param {Index} index
    */
-  const dropIndex = (tableBuilder: Knex.TableBuilder, index: Index) => {
+  const dropIndex = (tableBuilder: Knex.TableBuilder, index: Index, existingIndexes?: Index[]) => {
     if (!db.config.settings?.forceMigration) {
+      return;
+    }
+
+    // Check if the index exists in existingIndexes, and return early if it doesn't
+    if (existingIndexes && !existingIndexes.some((existingIndex) => existingIndex.name === name)) {
+      debug(`Index ${index.name} not found in existingIndexes. Skipping drop.`);
       return;
     }
 
@@ -288,32 +294,50 @@ const createHelpers = (db: Database) => {
       foreignKeys: [],
     }
   ) => {
-    const { indexes: existingIndexes, foreignKeys: existingForeignKeys } = existingMetadata;
+    let existingIndexes = [...existingMetadata.indexes];
+    const existingForeignKeys = [...existingMetadata.foreignKeys];
+
+    // In MySQL, dropping a foreign key can also implicitly drop an index with the same name
+    const isMySQL = db.config.connection.client === 'mysql';
+
+    // Track dropped foreign keys
+    const droppedForeignKeyNames: string[] = [];
 
     await schemaBuilder.alterTable(table.name, async (tableBuilder) => {
       // Drop foreign keys first to avoid foreign key errors in the following steps
       for (const removedForeignKey of table.foreignKeys.removed) {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, removedForeignKey);
+
+        if (isMySQL) {
+          droppedForeignKeyNames.push(removedForeignKey.name);
+        }
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
         debug(`Dropping updated foreign key ${updatedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, updatedForeignKey.object);
+
+        if (isMySQL) {
+          droppedForeignKeyNames.push(updatedForeignKey.object.name);
+        }
       }
 
-      /**
-       *  NOTE: regular index drops shouldn't be necessary because creates include dropping existing
-       * but since it doesn't result in any additional queries, we can keep the code for safety
-       *  */
+      // Remove dropped foreign keys from existingIndexes for MySQL
+      if (isMySQL) {
+        existingIndexes = existingIndexes.filter(
+          (index) => !droppedForeignKeyNames.includes(index.name)
+        );
+      }
+
       for (const removedIndex of table.indexes.removed) {
         debug(`Dropping index ${removedIndex.name} on ${table.name}`);
-        dropIndex(tableBuilder, removedIndex);
+        dropIndex(tableBuilder, removedIndex, existingIndexes);
       }
 
       for (const updatedIndex of table.indexes.updated) {
         debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
-        dropIndex(tableBuilder, updatedIndex.object);
+        dropIndex(tableBuilder, updatedIndex.object, existingIndexes);
       }
 
       // Drop columns after FKs have been removed to avoid FK errors
