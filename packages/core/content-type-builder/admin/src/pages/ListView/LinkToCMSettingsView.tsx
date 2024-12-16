@@ -82,7 +82,7 @@ export const LinkToCMSettingsView = memo(
       return null;
     }
 
-    if (!allowedActions.canConfigureView) {
+    if (!allowedActions.canConfigureView && !allowedActions.canConfigureLayout) {
       return null;
     }
 

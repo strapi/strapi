@@ -162,7 +162,7 @@ export const ReviewWorkflowsListView = () => {
           rows={workflows}
           footer={
             canCreate ? (
-              <TFooter icon={<Plus />} onClick={handleCreateClick}>
+              <TFooter cursor="pointer" icon={<Plus />} onClick={handleCreateClick}>
                 {formatMessage({
                   id: 'Settings.review-workflows.list.page.create',
                   defaultMessage: 'Create new workflow',
