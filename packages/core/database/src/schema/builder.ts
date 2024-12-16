@@ -286,6 +286,18 @@ const createHelpers = (db: Database) => {
     });
   };
 
+  /**
+   * Alters a database table by applying a set of schema changes including updates to columns, indexes, and foreign keys.
+   * This function ensures proper ordering of operations to avoid conflicts (e.g., foreign key errors) and handles
+   * MySQL-specific quirks where dropping a foreign key can implicitly drop an associated index.
+   *
+   * @param {Knex.SchemaBuilder} schemaBuilder - Knex SchemaBuilder instance to perform schema operations.
+   * @param {TableDiff['diff']} table - A diff object representing the schema changes to be applied to the table.
+   * @param {{ indexes: Index[]; foreignKeys: ForeignKey[] }} existingMetadata - Metadata about existing indexes and
+   *   foreign keys in the table. Used to ensure safe operations and avoid unnecessary modifications.
+   *   - indexes: Array of existing index definitions.
+   *   - foreignKeys: Array of existing foreign key definitions.
+   */
   const alterTable = async (
     schemaBuilder: Knex.SchemaBuilder,
     table: TableDiff['diff'],
