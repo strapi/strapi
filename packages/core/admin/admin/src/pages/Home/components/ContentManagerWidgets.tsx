@@ -118,21 +118,49 @@ const LastEditedWidget = () => {
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'update' });
 
   if (isLoading) {
-    return <Widget.Loading />;
+    return (
+      <Widget.Root
+        title={{
+          id: 'content-manager.widget.last-edited.title',
+          defaultMessage: 'Last edited entries',
+        }}
+        icon={Pencil}
+      >
+        <Widget.Loading />
+      </Widget.Root>
+    );
   }
 
   if (error) {
-    return <Widget.Error />;
+    return (
+      <Widget.Root
+        title={{
+          id: 'content-manager.widget.last-edited.title',
+          defaultMessage: 'Last edited entries',
+        }}
+        icon={Pencil}
+      >
+        <Widget.Error />
+      </Widget.Root>
+    );
   }
 
   if (data?.length === 0) {
     return (
-      <Widget.NoData>
-        {formatMessage({
-          id: 'content-manager.widget.last-edited.no-data',
-          defaultMessage: 'No edited entries',
-        })}
-      </Widget.NoData>
+      <Widget.Root
+        title={{
+          id: 'content-manager.widget.last-edited.title',
+          defaultMessage: 'Last edited entries',
+        }}
+        icon={Pencil}
+      >
+        <Widget.NoData>
+          {formatMessage({
+            id: 'content-manager.widget.last-edited.no-data',
+            defaultMessage: 'No edited entries',
+          })}
+        </Widget.NoData>
+      </Widget.Root>
     );
   }
 
@@ -162,21 +190,49 @@ const LastPublishedWidget = () => {
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'publish' });
 
   if (isLoading) {
-    return <Widget.Loading />;
+    return (
+      <Widget.Root
+        title={{
+          id: 'content-manager.widget.last-published.title',
+          defaultMessage: 'Last published entries',
+        }}
+        icon={CheckCircle}
+      >
+        <Widget.Loading />
+      </Widget.Root>
+    );
   }
 
   if (error) {
-    return <Widget.Error />;
+    return (
+      <Widget.Root
+        title={{
+          id: 'content-manager.widget.last-published.title',
+          defaultMessage: 'Last published entries',
+        }}
+        icon={CheckCircle}
+      >
+        <Widget.Error />
+      </Widget.Root>
+    );
   }
 
   if (data?.length === 0) {
     return (
-      <Widget.NoData>
-        {formatMessage({
-          id: 'content-manager.widget.last-published.no-data',
-          defaultMessage: 'No published entries',
-        })}
-      </Widget.NoData>
+      <Widget.Root
+        title={{
+          id: 'content-manager.widget.last-published.title',
+          defaultMessage: 'Last published entries',
+        }}
+        icon={CheckCircle}
+      >
+        <Widget.NoData>
+          {formatMessage({
+            id: 'content-manager.widget.last-published.no-data',
+            defaultMessage: 'No published entries',
+          })}
+        </Widget.NoData>
+      </Widget.Root>
     );
   }
 
