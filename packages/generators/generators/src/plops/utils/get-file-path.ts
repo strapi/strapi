@@ -1,15 +1,15 @@
 export default (destination: string) => {
   if (destination === 'api') {
-    return `api/{{ api }}`;
+    return `src/api/{{ api }}`;
   }
 
   if (destination === 'plugin') {
-    return `plugins/{{ plugin }}/server`;
+    return `src/plugins/{{ plugin }}/server`;
   }
 
   if (destination === 'root') {
-    return './';
+    return 'src';
   }
 
-  return `api/{{ id }}`;
+  return `src/api/{{ id }}`;
 };

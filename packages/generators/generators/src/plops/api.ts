@@ -27,9 +27,9 @@ export default (plop: NodePlopAPI) => {
         name: 'plugin',
         message: 'Plugin name',
         async choices() {
-          const pluginsPath = join(plop.getDestBasePath(), 'plugins');
+          const pluginsPath = join(process.cwd(), 'src/plugins');
           const exists = await fs.pathExists(pluginsPath);
-
+          console.log('pluginsPath', pluginsPath);
           if (!exists) {
             throw Error('Couldn\'t find a "plugins" directory');
           }
@@ -50,9 +50,11 @@ export default (plop: NodePlopAPI) => {
         return [];
       }
 
-      const filePath =
-        answers.isPluginApi && answers.plugin ? 'plugins/{{ plugin }}' : 'api/{{ id }}';
       const currentDir = process.cwd();
+      const filePath =
+        answers.isPluginApi && answers.plugin
+          ? join(process.cwd(), 'src/plugins/{{ plugin }}/server')
+          : join(process.cwd(), 'src/api/{{ id }}');
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [

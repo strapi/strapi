@@ -22,7 +22,7 @@ export default (plop: NodePlopAPI) => {
       const attributes = await getAttributesPrompts(inquirer);
 
       const api = await inquirer.prompt([
-        ...getDestinationPrompts('model', plop.getDestBasePath()),
+        ...getDestinationPrompts('model', process.cwd()),
         {
           when: (answers) => answers.destination === 'new',
           type: 'input',
@@ -34,7 +34,7 @@ export default (plop: NodePlopAPI) => {
               return 'Value must be in kebab-case';
             }
 
-            const apiPath = join(plop.getDestBasePath(), 'api');
+            const apiPath = join(process.cwd(), 'src/api');
             const exists = await fs.pathExists(apiPath);
 
             if (!exists) {
@@ -80,9 +80,8 @@ export default (plop: NodePlopAPI) => {
         return Object.assign(object, { [answer.attributeName]: val }, {});
       }, {});
 
-      const filePath = getFilePath(answers.destination);
-      // TODO: use basePath instead
       const currentDir = process.cwd();
+      const filePath = join(currentDir, getFilePath(answers.destination));
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions: Array<ActionType> = [

@@ -1,3 +1,4 @@
+import { join } from 'path';
 import type { NodePlopAPI } from 'plop';
 import tsUtils from '@strapi/typescript-utils';
 
@@ -16,15 +17,14 @@ export default (plop: NodePlopAPI) => {
         message: 'Middleware name',
         validate: (input) => validateInput(input),
       },
-      ...getDestinationPrompts('middleware', plop.getDestBasePath(), { rootFolder: true }),
+      ...getDestinationPrompts('middleware', process.cwd(), { rootFolder: true }),
     ],
     actions(answers) {
       if (!answers) {
         return [];
       }
-
-      const filePath = getFilePath(answers.destination);
       const currentDir = process.cwd();
+      const filePath = join(currentDir, getFilePath(answers.destination));
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       return [
