@@ -147,7 +147,6 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       pressEnterTwiceToExit(editor);
     },
     snippets: ['```'],
-    dragHandleTopMargin: '10px',
   },
 };
 
