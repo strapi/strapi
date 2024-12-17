@@ -202,13 +202,13 @@ const createHelpers = (db: Database) => {
       return;
     }
 
+    const { type, columns, name } = index;
+
     // Check if the index exists in existingIndexes, and return early if it doesn't
-    if (existingIndexes && !existingIndexes.some((existingIndex) => existingIndex.name === name)) {
+    if (existingIndexes && !existingIndexes.some((existingIndex) => existingIndex?.name === name)) {
       debug(`Index ${index.name} not found in existingIndexes. Skipping drop.`);
       return;
     }
-
-    const { type, columns, name } = index;
 
     switch (type) {
       case 'primary': {
