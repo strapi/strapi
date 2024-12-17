@@ -150,3 +150,129 @@ export const findByRowColumn = async (page: Page, rowText: string, columnText: s
   // Return the found cell
   return cell;
 };
+
+/**
+ * Drags a draggable element within an <li> containing `sourceText`
+ * to just above an <li> containing `targetText`, with smooth movement.
+ *
+ * @param {object} page - The Playwright page instance.
+ * @param {string} sourceText - Text inside the <li> containing the draggable element.
+ * @param {string} targetText - Text inside the <li> to drag the element above.
+ * @param {number} steps - Number of intermediate steps for smooth movement (default: 20).
+ * @param {number} delay - Delay in milliseconds between steps (default: 50ms).
+ */
+async function dragAboveSmooth(page, sourceText, targetText, steps = 20, delay = 50) {
+  const source = page.locator('li', { hasText: sourceText }).locator('[draggable="true"]');
+  const target = page.locator('li', { hasText: targetText });
+
+  const sourceBox = await source.boundingBox();
+  const targetBox = await target.boundingBox();
+
+  if (sourceBox && targetBox) {
+    // Calculate start and end positions
+    const startX = sourceBox.x + sourceBox.width / 2;
+    const startY = sourceBox.y + sourceBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y - 10; // 10 pixels above the target
+
+    // Move to the starting position and press the mouse
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+
+    // Incrementally move the mouse for smooth dragging
+    for (let i = 1; i <= steps; i++) {
+      const intermediateX = startX + (endX - startX) * (i / steps);
+      const intermediateY = startY + (endY - startY) * (i / steps);
+      await page.mouse.move(intermediateX, intermediateY);
+      await page.waitForTimeout(delay); // Add delay for smooth effect
+    }
+
+    // Release the mouse to drop the element
+    await page.mouse.up();
+    console.log(`Smoothly dragged element from "${sourceText}" to above "${targetText}".`);
+  } else {
+    console.error('Bounding boxes for source or target could not be determined.');
+  }
+}
+
+/**
+ * Smoothly drags a draggable element within a source <li> to just above a target <li>,
+ * with optional viewport resizing. Resizes back to the original viewport if adjusted.
+ *
+ * @param {object} page - The Playwright page instance.
+ * @param {object} options - Options for the drag operation.
+ * @param {object} options.source - Locator for the source <li> (containing the draggable element).
+ * @param {object} options.target - Locator for the target <li> (drop destination).
+ * @param {number} [options.steps=5] - Number of steps for smooth movement.
+ * @param {number} [options.delay=10] - Delay in milliseconds between steps.
+ * @param {number} [options.resizeHeight] - Optional viewport height adjustment.
+ */
+export const dragElementAbove = async (page, options) => {
+  const { source, target, steps = 5, delay = 10, resizeHeight } = options;
+
+  // Save the current viewport size
+  const currentViewport = page.viewportSize();
+
+  // Optionally resize the viewport
+  if (resizeHeight) {
+    await page.setViewportSize({ width: currentViewport.width, height: resizeHeight });
+  }
+
+  // Locate the draggable button within the source <li>
+  const draggable = source.locator('[draggable="true"]');
+
+  // Get bounding boxes of the draggable button and target <li>
+  const sourceBox = await draggable.boundingBox();
+  const targetBox = await target.boundingBox();
+
+  if (sourceBox && targetBox) {
+    // Calculate start and end positions
+    const startX = sourceBox.x + sourceBox.width / 2;
+    const startY = sourceBox.y + sourceBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y - 1; // 1 pixel above the target
+
+    // Move to the starting position and press the mouse
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+
+    // Incrementally move the mouse for smooth dragging
+    for (let i = 1; i <= steps; i++) {
+      const intermediateX = startX + (endX - startX) * (i / steps);
+      const intermediateY = startY + (endY - startY) * (i / steps);
+      await page.mouse.move(intermediateX, intermediateY);
+      await page.waitForTimeout(delay);
+    }
+
+    // Release the mouse to drop the element
+    await page.mouse.up();
+  } else {
+    throw new Error('Bounding boxes for source or target could not be determined.');
+  }
+
+  // Reset viewport to its original size if it was resized
+  if (resizeHeight) {
+    await page.setViewportSize(currentViewport);
+  }
+};
+
+/**
+ * Returns true if the first element appears before the second element in the DOM.
+ *
+ * @param {object} firstLocator - Playwright locator for the first element.
+ * @param {object} secondLocator - Playwright locator for the second element.
+ * @returns {Promise<boolean>} - Returns true if the first element is before the second element.
+ */
+export const isElementBefore = async (firstLocator, secondLocator) => {
+  const firstHandle = await firstLocator.elementHandle();
+  const secondHandle = await secondLocator.elementHandle();
+
+  if (!firstHandle || !secondHandle) {
+    throw new Error('One or both elements could not be found.');
+  }
+
+  // Compare positions in the DOM and return a boolean
+  return await firstHandle.evaluate((first, second) => {
+    return !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
+  }, secondHandle);
+};

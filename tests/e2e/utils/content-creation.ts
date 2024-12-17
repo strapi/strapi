@@ -18,8 +18,8 @@ export interface FieldValue {
 
 export interface CreateContentOptions {
   publish?: boolean;
-  save?: boolean;
-  verify?: boolean;
+  save: boolean;
+  verify: boolean;
 }
 
 /**
@@ -74,6 +74,8 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       }
       break;
 
+    // TODO: all cases that cannot be handled as text fills
+
     // all other cases can be handled as text fills
     default:
       await page.getByLabel(name).fill(String(value));
@@ -84,7 +86,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
 /**
  * Validate that fields have been saved correctly by checking their values on the page.
  */
-export const validateFields = async (page: Page, fields: FieldValue[]): Promise<void> => {
+export const verifyFields = async (page: Page, fields: FieldValue[]): Promise<void> => {
   for (const field of fields) {
     const { name, type, value } = field;
 
@@ -100,13 +102,16 @@ export const validateFields = async (page: Page, fields: FieldValue[]): Promise<
           // Validate each field within the component
           for (const componentField of componentFields) {
             // Ensure the category is expanded
-            const categoryButton = page.getByRole('button', { name: compName });
+            const categoryButton = page
+              .locator('button[data-state]', { hasText: compName })
+              .first();
+
             if ((await categoryButton.getAttribute('data-state')) !== 'open') {
               await categoryButton.click();
             }
 
             // TODO: make this only check within the dz box so we don't have to use unique names for each field
-            await validateFields(page, [componentField]);
+            await verifyFields(page, [componentField]);
           }
         }
         break;
@@ -134,7 +139,7 @@ export const createContent = async (
   page: Page,
   contentType: string,
   fields: FieldValue[],
-  options: CreateContentOptions = {}
+  options: CreateContentOptions
 ): Promise<void> => {
   await navToHeader(page, ['Content Manager', contentType], contentType);
 
@@ -155,6 +160,6 @@ export const createContent = async (
   if (options.verify) {
     // validate that data has been created successfully by refreshing page and checking that each field still has the value
     await page.reload();
-    await validateFields(page, fields);
+    await verifyFields(page, fields);
   }
 };
