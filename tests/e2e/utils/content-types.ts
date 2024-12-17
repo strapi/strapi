@@ -210,10 +210,12 @@ export const fillAddComponentAttribute = async (
     }
   }
 
+  // Locate the dialog first
+  const dialog = page.locator('dialog');
   // Select repeatable or single
-  if (await page.locator('text=repeatable').isVisible({ timeout: 0 })) {
+  if (await dialog.locator('text=repeatable').isVisible({ timeout: 0 })) {
     const repeatableValue = component.options.repeatable ? 'true' : 'false';
-    await page.click(`label[for="${repeatableValue}"]`);
+    await dialog.locator(`label[for="${repeatableValue}"]`).click();
   }
 };
 

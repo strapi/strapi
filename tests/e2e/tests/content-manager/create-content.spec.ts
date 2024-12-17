@@ -13,8 +13,34 @@ test.describe('Adding content', () => {
       resetFiles: true,
       importData: 'with-admin.tar',
       afterSetup: async ({ page }) => {
-        // TODO: to save the time from a server restart, add these components directly inside the with-admin dataset
+        // TODO: to save the time from a server restart, add these components directly inside the with-admin dataset and remove this
         await addAttributesToContentType(page, 'Article', [
+          {
+            type: 'component',
+            name: 'testrepeatablecomp',
+            component: {
+              options: {
+                repeatable: true,
+                name: 'testrepeatablecomp2',
+                icon: 'moon',
+                categorySelect: 'product',
+                attributes: [{ type: 'text', name: 'testrepeatablecomp2text' }],
+              },
+            },
+          },
+          {
+            type: 'component',
+            name: 'testsinglecomp',
+            component: {
+              options: {
+                repeatable: false,
+                name: 'testsinglecomp2',
+                icon: 'moon',
+                categorySelect: 'product',
+                attributes: [{ type: 'text', name: 'testsinglecomp2text' }],
+              },
+            },
+          },
           {
             type: 'dz',
             name: 'testdz',
@@ -26,15 +52,13 @@ test.describe('Adding content', () => {
                   name: 'testnewcomponentexistingcategory',
                   component: {
                     options: {
-                      repeatable: true,
                       name: 'testnewcomponentrepeatable',
                       icon: 'moon',
                       categorySelect: 'product',
-                      attributes: [{ type: 'text', name: 'testnewcompotext' }],
+                      attributes: [{ type: 'text', name: 'testnewcomponentexistingcategorytext' }],
                     },
                   },
                 },
-                // NOTE:
                 // Existing component with existing category
                 {
                   type: 'component',
@@ -42,7 +66,6 @@ test.describe('Adding content', () => {
                   component: {
                     useExisting: 'variations',
                     options: {
-                      repeatable: false,
                       name: 'testvariations',
                       icon: 'globe',
                     },
@@ -87,7 +110,11 @@ test.describe('Adding content', () => {
             category: 'product',
             name: 'testnewcomponentexistingcategory',
             fields: [
-              { type: 'text', name: 'testnewcompotext', value: 'First component text value' },
+              {
+                type: 'text',
+                name: 'testnewcomponentexistingcategorytext',
+                value: 'First component text value',
+              },
             ],
           },
           {
