@@ -70,6 +70,7 @@ const statusToLookup: TransformWithContentType = (contentType, params) => {
     return params;
   }
 
+  // @ts-expect-error: we need to create a different typing for internal params
   const lookup = params.lookup || {};
 
   switch (params?.status) {

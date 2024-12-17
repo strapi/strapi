@@ -1,6 +1,6 @@
 import { omit, assoc, merge, curry } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils, validate } from '@strapi/utils';
+import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
 
 import { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
@@ -47,6 +47,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     await validators.validateSort(ctx, params.sort, sortValidations);
     await validators.validateFields(ctx, params.fields, fieldValidations);
     await validators.validatePopulate(ctx, params.populate, populateValidations);
+
+    // Strip lookup from params, it's only used internally
+    if (params.lookup) {
+      throw new errors.ValidationError("Invalid params: 'lookup'");
+    }
 
     // TODO: add validate status, locale, pagination
 
