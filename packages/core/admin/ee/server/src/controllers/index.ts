@@ -1,4 +1,4 @@
-import 'koa-bodyparser';
+import 'koa-body';
 
 import authentication from './authentication';
 import role from './role';

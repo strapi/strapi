@@ -26,16 +26,6 @@ import type {
 
 const { isUsingTypeScript } = tsUtils;
 
-/* TODO extend the request in this way once Replace is available
-  type FileRequest = Context['request'] & { file: unknown };
-  type FileContext = Replace<Context, { request: FileRequest }>;
-*/
-declare module 'koa' {
-  interface Request {
-    files: unknown;
-  }
-}
-
 /**
  * A set of functions called "actions" for `Admin`
  */
