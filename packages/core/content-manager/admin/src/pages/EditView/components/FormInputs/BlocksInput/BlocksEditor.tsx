@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
+import { createContext, useStrapiApp, type FieldValue } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -9,15 +9,9 @@ import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
 
+import { ContentManagerPlugin } from '../../../../../content-manager';
 import { getTranslation } from '../../../../../utils/translations';
 
-import { codeBlocks } from './Blocks/Code';
-import { headingBlocks } from './Blocks/Heading';
-import { imageBlocks } from './Blocks/Image';
-import { linkBlocks } from './Blocks/Link';
-import { listBlocks } from './Blocks/List';
-import { paragraphBlocks } from './Blocks/Paragraph';
-import { quoteBlocks } from './Blocks/Quote';
 import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
@@ -32,9 +26,15 @@ import type { Schema } from '@strapi/types';
  * BlocksEditorProvider
  * -----------------------------------------------------------------------------------------------*/
 
+interface CustomNode extends Omit<Schema.Attribute.BlocksNode, 'type'> {
+  type: Schema.Attribute.BlocksNode['type'] | string;
+  level?: number;
+  format?: string;
+}
+
 interface BaseBlock {
   renderElement: (props: RenderElementProps) => React.JSX.Element;
-  matchNode: (node: Schema.Attribute.BlocksNode) => boolean;
+  matchNode: (node: Schema.Attribute.BlocksNode | CustomNode) => boolean;
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
@@ -44,12 +44,12 @@ interface BaseBlock {
 }
 
 interface NonSelectorBlock extends BaseBlock {
-  isInBlocksSelector: false;
+  isInBlocksSelector?: false;
 }
 
 interface SelectorBlock extends BaseBlock {
   isInBlocksSelector: true;
-  icon: React.ComponentType;
+  icon?: React.ComponentType;
   label: MessageDescriptor;
 }
 
@@ -82,8 +82,11 @@ type BlocksStore = {
   [K in NonSelectorBlockKey]: NonSelectorBlock;
 };
 
+type RichTextBlocksStore = Partial<BlocksStore> & {
+  [key: string]: SelectorBlock | NonSelectorBlock;
+};
+
 interface BlocksEditorContextValue {
-  blocks: BlocksStore;
   modifiers: ModifiersStore;
   disabled: boolean;
   name: string;
@@ -94,14 +97,23 @@ interface BlocksEditorContextValue {
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
   createContext<BlocksEditorContextValue>('BlocksEditor');
 
-function useBlocksEditorContext(
-  consumerName: string
-): BlocksEditorContextValue & { editor: Editor } {
+function useBlocksEditorContext(consumerName: string): BlocksEditorContextValue & {
+  editor: Editor;
+  blocks: RichTextBlocksStore;
+} {
   const context = usePartialBlocksEditorContext(consumerName, (state) => state);
+  const apis = useStrapiApp(
+    'useBlocksEditorContext',
+    (state) => state.plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+  );
+
+  const blocks = apis.getRichTextBlocks();
+
   const editor = useSlate();
 
   return {
     ...context,
+    blocks,
     editor,
   };
 }
@@ -210,16 +222,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       }
     };
 
-    const blocks: BlocksStore = {
-      ...paragraphBlocks,
-      ...headingBlocks,
-      ...listBlocks,
-      ...linkBlocks,
-      ...imageBlocks,
-      ...quoteBlocks,
-      ...codeBlocks,
-    };
-
     return (
       <>
         <VisuallyHidden id={ariaDescriptionId}>
@@ -236,7 +238,6 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
           key={key}
         >
           <BlocksEditorProvider
-            blocks={blocks}
             modifiers={modifiers}
             disabled={disabled}
             name={name}
@@ -273,6 +274,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
 export {
   type BlocksStore,
+  type RichTextBlocksStore,
   type SelectorBlockKey,
   BlocksEditor,
   BlocksEditorProvider,
