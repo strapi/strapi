@@ -1,0 +1,23 @@
+{
+  "link": "Saite",
+  "Settings.email.plugin.button.test-email": "Sūtīt testa e-pastu",
+  "Settings.email.plugin.label.defaultFrom": "Noklusējuma sūtītāja e-pasts",
+  "Settings.email.plugin.label.defaultReplyTo": "Noklusējuma atbildes e-pasts",
+  "Settings.email.plugin.label.provider": "E-pasta pakalpojumu sniedzējs",
+  "Settings.email.plugin.label.testAddress": "Saņēmēja e-pasts",
+  "Settings.email.plugin.notification.config.error": "Neizdevās iegūt e-pasta konfigurāciju",
+  "Settings.email.plugin.notification.data.loaded": "E-pasta iestatījumu dati ir ielādēti",
+  "Settings.email.plugin.notification.test.error": "Neizdevās nosūtīt testa e-pastu uz {to}",
+  "Settings.email.plugin.notification.test.success": "E-pasta tests izdevās, pārbaudiet {to} pastkasti",
+  "Settings.email.plugin.placeholder.defaultFrom": "piemērs: Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "piemērs: Strapi <example@strapi.io>",
+  "Settings.email.plugin.placeholder.testAddress": "piemērs: developer@example.com",
+  "Settings.email.plugin.subTitle": "Pārbaudiet e-pasta spraudņa iestatījumus",
+  "Settings.email.plugin.text.configuration": "Spraudnis ir konfigurēts caur {file} failu, skatiet šo {link} dokumentācijai.",
+  "Settings.email.plugin.title": "Konfigurācija",
+  "Settings.email.plugin.title.config": "Konfigurācija",
+  "Settings.email.plugin.title.test": "Testa e-pasta piegāde",
+  "SettingsNav.link.settings": "Iestatījumi",
+  "SettingsNav.section-label": "E-pasta spraudnis",
+  "components.Input.error.validation.email": "Šis nav derīgs e-pasts"
+}

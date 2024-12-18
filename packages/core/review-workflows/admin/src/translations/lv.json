@@ -1,0 +1,11 @@
+{
+  "settings.page.title": "Pārskatīšanas darbplūsmas",
+  "settings.page.subtitle": "{count, plural, one {# posms} other {# posmi}}",
+  "settings.page.isLoading": "Darbplūsma tiek ielādēta",
+  "settings.page.delete.confirm.body": "Visi ieraksti, kas piešķirti dzēstajiem posmiem, tiks pārvietoti uz iepriekšējo posmu. Vai tiešām vēlaties saglabāt?",
+  "settings.stage.name.label": "Posma nosaukums",
+  "settings.not-available": "Pārskatīšanas darbplūsmas ir pieejamas tikai Enterprise Edition. Jauniniet, lai izveidotu un pārvaldītu darbplūsmas.",
+  "settings.review-workflows.workflow.stageRequiredToPublish.label": "Nepieciešamais posms publicēšanai",
+  "settings.review-workflows.workflow.stageRequiredToPublish.any": "Jebkurš posms",
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Neļauj publicēt ierakstus, ja tie nav nepieciešamajā posmā."
+}

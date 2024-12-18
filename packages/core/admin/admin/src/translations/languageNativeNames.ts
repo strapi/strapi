@@ -36,4 +36,5 @@ export const languageNativeNames = {
   zh: '中文 (繁體)',
   sa: 'संस्कृत',
   hi: 'हिन्दी',
+  lv: 'Latviešu',
 } as const;
