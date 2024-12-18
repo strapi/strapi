@@ -152,50 +152,6 @@ export const findByRowColumn = async (page: Page, rowText: string, columnText: s
 };
 
 /**
- * Drags a draggable element within an <li> containing `sourceText`
- * to just above an <li> containing `targetText`, with smooth movement.
- *
- * @param {object} page - The Playwright page instance.
- * @param {string} sourceText - Text inside the <li> containing the draggable element.
- * @param {string} targetText - Text inside the <li> to drag the element above.
- * @param {number} steps - Number of intermediate steps for smooth movement (default: 20).
- * @param {number} delay - Delay in milliseconds between steps (default: 50ms).
- */
-async function dragAboveSmooth(page, sourceText, targetText, steps = 20, delay = 50) {
-  const source = page.locator('li', { hasText: sourceText }).locator('[draggable="true"]');
-  const target = page.locator('li', { hasText: targetText });
-
-  const sourceBox = await source.boundingBox();
-  const targetBox = await target.boundingBox();
-
-  if (sourceBox && targetBox) {
-    // Calculate start and end positions
-    const startX = sourceBox.x + sourceBox.width / 2;
-    const startY = sourceBox.y + sourceBox.height / 2;
-    const endX = targetBox.x + targetBox.width / 2;
-    const endY = targetBox.y - 10; // 10 pixels above the target
-
-    // Move to the starting position and press the mouse
-    await page.mouse.move(startX, startY);
-    await page.mouse.down();
-
-    // Incrementally move the mouse for smooth dragging
-    for (let i = 1; i <= steps; i++) {
-      const intermediateX = startX + (endX - startX) * (i / steps);
-      const intermediateY = startY + (endY - startY) * (i / steps);
-      await page.mouse.move(intermediateX, intermediateY);
-      await page.waitForTimeout(delay); // Add delay for smooth effect
-    }
-
-    // Release the mouse to drop the element
-    await page.mouse.up();
-    console.log(`Smoothly dragged element from "${sourceText}" to above "${targetText}".`);
-  } else {
-    console.error('Bounding boxes for source or target could not be determined.');
-  }
-}
-
-/**
  * Smoothly drags a draggable element within a source <li> to just above a target <li>,
  * with optional viewport resizing. Resizes back to the original viewport if adjusted.
  *
