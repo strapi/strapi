@@ -50,5 +50,15 @@ export const validatePreviewUrl = async (
     newParams.documentId = doc?.documentId;
   }
 
+  /**
+   * If status is not specified, follow the following rules:
+   * - D&P disabled: status is considered published
+   * - D&P enabled: status is considered draft
+   */
+  if (!newParams.status) {
+    const isDPEnabled = model?.options?.draftAndPublish;
+    newParams.status = isDPEnabled ? 'draft' : 'published';
+  }
+
   return newParams;
 };
