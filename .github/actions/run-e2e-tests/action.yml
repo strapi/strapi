@@ -14,5 +14,4 @@ runs:
       env:
         RUN_EE: ${{ inputs.runEE }}
         JEST_OPTIONS: ${{ inputs.jestOptions }}
-        STRAPI_FEATURES_FUTURE_RELEASES_SCHEDULING: ${{ inputs.enableFutureFeatures }}
       shell: bash
