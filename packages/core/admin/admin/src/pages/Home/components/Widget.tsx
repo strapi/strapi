@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Loader, Typography } from '@strapi/design-system';
+import { Box, Flex, type FlexProps, Loader, Typography } from '@strapi/design-system';
 import { PuzzlePiece, WarningCircle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { type MessageDescriptor, useIntl } from 'react-intl';
@@ -18,15 +18,15 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
 
   return (
     <Flex
+      width="100%"
+      hasRadius
       direction="column"
       alignItems="flex-start"
-      gap={4}
       background="neutral0"
-      padding={6}
       shadow="tableShadow"
-      hasRadius
-      width="100%"
       tag="section"
+      gap={4}
+      padding={6}
       aria-labelledby={id}
     >
       <Flex direction="row" alignItems="center" gap={2} tag="header">
@@ -50,7 +50,7 @@ const Loading = ({ children }: LoadingProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Flex direction="column" height="100%" justifyContent="center" alignItems="center">
+    <Flex height="100%" justifyContent="center" alignItems="center">
       <Loader>
         {children ??
           formatMessage({
@@ -70,7 +70,7 @@ const Error = ({ children }: ErrorProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={2}>
+    <Flex height="100%" direction="column" justifyContent="center" alignItems="center" gap={2}>
       <WarningCircle width="3.2rem" height="3.2rem" fill="danger600" />
       <Typography variant="delta">
         {formatMessage({
@@ -97,7 +97,7 @@ const NoData = ({ children }: NoDataProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Flex direction="column" height="100%" justifyContent="center" alignItems="center" gap={6}>
+    <Flex height="100%" direction="column" justifyContent="center" alignItems="center" gap={6}>
       <EmptyDocuments width="16rem" height="8.8rem" />
       <Typography textColor="neutral600">
         {children ??
