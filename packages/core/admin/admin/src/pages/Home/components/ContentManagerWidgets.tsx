@@ -81,7 +81,11 @@ const WidgetContent = ({ document }: { document: RecentDocument }) => {
       </Td>
       <Td>
         <Box display="inline-block">
-          {document.status && <DocumentStatus status={document.status} />}
+          {document.status ? (
+            <DocumentStatus status={document.status} />
+          ) : (
+            <Typography aria-hidden>-</Typography>
+          )}
         </Box>
       </Td>
       <Td>
