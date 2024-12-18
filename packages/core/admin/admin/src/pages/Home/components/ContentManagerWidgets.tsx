@@ -13,14 +13,6 @@ import { Widget } from './Widget';
 
 import type { RecentDocument } from '../../../../../shared/contracts/homepage';
 
-const getEditViewLink = (document: RecentDocument): string => {
-  // TODO: import the constants for this once the code is moved to the CM package
-  const kindPath = document.kind === 'singleType' ? 'single-types' : 'collection-types';
-  const queryParams = document.locale ? `?plugins[i18n][locale]=${document.locale}` : '';
-
-  return `/content-manager/${kindPath}/${document.contentTypeUid}/${document.documentId}${queryParams}`;
-};
-
 const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'inline-block' })`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -49,10 +41,19 @@ const DocumentStatus = ({ status = 'draft' }: DocumentStatusProps) => {
   );
 };
 
-const WidgetContent = ({ document }: { document: RecentDocument }) => {
+const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
+
+  const getEditViewLink = (document: RecentDocument): string => {
+    // TODO: import the constants for this once the code is moved to the CM package
+    const isSingleType = document.kind === 'singleType';
+    const kindPath = isSingleType ? 'single-types' : 'collection-types';
+    const queryParams = document.locale ? `?plugins[i18n][locale]=${document.locale}` : '';
+
+    return `/content-manager/${kindPath}/${document.contentTypeUid}${isSingleType ? '' : '/' + document.documentId}${queryParams}`;
+  };
 
   const handleRowClick = (document: RecentDocument) => () => {
     trackUsage('willEditEntryFromHome');
@@ -61,52 +62,58 @@ const WidgetContent = ({ document }: { document: RecentDocument }) => {
   };
 
   return (
-    <Tr onClick={handleRowClick(document)} key={document.documentId}>
-      <Td>
-        <CellTypography title={document.title} variant="omega" textColor="neutral800">
-          {document.title}
-        </CellTypography>
-      </Td>
-      <Td>
-        <CellTypography variant="omega" textColor="neutral600">
-          {document.kind === 'singleType'
-            ? formatMessage({
-                id: 'content-manager.widget.last-edited.single-type',
-                defaultMessage: 'Single-Type',
-              })
-            : formatMessage({
-                id: document.contentTypeDisplayName,
-                defaultMessage: document.contentTypeDisplayName,
-              })}
-        </CellTypography>
-      </Td>
-      <Td>
-        <Box display="inline-block">
-          <DocumentStatus status={document.status} />
-        </Box>
-      </Td>
-      <Td>
-        <Typography textColor="neutral600">
-          <RelativeTime timestamp={new Date(document.updatedAt)} />
-        </Typography>
-      </Td>
-      <Td onClick={(e) => e.stopPropagation()}>
-        <Box display="inline-block">
-          <IconButton
-            tag={Link}
-            to={getEditViewLink(document)}
-            onClick={() => trackUsage('willEditEntryFromHome')}
-            label={formatMessage({
-              id: 'content-manager.actions.edit.label',
-              defaultMessage: 'Edit',
-            })}
-            variant="ghost"
-          >
-            <Pencil />
-          </IconButton>
-        </Box>
-      </Td>
-    </Tr>
+    <Table colCount={5} rowCount={documents?.length ?? 0}>
+      <Tbody>
+        {documents?.map((document) => (
+          <Tr onClick={handleRowClick(document)} key={document.documentId}>
+            <Td>
+              <CellTypography title={document.title} variant="omega" textColor="neutral800">
+                {document.title}
+              </CellTypography>
+            </Td>
+            <Td>
+              <CellTypography variant="omega" textColor="neutral600">
+                {document.kind === 'singleType'
+                  ? formatMessage({
+                      id: 'content-manager.widget.last-edited.single-type',
+                      defaultMessage: 'Single-Type',
+                    })
+                  : formatMessage({
+                      id: document.contentTypeDisplayName,
+                      defaultMessage: document.contentTypeDisplayName,
+                    })}
+              </CellTypography>
+            </Td>
+            <Td>
+              <Box display="inline-block">
+                <DocumentStatus status={document.status} />
+              </Box>
+            </Td>
+            <Td>
+              <Typography textColor="neutral600">
+                <RelativeTime timestamp={new Date(document.updatedAt)} />
+              </Typography>
+            </Td>
+            <Td onClick={(e) => e.stopPropagation()}>
+              <Box display="inline-block">
+                <IconButton
+                  tag={Link}
+                  to={getEditViewLink(document)}
+                  onClick={() => trackUsage('willEditEntryFromHome')}
+                  label={formatMessage({
+                    id: 'content-manager.actions.edit.label',
+                    defaultMessage: 'Edit',
+                  })}
+                  variant="ghost"
+                >
+                  <Pencil />
+                </IconButton>
+              </Box>
+            </Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
   );
 };
 
@@ -114,7 +121,7 @@ const WidgetContent = ({ document }: { document: RecentDocument }) => {
  * LastEditedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastEditedWidget = () => {
+const LastEditedWidgetContent = () => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'update' });
 
@@ -122,11 +129,11 @@ const LastEditedWidget = () => {
     return <Widget.Loading />;
   }
 
-  if (error) {
+  if (error || !data) {
     return <Widget.Error />;
   }
 
-  if (data?.length === 0) {
+  if (data.length === 0) {
     return (
       <Widget.NoData>
         {formatMessage({
@@ -137,6 +144,10 @@ const LastEditedWidget = () => {
     );
   }
 
+  return <RecentDocumentsTable documents={data} />;
+};
+
+const LastEditedWidget = () => {
   return (
     <Widget.Root
       title={{
@@ -145,11 +156,7 @@ const LastEditedWidget = () => {
       }}
       icon={Pencil}
     >
-      <Table colCount={5} rowCount={data?.length ?? 0}>
-        <Tbody>
-          {data?.map((document) => <WidgetContent key={document.documentId} document={document} />)}
-        </Tbody>
-      </Table>
+      <LastEditedWidgetContent />
     </Widget.Root>
   );
 };
@@ -158,7 +165,7 @@ const LastEditedWidget = () => {
  * LastPublishedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastPublishedWidget = () => {
+const LastPublishedWidgetContent = () => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'publish' });
 
@@ -166,11 +173,11 @@ const LastPublishedWidget = () => {
     return <Widget.Loading />;
   }
 
-  if (error) {
+  if (error || !data) {
     return <Widget.Error />;
   }
 
-  if (data?.length === 0) {
+  if (data.length === 0) {
     return (
       <Widget.NoData>
         {formatMessage({
@@ -181,6 +188,10 @@ const LastPublishedWidget = () => {
     );
   }
 
+  return <RecentDocumentsTable documents={data} />;
+};
+
+const LastPublishedWidget = () => {
   return (
     <Widget.Root
       title={{
@@ -189,11 +200,7 @@ const LastPublishedWidget = () => {
       }}
       icon={CheckCircle}
     >
-      <Table colCount={5} rowCount={data?.length ?? 0}>
-        <Tbody>
-          {data?.map((document) => <WidgetContent key={document.documentId} document={document} />)}
-        </Tbody>
-      </Table>
+      <LastPublishedWidgetContent />
     </Widget.Root>
   );
 };
