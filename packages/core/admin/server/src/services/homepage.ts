@@ -133,7 +133,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         return {
           ...recentDocument,
-          status,
+          status: hasDraftAndPublish ? status : undefined,
         };
       })
     );

@@ -86,7 +86,13 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
             </Td>
             <Td>
               <Box display="inline-block">
-                <DocumentStatus status={document.status} />
+                {document.status ? (
+                  <DocumentStatus status={document.status} />
+                ) : (
+                  <Typography textColor="neutral600" aria-hidden>
+                    -
+                  </Typography>
+                )}
               </Box>
             </Td>
             <Td>
