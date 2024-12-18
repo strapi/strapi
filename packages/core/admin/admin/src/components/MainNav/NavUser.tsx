@@ -27,7 +27,7 @@ const MenuTrigger = styled(Menu.Trigger)`
 `;
 
 const MenuContent = styled(Menu.Content)`
-  left: ${({ theme }) => theme.spaces[5]};
+  left: ${({ theme }) => theme.spaces[0]};
 `;
 
 const MenuItem = styled(Menu.Item)`
@@ -60,7 +60,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   };
 
   return (
-    <Flex justifyContent="center" {...props}>
+    <Flex justifyContent="center"  {...props}>
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Avatar.Item delayMs={0} fallback={initials} />
