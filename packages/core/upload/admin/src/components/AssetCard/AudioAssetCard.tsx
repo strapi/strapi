@@ -1,4 +1,4 @@
-import { Box, CardAsset } from '@strapi/design-system';
+import { Box, CardAsset, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
@@ -30,9 +30,11 @@ export const AudioAssetCard = ({
   return (
     <AssetCardBase name={name} selected={selected} {...restProps} variant="Audio">
       <CardAsset size={size}>
-        <AudioPreviewWrapper size={size}>
-          <AudioPreview url={url} alt={name} />
-        </AudioPreviewWrapper>
+        <Flex alignItems="center">
+          <AudioPreviewWrapper size={size}>
+            <AudioPreview url={url} alt={name} />
+          </AudioPreviewWrapper>
+        </Flex>
       </CardAsset>
     </AssetCardBase>
   );

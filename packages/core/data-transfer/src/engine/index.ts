@@ -41,7 +41,7 @@ import {
   createDiagnosticReporter,
   IDiagnosticReporter,
   ErrorDiagnosticSeverity,
-} from './diagnostic';
+} from '../utils/diagnostic';
 import { DataTransferError } from '../errors';
 import * as utils from '../utils';
 import { ProviderTransferError } from '../errors/providers';
@@ -200,7 +200,7 @@ class TransferEngine<
   reportInfo(message: string, params?: unknown) {
     this.diagnostics.report({
       kind: 'info',
-      details: { createdAt: new Date(), message, params },
+      details: { createdAt: new Date(), message, params, origin: 'engine' },
     });
   }
 
@@ -604,8 +604,8 @@ class TransferEngine<
    */
   async bootstrap(): Promise<void> {
     const results = await Promise.allSettled([
-      this.sourceProvider.bootstrap?.(),
-      this.destinationProvider.bootstrap?.(),
+      this.sourceProvider.bootstrap?.(this.diagnostics),
+      this.destinationProvider.bootstrap?.(this.diagnostics),
     ]);
 
     results.forEach((result) => {

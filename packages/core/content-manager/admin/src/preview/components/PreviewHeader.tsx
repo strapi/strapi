@@ -1,19 +1,16 @@
 import * as React from 'react';
 
-import { useClipboard, useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
 import {
-  Box,
-  type BoxProps,
-  Flex,
-  IconButton,
-  Tabs,
-  Typography,
-  Grid,
-} from '@strapi/design-system';
+  useClipboard,
+  useHistory,
+  useNotification,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
+import { IconButton, Tabs, Typography, Grid } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
-import { type MessageDescriptor, useIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+import { Link, type To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
@@ -30,14 +27,40 @@ const ClosePreviewButton = () => {
   }>();
   const { formatMessage } = useIntl();
 
+  const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
+  const goBack = useHistory('BackButton', (state) => state.goBack);
+  const history = useHistory('BackButton', (state) => state.history);
+  const locationIndex = useHistory('BackButton', (state) => state.currentLocationIndex);
+
+  /**
+   * Get the link destination from the history.
+   * Rely on a fallback (the parent edit view page) if there's no page to go back .
+   */
+  const historyTo = canGoBack ? history.at(locationIndex - 2) : undefined;
+  const fallback = {
+    pathname: '..',
+    search: stringify(query, { encode: false }),
+  } satisfies To;
+  const toWithFallback = historyTo ?? fallback;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (canGoBack) {
+      // Prevent normal link behavior, go back in the history stack instead
+      e.preventDefault();
+      goBack();
+      return;
+    }
+
+    // Otherwise rely on native link behavior to go back to the edit view. We don't use navigate()
+    // here in order to get the relative="path" functionality from the Link component.
+  };
+
   return (
     <IconButton
       tag={Link}
       relative="path"
-      to={{
-        pathname: '..',
-        search: stringify({ plugins: query.plugins }, { encode: false }),
-      }}
+      to={toWithFallback}
+      onClick={handleClick}
       label={formatMessage({
         id: 'content-manager.preview.header.close',
         defaultMessage: 'Close preview',
@@ -126,7 +149,20 @@ const PreviewHeader = () => {
   // Get main field
   const mainField = usePreviewContext('PreviewHeader', (state) => state.mainField);
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
-  const title = document[mainField];
+  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+
+  /**
+   * We look to see what the mainField is from the configuration, if it's an id
+   * we don't use it because it's a uuid format and not very user friendly.
+   * Instead, we display the schema name for single-type documents
+   * or "Untitled".
+   */
+  let documentTitle = 'Untitled';
+  if (mainField !== 'id' && document?.[mainField]) {
+    documentTitle = document[mainField];
+  } else if (schema.kind === 'singleType' && schema?.info.displayName) {
+    documentTitle = schema.info.displayName;
+  }
 
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -156,9 +192,9 @@ const PreviewHeader = () => {
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <Typography tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
-          {title}
-        </Typography>
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={documentTitle}>
+          {documentTitle}
+        </PreviewTitle>
         <Status />
       </Grid.Item>
       {/* Tabs */}
@@ -181,6 +217,12 @@ const PreviewHeader = () => {
     </Grid.Root>
   );
 };
+
+const PreviewTitle = styled(Typography)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
