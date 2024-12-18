@@ -60,7 +60,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   };
 
   return (
-    <Flex justifyContent="center"  {...props}>
+    <Flex justifyContent="center" {...props}>
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Avatar.Item delayMs={0} fallback={initials} />
