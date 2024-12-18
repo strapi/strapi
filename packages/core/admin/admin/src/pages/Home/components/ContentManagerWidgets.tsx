@@ -49,8 +49,9 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
   const getEditViewLink = (document: RecentDocument): string => {
     // TODO: import the constants for this once the code is moved to the CM package
     const kindPath = document.kind === 'singleType' ? 'single-types' : 'collection-types';
+    const queryParams = document.locale ? `?plugins[i18n][locale]=${document.locale}` : '';
 
-    return `/content-manager/${kindPath}/${document.contentTypeUid}/${document.documentId}`;
+    return `/content-manager/${kindPath}/${document.contentTypeUid}/${document.documentId}${queryParams}`;
   };
 
   const handleRowClick = (document: RecentDocument) => () => {
