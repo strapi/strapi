@@ -61,11 +61,11 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   return (
     <Flex
       justifyContent="center"
-      {...props}
       padding={3}
       borderStyle="solid"
       borderWidth="1px 0 0 0"
       borderColor="neutral150"
+      {...props}
     >
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
