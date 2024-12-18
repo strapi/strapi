@@ -13,7 +13,7 @@ import { Widget } from './Widget';
 
 import type { RecentDocument } from '../../../../../shared/contracts/homepage';
 
-const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'inline-block' })`
+const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'block' })`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -65,7 +65,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
     <Table colCount={5} rowCount={documents?.length ?? 0}>
       <Tbody>
         {documents?.map((document) => (
-          <Tr onClick={handleRowClick(document)} key={document.documentId}>
+          <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
             <Td>
               <CellTypography title={document.title} variant="omega" textColor="neutral800">
                 {document.title}
