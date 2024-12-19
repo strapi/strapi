@@ -7,17 +7,16 @@ import { sharedSetup } from '../../utils/setup';
 const createAPIToken = async (page, tokenName, duration, type) => {
   await navToHeader(page, ['Settings', 'API Tokens', 'Create new API Token'], 'Create API Token');
 
-  await clickAndWait(page, page.getByLabel('Name*'));
+  await page.getByLabel('Name*').click();
   await page.getByLabel('Name*').fill(tokenName);
 
-  await clickAndWait(page, page.getByLabel('Token duration'));
-  await clickAndWait(page, page.getByRole('option', { name: duration }));
+  await page.getByLabel('Token duration').click();
+  await page.getByRole('option', { name: duration }).click();
 
-  await clickAndWait(page, page.getByLabel('Token type'));
-  await clickAndWait(page, page.getByRole('option', { name: type }));
+  await page.getByLabel('Token type').click();
+  await page.getByRole('option', { name: type }).click();
 
-  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-
+  await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByText('Make sure to copy this token')).toBeVisible();
   await expect(page.getByText('Expiration date:')).toBeVisible();
 };
