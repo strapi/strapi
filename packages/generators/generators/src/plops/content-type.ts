@@ -80,8 +80,8 @@ export default (plop: NodePlopAPI) => {
         return Object.assign(object, { [answer.attributeName]: val }, {});
       }, {});
 
-      const currentDir = process.cwd();
       const filePath = getFilePath(answers.destination);
+      const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions: Array<ActionType> = [

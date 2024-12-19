@@ -16,8 +16,8 @@ export default (plop: NodePlopAPI) => {
       },
     ],
     actions() {
-      const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+      const currentDir = process.cwd();
       const timestamp = getFormattedDate();
 
       return [

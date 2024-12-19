@@ -49,9 +49,9 @@ export default (plop: NodePlopAPI) => {
         return [];
       }
 
-      const currentDir = process.cwd();
       const filePath =
         answers.isPluginApi && answers.plugin ? 'plugins/{{ plugin }}/server' : 'api/{{ id }}';
+      const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [
