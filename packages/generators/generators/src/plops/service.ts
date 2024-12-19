@@ -1,4 +1,3 @@
-import { join } from 'path';
 import type { NodePlopAPI } from 'plop';
 import tsUtils from '@strapi/typescript-utils';
 
