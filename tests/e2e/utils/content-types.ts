@@ -181,15 +181,7 @@ export const fillAddComponentAttribute = async (
   component: AddAttribute['component']
 ) => {
   if (component.options.name) {
-    const displayNameLocator = page.getByLabel('Display name');
-    if (await displayNameLocator.isVisible({ timeout: 0 })) {
-      await displayNameLocator.fill(component.options.name);
-    } else {
-      const nameLocator = page.getByLabel('Name', { exact: true });
-      if (await nameLocator.isVisible({ timeout: 0 })) {
-        await nameLocator.fill(component.options.name);
-      }
-    }
+    await fillComponentName(page, component.options.name);
   }
 
   // if existing component, select it
@@ -210,18 +202,33 @@ export const fillAddComponentAttribute = async (
     }
   }
 
-  // Locate the dialog first
-  const dialog = page.locator('dialog');
-  // Select repeatable or single
-  if (await dialog.locator('text=repeatable').isVisible({ timeout: 0 })) {
-    const repeatableValue = component.options.repeatable ? 'true' : 'false';
-    await dialog.locator(`label[for="${repeatableValue}"]`).click();
-  }
+  await selectComponentRepeatable(page, component.options.repeatable);
 };
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+export const fillComponentName = async (page: Page, name: string) => {
+  const displayNameLocator = page.getByLabel('Display name');
+  if (await displayNameLocator.isVisible({ timeout: 0 })) {
+    await displayNameLocator.fill(name);
+  } else {
+    const nameLocator = page.getByLabel('Name', { exact: true });
+    if (await nameLocator.isVisible({ timeout: 0 })) {
+      await nameLocator.fill(name);
+    }
+  }
+};
+
+export const selectComponentRepeatable = async (page: Page, value: boolean) => {
+  // Check if the "repeatable" options are present
+  if (await page.locator('input[name="repeatable"]').first().isVisible({ timeout: 0 })) {
+    const repeatableValue = value ? 'true' : 'false';
+    const radioButton = page.locator(`input[name="repeatable"][value="${repeatableValue}"]`);
+    await radioButton.click({ force: true });
+  }
+};
 
 export const addComponentAttribute = async (
   page: Page,
@@ -233,21 +240,33 @@ export const addComponentAttribute = async (
   const useExistingLabel = attribute.component.useExisting ? 'false' : 'true';
   await page.click(`label[for="${useExistingLabel}"]`);
 
+  // if "select a component"
   if (await page.getByRole('button', { name: 'Select a component' }).isVisible({ timeout: 0 })) {
     await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
     await fillAddComponentAttribute(page, attribute.component);
-  } else if (
+  }
+  // if "configure a component"
+  else if (
     await page.getByRole('button', { name: 'Configure the component' }).isVisible({ timeout: 0 })
   ) {
     await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
     await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
-  } else if (attribute.component.useExisting) {
+  }
+  // if using an existing component
+  else if (attribute.component.useExisting) {
     await fillAddComponentAttribute(page, attribute.component);
-  } else {
+  }
+  //??
+  else {
     await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
   }
 
+  await fillComponentName(page, attribute.name);
+
+  await selectComponentRepeatable(page, attribute.component?.options.repeatable);
+
   if (attrCompOptions.attributes) {
+    // TODO: if "
     const addFirstFieldButton = page.getByRole('button', {
       name: new RegExp('Add first field to the component', 'i'),
     });
@@ -384,21 +403,6 @@ export const addAttributes = async (
     }
   }
 };
-// attempt to submit a component but don't check for errors so that they can be checked by the caller
-export const submitComponent = async (page: Page, options: CreateComponentOptions) => {
-  await openComponentBuilder(page);
-
-  await fillCreateComponent(page, options);
-
-  await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-
-  if (options.attributes) {
-    await addAttributes(page, options.attributes);
-  }
-
-  // Save the component
-  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-};
 
 const saveAndVerifyContent = async (
   page: Page,
@@ -415,12 +419,13 @@ const saveAndVerifyContent = async (
 
   for (let i = 0; i < options.attributes.length; i++) {
     const attribute = options.attributes[i];
-    const name = attribute.component?.options.name || attribute.name;
+    const name = attribute.name || attribute.component?.options.name;
     const typeCell = await findByRowColumn(page, name, 'Type');
 
     if (!getAttributeIdentifiers(attribute).buttonName) {
       throw new Error('unknown type ' + attribute.type);
     }
+
     await expect(typeCell).toContainText(getAttributeIdentifiers(attribute).listLabel, {
       ignoreCase: true,
     });
