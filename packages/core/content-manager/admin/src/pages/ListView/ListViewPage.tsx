@@ -326,7 +326,7 @@ const ListViewPage = () => {
                           </Table.Cell>
                         );
                       })}
-                      {/* we stop propogation here to allow the menu to trigger it's events without triggering the row redirect */}
+                      {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
                       <ActionsCell onClick={(e) => e.stopPropagation()}>
                         <TableActions document={row} />
                       </ActionsCell>
