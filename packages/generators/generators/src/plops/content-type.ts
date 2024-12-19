@@ -34,7 +34,7 @@ export default (plop: NodePlopAPI) => {
               return 'Value must be in kebab-case';
             }
 
-            const apiPath = join(process.cwd(), 'src/api');
+            const apiPath = join(plop.getDestBasePath(), 'api');
             const exists = await fs.pathExists(apiPath);
 
             if (!exists) {
@@ -81,7 +81,7 @@ export default (plop: NodePlopAPI) => {
       }, {});
 
       const currentDir = process.cwd();
-      const filePath = join(currentDir, getFilePath(answers.destination));
+      const filePath = getFilePath(answers.destination);
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions: Array<ActionType> = [

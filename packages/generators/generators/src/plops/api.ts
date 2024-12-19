@@ -27,7 +27,7 @@ export default (plop: NodePlopAPI) => {
         name: 'plugin',
         message: 'Plugin name',
         async choices() {
-          const pluginsPath = join(process.cwd(), 'src/plugins');
+          const pluginsPath = join(plop.getDestBasePath(), 'plugins');
           const exists = await fs.pathExists(pluginsPath);
           console.log('pluginsPath', pluginsPath);
           if (!exists) {
@@ -52,9 +52,7 @@ export default (plop: NodePlopAPI) => {
 
       const currentDir = process.cwd();
       const filePath =
-        answers.isPluginApi && answers.plugin
-          ? join(process.cwd(), 'src/plugins/{{ plugin }}/server')
-          : join(process.cwd(), 'src/api/{{ id }}');
+        answers.isPluginApi && answers.plugin ? 'plugins/{{ plugin }}/server' : 'api/{{ id }}';
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       const baseActions = [

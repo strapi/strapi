@@ -37,7 +37,7 @@ export default (
       message: 'Which API is this for?',
       name: 'api',
       async choices() {
-        const apiPath = join(basePath, 'src/api');
+        const apiPath = join(basePath, 'api');
         const exists = await fs.pathExists(apiPath);
 
         if (!exists) {
@@ -60,7 +60,7 @@ export default (
       message: 'Which plugin is this for?',
       name: 'plugin',
       async choices() {
-        const pluginsPath = join(basePath, 'src/plugins');
+        const pluginsPath = join(basePath, 'plugins');
         const exists = await fs.pathExists(pluginsPath);
 
         if (!exists) {

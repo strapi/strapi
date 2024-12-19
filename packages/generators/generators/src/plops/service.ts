@@ -15,7 +15,7 @@ export default (plop: NodePlopAPI) => {
         name: 'id',
         message: 'Service name',
       },
-      ...getDestinationPrompts('service', process.cwd()),
+      ...getDestinationPrompts('service', plop.getDestBasePath()),
     ],
     actions(answers) {
       if (!answers) {
@@ -23,9 +23,8 @@ export default (plop: NodePlopAPI) => {
       }
 
       const currentDir = process.cwd();
-      const filePath = join(currentDir, getFilePath(answers?.destination));
+      const filePath = getFilePath(answers?.destination);
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
-
       return [
         {
           type: 'add',

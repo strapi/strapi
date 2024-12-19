@@ -1,4 +1,3 @@
-import { join } from 'path';
 import type { NodePlopAPI } from 'plop';
 import tsUtils from '@strapi/typescript-utils';
 
@@ -17,7 +16,7 @@ export default (plop: NodePlopAPI) => {
         message: 'Controller name',
         validate: (input) => validateInput(input),
       },
-      ...getDestinationPrompts('controller', process.cwd()),
+      ...getDestinationPrompts('controller', plop.getDestBasePath()),
     ],
     actions(answers) {
       if (!answers) {
@@ -25,7 +24,7 @@ export default (plop: NodePlopAPI) => {
       }
 
       const currentDir = process.cwd();
-      const filePath = join(currentDir, getFilePath(answers.destination));
+      const filePath = getFilePath(answers.destination);
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       return [
