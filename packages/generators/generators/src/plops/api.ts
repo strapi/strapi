@@ -29,7 +29,6 @@ export default (plop: NodePlopAPI) => {
         async choices() {
           const pluginsPath = join(plop.getDestBasePath(), 'plugins');
           const exists = await fs.pathExists(pluginsPath);
-          console.log('pluginsPath', pluginsPath);
           if (!exists) {
             throw Error('Couldn\'t find a "plugins" directory');
           }
