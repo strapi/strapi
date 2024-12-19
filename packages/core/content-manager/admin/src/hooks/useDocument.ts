@@ -105,7 +105,10 @@ const useDocument: UseDocument = (args, opts) => {
     error,
   } = useGetDocumentQuery(args, {
     ...opts,
-    skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
+    skip:
+      (!args.documentId && args.collectionType !== SINGLE_TYPES) ||
+      args.documentId === 'create' ||
+      opts?.skip,
   });
 
   const {
@@ -170,15 +173,20 @@ const useDocument: UseDocument = (args, opts) => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * useDoc
+ * useContentManagerRoute
  * -----------------------------------------------------------------------------------------------*/
 
 /**
  * @internal this hook uses the router to extract the model, collection type & id from the url.
  * therefore, it shouldn't be used outside of the content-manager because it won't work as intended.
  */
-const useDoc = () => {
-  const { id, slug, collectionType, origin } = useParams<{
+const useContentManagerRoute = () => {
+  const {
+    id,
+    slug: model,
+    collectionType,
+    origin,
+  } = useParams<{
     id: string;
     origin: string;
     slug: string;
@@ -191,24 +199,16 @@ const useDoc = () => {
     throw new Error('Could not find collectionType in url params');
   }
 
-  if (!slug) {
+  if (!model) {
     throw new Error('Could not find model in url params');
   }
 
-  const document = useDocument(
-    { documentId: origin || id, model: slug, collectionType, params },
-    {
-      skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
-    }
-  );
-
-  const returnId = origin || id === 'create' ? undefined : id;
-
   return {
     collectionType,
-    model: slug,
-    id: returnId,
-    ...document,
+    model,
+    id,
+    origin,
+    params,
   };
 };
 
@@ -219,15 +219,21 @@ const useDoc = () => {
  * Make sure to use this hook inside the content manager.
  */
 const useContentManagerContext = () => {
+  const { collectionType, model, id, params, origin } = useContentManagerRoute();
   const {
-    collectionType,
-    model,
-    id,
     components,
-    isLoading: isLoadingDoc,
+    isLoading: isLoadingDocument,
     schema,
     schemas,
-  } = useDoc();
+    document,
+    meta,
+    hasError,
+  } = useDocument(
+    { documentId: origin || id, model, collectionType, params },
+    {
+      skip: id === 'create' || (!origin && !id && collectionType !== SINGLE_TYPES),
+    }
+  );
 
   const layout = useDocumentLayout(model);
 
@@ -237,14 +243,14 @@ const useContentManagerContext = () => {
   const slug = model;
   const isCreatingEntry = id === 'create';
 
-  const {} = useContentTypeSchema();
-
-  const isLoading = isLoadingDoc || layout.isLoading;
+  const isLoading = isLoadingDocument || layout.isLoading;
   const error = layout.error;
+  const hasAnyError = hasError || layout.error;
 
   return {
     error,
     isLoading,
+    hasError: hasAnyError,
 
     // Base metadata
     model,
@@ -265,8 +271,12 @@ const useContentManagerContext = () => {
 
     // layout infos
     layout,
+
+    // Document
+    document,
+    meta,
   };
 };
 
-export { useDocument, useDoc, useContentManagerContext };
+export { useDocument, useContentManagerContext };
 export type { UseDocument, UseDocumentArgs, Document, Schema, ComponentsDictionary };

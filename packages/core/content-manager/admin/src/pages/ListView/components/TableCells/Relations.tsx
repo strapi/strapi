@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Typography, Loader, useNotifyAT, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../../hooks/useDocument';
 import { useGetRelationsQuery } from '../../../../services/relations';
 import { getRelationLabel } from '../../../../utils/relations';
 import { getTranslation } from '../../../../utils/translations';
@@ -35,7 +35,7 @@ interface RelationMultipleProps
  * TODO: fix this component – tracking issue https://strapi-inc.atlassian.net/browse/CONTENT-2184
  */
 const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleProps) => {
-  const { model } = useDoc();
+  const { model } = useContentManagerContext();
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const [isOpen, setIsOpen] = React.useState(false);

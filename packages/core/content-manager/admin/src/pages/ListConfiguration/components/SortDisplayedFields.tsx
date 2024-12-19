@@ -5,7 +5,7 @@ import { Box, Flex, VisuallyHidden, Typography, Menu } from '@strapi/design-syst
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDoc } from '../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../hooks/useDocument';
 import { useGetContentTypeConfigurationQuery } from '../../../services/contentTypes';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
 import { getTranslation } from '../../../utils/translations';
@@ -19,7 +19,7 @@ interface SortDisplayedFieldsProps extends Pick<ListLayout, 'layout'> {}
 
 const SortDisplayedFields = () => {
   const { formatMessage } = useIntl();
-  const { model, schema } = useDoc();
+  const { model, contentType: schema } = useContentManagerContext();
   const [isDraggingSibling, setIsDraggingSibling] = React.useState(false);
   const [lastAction, setLastAction] = React.useState<string | null>(null);
   const scrollableContainerRef = React.useRef<HTMLDivElement>(null);

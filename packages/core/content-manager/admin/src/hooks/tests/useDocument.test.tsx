@@ -5,7 +5,7 @@ import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { mockData } from '../../../tests/mockData';
-import { useDocument, useDoc } from '../useDocument';
+import { useDocument, useContentManagerContext } from '../useDocument';
 
 describe('useDocument', () => {
   it('should return the document', async () => {
@@ -332,12 +332,12 @@ describe('useDocument', () => {
 });
 
 /**
- * useDoc is an abstraction around useDocument that extracts the model, collection type & id from the url
+ * useContentManagerContext is an abstraction around useDocument that extracts the model, collection type & id from the url
  * and passes this automatically to useDocument.
  */
-describe('useDoc', () => {
+describe('useContentManagerContext', () => {
   it('should return the document based on the url', async () => {
-    const { result } = renderHook(() => useDoc(), {
+    const { result } = renderHook(() => useContentManagerContext(), {
       initialEntries: [
         `/content-manager/collection-types/${mockData.contentManager.contentType}/12345`,
       ],
