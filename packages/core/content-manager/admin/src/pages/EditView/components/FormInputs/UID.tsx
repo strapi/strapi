@@ -23,7 +23,7 @@ import { useMatch } from 'react-router-dom';
 import { styled, keyframes } from 'styled-components';
 
 import { useDebounce } from '../../../../hooks/useDebounce';
-import { useDoc } from '../../../../hooks/useDocument';
+import { useContentManagerContext } from '../../../../hooks/useDocument';
 import { CLONE_PATH } from '../../../../router';
 import {
   useGenerateUIDMutation,
@@ -47,7 +47,7 @@ interface UIDInputProps extends Omit<InputProps, 'type'> {
 
 const UIDInput = React.forwardRef<any, UIDInputProps>(
   ({ hint, label, labelAction, name, required, ...props }, ref) => {
-    const { model, id } = useDoc();
+    const { model, id } = useContentManagerContext();
     const allFormValues = useForm('InputUID', (form) => form.values);
     const [availability, setAvailability] = React.useState<CheckUIDAvailability.Response>();
     const [showRegenerate, setShowRegenerate] = React.useState(false);
