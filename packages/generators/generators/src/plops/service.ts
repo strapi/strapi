@@ -24,6 +24,7 @@ export default (plop: NodePlopAPI) => {
       const filePath = getFilePath(answers?.destination);
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
+
       return [
         {
           type: 'add',

@@ -22,7 +22,7 @@ export default (plop: NodePlopAPI) => {
       const attributes = await getAttributesPrompts(inquirer);
 
       const api = await inquirer.prompt([
-        ...getDestinationPrompts('model', process.cwd()),
+        ...getDestinationPrompts('model', plop.getDestBasePath()),
         {
           when: (answers) => answers.destination === 'new',
           type: 'input',
