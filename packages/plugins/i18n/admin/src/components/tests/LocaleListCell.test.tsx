@@ -20,14 +20,7 @@ jest.mock('@strapi/content-manager/strapi-admin', () => ({
 
 describe('LocaleListCell', () => {
   it('renders a button with all the names of the locales that are available for the document', async () => {
-    render(
-      <LocaleListCell
-        documentId="12345"
-        collectionType="collection-types"
-        locale="en"
-        model="api::address.address"
-      />
-    );
+    render(<LocaleListCell localizations={[{ locale: 'en' }, { locale: 'fr' }]} locale="en" />);
 
     expect(
       await screen.findByRole('button', { name: 'English (default), Français' })
@@ -38,12 +31,7 @@ describe('LocaleListCell', () => {
 
   it('renders a list of the locales available on the document when the button is clicked', async () => {
     const { user } = render(
-      <LocaleListCell
-        documentId="12345"
-        collectionType="collection-types"
-        locale="en"
-        model="api::address.address"
-      />
+      <LocaleListCell localizations={[{ locale: 'en' }, { locale: 'fr' }]} locale="en" />
     );
 
     expect(
