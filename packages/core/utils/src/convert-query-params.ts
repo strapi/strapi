@@ -285,7 +285,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     if (isPagePagination && isOffsetPagination) {
       throw new PaginationError(
-        'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+        'Invalid pagination attributes. The page parameters are incorrect and must be in the pagination object'
       );
     }
   };
