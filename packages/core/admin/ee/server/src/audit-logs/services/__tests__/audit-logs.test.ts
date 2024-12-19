@@ -1,5 +1,5 @@
 import { createAuditLogsLifecycleService } from '../lifecycles';
-import createEventHub from '../../../../../../../core/dist/services/event-hub';
+import createEventHub from '../../../../../../../core/src/services/event-hub';
 import { scheduleJob } from 'node-schedule';
 
 import '@strapi/types';

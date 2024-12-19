@@ -10,7 +10,6 @@ import {
 } from '@strapi/admin/strapi-admin';
 import { Button, Typography, Flex, Link, Dialog } from '@strapi/design-system';
 import { ArrowLeft, WarningCircle } from '@strapi/icons';
-import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
@@ -18,6 +17,8 @@ import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
 import { PERMISSIONS } from '../../constants/plugin';
 import { useHistoryContext } from '../pages/History';
 import { useRestoreVersionMutation } from '../services/historyVersion';
+
+import type { UID } from '@strapi/types';
 
 interface VersionHeaderProps {
   headerId: string;

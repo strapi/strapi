@@ -1,5 +1,5 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src", "packup.config.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

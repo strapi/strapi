@@ -1,6 +1,6 @@
 import { difference, omit } from 'lodash/fp';
 import type { Struct, UID } from '@strapi/types';
-import { Core, Data, Modules, Schema } from '@strapi/types';
+import type { Core, Data, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { FIELDS_TO_IGNORE } from '../constants';

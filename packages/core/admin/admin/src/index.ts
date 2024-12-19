@@ -47,7 +47,7 @@ export { useAPIErrorHandler, type ApiError } from './hooks/useAPIErrorHandler';
 export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
-export { useRBAC } from './hooks/useRBAC';
+export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
 export { useAdminUsers } from './services/users';
 
@@ -71,7 +71,14 @@ export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
  * Utils
  */
 export { translatedErrors } from './utils/translatedErrors';
-export * from './utils/getFetchClient';
+export { getFetchClient, isFetchError, FetchError } from './utils/getFetchClient';
+export type {
+  ErrorResponse,
+  FetchClient,
+  FetchConfig,
+  FetchOptions,
+  FetchResponse,
+} from './utils/getFetchClient';
 export * from './utils/baseQuery';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
