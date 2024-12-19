@@ -2,7 +2,6 @@
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
     "production": [
-      "default",
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/*.test.js",
       "!{projectRoot}/**/*.test.api.js",
@@ -20,9 +19,15 @@
     "packageManager": "yarn"
   },
   "targetDefaults": {
-    "build": {
-      "inputs": ["production", "^production"],
-      "dependsOn": ["^build"],
+    "build:code": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "build:types": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build:types"],
       "cache": true
     },
     "test:unit": {
@@ -46,6 +51,7 @@
     }
   },
   "useInferencePlugins": false,
+  "parallel": 8,
   "pluginsConfig": {
     "@nx/js": {
       "analyzeSourceFiles": false

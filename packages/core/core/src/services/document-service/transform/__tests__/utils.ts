@@ -1,4 +1,4 @@
-import { Schema, Common } from '@strapi/types';
+import type { Schema, Common } from '@strapi/types';
 
 const createSchemaFromAttributes = (
   uid: Common.UID.ContentType,

@@ -1,4 +1,4 @@
-import { UID, Schema } from '@strapi/types';
+import type { UID, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import type { Document } from '../document-manager';
 
