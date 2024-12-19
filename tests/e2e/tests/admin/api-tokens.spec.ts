@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
 import { navToHeader } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { sharedSetup } from '../../utils/setup';
 
 const createAPIToken = async (page, tokenName, duration, type) => {
   await navToHeader(page, ['Settings', 'API Tokens', 'Create new API Token'], 'Create API Token');
@@ -16,16 +15,18 @@ const createAPIToken = async (page, tokenName, duration, type) => {
   await page.getByRole('option', { name: type }).click();
 
   await page.getByRole('button', { name: 'Save' }).click();
-
   await expect(page.getByText('Make sure to copy this token')).toBeVisible();
   await expect(page.getByText('Expiration date:')).toBeVisible();
 };
 
 test.describe('API Tokens', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
-    await login({ page });
+    await sharedSetup('ctb-edit-st', page, {
+      login: true,
+      skipTour: true,
+      resetFiles: true,
+      importData: 'with-admin.tar',
+    });
   });
 
   // Test token creation
