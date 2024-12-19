@@ -144,7 +144,7 @@ const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) =>
           </Flex>
           {displayedIcon === 'reload' && (
             <IconBox padding={6} background="primary100" borderColor="primary200">
-              <LoaderReload width="3.6rem" height="3.6rem" />
+              <LoaderReload width="4rem" height="4rem" />
             </IconBox>
           )}
           {displayedIcon === 'time' && (
@@ -209,6 +209,9 @@ const Overlay = styled(Flex)`
 
 const IconBox = styled(Box)`
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   svg {
     > path {
       fill: ${({ theme }) => theme.colors.primary600} !important;
