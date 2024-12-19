@@ -133,12 +133,13 @@ test.describe('Adding content', () => {
 
     await createContent(page, 'Article', fields, { save: false, publish: false, verify: false });
 
+    await page.waitForLoadState('networkidle');
+
     const source = page.locator('li:has-text("variations")');
     const target = page.locator('li:has-text("testnewcomponentexistingcategory")');
     await dragElementAbove(page, {
       source,
       target,
-      resizeHeight: 2000,
     });
 
     // Save and verify fields exist

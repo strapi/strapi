@@ -155,24 +155,68 @@ export const findByRowColumn = async (page: Page, rowText: string, columnText: s
  * Smoothly drags a draggable element within a source <li> to just above a target <li>,
  * with optional viewport resizing. Resizes back to the original viewport if adjusted.
  *
+ * Note that the viewport may need to completely contain the selected elements to work.
+ *
  * @param {object} page - The Playwright page instance.
  * @param {object} options - Options for the drag operation.
  * @param {object} options.source - Locator for the source <li> (containing the draggable element).
  * @param {object} options.target - Locator for the target <li> (drop destination).
  * @param {number} [options.steps=5] - Number of steps for smooth movement.
  * @param {number} [options.delay=10] - Delay in milliseconds between steps.
- * @param {number} [options.resizeHeight] - Optional viewport height adjustment.
  */
 export const dragElementAbove = async (page, options) => {
-  const { source, target, steps = 5, delay = 10, resizeHeight } = options;
+  const { source, target, steps = 5, delay = 20 } = options;
 
   // Save the current viewport size
   const currentViewport = page.viewportSize();
 
-  // Optionally resize the viewport
-  if (resizeHeight) {
-    await page.setViewportSize({ width: currentViewport.width, height: resizeHeight });
+  // Helper to check if an element is fully visible in the viewport
+  const isElementFullyVisible = async (element) => {
+    const box = await element.boundingBox();
+    if (!box) return false;
+
+    const viewport = page.viewportSize();
+    return box.y >= 0 && box.y + box.height <= viewport.height;
+  };
+
+  // Check if source and target are fully visible
+  const sourceVisible = await isElementFullyVisible(source);
+  const targetVisible = await isElementFullyVisible(target);
+
+  // Resize and scroll if necessary
+  if (!sourceVisible || !targetVisible) {
+    const sourceBox = await source.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (sourceBox && targetBox) {
+      const topElementY = Math.min(sourceBox.y, targetBox.y);
+      const bottomElementY = Math.max(
+        sourceBox.y + sourceBox.height,
+        targetBox.y + targetBox.height
+      );
+
+      const requiredHeight = bottomElementY - topElementY;
+
+      // Resize viewport if necessary
+      if (requiredHeight > currentViewport.height) {
+        await page.setViewportSize({
+          width: currentViewport.width,
+          height: requiredHeight,
+        });
+      }
+
+      // Scroll to the top element
+      await page.evaluate((y) => {
+        window.scrollTo(0, y);
+      }, topElementY);
+    } else {
+      throw new Error('Bounding boxes for source or target could not be determined.');
+    }
   }
+
+  // Wait for the page to stabilize
+  await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(delay);
 
   // Locate the draggable button within the source <li>
   const draggable = source.locator('[draggable="true"]');
@@ -207,7 +251,7 @@ export const dragElementAbove = async (page, options) => {
   }
 
   // Reset viewport to its original size if it was resized
-  if (resizeHeight) {
+  if (currentViewport != page.viewportSize()) {
     await page.setViewportSize(currentViewport);
   }
 };
