@@ -49,6 +49,7 @@ const blocksData: Schema.Attribute.BlocksValue = [
         text: '<SomeComponent />',
       },
     ],
+    language: 'javascript',
   },
   // A paragraph with combined text modifiers
   {
