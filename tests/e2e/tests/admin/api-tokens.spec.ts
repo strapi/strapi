@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { clickAndWait, navToHeader } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { navToHeader } from '../../utils/shared';
 import { sharedSetup } from '../../utils/setup';
 
 const createAPIToken = async (page, tokenName, duration, type) => {
