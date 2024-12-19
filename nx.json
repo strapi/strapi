@@ -51,7 +51,7 @@
     }
   },
   "useInferencePlugins": false,
-  "parallel": 5,
+  "parallel": 8,
   "pluginsConfig": {
     "@nx/js": {
       "analyzeSourceFiles": false
