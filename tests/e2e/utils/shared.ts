@@ -150,32 +150,129 @@ export const findByRowColumn = async (page: Page, rowText: string, columnText: s
   // Return the found cell
   return cell;
 };
-
 /**
- * Smoothly drags a draggable element within a source <li> to just above a target <li>,
- * with optional viewport resizing. Resizes back to the original viewport if adjusted.
- *
- * Note that the viewport may need to completely contain the selected elements to work.
+ * WebKit-specific implementation of ensureElementsInViewport.
+ * Ensures that two elements are fully visible in the viewport by calculating their bounding boxes
+ * and adjusting the viewport if necessary.
  *
  * @param {object} page - The Playwright page instance.
- * @param {object} options - Options for the drag operation.
- * @param {object} options.source - Locator for the source <li> (containing the draggable element).
- * @param {object} options.target - Locator for the target <li> (drop destination).
- * @param {number} [options.steps=5] - Number of steps for smooth movement.
- * @param {number} [options.delay=10] - Delay in milliseconds between steps.
+ * @param {object} source - Locator for the source element.
+ * @param {object} target - Locator for the target element.
  */
-export const dragElementAbove = async (page, options) => {
-  const { source, target, steps = 5, delay = 20 } = options;
+export const ensureElementsInViewportWebkit = async (page, source, target) => {
+  const currentViewport = await page.viewportSize();
+  console.log('Current viewport size:', currentViewport);
 
-  // Save the current viewport size
-  const currentViewport = page.viewportSize();
+  let combinedBox = { top: Infinity, bottom: -Infinity, left: Infinity, right: -Infinity };
+
+  // Helper function to fetch the absolute bounding box
+  const calculateBoundingBox = async (element) => {
+    return await element.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+      return {
+        top: rect.top + scrollTop,
+        bottom: rect.bottom + scrollTop,
+        left: rect.left + scrollLeft,
+        right: rect.right + scrollLeft,
+        width: rect.width,
+        height: rect.height,
+      };
+    });
+  };
+
+  // Calculate the combined bounding box for both elements
+  const elements = [source, target];
+  for (const [index, element] of elements.entries()) {
+    console.log(`Processing element ${index + 1}/${elements.length}`);
+    const box = await calculateBoundingBox(element);
+
+    if (!box) {
+      console.error(`Bounding box for element ${index + 1} could not be determined.`);
+      continue;
+    }
+
+    console.log(`Absolute bounding box for element ${index + 1}:`, box);
+
+    combinedBox = {
+      top: Math.min(combinedBox.top, box.top),
+      bottom: Math.max(combinedBox.bottom, box.bottom),
+      left: Math.min(combinedBox.left, box.left),
+      right: Math.max(combinedBox.right, box.right),
+    };
+    console.log(`Updated combined bounding box after element ${index + 1}:`, combinedBox);
+  }
+
+  // Calculate the required scroll position
+  const scrollToY = Math.max(
+    0,
+    combinedBox.top - (currentViewport.height - (combinedBox.bottom - combinedBox.top)) / 2
+  );
+  const scrollToX = Math.max(0, combinedBox.left);
+  console.log('Scrolling to position:', { top: scrollToY, left: scrollToX });
+
+  // Scroll the viewport
+  await page.evaluate(
+    ({ top, left }) => {
+      console.log('Before scroll:', { scrollX: window.scrollX, scrollY: window.scrollY });
+      window.scrollTo(left, top);
+      console.log('After scroll:', { scrollX: window.scrollX, scrollY: window.scrollY });
+    },
+    { top: scrollToY, left: scrollToX }
+  );
+
+  // Validate visibility of each element
+  for (const [index, element] of elements.entries()) {
+    console.log(`Validating visibility of element ${index + 1}`);
+    const rect = await element.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      const isVisible =
+        rect.top >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.left >= 0 &&
+        rect.right <= window.innerWidth;
+
+      console.log('Element rect:', rect, 'Is visible:', isVisible);
+      return isVisible;
+    });
+
+    if (!rect) {
+      console.warn(`Element ${index + 1} is NOT fully visible.`);
+    } else {
+      console.log(`Element ${index + 1} is fully visible.`);
+    }
+  }
+
+  console.log('ensureElementsInViewportWebkit completed.');
+};
+
+/**
+ * Ensures that the given elements are fully visible within the viewport.
+ * Resizes the viewport and scrolls if required.
+ *
+ * @param {object} page - The Playwright page instance.
+ * @param {object} source - Locator for the source element.
+ * @param {object} target - Locator for the target element.
+ */
+export const ensureElementsInViewport = async (page, source, target) => {
+  // Detect the browser type
+  const browserType = page.context().browser()?.browserType().name();
+
+  // Short-circuit to WebKit-specific implementation
+  if (browserType === 'webkit') {
+    return ensureElementsInViewportWebkit(page, source, target);
+  }
+
+  const currentViewport = await page.viewportSize();
 
   // Helper to check if an element is fully visible in the viewport
   const isElementFullyVisible = async (element) => {
     const box = await element.boundingBox();
     if (!box) return false;
 
-    const viewport = page.viewportSize();
+    const viewport = await page.viewportSize();
     return box.y >= 0 && box.y + box.height <= viewport.height;
   };
 
@@ -183,12 +280,12 @@ export const dragElementAbove = async (page, options) => {
   const sourceVisible = await isElementFullyVisible(source);
   const targetVisible = await isElementFullyVisible(target);
 
-  // Resize and scroll if necessary
   if (!sourceVisible || !targetVisible) {
     const sourceBox = await source.boundingBox();
     const targetBox = await target.boundingBox();
 
     if (sourceBox && targetBox) {
+      // Determine the bounding box that contains both elements
       const topElementY = Math.min(sourceBox.y, targetBox.y);
       const bottomElementY = Math.max(
         sourceBox.y + sourceBox.height,
@@ -213,10 +310,25 @@ export const dragElementAbove = async (page, options) => {
       throw new Error('Bounding boxes for source or target could not be determined.');
     }
   }
+};
 
-  // Wait for the page to stabilize
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(delay);
+/**
+ * Smoothly drags a draggable element within a source <li> to just above a target <li>.
+ * Automatically detects WebKit and uses a WebKit-specific implementation if needed.
+ *
+ * @param {object} page - The Playwright page instance.
+ * @param {object} options - Options for the drag operation.
+ * @param {object} options.source - Locator for the source <li> (containing the draggable element).
+ * @param {object} options.target - Locator for the target <li> (drop destination).
+ * @param {number} [options.steps=5] - Number of steps for smooth movement.
+ * @param {number} [options.delay=10] - Delay in milliseconds between steps.
+ */
+export const dragElementAbove = async (page, options) => {
+  // Extract options
+  const { source, target, steps = 5, delay = 20 } = options;
+
+  // Ensure both elements are fully visible in the viewport
+  await ensureElementsInViewport(page, source, target);
 
   // Locate the draggable button within the source <li>
   const draggable = source.locator('[draggable="true"]');
@@ -248,11 +360,6 @@ export const dragElementAbove = async (page, options) => {
     await page.mouse.up();
   } else {
     throw new Error('Bounding boxes for source or target could not be determined.');
-  }
-
-  // Reset viewport to its original size if it was resized
-  if (currentViewport != page.viewportSize()) {
-    await page.setViewportSize(currentViewport);
   }
 };
 
