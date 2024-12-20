@@ -19,6 +19,7 @@ const command = ({ command }: { command: Command }) => {
     .addOption(
       new Option('--no-compress', 'Disables gzip compression of output file').default(true)
     )
+    .addOption(new Option('--verbose', 'Enable verbose logs'))
     .addOption(
       new Option(
         '-k, --key <string>',

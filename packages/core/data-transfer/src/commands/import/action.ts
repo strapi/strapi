@@ -34,6 +34,7 @@ interface CmdOptions {
   file?: string;
   decompress?: boolean;
   decrypt?: boolean;
+  verbose?: boolean;
   key?: string;
   conflictStrategy?: 'restore';
   force?: boolean;
@@ -109,7 +110,7 @@ export default async (opts: CmdOptions) => {
 
   const engine = createTransferEngine(source, destination, engineOptions);
 
-  engine.diagnostics.onDiagnostic(formatDiagnostic('import'));
+  engine.diagnostics.onDiagnostic(formatDiagnostic('import', opts.verbose));
 
   const progress = engine.progress.stream;
 
