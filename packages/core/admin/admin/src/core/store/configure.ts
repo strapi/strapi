@@ -1,95 +1,32 @@
 import {
   configureStore,
-  StoreEnhancer,
   Middleware,
   Reducer,
-  combineReducers,
-  MiddlewareAPI,
   isRejected,
   combineSlices,
+  createDynamicMiddleware,
 } from '@reduxjs/toolkit';
 
-import { reducer as appReducer, adminSlice, AppState, logout } from '../../reducer';
+import { adminSlice, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
 
-/**
- * @description Static reducers are ones we know, they live in the admin package.
- */
-const staticReducers = {
-  [adminApi.reducerPath]: adminApi.reducer,
-  admin_app: appReducer,
-} as const;
-
-const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => StoreEnhancer =
-  (appReducers) =>
-  (next) =>
-  (...args) => {
-    const store = next(...args);
-
-    const asyncReducers: Record<string, Reducer> = {};
-
-    return {
-      ...store,
-      asyncReducers,
-      injectReducer: (key: string, asyncReducer: Reducer) => {
-        asyncReducers[key] = asyncReducer;
-        store.replaceReducer(
-          // @ts-expect-error we dynamically add reducers which makes the types uncomfortable.
-          combineReducers({
-            ...appReducers,
-            ...asyncReducers,
-          })
-        );
-      },
-    };
-  };
-
-type PreloadState = Partial<{
-  admin_app: AppState;
-}>;
-
-const rootReducer = combineSlices(adminApi, adminSlice);
-
-/**
- * @description This is the main store configuration function, injected Reducers use our legacy app.addReducer API,
- * which we're trying to phase out. App Middlewares could potentially be improved...?
- */
-const configureStoreImpl = (
-  appMiddlewares: Array<() => Middleware> = [],
-  injectedReducers: Record<string, Reducer> = {}
-) => {
-  const coreReducers = { ...staticReducers, ...injectedReducers } as const;
-
-  const defaultMiddlewareOptions = {} as any;
-
-  // These are already disabled in 'production' env but we also need to disable it in test environments
-  // However, we want to leave them on for development so any issues can still be caught
-  if (process.env.NODE_ENV === 'test') {
-    defaultMiddlewareOptions.serializableCheck = false;
-    defaultMiddlewareOptions.immutableCheck = false;
-  }
-
-  const store = configureStore({
-    reducer: coreReducers,
-    devTools: process.env.NODE_ENV !== 'production',
-    middleware: (getDefaultMiddleware) => [
-      ...getDefaultMiddleware(defaultMiddlewareOptions),
-      rtkQueryUnauthorizedMiddleware,
-      adminApi.middleware,
-      ...appMiddlewares.map((m) => m()),
-    ],
-    enhancers: [injectReducerStoreEnhancer(coreReducers)],
-  });
-
-  return store;
+const isActionWithStatus = (action: unknown): action is { payload: { status: number } } => {
+  return (
+    typeof action === 'object' &&
+    action !== null &&
+    'payload' in action &&
+    typeof action['payload'] === 'object' &&
+    action['payload'] !== null &&
+    'status' in action['payload']
+  );
 };
 
 const rtkQueryUnauthorizedMiddleware: Middleware =
-  ({ dispatch }: MiddlewareAPI) =>
+  ({ dispatch }) =>
   (next) =>
   (action) => {
     // isRejectedWithValue Or isRejected
-    if (isRejected(action) && action.payload?.status === 401) {
+    if (isRejected(action) && isActionWithStatus(action) && action.payload.status === 401) {
       dispatch(logout());
       window.location.href = '/admin/auth/login';
       return;
@@ -98,7 +35,51 @@ const rtkQueryUnauthorizedMiddleware: Middleware =
     return next(action);
   };
 
-type Store = ReturnType<typeof configureStoreImpl> & {
+const dynamicMiddleware = createDynamicMiddleware();
+dynamicMiddleware.addMiddleware(rtkQueryUnauthorizedMiddleware);
+
+// Util to combine new slices with the default admin ones without breaking the types
+const combineWithAdminSlices = (...slices: Parameters<typeof combineSlices>): Reducer =>
+  combineSlices(adminApi, adminSlice, ...slices);
+
+const store = configureStore({
+  reducer: combineWithAdminSlices(),
+  devTools: process.env.NODE_ENV !== 'production',
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: process.env.NODE_ENV === 'development',
+      immutableCheck: process.env.NODE_ENV === 'development',
+    }).concat(dynamicMiddleware.middleware),
+}) as Store;
+
+/**
+ * @description This is the main store configuration function, injected Reducers use our legacy app.addReducer API,
+ * which we're trying to phase out. App Middlewares could potentially be improved...?
+ */
+const configureStoreImpl = (
+  appMiddlewares: Array<() => Middleware> = [],
+  injectedReducers: Record<string, Reducer> = {}
+): Store => {
+  // Inject middleware from plugins
+  dynamicMiddleware.addMiddleware(...appMiddlewares.map((m) => m()));
+
+  /**
+   * Add a dictionary for plugin reducers.
+   * Initialize it with the reducers from the app.addReducers API.
+   */
+  store.asyncReducers = injectedReducers;
+  store.replaceReducer(combineWithAdminSlices(injectedReducers));
+
+  // Create an inject reducer function that plugins can access whenever
+  store.injectReducer = (key: string, asyncReducer: Reducer) => {
+    store.asyncReducers[key] = asyncReducer;
+    store.replaceReducer(combineWithAdminSlices(injectedReducers));
+  };
+
+  return store;
+};
+
+type Store = ReturnType<typeof configureStore> & {
   asyncReducers: Record<string, Reducer>;
   injectReducer: (key: string, asyncReducer: Reducer) => void;
 };
@@ -107,5 +88,5 @@ type RootState = ReturnType<Store['getState']>;
 
 type Dispatch = Store['dispatch'];
 
-export { configureStoreImpl as configureStore };
-export type { RootState, Dispatch, AppState, Store, PreloadState };
+export { configureStoreImpl as configureStore, store };
+export type { RootState, Dispatch, AppState, Store };

@@ -40,6 +40,7 @@ export const getStoredToken = (): string | null => {
 
 const adminSlice = createSlice({
   name: 'admin',
+  reducerPath: 'admin_app',
   initialState: () => {
     return {
       language: {
