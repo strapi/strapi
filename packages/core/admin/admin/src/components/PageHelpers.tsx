@@ -10,7 +10,7 @@ import {
   MainProps,
 } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
-import { EmptyPermissions, EmptyDocuments } from '@strapi/icons/symbols';
+import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { useAuth, Permission } from '../features/Auth';
@@ -141,7 +141,6 @@ const NoData = (props: NoDataProps) => {
       <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
-            icon={<EmptyDocuments width="16rem" />}
             action={props.action}
             content={formatMessage({
               id: 'app.components.EmptyStateLayout.content-document',
@@ -255,7 +254,7 @@ export interface TitleProps {
  */
 const Title = ({ children: title }: TitleProps) => {
   React.useEffect(() => {
-    document.title = `${title} | Strapi`;
+    document.title = `${title} | Happy Horizon CMS`;
   }, [title]);
 
   return null;

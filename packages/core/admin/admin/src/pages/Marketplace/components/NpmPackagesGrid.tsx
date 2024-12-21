@@ -1,5 +1,4 @@
 import { Box, BoxComponent, Flex, Grid, Typography } from '@strapi/design-system';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -60,7 +59,6 @@ const NpmPackagesGrid = ({
         </Layouts.Grid>
         <Box position="absolute" top={11} width="100%">
           <Flex alignItems="center" justifyContent="center" direction="column">
-            <EmptyDocuments width="160px" height="88px" />
             <Box paddingTop={6}>
               <Typography variant="delta" tag="p" textColor="neutral600">
                 {emptySearchMessage}

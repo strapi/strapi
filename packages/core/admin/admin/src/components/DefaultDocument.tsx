@@ -32,7 +32,7 @@ const DefaultDocument = ({ entryPath }: DefaultDocumentProps) => {
         <meta name="robots" content="noindex" />
         <meta name="referrer" content="same-origin" />
 
-        <title>Strapi Admin</title>
+        <title>Happy Horizon CMS</title>
         <style>{globalStyles}</style>
       </head>
       <body>

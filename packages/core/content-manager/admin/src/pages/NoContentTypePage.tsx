@@ -1,7 +1,6 @@
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -39,7 +38,6 @@ const NoContentType = () => {
               "You don't have any content yet, we recommend you to create your first Content-Type.",
           })}
           hasRadius
-          icon={<EmptyDocuments width="16rem" />}
           shadow="tableShadow"
         />
       </Layouts.Content>

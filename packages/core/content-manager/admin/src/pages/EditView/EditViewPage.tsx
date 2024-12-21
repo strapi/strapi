@@ -12,6 +12,7 @@ import { Grid, Main, Tabs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
+import Sticky from 'react-sticky-el';
 
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
@@ -213,7 +214,7 @@ const EditViewPage = () => {
                 ) : null}
               </Tabs.List>
               <Grid.Root paddingTop={8} gap={4}>
-                <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
+                <Grid.Item col={10} m={9} s={12} direction="column" alignItems="stretch">
                   <Tabs.Content value="draft">
                     <FormLayout layout={layout} />
                   </Tabs.Content>
@@ -221,8 +222,10 @@ const EditViewPage = () => {
                     <FormLayout layout={layout} />
                   </Tabs.Content>
                 </Grid.Item>
-                <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
-                  <Panels />
+                <Grid.Item col={2} m={3} s={12} direction="column" alignItems="stretch">
+                  <Sticky>
+                    <Panels />
+                  </Sticky>
                 </Grid.Item>
               </Grid.Root>
             </Tabs.Root>

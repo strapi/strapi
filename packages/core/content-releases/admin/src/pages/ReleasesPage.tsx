@@ -27,7 +27,6 @@ import {
   Link,
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import { format } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
@@ -110,7 +109,6 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
             target: sectionTitle,
           }
         )}
-        icon={<EmptyDocuments width="16rem" />}
       />
     );
   }

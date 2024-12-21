@@ -8,6 +8,16 @@ const config = {
   locales: ['it', 'es', 'en', 'en-GB'],
 };
 const bootstrap = (app) => {
+  app.getPlugin('content-manager').injectComponent('menu', 'left-menu', {
+    name: 'customMenu',
+      Component: () => (
+        <div>
+          <div>Custom Menu</div>
+          <Button>Click me</Button>
+        </div>
+      ),
+  });
+
   app.getPlugin('content-manager').injectComponent('editView', 'right-links', {
     name: 'PreviewButton',
     Component: () => (

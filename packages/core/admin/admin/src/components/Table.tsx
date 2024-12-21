@@ -28,7 +28,6 @@ import {
   RawTdProps,
 } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -325,7 +324,6 @@ const Empty = (props: Table.EmptyProps) => {
               defaultMessage: 'No content found',
             })}
             hasRadius
-            icon={<EmptyDocuments width="16rem" />}
             {...props}
           />
         </Td>

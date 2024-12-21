@@ -3,6 +3,7 @@ import { useStrapiApp, InjectionZoneComponent } from '@strapi/admin/strapi-admin
 import { PLUGIN_ID } from '../constants/plugin';
 
 const INJECTION_ZONES = {
+  menu: { 'left-menu': [] },
   editView: { informations: [], 'right-links': [] },
   listView: {
     actions: [],
@@ -13,6 +14,9 @@ const INJECTION_ZONES = {
 } satisfies InjectionZones;
 
 interface InjectionZones {
+  menu: {
+    'left-menu': InjectionZoneComponent[];
+  };
   editView: {
     informations: InjectionZoneComponent[];
     'right-links': InjectionZoneComponent[];
@@ -26,6 +30,7 @@ interface InjectionZones {
 }
 
 type InjectionZoneArea =
+  | 'menu.left-menu'
   | 'editView.informations'
   | 'editView.right-links'
   | 'listView.actions'

@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
@@ -184,7 +183,6 @@ export const ListView = () => {
             )}
             {canCreate && apiTokens.length === 0 ? (
               <EmptyStateLayout
-                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.apiTokens.addFirstToken',
                   defaultMessage: 'Add your first API Token',
@@ -206,7 +204,6 @@ export const ListView = () => {
             ) : null}
             {!canCreate && apiTokens.length === 0 ? (
               <EmptyStateLayout
-                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.apiTokens.emptyStateLayout',
                   defaultMessage: 'You don’t have any content yet...',

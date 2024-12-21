@@ -1,6 +1,6 @@
 {
-  "name": "strapi",
-  "private": true,
+  "name": "@ef2/strapi",
+  "version": "5.6.1",
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
   },

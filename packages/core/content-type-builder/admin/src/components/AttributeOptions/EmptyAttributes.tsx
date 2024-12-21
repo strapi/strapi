@@ -1,6 +1,5 @@
 import { Box, Flex, Typography, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -40,7 +39,6 @@ export const EmptyAttributes = () => {
       <EmptyCardGrid />
       <Box position="absolute" top={6} width="100%">
         <Flex alignItems="center" justifyContent="center" direction="column">
-          <EmptyDocuments width="160px" height="88px" />
           <Box paddingTop={6} paddingBottom={4}>
             <Box textAlign="center">
               <Typography variant="delta" tag="p" textColor="neutral600">

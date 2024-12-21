@@ -20,7 +20,6 @@ import {
   Modal,
 } from '@strapi/design-system';
 import { PaperPlane } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useFormik } from 'formik';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
@@ -67,7 +66,6 @@ export const NoReleases = () => {
   const { formatMessage } = useIntl();
   return (
     <EmptyStateLayout
-      icon={<EmptyDocuments width="16rem" />}
       content={formatMessage({
         id: 'content-releases.content-manager-edit-view.add-to-release.no-releases-message',
         defaultMessage:

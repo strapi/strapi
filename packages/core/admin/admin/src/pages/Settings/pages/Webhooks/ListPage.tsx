@@ -21,7 +21,6 @@ import {
   Dialog,
 } from '@strapi/design-system';
 import { Pencil, Plus, Trash } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 
@@ -390,7 +389,6 @@ const ListPage = () => {
             </Table>
           ) : (
             <EmptyStateLayout
-              icon={<EmptyDocuments width="160px" />}
               content={formatMessage({
                 id: 'Settings.webhooks.list.empty.description',
                 defaultMessage: 'No webhooks found',
