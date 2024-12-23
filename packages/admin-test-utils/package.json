@@ -78,7 +78,7 @@
     "whatwg-fetch": "3.6.2"
   },
   "devDependencies": {
-    "@reduxjs/toolkit": "2.4.0",
+    "@reduxjs/toolkit": "2.5.0",
     "@strapi/pack-up": "5.0.2",
     "@testing-library/jest-dom": "6.4.5",
     "eslint-config-custom": "5.6.0",
@@ -87,7 +87,7 @@
     "tsconfig": "5.6.0"
   },
   "peerDependencies": {
-    "@reduxjs/toolkit": "^1.9.7",
+    "@reduxjs/toolkit": "^2.5.0",
     "@testing-library/jest-dom": "^5.16.5",
     "jest-environment-jsdom": "^29.0.0",
     "styled-components": "^6.0.0"

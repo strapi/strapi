@@ -54,7 +54,7 @@
     "watch": "strapi-plugin watch"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "1.9.7",
+    "@reduxjs/toolkit": "2.5.0",
     "@strapi/admin": "5.6.0",
     "@strapi/design-system": "2.0.0-rc.14",
     "@strapi/icons": "2.0.0-rc.14",
