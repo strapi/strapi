@@ -7,7 +7,7 @@ import {
   createDynamicMiddleware,
 } from '@reduxjs/toolkit';
 
-import { adminSlice, AppState, logout } from '../../reducer';
+import { adminSlice, AppState, initialize, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
 
 const isActionWithStatus = (action: unknown): action is { payload: { status: number } } => {
@@ -57,6 +57,7 @@ const store = configureStore({
  * which we're trying to phase out. App Middlewares could potentially be improved...?
  */
 const configureStoreImpl = (
+  initialState: AppState,
   appMiddlewares: Array<() => Middleware> = [],
   injectedReducers: Record<string, Reducer> = {}
 ): Store => {
@@ -76,12 +77,17 @@ const configureStoreImpl = (
     store.replaceReducer(combineWithAdminSlices(injectedReducers));
   };
 
+  store.dispatch(initialize(initialState));
+
   return store;
 };
 
-type Store = ReturnType<typeof configureStore> & {
+type Store = Omit<ReturnType<typeof configureStore>, 'getState'> & {
   asyncReducers: Record<string, Reducer>;
   injectReducer: (key: string, asyncReducer: Reducer) => void;
+  getState: () => {
+    admin_app: AppState;
+  };
 };
 
 type RootState = ReturnType<Store['getState']>;

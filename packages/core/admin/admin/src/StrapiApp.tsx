@@ -437,9 +437,8 @@ class StrapiApp {
     const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
       'en') as keyof typeof localeNames;
 
-    this.store = configureStore(this.middlewares, this.reducers) as Store;
-    this.store.dispatch(
-      initialize({
+    this.store = configureStore(
+      {
         permissions: merge({}, ADMIN_PERMISSIONS_CE, ADMIN_PERMISSIONS_EE),
         theme: {
           availableThemes: [],
@@ -450,8 +449,10 @@ class StrapiApp {
           localeNames,
         },
         token: getStoredToken(),
-      })
-    );
+      },
+      this.middlewares,
+      this.reducers
+    ) as Store;
 
     const router = this.router.createRouter(this, {
       basename: getBasename(),

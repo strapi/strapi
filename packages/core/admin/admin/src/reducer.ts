@@ -52,12 +52,12 @@ const adminSlice = createSlice({
         availableThemes: [],
         currentTheme: localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system',
       },
-      token: null,
+      token: getStoredToken(),
     } as AppState;
   },
   reducers: {
     initialize(state, action: PayloadAction<AppState>) {
-      state = action.payload;
+      return action.payload;
     },
     setAppTheme(state, action: PayloadAction<ThemeName>) {
       state.theme.currentTheme = action.payload;
