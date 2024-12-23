@@ -8582,7 +8582,7 @@ __metadata:
     fractional-indexing: "npm:3.2.0"
     fs-extra: "npm:11.2.0"
     highlight.js: "npm:^10.4.1"
-    immer: "npm:9.0.21"
+    immer: "npm:10.1.1"
     inquirer: "npm:8.2.5"
     invariant: "npm:^2.2.4"
     is-localhost-ip: "npm:2.0.0"
@@ -8691,7 +8691,7 @@ __metadata:
     date-fns: "npm:2.30.0"
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
-    immer: "npm:9.0.21"
+    immer: "npm:10.1.1"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
@@ -8799,7 +8799,7 @@ __metadata:
     "@types/pluralize": "npm:0.0.30"
     date-fns: "npm:2.30.0"
     fs-extra: "npm:11.2.0"
-    immer: "npm:9.0.21"
+    immer: "npm:10.1.1"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
@@ -9267,7 +9267,7 @@ __metadata:
     cheerio: "npm:^1.0.0"
     formik: "npm:2.4.5"
     fs-extra: "npm:11.2.0"
-    immer: "npm:9.0.21"
+    immer: "npm:10.1.1"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
     koa-session: "npm:6.4.0"
@@ -9376,7 +9376,7 @@ __metadata:
     bcryptjs: "npm:2.4.3"
     formik: "npm:2.4.5"
     grant-koa: "npm:5.4.8"
-    immer: "npm:9.0.21"
+    immer: "npm:10.1.1"
     jsonwebtoken: "npm:9.0.0"
     jwk-to-pem: "npm:2.0.5"
     koa: "npm:2.15.2"
@@ -9806,7 +9806,7 @@ __metadata:
     formidable: "npm:3.5.1"
     formik: "npm:2.4.5"
     fs-extra: "npm:11.2.0"
-    immer: "npm:9.0.21"
+    immer: "npm:10.1.1"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
     koa-range: "npm:0.3.0"
@@ -20049,17 +20049,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:9.0.21, immer@npm:^9.0.6":
-  version: 9.0.21
-  resolution: "immer@npm:9.0.21"
-  checksum: 10c0/03ea3ed5d4d72e8bd428df4a38ad7e483ea8308e9a113d3b42e0ea2cc0cc38340eb0a6aca69592abbbf047c685dbda04e3d34bf2ff438ab57339ed0a34cc0a05
-  languageName: node
-  linkType: hard
-
-"immer@npm:^10.0.3":
+"immer@npm:10.1.1, immer@npm:^10.0.3":
   version: 10.1.1
   resolution: "immer@npm:10.1.1"
   checksum: 10c0/b749e10d137ccae91788f41bd57e9387f32ea6d6ea8fd7eb47b23fd7766681575efc7f86ceef7fe24c3bc9d61e38ff5d2f49c2663b2b0c056e280a4510923653
+  languageName: node
+  linkType: hard
+
+"immer@npm:^9.0.6":
+  version: 9.0.21
+  resolution: "immer@npm:9.0.21"
+  checksum: 10c0/03ea3ed5d4d72e8bd428df4a38ad7e483ea8308e9a113d3b42e0ea2cc0cc38340eb0a6aca69592abbbf047c685dbda04e3d34bf2ff438ab57339ed0a34cc0a05
   languageName: node
   linkType: hard
 

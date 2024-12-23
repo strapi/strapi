@@ -52,7 +52,7 @@
     "bcryptjs": "2.4.3",
     "formik": "2.4.5",
     "grant-koa": "5.4.8",
-    "immer": "9.0.21",
+    "immer": "10.1.1",
     "jsonwebtoken": "9.0.0",
     "jwk-to-pem": "2.0.5",
     "koa": "2.15.2",
