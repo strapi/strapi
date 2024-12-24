@@ -113,7 +113,7 @@ export async function* getBatchToDiscard({
   db,
   trx,
   uid,
-  batchSize = 1000,
+  batchSize = 500,
 }: {
   db: Database;
   trx: Knex;
