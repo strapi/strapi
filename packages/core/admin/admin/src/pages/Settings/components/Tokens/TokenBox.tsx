@@ -47,6 +47,7 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
               })}
               onClick={handleClick(token)}
               variant="ghost"
+              type="button"
               style={{ padding: 0, height: '1.6rem' }}
             >
               <Duplicate />
