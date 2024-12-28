@@ -14,7 +14,7 @@ import type {
   TransferStage,
   Protocol,
 } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import type { ILocalStrapiDestinationProviderOptions } from '../local-destination';
 import { TRANSFER_PATH } from '../../remote/constants';
@@ -227,7 +227,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'remote-destination-provider',
+        origin: 'remote-destination-provider',
       },
       kind: 'info',
     });
@@ -257,13 +257,13 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
     this.#reportInfo('establishing websocket connection');
     // No auth defined, trying public access for transfer
     if (!auth) {
-      ws = await connectToWebsocket(wsUrl);
+      ws = await connectToWebsocket(wsUrl, undefined, this.#diagnostics);
     }
 
     // Common token auth, this should be the main auth method
     else if (auth.type === 'token') {
       const headers = { Authorization: `Bearer ${auth.token}` };
-      ws = await connectToWebsocket(wsUrl, { headers });
+      ws = await connectToWebsocket(wsUrl, { headers }, this.#diagnostics);
     }
 
     // Invalid auth method provided

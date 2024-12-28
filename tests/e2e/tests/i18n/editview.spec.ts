@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../constants';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
-import { findAndClose } from '../../utils/shared';
+import { clickAndWait, findAndClose } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 
 test.describe('Edit view', () => {
@@ -608,129 +608,129 @@ test.describe('Edit view', () => {
   };
 
   for (const [type, validationParams] of Object.entries(typesOfValidation)) {
-    test.fixme(
-      `As a user I want to see the relevant error message when trying to publish a draft that fails ${type} validation`,
-      async ({ browser, page }) => {
-        const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
-        const EDIT_URL =
-          /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
+    test(`As a user I want to see the relevant error message when trying to publish a draft that fails ${type} validation`, async ({
+      browser,
+      page,
+    }) => {
+      const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
+      const EDIT_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
 
-        const {
-          field,
-          initialValue,
-          ctbParams: { key: ctbKey, operation: ctbOperation },
-          expectedError,
-        } = validationParams;
+      const {
+        field,
+        initialValue,
+        ctbParams: { key: ctbKey, operation: ctbOperation },
+        expectedError,
+      } = validationParams;
 
-        /**
-         * Navigate to our articles list-view where there will be one document already made in the `en` locale
-         */
-        await page.getByRole('link', { name: 'Content Manager' }).click();
-        await page.getByRole('link', { name: 'Article' }).click();
-        await page.waitForURL(LIST_URL);
-        await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+      /**
+       * Navigate to our articles list-view where there will be one document already made in the `en` locale
+       */
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+      await page.waitForURL(LIST_URL);
+      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
 
-        /**
-         * Assert we're on the english locale and our document exists
-         */
-        await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
-          'English (en)'
-        );
-        await expect(
-          page.getByRole('row', { name: 'Why I prefer football over soccer' })
-        ).toBeVisible();
-        await page.getByText('why-i-prefer-football-over-').click();
-        await page.waitForURL(EDIT_URL);
+      /**
+       * Assert we're on the english locale and our document exists
+       */
+      await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
+        'English (en)'
+      );
+      await expect(
+        page.getByRole('row', { name: 'Why I prefer football over soccer' })
+      ).toBeVisible();
+      await page.getByText('why-i-prefer-football-over-').click();
+      await page.waitForURL(EDIT_URL);
 
-        /**
-         * This is here because the `fill` method below doesn't immediately update the value
-         * in webkit.
-         */
-        if (browser.browserType().name() === 'webkit') {
-          await page.getByRole('textbox', { name: 'title' }).press('s');
-          await page.getByRole('textbox', { name: 'title' }).press('Delete');
-        }
-
-        /**
-         * Fill the target field with the initial value, there is currently no
-         * validation on this field
-         */
-        await page.getByRole('textbox', { name: field }).fill(initialValue);
-        await page.getByRole('button', { name: 'Save' }).click();
-        await findAndClose(page, 'Success:Saved');
-
-        /**
-         * Navigate to the CTB and modify the schema of the article to apply the
-         * validation constraints to the field
-         */
-        await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-        await page.getByRole('button', { name: 'Close' }).click(); // TODO improve this
-
-        /**
-         * Edit the field and apply the validation constraint
-         */
-        await page.getByRole('link', { name: 'Article' }).click();
-        await page
-          .getByRole('button', { name: `Edit ${field}` })
-          .first()
-          .click();
-        await page.getByRole('tab', { name: 'Advanced settings' }).click();
-
-        const ctbOperatonType = ctbOperation?.type ?? '';
-        switch (ctbOperatonType) {
-          case 'click':
-            await page.getByLabel(ctbKey).first().click();
-            break;
-          case 'fill': {
-            if (!ctbOperation?.value) {
-              throw new Error('CTB operation value is required');
-            }
-
-            await page.getByLabel(ctbKey).first().click();
-            await page.getByRole('textbox', { name: ctbKey }).fill(ctbOperation.value);
-            break;
-          }
-          default:
-            throw new Error(`Unsupported CTB operation type ${ctbOperatonType} provided`);
-        }
-
-        await page.getByRole('button', { name: 'Finish' }).click();
-        await page.getByRole('button', { name: 'Save' }).click();
-
-        /**
-         * Wait for the server to restart
-         */
-        await waitForRestart(page);
-
-        /**
-         * Navigate back to the article we just modified
-         */
-        await page.getByRole('link', { name: 'Content Manager' }).click();
-        await page.getByRole('link', { name: 'Article' }).click();
-        await page.waitForURL(LIST_URL);
-
-        await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-        await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
-          'English (en)'
-        );
-
-        /**
-         * Attempt to publish through the 'Publish multiple locales' button
-         */
-        await page.getByText('why-i-prefer-football-over-').click();
-        await page.getByRole('button', { name: 'More document actions' }).click();
-        await page.getByText('Publish multiple locales').click();
-
-        /**
-         * We have modified the content and then modifed the schema in a way that
-         * is incompatible. Therefore we should expect the relevant error message
-         * to be displayed.
-         */
-        await expect(page.getByText('1 entry waiting for action')).toBeVisible();
-        await expect(
-          page.getByLabel('Publish multiple locales').getByText(`${field}: ${expectedError}`)
-        ).toBeVisible();
+      /**
+       * This is here because the `fill` method below doesn't immediately update the value
+       * in webkit.
+       */
+      if (browser.browserType().name() === 'webkit') {
+        await page.getByRole('textbox', { name: 'title' }).press('s');
+        await page.getByRole('textbox', { name: 'title' }).press('Delete');
       }
-    );
+
+      /**
+       * Fill the target field with the initial value, there is currently no
+       * validation on this field
+       */
+      await page.getByRole('textbox', { name: field }).fill(initialValue);
+      await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Success:Saved');
+
+      /**
+       * Navigate to the CTB and modify the schema of the article to apply the
+       * validation constraints to the field
+       */
+      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+      await page.getByRole('button', { name: 'Close' }).click(); // TODO improve this
+
+      /**
+       * Edit the field and apply the validation constraint
+       */
+      await page.getByRole('link', { name: 'Article' }).click();
+      await page
+        .getByRole('button', { name: `Edit ${field}` })
+        .first()
+        .click();
+      await page.getByRole('tab', { name: 'Advanced settings' }).click();
+
+      const ctbOperatonType = ctbOperation?.type ?? '';
+      switch (ctbOperatonType) {
+        case 'click':
+          await page.getByLabel(ctbKey).first().click();
+          break;
+        case 'fill': {
+          if (!ctbOperation?.value) {
+            throw new Error('CTB operation value is required');
+          }
+
+          await page.getByLabel(ctbKey).first().click();
+          await page.getByRole('textbox', { name: ctbKey }).fill(ctbOperation.value);
+          break;
+        }
+        default:
+          throw new Error(`Unsupported CTB operation type ${ctbOperatonType} provided`);
+      }
+
+      await page.getByRole('button', { name: 'Finish' }).click();
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      /**
+       * Wait for the server to restart
+       */
+      await waitForRestart(page);
+
+      /**
+       * Navigate back to the article we just modified
+       */
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Article' }).click();
+      await page.waitForURL(LIST_URL);
+
+      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+      await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
+        'English (en)'
+      );
+
+      /**
+       * Attempt to publish through the 'Publish multiple locales' button
+       */
+      await page.getByText('why-i-prefer-football-over-').click();
+      await page.getByRole('button', { name: 'More document actions' }).click();
+      await page.getByRole('menuitem', { name: 'Publish multiple locales', exact: true }).click();
+
+      /**
+       * We have modified the content and then modifed the schema in a way that
+       * is incompatible. Therefore we should expect the relevant error message
+       * to be displayed.
+       */
+      await expect(page.getByText('1 entry waiting for action')).toBeVisible();
+      await expect(
+        page.getByLabel('Publish multiple locales').getByText(`${field}: ${expectedError}`)
+      ).toBeVisible();
+    });
   }
 });

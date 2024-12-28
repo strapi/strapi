@@ -118,6 +118,7 @@ const ExpandIconButton = styled(IconButton)`
   position: absolute;
   bottom: 1.2rem;
   right: 1.2rem;
+  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 `;
 
 /**

@@ -81,7 +81,6 @@ export default (plop: NodePlopAPI) => {
       }, {});
 
       const filePath = getFilePath(answers.destination);
-      // TODO: use basePath instead
       const currentDir = process.cwd();
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 

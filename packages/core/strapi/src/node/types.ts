@@ -14,6 +14,10 @@ interface BaseContext {
    */
   basePath: string;
   /**
+   * internal path to serve the admin panel
+   */
+  adminPath: string;
+  /**
    * The bundler to use for building & watching
    */
   bundler: Pick<Required<BuildOptions>, 'bundler'>['bundler'];

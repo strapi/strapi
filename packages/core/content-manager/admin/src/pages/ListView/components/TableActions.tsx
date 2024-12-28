@@ -53,7 +53,7 @@ const TableActions = ({ document }: TableActionsProps) => {
     <DescriptionComponentRenderer
       props={props}
       descriptions={(plugins['content-manager'].apis as ContentManagerPlugin['config']['apis'])
-        .getDocumentActions()
+        .getDocumentActions('table-row')
         // We explicitly remove the PublishAction from description so we never render it and we don't make unnecessary requests.
         .filter((action) => action.name !== 'PublishAction')}
     >
@@ -125,6 +125,7 @@ const EditAction: DocumentActionComponent = ({ documentId }) => {
 };
 
 EditAction.type = 'edit';
+EditAction.position = 'table-row';
 
 /**
  * Because the icon system is completely broken, we have to do
@@ -227,6 +228,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
 };
 
 CloneAction.type = 'clone';
+CloneAction.position = 'table-row';
 
 /**
  * Because the icon system is completely broken, we have to do

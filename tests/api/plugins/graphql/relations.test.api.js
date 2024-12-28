@@ -699,7 +699,6 @@ describe('Test Graphql Relations API End to End', () => {
     test('Create person', async () => {
       const person = {
         name: 'Chuck Norris',
-        privateName: 'Jean-Eude',
       };
 
       const res = await graphqlQuery({
@@ -841,7 +840,7 @@ describe('Test Graphql Relations API End to End', () => {
       });
     });
 
-    test('Edit person/cars relations removes correctly a car', async () => {
+    test(`Can't edit a private relation `, async () => {
       const newPerson = {
         name: 'Check Norris Junior',
         privateCars: [],
@@ -863,7 +862,10 @@ describe('Test Graphql Relations API End to End', () => {
         },
       });
 
-      expect(mutationRes.statusCode).toBe(200);
+      expect(mutationRes.statusCode).toBe(400);
+      expect(mutationRes.body.errors[0].message).toBe(
+        `Variable "$data" got invalid value { name: "Check Norris Junior", privateCars: [] }; Field "privateCars" is not defined by type "PersonInput".`
+      );
 
       const queryRes = await graphqlQuery({
         query: /* GraphQL */ `
@@ -892,7 +894,7 @@ describe('Test Graphql Relations API End to End', () => {
           car: {
             data: {
               attributes: {
-                person: null,
+                person: { data: { documentId: data.people[0].documentId } },
               },
             },
           },

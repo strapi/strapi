@@ -167,7 +167,7 @@ const HeaderToolbar = () => {
         }}
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-        ).getDocumentActions()}
+        ).getDocumentActions('header')}
       >
         {(actions) => {
           const headerActions = actions.filter((action) => {
@@ -470,6 +470,7 @@ const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model
 };
 
 ConfigureTheViewAction.type = 'configure-the-view';
+ConfigureTheViewAction.position = 'header';
 
 const EditTheModelAction: DocumentActionComponent = ({ model }) => {
   const navigate = useNavigate();
@@ -489,6 +490,7 @@ const EditTheModelAction: DocumentActionComponent = ({ model }) => {
 };
 
 EditTheModelAction.type = 'edit-the-model';
+EditTheModelAction.position = 'header';
 
 const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionType, document }) => {
   const navigate = useNavigate();
@@ -578,6 +580,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
 };
 
 DeleteAction.type = 'delete';
+DeleteAction.position = ['header', 'table-row'];
 
 const DEFAULT_HEADER_ACTIONS = [EditTheModelAction, ConfigureTheViewAction, DeleteAction];
 

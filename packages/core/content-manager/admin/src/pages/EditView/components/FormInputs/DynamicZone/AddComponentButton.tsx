@@ -30,13 +30,13 @@ const AddComponentButton = ({
     >
       <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
-        <AddComponentTitle
+        <Typography
           variant="pi"
           fontWeight="bold"
-          textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
+          textColor={hasError && !isOpen ? 'danger600' : 'neutral600'}
         >
           {children}
-        </AddComponentTitle>
+        </Typography>
       </Flex>
     </StyledButton>
   );
@@ -53,45 +53,15 @@ const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolea
   }
   > path {
     fill: ${({ theme, $hasError }) =>
-      $hasError ? theme.colors.danger600 : theme.colors.neutral600};
+      $hasError ? theme.colors.danger600 : theme.colors.neutral500};
   }
 `;
 
-const AddComponentTitle = styled<TypographyComponent>(Typography)``;
-
 const StyledButton = styled(Button)`
+  padding-left: ${({ theme }) => theme.spaces[3]};
   border-radius: 26px;
-  border-color: ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
   height: 5rem;
-
-  &:hover {
-    ${AddComponentTitle} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
-
-    ${StyledAddIcon} {
-      > circle {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-      > path {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-    }
-  }
-  &:active {
-    ${AddComponentTitle} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
-    ${StyledAddIcon} {
-      > circle {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-      > path {
-        fill: ${({ theme }) => theme.colors.neutral100};
-      }
-    }
-  }
 `;
 
 export { AddComponentButton };

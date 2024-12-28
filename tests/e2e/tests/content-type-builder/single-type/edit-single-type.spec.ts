@@ -91,4 +91,36 @@ test.describe('Edit single type', () => {
 
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
+
+  test('Can change type name', async ({ page }) => {
+    const newname = 'New name';
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+
+    await page.getByRole('textbox', { name: 'Display name' }).fill(newname);
+
+    await page.getByRole('button', { name: 'Finish', exact: true }).click();
+
+    await waitForRestart(page);
+
+    // TODO: fix bug that requires a page refresh to see that content types have been updated
+    await page.reload();
+
+    await expect(page.getByRole('heading', { name: newname })).toBeVisible();
+  });
+
+  test('Can delete type', async ({ page }) => {
+    await page.getByRole('button', { name: 'Edit', exact: true }).click();
+
+    // need to accept the browser modal
+    page.on('dialog', (dialog) => dialog.accept());
+
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+
+    await waitForRestart(page);
+
+    // TODO: fix bug that requires a page refresh to see that content types have been updated
+    await page.reload();
+
+    await expect(page.getByRole('heading', { name: ctName })).not.toBeVisible();
+  });
 });

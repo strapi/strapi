@@ -30,7 +30,7 @@ const goToHistoryPage = async (page: Page) => {
 
   // TODO find out why the history button sometimes doesn't appear. Reloading shouldn't be necessary
   if (await historyButton.isVisible()) {
-    await historyButton.click();
+    await clickAndWait(page, historyButton);
   } else {
     await page.reload();
     await goToHistoryPage(page);
@@ -219,19 +219,22 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByText('Will Kitman').click();
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Coach Beard').click();
+      // Make sure the relation was added before proceeding to save, otherwise we risk saving too quickly without the relation
+      await expect(page.getByRole('link', { name: 'Coach Beard' })).toBeVisible();
       await page.getByRole('button', { name: 'Save' }).click();
-      await page.waitForURL(ARTICLE_EDIT_URL);
+      // Confirm the save was succesful before proceeding, otherwise we may end up on the related page before the relation is established
+      await findAndClose(page, 'Saved Document');
 
       // Delete one of the authors, leaving only Coach Beard
       await clickAndWait(page, page.getByRole('link', { name: 'Will Kitman' }));
       await page.waitForURL(AUTHOR_EDIT_URL);
-      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('button', { name: 'More actions' }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
-      // Go to the the article's history page
+      // Go to the history page
       await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-      await page.getByRole('gridcell', { name: 'Zava retires' }).click();
+      await clickAndWait(page, page.getByRole('gridcell', { name: 'Zava retires' }));
       await page.waitForURL(ARTICLE_EDIT_URL);
       await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
@@ -432,9 +435,7 @@ describeOnCondition(edition === 'EE')('History', () => {
 
       // Create new author
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      // await page.waitForSelector('text=Author');
       await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
-      // await page.waitForSelector('text=Create new entry');
       await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
@@ -457,11 +458,11 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
-      // Go to the the article's history page
+      // Go to the history page
       await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
       await page.waitForURL(HOMEPAGE_EDIT_URL);
       await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await clickAndWait(page, page.getByRole('menuitem', { name: /content history/i }));
       await page.waitForURL(HOMEPAGE_HISTORY_URL);
 
       // Assert that the unknown relation alert is displayed

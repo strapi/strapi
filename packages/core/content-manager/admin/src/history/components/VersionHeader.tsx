@@ -78,7 +78,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           }),
           message: formatMessage({
             id: 'content-manager.restore.success.message',
-            defaultMessage: 'The content of the restored version is not published yet.',
+            defaultMessage: 'A past version of the content was restored.',
           }),
         });
 

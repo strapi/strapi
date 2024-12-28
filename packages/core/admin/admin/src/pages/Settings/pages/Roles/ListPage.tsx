@@ -173,7 +173,7 @@ const ListPage = () => {
             rowCount={rowCount}
             footer={
               canCreate ? (
-                <TFooter onClick={handleNewRoleClick} icon={<Plus />}>
+                <TFooter cursor="pointer" onClick={handleNewRoleClick} icon={<Plus />}>
                   {formatMessage({
                     id: 'Settings.roles.list.button.add',
                     defaultMessage: 'Add new role',
@@ -221,6 +221,7 @@ const ListPage = () => {
             <Tbody>
               {roles?.map((role, index) => (
                 <RoleRow
+                  cursor="pointer"
                   key={role.id}
                   id={role.id}
                   name={role.name}

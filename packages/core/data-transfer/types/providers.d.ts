@@ -6,7 +6,7 @@ import type {
   MaybePromise,
 } from './utils';
 import type { IMetadata } from './common-entities';
-import type { IDiagnosticReporter } from '../src/engine/diagnostic';
+import type { IDiagnosticReporter } from '../src/utils/diagnostic';
 
 export type ProviderType = 'source' | 'destination';
 

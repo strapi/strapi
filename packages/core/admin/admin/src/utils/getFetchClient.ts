@@ -150,6 +150,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     <Param = unknown>(params?: Param) =>
     (url: string) => {
       if (params) {
+        if (typeof params === 'string') {
+          return `${url}?${params}`;
+        }
+
+        /**
+         * TODO V6: Encoding should be enabled in this step
+         * So the rest of the app doesn't have to worry about it,
+         * It's considered a breaking change because it impacts any API request, including the user's custom code
+         */
         const serializedParams = qs.stringify(params, { encode: false });
         return `${url}?${serializedParams}`;
       }

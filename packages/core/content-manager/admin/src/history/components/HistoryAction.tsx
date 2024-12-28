@@ -57,5 +57,6 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
 };
 
 HistoryAction.type = 'history';
+HistoryAction.position = 'header';
 
 export { HistoryAction };

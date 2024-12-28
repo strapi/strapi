@@ -13,7 +13,7 @@ export const registerPreviewRoute = (app) => {
     path: 'preview/*',
     children: [
       {
-        path: ':uid/:documentId/:locale/:status',
+        path: ':collectionType/:uid/:documentId/:locale/:status',
         element: <Preview />,
       },
     ],

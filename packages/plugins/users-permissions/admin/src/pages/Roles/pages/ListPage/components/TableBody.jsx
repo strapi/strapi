@@ -50,7 +50,7 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
   return (
     <Tbody>
       {sortedRoles?.map((role) => (
-        <Tr key={role.name} onClick={() => navigate(role.id.toString())}>
+        <Tr cursor="pointer" key={role.name} onClick={() => navigate(role.id.toString())}>
           <Td width="20%">
             <Typography>{role.name}</Typography>
           </Td>

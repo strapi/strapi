@@ -157,13 +157,13 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
               <Flex gap={2}>
                 <Button variant="tertiary" onClick={handleClose}>
                   {formatMessage({
-                    id: 'components.Blocks.popover.cancel',
+                    id: 'global.cancel',
                     defaultMessage: 'Cancel',
                   })}
                 </Button>
                 <Button disabled={Boolean(inputNotDirty) || isSaveDisabled} onClick={handleSave}>
                   {formatMessage({
-                    id: 'components.Blocks.popover.save',
+                    id: 'global.save',
                     defaultMessage: 'Save',
                   })}
                 </Button>

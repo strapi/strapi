@@ -317,10 +317,7 @@ describe('CM API - Document metadata', () => {
       createdAt: expect.any(String),
       updatedAt: expect.any(String),
     };
-    expect(meta.availableLocales).toEqual(
-      expect.arrayContaining([expect.objectContaining(expectedLocaleData)])
-    );
-
+    expect(meta.availableLocales).toMatchObject([expectedLocaleData]);
     // Ensure no unwanted keys are present
     const unwantedKeys = ['shopName'];
     unwantedKeys.forEach((key) => {

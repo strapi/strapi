@@ -119,7 +119,15 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
   };
 
   return (
-    <Flex tag="fieldset" direction="column" alignItems="stretch" gap={3} borderWidth={0}>
+    <Flex
+      tag="fieldset"
+      direction="column"
+      alignItems="stretch"
+      gap={3}
+      borderWidth={0}
+      maxHeight={'240px'}
+      overflow={'scroll'}
+    >
       <Flex justifyContent="space-between">
         <Typography tag="legend" variant="pi" fontWeight="bold">
           {formatMessage({

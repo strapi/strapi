@@ -239,8 +239,14 @@ const ActionRow = ({
   };
 
   return (
-    <Flex tag="li" background={isGrey ? 'neutral100' : 'neutral0'} paddingBottom={3} paddingTop={3}>
-      <Flex paddingLeft={6} style={{ width: 180 }}>
+    <Flex
+      tag="li"
+      background={isGrey ? 'neutral100' : 'neutral0'}
+      paddingBottom={3}
+      paddingTop={3}
+      justifyContent={'space-evenly'}
+    >
+      <Flex style={{ width: 180 }}>
         <Typography variant="sigma" textColor="neutral600">
           {formatMessage({
             id: 'Settings.permissions.conditions.can',

@@ -18,6 +18,7 @@ const config: UserConfig = {
         'revert',
         'security',
         'test',
+        'future',
       ],
     ],
   },

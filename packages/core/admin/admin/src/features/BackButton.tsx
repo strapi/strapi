@@ -4,7 +4,7 @@ import { Link, LinkProps } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
-import { NavLink, type To, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, type To, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 
 import { createContext } from '../components/Context';
 
@@ -70,6 +70,7 @@ interface HistoryProviderProps {
 
 const HistoryProvider = ({ children }: HistoryProviderProps) => {
   const location = useLocation();
+  const navigationType = useNavigationType();
   const navigate = useNavigate();
   const [state, dispatch] = React.useReducer(reducer, {
     history: [],
@@ -89,8 +90,7 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
 
   const goBack: HistoryContextValue['goBack'] = React.useCallback(() => {
     /**
-     * Perform the browser back action
-     * dispatch the goBack action to keep redux in sync
+     * Perform the browser back action, dispatch the goBack action to keep the state in sync
      * and set the ref to avoid an infinite loop and incorrect state pushing
      */
     navigate(-1);
@@ -119,6 +119,12 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
   React.useLayoutEffect(() => {
     if (isGoingBack.current) {
       isGoingBack.current = false;
+    } else if (navigationType === 'REPLACE') {
+      // Prevent appending to the history when the location changes via a replace:true navigation
+      dispatch({
+        type: 'REPLACE_STATE',
+        payload: { to: location.pathname, search: location.search },
+      });
     } else {
       // this should only occur on link movements, not back/forward clicks
       dispatch({
@@ -126,7 +132,7 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
         payload: { to: location.pathname, search: location.search },
       });
     }
-  }, [dispatch, location.pathname, location.search]);
+  }, [dispatch, location.pathname, location.search, navigationType]);
 
   return (
     <Provider pushState={pushState} goBack={goBack} {...state}>
@@ -138,6 +144,13 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
 type HistoryActions =
   | {
       type: 'PUSH_STATE';
+      payload: {
+        to: string;
+        search: string;
+      };
+    }
+  | {
+      type: 'REPLACE_STATE';
       payload: {
         to: string;
         search: string;
@@ -167,6 +180,12 @@ const reducer = (state: HistoryState, action: HistoryActions) =>
         draft.currentLocation = path;
         draft.currentLocationIndex += 1;
 
+        break;
+      }
+      case 'REPLACE_STATE': {
+        const path = `${action.payload.to}${action.payload.search}`;
+        draft.history = [...state.history.slice(0, state.currentLocationIndex - 1), path];
+        draft.currentLocation = path;
         break;
       }
       case 'GO_BACK': {
@@ -207,6 +226,7 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
     const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
     const goBack = useHistory('BackButton', (state) => state.goBack);
     const history = useHistory('BackButton', (state) => state.history);
+    const currentLocationIndex = useHistory('BackButton', (state) => state.currentLocationIndex);
     const hasFallback = fallback !== '';
     const shouldBeDisabled = disabled || (!canGoBack && !hasFallback);
 
@@ -221,7 +241,7 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
     };
 
     // The link destination from the history. Undefined if there is only 1 location in the history.
-    const historyTo = canGoBack ? history.at(-1) : undefined;
+    const historyTo = canGoBack ? history.at(currentLocationIndex - 2) : undefined;
     // If no link destination from the history, use the fallback.
     const toWithFallback = historyTo ?? fallback;
 

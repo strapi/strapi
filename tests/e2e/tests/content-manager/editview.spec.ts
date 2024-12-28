@@ -250,6 +250,11 @@ test.describe('Edit View', () => {
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
 
+      // Check that we can save with keyboard shortcuts
+      await page.getByRole('textbox', { name: 'title' }).fill('Being an American...');
+      await page.keyboard.press('Control+Enter');
+      await findAndClose(page, 'Saved Document');
+
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'true'

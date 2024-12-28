@@ -250,5 +250,21 @@ describe('Document Service Validations', () => {
         ).rejects.toThrow(errors.ValidationError);
       });
     });
+
+    /**
+     * Lookup is an internal parameter used to filter by locale and status.
+     * It should not be exposed to the public API.
+     */
+    describe('lookup', () => {
+      it('should throw ValidationError', async () => {
+        await expect(
+          strapi.documents(ARTICLE_UID)[methodName]({
+            lookup: {
+              title: 'Hello World',
+            },
+          })
+        ).rejects.toThrow(errors.ValidationError);
+      });
+    });
   });
 });

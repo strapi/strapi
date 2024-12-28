@@ -7,6 +7,7 @@ interface RoleRowProps extends Pick<AdminRole, 'id' | 'name' | 'description' | '
   icons: Array<Required<Pick<IconButtonProps, 'children' | 'label' | 'onClick'>>>;
   rowIndex: number;
   canUpdate?: boolean;
+  cursor?: string;
 }
 
 const RoleRow = ({
@@ -17,6 +18,7 @@ const RoleRow = ({
   icons,
   rowIndex,
   canUpdate,
+  cursor,
 }: RoleRowProps) => {
   const { formatMessage } = useIntl();
   const [, editObject] = icons;
@@ -31,6 +33,7 @@ const RoleRow = ({
 
   return (
     <Tr
+      cursor={cursor}
       aria-rowindex={rowIndex}
       key={id}
       // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
