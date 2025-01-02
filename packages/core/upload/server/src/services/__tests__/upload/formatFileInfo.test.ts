@@ -1,6 +1,17 @@
+import _ from 'lodash';
 import createUploadService from '../../upload';
 
-const uploadService = createUploadService({} as any);
+const defaultConfig = {
+  'plugin::upload': {},
+};
+
+const uploadService = createUploadService({
+  strapi: {
+    config: {
+      get: (path: any, defaultValue: any) => _.get(defaultConfig, path, defaultValue),
+    },
+  },
+} as any);
 
 describe('Upload service', () => {
   beforeAll(() => {
@@ -28,6 +39,36 @@ describe('Upload service', () => {
       expect(await uploadService.formatFileInfo(fileData)).toMatchObject({
         name: 'File Name.png',
         hash: expect.stringContaining('File_Name'),
+        ext: '.png',
+        mime: 'image/png',
+        size: 1000,
+      });
+    });
+
+    test('Has hash without suffix when config.randomSuffix is false', async () => {
+      const fileData = {
+        filename: 'File Name.png',
+        type: 'image/png',
+        size: 1000 * 1000,
+      };
+
+      const randomSuffixDefaultConfig = {
+        'plugin::upload': {
+          randomSuffix: false,
+        },
+      };
+      const randomSuffixUploadService = createUploadService({
+        strapi: {
+          config: {
+            get: (path: any, defaultValue: any) =>
+              _.get(randomSuffixDefaultConfig, path, defaultValue),
+          },
+        },
+      } as any);
+
+      expect(await randomSuffixUploadService.formatFileInfo(fileData)).toMatchObject({
+        name: 'File Name.png',
+        hash: expect.stringMatching('File_Name'),
         ext: '.png',
         mime: 'image/png',
         size: 1000,
