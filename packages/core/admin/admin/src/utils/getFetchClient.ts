@@ -1,3 +1,4 @@
+import Cookies from 'js-cookie';
 import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
 
@@ -58,9 +59,7 @@ const isFetchError = (error: unknown): error is FetchError => {
 };
 
 const getToken = () =>
-  JSON.parse(
-    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN) ?? '""'
-  );
+  JSON.parse(localStorage.getItem(STORAGE_KEYS.TOKEN) ?? Cookies.get(STORAGE_KEYS.TOKEN) ?? '""');
 
 type FetchClient = {
   get: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
