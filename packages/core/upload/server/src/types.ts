@@ -56,6 +56,7 @@ export interface Folder {
 export interface Config {
   provider: string;
   sizeLimit?: number;
+  randomSuffix?: boolean;
   providerOptions: Record<string, unknown>;
   actionOptions: Record<string, unknown>;
 }
