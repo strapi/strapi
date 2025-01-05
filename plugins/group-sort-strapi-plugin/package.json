@@ -1,5 +1,5 @@
 {
-  "version": "0.1.3",
+  "version": "0.1.4",
   "keywords": [],
   "type": "commonjs",
   "exports": {
@@ -80,5 +80,6 @@
     "type": "git",
     "url": "git+https://github.com/giollord/group-sort-strapi-plugin.git",
     "directory": "plugins/group-sort-strapi-plugin"
-  }
+  },
+  "homepage": "https://github.com/giollord/group-sort-strapi-plugin/tree/develop/plugins/group-sort-strapi-plugin"
 }
