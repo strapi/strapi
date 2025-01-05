@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.3",
   "keywords": [],
   "type": "commonjs",
   "exports": {
@@ -75,5 +75,10 @@
   "name": "group-arrange-strapi-plugin",
   "description": "Allows to group and arrange content",
   "license": "MIT",
-  "author": "Barkov Daniil <giollord@gmail.com>"
+  "author": "Barkov Daniil <giollord@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giollord/group-sort-strapi-plugin.git",
+    "directory": "plugins/group-sort-strapi-plugin"
+  }
 }
