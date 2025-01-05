@@ -1,3 +1,5 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
 ############################
 # OS X
 ############################
@@ -10,11 +12,13 @@ Icon
 .Trashes
 ._*
 
+
 ############################
 # Linux
 ############################
 
 *~
+
 
 ############################
 # Windows
@@ -28,6 +32,7 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+
 
 ############################
 # Packages
@@ -57,6 +62,7 @@ $RECYCLE.BIN/
 *.out
 *.pid
 
+
 ############################
 # Logs and databases
 ############################
@@ -64,17 +70,38 @@ $RECYCLE.BIN/
 .tmp
 *.log
 *.sql
-!.github/workflows/db/**/*.sql
 *.sqlite
+*.sqlite3
+
 
 ############################
 # Misc.
 ############################
 
 *#
+ssl
 .idea
 nbproject
+.tsbuildinfo
 .eslintcache
+.env
+
+
+############################
+# Strapi
+############################
+
+public/uploads/*
+!public/uploads/.gitkeep
+
+
+############################
+# Build
+############################
+
+dist
+build
+
 
 ############################
 # Node.js
@@ -85,79 +112,27 @@ lcov.info
 pids
 logs
 results
-build
 node_modules
 .node_history
-package-lock.json
-**/package-lock.json
-!plugins/group-sort-strapi-plugin/package-lock.json
-!docs/package-lock.json
-*.heapsnapshot
 
-############################
-# Tests
-############################
-
-test-apps
-coverage
-
-############################
-# Builds
-############################
-
-packages/generators/app/files/public/
-schema.graphql
-dist
-.nx
-.tsbuildinfo
-.eslintcache
-
-############################
-# Example app
-############################
-
-.dev
-# *.cache
-
-############################
-# Visual Studio Code
-############################
-
-.vscode/
-!.vscode/settings.json
-front-workspace.code-workspace
-.yarnrc
 
 ############################
 # Package managers
 ############################
 
-.pnp.*
 .yarn/*
+!.yarn/cache
+!.yarn/unplugged
 !.yarn/patches
-!.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+.pnp.*
 yarn-error.log
-pnpm-debug.log
-npm-debug.log
+
 
 ############################
-# Playwright
+# Tests
 ############################
-playwright-report
-test-results
-!tests/e2e/data/*.tar
-tests/e2e/.env
-!tests/cli/data/*.tar.gz
-tests/cli/.env
 
-############################
-# Strapi
-############################
-examples/**/types/generated
-.nx/cache
-
-# Ignore yarn.lock inside templates
-templates/yarn.lock
+coverage

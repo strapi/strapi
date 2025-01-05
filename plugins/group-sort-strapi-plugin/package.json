@@ -1,0 +1,79 @@
+{
+  "version": "0.1.0",
+  "keywords": [],
+  "type": "commonjs",
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "strapi-plugin build",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link",
+    "verify": "strapi-plugin verify",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:ts:back": "run -T tsc -p server/tsconfig.json"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@strapi/design-system": "^2.0.0-rc.14",
+    "@strapi/icons": "^2.0.0-rc.14",
+    "react-async": "10.0.1",
+    "react-grid-layout": "1.5.0",
+    "react-intl": "^7.0.4",
+    "react-query": "3.39.3",
+    "react-use": "17.6.0",
+    "yup": "0.32.9"
+  },
+  "devDependencies": {
+    "@strapi/content-manager": "workspace:*",
+    "@strapi/content-type-builder": "workspace:*",
+    "@strapi/sdk-plugin": "^5.2.8",
+    "@strapi/strapi": "workspace:*",
+    "@strapi/types": "workspace:*",
+    "@strapi/typescript-utils": "workspace:*",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-grid-layout": "1.3.5",
+    "koa": "2.15.2",
+    "prettier": "^3.4.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "styled-components": "^6.1.13",
+    "typescript": "^5.7.2"
+  },
+  "peerDependencies": {
+    "@strapi/sdk-plugin": "^5.2.8",
+    "@strapi/strapi": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "styled-components": "^6.1.13"
+  },
+  "strapi": {
+    "kind": "plugin",
+    "name": "group-arrange-strapi-plugin",
+    "displayName": "Group and Arrange",
+    "description": "Allows to group and arrange content"
+  },
+  "name": "group-arrange-strapi-plugin",
+  "description": "Allows to group and arrange content",
+  "license": "MIT",
+  "author": "Barkov Daniil <giollord@gmail.com>"
+}

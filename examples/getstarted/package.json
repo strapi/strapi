@@ -24,6 +24,7 @@
     "@strapi/provider-upload-cloudinary": "workspace:*",
     "@strapi/strapi": "workspace:*",
     "better-sqlite3": "11.3.0",
+    "group-arrange-strapi-plugin": "workspace:*",
     "lodash": "4.17.21",
     "mysql2": "3.9.8",
     "passport-google-oauth2": "0.2.0",
@@ -32,7 +33,6 @@
     "react-dom": "18.3.1",
     "react-intl": "6.6.2",
     "react-router-dom": "6.22.3",
-    "strapi-plugin-workspace-plugin": "workspace:*",
     "styled-components": "6.1.8"
   },
   "engines": {
