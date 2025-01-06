@@ -478,7 +478,9 @@ const VersionInputRenderer = ({
           hint={hint}
           labelAction={customLabelAction}
           disabled={fieldIsDisabled}
-        />
+        >
+          {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
+        </DynamicZone>
       );
     case 'relation':
       return (
