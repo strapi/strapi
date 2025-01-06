@@ -8620,7 +8620,6 @@ __metadata:
     sift: "npm:16.0.1"
     styled-components: "npm:6.1.8"
     typescript: "npm:5.3.2"
-    use-context-selector: "npm:1.4.1"
     vite: "npm:5.2.14"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
@@ -31074,23 +31073,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10c0/8a0867ffd441f358c66d79567970a745cc78ac2f98840a81c1fa749a525e8716116c645497d886a815e1dcf40ad81a107ebd6a7d15fd9ab5925c44a994a1d89a
-  languageName: node
-  linkType: hard
-
-"use-context-selector@npm:1.4.1":
-  version: 1.4.1
-  resolution: "use-context-selector@npm:1.4.1"
-  peerDependencies:
-    react: ">=16.8.0"
-    react-dom: "*"
-    react-native: "*"
-    scheduler: ">=0.19.0"
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-native:
-      optional: true
-  checksum: 10c0/9751181117fdb47049aec8f3a6ccc4f1286e8661c769dbed554d58e478538cb83dac180a62baedcb3f65c99c3ed41d5423a955c9b7c12133b0e4263c30255bff
   languageName: node
   linkType: hard
 
