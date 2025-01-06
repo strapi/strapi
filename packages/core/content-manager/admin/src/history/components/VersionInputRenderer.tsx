@@ -179,10 +179,12 @@ const createInitialValuesForPath = (keyPath: string, value: any) => {
   const keys = keyPath.split('.');
   // The root level object
   const root: Record<string, any> = {};
-  console.log(keyPath, value);
-  // Point the first node to the root
+
+  // Make the first node the root
   let node = root;
   keys.forEach((key, index) => {
+    // Skip prototype pollution keys
+    if (key === '__proto__' || key === 'constructor') return;
     // If it's the last key, set the node value
     if (index === keys.length - 1) {
       node[key] = value;

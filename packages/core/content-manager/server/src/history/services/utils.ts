@@ -347,46 +347,6 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
-  /**
-   * @description
-   * Builds a key path to the next nested component (fieldA.component.fieldB.componentB...)
-   * @returns
-   * The updated key path and the next component's schema
-   */
-  const getNextComponent = (
-    componentKeyPath: string[],
-    componentName: string,
-    componentSchema: Schema.Attribute.AnyAttribute
-  ) => {
-    if (componentSchema.type !== 'component') return;
-
-    // Update the keyPath to include a component that has never been visited
-    const keyPath = [...componentKeyPath];
-    if (!keyPath.includes(componentName)) {
-      // When the attribute key is not already in the keyPath, add it
-      keyPath.push(componentName);
-    }
-
-    // Get the component's schema
-    const component = strapi.getModel(componentSchema.component);
-
-    // Initialize the next component as the current component
-    let nextComponent = component;
-
-    // Loop each attribute in the component schema
-    for (const [key, val] of Object.entries(component.attributes)) {
-      if (val.type === 'component') {
-        // When it's a nested component, update the keyPath to the nested component
-        keyPath.push(key);
-        // Traverse to that component
-        nextComponent = strapi.getModel(val.component);
-      } else {
-        // Exit with the next component
-        return { keyPath, schema: nextComponent };
-      }
-    }
-  };
-
   return {
     getSchemaAttributesDiff,
     getRelationRestoreValue,
@@ -399,6 +359,5 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getDeepPopulate,
     buildMediaResponse,
     buildRelationReponse,
-    getNextComponent,
   };
 };
