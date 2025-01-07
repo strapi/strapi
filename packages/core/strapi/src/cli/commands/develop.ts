@@ -16,6 +16,7 @@ const action = async (options: DevelopCLIOptions) => {
       }
     }
 
+    console.log('Building...', options);
     await nodeDevelop(options);
   } catch (err) {
     handleUnexpectedError(err);

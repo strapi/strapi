@@ -100,6 +100,10 @@ const develop = async ({
      * sure that at least the admin is built for users & they can interact
      * with the application.
      */
+
+    // TODO test with watchAdmin false - I guess if it's built then dev will
+    // fail in the same way as production?
+    // npm run develop -- --no-watch-admin
     if (!watchAdmin) {
       timer.start('createBuildContext');
       const contextSpinner = logger.spinner(`Building build context`).start();
