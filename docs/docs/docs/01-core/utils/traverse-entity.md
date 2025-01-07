@@ -77,8 +77,6 @@ interface VisitorOptions {
 - **`getModel`**: Function to retrieve a schema definition by UID.  
 - **`parent`** *(optional)*: Information about the parent attribute.
 
----
-
 ### VisitorUtils
 ```typescript
 interface VisitorUtils {
@@ -89,8 +87,6 @@ interface VisitorUtils {
 Utility functions to modify the entity:  
 - **`remove(key)`**: Deletes an attribute from the entity.  
 - **`set(key, value)`**: Sets or updates an attribute on the entity.
-
----
 
 ### Path
 ```typescript
@@ -103,8 +99,6 @@ Tracks the traversal path:
 - **`raw`**: The traversal path on the entity
 - **`attribute`**: The same traversal path on the schema if the attibute exists
 
----
-
 ### Parent
 ```typescript
 interface Parent {
@@ -116,7 +110,6 @@ interface Parent {
 ```
 Tracks parent information for the current attribute.
 
----
 
 ### TraverseOptions
 ```typescript
