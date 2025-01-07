@@ -196,6 +196,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           if (options.attribute.type === 'component') {
             // Ids on components throw an error when restoring
             utils.remove('id');
+
+            if (options.attribute.repeatable && options.value === null) {
+              // Repeatable Components should always be an array
+              utils.set(options.key, [] as any);
+            }
           }
 
           if (options.attribute.type === 'dynamiczone') {
