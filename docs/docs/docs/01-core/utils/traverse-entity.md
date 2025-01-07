@@ -100,8 +100,8 @@ interface Path {
 }
 ```
 Tracks the traversal path:
-- **`raw`**: The raw path of the current attribute in the entity.  
-- **`attribute`**: The schema-defined attribute path.
+- **`raw`**: The traversal path on the entity
+- **`attribute`**: The same traversal path on the schema if the attibute exists
 
 ---
 
