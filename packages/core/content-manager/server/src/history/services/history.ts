@@ -198,6 +198,13 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             utils.remove('id');
           }
 
+          if (options.attribute.type === 'dynamiczone') {
+            if (options.value === null) {
+              // Dynamic zones should always be an array
+              utils.set(options.key, [] as any);
+            }
+          }
+
           if (
             options.attribute.type === 'relation' &&
             // TODO: handle polymorphic relations
