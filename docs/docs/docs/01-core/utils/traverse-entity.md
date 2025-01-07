@@ -9,14 +9,10 @@ tags:
 
 The `traverseEntity` function is designed to recursively traverse a data entity based on its schema definition. It provides hooks to execute custom logic at each level of the traversal through the `Visitor` function.
 
----
-
 ## Overview
 
 ### Purpose
 The utility is used for structured data manipulation. It supports various types of attributes, such as relations, components, dynamic zones, and media, allowing seamless traversal and transformation of deeply nested entities.
-
----
 
 ## Function: `traverseEntity`
 
@@ -46,8 +42,6 @@ async function traverseEntity(
 ### Returns
 A `Promise<Data>` that resolves with the transformed entity.
 
----
-
 ## Related Types
 
 ### Visitor
@@ -59,8 +53,6 @@ A function executed during traversal for each attribute.
 **Parameters**:  
 - **`visitorOptions`** *(VisitorOptions)*: Provides details about the current state of traversal.  
 - **`visitorUtils`** *(VisitorUtils)*: Utilities for modifying the entity (e.g., `set`, `remove`).
-
----
 
 ### VisitorOptions
 ```typescript
