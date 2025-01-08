@@ -30,7 +30,7 @@ module.exports = {
   setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: '@strapi/admin-test-utils/environment',
-  prettierPath: require.resolve('prettier-2'),
+  prettierPath: require.resolve('prettier'), // Automatically resolve the latest Prettier version
   transform: {
     '^.+\\.js(x)?$': [
       '@swc/jest',
@@ -40,8 +40,7 @@ module.exports = {
             jsx: true,
             dynamicImport: true,
           },
-          // this should match the minimum supported node.js version
-          target: 'es2020',
+          target: 'es2020', // Matches the minimum supported Node.js version
         },
       },
     ],
@@ -81,11 +80,10 @@ module.exports = {
   testEnvironmentOptions: {
     url: 'http://localhost:1337/admin',
   },
-  // Use `jest-watch-typeahead` version 0.6.5. Newest version 1.0.0 does not support jest@26
-  // Reference: https://github.com/jest-community/jest-watch-typeahead/releases/tag/v1.0.0
+  // Use the latest version of jest-watch-typeahead compatible with Jest
   watchPlugins: ['jest-watch-typeahead/filename', 'jest-watch-typeahead/testname'],
 
-  // NOTE: this doesn't work with projects due to a jest bug, so we also set it
+  // NOTE: This doesn't work with projects due to a Jest bug, so we also set it
   // using jest.setTimeout() in the after-env script
   testTimeout: 60 * 1000,
 };
