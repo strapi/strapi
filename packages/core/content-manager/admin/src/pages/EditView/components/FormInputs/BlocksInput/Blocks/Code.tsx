@@ -2,8 +2,9 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { CodeBlock as CodeBlockIcon } from '@strapi/icons';
+import * as Prism from 'prismjs';
 import { useIntl } from 'react-intl';
-import { Editor, Transforms } from 'slate';
+import { BaseRange, Element, Editor, Node, NodeEntry, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
@@ -12,6 +13,43 @@ import { codeLanguages } from '../utils/constants';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
+// Import the PrismJS theme to highlight the code
+import 'prismjs/themes/prism-solarizedlight.css';
+import './utils/prismLanguages';
+
+type BaseRangeCustom = BaseRange & { className: string };
+
+export const decorateCode = ([node, path]: NodeEntry) => {
+  const ranges: BaseRangeCustom[] = [];
+
+  // make sure it is an Slate Element
+  if (!Element.isElement(node) || node.type !== 'code') return ranges;
+  // transform the Element into a string
+  const text = Node.string(node);
+  const language = codeLanguages.find((lang) => lang.value === node.language);
+  const decorateKey = language?.decorate ?? language?.value;
+
+  const selectedLanguage = Prism.languages[decorateKey || 'plaintext'];
+
+  // create "tokens" with "prismjs" and put them in "ranges"
+  const tokens = Prism.tokenize(text, selectedLanguage);
+  let start = 0;
+  for (const token of tokens) {
+    const length = token.length;
+    const end = start + length;
+    if (typeof token !== 'string') {
+      ranges.push({
+        anchor: { path, offset: start },
+        focus: { path, offset: end },
+        className: `token ${token.type}`,
+      });
+    }
+    start = end;
+  }
+
+  // these will be found in "renderLeaf" in "leaf" and their "className" will be applied
+  return ranges;
+};
 
 const CodeBlock = styled.pre`
   border-radius: ${({ theme }) => theme.borderRadius};
@@ -109,7 +147,6 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
       pressEnterTwiceToExit(editor);
     },
     snippets: ['```'],
-    dragHandleTopMargin: '10px',
   },
 };
 

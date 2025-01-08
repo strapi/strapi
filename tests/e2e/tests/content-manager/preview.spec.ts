@@ -1,12 +1,10 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose, skipCtbTour } from '../../utils/shared';
+import { clickAndWait, findAndClose, skipCtbTour } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 
-const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-
-describeOnCondition(edition === 'EE')('Preview', () => {
+test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
     await resetFiles();
@@ -41,7 +39,8 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await titleInput.fill('New title');
     const previewLink = page.getByRole('link', { name: /open preview/i });
     await expect(previewLink).toBeDisabled();
-    await previewLink.hover();
+    // Can't hover the link directly because of pointer-events:none, so hover the div parent
+    await previewLink.locator('..').hover();
     await expect(
       page.getByRole('tooltip', { name: /please save to open the preview/i })
     ).toBeVisible();
@@ -93,20 +92,19 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
 
     // Check if the iframe is present
-    const iframe = await page.getByTitle('Preview');
+    const iframe = page.getByTitle('Preview');
     expect(iframe).not.toBeNull();
 
     // Check if the iframe is loading the correct URL
-    const src = await iframe.getAttribute('src');
-    expect(src).toContain('/preview/api::article.article/');
-    expect(src).toContain('/en/draft');
+    await expect(iframe).toHaveAttribute('src', /\/preview\/api::article\.article\/.+\/en\/draft$/);
 
     // Navigate to the published tab
     await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
 
-    const updatedIframe = await page.getByTitle('Preview');
-    const srcPublished = await updatedIframe.getAttribute('src');
-    expect(srcPublished).toContain('/preview/api::article.article/');
-    expect(srcPublished).toContain('/en/published');
+    const updatedIframe = page.getByTitle('Preview');
+    await expect(updatedIframe).toHaveAttribute(
+      'src',
+      /\/preview\/api::article\.article\/.+\/en\/published$/
+    );
   });
 });

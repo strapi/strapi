@@ -17,16 +17,27 @@ export const Wrapper = styled.div`
     50% / 20px 20px;
 
   svg {
-    font-size: 4.8rem;
-    height: 26.4rem;
+    height: 26px;
   }
 
   img,
-  video {
+  mux-player {
     margin: 0;
     padding: 0;
     max-height: 26.4rem;
     max-width: 100%;
+  }
+
+  mux-player {
+    --play-button: inline-flex;
+    --mute-button: inline-flex;
+    --pip-button: inline-flex;
+    --fullscreen-button: inline-flex;
+    --playback-rate-button: inline-flex;
+    --volume-range: inline-flex;
+    --time-range: inline-flex;
+    --time-display: inline-flex;
+    --duration-display: inline-flex;
   }
 `;
 
