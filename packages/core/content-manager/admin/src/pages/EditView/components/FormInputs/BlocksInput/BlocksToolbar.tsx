@@ -28,6 +28,7 @@ import { type Block, getEntries, getKeys } from './utils/types';
 const ToolbarWrapper = styled<FlexComponent>(Flex)`
   &[aria-disabled='true'] {
     cursor: not-allowed;
+    background: ${({ theme }) => theme.colors.neutral150};
   }
 `;
 
@@ -40,7 +41,7 @@ const Separator = styled(Toolbar.Separator)`
 const FlexButton = styled<FlexComponent<'button'>>(Flex)`
   // Inherit the not-allowed cursor from ToolbarWrapper when disabled
   &[aria-disabled] {
-    cursor: inherit;
+    cursor: not-allowed;
   }
 
   &[aria-disabled='false'] {
@@ -539,7 +540,7 @@ const BlocksToolbar = () => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper gap={2} padding={2}>
+      <ToolbarWrapper gap={2} padding={2} width="100%">
         <BlocksDropdown />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
