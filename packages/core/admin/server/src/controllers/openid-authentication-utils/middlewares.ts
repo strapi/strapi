@@ -105,7 +105,7 @@ export const redirectWithAuth: Core.MiddlewareHandler = (ctx) => {
   const { user } = ctx.state;
   
   strapi.log.debug({ctx}); //debugging the headers to check if 'x-forward-proto' is being added by the ALB
-  strapi.log.debug({domain}); //debugging the headers to check if 'x-forward-proto' is being added by the ALB
+  strapi.log.debug({domain});
 
   const jwt = getService('token').createJwtToken(user);
 
