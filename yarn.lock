@@ -9275,7 +9275,7 @@ __metadata:
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     openapi-types: "npm:12.1.3"
-    path-to-regexp: "npm:8.1.0"
+    path-to-regexp: "npm:8.2.0"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-intl: "npm:6.6.2"
@@ -25896,10 +25896,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:8.1.0":
-  version: 8.1.0
-  resolution: "path-to-regexp@npm:8.1.0"
-  checksum: 10c0/1c46be3806ab081bedc51eb238fcb026b61b15f19e8924b26e7dad88812dda499efe357a780665dc915dcab3be67213f145f5e2921b8fc8c6c497608d4e092ed
+"path-to-regexp@npm:8.2.0":
+  version: 8.2.0
+  resolution: "path-to-regexp@npm:8.2.0"
+  checksum: 10c0/ef7d0a887b603c0a142fad16ccebdcdc42910f0b14830517c724466ad676107476bba2fe9fffd28fd4c141391ccd42ea426f32bb44c2c82ecaefe10c37b90f5a
   languageName: node
   linkType: hard
 
