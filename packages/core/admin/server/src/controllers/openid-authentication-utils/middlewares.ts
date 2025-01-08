@@ -103,12 +103,15 @@ export const redirectWithAuth: Core.MiddlewareHandler = (ctx) => {
   const redirectUrls = utils.getPrefixedRedirectUrls();
   const domain: string | undefined = strapi.config.get('admin.auth.domain');
   const { user } = ctx.state;
+  
+  strapi.log.debug({ctx}); //debugging the headers to check if 'x-forward-proto' is being added by the ALB
+  strapi.log.debug({domain}); //debugging the headers to check if 'x-forward-proto' is being added by the ALB
 
   const jwt = getService('token').createJwtToken(user);
 
   const isProduction = strapi.config.get('environment') === 'production';
 
-  const cookiesOptions = { httpOnly: false, secure: isProduction, overwrite: true, domain };
+  const cookiesOptions = { httpOnly: true, secure: isProduction, overwrite: true, domain };
 
   const sanitizedUser = getService('user').sanitizeUser(user);
   strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider });
