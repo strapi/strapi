@@ -73,6 +73,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
         }
       }
       break;
+
     case 'date_date':
       // 1) Parse the date from the string (expected "MM/DD/YYYY" or something that new Date(...) can handle)
       const date = new Date(value as string);

@@ -9,7 +9,7 @@ import { InputProps } from './types';
 
 const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, type, ...props }, ref) => {
-    const field = useField<number>(name);
+    const field = useField<number | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
@@ -20,10 +20,12 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
         <NumberInput
           ref={composedRefs}
           onValueChange={(value) => {
-            field.onChange(name, value);
+            // Convert undefined to null to store it in the form state
+            // See https://github.com/strapi/strapi/issues/22533
+            field.onChange(name, value ?? null);
           }}
           step={type === 'float' || type == 'decimal' ? 0.01 : 1}
-          value={field.value}
+          value={field.value ?? undefined}
           {...props}
         />
         <Field.Hint />
