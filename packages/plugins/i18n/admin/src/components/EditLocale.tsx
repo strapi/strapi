@@ -100,7 +100,7 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
         ...data,
       });
 
-      if ('error' in res) {
+      if (res.error) {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else {

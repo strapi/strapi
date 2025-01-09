@@ -87,7 +87,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
       params: { releaseId: values.releaseId },
     });
 
-    if ('data' in response) {
+    if (response.data) {
       // Handle success
 
       const notificationMessage = formatMessage(

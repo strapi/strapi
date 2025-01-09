@@ -145,7 +145,7 @@ const ReleaseDetailsLayout = ({
   const handlePublishRelease = (id: string) => async () => {
     const response = await publishRelease({ id });
 
-    if ('data' in response) {
+    if (response.data) {
       // When the response returns an object with 'data', handle success
       toggleNotification({
         type: 'success',

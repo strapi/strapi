@@ -40,6 +40,7 @@ export const getStoredToken = (): string | null => {
 
 const adminSlice = createSlice({
   name: 'admin',
+  reducerPath: 'admin_app',
   initialState: () => {
     return {
       language: {
@@ -51,10 +52,13 @@ const adminSlice = createSlice({
         availableThemes: [],
         currentTheme: localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system',
       },
-      token: null,
+      token: getStoredToken(),
     } as AppState;
   },
   reducers: {
+    initialize(state, action: PayloadAction<AppState>) {
+      return action.payload;
+    },
     setAppTheme(state, action: PayloadAction<ThemeName>) {
       state.theme.currentTheme = action.payload;
       window.localStorage.setItem(THEME_LOCAL_STORAGE_KEY, action.payload);
@@ -94,8 +98,8 @@ const adminSlice = createSlice({
 
 const reducer = adminSlice.reducer;
 
-export const { setAppTheme, setAvailableThemes, setLocale, setToken, logout, login } =
+export const { initialize, setAppTheme, setAvailableThemes, setLocale, setToken, logout, login } =
   adminSlice.actions;
 
-export { reducer, THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY };
+export { adminSlice, reducer, THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY };
 export type { AppState, ThemeName };

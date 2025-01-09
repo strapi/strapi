@@ -74,6 +74,7 @@ export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
 export * from './services/api';
+export { store } from './core/store/configure';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 
 /**

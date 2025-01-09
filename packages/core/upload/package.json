@@ -66,7 +66,7 @@
     "date-fns": "2.30.0",
     "formik": "2.4.5",
     "fs-extra": "11.2.0",
-    "immer": "9.0.21",
+    "immer": "10.1.1",
     "koa-range": "0.3.0",
     "koa-static": "5.0.0",
     "lodash": "4.17.21",

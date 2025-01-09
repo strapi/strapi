@@ -24,6 +24,7 @@ import {
   LANGUAGE_LOCAL_STORAGE_KEY,
   ThemeName,
   getStoredToken,
+  initialize,
 } from './reducer';
 import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
@@ -438,18 +439,16 @@ class StrapiApp {
 
     this.store = configureStore(
       {
-        admin_app: {
-          permissions: merge({}, ADMIN_PERMISSIONS_CE, ADMIN_PERMISSIONS_EE),
-          theme: {
-            availableThemes: [],
-            currentTheme: (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system') as ThemeName,
-          },
-          language: {
-            locale: localeNames[locale] ? locale : 'en',
-            localeNames,
-          },
-          token: getStoredToken(),
+        permissions: merge({}, ADMIN_PERMISSIONS_CE, ADMIN_PERMISSIONS_EE),
+        theme: {
+          availableThemes: [],
+          currentTheme: (localStorage.getItem(THEME_LOCAL_STORAGE_KEY) || 'system') as ThemeName,
         },
+        language: {
+          locale: localeNames[locale] ? locale : 'en',
+          localeNames,
+        },
+        token: getStoredToken(),
       },
       this.middlewares,
       this.reducers

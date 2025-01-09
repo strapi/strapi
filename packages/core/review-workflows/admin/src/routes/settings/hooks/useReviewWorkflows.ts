@@ -54,7 +54,7 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
       try {
         const res = await createWorkflow({ data });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(res.error),
@@ -87,7 +87,7 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
       try {
         const res = await updateWorkflow({ id, data });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(res.error),
@@ -120,7 +120,7 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
       try {
         const res = await deleteWorkflow({ id });
 
-        if ('error' in res) {
+        if (res.error) {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(res.error),

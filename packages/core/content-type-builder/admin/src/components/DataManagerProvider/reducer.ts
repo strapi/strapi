@@ -1,4 +1,4 @@
-import produce, { current } from 'immer';
+import { produce, current } from 'immer';
 import get from 'lodash/get';
 import set from 'lodash/set';
 

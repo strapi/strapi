@@ -123,7 +123,7 @@ const AuthProvider = ({
   React.useEffect(() => {
     if (token && !_disableRenewToken) {
       renewTokenMutation({ token }).then((res) => {
-        if ('data' in res) {
+        if (res.data) {
           dispatch(
             loginAction({
               token: res.data.token,
@@ -169,7 +169,7 @@ const AuthProvider = ({
        * There will always be a `data` key in the response
        * because if something fails, it will throw an error.
        */
-      if ('data' in res) {
+      if (res.data) {
         const { token } = res.data;
 
         dispatch(

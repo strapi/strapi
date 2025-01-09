@@ -9,7 +9,7 @@ const extendCTBAttributeInitialDataMiddleware: () => Middleware<
 > = () => {
   return ({ getState }) =>
     (next) =>
-    (action) => {
+    (action: any) => {
       const enhanceAction = () => {
         // the block here is to catch the error when trying to access the state
         // of the ctb when the plugin is not mounted

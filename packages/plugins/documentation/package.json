@@ -54,7 +54,7 @@
     "watch": "strapi-plugin watch"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "1.9.7",
+    "@reduxjs/toolkit": "2.5.0",
     "@strapi/admin": "5.6.0",
     "@strapi/design-system": "2.0.0-rc.14",
     "@strapi/icons": "2.0.0-rc.14",
@@ -63,7 +63,7 @@
     "cheerio": "^1.0.0",
     "formik": "2.4.5",
     "fs-extra": "11.2.0",
-    "immer": "9.0.21",
+    "immer": "10.1.1",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "path-to-regexp": "8.2.0",
