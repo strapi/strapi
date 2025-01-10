@@ -5201,14 +5201,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:1.38.1":
-  version: 1.38.1
-  resolution: "@playwright/test@npm:1.38.1"
+"@playwright/test@npm:1.49.1":
+  version: 1.49.1
+  resolution: "@playwright/test@npm:1.49.1"
   dependencies:
-    playwright: "npm:1.38.1"
+    playwright: "npm:1.49.1"
   bin:
     playwright: cli.js
-  checksum: 10c0/9b4220ca741d5226bd4398bd0f048ba5b17b1ec870e72f6b046d569c7dc16028592eeb1ac76131dcade267d380401b5569596fcf74cf47350c01d04927ec92d0
+  checksum: 10c0/2fca0bb7b334f7a23c7c5dfa5dbe37b47794c56f39b747c8d74a2f95c339e7902a296f2f1dd32c47bdd723cfa92cee05219f1a5876725dc89a1871b9137a286d
   languageName: node
   linkType: hard
 
@@ -26316,27 +26316,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.38.1":
-  version: 1.38.1
-  resolution: "playwright-core@npm:1.38.1"
+"playwright-core@npm:1.49.1":
+  version: 1.49.1
+  resolution: "playwright-core@npm:1.49.1"
   bin:
     playwright-core: cli.js
-  checksum: 10c0/23958aa6f30e2de85e3cd256b7b105ab75108ac1c437a405cb78a3579ae8bbc5d79a5d6136dce4914f9dff8a0af1be549d02d3e857aaec5c30b90d3d1ed72083
+  checksum: 10c0/990b619c75715cd98b2c10c1180a126e3a454b247063b8352bc67792fe01183ec07f31d30c8714c3768cefed12886d1d64ac06da701f2baafc2cad9b439e3919
   languageName: node
   linkType: hard
 
-"playwright@npm:1.38.1":
-  version: 1.38.1
-  resolution: "playwright@npm:1.38.1"
+"playwright@npm:1.49.1":
+  version: 1.49.1
+  resolution: "playwright@npm:1.49.1"
   dependencies:
     fsevents: "npm:2.3.2"
-    playwright-core: "npm:1.38.1"
+    playwright-core: "npm:1.49.1"
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 10c0/c4d94e38f2bc37e547bdfd96ae09e317d7b5fb039710837ab477d3b12be2430091b93122da2658d096c7afc7838cad0b864c1957441b517bb8ededef3b16d446
+  checksum: 10c0/2368762c898920d4a0a5788b153dead45f9c36c3f5cf4d2af5228d0b8ea65823e3bbe998877950a2b9bb23a211e4633996f854c6188769dc81a25543ac818ab5
   languageName: node
   linkType: hard
 
@@ -29481,7 +29481,7 @@ __metadata:
     "@babel/core": "npm:^7.20.12"
     "@babel/eslint-parser": "npm:^7.19.1"
     "@babel/preset-react": "npm:7.18.6"
-    "@playwright/test": "npm:1.38.1"
+    "@playwright/test": "npm:1.49.1"
     "@strapi/admin-test-utils": "workspace:*"
     "@strapi/eslint-config": "npm:0.2.0"
     "@swc/cli": "npm:0.1.62"
