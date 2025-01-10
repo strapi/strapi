@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.2",
+    "@types/debug": "4.1.12",
     "@types/fs-extra": "11.0.4",
     "eslint-config-custom": "5.7.0",
     "tsconfig": "5.7.0"
