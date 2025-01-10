@@ -5,21 +5,29 @@ cd "$(dirname "$0")/.."
 
 set -e
 
-version=""
+version=$VERSION
+distTag=$DIST_TAG
 
-echo "Please enter the version you want to publish"
-read -r version
+if [[ -z "$version" ]]; then
+  echo "Please enter the version you want to publish"
+  read -r version
+fi
+
+if [[ -z "$distTag" ]]; then
+  echo "Please enter the dist-tag you want to publish with"
+  read -r distTag
+fi
 
 # publish packages
 ./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles
 ./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
-./node_modules/.bin/lerna publish --no-push --force-publish --dist-tag latest --exact "$version"
+yarn release --version "$version" --tag "$distTag" "$@"
 
-# push main branch
-git push origin HEAD
+# # push main branch
+# git push origin HEAD
 
-# push tag
-git push origin v"$version"
+# # push tag
+# git push origin v"$version"
 
-# run changelog cli
-npx @sclt/program-changelog
+# # run changelog cli
+# npx @sclt/program-changelog
