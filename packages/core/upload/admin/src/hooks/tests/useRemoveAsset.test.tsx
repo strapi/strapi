@@ -1,3 +1,4 @@
+/* eslint-disable check-file/filename-naming-convention */
 import { NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { act, renderHook, waitFor } from '@testing-library/react';
@@ -38,7 +39,7 @@ const client = new QueryClient({
   },
 });
 
-function ComponentFixture({ children }: { children: React.ReactNode }) {
+const ComponentFixture = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={client}>
       <DesignSystemProvider>
@@ -50,7 +51,7 @@ function ComponentFixture({ children }: { children: React.ReactNode }) {
       </DesignSystemProvider>
     </QueryClientProvider>
   );
-}
+};
 
 function setup(...args: Parameters<typeof useRemoveAsset>) {
   return new Promise((resolve) => {
@@ -69,6 +70,7 @@ describe('useRemoveAsset', () => {
     const { toggleNotification } = useNotification();
     const {
       result: { current },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } = (await setup(jest.fn)) as { result: { current: any } };
     const { removeAsset } = current;
 
@@ -89,6 +91,7 @@ describe('useRemoveAsset', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } = (await setup(jest.fn)) as { result: { current: any } };
     const { removeAsset } = current;
 
@@ -116,6 +119,7 @@ describe('useRemoveAsset', () => {
     const {
       result: { current },
       // @ts-expect-error We are checking the error case
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } = (await setup()) as { result: { current: any } };
     const { removeAsset } = current;
 

@@ -1,7 +1,4 @@
 import { test, expect, type Page, type Locator } from '@playwright/test';
-import { waitForRestart } from './restart';
-import pluralize from 'pluralize';
-import { kebabCase } from 'lodash/fp';
 
 type NavItem = string | [string, string] | Locator;
 
@@ -61,11 +58,9 @@ export const navToHeader = async (page: Page, navItems: NavItem[], headerText: s
  * Skip the tour if the modal is visible
  */
 export const skipCtbTour = async (page: Page) => {
-  const modalSelector = 'role=button[name="Skip the tour"]';
-
   try {
-    await page.waitForSelector(modalSelector, { timeout: 1000 });
-    const modal = page.locator(modalSelector);
+    const modal = await page.getByRole('button', { name: 'Skip the tour' });
+
     if (await modal.isVisible()) {
       await modal.click();
       await expect(modal).not.toBeVisible();
@@ -83,10 +78,7 @@ export const skipCtbTour = async (page: Page) => {
  */
 export const clickAndWait = async (page: Page, locator: Locator) => {
   await locator.click();
-
-  if (page.context().browser()?.browserType().name() === 'webkit') {
-    await page.waitForLoadState('networkidle');
-  }
+  await page.waitForLoadState('networkidle');
 };
 
 /**
@@ -114,74 +106,280 @@ export const findAndClose = async (
   }
 };
 
-export const createSingleType = async (page, data) => {
-  const { name, singularId, pluralId } = data;
+/**
+ * Finds a specific cell in a table by matching both the row text and the column header text.
+ *
+ * This function performs the following steps:
+ * 1. Finds a row in the table that contains the specified `rowText` (case-insensitive).
+ * 2. Finds the column header in the table that contains the specified `columnText` (case-insensitive).
+ * 3. Identifies the cell in the located row that corresponds to the column where the header matches the `columnText`.
+ * 4. Returns the found cell for further interactions or assertions.
+ *
+ * @param {Page} page - The Playwright `Page` object representing the browser page.
+ * @param {string} rowText - The text to match in the row (case-insensitive).
+ * @param {string} columnText - The text to match in the column header (case-insensitive).
+ *
+ * @returns {Locator} - A Playwright Locator object representing the intersecting cell.
+ *
+ * @throws Will throw an error if the row or column header is not found, or if the cell is not visible.
+ *
+ * @warning This function assumes a standard table structure where each row has an equal number of cells,
+ *          and no cells are merged (`colspan` or `rowspan`). If the table contains merged cells,
+ *          this method may return incorrect results or fail to locate the correct cell.
+ *          Matches the header exactly (cell contains only exact text)
+ *          Matches the row loosely (finds a row containing that text somewhere)
+ */
+export const findByRowColumn = async (page: Page, rowText: string, columnText: string) => {
+  // Locate the row that contains the rowText
+  // This just looks for the text in a row, so ensure that it is specific enough
+  const row = page.locator('tr').filter({ hasText: new RegExp(`${rowText}`) });
+  await expect(row).toBeVisible();
 
-  await page.getByRole('button', { name: 'Create new single type' }).click();
+  // Locate the column header that matches the columnText
+  // This assumes that header is exact (cell only contains that text and nothing else)
+  const header = page.locator('thead th').filter({ hasText: new RegExp(`^${columnText}$`, 'i') });
+  await expect(header).toBeVisible();
 
-  await expect(page.getByRole('heading', { name: 'Create a single type' })).toBeVisible();
+  // Find the index of the matching column header
+  const columnIndex = await header.evaluate((el) => Array.from(el.parentNode.children).indexOf(el));
 
-  const displayName = page.getByLabel('Display name');
-  await displayName.fill(name);
+  // Find the cell in the located row that corresponds to the matching column index
+  const cell = row.locator(`td:nth-child(${columnIndex + 1})`);
+  await expect(cell).toBeVisible();
 
-  const singularIdField = page.getByLabel('API ID (Singular)');
-  await expect(singularIdField).toHaveValue(singularId || kebabCase(name));
-  if (singularId) {
-    singularIdField.fill(singularId);
+  // Return the found cell
+  return cell;
+};
+/**
+ * WebKit-specific implementation of ensureElementsInViewport.
+ * Ensures that two elements are fully visible in the viewport by calculating their bounding boxes
+ * and adjusting the viewport if necessary.
+ *
+ * @param {object} page - The Playwright page instance.
+ * @param {object} source - Locator for the source element.
+ * @param {object} target - Locator for the target element.
+ */
+export const ensureElementsInViewportWebkit = async (page, source, target) => {
+  const currentViewport = await page.viewportSize();
+  console.log('Current viewport size:', currentViewport);
+
+  let combinedBox = { top: Infinity, bottom: -Infinity, left: Infinity, right: -Infinity };
+
+  // Helper function to fetch the absolute bounding box
+  const calculateBoundingBox = async (element) => {
+    return await element.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+      return {
+        top: rect.top + scrollTop,
+        bottom: rect.bottom + scrollTop,
+        left: rect.left + scrollLeft,
+        right: rect.right + scrollLeft,
+        width: rect.width,
+        height: rect.height,
+      };
+    });
+  };
+
+  // Calculate the combined bounding box for both elements
+  const elements = [source, target];
+  for (const [index, element] of elements.entries()) {
+    console.log(`Processing element ${index + 1}/${elements.length}`);
+    const box = await calculateBoundingBox(element);
+
+    if (!box) {
+      console.error(`Bounding box for element ${index + 1} could not be determined.`);
+      continue;
+    }
+
+    console.log(`Absolute bounding box for element ${index + 1}:`, box);
+
+    combinedBox = {
+      top: Math.min(combinedBox.top, box.top),
+      bottom: Math.max(combinedBox.bottom, box.bottom),
+      left: Math.min(combinedBox.left, box.left),
+      right: Math.max(combinedBox.right, box.right),
+    };
+    console.log(`Updated combined bounding box after element ${index + 1}:`, combinedBox);
   }
 
-  const pluralIdField = page.getByLabel('API ID (Plural)');
-  await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
-  if (pluralId) {
-    pluralIdField.fill(pluralId);
+  // Calculate the required scroll position
+  const scrollToY = Math.max(
+    0,
+    combinedBox.top - (currentViewport.height - (combinedBox.bottom - combinedBox.top)) / 2
+  );
+  const scrollToX = Math.max(0, combinedBox.left);
+  console.log('Scrolling to position:', { top: scrollToY, left: scrollToX });
+
+  // Scroll the viewport
+  await page.evaluate(
+    ({ top, left }) => {
+      console.log('Before scroll:', { scrollX: window.scrollX, scrollY: window.scrollY });
+      window.scrollTo(left, top);
+      console.log('After scroll:', { scrollX: window.scrollX, scrollY: window.scrollY });
+    },
+    { top: scrollToY, left: scrollToX }
+  );
+
+  // Validate visibility of each element
+  for (const [index, element] of elements.entries()) {
+    console.log(`Validating visibility of element ${index + 1}`);
+    const rect = await element.evaluate((el) => {
+      const rect = el.getBoundingClientRect();
+      const isVisible =
+        rect.top >= 0 &&
+        rect.bottom <= window.innerHeight &&
+        rect.left >= 0 &&
+        rect.right <= window.innerWidth;
+
+      console.log('Element rect:', rect, 'Is visible:', isVisible);
+      return isVisible;
+    });
+
+    if (!rect) {
+      console.warn(`Element ${index + 1} is NOT fully visible.`);
+    } else {
+      console.log(`Element ${index + 1} is fully visible.`);
+    }
   }
 
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  // Create an initial text field for it
-  await expect(page.getByText('Select a field for your single type')).toBeVisible();
-  await page.getByText('Small or long text').click();
-  await page.getByLabel('Name', { exact: true }).fill('myattribute');
-  await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
-
-  await waitForRestart(page);
-
-  await expect(page.getByRole('heading', { name })).toBeVisible();
+  console.log('ensureElementsInViewportWebkit completed.');
 };
 
-export const createCollectionType = async (page, data) => {
-  const { name, singularId, pluralId } = data;
+/**
+ * Ensures that the given elements are fully visible within the viewport.
+ * Resizes the viewport and scrolls if required.
+ *
+ * @param {object} page - The Playwright page instance.
+ * @param {object} source - Locator for the source element.
+ * @param {object} target - Locator for the target element.
+ */
+export const ensureElementsInViewport = async (page, source, target) => {
+  // Detect the browser type
+  const browserType = page.context().browser()?.browserType().name();
 
-  await page.getByRole('button', { name: 'Create new collection type' }).click();
-
-  await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
-
-  const displayName = page.getByLabel('Display name');
-  await displayName.fill(name);
-
-  const singularIdField = page.getByLabel('API ID (Singular)');
-  await expect(singularIdField).toHaveValue(singularId || kebabCase(name));
-  if (singularId) {
-    singularIdField.fill(singularId);
+  // Short-circuit to WebKit-specific implementation
+  if (browserType === 'webkit') {
+    return ensureElementsInViewportWebkit(page, source, target);
   }
 
-  const pluralIdField = page.getByLabel('API ID (Plural)');
-  await expect(pluralIdField).toHaveValue(pluralId || pluralize(kebabCase(name)));
-  if (pluralId) {
-    pluralIdField.fill(pluralId);
+  const currentViewport = await page.viewportSize();
+
+  // Helper to check if an element is fully visible in the viewport
+  const isElementFullyVisible = async (element) => {
+    const box = await element.boundingBox();
+    if (!box) return false;
+
+    const viewport = await page.viewportSize();
+    return box.y >= 0 && box.y + box.height <= viewport.height;
+  };
+
+  // Check if source and target are fully visible
+  const sourceVisible = await isElementFullyVisible(source);
+  const targetVisible = await isElementFullyVisible(target);
+
+  if (!sourceVisible || !targetVisible) {
+    const sourceBox = await source.boundingBox();
+    const targetBox = await target.boundingBox();
+
+    if (sourceBox && targetBox) {
+      // Determine the bounding box that contains both elements
+      const topElementY = Math.min(sourceBox.y, targetBox.y);
+      const bottomElementY = Math.max(
+        sourceBox.y + sourceBox.height,
+        targetBox.y + targetBox.height
+      );
+
+      const requiredHeight = bottomElementY - topElementY;
+
+      // Resize viewport if necessary
+      if (requiredHeight > currentViewport.height) {
+        await page.setViewportSize({
+          width: currentViewport.width,
+          height: requiredHeight,
+        });
+      }
+
+      // Scroll to the top element
+      await page.evaluate((y) => {
+        window.scrollTo(0, y);
+      }, topElementY);
+    } else {
+      throw new Error('Bounding boxes for source or target could not be determined.');
+    }
+  }
+};
+
+/**
+ * Smoothly drags a draggable element within a source <li> to just above a target <li>.
+ * Automatically detects WebKit and uses a WebKit-specific implementation if needed.
+ *
+ * @param {object} page - The Playwright page instance.
+ * @param {object} options - Options for the drag operation.
+ * @param {object} options.source - Locator for the source <li> (containing the draggable element).
+ * @param {object} options.target - Locator for the target <li> (drop destination).
+ * @param {number} [options.steps=5] - Number of steps for smooth movement.
+ * @param {number} [options.delay=10] - Delay in milliseconds between steps.
+ */
+export const dragElementAbove = async (page, options) => {
+  // Extract options
+  const { source, target, steps = 5, delay = 20 } = options;
+
+  // Ensure both elements are fully visible in the viewport
+  await ensureElementsInViewport(page, source, target);
+
+  // Locate the draggable button within the source <li>
+  const draggable = source.locator('[draggable="true"]');
+
+  // Get bounding boxes of the draggable button and target <li>
+  const sourceBox = await draggable.boundingBox();
+  const targetBox = await target.boundingBox();
+
+  if (sourceBox && targetBox) {
+    // Calculate start and end positions
+    const startX = sourceBox.x + sourceBox.width / 2;
+    const startY = sourceBox.y + sourceBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y - 1; // 1 pixel above the target
+
+    // Move to the starting position and press the mouse
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+
+    // Incrementally move the mouse for smooth dragging
+    for (let i = 1; i <= steps; i++) {
+      const intermediateX = startX + (endX - startX) * (i / steps);
+      const intermediateY = startY + (endY - startY) * (i / steps);
+      await page.mouse.move(intermediateX, intermediateY);
+      await page.waitForTimeout(delay);
+    }
+
+    // Release the mouse to drop the element
+    await page.mouse.up();
+  } else {
+    throw new Error('Bounding boxes for source or target could not be determined.');
+  }
+};
+
+/**
+ * Returns true if the first element appears before the second element in the DOM.
+ *
+ * @param {object} firstLocator - Playwright locator for the first element.
+ * @param {object} secondLocator - Playwright locator for the second element.
+ * @returns {Promise<boolean>} - Returns true if the first element is before the second element.
+ */
+export const isElementBefore = async (firstLocator, secondLocator) => {
+  const firstHandle = await firstLocator.elementHandle();
+  const secondHandle = await secondLocator.elementHandle();
+
+  if (!firstHandle || !secondHandle) {
+    throw new Error('One or both elements could not be found.');
   }
 
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  // Create an initial text field for it
-  await expect(page.getByText('Select a field for your collection type')).toBeVisible();
-  await page.getByText('Small or long text').click();
-  await page.getByLabel('Name', { exact: true }).fill('myattribute');
-  await page.getByRole('button', { name: 'Finish' }).click();
-  await page.getByRole('button', { name: 'Save' }).click();
-
-  await waitForRestart(page);
-
-  await expect(page.getByRole('heading', { name })).toBeVisible();
+  // Compare positions in the DOM and return a boolean
+  return await firstHandle.evaluate((first, second) => {
+    return !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
+  }, secondHandle);
 };

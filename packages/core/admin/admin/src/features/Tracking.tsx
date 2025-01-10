@@ -148,6 +148,7 @@ interface EventWithoutProperties {
     | 'didSelectContentTypeFieldSettings'
     | 'didSelectContentTypeSettings'
     | 'didEditAuthenticationProvider'
+    | 'didRestoreHistoryVersion'
     | 'hasClickedCTBAddFieldBanner'
     | 'removeComponentFromDynamicZone'
     | 'willAddMoreFieldToContentType'
@@ -171,6 +172,7 @@ interface EventWithoutProperties {
     | 'willEditEditLayout'
     | 'willEditEmailTemplates'
     | 'willEditEntryFromButton'
+    | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
     | 'willEditFieldOfContentType'
     | 'willEditMediaLibraryConfig'
@@ -186,7 +188,6 @@ interface EventWithoutProperties {
     | 'willSaveComponent'
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
-    | 'willOpenPreview'
     | 'didEditFieldNameOnContentType'
     | 'didCreateRelease';
   properties?: never;
@@ -224,7 +225,7 @@ interface DidEditMediaLibraryElementsEvent {
   name: 'didEditMediaLibraryElements';
   properties: MediaEvents['properties'] & {
     type: string;
-    changeLocation: string;
+    changeLocation: string | boolean;
   };
 }
 
@@ -363,7 +364,8 @@ type EventsWithProperties =
   | UpdateEntryEvents
   | WillModifyTokenEvent
   | WillNavigateEvent
-  | DidPublishRelease;
+  | DidPublishRelease
+  | MediaEvents;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

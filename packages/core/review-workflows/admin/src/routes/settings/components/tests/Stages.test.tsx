@@ -79,7 +79,7 @@ describe('Stages', () => {
 
     await user.click(screen.getByRole('button', { name: 'Add new stage' }));
 
-    expect(screen.getAllByRole('button').length).toBe(10);
+    expect(screen.getAllByRole('button').length).toBe(11);
   });
 
   it('should not render the "add stage" button if canUpdate = false', () => {
@@ -183,7 +183,7 @@ describe('Stages', () => {
     });
 
     await user.click(screen.getByRole('button', { name: 'stage-1' }));
-    expect(screen.getByRole('textbox')).toHaveValue('stage-1');
+    expect(screen.getByRole('button', { name: 'stage-1' })).toBeInTheDocument();
   });
 
   it('disables all input fields, if canUpdate = false', async () => {

@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Writable, PassThrough } from 'stream';
-import type { Core } from '@strapi/types';
+import { type Core } from '@strapi/types';
 
 import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';
@@ -34,6 +34,10 @@ export interface PushHandler extends Handler {
    * Holds all the stages' stream for the current transfer handler (one registry per connection)
    */
   streams?: { [stage in TransferStage]?: Writable };
+
+  stats: {
+    [stage in Exclude<TransferStage, 'schemas'>]: Protocol.Client.Stats;
+  };
 
   /**
    * Holds all the transferred assets for the current transfer handler (one registry per connection)
@@ -121,7 +125,26 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   verifyAuth(this: PushHandler) {
     return proto.verifyAuth.call(this, TRANSFER_KIND);
   },
-
+  onInfo(message) {
+    this.diagnostics?.report({
+      details: {
+        message,
+        origin: 'push-handler',
+        createdAt: new Date(),
+      },
+      kind: 'info',
+    });
+  },
+  onWarning(message) {
+    this.diagnostics?.report({
+      details: {
+        message,
+        createdAt: new Date(),
+        origin: 'push-handler',
+      },
+      kind: 'warning',
+    });
+  },
   cleanup(this: PushHandler) {
     proto.cleanup.call(this);
 
@@ -219,7 +242,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     // Regular command message (init, end, status)
     if (type === 'command') {
       const { command } = msg;
-
+      this.onInfo(`received command:${command} uuid:${uuid}`);
       await this.executeAndRespond(uuid, () => {
         this.assertValidTransferCommand(command);
 
@@ -227,13 +250,13 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
         if (command === 'status') {
           return this.status();
         }
-
         return this[command](msg.params);
       });
     }
 
     // Transfer message (the transfer must be init first)
     else if (type === 'transfer') {
+      this.onInfo(`received transfer action:${msg.action} step:${msg.kind} uuid:${uuid}`);
       await this.executeAndRespond(uuid, async () => {
         await this.verifyAuth();
 
@@ -313,6 +336,8 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       await this.createWritableStreamForStep(stage);
 
+      this.stats[stage] = { started: 0, finished: 0 };
+
       return { ok: true };
     }
 
@@ -332,12 +357,17 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       }
 
       // For all other steps
-      await Promise.all(msg.data.map((item) => writeAsync(stream, item)));
+      await Promise.all(
+        msg.data.map(async (item) => {
+          this.stats[stage].started += 1;
+          await writeAsync(stream, item);
+          this.stats[stage].finished += 1;
+        })
+      );
     }
 
     if (msg.action === 'end') {
       this.unlockTransferStep(stage);
-
       const stream = this.streams?.[stage];
 
       if (stream && !stream.closed) {
@@ -348,7 +378,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       delete this.streams?.[stage];
 
-      return { ok: true };
+      return { ok: true, stats: this.stats[stage] };
     }
   },
 
@@ -369,7 +399,9 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
       this.flow?.set(step);
     }
-
+    if (action === 'bootstrap') {
+      return this.provider?.[action](this.diagnostics);
+    }
     return this.provider?.[action]();
   },
 
@@ -390,6 +422,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       }
 
       if (action === 'start') {
+        this.stats.assets.started += 1;
         this.assets[assetID] = { ...item.data, stream: new PassThrough() };
         writeAsync(assetsStream, this.assets[assetID]);
       }
@@ -407,6 +440,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
           const { stream: assetStream } = this.assets[assetID];
           assetStream
             .on('close', () => {
+              this.stats.assets.finished += 1;
               delete this.assets[assetID];
               resolve();
             })
@@ -443,6 +477,12 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
     this.assets = {};
     this.streams = {};
+    this.stats = {
+      assets: { started: 0, finished: 0 },
+      configuration: { started: 0, finished: 0 },
+      entities: { started: 0, finished: 0 },
+      links: { started: 0, finished: 0 },
+    };
 
     this.flow = createFlow(DEFAULT_TRANSFER_FLOW);
 
@@ -453,7 +493,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     });
 
     this.provider.onWarning = (message) => {
-      // TODO send a warning message to the client
+      this.onWarning(message);
       strapi.log.warn(message);
     };
 

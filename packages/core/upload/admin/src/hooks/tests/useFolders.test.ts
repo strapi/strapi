@@ -132,7 +132,7 @@ describe('useFolders', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    await waitFor(() => expect(screen.getByText('notification.error')).toBeInTheDocument());
+    await screen.findByText('notification.error');
 
     console.error = originalConsoleError;
     server.restoreHandlers();

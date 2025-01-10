@@ -8,6 +8,7 @@ interface Link {
   id: ID;
   position?: { before?: ID; after?: ID; start?: true; end?: true };
   order?: number;
+  __component?: string;
 }
 
 interface OrderedLink extends Link {
@@ -51,8 +52,26 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
         needsSorting = true;
       }
 
-      // If the relation is already in the array, throw an error
-      if (mapper[relation.id]) {
+      /**
+       * We do not allow duplicate relations to be connected, so we need to check for uniqueness with components
+       * Note that the id here includes the uid for polymorphic relations
+       *
+       * So for normal relations, the same id means the same relation
+       * For component relations, it means the unique combo of (id, component name)
+       */
+
+      // Check if there's an existing relation with this id
+      const existingRelation = mapper[relation.id];
+
+      // Check if existing relation has a component or not
+      const hasNoComponent = existingRelation && !('__component' in existingRelation);
+
+      // Check if the existing relation has the same component as the new relation
+      const hasSameComponent =
+        existingRelation && existingRelation.__component === relation.__component;
+
+      // If we have an existing relation that is not unique (no component or same component) we won't accept it
+      if (existingRelation && (hasNoComponent || hasSameComponent)) {
         throw new InvalidRelationError(
           `The relation with id ${relation.id} is already connected. ` +
             'You cannot connect the same relation twice.'

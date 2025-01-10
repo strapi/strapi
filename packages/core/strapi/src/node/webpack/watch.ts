@@ -89,7 +89,7 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
     ctx.strapi.server.routes([
       {
         method: 'GET',
-        path: `${ctx.basePath}:path*`,
+        path: `${ctx.adminPath}/:path*`,
         handler: serveAdmin,
         config: { auth: false },
       },

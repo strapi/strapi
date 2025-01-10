@@ -4,7 +4,7 @@ import { Link, LinkProps } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, type To, useLocation, useNavigate, useNavigationType } from 'react-router-dom';
 
 import { createContext } from '../components/Context';
 
@@ -70,6 +70,7 @@ interface HistoryProviderProps {
 
 const HistoryProvider = ({ children }: HistoryProviderProps) => {
   const location = useLocation();
+  const navigationType = useNavigationType();
   const navigate = useNavigate();
   const [state, dispatch] = React.useReducer(reducer, {
     history: [],
@@ -89,8 +90,7 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
 
   const goBack: HistoryContextValue['goBack'] = React.useCallback(() => {
     /**
-     * Perform the browser back action
-     * dispatch the goBack action to keep redux in sync
+     * Perform the browser back action, dispatch the goBack action to keep the state in sync
      * and set the ref to avoid an infinite loop and incorrect state pushing
      */
     navigate(-1);
@@ -119,6 +119,12 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
   React.useLayoutEffect(() => {
     if (isGoingBack.current) {
       isGoingBack.current = false;
+    } else if (navigationType === 'REPLACE') {
+      // Prevent appending to the history when the location changes via a replace:true navigation
+      dispatch({
+        type: 'REPLACE_STATE',
+        payload: { to: location.pathname, search: location.search },
+      });
     } else {
       // this should only occur on link movements, not back/forward clicks
       dispatch({
@@ -126,7 +132,7 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
         payload: { to: location.pathname, search: location.search },
       });
     }
-  }, [dispatch, location.pathname, location.search]);
+  }, [dispatch, location.pathname, location.search, navigationType]);
 
   return (
     <Provider pushState={pushState} goBack={goBack} {...state}>
@@ -138,6 +144,13 @@ const HistoryProvider = ({ children }: HistoryProviderProps) => {
 type HistoryActions =
   | {
       type: 'PUSH_STATE';
+      payload: {
+        to: string;
+        search: string;
+      };
+    }
+  | {
+      type: 'REPLACE_STATE';
       payload: {
         to: string;
         search: string;
@@ -169,6 +182,12 @@ const reducer = (state: HistoryState, action: HistoryActions) =>
 
         break;
       }
+      case 'REPLACE_STATE': {
+        const path = `${action.payload.to}${action.payload.search}`;
+        draft.history = [...state.history.slice(0, state.currentLocationIndex - 1), path];
+        draft.currentLocation = path;
+        break;
+      }
       case 'GO_BACK': {
         const newIndex = state.currentLocationIndex - 1;
 
@@ -188,43 +207,62 @@ const reducer = (state: HistoryState, action: HistoryActions) =>
 /* -------------------------------------------------------------------------------------------------
  * BackButton
  * -----------------------------------------------------------------------------------------------*/
-interface BackButtonProps extends Pick<LinkProps, 'disabled'> {}
+interface BackButtonProps extends Pick<LinkProps, 'disabled'> {
+  fallback?: To;
+}
 
 /**
  * @beta
  * @description The universal back button for the Strapi application. This uses the internal history
  * context to navigate the user back to the previous location. It can be completely disabled in a
- * specific user case.
+ * specific user case. When no history is available, you can provide a fallback destination,
+ * otherwise the link will be disabled.
  */
-const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(({ disabled }, ref) => {
-  const { formatMessage } = useIntl();
+const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(
+  ({ disabled, fallback = '' }, ref) => {
+    const { formatMessage } = useIntl();
+    const navigate = useNavigate();
 
-  const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
-  const goBack = useHistory('BackButton', (state) => state.goBack);
-  const history = useHistory('BackButton', (state) => state.history);
+    const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
+    const goBack = useHistory('BackButton', (state) => state.goBack);
+    const history = useHistory('BackButton', (state) => state.history);
+    const currentLocationIndex = useHistory('BackButton', (state) => state.currentLocationIndex);
+    const hasFallback = fallback !== '';
+    const shouldBeDisabled = disabled || (!canGoBack && !hasFallback);
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    goBack();
-  };
+    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
 
-  return (
-    <Link
-      ref={ref}
-      tag={NavLink}
-      to={history.at(-1) ?? ''}
-      onClick={handleClick}
-      disabled={disabled || !canGoBack}
-      aria-disabled={disabled || !canGoBack}
-      startIcon={<ArrowLeft />}
-    >
-      {formatMessage({
-        id: 'global.back',
-        defaultMessage: 'Back',
-      })}
-    </Link>
-  );
-});
+      if (canGoBack) {
+        goBack();
+      } else if (hasFallback) {
+        navigate(fallback);
+      }
+    };
 
-export { BackButton, HistoryProvider };
+    // The link destination from the history. Undefined if there is only 1 location in the history.
+    const historyTo = canGoBack ? history.at(currentLocationIndex - 2) : undefined;
+    // If no link destination from the history, use the fallback.
+    const toWithFallback = historyTo ?? fallback;
+
+    return (
+      <Link
+        ref={ref}
+        tag={NavLink}
+        to={toWithFallback}
+        onClick={handleClick}
+        disabled={shouldBeDisabled}
+        aria-disabled={shouldBeDisabled}
+        startIcon={<ArrowLeft />}
+      >
+        {formatMessage({
+          id: 'global.back',
+          defaultMessage: 'Back',
+        })}
+      </Link>
+    );
+  }
+);
+
+export { BackButton, HistoryProvider, useHistory };
 export type { BackButtonProps, HistoryProviderProps, HistoryContextValue, HistoryState };

@@ -13,7 +13,7 @@ export type FlattenedNode<T> = {
   children?: TreeNode<T>[];
 };
 
-export default function flattenTree<T>(
+export function flattenTree<T>(
   tree: TreeNode<T>[],
   parent: TreeNode<T> | null = null,
   depth: number = 0
