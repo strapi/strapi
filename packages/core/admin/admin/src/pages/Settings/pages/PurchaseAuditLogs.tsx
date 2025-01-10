@@ -30,7 +30,7 @@ const PurchaseAuditLogs = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://strp.cc/45mbAdF"
+                href="https://strapi.io/features/audit-logs?utm_campaign=In-Product-CTA&utm_source=Audit-Logs"
                 isExternal
                 target="_blank"
               >

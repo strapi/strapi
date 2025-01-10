@@ -24,7 +24,7 @@ import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
-import { InputRenderer } from '../../InputRenderer';
+import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
 import type { ComponentPickerProps } from './ComponentPicker';
 
@@ -38,6 +38,7 @@ interface DynamicComponentProps
   onAddComponent: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
+  children?: (props: InputRendererProps) => React.ReactNode;
 }
 
 const DynamicComponent = ({
@@ -52,6 +53,7 @@ const DynamicComponent = ({
   onCancel,
   dynamicComponentsByCategory = {},
   onAddComponent,
+  children,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
@@ -261,7 +263,11 @@ const DynamicComponent = ({
                                   direction="column"
                                   alignItems="stretch"
                                 >
-                                  <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                                  {children ? (
+                                    children({ ...fieldWithTranslatedLabel, name: fieldName })
+                                  ) : (
+                                    <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                                  )}
                                 </Grid.Item>
                               );
                             })}

@@ -291,5 +291,10 @@
   "history.restore.success.message": "A past version of the content was restored.",
   "history.restore.error.message": "Could not restore version.",
   "validation.error": "There are validation errors in your document. Please fix them before saving.",
-  "bulk-publish.edit": "Edit"
+  "bulk-publish.edit": "Edit",
+  "widget.last-edited.title": "Last edited entries",
+  "widget.last-edited.single-type": "Single-Type",
+  "widget.last-edited.no-data": "No edited entries",
+  "widget.last-published.title": "Last published entries",
+  "widget.last-published.no-data": "No published entries"
 }
