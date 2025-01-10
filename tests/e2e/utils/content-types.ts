@@ -80,6 +80,8 @@ type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
 
+type AddDynamicZoneOptions = {};
+
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
