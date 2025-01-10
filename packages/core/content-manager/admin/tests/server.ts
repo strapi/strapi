@@ -12,8 +12,16 @@ export const handlers: RequestHandler[] = [
    * CONTENT_MANAGER
    *
    */
-  http.put('/content-manager/content-types/:model/configuration', () => {
-    return new HttpResponse(null, { status: 200 });
+  http.put('/content-manager/content-types/:model/configuration', ({ params }) => {
+    return HttpResponse.json(
+      {
+        data:
+          params.model === 'api::homepage.homepage'
+            ? mockData.contentManager.singleTypeConfiguration
+            : mockData.contentManager.collectionTypeConfiguration,
+      },
+      { status: 200 }
+    );
   }),
   http.get('/content-manager/content-types/:model/configuration', ({ params }) => {
     const configuration =
@@ -281,26 +289,29 @@ export const handlers: RequestHandler[] = [
       },
     });
   }),
-  http.post<never, { data?: { target: string } }>(
-    '/content-manager/uid/generate',
-    async ({ request }) => {
-      const body = await request.json();
+  http.post<never, { data?: { target: string } }>('/content-manager/uid/generate', async () => {
+    return HttpResponse.json({
+      data: 'regenerated',
+    });
+  }),
+  http.post<never, { value?: string }>('/content-manager/uid/check-availability', async (args) => {
+    const { request, params } = args;
+    console.log('check-availability', params, request);
 
-      return HttpResponse.json({
-        data: body?.data?.target ?? 'regenerated',
-      });
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      // TODO msw error TypeError: Body is unusable here
+      console.log('Error parsing request body:', error);
     }
-  ),
-  http.post<never, { value?: string }>(
-    '/content-manager/uid/check-availability',
-    async ({ request }) => {
-      const body = await request.json();
 
-      return HttpResponse.json({
+    return HttpResponse.json({
+      data: {
         isAvailable: body?.value === 'not-taken',
-      });
-    }
-  ),
+      },
+    });
+  }),
   http.get('/content-manager/collection-types/:contentType', () => {
     return HttpResponse.json({
       results: [

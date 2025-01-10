@@ -108,7 +108,7 @@ describe('UIDInput', () => {
     expect(screen.getByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
   });
 
-  test('Checks the availability', async () => {
+  test.only('Checks the availability', async () => {
     const { user } = render({
       required: true,
       initialValues: {
@@ -121,7 +121,38 @@ describe('UIDInput', () => {
     expect(screen.queryByText('Available')).not.toBeInTheDocument();
     expect(screen.queryByText('Unvailable')).not.toBeInTheDocument();
 
-    jest.useFakeTimers();
+    /*
+      I’ve been looking at upgrading to v2 of MSW and fixing all the FE test failures in the content manager to start with.
+      when checking the availability of the UID we do this in packages/core/content-manager/admin/tests/server.ts
+
+        http.post<never, { value?: string }>(
+          '/content-manager/uid/check-availability',
+          async ({ request }) => {
+            const body = await request.json();
+
+            return HttpResponse.json({
+              isAvailable: body?.value === 'not-taken',
+            });
+
+      The test that triggers this availability check uses jest.useFakeTimers(); & it is a known limitation of msw that when faking jest timers you can no longer access request.json()as we need above 
+      see https://mswjs.io/docs/runbook/#:~:text=Requests%20are%20not%20resolving,%7D) 
+
+      I have tried setting doNotFake: ['queueMicrotask'], as suggested in the
+      msw docs but that doesn’t fix the issue.
+    */
+    jest.useFakeTimers({
+      doNotFake: [
+        // 'setTimeout',
+        // 'clearTimeout',
+        // 'setInterval',
+        // 'clearInterval',
+        // 'setImmediate',
+        // 'clearImmediate',
+        // 'Date',
+        'queueMicrotask',
+      ],
+    });
+
     const input = screen.getByRole('textbox');
     await user.clear(input);
     await user.type(input, 'not-taken');
