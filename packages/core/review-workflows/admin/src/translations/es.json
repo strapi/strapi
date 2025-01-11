@@ -1,0 +1,12 @@
+{
+    "settings.page.title": "Flujos de revisión",
+    "settings.page.subtitle": "{count, plural, one {# etapa} other {# etapas}}",
+    "settings.page.isLoading": "Cargando flujo",
+    "settings.page.delete.confirm.body": "Todas las entradas asignadas a las etapas eliminadas se moverán a la etapa anterior. ¿Estás seguro de que quieres guardar?",
+    "settings.stage.name.label": "Nombre de la etapa",
+    "settings.not-available": "Flujos de revisión sólo está disponible como parte de la Edición Enterprise. Actualiza para crear y gestionar flujos.",
+    "settings.review-workflows.workflow.stageRequiredToPublish.label": "Etapa necesaria para la publicación",
+    "settings.review-workflows.workflow.stageRequiredToPublish.any": "Cualquier etapa",
+    "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Impide que se publiquen las entradas si no están en la fase requerida."
+  }
+  
