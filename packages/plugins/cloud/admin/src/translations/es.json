@@ -1,0 +1,18 @@
+{
+    "Plugin.name": "Desplegar",
+    "Homepage.title": "Alojamiento en la nube totalmente gestionado para tu proyecto Strapi",
+    "Homepage.subTitle": "Sigue este proceso de 2 pasos para obtener todo lo que necesitas para ejecutar Strapi en producción.",
+    "Homepage.githubBox.title.versioned": "Proyecto subido a GitHub",
+    "Homepage.githubBox.title.not-versioned": "Sube tu proyecto en GitHub",
+    "Homepage.githubBox.subTitle.versioned": "¡Lo has hecho! Estás a un paso de tener tu proyecto alojado en línea.",
+    "Homepage.githubBox.subTitle.not-versioned": "Tu proyecto tiene que estar versionado en GitHub antes de desplegarlo en Strapi Cloud.",
+    "Homepage.githubBox.buttonText": "Subir a GitHub",
+    "Homepage.cloudBox.title": "Despliegue en Strapi Cloud",
+    "Homepage.cloudBox.subTitle": "Disfrute de una pila optimizada para Strapi que incluye base de datos, proveedor de correo electrónico y CDN.",
+    "Homepage.cloudBox.buttonText": "Despliegue en Strapi Cloud",
+    "Homepage.textBox.label.versioned": "¡Prueba Strapi Cloud gratis!",
+    "Homepage.textBox.label.not-versioned": "¿Por qué subir mi proyecto a GitHub?",
+    "Homepage.textBox.text.versioned": "Strapi Cloud ofrece una prueba gratuita de 14 días para que experimentes con tu proyecto en la nube incluyendo todas las características.",
+    "Homepage.textBox.text.not-versioned": "Strapi Cloud obtendrá y desplegará tu proyecto desde tu repositorio GitHub. Esta es la mejor manera de versionar, gestionar y desplegar tu proyecto. Sigue los pasos en GitHub para subirlo con éxito."
+  }
+  
