@@ -7,6 +7,13 @@ export enum AssetType {
   Audio = 'audio',
 }
 
+export enum FileType {
+  Pdf = 'pdf',
+  Csv = 'csv',
+  Xls = 'xls',
+  Zip = 'zip',
+}
+
 export enum AssetSource {
   Url = 'url',
   Computer = 'computer',

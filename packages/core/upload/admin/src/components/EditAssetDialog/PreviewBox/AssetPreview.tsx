@@ -3,11 +3,12 @@ import * as React from 'react';
 
 import MuxPlayer from '@mux/mux-player-react';
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
+import { File } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+import { AssetType, FileType } from '../../../constants';
+import { getFileIconComponent } from '../../../utils/icons';
 
 const CardAsset = styled(Flex)`
   min-height: 26.4rem;
@@ -54,11 +55,14 @@ export const AssetPreview = React.forwardRef<
     );
   }
 
-  if (mime.includes('pdf')) {
+  // if mime.includes any of the values from the FileType enum, use the FILE_TYPE_ICON_COMPONENT_MAP to render the corresponding icon component
+  // eg. if mime is a pdf, render the FilePdf icon component
+  if (Object.values(FileType).some((type) => mime.includes(type))) {
+    const IconComponent = getFileIconComponent(mime);
     return (
       <CardAsset width="100%" justifyContent="center" {...props}>
         <Flex gap={2} direction="column" alignItems="center">
-          <FilePdf aria-label={name} fill="neutral500" width={24} height={24} />
+          <IconComponent aria-label={name} fill="neutral500" width={24} height={24} />
           <Typography textColor="neutral500" variant="pi">
             {formatMessage({
               id: 'noPreview',
