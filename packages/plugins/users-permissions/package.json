@@ -51,7 +51,7 @@
     "@strapi/utils": "5.7.0",
     "bcryptjs": "2.4.3",
     "formik": "2.4.5",
-    "grant-koa": "5.4.8",
+    "grant": "^5.4.8",
     "immer": "9.0.21",
     "jsonwebtoken": "9.0.0",
     "jwk-to-pem": "2.0.5",
