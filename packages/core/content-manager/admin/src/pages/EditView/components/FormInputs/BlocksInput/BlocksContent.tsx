@@ -85,30 +85,32 @@ const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)<{
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
   border-radius: ${({ theme }) => theme.borderRadius};
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[6]};
+  padding-left: ${({ theme }) => theme.spaces[0]};
+  padding-right: ${({ theme }) => theme.spaces[0]};
+  padding-top: ${({ theme }) => theme.spaces[1]};
+  padding-bottom: ${({ theme }) => theme.spaces[1]};
   visibility: hidden;
   cursor: grab;
   opacity: inherit;
   margin-top: ${(props) => props.$dragHandleTopMargin ?? 0};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.neutral200};
+    background: ${({ theme }) => theme.colors.neutral100};
   }
   &:active {
     cursor: grabbing;
+    background: ${({ theme }) => theme.colors.neutral150};
   }
   &[aria-disabled='true'] {
-    cursor: not-allowed;
-    background: transparent;
+    visibility: hidden;
   }
   svg {
-    height: auto;
     min-width: ${({ theme }) => theme.spaces[3]};
 
     path {
-      fill: ${({ theme }) => theme.colors.neutral700};
+      fill: ${({ theme }) => theme.colors.neutral500};
     }
   }
 `;
@@ -591,7 +593,7 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
       background="neutral0"
       color="neutral800"
       lineHeight={6}
-      paddingRight={4}
+      paddingRight={7}
       paddingTop={6}
       paddingBottom={3}
     >

@@ -40,7 +40,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           return [];
         }
 
-        return [{ type: 'Document', id: `${model}_LIST` }];
+        return [{ type: 'Document', id: `${model}_LIST` }, 'RecentDocumentList'];
       },
     }),
     cloneDocument: builder.mutation<
@@ -61,6 +61,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       invalidatesTags: (_result, _error, { model }) => [
         { type: 'Document', id: `${model}_LIST` },
         { type: 'UidAvailability', id: model },
+        'RecentDocumentList',
       ],
     }),
     /**
@@ -86,7 +87,26 @@ const documentApi = contentManagerApi.injectEndpoints({
         { type: 'Document', id: `${model}_LIST` },
         'Relations',
         { type: 'UidAvailability', id: model },
+        'RecentDocumentList',
       ],
+      transformResponse: (response: Create.Response, meta, arg): Create.Response => {
+        /**
+         * TODO v6
+         * Adapt plugin:users-permissions.user to return the same response
+         * shape as all other requests. The error is returned as expected.
+         */
+        if (!('data' in response) && arg.model === 'plugin::users-permissions.user') {
+          return {
+            data: response,
+            meta: {
+              availableStatus: [],
+              availableLocales: [],
+            },
+          };
+        }
+
+        return response;
+      },
     }),
     deleteDocument: builder.mutation<
       Delete.Response,
@@ -107,6 +127,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { collectionType, model }) => [
         { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
+        'RecentDocumentList',
       ],
     }),
     deleteManyDocuments: builder.mutation<
@@ -121,7 +142,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_res, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_res, _error, { model }) => [
+        { type: 'Document', id: `${model}_LIST` },
+        'RecentDocumentList',
+      ],
     }),
     discardDocument: builder.mutation<
       Discard.Response,
@@ -151,6 +175,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
           { type: 'UidAvailability', id: model },
+          'RecentDocumentList',
         ];
       },
     }),
@@ -303,6 +328,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
+          'RecentDocumentList',
         ];
       },
     }),
@@ -346,6 +372,8 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           'Relations',
           { type: 'UidAvailability', id: model },
+          'RecentDocumentList',
+          'RecentDocumentList',
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
@@ -388,6 +416,7 @@ const documentApi = contentManagerApi.injectEndpoints({
             type: 'Document',
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
+          'RecentDocumentList',
         ];
       },
     }),
@@ -406,8 +435,10 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_res, _error, { model, documentIds }) =>
-        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model, documentIds }) => [
+        ...documentIds.map((id) => ({ type: 'Document' as const, id: `${model}_${id}` })),
+        'RecentDocumentList',
+      ],
     }),
   }),
 });
