@@ -22,7 +22,7 @@ describe('Env helper', () => {
 
     test('Returns NaN if var is not castable', () => {
       process.env.NOT_INT_VAR = '';
-      expect(envHelper.int('NOT_INT_VAR')).toEqual(Number.NaN);
+      expect(envHelper.int('NOT_INT_VAR')).toBeNaN();
     });
 
     test('Returns a valid int when possible', () => {
@@ -38,7 +38,7 @@ describe('Env helper', () => {
 
     test('Returns NaN if var is not castable', () => {
       process.env.NOT_FLOAT_VAR = '';
-      expect(envHelper.float('NOT_FLOAT_VAR')).toEqual(Number.NaN);
+      expect(envHelper.float('NOT_FLOAT_VAR')).toBeNaN();
     });
 
     test('Returns a valid float when possible', () => {
@@ -79,7 +79,7 @@ describe('Env helper', () => {
       process.env.JSON_VAR = '{"}';
       expect(() => {
         envHelper.json('JSON_VAR');
-      }).toThrow('Invalid json environment variable');
+      }).toThrow('Invalid JSON environment variable');
     });
 
     test.each([
@@ -134,7 +134,7 @@ describe('Env helper', () => {
 
     test('Returns InvalidDate if var is not castable', () => {
       process.env.NOT_DATE_VAR = 'random string';
-      expect(envHelper.date('NOT_DATE_VAR').getTime()).toEqual(Number.NaN);
+      expect(envHelper.date('NOT_DATE_VAR')?.getTime()).toBeNaN();
     });
 
     test('Returns a valid date when possible', () => {
@@ -145,10 +145,12 @@ describe('Env helper', () => {
 
   describe('env with union cast', () => {
     test('Throws if expectedValues is not provided', () => {
+      // @ts-expect-error Testing invalid input
       expect(() => envHelper.oneOf('NO_VAR')).toThrow();
     });
 
     test('Throws if defaultValue not included in expectedValues', () => {
+      // @ts-expect-error Testing invalid input
       expect(() => envHelper.oneOf('NO_VAR', ['lorem', 'ipsum'], 'test')).toThrow();
     });
 
