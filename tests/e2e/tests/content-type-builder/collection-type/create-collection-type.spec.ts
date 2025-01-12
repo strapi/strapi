@@ -57,7 +57,7 @@ test.describe('Create collection type with all field types', () => {
             name: 'testnewcomponentnewcategory',
             icon: 'alien',
             categoryCreate: 'testcategory',
-            attributes: [{ type: 'text', name: 'testcompotext' }],
+            attributes: [{ type: 'text', name: 'testnewcompotext' }],
           },
         },
       },
@@ -71,7 +71,7 @@ test.describe('Create collection type with all field types', () => {
             name: 'testnewcomponentrepeatable',
             icon: 'moon',
             categorySelect: 'testcategory',
-            attributes: [{ type: 'text', name: 'testcompotext' }],
+            attributes: [{ type: 'text', name: 'testexistingcompotext' }],
           },
         },
       },
@@ -94,7 +94,6 @@ test.describe('Create collection type with all field types', () => {
         type: 'dz',
         name: 'testdynamiczone',
         dz: {
-          options: {},
           components: [
             {
               type: 'component',
@@ -105,7 +104,7 @@ test.describe('Create collection type with all field types', () => {
                   name: 'testnewcomponentnewcategory',
                   icon: 'paint',
                   categoryCreate: 'testcategory',
-                  attributes: [{ type: 'text', name: 'testcompotext' }],
+                  attributes: [{ type: 'text', name: 'testdzcompotext' }],
                 },
               },
             },
