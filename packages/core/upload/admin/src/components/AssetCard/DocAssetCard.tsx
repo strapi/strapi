@@ -28,7 +28,7 @@ export const DocAssetCard = ({
   ...restProps
 }: DocAssetCardProps) => {
   const { formatMessage } = useIntl();
-  const IconComponent = getFileIconComponent(extension as FileType);
+  const IconComponent = getFileIconComponent(extension);
   return (
     <AssetCardBase
       name={name}
