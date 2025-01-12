@@ -158,13 +158,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const status = documents[0].publishedAt !== null ? 'published' : 'draft';
     const locales = documents.map((d) => d.locale).filter(Boolean);
 
+    const where: Record<string, any> = {
+      documentId: { $in: documents.map((d) => d.documentId).filter(Boolean) },
+      publishedAt: { $null: status === 'published' },
+    };
+
+    // If there is any locale to filter (if i18n is enabled)
+    if (locales.length) {
+      where.locale = { $in: locales };
+    }
+
     return strapi.query(uid).findMany({
-      where: {
-        documentId: { $in: documents.map((d) => d.documentId).filter(Boolean) },
-        // NOTE: find the "opposite" status
-        publishedAt: { $null: status === 'published' },
-        locale: { $in: locales },
-      },
+      where,
       select: ['id', 'documentId', 'locale', 'updatedAt', 'createdAt', 'publishedAt'],
     });
   },
