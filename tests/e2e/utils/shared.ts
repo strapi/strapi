@@ -157,6 +157,7 @@ export const findByRowColumn = async (page: Page, rowText: string, columnText: s
   // Return the found cell
   return cell;
 };
+
 /**
  * WebKit-specific implementation of ensureElementsInViewport.
  * Ensures that two elements are fully visible in the viewport by calculating their bounding boxes

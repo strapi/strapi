@@ -266,7 +266,6 @@ export const addComponentAttribute = async (
   await selectComponentRepeatable(page, attribute.component?.options.repeatable);
 
   if (attrCompOptions.attributes) {
-    // TODO: if "
     const addFirstFieldButton = page.getByRole('button', {
       name: new RegExp('Add first field to the component', 'i'),
     });
