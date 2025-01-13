@@ -151,4 +151,27 @@ test.describe('Adding content', () => {
     const before = await isElementBefore(source, target);
     expect(before).toBe(true);
   });
+
+  // TODO: can this become a loop to test every field? might work best to have a create where every first attempt to enter an attribute is made without a name
+  test('when I fail to enter a name for a dz I see an error', async ({ page }) => {
+    // TODO: add support for advanced options: required
+    const fields = [
+      {
+        name: '',
+        type: 'dz',
+        value: [
+          {
+            category: 'product',
+            name: 'variations',
+            fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
+          },
+        ],
+      },
+    ] satisfies FieldValue[];
+
+    await createContent(page, 'Article', fields, { save: true, publish: false, verify: false });
+
+    // TODO: check that aria-invalid=true for this input
+    expect(page.getByText('This value is required')).toBeVisible();
+  });
 });
