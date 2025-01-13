@@ -88,9 +88,6 @@ test.describe('Adding content', () => {
       },
     });
 
-    // reload due to bug that doesn't update UI
-    await page.reload();
-
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   });
 
@@ -169,7 +166,6 @@ test.describe('Adding content', () => {
   test('when I publish an empty required text field inside a dz I see an error', async ({
     page,
   }) => {
-    // TODO: add support for advanced options: required
     const fields = [
       {
         name: 'testdz',
