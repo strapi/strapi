@@ -4,7 +4,6 @@ import { styled } from 'styled-components';
 import { getFileIconComponent } from '../../utils/icons';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
-import { FileType } from 'src/constants';
 
 const CardAsset = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;

@@ -7,8 +7,9 @@ import { File } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
-import { AssetType, FileType } from '../../../constants';
+import { AssetType } from '../../../constants';
 import { getFileIconComponent } from '../../../utils/icons';
+import { typeFromMime } from '../../../utils';
 
 const CardAsset = styled(Flex)`
   min-height: 26.4rem;
@@ -33,19 +34,21 @@ export const AssetPreview = React.forwardRef<
 >(({ mime, url, name, ...props }, ref) => {
   const theme = useTheme();
 
+  const documentType = typeFromMime(mime);
+
   const { formatMessage } = useIntl();
 
-  if (mime.includes(AssetType.Image)) {
+  if (documentType === AssetType.Image) {
     return (
       <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />
     );
   }
 
-  if (mime.includes(AssetType.Video)) {
+  if (documentType === AssetType.Video) {
     return <MuxPlayer src={url} accentColor={theme.colors.primary500} />;
   }
 
-  if (mime.includes(AssetType.Audio)) {
+  if (documentType === AssetType.Audio) {
     return (
       <Box margin="5">
         <audio controls src={url} ref={ref as React.ForwardedRef<HTMLAudioElement>} {...props}>
@@ -55,30 +58,13 @@ export const AssetPreview = React.forwardRef<
     );
   }
 
-  // if mime.includes any of the values from the FileType enum, use the FILE_TYPE_ICON_COMPONENT_MAP to render the corresponding icon component
-  // eg. if mime is a pdf, render the FilePdf icon component
-  if (Object.values(FileType).some((type) => mime.includes(type))) {
-    const IconComponent = getFileIconComponent(mime);
-    return (
-      <CardAsset width="100%" justifyContent="center" {...props}>
-        <Flex gap={2} direction="column" alignItems="center">
-          <IconComponent aria-label={name} fill="neutral500" width={24} height={24} />
-          <Typography textColor="neutral500" variant="pi">
-            {formatMessage({
-              id: 'noPreview',
-              defaultMessage: 'No preview available',
-            })}
-          </Typography>
-        </Flex>
-      </CardAsset>
-    );
-  }
-
+  // getFileIconComponent will handle all other file types, eg. PDF, CSV, XLS, ZIP
+  // If the file type is not recognized, the default icon will be used
+  const IconComponent = getFileIconComponent(documentType);
   return (
     <CardAsset width="100%" justifyContent="center" {...props}>
       <Flex gap={2} direction="column" alignItems="center">
-        <File aria-label={name} fill="neutral500" width={24} height={24} />
-
+        <IconComponent aria-label={name} fill="neutral500" width={24} height={24} />
         <Typography textColor="neutral500" variant="pi">
           {formatMessage({
             id: 'noPreview',
