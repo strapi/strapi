@@ -316,11 +316,13 @@ const createHelpers = (db: Database) => {
         droppedForeignKeyNames.push(updatedForeignKey.object.name);
       }
 
-      // In some databases, dropping a foreign key can also implicitly drop an index with the same name
-      // Remove them from existing indexes to be safe
-      existingIndexes = existingIndexes.filter(
-        (index) => !droppedForeignKeyNames.includes(index.name)
-      );
+      // In MySQL, dropping a foreign key can also implicitly drop an index with the same name
+      // Remove dropped foreign keys from existingIndexes for MySQL
+      if (db.config.connection.client === 'mysql') {
+        existingIndexes = existingIndexes.filter(
+          (index) => !droppedForeignKeyNames.includes(index.name)
+        );
+      }
 
       for (const removedIndex of table.indexes.removed) {
         debug(`Dropping index ${removedIndex.name} on ${table.name}`);
