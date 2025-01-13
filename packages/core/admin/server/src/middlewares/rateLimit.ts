@@ -3,8 +3,16 @@ import path from 'path';
 import utils from '@strapi/utils';
 import { isString, has, toLower, get } from 'lodash/fp';
 import type { Core } from '@strapi/types';
+import Redis from 'ioredis';
+import { RateLimiterRedis } from 'rate-limiter-flexible';
 
 const { RateLimitError } = utils.errors;
+
+// Create Redis client
+const redis = new Redis({
+  host: process.env.REDIS_HOST || 'localhost',
+  port: Number(process.env.REDIS_PORT) || 6379,
+});
 
 export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
@@ -21,13 +29,8 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
     }
 
     if (rateLimitConfig.enabled === true) {
-      // TODO: TS - Do the dynamic import
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const rateLimit = require('koa2-ratelimit').RateLimit;
-
       const requestEmail = get('request.body.email')(ctx);
       const userEmail = isString(requestEmail) ? requestEmail.toLowerCase() : 'unknownEmail';
-
       const requestPath = isString(ctx.request.path)
         ? toLower(path.normalize(ctx.request.path)).replace(/\/$/, '')
         : 'invalidPath';
@@ -43,7 +46,21 @@ export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
         ...config,
       };
 
-      return rateLimit.middleware(loadConfig)(ctx, next);
+      // Create rate limiter instance with merged config
+      const rateLimiter = new RateLimiterRedis({
+        storeClient: redis,
+        keyPrefix: loadConfig.prefixKey,
+        points: loadConfig.max,
+        duration: loadConfig.interval.min * 60,
+        blockDuration: loadConfig.interval.min * 60,
+      });
+
+      try {
+        await rateLimiter.consume(loadConfig.prefixKey);
+        return next();
+      } catch (err) {
+        return loadConfig.handler();
+      }
     }
 
     return next();
