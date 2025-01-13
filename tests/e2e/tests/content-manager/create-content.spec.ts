@@ -24,7 +24,9 @@ test.describe('Adding content', () => {
                 name: 'testrepeatablecomp2',
                 icon: 'moon',
                 categorySelect: 'product',
-                attributes: [{ type: 'text', name: 'testrepeatablecomp2text' }],
+                attributes: [
+                  { type: 'text', name: 'testrepeatablecomp2text', advanced: { required: true } },
+                ],
               },
             },
           },
@@ -37,7 +39,9 @@ test.describe('Adding content', () => {
                 name: 'testsinglecomp2',
                 icon: 'moon',
                 categorySelect: 'product',
-                attributes: [{ type: 'text', name: 'testsinglecomp2text' }],
+                attributes: [
+                  { type: 'text', name: 'testsinglecomp2text', advanced: { required: true } },
+                ],
               },
             },
           },
@@ -55,14 +59,20 @@ test.describe('Adding content', () => {
                       name: 'testnewcomponentrepeatable',
                       icon: 'moon',
                       categorySelect: 'product',
-                      attributes: [{ type: 'text', name: 'testnewcomponentexistingcategorytext' }],
+                      attributes: [
+                        {
+                          type: 'text',
+                          name: 'testnewcomponentexistingcategorytext',
+                          advanced: { required: true },
+                        },
+                      ],
                     },
                   },
                 },
                 // Existing component with existing category
                 {
                   type: 'component',
-                  name: 'testexistingcomponentexistingcategory', // TODO: is this used?
+                  name: 'testexistingcomponentexistingcategory',
                   component: {
                     useExisting: 'variations',
                     options: {
@@ -77,6 +87,9 @@ test.describe('Adding content', () => {
         ]);
       },
     });
+
+    // reload due to bug that doesn't update UI
+    await page.reload();
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   });
@@ -153,25 +166,34 @@ test.describe('Adding content', () => {
   });
 
   // TODO: can this become a loop to test every field? might work best to have a create where every first attempt to enter an attribute is made without a name
-  test('when I fail to enter a name for a dz I see an error', async ({ page }) => {
+  test('when I publish an empty required text field inside a dz I see an error', async ({
+    page,
+  }) => {
     // TODO: add support for advanced options: required
     const fields = [
       {
-        name: '',
+        name: 'testdz',
         type: 'dz',
         value: [
           {
             category: 'product',
-            name: 'variations',
-            fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
+            name: 'newcomponentexistingcategory',
+            fields: [
+              {
+                type: 'text',
+                name: 'testnewcomponentexistingcategorytext',
+                value: '',
+              },
+            ],
           },
         ],
       },
     ] satisfies FieldValue[];
 
-    await createContent(page, 'Article', fields, { save: true, publish: false, verify: false });
+    await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
 
     // TODO: check that aria-invalid=true for this input
+
     expect(page.getByText('This value is required')).toBeVisible();
   });
 });

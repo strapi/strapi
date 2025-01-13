@@ -194,12 +194,12 @@ export const createContent = async (
 
   if (options.save) {
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Saved Document');
+    await findAndClose(page, 'Saved Document', { required: options.verify });
   }
 
   if (options.publish) {
     await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
-    await findAndClose(page, 'Published Document');
+    await findAndClose(page, 'Published Document', { required: options.verify });
   }
 
   if (options.verify) {
