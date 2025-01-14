@@ -47,6 +47,35 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      description: Select the database type you are using.
+      multiple: false
+      options:
+        - Strapi Cloud
+        - SQLite
+        - MySQL
+        - MariaDB
+        - PostgreSQL
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: codeType
+    attributes:
+      label: Javascript or Typescript
+      description: Select the code language your project is using.
+      multiple: false
+      options:
+        - Javascript
+        - Typescript
+        - Other
+    validations:
+      required: true
+
   - type: input
     id: url
     attributes:
