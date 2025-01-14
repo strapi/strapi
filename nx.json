@@ -60,10 +60,10 @@
       }
     },
     "version": {
-      "conventionalCommits": false
-    },
-    "git": {
-      "commitMessage": "release: {version}"
+      "conventionalCommits": false,
+      "git": {
+        "commitMessage": "release: {version}"
+      }
     },
     "conventionalCommits": {
       "types": {

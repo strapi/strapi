@@ -49,7 +49,7 @@
     "prettier:code": "prettier --cache --cache-strategy content \"**/*.{js,ts,jsx,tsx,json}\"",
     "prettier:other": "prettier --cache --cache-strategy content \"**/*.{md,mdx,css,scss,yaml,yml}\"",
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
-    "release": "nx release",
+    "release": "node scripts/release.js",
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
     "test:api:clean": "rimraf ./coverage",
