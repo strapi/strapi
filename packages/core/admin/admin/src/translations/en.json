@@ -546,6 +546,7 @@
   "app.utils.unpublish": "Unpublish",
   "app.utils.published": "Published",
   "app.utils.ready-to-publish": "Ready to publish",
+  "app.utils.already-published": "Already published",
   "app.utils.ready-to-publish-changes": "Ready to publish changes",
   "app.utils.ready-to-unpublish-changes": "Ready to unpublish",
   "app.confirm.body": "Are you sure?",
