@@ -21,13 +21,4 @@ fi
 # publish packages
 ./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles
 ./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
-yarn release --version "$version" --tag "$distTag" "$@"
-
-# # push main branch
-# git push origin HEAD
-
-# # push tag
-# git push origin v"$version"
-
-# # run changelog cli
-# npx @sclt/program-changelog
+yarn release --version "$version" --tag "$distTag" --dry-run false "$@"
