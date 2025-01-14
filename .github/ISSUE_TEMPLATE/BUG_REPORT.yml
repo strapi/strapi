@@ -54,7 +54,7 @@ body:
       description: If you would like to provide a link to a repository that reproduces the issue, please provide it here.
       placeholder: https://github.com/strapi/LaunchPad
     validations:
-      required: true
+      required: false
 
   - type: textarea
     attributes:
@@ -103,15 +103,19 @@ body:
       label: Media
       description: If available, please upload screenshots or videos to illustrate the issue.
 
+  - type: textarea
+    id: informationContext
+    attributes:
+      label: Additional information
+      description: If available, please add any additional information you may find useful to help us understand the issue.
+
   - type: checkboxes
     id: checklist
     attributes:
       label: Confirmation Checklist
       options:
-        - label: I have checked the existing [issues](https://github.com/strapi/strapi/issues)
+        - label: I have checked the existing [issues](https://github.com/strapi/strapi/issues) for duplicates.
           required: true
 
-        - label: I agree to follow this project's [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md)
+        - label: I agree to follow this project's [Code of Conduct](https://github.com/strapi/strapi/blob/develop/CODE_OF_CONDUCT.md).
           required: true
-
-        - label: I would like to work on this issue
