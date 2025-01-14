@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-cloud",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "description": "Instructions to deploy your local project to Strapi Cloud",
   "license": "MIT",
   "author": {
@@ -42,13 +42,13 @@
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.2.0",
-    "@strapi/strapi": "5.6.0",
-    "eslint-config-custom": "5.6.0",
+    "@strapi/strapi": "5.7.0",
+    "eslint-config-custom": "5.7.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "tsconfig": "5.6.0",
+    "tsconfig": "5.7.0",
     "typescript": "5.3.2"
   },
   "peerDependencies": {

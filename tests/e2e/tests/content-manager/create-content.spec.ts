@@ -62,7 +62,7 @@ test.describe('Adding content', () => {
                 // Existing component with existing category
                 {
                   type: 'component',
-                  name: 'testexistingcomponentexistingcategory', // TODO: is this used?
+                  name: 'testexistingcomponentexistingcategory',
                   component: {
                     useExisting: 'variations',
                     options: {

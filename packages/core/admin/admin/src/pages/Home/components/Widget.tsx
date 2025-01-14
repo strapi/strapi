@@ -23,6 +23,7 @@ const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
       direction="column"
       alignItems="flex-start"
       background="neutral0"
+      borderColor="neutral150"
       shadow="tableShadow"
       tag="section"
       gap={4}
