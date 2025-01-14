@@ -80,8 +80,6 @@ type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
 
-type AddDynamicZoneOptions = {};
-
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
@@ -268,7 +266,6 @@ export const addComponentAttribute = async (
   await selectComponentRepeatable(page, attribute.component?.options.repeatable);
 
   if (attrCompOptions.attributes) {
-    // TODO: if "
     const addFirstFieldButton = page.getByRole('button', {
       name: new RegExp('Add first field to the component', 'i'),
     });
