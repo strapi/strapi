@@ -74,6 +74,45 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       }
       break;
 
+    case 'date_date':
+      // 1) Parse the date from the string (expected "MM/DD/YYYY" or something that new Date(...) can handle)
+      const date = new Date(value as string);
+
+      // 2) Decide if we use the UI approach or direct fill
+      const now = new Date();
+      const sameMonthAndYear =
+        date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+
+      if (sameMonthAndYear) {
+        // -- UI approach (click date in the datepicker) --
+        const input = page.getByLabel(name);
+        await input.click();
+
+        // Build the aria-label for the date cell
+        const formattedDate = date.toLocaleString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        });
+
+        // Click on that cell
+        await page.locator(`td[aria-label="${formattedDate}"]`).click();
+
+        // Optionally verify that the input matches the zero-padded "MM/DD/YYYY"
+        const expected = `${String(date.getMonth() + 1).padStart(2, '0')}/${String(
+          date.getDate()
+        ).padStart(2, '0')}/${date.getFullYear()}`;
+
+        await expect(input).toHaveValue(expected);
+      } else {
+        // f
+        await page.getByLabel(name).fill(value as string);
+        // trigger blur to ensure the date is saved correctly
+        await page.keyboard.press('Tab');
+      }
+      break;
+
     // TODO: all cases that cannot be handled as text fills
 
     // all other cases can be handled as text fills
@@ -94,6 +133,12 @@ export const verifyFields = async (page: Page, fields: FieldValue[]): Promise<vo
       case 'boolean':
         const isChecked = await page.getByLabel(name).isChecked();
         expect(isChecked).toBe(value);
+        break;
+      case 'date_date':
+        const inputValue = await page.getByLabel(name).inputValue();
+        const expectedDate = new Date(value as string);
+        const expectedFormat = `${String(expectedDate.getMonth() + 1).padStart(2, '0')}/${String(expectedDate.getDate()).padStart(2, '0')}/${expectedDate.getFullYear()}`;
+        expect(inputValue).toBe(expectedFormat);
         break;
       case 'dz':
         for (const component of value as ComponentValue[]) {
