@@ -1,14 +1,17 @@
-name: 'Publish Prerelease'
+name: 'Publish release'
 
 on:
   workflow_dispatch:
     inputs:
-      dist-tag:
-        description: 'The tag you want to publish to NPM'
-        default: 'experimental'
+      version:
+        type: choice
+        description: 'The version you want to publish to NPM'
+        options:
+          - patch
+          - minor
 
 permissions:
-  contents: read # to fetch code (actions/checkout)
+  contents: write
 
 jobs:
   publish:
@@ -23,7 +26,7 @@ jobs:
         with:
           node-version: 20
       - run: yarn
-      - run: ./scripts/pre-publish.sh
+      - run: ./scripts/publish.sh
         env:
-          VERSION: '0.0.0-experimental.${{ github.sha }}'
-          DIST_TAG: ${{ github.event.inputs.dist-tag }}
+          VERSION: ${{ github.event.inputs.version }}
+          DIST_TAG: 'latest'
