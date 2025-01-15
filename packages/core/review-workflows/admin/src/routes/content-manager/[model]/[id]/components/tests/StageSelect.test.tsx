@@ -1,6 +1,6 @@
 import { waitForElementToBeRemoved } from '@testing-library/react';
 import { render as renderRTL, waitFor, server, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { StageSelect } from '../StageSelect';
@@ -50,9 +50,15 @@ describe('StageSelect', () => {
 
   it("renders the select as disabled with a hint, if there aren't any stages", async () => {
     server.use(
-      rest.get('*/content-manager/:kind/:uid/:id/stages', (req, res, ctx) => {
-        return res.once(ctx.json({ data: [] }));
-      })
+      http.get(
+        '*/content-manager/:kind/:uid/:id/stages',
+        () => {
+          return HttpResponse.json({
+            data: [],
+          });
+        },
+        { once: true }
+      )
     );
 
     render();

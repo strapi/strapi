@@ -1,16 +1,15 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
 import pluginId from '../pluginId';
 
 const handlers = [
   // Mock get role route
-  rest.get(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get(`*/${pluginId}/roles/:roleId`, ({ params }) => {
+    return HttpResponse.json(
+      {
         role: {
-          id: req.params.roleId,
+          id: params.roleId,
           name: 'Authenticated',
           description: 'Default role given to authenticated user.',
           type: 'authenticated',
@@ -29,25 +28,27 @@ const handlers = [
             },
           },
         },
-      })
+      },
+      {
+        status: 200,
+      }
     );
   }),
 
   // Mock edit role route
-  rest.put(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json({ ok: true }));
+  http.put(`*/${pluginId}/roles/:roleId`, () => {
+    return HttpResponse.json({ ok: true }, { status: 200 });
   }),
 
   // Mock create role route
-  rest.post(`*/${pluginId}/roles`, (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json({ ok: true }));
+  http.post(`*/${pluginId}/roles`, () => {
+    return HttpResponse.json({ ok: true }, { status: 200 });
   }),
 
   // Mock get all routes route
-  rest.get(`*/${pluginId}/routes`, (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get(`*/${pluginId}/routes`, () => {
+    return HttpResponse.json(
+      {
         routes: {
           'api::address': [
             {
@@ -67,15 +68,17 @@ const handlers = [
             },
           ],
         },
-      })
+      },
+      {
+        status: 200,
+      }
     );
   }),
 
   // Mock permissions route
-  rest.get(`*/${pluginId}/permissions`, (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get(`*/${pluginId}/permissions`, () => {
+    return HttpResponse.json(
+      {
         permissions: {
           'api::address': {
             controllers: {
@@ -88,14 +91,16 @@ const handlers = [
             },
           },
         },
-      })
+      },
+      {
+        status: 200,
+      }
     );
   }),
 
-  rest.get('*/roles', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('*/roles', () => {
+    return HttpResponse.json(
+      {
         roles: [
           {
             id: 1,
@@ -112,14 +117,16 @@ const handlers = [
             nb_users: 0,
           },
         ],
-      })
+      },
+      {
+        status: 200,
+      }
     );
   }),
 
-  rest.get('*/providers', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('*/providers', () => {
+    return HttpResponse.json(
+      {
         email: { enabled: true, icon: 'envelope' },
         discord: {
           callback: '/auth/discord/callback',
@@ -129,14 +136,16 @@ const handlers = [
           scope: ['identify', 'email'],
           secret: '',
         },
-      })
+      },
+      {
+        status: 200,
+      }
     );
   }),
 
-  rest.get('*/email-templates', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('*/email-templates', () => {
+    return HttpResponse.json(
+      {
         email_confirmation: {
           display: 'Email.template.email_confirmation',
           options: {
@@ -161,14 +170,16 @@ const handlers = [
             response_email: '',
           },
         },
-      })
+      },
+      {
+        status: 200,
+      }
     );
   }),
 
-  rest.get('*/advanced', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
+  http.get('*/advanced', () => {
+    return HttpResponse.json(
+      {
         roles: [{ name: 'Authenticated', type: 'authenticated' }],
         settings: {
           allow_register: false,
@@ -178,7 +189,10 @@ const handlers = [
           email_reset_password: 'https://cat-bounce.com/',
           unique_email: false,
         },
-      })
+      },
+      {
+        status: 200,
+      }
     );
   }),
 ];

@@ -1,6 +1,6 @@
 import { fireEvent } from '@testing-library/react';
 import { render, server } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { LogoInput } from '../LogoInput';
 
@@ -221,11 +221,10 @@ describe('ApplicationsInfosPage || LogoInput', () => {
   describe('from url', () => {
     it('should show error message when uploading wrong file format', async () => {
       server.use(
-        rest.get('http://gifs.com/some-gif.gif', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/gif'),
-            ctx.body(new Blob(['my-image'], { type: 'image/gif' }))
-          );
+        http.get('http://gifs.com/some-gif.gif', () => {
+          return new HttpResponse(new Blob(['my-image'], { type: 'image/gif' }), {
+            headers: { 'content-type': 'image/gif' },
+          });
         })
       );
 
@@ -250,10 +249,12 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should show error message when uploading unauthorized width/height', async () => {
       server.use(
-        rest.get('http://gifs.com/some-png.png', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/png'),
-            ctx.body(new File(['1'.repeat(1024 * 1024 + 1)], 'my-image', { type: 'image/png' }))
+        http.get('http://gifs.com/some-png.png', () => {
+          return new HttpResponse(
+            new File(['1'.repeat(1024 * 1024 + 1)], 'my-image', { type: 'image/png' }),
+            {
+              headers: { 'content-type': 'image/png' },
+            }
           );
         })
       );
@@ -281,11 +282,10 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should accept upload and lead user to next modal', async () => {
       server.use(
-        rest.get('http://gifs.com/some-png.png', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/png'),
-            ctx.body(new File(['1'], 'my-image', { type: 'image/png' }))
-          );
+        http.get('http://gifs.com/some-png.png', () => {
+          return new HttpResponse(new File(['1'], 'my-image', { type: 'image/png' }), {
+            headers: { 'content-type': 'image/png' },
+          });
         })
       );
 
@@ -310,11 +310,10 @@ describe('ApplicationsInfosPage || LogoInput', () => {
 
     it('should let user choose another logo', async () => {
       server.use(
-        rest.get('http://gifs.com/some-png.png', (_, res, ctx) => {
-          return res(
-            ctx.set('content-type', 'image/png'),
-            ctx.body(new File(['1'], 'my-image', { type: 'image/png' }))
-          );
+        http.get('http://gifs.com/some-png.png', () => {
+          return new HttpResponse(new File(['1'], 'my-image', { type: 'image/png' }), {
+            headers: { 'content-type': 'image/png' },
+          });
         })
       );
 

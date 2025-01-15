@@ -31,13 +31,6 @@
       "source": "./src/after-env.ts",
       "default": "./dist/after-env.js"
     },
-    "./environment": {
-      "types": "./dist/environment.d.ts",
-      "module": "./dist/environment.mjs",
-      "require": "./dist/environment.js",
-      "source": "./src/environment.ts",
-      "default": "./dist/environment.js"
-    },
     "./file-mock": {
       "types": "./dist/file-mock.d.ts",
       "module": "./dist/file-mock.mjs",
@@ -82,14 +75,12 @@
     "@strapi/pack-up": "5.0.2",
     "@testing-library/jest-dom": "6.4.5",
     "eslint-config-custom": "5.7.0",
-    "jest-environment-jsdom": "29.6.1",
     "styled-components": "6.1.8",
     "tsconfig": "5.7.0"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.7",
     "@testing-library/jest-dom": "^5.16.5",
-    "jest-environment-jsdom": "^29.0.0",
     "styled-components": "^6.0.0"
   },
   "engines": {

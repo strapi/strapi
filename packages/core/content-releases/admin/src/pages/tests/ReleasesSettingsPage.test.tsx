@@ -1,6 +1,6 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
 import { render, server, screen } from '@tests/utils';
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 import { useTypedSelector } from '../../modules/hooks';
 import { ProtectedReleasesSettingsPage } from '../ReleasesSettingsPage';
@@ -51,14 +51,12 @@ describe('Releases Settings page', () => {
       },
     ]);
     server.use(
-      rest.get('/content-releases/settings', (req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              defaultTimezone: null,
-            },
-          })
-        )
+      http.get('/content-releases/settings', () =>
+        HttpResponse.json({
+          data: {
+            defaultTimezone: null,
+          },
+        })
       )
     );
 
@@ -81,14 +79,12 @@ describe('Releases Settings page', () => {
       allowedActions: { canRead: true, canUpdate: true },
     }));
     server.use(
-      rest.get('/content-releases/settings', (req, res, ctx) =>
-        res(
-          ctx.json({
-            data: {
-              defaultTimezone: '',
-            },
-          })
-        )
+      http.get('/content-releases/settings', () =>
+        HttpResponse.json({
+          data: {
+            defaultTimezone: '',
+          },
+        })
       )
     );
 
