@@ -30,3 +30,5 @@ jobs:
         env:
           VERSION: ${{ github.event.inputs.version }}
           DIST_TAG: 'latest'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
