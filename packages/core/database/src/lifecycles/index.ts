@@ -20,6 +20,8 @@ export interface LifecycleProvider {
   clear(): void;
   run(action: Action, uid: string, properties: Properties, states?: States): Promise<States>;
   createEvent(action: Action, uid: string, properties: Properties, state: State): Event;
+  disable(): void;
+  enable(): void;
 }
 
 export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
@@ -27,6 +29,8 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
     subscriberUtils.timestampsLifecyclesSubscriber,
     subscriberUtils.modelsLifecyclesSubscriber,
   ];
+
+  let isLifecycleHooksDisabled = false;
 
   return {
     subscribe(subscriber) {
@@ -38,6 +42,14 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
       subscribers.push(subscriber);
 
       return () => subscribers.splice(subscribers.indexOf(subscriber), 1);
+    },
+
+    disable() {
+      isLifecycleHooksDisabled = true;
+    },
+
+    enable() {
+      isLifecycleHooksDisabled = false;
     },
 
     clear() {
@@ -62,6 +74,7 @@ export const createLifecyclesProvider = (db: Database): LifecycleProvider => {
      * @param {Map<any, any>} states
      */
     async run(action, uid, properties, states = new Map()) {
+      if (isLifecycleHooksDisabled) return states;
       for (let i = 0; i < subscribers.length; i += 1) {
         const subscriber = subscribers[i];
         if (typeof subscriber === 'function') {

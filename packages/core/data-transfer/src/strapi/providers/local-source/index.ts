@@ -39,6 +39,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     this.strapi = await this.options.getStrapi();
+    this.strapi.db.lifecycles.disable();
   }
 
   #reportInfo(message: string) {
@@ -54,7 +55,8 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
-
+    assertValidStrapi(this.strapi);
+    this.strapi.db.lifecycles.enable();
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
       await this.strapi?.destroy();
