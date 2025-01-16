@@ -507,7 +507,7 @@ const RelationsInput = ({
 
   const hasNextPage = data?.pagination ? data.pagination.page < data.pagination.pageCount : false;
 
-  const options = data?.results ?? [];
+  const options = data?.results?.filter((opt) => opt.status === 'published') ?? [];
 
   const handleChange = (relationId?: string) => {
     if (!relationId) {
