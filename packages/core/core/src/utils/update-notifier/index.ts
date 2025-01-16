@@ -8,7 +8,7 @@ import { env } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const pkg = require('../../../package.json');
+import pkg from '../../../package.json';
 
 const CHECK_INTERVAL = 1000 * 60 * 60 * 24 * 1; // 1 day
 const NOTIF_INTERVAL = 1000 * 60 * 60 * 24 * 7; // 1 week

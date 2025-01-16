@@ -1,4 +1,4 @@
-import { Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 import { createService } from '../index';
 import { CollectionTypeService } from '../collection-type';
 import { SingleTypeService } from '../single-type';

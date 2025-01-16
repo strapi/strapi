@@ -49,17 +49,18 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "lodash": "4.17.21",
     "nodemailer": "6.9.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
     "@types/nodemailer": "6.4.7",
     "eslint-config-custom": "5.8.1",
     "tsconfig": "5.8.1"

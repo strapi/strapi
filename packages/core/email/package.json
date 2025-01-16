@@ -41,7 +41,11 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -49,7 +53,7 @@
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@strapi/design-system": "2.0.0-rc.14",
@@ -63,7 +67,6 @@
   },
   "devDependencies": {
     "@strapi/admin": "5.8.1",
-    "@strapi/pack-up": "5.0.2",
     "@strapi/types": "5.8.1",
     "@testing-library/react": "15.0.7",
     "@types/koa": "2.13.4",

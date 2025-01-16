@@ -99,13 +99,14 @@
     "index.js"
   ],
   "scripts": {
-    "build": "run pack-up build && run copy-files",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
-    "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.15",
@@ -121,7 +122,6 @@
     "@strapi/generators": "5.8.1",
     "@strapi/i18n": "5.8.1",
     "@strapi/logger": "5.8.1",
-    "@strapi/pack-up": "5.0.2",
     "@strapi/permissions": "5.8.1",
     "@strapi/review-workflows": "5.8.1",
     "@strapi/types": "5.8.1",
@@ -165,7 +165,7 @@
     "resolve-from": "5.0.0",
     "semver": "7.5.4",
     "style-loader": "3.3.4",
-    "typescript": "5.3.2",
+    "typescript": "5.4.4",
     "vite": "5.2.14",
     "webpack": "^5.90.3",
     "webpack-bundle-analyzer": "^4.10.1",

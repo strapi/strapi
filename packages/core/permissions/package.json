@@ -27,13 +27,15 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
@@ -43,7 +45,6 @@
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
     "eslint-config-custom": "5.8.1",
     "tsconfig": "5.8.1"
   },

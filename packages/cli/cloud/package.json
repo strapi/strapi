@@ -38,11 +38,13 @@
     "./bin"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@strapi/utils": "5.8.1",
@@ -67,7 +69,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
     "@types/lodash": "^4.14.191",

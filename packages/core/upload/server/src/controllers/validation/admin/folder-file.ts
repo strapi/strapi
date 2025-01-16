@@ -73,8 +73,8 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
       });
 
       const unmovableFoldersNames = folders
-        .filter((folder) => isFolderOrChild(destinationFolder, folder))
-        .map((f) => f.name);
+        .filter((folder: any) => isFolderOrChild(destinationFolder, folder))
+        .map((f: any) => f.name);
 
       if (unmovableFoldersNames.length > 0) {
         return this.createError({
