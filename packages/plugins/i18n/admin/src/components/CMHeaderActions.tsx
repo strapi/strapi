@@ -30,7 +30,6 @@ import {
   type StatusVariant,
 } from '@strapi/design-system';
 import { WarningCircle, ListPlus, Trash, Download, Cross, Plus } from '@strapi/icons';
-import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -46,6 +45,7 @@ import { BulkLocaleActionModal } from './BulkLocaleActionModal';
 
 import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
+import type { Modules } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * LocalePickerAction
