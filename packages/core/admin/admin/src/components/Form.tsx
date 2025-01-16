@@ -574,15 +574,18 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         }
 
         const [key] = generateNKeysBetween(
-          currentField.at(position - 1)?.__temp_key__,
-          currentField.at(position)?.__temp_key__,
+          currentField.at(position > 0 ? position - 1 : position)?.__temp_key__,
+          currentField.at(position > 0 ? position : position - 1)?.__temp_key__,
           1
         );
 
         draft.values = setIn(
           state.values,
           action.payload.field,
-          setIn(currentField, position.toString(), { ...action.payload.value, __temp_key__: key })
+          currentField.toSpliced(position, 0, {
+            ...action.payload.value,
+            __temp_key__: key,
+          })
         );
 
         break;
