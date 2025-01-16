@@ -158,7 +158,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<Configuratio
     output: {
       filename: '[name].js',
       path: ctx.distPath,
-      publicPath: ctx.basePath,
+      publicPath: `${ctx.basePath}/`,
     },
     infrastructureLogging: {
       level: 'error',
