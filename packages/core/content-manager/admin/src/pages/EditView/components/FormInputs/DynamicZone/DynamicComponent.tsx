@@ -149,7 +149,14 @@ const DynamicComponent = ({
         <Drag />
       </IconButton>
       <Menu.Root>
-        <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
+        <Menu.Trigger
+          size="S"
+          endIcon={null}
+          paddingTop="4px"
+          // paddingBottom="4px"
+          paddingLeft="7px"
+          paddingRight="7px"
+        >
           <More aria-hidden focusable={false} />
           <VisuallyHidden tag="span">
             {formatMessage({
