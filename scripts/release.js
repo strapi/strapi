@@ -77,8 +77,8 @@ const yargs = require('yargs');
         version: workspaceVersion,
         dryRun: options.dryRun,
         verbose: options.verbose,
-        gitCommit: !options.dryRun,
-        gitCommitArgs: '',
+        gitCommit: false,
+        gitTag: false,
       });
     }
   }
