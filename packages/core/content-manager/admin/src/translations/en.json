@@ -65,6 +65,7 @@
   "bulk-publish.already-published": "Already Published",
   "bulk-unpublish.already-unpublished": "Already Unpublished",
   "bulk-publish.modified": "Ready to publish changes",
+  "bulk-publish.waiting-for-action": "Waiting for action",
   "components.TableDelete.delete": "Delete all",
   "components.TableDelete.deleteSelected": "Delete selected",
   "components.TableDelete.label": "{number, plural, one {# entry} other {# entries}} selected",

@@ -17,6 +17,7 @@ import {
   Tooltip,
   Loader,
   TypographyComponent,
+  Grid as GridComponent,
 } from '@strapi/design-system';
 import { Pencil, CrossCircle, CheckCircle, ArrowsCounterClockwise } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -45,6 +46,16 @@ import type { Document } from '../../../../hooks/useDocument';
 
 const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
+`;
+
+const GridRoot = styled(GridComponent.Root)`
+  border-left: 1px solid ${({ theme }) => theme.colors.neutral150};
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+const GridItem = styled(GridComponent.Item)`
+  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -207,7 +218,7 @@ const SelectedEntriesTableContent = ({
       </Table.Head>
       <Table.Loading />
       <Table.Body>
-        {rowsToDisplay.map((row, index) => (
+        {rowsToDisplay.map((row) => (
           <Table.Row key={row.id}>
             <Table.CheckboxCell id={row.id} />
             <Table.Cell>
@@ -268,10 +279,91 @@ const SelectedEntriesTableContent = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
- * BoldChunk
+ * PublicationStatusSummary
  * -----------------------------------------------------------------------------------------------*/
 
-const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{chunks}</Typography>;
+interface PublicationStatusSummaryProps {
+  count: number;
+  icon: React.ReactNode;
+  message: string;
+}
+
+const PublicationStatusSummary = ({ count, icon, message }: PublicationStatusSummaryProps) => {
+  return (
+    <Flex justifyContent="space-between" flex={1} gap={3}>
+      <Flex gap={2}>
+        {icon}
+        <Typography>{message}</Typography>
+      </Flex>
+      <Typography fontWeight="bold">{count}</Typography>
+    </Flex>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * PublicationStatusGrid
+ * -----------------------------------------------------------------------------------------------*/
+
+interface PublicationStatusGridProps {
+  entriesReadyToPublishCount: number;
+  entriesModifiedCount: number;
+  entriesPublishedCount: number;
+  entriesWithErrorsCount: number;
+}
+
+const PublicationStatusGrid = ({
+  entriesReadyToPublishCount,
+  entriesPublishedCount,
+  entriesModifiedCount,
+  entriesWithErrorsCount,
+}: PublicationStatusGridProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <GridRoot hasRadius>
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesReadyToPublishCount}
+          icon={<CheckCircle fill="success600" />}
+          message={formatMessage({
+            id: 'app.utils.ready-to-publish',
+            defaultMessage: 'Ready to publish',
+          })}
+        />
+      </GridItem>
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesPublishedCount}
+          icon={<CheckCircle fill="success600" />}
+          message={formatMessage({
+            id: 'app.utils.already-published',
+            defaultMessage: 'Already published',
+          })}
+        />
+      </GridItem>
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesModifiedCount}
+          icon={<ArrowsCounterClockwise fill="alternative600" />}
+          message={formatMessage({
+            id: 'content-manager.bulk-publish.modified',
+            defaultMessage: 'Ready to publish changes',
+          })}
+        />
+      </GridItem>
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesWithErrorsCount}
+          icon={<CrossCircle fill="danger600" />}
+          message={formatMessage({
+            id: 'content-manager.bulk-publish.waiting-for-action',
+            defaultMessage: 'Waiting for action',
+          })}
+        />
+      </GridItem>
+    </GridRoot>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * SelectedEntriesModalContent
@@ -355,7 +447,6 @@ const SelectedEntriesModalContent = ({
     };
   }, [components, data, schema]);
 
-  const [publishedCount, setPublishedCount] = React.useState(0);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
   const { publishMany: bulkPublishAction } = useDocumentActions();
@@ -375,11 +466,14 @@ const SelectedEntriesModalContent = ({
   const selectedEntriesWithErrorsCount = selectedEntries.filter(
     ({ documentId }) => validationErrors[documentId]
   ).length;
-  const selectedEntriesPublished = selectedEntries.filter(
+  const selectedEntriesPublishedCount = selectedEntries.filter(
     ({ status }) => status === 'published'
   ).length;
+  const selectedEntriesModifiedCount = selectedEntries.filter(
+    ({ status, documentId }) => status === 'modified' && !validationErrors[documentId]
+  ).length;
   const selectedEntriesWithNoErrorsCount =
-    selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublished;
+    selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublishedCount;
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -388,9 +482,6 @@ const SelectedEntriesModalContent = ({
 
     const res = await bulkPublishAction({ model: model, documentIds: entriesToPublish, params });
     if (!('error' in res)) {
-      // @ts-expect-error TODO: check with BE why response is not consistent with other actions
-      setPublishedCount(res.count);
-
       const unpublishedEntries = rows.filter((row) => {
         return !entriesToPublish.includes(row.documentId);
       });
@@ -399,42 +490,18 @@ const SelectedEntriesModalContent = ({
     }
   };
 
-  const getFormattedCountMessage = () => {
-    if (publishedCount) {
-      return formatMessage(
-        {
-          id: getTranslation('containers.list.selectedEntriesModal.publishedCount'),
-          defaultMessage:
-            '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
-        },
-        {
-          publishedCount,
-          withErrorsCount: selectedEntriesWithErrorsCount,
-          b: BoldChunk,
-        }
-      );
-    }
-
-    return formatMessage(
-      {
-        id: getTranslation('containers.list.selectedEntriesModal.selectedCount'),
-        defaultMessage:
-          '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
-      },
-      {
-        readyToPublishCount: selectedEntriesWithNoErrorsCount,
-        withErrorsCount: selectedEntriesWithErrorsCount,
-        alreadyPublishedCount: selectedEntriesPublished,
-        b: BoldChunk,
-      }
-    );
-  };
-
   return (
     <>
       <Modal.Body>
-        <Typography>{getFormattedCountMessage()}</Typography>
-        <Box marginTop={5}>
+        <PublicationStatusGrid
+          entriesReadyToPublishCount={
+            selectedEntriesWithNoErrorsCount - selectedEntriesModifiedCount
+          }
+          entriesPublishedCount={selectedEntriesPublishedCount}
+          entriesModifiedCount={selectedEntriesModifiedCount}
+          entriesWithErrorsCount={selectedEntriesWithErrorsCount}
+        />
+        <Box marginTop={7}>
           <SelectedEntriesTableContent
             isPublishing={isSubmittingForm}
             rowsToDisplay={rows}
@@ -459,7 +526,7 @@ const SelectedEntriesModalContent = ({
             disabled={
               selectedEntries.length === 0 ||
               selectedEntries.length === selectedEntriesWithErrorsCount ||
-              selectedEntriesPublished === selectedEntries.length ||
+              selectedEntriesPublishedCount === selectedEntries.length ||
               isLoading
             }
             loading={isSubmittingForm}
