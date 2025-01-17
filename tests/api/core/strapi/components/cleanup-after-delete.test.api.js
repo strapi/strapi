@@ -7,7 +7,6 @@ const pluralize = require('pluralize');
 
 let strapi;
 let rq;
-const warnSpy = jest.fn();
 
 const restart = async () => {
   await strapi.destroy();
