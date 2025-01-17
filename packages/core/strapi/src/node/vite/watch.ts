@@ -57,10 +57,21 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
 
   const viteMiddlewares: Core.MiddlewareHandler = (koaCtx, next) => {
     return new Promise((resolve, reject) => {
+      const prefix = ctx.basePath.replace(ctx.adminPath, '').replace(/\/+$/, '');
+
+      const originalPath = koaCtx.path;
+      if (!koaCtx.path.startsWith(prefix)) {
+        koaCtx.path = `${prefix}${koaCtx.path}`;
+      }
+
       vite.middlewares(koaCtx.req, koaCtx.res, (err: unknown) => {
         if (err) {
           reject(err);
         } else {
+          if (!koaCtx.res.headersSent) {
+            koaCtx.path = originalPath;
+          }
+
           resolve(next());
         }
       });
