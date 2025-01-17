@@ -141,21 +141,25 @@ export default {
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
         form: {
           advanced({ contentTypeSchema, forTarget, type, step }: any) {
-            if (forTarget !== 'contentType') {
+            // A top level as well as a nested components inside a repeatable should be able to be localized
+            if (!['contentType', 'component', 'components'].includes(forTarget)) {
               return [];
             }
 
-            const hasI18nEnabled = get(
-              contentTypeSchema,
-              ['schema', 'pluginOptions', 'i18n', 'localized'],
-              false
-            );
+            if (forTarget === 'contentType') {
+              const hasI18nEnabled = get(
+                contentTypeSchema,
+                ['schema', 'pluginOptions', 'i18n', 'localized'],
+                false
+              );
 
-            if (!hasI18nEnabled) {
-              return [];
+              if (!hasI18nEnabled) {
+                return [];
+              }
             }
 
-            if (type === 'component' && step === '1') {
+            // Keep this condition but keep it for contentType as components can be nested
+            if (type === 'component' && step === '1' && forTarget === 'contentType') {
               return [];
             }
 
