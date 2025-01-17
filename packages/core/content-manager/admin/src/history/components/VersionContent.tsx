@@ -204,6 +204,7 @@ const VersionContent = () => {
       (schemaAttributes: Schema.Attributes, components: ComponentsDictionary = {}) =>
       (document: Omit<Document, 'id'>) => {
         const schema = { attributes: schemaAttributes };
+
         const transformations = pipe(
           removeFieldsThatDontExistOnSchema(schema),
           prepareTempKeys(schema, components)

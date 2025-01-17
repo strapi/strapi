@@ -10,6 +10,7 @@ const contentManagerApi = adminApi.enhanceEndpoints({
     'HistoryVersion',
     'Relations',
     'UidAvailability',
+    'RecentDocumentList',
   ],
 });
 

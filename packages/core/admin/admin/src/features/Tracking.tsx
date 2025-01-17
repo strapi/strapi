@@ -172,6 +172,7 @@ interface EventWithoutProperties {
     | 'willEditEditLayout'
     | 'willEditEmailTemplates'
     | 'willEditEntryFromButton'
+    | 'willEditEntryFromHome'
     | 'willEditEntryFromList'
     | 'willEditFieldOfContentType'
     | 'willEditMediaLibraryConfig'

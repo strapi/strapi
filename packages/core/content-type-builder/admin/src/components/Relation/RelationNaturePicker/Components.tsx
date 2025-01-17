@@ -30,6 +30,7 @@ const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }
       fill: ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary700' : 'neutral500']};
     }
   }
+  cursor: pointer;
   &:disabled {
     cursor: not-allowed;
   }

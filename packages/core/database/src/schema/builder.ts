@@ -73,6 +73,16 @@ export default (db: Database) => {
       const forceMigration = db.config.settings?.forceMigration;
 
       await db.dialect.startSchemaUpdate();
+
+      // Pre-fetch metadata for all updated tables
+      const existingMetadata: Record<string, { indexes: Index[]; foreignKeys: ForeignKey[] }> = {};
+      for (const table of schemaDiff.tables.updated) {
+        existingMetadata[table.name] = {
+          indexes: await db.dialect.schemaInspector.getIndexes(table.name),
+          foreignKeys: await db.dialect.schemaInspector.getForeignKeys(table.name),
+        };
+      }
+
       await db.connection.transaction(async (trx) => {
         await this.createTables(schemaDiff.tables.added, trx);
 
@@ -98,7 +108,8 @@ export default (db: Database) => {
           // alter table
           const schemaBuilder = this.getSchemaBuilder(trx);
 
-          await helpers.alterTable(schemaBuilder, table);
+          const { indexes, foreignKeys } = existingMetadata[table.name];
+          await helpers.alterTable(schemaBuilder, table, { indexes, foreignKeys });
         }
       });
 
@@ -131,8 +142,21 @@ const createHelpers = (db: Database) => {
   /**
    * Drops a foreign key from a table
    */
-  const dropForeignKey = (tableBuilder: Knex.TableBuilder, foreignKey: ForeignKey) => {
+  const dropForeignKey = (
+    tableBuilder: Knex.TableBuilder,
+    foreignKey: ForeignKey,
+    existingForeignKeys?: ForeignKey[]
+  ) => {
     const { name, columns } = foreignKey;
+
+    // Check if the index exists in existingIndexes, and return early if it doesn't
+    if (
+      existingForeignKeys &&
+      !existingForeignKeys.some((existingIndex) => existingIndex?.name === name)
+    ) {
+      debug(`Foreign Key ${name} not found in existing foreign keys. Skipping drop.`);
+      return;
+    }
 
     tableBuilder.dropForeign(columns, name);
   };
@@ -145,10 +169,10 @@ const createHelpers = (db: Database) => {
 
     switch (type) {
       case 'primary': {
-        return tableBuilder.primary(columns, name);
+        return tableBuilder.primary(columns, { constraintName: name });
       }
       case 'unique': {
-        return tableBuilder.unique(columns, name);
+        return tableBuilder.unique(columns, { indexName: name });
       }
       default: {
         return tableBuilder.index(columns, name, type);
@@ -161,12 +185,18 @@ const createHelpers = (db: Database) => {
    * @param {Knex.TableBuilder} tableBuilder
    * @param {Index} index
    */
-  const dropIndex = (tableBuilder: Knex.TableBuilder, index: Index) => {
+  const dropIndex = (tableBuilder: Knex.TableBuilder, index: Index, existingIndexes?: Index[]) => {
     if (!db.config.settings?.forceMigration) {
       return;
     }
 
     const { type, columns, name } = index;
+
+    // Check if the index exists in existingIndexes, and return early if it doesn't
+    if (existingIndexes && !existingIndexes.some((existingIndex) => existingIndex?.name === name)) {
+      debug(`Index ${index.name} not found in existingIndexes. Skipping drop.`);
+      return;
+    }
 
     switch (type) {
       case 'primary': {
@@ -244,45 +274,67 @@ const createHelpers = (db: Database) => {
     });
   };
 
-  const alterTable = async (schemaBuilder: Knex.SchemaBuilder, table: TableDiff['diff']) => {
-    await schemaBuilder.alterTable(table.name, (tableBuilder) => {
-      // Delete indexes / fks / columns
+  /**
+   * Alters a database table by applying a set of schema changes including updates to columns, indexes, and foreign keys.
+   * This function ensures proper ordering of operations to avoid conflicts (e.g., foreign key errors) and handles
+   * MySQL-specific quirks where dropping a foreign key can implicitly drop an associated index.
+   *
+   * @param {Knex.SchemaBuilder} schemaBuilder - Knex SchemaBuilder instance to perform schema operations.
+   * @param {TableDiff['diff']} table - A diff object representing the schema changes to be applied to the table.
+   * @param {{ indexes: Index[]; foreignKeys: ForeignKey[] }} existingMetadata - Metadata about existing indexes and
+   *   foreign keys in the table. Used to ensure safe operations and avoid unnecessary modifications.
+   *   - indexes: Array of existing index definitions.
+   *   - foreignKeys: Array of existing foreign key definitions.
+   */
+  const alterTable = async (
+    schemaBuilder: Knex.SchemaBuilder,
+    table: TableDiff['diff'],
+    existingMetadata: { indexes: Index[]; foreignKeys: ForeignKey[] } = {
+      indexes: [],
+      foreignKeys: [],
+    }
+  ) => {
+    let existingIndexes = [...existingMetadata.indexes];
+    const existingForeignKeys = [...existingMetadata.foreignKeys];
 
+    // Track dropped foreign keys
+    const droppedForeignKeyNames: string[] = [];
+
+    await schemaBuilder.alterTable(table.name, async (tableBuilder) => {
       // Drop foreign keys first to avoid foreign key errors in the following steps
       for (const removedForeignKey of table.foreignKeys.removed) {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
-        dropForeignKey(tableBuilder, removedForeignKey);
+        dropForeignKey(tableBuilder, removedForeignKey, existingForeignKeys);
+
+        droppedForeignKeyNames.push(removedForeignKey.name);
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
         debug(`Dropping updated foreign key ${updatedForeignKey.name} on ${table.name}`);
-        dropForeignKey(tableBuilder, updatedForeignKey.object);
+        dropForeignKey(tableBuilder, updatedForeignKey.object, existingForeignKeys);
+
+        droppedForeignKeyNames.push(updatedForeignKey.object.name);
       }
 
-      // for mysql only, dropForeignKey also removes the index, so don't drop it twice
-      const isMySQL = db.config.connection.client === 'mysql';
-      const ignoreForeignKeyNames = isMySQL
-        ? [
-            ...table.foreignKeys.removed.map((fk) => fk.name),
-            ...table.foreignKeys.updated.map((fk) => fk.name),
-          ]
-        : [];
+      // In MySQL, dropping a foreign key can also implicitly drop an index with the same name
+      // Remove dropped foreign keys from existingIndexes for MySQL
+      if (db.config.connection.client === 'mysql') {
+        existingIndexes = existingIndexes.filter(
+          (index) => !droppedForeignKeyNames.includes(index.name)
+        );
+      }
 
       for (const removedIndex of table.indexes.removed) {
-        if (!ignoreForeignKeyNames.includes(removedIndex.name)) {
-          debug(`Dropping index ${removedIndex.name} on ${table.name}`);
-          dropIndex(tableBuilder, removedIndex);
-        }
+        debug(`Dropping index ${removedIndex.name} on ${table.name}`);
+        dropIndex(tableBuilder, removedIndex, existingIndexes);
       }
 
       for (const updatedIndex of table.indexes.updated) {
-        if (!ignoreForeignKeyNames.includes(updatedIndex.name)) {
-          debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
-          dropIndex(tableBuilder, updatedIndex.object);
-        }
+        debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
+        dropIndex(tableBuilder, updatedIndex.object, existingIndexes);
       }
 
-      // We drop columns after indexes to ensure that it doesn't cascade delete any indexes we expect to exist
+      // Drop columns after FKs have been removed to avoid FK errors
       for (const removedColumn of table.columns.removed) {
         debug(`Dropping column ${removedColumn.name} on ${table.name}`);
         dropColumn(tableBuilder, removedColumn);
@@ -325,7 +377,7 @@ const createHelpers = (db: Database) => {
       }
 
       for (const addedForeignKey of table.foreignKeys.added) {
-        debug(`Creating foreign keys ${addedForeignKey.name} on ${table.name}`);
+        debug(`Creating foreign key ${addedForeignKey.name} on ${table.name}`);
         createForeignKey(tableBuilder, addedForeignKey);
       }
 

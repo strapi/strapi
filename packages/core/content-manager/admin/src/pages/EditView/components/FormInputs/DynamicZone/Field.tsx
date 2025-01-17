@@ -23,6 +23,7 @@ import { ComponentPicker } from './ComponentPicker';
 import { DynamicComponent, DynamicComponentProps } from './DynamicComponent';
 import { DynamicZoneLabel, DynamicZoneLabelProps } from './DynamicZoneLabel';
 
+import type { InputRendererProps } from '../../InputRenderer';
 import type { Schema } from '@strapi/types';
 
 interface DynamicZoneContextValue {
@@ -39,7 +40,9 @@ const [DynamicZoneProvider, useDynamicZone] = createContext<DynamicZoneContextVa
 interface DynamicZoneProps
   extends Omit<Extract<EditFieldLayout, { type: 'dynamiczone' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'>,
-    Pick<DynamicZoneLabelProps, 'labelAction'> {}
+    Pick<DynamicZoneLabelProps, 'labelAction'> {
+  children?: (props: InputRendererProps) => React.ReactNode;
+}
 
 const DynamicZone = ({
   attribute,
@@ -49,6 +52,7 @@ const DynamicZone = ({
   labelAction,
   name,
   required = false,
+  children,
 }: DynamicZoneProps) => {
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = attribute ?? {};
@@ -278,7 +282,9 @@ const DynamicZone = ({
                     onGrabItem={handleGrabItem}
                     onAddComponent={handleAddComponent}
                     dynamicComponentsByCategory={dynamicComponentsByCategory}
-                  />
+                  >
+                    {children}
+                  </DynamicComponent>
                 </ComponentProvider>
               ))}
             </ol>

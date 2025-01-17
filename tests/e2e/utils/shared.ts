@@ -84,15 +84,22 @@ export const clickAndWait = async (page: Page, locator: Locator) => {
 /**
  * Look for an element containing text, and then click a sibling close button
  */
-export const findAndClose = async (
-  page: Page,
-  text: string,
-  role: string = 'status',
-  closeLabel: string = 'Close'
-) => {
+
+interface FindAndCloseOptions {
+  role?: string;
+  closeLabel?: string;
+  required?: boolean;
+}
+
+export const findAndClose = async (page: Page, text: string, options: FindAndCloseOptions = {}) => {
+  const { role = 'status', closeLabel = 'Close', required = true } = options;
+
   // Verify the popup text is visible.
   const elements = page.locator(`:has-text("${text}")[role="${role}"]`);
-  await expect(elements.first()).toBeVisible(); // expect at least one element
+
+  if (required) {
+    await expect(elements.first()).toBeVisible(); // expect at least one element
+  }
 
   // Find all 'Close' buttons that are siblings of the elements containing the specified text.
   const closeBtns = page.locator(
@@ -150,6 +157,7 @@ export const findByRowColumn = async (page: Page, rowText: string, columnText: s
   // Return the found cell
   return cell;
 };
+
 /**
  * WebKit-specific implementation of ensureElementsInViewport.
  * Ensures that two elements are fully visible in the viewport by calculating their bounding boxes
@@ -382,4 +390,19 @@ export const isElementBefore = async (firstLocator, secondLocator) => {
   return await firstHandle.evaluate((first, second) => {
     return !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
   }, secondHandle);
+};
+
+/**
+ * Ensures that the specified checkbox is in the desired checked state.
+ * If the checkbox's current state does not match the desired state, it clicks the checkbox to toggle it.
+ *
+ * @param {Locator} locator - Playwright locator for the checkbox element.
+ * @param {boolean} checked - Desired checked state of the checkbox (true for checked, false for unchecked).
+ * @returns {Promise<void>} - Resolves when the checkbox state is correctly set.
+ */
+export const ensureCheckbox = async (locator: Locator, checked: boolean) => {
+  const isChecked = await locator.isChecked();
+  if (isChecked !== checked) {
+    await locator.click();
+  }
 };

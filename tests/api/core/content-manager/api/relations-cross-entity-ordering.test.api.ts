@@ -1,9 +1,9 @@
 'use strict';
 
-const { createTestBuilder } = require('api-tests/builder');
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
-const modelsUtils = require('api-tests/models');
+import { createTestBuilder } from 'api-tests/builder';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest } from 'api-tests/request';
+import modelsUtils from 'api-tests/models';
 
 let strapi;
 let rq;
@@ -11,9 +11,8 @@ const data = {
   products: [],
   shops: [],
 };
-let id1;
-let id2;
-let id3;
+let documentId1: string;
+let documentId2: string;
 const populateShop = [
   'products_ow',
   'products_oo',
@@ -112,7 +111,7 @@ const shopModel = {
   pluralName: 'shops',
 };
 
-const createEntry = async (singularName, data, populate) => {
+const createEntry = async (singularName: string, data: any, populate: string[]) => {
   const { body } = await rq({
     method: 'POST',
     url: `/content-manager/collection-types/api::${singularName}.${singularName}`,
@@ -122,7 +121,7 @@ const createEntry = async (singularName, data, populate) => {
   return body;
 };
 
-const updateEntry = async (singularName, id, data, populate) => {
+const updateEntry = async (singularName: string, id: string, data: any, populate: string[]) => {
   const { body } = await rq({
     method: 'PUT',
     url: `/content-manager/collection-types/api::${singularName}.${singularName}/${id}`,
@@ -132,27 +131,7 @@ const updateEntry = async (singularName, id, data, populate) => {
   return body;
 };
 
-const cloneEntry = async (singularName, id, data, populate) => {
-  const { body } = await rq({
-    method: 'POST',
-    url: `/content-manager/collection-types/api::${singularName}.${singularName}/clone/${id}`,
-    body: data,
-    qs: { populate },
-  });
-  return body;
-};
-
-const getRelations = async (uid, field, id) => {
-  const res = await rq({
-    method: 'GET',
-    url: `/content-manager/relations/${uid}/${id}/${field}`,
-  });
-
-  return res.body;
-};
-
-// TODO: Fix relations
-describe.skip('Relations', () => {
+describe('Relations', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -163,17 +142,16 @@ describe.skip('Relations', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    const createdProduct1 = await createEntry('product', { name: 'Skate' });
-    const createdProduct2 = await createEntry('product', { name: 'Candle' });
-    const createdProduct3 = await createEntry('product', { name: 'Mug' });
+    const createdProduct1 = await createEntry('product', { name: 'Skate' }, []);
+    const createdProduct2 = await createEntry('product', { name: 'Candle' }, []);
+    const createdProduct3 = await createEntry('product', { name: 'Mug' }, []);
 
     data.products.push(createdProduct1);
     data.products.push(createdProduct2);
     data.products.push(createdProduct3);
 
-    id1 = data.products[0].documentId;
-    id2 = data.products[1].documentId;
-    id3 = data.products[2].documentId;
+    documentId1 = data.products[0].data.documentId;
+    documentId2 = data.products[1].data.documentId;
   });
 
   afterAll(async () => {
@@ -191,15 +169,15 @@ describe.skip('Relations', () => {
           'shop',
           {
             name: 'Cazotte Shop',
-            products_ow: { connect: [id1] },
-            products_oo: { connect: [id1] },
-            products_mo: { connect: [id1] },
-            products_om: { connect: [id1, id2] },
-            products_mm: { connect: [id1, id2] },
-            products_mw: { connect: [id1, id2] },
+            products_ow: { connect: [documentId1] },
+            products_oo: { connect: [documentId1] },
+            products_mo: { connect: [documentId1] },
+            products_om: { connect: [documentId1, documentId2] },
+            products_mm: { connect: [documentId1, documentId2] },
+            products_mw: { connect: [documentId1, documentId2] },
             myCompo: {
-              compo_products_ow: { connect: [id1] },
-              compo_products_mw: { connect: [id1, id2] },
+              compo_products_ow: { connect: [documentId1] },
+              compo_products_mw: { connect: [documentId1, documentId2] },
             },
           },
           ['myCompo']
@@ -210,30 +188,41 @@ describe.skip('Relations', () => {
       // Update shop 1 relation order
       await updateEntry(
         'shop',
-        shops[0].documentId,
+        shops[0].data.documentId,
         {
           name: 'Cazotte Shop',
-          products_om: { disconnect: [id2] },
-          products_mm: { disconnect: [id2] },
-          products_mw: { disconnect: [id2] },
+          products_om: { disconnect: [documentId2] },
+          products_mm: { disconnect: [documentId2] },
+          products_mw: { disconnect: [documentId2] },
           myCompo: {
-            id: shops[0].myCompo.documentId,
-            compo_products_mw: { disconnect: [id2] },
+            compo_products_mw: { disconnect: [documentId2] },
           },
         },
         []
       );
 
       const updatedShop2 = await strapi.db.query('api::shop.shop').findOne({
-        where: { documentId: shops[1].documentId },
+        where: { documentId: shops[1].data.documentId },
         populate: populateShop,
       });
 
       // shop2 relations should be unchanged
-      expect(updatedShop2.products_om).toMatchObject([{ id: id1 }, { id: id2 }]);
-      expect(updatedShop2.products_mm).toMatchObject([{ id: id1 }, { id: id2 }]);
-      expect(updatedShop2.products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
-      expect(updatedShop2.myCompo.compo_products_mw).toMatchObject([{ id: id1 }, { id: id2 }]);
+      expect(updatedShop2.products_om).toMatchObject([
+        { documentId: documentId1 },
+        { documentId: documentId2 },
+      ]);
+      expect(updatedShop2.products_mm).toMatchObject([
+        { documentId: documentId1 },
+        { documentId: documentId2 },
+      ]);
+      expect(updatedShop2.products_mw).toMatchObject([
+        { documentId: documentId1 },
+        { documentId: documentId2 },
+      ]);
+      expect(updatedShop2.myCompo.compo_products_mw).toMatchObject([
+        { documentId: documentId1 },
+        { documentId: documentId2 },
+      ]);
     });
   });
 });

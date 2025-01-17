@@ -24,7 +24,9 @@ test.describe('Adding content', () => {
                 name: 'testrepeatablecomp2',
                 icon: 'moon',
                 categorySelect: 'product',
-                attributes: [{ type: 'text', name: 'testrepeatablecomp2text' }],
+                attributes: [
+                  { type: 'text', name: 'testrepeatablecomp2text', advanced: { required: true } },
+                ],
               },
             },
           },
@@ -37,7 +39,9 @@ test.describe('Adding content', () => {
                 name: 'testsinglecomp2',
                 icon: 'moon',
                 categorySelect: 'product',
-                attributes: [{ type: 'text', name: 'testsinglecomp2text' }],
+                attributes: [
+                  { type: 'text', name: 'testsinglecomp2text', advanced: { required: true } },
+                ],
               },
             },
           },
@@ -55,14 +59,20 @@ test.describe('Adding content', () => {
                       name: 'testnewcomponentrepeatable',
                       icon: 'moon',
                       categorySelect: 'product',
-                      attributes: [{ type: 'text', name: 'testnewcomponentexistingcategorytext' }],
+                      attributes: [
+                        {
+                          type: 'text',
+                          name: 'testnewcomponentexistingcategorytext',
+                          advanced: { required: true },
+                        },
+                      ],
                     },
                   },
                 },
                 // Existing component with existing category
                 {
                   type: 'component',
-                  name: 'testexistingcomponentexistingcategory', // TODO: is this used?
+                  name: 'testexistingcomponentexistingcategory',
                   component: {
                     useExisting: 'variations',
                     options: {
@@ -150,5 +160,36 @@ test.describe('Adding content', () => {
     // verify order of components
     const before = await isElementBefore(source, target);
     expect(before).toBe(true);
+  });
+
+  // TODO: can this become a loop to test every field? might work best to have a create where every first attempt to enter an attribute is made without a name
+  test('when I publish an empty required text field inside a dz I see an error', async ({
+    page,
+  }) => {
+    const fields = [
+      {
+        name: 'testdz',
+        type: 'dz',
+        value: [
+          {
+            category: 'product',
+            name: 'newcomponentexistingcategory',
+            fields: [
+              {
+                type: 'text',
+                name: 'testnewcomponentexistingcategorytext',
+                value: '',
+              },
+            ],
+          },
+        ],
+      },
+    ] satisfies FieldValue[];
+
+    await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
+
+    // TODO: check that aria-invalid=true for this input
+
+    expect(page.getByText('This value is required')).toBeVisible();
   });
 });

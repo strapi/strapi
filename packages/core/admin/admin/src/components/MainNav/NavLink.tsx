@@ -24,25 +24,18 @@ const MainNavLinkWrapper = styled(RouterLink)`
   padding-block: 0.6rem;
   padding-inline: 0.6rem;
 
-  &:hover,
-  &.active {
-    background: ${({ theme }) => theme.colors.neutral100};
-  }
-
   &:hover {
     svg path {
       fill: ${({ theme }) => theme.colors.neutral600};
     }
-    color: ${({ theme }) => theme.colors.neutral700};
+    background: ${({ theme }) => theme.colors.neutral100};
   }
 
   &.active {
     svg path {
       fill: ${({ theme }) => theme.colors.primary600};
     }
-
-    color: ${({ theme }) => theme.colors.primary600};
-    font-weight: 500;
+    background: ${({ theme }) => theme.colors.primary100};
   }
 `;
 
