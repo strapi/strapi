@@ -28,6 +28,7 @@ const App = ({ strapi, store }: AppProps) => {
     }
   }, []);
 
+  console.log('App Loaded');
   return (
     <Providers strapi={strapi} store={store}>
       <Suspense fallback={<Page.Loading />}>
