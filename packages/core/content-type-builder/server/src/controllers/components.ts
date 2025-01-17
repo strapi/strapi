@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import type { Context } from 'koa';
 import type { UID } from '@strapi/types';
+import { MigrationBuilder } from '../services/migration-builder';
 import { getService } from '../utils';
 import { validateComponentInput, validateUpdateComponentInput } from './validation/component';
 
@@ -101,6 +102,8 @@ export default {
 
       const componentService = getService('components');
 
+      // TODO: renaming component attributes is slightly different than renaming normal attributes
+
       const component = (await componentService.editComponent(uid, {
         component: body.component,
         components: body.components,
@@ -134,6 +137,10 @@ export default {
       const componentService = getService('components');
 
       const component = await componentService.deleteComponent(uid);
+
+      const migrationBuilder = new MigrationBuilder();
+      migrationBuilder.addDeleteComponent(uid);
+      await migrationBuilder.writeFiles();
 
       setImmediate(() => strapi.reload());
 
