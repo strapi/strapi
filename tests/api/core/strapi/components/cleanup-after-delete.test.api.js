@@ -40,7 +40,6 @@ const contentType = {
   displayName: 'contentwithcomponent',
   singularName: 'contentwithcomponent',
   pluralName: 'contentwithcomponents',
-  // draftAndPublish: true,
   attributes: {
     tempcomp: {
       type: 'component',
