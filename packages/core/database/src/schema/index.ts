@@ -6,6 +6,7 @@ import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
 import type { Database } from '..';
+import { SchemaDiff } from './types';
 
 export type * from './types';
 
@@ -15,8 +16,8 @@ export interface SchemaProvider {
   builder: ReturnType<typeof createSchemaBuilder>;
   schemaDiff: ReturnType<typeof createSchemaDiff>;
   schemaStorage: ReturnType<typeof createSchemaStorage>;
-  sync(): Promise<void>;
-  syncSchema(): Promise<void>;
+  sync(): Promise<SchemaDiff['status']>;
+  syncSchema(): Promise<SchemaDiff['status']>;
   reset(): Promise<void>;
   create(): Promise<void>;
   drop(): Promise<void>;
@@ -60,7 +61,7 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       await this.create();
     },
 
-    async syncSchema() {
+    async syncSchema(): Promise<SchemaDiff['status']> {
       debug('Synchronizing database schema');
 
       const DBSchema = await db.dialect.schemaInspector.getSchema();
@@ -72,12 +73,14 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       }
 
       await this.schemaStorage.add(schema);
+
+      return status;
     },
 
     // TODO: support options to migrate softly or forcefully
     // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
     // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
-    async sync() {
+    async sync(): Promise<SchemaDiff['status']> {
       if (await db.migrations.shouldRun()) {
         debug('Found migrations to run');
         await db.migrations.up();
@@ -102,6 +105,8 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       }
 
       debug('Schema unchanged');
+
+      return 'UNCHANGED';
     },
   };
 };
