@@ -29,7 +29,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "run -T run-p clean build:code build:types",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
     "build:code": "run -T rollup -c",
     "build:types": "run -T run-p build:types:admin",
     "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",

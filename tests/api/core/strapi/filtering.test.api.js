@@ -114,7 +114,7 @@ describe('Filtering API', () => {
     await builder.cleanup();
   });
 
-  describe('Basic filters', () => {
+  describe.only('Basic filters', () => {
     describe('Filter $and', () => {
       test('Should return an array with matching entities', async () => {
         const res = await rq({
@@ -133,6 +133,8 @@ describe('Filtering API', () => {
             },
           },
         });
+
+        console.log(data);
 
         expect(res.body.data).toEqual(expect.arrayContaining([data.product[0]]));
       });

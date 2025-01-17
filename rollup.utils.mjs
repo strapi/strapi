@@ -4,6 +4,7 @@ import { defineConfig } from 'rollup';
 import swc from '@rollup/plugin-swc';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import dynamicImportVars from '@rollup/plugin-dynamic-import-vars';
 
 import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
@@ -36,6 +37,7 @@ const basePlugins = () => [
       sourceMaps: true,
     },
   }),
+  dynamicImportVars({}),
 ];
 
 const baseConfig = (baseDir) => {

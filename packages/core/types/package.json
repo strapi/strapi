@@ -33,7 +33,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "run -T run-p clean build:types",
+    "build": "run -T run-s clean build:types",
     "build:types": "run -T tsc -p tsconfig.build.json",
     "clean": "run -T rimraf ./dist",
     "doc:ts": "typedoc",

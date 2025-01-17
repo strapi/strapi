@@ -19,6 +19,12 @@
     "packageManager": "yarn"
   },
   "targetDefaults": {
+    "build": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build"],
+      "cache": true
+    },
     "build:code": {
       "inputs": ["default", "^production"],
       "outputs": ["{projectRoot}/dist"],

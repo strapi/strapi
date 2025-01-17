@@ -35,7 +35,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "run -T run-p clean build:code build:types",
+    "build": "run -T npm-run-all clean build:code",
     "build:code": "run -T rollup -c",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
