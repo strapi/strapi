@@ -9375,7 +9375,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.5.2"
     bcryptjs: "npm:2.4.3"
     formik: "npm:2.4.5"
-    grant-koa: "npm:5.4.8"
+    grant: "npm:^5.4.8"
     immer: "npm:9.0.21"
     jsonwebtoken: "npm:9.0.0"
     jwk-to-pem: "npm:2.0.5"
@@ -14988,9 +14988,9 @@ __metadata:
   linkType: hard
 
 "cookie-signature@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "cookie-signature@npm:1.2.1"
-  checksum: 10c0/1f71acf64931d7e7684aa228a0dad70162f6993b65b2957e076833cbd6f9a2f507b8d731b15e3895dce0e7ba4c63551f4686d1a3120199fe28060c41fd493a73
+  version: 1.2.2
+  resolution: "cookie-signature@npm:1.2.2"
+  checksum: 10c0/54e05df1a293b3ce81589b27dddc445f462f6fa6812147c033350cd3561a42bc14481674e05ed14c7bd0ce1e8bb3dc0e40851bad75415733711294ddce0b7bc6
   languageName: node
   linkType: hard
 
@@ -16261,7 +16261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"elliptic@npm:^6.5.4":
+"elliptic@npm:^6.5.4, elliptic@npm:^6.6.1":
   version: 6.6.1
   resolution: "elliptic@npm:6.6.1"
   dependencies:
@@ -16273,21 +16273,6 @@ __metadata:
     minimalistic-assert: "npm:^1.0.1"
     minimalistic-crypto-utils: "npm:^1.0.1"
   checksum: 10c0/8b24ef782eec8b472053793ea1e91ae6bee41afffdfcb78a81c0a53b191e715cbe1292aa07165958a9bbe675bd0955142560b1a007ffce7d6c765bcaf951a867
-  languageName: node
-  linkType: hard
-
-"elliptic@npm:^6.5.7":
-  version: 6.5.7
-  resolution: "elliptic@npm:6.5.7"
-  dependencies:
-    bn.js: "npm:^4.11.9"
-    brorand: "npm:^1.1.0"
-    hash.js: "npm:^1.0.0"
-    hmac-drbg: "npm:^1.0.1"
-    inherits: "npm:^2.0.4"
-    minimalistic-assert: "npm:^1.0.1"
-    minimalistic-crypto-utils: "npm:^1.0.1"
-  checksum: 10c0/799959b6c54ea3564e8961f35abdf8c77e37617f3051614b05ab1fb6a04ddb65bd1caa75ed1bae375b15dda312a0f79fed26ebe76ecf05c5a7af244152a601b8
   languageName: node
   linkType: hard
 
@@ -19297,17 +19282,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"grant-koa@npm:5.4.8":
-  version: 5.4.8
-  resolution: "grant-koa@npm:5.4.8"
-  dependencies:
-    grant: "npm:^5.4.8"
-  peerDependencies:
-    koa: ">=2.0.0"
-  checksum: 10c0/74d0ef4c1ca359675988a8939507163b16e6257088f287100c1bbb6ae9eecb2945740cca38a8039cb293f8ddfca5341435a32d561ce3d658120f8a84e9808807
-  languageName: node
-  linkType: hard
-
 "grant@npm:^5.4.8":
   version: 5.4.23
   resolution: "grant@npm:5.4.23"
@@ -22095,13 +22069,13 @@ __metadata:
   linkType: hard
 
 "jwk-to-pem@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "jwk-to-pem@npm:2.0.6"
+  version: 2.0.7
+  resolution: "jwk-to-pem@npm:2.0.7"
   dependencies:
     asn1.js: "npm:^5.3.0"
-    elliptic: "npm:^6.5.7"
+    elliptic: "npm:^6.6.1"
     safe-buffer: "npm:^5.0.1"
-  checksum: 10c0/1ae56a2a807153375390e6b627a41231c593a30c1e58543c052c46114ac3df636182e7d7f525828161a44ce9e91c4aa61aae116db5a7f03b0f1db771c724cdba
+  checksum: 10c0/00fc138edff0e9dbea2d321f5c33b9a094ea8b2ab34a28cf3117df4dca3795d18f7a8b6bd08fa56ecdd1dad2716df459e47d6843413606dd15b98dd8b8f789ed
   languageName: node
   linkType: hard
 
@@ -26674,12 +26648,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:6.13.0, qs@npm:^6.10.3, qs@npm:^6.11.0, qs@npm:^6.13.0, qs@npm:^6.5.2, qs@npm:^6.9.6":
+"qs@npm:6.13.0, qs@npm:^6.10.3, qs@npm:^6.11.0, qs@npm:^6.5.2, qs@npm:^6.9.6":
   version: 6.13.0
   resolution: "qs@npm:6.13.0"
   dependencies:
     side-channel: "npm:^1.0.6"
   checksum: 10c0/62372cdeec24dc83a9fb240b7533c0fdcf0c5f7e0b83343edd7310f0ab4c8205a5e7c56406531f2e47e1b4878a3821d652be4192c841de5b032ca83619d8f860
+  languageName: node
+  linkType: hard
+
+"qs@npm:^6.13.0":
+  version: 6.13.1
+  resolution: "qs@npm:6.13.1"
+  dependencies:
+    side-channel: "npm:^1.0.6"
+  checksum: 10c0/5ef527c0d62ffca5501322f0832d800ddc78eeb00da3b906f1b260ca0492721f8cdc13ee4b8fd8ac314a6ec37b948798c7b603ccc167e954088df392092f160c
   languageName: node
   linkType: hard
 
