@@ -218,7 +218,7 @@ const SelectedEntriesTableContent = ({
       </Table.Head>
       <Table.Loading />
       <Table.Body>
-        {rowsToDisplay.map((row, index) => (
+        {rowsToDisplay.map((row) => (
           <Table.Row key={row.id}>
             <Table.CheckboxCell id={row.id} />
             <Table.Cell>
@@ -279,12 +279,6 @@ const SelectedEntriesTableContent = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
- * BoldChunk
- * -----------------------------------------------------------------------------------------------*/
-
-const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{chunks}</Typography>;
-
-/* -------------------------------------------------------------------------------------------------
  * PublicationStatusSummary
  * -----------------------------------------------------------------------------------------------*/
 
@@ -301,7 +295,7 @@ const PublicationStatusSummary = ({ count, icon, message }: PublicationStatusSum
         {icon}
         <Typography>{message}</Typography>
       </Flex>
-      {BoldChunk(count)}
+      <Typography fontWeight="bold">{count}</Typography>
     </Flex>
   );
 };
@@ -325,48 +319,48 @@ const PublicationStatusGrid = ({
 }: PublicationStatusGridProps) => {
   const { formatMessage } = useIntl();
 
-  const publicationStatuses = [
-    {
-      count: entriesReadyToPublishCount,
-      icon: <CheckCircle fill="success600" />,
-      message: formatMessage({
-        id: 'app.utils.ready-to-publish',
-        defaultMessage: 'Ready to publish',
-      }),
-    },
-    {
-      count: entriesPublishedCount,
-      icon: <CheckCircle fill="success600" />,
-      message: formatMessage({
-        id: 'app.utils.already-published',
-        defaultMessage: 'Already published',
-      }),
-    },
-    {
-      count: entriesModifiedCount,
-      icon: <ArrowsCounterClockwise fill="alternative600" />,
-      message: formatMessage({
-        id: 'content-manager.bulk-publish.modified',
-        defaultMessage: 'Ready to publish changes',
-      }),
-    },
-    {
-      count: entriesWithErrorsCount,
-      icon: <CrossCircle fill="danger600" />,
-      message: formatMessage({
-        id: 'content-manager.bulk-publish.waiting-for-action',
-        defaultMessage: 'Waiting for action',
-      }),
-    },
-  ];
-
   return (
     <GridRoot hasRadius>
-      {publicationStatuses.map((item) => (
-        <GridItem key={item.message} col={6} padding={4}>
-          <PublicationStatusSummary count={item.count} icon={item.icon} message={item.message} />
-        </GridItem>
-      ))}
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesReadyToPublishCount}
+          icon={<CheckCircle fill="success600" />}
+          message={formatMessage({
+            id: 'app.utils.ready-to-publish',
+            defaultMessage: 'Ready to publish',
+          })}
+        />
+      </GridItem>
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesPublishedCount}
+          icon={<CheckCircle fill="success600" />}
+          message={formatMessage({
+            id: 'app.utils.already-published',
+            defaultMessage: 'Already published',
+          })}
+        />
+      </GridItem>
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesModifiedCount}
+          icon={<ArrowsCounterClockwise fill="alternative600" />}
+          message={formatMessage({
+            id: 'content-manager.bulk-publish.modified',
+            defaultMessage: 'Ready to publish changes',
+          })}
+        />
+      </GridItem>
+      <GridItem col={6} padding={4}>
+        <PublicationStatusSummary
+          count={entriesWithErrorsCount}
+          icon={<CrossCircle fill="danger600" />}
+          message={formatMessage({
+            id: 'content-manager.bulk-publish.waiting-for-action',
+            defaultMessage: 'Waiting for action',
+          })}
+        />
+      </GridItem>
     </GridRoot>
   );
 };
@@ -472,14 +466,14 @@ const SelectedEntriesModalContent = ({
   const selectedEntriesWithErrorsCount = selectedEntries.filter(
     ({ documentId }) => validationErrors[documentId]
   ).length;
-  const selectedEntriesPublished = selectedEntries.filter(
+  const selectedEntriesPublishedCount = selectedEntries.filter(
     ({ status }) => status === 'published'
   ).length;
-  const selectedEntriesModified = selectedEntries.filter(
-    ({ status }) => status === 'modified'
+  const selectedEntriesModifiedCount = selectedEntries.filter(
+    ({ status, documentId }) => status === 'modified' && !validationErrors[documentId]
   ).length;
   const selectedEntriesWithNoErrorsCount =
-    selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublished;
+    selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublishedCount;
 
   const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
@@ -500,9 +494,11 @@ const SelectedEntriesModalContent = ({
     <>
       <Modal.Body>
         <PublicationStatusGrid
-          entriesReadyToPublishCount={selectedEntriesWithNoErrorsCount - selectedEntriesModified}
-          entriesPublishedCount={selectedEntriesPublished}
-          entriesModifiedCount={selectedEntriesModified}
+          entriesReadyToPublishCount={
+            selectedEntriesWithNoErrorsCount - selectedEntriesModifiedCount
+          }
+          entriesPublishedCount={selectedEntriesPublishedCount}
+          entriesModifiedCount={selectedEntriesModifiedCount}
           entriesWithErrorsCount={selectedEntriesWithErrorsCount}
         />
         <Box marginTop={7}>
@@ -530,7 +526,7 @@ const SelectedEntriesModalContent = ({
             disabled={
               selectedEntries.length === 0 ||
               selectedEntries.length === selectedEntriesWithErrorsCount ||
-              selectedEntriesPublished === selectedEntries.length ||
+              selectedEntriesPublishedCount === selectedEntries.length ||
               isLoading
             }
             loading={isSubmittingForm}

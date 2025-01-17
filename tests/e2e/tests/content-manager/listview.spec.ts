@@ -67,19 +67,19 @@ test.describe('List View', () => {
         readyToPublishChangesCount: number
       ) => {
         const alreadyPublishedElement = await page
-          .locator('text=Already Published')
+          .getByText('Already Published')
           .first()
           .locator('xpath=../following-sibling::*');
         const readyToPublishElement = await page
-          .locator('text=Ready to publish')
+          .getByText('Ready to publish')
           .first()
           .locator('xpath=../following-sibling::*');
         const waitingForActionElement = await page
-          .locator('text=Waiting for action')
+          .getByText('Waiting for action')
           .first()
           .locator('xpath=../following-sibling::*');
         const readyToPublishChangesElement = await page
-          .locator('text=Ready to publish changes')
+          .getByText('Ready to publish changes')
           .first()
           .locator('xpath=../following-sibling::*');
 
