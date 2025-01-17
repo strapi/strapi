@@ -14,7 +14,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { Document, useDoc } from '../../../hooks/useDocument';
+import { Document, useContentManagerContext } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { isBaseQueryError } from '../../../utils/api';
 import { DocumentActionsMenu } from '../../EditView/components/DocumentActions';
@@ -38,7 +38,7 @@ interface TableActionsProps {
 
 const TableActions = ({ document }: TableActionsProps) => {
   const { formatMessage } = useIntl();
-  const { model, collectionType } = useDoc();
+  const { model, collectionType } = useContentManagerContext();
   const plugins = useStrapiApp('TableActions', (state) => state.plugins);
 
   const props: DocumentActionProps = {
