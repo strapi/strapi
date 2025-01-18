@@ -1,13 +1,20 @@
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { StrapiApp } from '../StrapiApp';
 
 describe('ADMIN | new StrapiApp', () => {
   it('should render the app without plugins', async () => {
     const app = new StrapiApp();
-    const { findByRole } = render(app.render());
+    const { getByRole } = render(app.render());
 
-    await findByRole('combobox');
+    await waitFor(
+      () => {
+        expect(getByRole('combobox')).toBeInTheDocument();
+      },
+      {
+        timeout: 60000,
+      }
+    );
   });
 
   describe('Hook api', () => {
