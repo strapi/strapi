@@ -1,6 +1,6 @@
 import fse from 'fs-extra';
 import { defaultsDeep } from 'lodash/fp';
-import body, { KoaBodyMiddlewareOptions } from 'koa-body';
+import { koaBody, KoaBodyMiddlewareOptions } from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
 import type { Core } from '@strapi/types';
@@ -37,7 +37,7 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
       await next();
     } else {
       try {
-        await body(bodyConfig)(ctx, async () => {});
+        await koaBody(bodyConfig)(ctx, async () => {});
 
         const files = getFiles(ctx);
 

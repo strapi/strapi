@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Writable, PassThrough } from 'stream';
-import { type Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import type { TransferFlow, Step } from '../flows';
 import type { TransferStage, IAsset, Protocol } from '../../../../types';

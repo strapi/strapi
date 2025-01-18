@@ -1,5 +1,5 @@
 import { PLUGIN_ID, FEATURE_ID } from './constants';
-import { Panel } from './routes/content-manager/[model]/[id]/components/Panel';
+import { Panel } from './routes/content-manager/model/id/components/Panel';
 import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
