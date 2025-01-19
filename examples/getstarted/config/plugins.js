@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = ({ env }) => ({
+module.exports = () => ({
   graphql: {
     enabled: true,
     config: {
@@ -34,23 +34,5 @@ module.exports = ({ env }) => ({
   todo: {
     enabled: false,
     resolve: `../plugins/todo-example`, // From the /examples/plugins folder
-  },
-
-  email: {
-    config: {
-      provider: 'nodemailer',
-      providerOptions: {
-        host: env('SMTP_HOST'),
-        port: env('SMTP_PORT', 1025),
-        auth: {
-          user: env('SMTP_USERNAME'),
-          pass: env('SMTP_PASSWORD'),
-        },
-      },
-      settings: {
-        defaultFrom: env('SMTP_EMAIL'),
-        defaultReplyTo: env('SMTP_EMAIL'),
-      },
-    },
   },
 });
