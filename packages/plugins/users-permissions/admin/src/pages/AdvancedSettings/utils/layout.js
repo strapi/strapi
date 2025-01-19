@@ -79,7 +79,7 @@ const layout = [
   {
     label: {
       id: getTrad('EditForm.inputToggle.label.email-confirmation-error-redirection'),
-      defaultMessage: 'Email confirmation error redirect URL',
+      defaultMessage: 'Email confirmation error redirect url',
     },
     hint: {
       id: getTrad('EditForm.inputToggle.description.email-confirmation-error-redirection'),
