@@ -175,6 +175,7 @@ const handlers = [
           default_role: 'authenticated',
           email_confirmation: false,
           email_confirmation_redirection: '',
+          email_confirmation_error_redirection: '',
           email_reset_password: 'https://cat-bounce.com/',
           unique_email: false,
         },
