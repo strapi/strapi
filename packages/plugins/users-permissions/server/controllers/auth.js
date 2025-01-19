@@ -408,7 +408,7 @@ module.exports = ({ strapi }) => ({
       .get();
 
     if (!user) {
-      const redirectUrl = settings.email_confirmation_error_redirection ?? null;
+      const redirectUrl = settings.email_confirmation_error_redirection || null;
 
       if (redirectUrl) {
         return ctx.redirect(redirectUrl);
