@@ -403,7 +403,17 @@ module.exports = ({ strapi }) => ({
 
     const [user] = await userService.fetchAll({ filters: { confirmationToken } });
 
+    const settings = await strapi
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
+      .get();
+
     if (!user) {
+      const redirectUrl = settings.email_confirmation_error_redirection ?? null;
+
+      if (redirectUrl) {
+        return ctx.redirect(redirectUrl);
+      }
+
       throw new ValidationError('Invalid token');
     }
 
@@ -415,10 +425,6 @@ module.exports = ({ strapi }) => ({
         user: await sanitizeUser(user, ctx),
       });
     } else {
-      const settings = await strapi
-        .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
-        .get();
-
       ctx.redirect(settings.email_confirmation_redirection || '/');
     }
   },

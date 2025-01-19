@@ -76,6 +76,23 @@ const layout = [
     type: 'string',
     size: 12,
   },
+  {
+    label: {
+      id: getTrad('EditForm.inputToggle.label.email-confirmation-error-redirection'),
+      defaultMessage: 'Email confirmation error redirect URL',
+    },
+    hint: {
+      id: getTrad('EditForm.inputToggle.description.email-confirmation-error-redirection'),
+      defaultMessage: 'Enter the URL to redirect users to if email confirmation fails.',
+    },
+    placeholder: {
+      id: getTrad('EditForm.inputToggle.placeholder.email-confirmation-error-redirection'),
+      defaultMessage: 'e.g. https://yourfrontend.com/email-confirmation-error',
+    },
+    name: 'email_confirmation_error_redirection',
+    type: 'string',
+    size: 12,
+  },
 ];
 
 export default layout;
