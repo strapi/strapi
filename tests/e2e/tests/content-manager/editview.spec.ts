@@ -694,10 +694,16 @@ test.describe('Edit View', () => {
       expect(components[0]).toHaveText(/product carousel/i);
       expect(components[1]).toHaveText(/content and image/i);
 
-      // Add components add specific locations
+      // Add components add specific locations:
+      // - very last position
+      await components[1].getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /add component below/i }).click();
+      await page.getByRole('menuitem', { name: /product carousel/i }).click();
+      // - very first position
       await components[0].getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /add component above/i }).click();
       await page.getByRole('menuitem', { name: /hero image/i }).click();
+      // - middle position
       await components[1].getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /add component below/i }).click();
       await page.getByRole('menuitem', { name: /hero image/i }).click();
@@ -707,11 +713,12 @@ test.describe('Edit View', () => {
         .getByRole('listitem')
         .filter({ has: page.getByRole('heading') })
         .all();
-      expect(updatedComponents).toHaveLength(4);
+      expect(updatedComponents).toHaveLength(5);
       expect(updatedComponents[0]).toHaveText(/hero image/i);
       expect(updatedComponents[1]).toHaveText(/product carousel/i);
       expect(updatedComponents[2]).toHaveText(/hero image/i);
       expect(updatedComponents[3]).toHaveText(/content and image/i);
+      expect(updatedComponents[4]).toHaveText(/product carousel/i);
     });
   });
 });
