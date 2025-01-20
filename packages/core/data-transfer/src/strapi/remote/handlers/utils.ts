@@ -126,6 +126,8 @@ export const handleWSUpgrade = (wss: WebSocketServer, ctx: Context, callback: WS
     }
 
     disableTimeouts();
+    strapi.db.lifecycles.disable();
+    strapi.log.info('[Data transfer] Disabling lifecycle hooks');
 
     // Create a connection between the client & the server
     wss.emit('connection', client, ctx.req);
@@ -347,6 +349,8 @@ export const handlerControllerFactory =
             cannotRespondHandler(err);
           } finally {
             resetTimeouts();
+            strapi.db.lifecycles.enable();
+            strapi.log.info('[Data transfer] Restoring lifecycle hooks');
           }
         });
         ws.on('error', async (...args) => {
