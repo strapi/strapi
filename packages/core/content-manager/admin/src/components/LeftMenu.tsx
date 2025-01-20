@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useEffect, useRef, useCallback, Fragment } from "react";
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import {
@@ -21,6 +22,32 @@ import { getTranslation } from '../utils/translations';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 
+  // Custom hook to handle scroll locking
+  const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
+    const handleScroll = useCallback((event: WheelEvent) => {
+      const sidebar = ref.current;
+      if (!sidebar) return;
+  
+      const isAtTop = sidebar.scrollTop === 0;
+      const isAtBottom = sidebar.scrollHeight - sidebar.scrollTop === sidebar.clientHeight;
+  
+      if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
+        event.preventDefault();
+      }
+    }, []);
+  
+    useEffect(() => {
+      const sidebar = ref.current;
+      if (!sidebar) return;
+  
+      sidebar.addEventListener("wheel", handleScroll, { passive: false });
+  
+      return () => {
+        sidebar.removeEventListener("wheel", handleScroll);
+      };
+    }, [handleScroll]);
+  };
+
 const SubNavLinkCustom = styled(SubNavLink)`
   div {
     width: inherit;
@@ -37,6 +64,8 @@ const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
   const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  usePreventScroll(sidebarRef);
 
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
@@ -133,7 +162,7 @@ const LeftMenu = () => {
   };
 
   return (
-    <SubNav aria-label={label}>
+    <SubNav ref={sidebarRef} aria-label={label}>
       <SubNavHeader
         label={label}
         searchable

@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { useEffect, useRef, useCallback, Fragment } from "react";
 
 import {
   Box,
@@ -20,6 +20,33 @@ import { getTrad } from '../../utils/getTrad';
 
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
 
+
+// Custom hook to handle scroll locking
+const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
+  const handleScroll = useCallback((event: WheelEvent) => {
+    const sidebar = ref.current;
+    if (!sidebar) return;
+
+    const isAtTop = sidebar.scrollTop === 0;
+    const isAtBottom = sidebar.scrollHeight - sidebar.scrollTop === sidebar.clientHeight;
+
+    if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
+      event.preventDefault();
+    }
+  }, []);
+
+  useEffect(() => {
+    const sidebar = ref.current;
+    if (!sidebar) return;
+
+    sidebar.addEventListener("wheel", handleScroll, { passive: false });
+
+    return () => {
+      sidebar.removeEventListener("wheel", handleScroll);
+    };
+  }, [handleScroll]);
+};
+
 const SubNavLinkCustom = styled(SubNavLink)`
   div {
     width: inherit;
@@ -35,6 +62,8 @@ const SubNavLinkCustom = styled(SubNavLink)`
 export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  usePreventScroll(sidebarRef);
 
   const pluginName = formatMessage({
     id: getTrad('plugin.name'),
@@ -42,8 +71,8 @@ export const ContentTypeBuilderNav = () => {
   });
 
   return (
-    <SubNav aria-label={pluginName}>
-      <SubNavHeader
+    <SubNav  ref={sidebarRef} aria-label={pluginName}>
+      <SubNavHeader 
         searchable
         value={searchValue}
         onClear={() => onSearchChange('')}

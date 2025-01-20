@@ -71,6 +71,39 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   );
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
+  // Left Menu Scroll Fix 20-01-2025
+  React.useEffect(() => {
+    const preventScroll = (event: Event) => event.preventDefault(); 
+  
+    const toggleScroll = (enable: boolean) => {
+      window[enable ? 'addEventListener' : 'removeEventListener'](
+        'wheel',
+        preventScroll as EventListener, 
+        { passive: false }
+      );
+    };
+  
+    const mainNavElement = document.querySelector('nav');
+    if (mainNavElement) {
+      const handleMouseEnter = () => toggleScroll(true);
+      const handleMouseLeave = () => toggleScroll(false);
+  
+      mainNavElement.addEventListener('mouseenter', handleMouseEnter);
+      mainNavElement.addEventListener('mouseleave', handleMouseLeave);
+  
+      const isCursorOverMainNav = mainNavElement.matches(':hover');
+      if (isCursorOverMainNav) {
+        toggleScroll(true);
+      }
+  
+      return () => {
+        mainNavElement.removeEventListener('mouseenter', handleMouseEnter);
+        mainNavElement.removeEventListener('mouseleave', handleMouseLeave);
+        toggleScroll(false);
+      };
+    }
+  }, [pathname]);
+// scroll fix end
   return (
     <MainNav>
       <NavBrand />
