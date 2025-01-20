@@ -616,7 +616,7 @@
   "Settings.application.customization.modal.upload.next": "التالي",
   "Settings.application.customization.size-details": "أقصى بُعد: {dimension} x {dimension} ، الحد الأقصى لحجم الملف: {size} كيلوبايت",
   "Settings.application.description": "المعلومات العالمية للوحة الإدارة",
-  "Settings.application.edition-title": "الخطة الحالية",
+  "Settings.application.edition-title": "الإصدار الحالي",
   "Settings.application.ee-or-ce": "{communityEdition، select، true {Community Edition} أخرى {Enterprise Edition}}",
   "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud، select، true {Add seat} other {Contact sales}}",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "عند الحد: أضف مقاعد لدعوة المزيد من المستخدمين",
