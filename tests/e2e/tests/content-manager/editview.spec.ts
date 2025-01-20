@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose } from '../../utils/shared';
+import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -677,6 +677,48 @@ test.describe('Edit View', () => {
       );
       await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
       await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
+    });
+
+    test('as a user I want to add a component to a dynamic zone at a specific position', async ({
+      page,
+    }) => {
+      await page.getByLabel('Content Manager').click();
+      await navToHeader(page, ['Content Manager', 'Shop'], 'UK Shop');
+
+      // There should be a dynamic zone with two components
+      const components = await page
+        .getByRole('listitem')
+        .filter({ has: page.getByRole('heading') })
+        .all();
+      expect(components).toHaveLength(2);
+      expect(components[0]).toHaveText(/product carousel/i);
+      expect(components[1]).toHaveText(/content and image/i);
+
+      // Add components add specific locations:
+      // - very last position
+      await components[1].getByRole('button', { name: /more actions/i }).click({ force: true });
+      await page.getByRole('menuitem', { name: /add component below/i }).click({ force: true });
+      await page.getByRole('menuitem', { name: /product carousel/i }).click({ force: true });
+      // - very first position
+      await components[0].getByRole('button', { name: /more actions/i }).click({ force: true });
+      await page.getByRole('menuitem', { name: /add component above/i }).click({ force: true });
+      await page.getByRole('menuitem', { name: /hero image/i }).click({ force: true });
+      // - middle position
+      await components[1].getByRole('button', { name: /more actions/i }).click({ force: true });
+      await page.getByRole('menuitem', { name: /add component below/i }).click({ force: true });
+      await page.getByRole('menuitem', { name: /hero image/i }).click({ force: true });
+
+      // Make sure we get the desired components order
+      const updatedComponents = await page
+        .getByRole('listitem')
+        .filter({ has: page.getByRole('heading') })
+        .all();
+      expect(updatedComponents).toHaveLength(5);
+      expect(updatedComponents[0]).toHaveText(/hero image/i);
+      expect(updatedComponents[1]).toHaveText(/product carousel/i);
+      expect(updatedComponents[2]).toHaveText(/hero image/i);
+      expect(updatedComponents[3]).toHaveText(/content and image/i);
+      expect(updatedComponents[4]).toHaveText(/product carousel/i);
     });
   });
 });
