@@ -21,7 +21,7 @@ type Transform = <TAttribute extends Schema.Attribute.AnyAttribute>(
   value: any,
   attribute: TAttribute
 ) => any;
-type AnyData = Omit<Document, 'id'>;
+export type AnyData = Omit<Document, 'id'>;
 
 const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
 

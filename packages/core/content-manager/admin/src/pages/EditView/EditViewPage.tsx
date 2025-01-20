@@ -57,6 +57,7 @@ const EditViewPage = () => {
     model,
     hasError,
     getTitle,
+    getInitialFormValues,
   } = useDoc();
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
@@ -99,28 +100,7 @@ const EditViewPage = () => {
 
   const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
-  /**
-   * Here we prepare the form for editing, we need to:
-   * - remove prohibited fields from the document (passwords | ADD YOURS WHEN THERES A NEW ONE)
-   * - swap out count objects on relations for empty arrays
-   * - set __temp_key__ on array objects for drag & drop
-   *
-   * We also prepare the form for new documents, so we need to:
-   * - set default values on fields
-   */
-  const initialValues = React.useMemo(() => {
-    if ((!document && !isCreatingDocument && !isSingleType) || !schema) {
-      return undefined;
-    }
-
-    /**
-     * Check that we have an ID so we know the
-     * document has been created in some way.
-     */
-    const form = document?.id ? document : createDefaultForm(schema, components);
-
-    return transformDocument(schema, components)(form);
-  }, [document, isCreatingDocument, isSingleType, schema, components]);
+  const initialValues = getInitialFormValues(isCreatingDocument);
 
   if (hasError) {
     return <Page.Error />;

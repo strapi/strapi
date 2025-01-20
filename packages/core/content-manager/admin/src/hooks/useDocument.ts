@@ -19,6 +19,8 @@ import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
 import { SINGLE_TYPES } from '../constants/collections';
+import { type AnyData, transformDocument } from '../pages/EditView/utils/data';
+import { createDefaultForm } from '../pages/EditView/utils/forms';
 import { useGetDocumentQuery } from '../services/documents';
 import { buildValidParams } from '../utils/api';
 import { createYupSchema } from '../utils/validation';
@@ -65,6 +67,10 @@ type UseDocument = (
    * Get the document's title
    */
   getTitle: (mainField: string) => string;
+  /**
+   * Get the initial form values for the document
+   */
+  getInitialFormValues: (isCreatingDocument?: boolean) => AnyData | undefined;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -111,7 +117,6 @@ const useDocument: UseDocument = (args, opts) => {
     ...opts,
     skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
   });
-
   const document = data?.data;
   const meta = data?.meta;
 
@@ -121,6 +126,7 @@ const useDocument: UseDocument = (args, opts) => {
     schemas,
     isLoading: isLoadingSchema,
   } = useContentTypeSchema(args.model);
+  const isSingleType = schema?.kind === 'singleType';
 
   const getTitle = (mainField: string) => {
     if (mainField !== 'id' && document?.[mainField]) {
@@ -128,7 +134,7 @@ const useDocument: UseDocument = (args, opts) => {
       return document[mainField];
     }
 
-    if (schema?.kind === 'singleType' && schema?.info.displayName) {
+    if (isSingleType && schema?.info.displayName) {
       // When it's a singleType without a mainField, use the contentType displayName
       return schema.info.displayName;
     }
@@ -176,6 +182,32 @@ const useDocument: UseDocument = (args, opts) => {
     [validationSchema]
   );
 
+  /**
+   * Here we prepare the form for editing, we need to:
+   * - remove prohibited fields from the document (passwords | ADD YOURS WHEN THERES A NEW ONE)
+   * - swap out count objects on relations for empty arrays
+   * - set __temp_key__ on array objects for drag & drop
+   *
+   * We also prepare the form for new documents, so we need to:
+   * - set default values on fields
+   */
+  const getInitialFormValues = React.useCallback(
+    (isCreatingDocument: boolean = false) => {
+      if ((!document && !isCreatingDocument && !isSingleType) || !schema) {
+        return undefined;
+      }
+
+      /**
+       * Check that we have an ID so we know the
+       * document has been created in some way.
+       */
+      const form = document?.id ? document : createDefaultForm(schema, components);
+
+      return transformDocument(schema, components)(form);
+    },
+    [document, isSingleType, schema, components]
+  );
+
   const isLoading = isLoadingDocument || isFetchingDocument || isLoadingSchema;
   const hasError = !!error;
 
@@ -189,6 +221,7 @@ const useDocument: UseDocument = (args, opts) => {
     schemas,
     validate,
     getTitle,
+    getInitialFormValues,
   } satisfies ReturnType<UseDocument>;
 };
 
