@@ -7,11 +7,11 @@ import {
   Flex,
   Grid,
   IconButton,
-  VisuallyHidden,
   useComposedRefs,
   Menu,
   MenuItem,
   BoxComponent,
+  VisuallyHidden,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -156,6 +156,7 @@ const DynamicComponent = ({
               id: getTranslation('components.DynamicZone.more-actions'),
               defaultMessage: 'More actions',
             })}
+            tag="span"
           >
             <More aria-hidden focusable={false} />
           </IconButton>
