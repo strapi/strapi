@@ -155,12 +155,12 @@ describe('Content Type Builder - Content types', () => {
     });
 
     test.each([
-      ['singularName', 'singularName'],
-      ['singularName', 'pluralName'],
-      ['pluralName', 'singularName'],
-      ['pluralName', 'pluralName'],
-      ['pluralName', 'collectionName'],
-    ])(`Cannot use %p that exists as another type's %p`, async (sourceField, matchField) => {
+      ['singularName', 'singularName', 'dog'],
+      ['singularName', 'pluralName', 'dogs'],
+      ['pluralName', 'singularName', 'dog'],
+      ['pluralName', 'pluralName', 'dogs'],
+      ['pluralName', 'collectionName', 'dogs-collection'],
+    ])(`Cannot use %p that exists as another type's %p`, async (sourceField, matchField, sourceValue) => {
       const body = {
         contentType: {
           displayName: 'Frogs Frogs Frogs',
@@ -193,6 +193,7 @@ describe('Content Type Builder - Content types', () => {
                 message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
                 name: 'ValidationError',
                 path: ['contentType', sourceField],
+                value: sourceValue
               },
             ],
           },
@@ -232,18 +233,23 @@ describe('Content Type Builder - Content types', () => {
                     'Attribute keys cannot be one of id, document_id, created_at, updated_at, published_at, created_by_id, updated_by_id, created_by, updated_by, entry_id, status, localizations, meta, locale, __component, __contentType, strapi*, _strapi*, __strapi*',
                   name: 'ValidationError',
                   path: ['contentType', 'attributes', prefix],
+                  value: {
+                    type: "string"
+                  },
                 },
                 {
                   message:
                     'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
                   name: 'ValidationError',
                   path: ['contentType', 'singularName'],
+                  value: "strapi-singular",
                 },
                 {
                   message:
                     'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
                   name: 'ValidationError',
                   path: ['contentType', 'pluralName'],
+                  value: "strapi-plural",
                 },
               ],
             },
@@ -281,6 +287,16 @@ describe('Content Type Builder - Content types', () => {
                 message: 'contentType: singularName and pluralName should be different',
                 name: 'ValidationError',
                 path: ['contentType'],
+                value: {
+                  displayName: 'same string',
+                  singularName: 'same-string',
+                  pluralName: 'same-string',
+                  attributes: {
+                    title: {
+                      type: 'string',
+                    },
+                  },
+                }
               },
             ],
           },
@@ -330,6 +346,14 @@ describe('Content Type Builder - Content types', () => {
                 message: 'contentType: singularName and pluralName should be different',
                 name: 'ValidationError',
                 path: ['contentType'],
+                value: {
+                  draftAndPublish: true,
+                  attributes: {
+                    title: {
+                      type: 'string',
+                    },
+                  },
+                }
               },
             ],
           },
