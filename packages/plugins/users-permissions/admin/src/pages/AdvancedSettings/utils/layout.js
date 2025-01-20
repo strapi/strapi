@@ -1,98 +1,62 @@
 import { getTrad } from '../../../utils';
 
+const createField = ({ id, defaultMessage, name, type = 'string', size = 12, placeholder }) => ({
+  label: {
+    id: getTrad(`EditForm.inputToggle.label.${id}`),
+    defaultMessage,
+  },
+  hint: {
+    id: getTrad(`EditForm.inputToggle.description.${id}`),
+    defaultMessage: `Description for ${defaultMessage}`,
+  },
+  name,
+  type,
+  size,
+  ...(placeholder && {
+    placeholder: {
+      id: getTrad(`EditForm.inputToggle.placeholder.${id}`),
+      defaultMessage: placeholder,
+    },
+  }),
+});
+
 const layout = [
-  {
-    label: {
-      id: getTrad('EditForm.inputToggle.label.email'),
-      defaultMessage: 'One account per email address',
-    },
-    hint: {
-      id: getTrad('EditForm.inputToggle.description.email'),
-      defaultMessage:
-        'Disallow the user to create multiple accounts using the same email address with different authentication providers.',
-    },
+  createField({
+    id: 'email',
+    defaultMessage: 'One account per email address',
     name: 'unique_email',
     type: 'boolean',
-    size: 12,
-  },
-  {
-    label: {
-      id: getTrad('EditForm.inputToggle.label.sign-up'),
-      defaultMessage: 'Enable sign-ups',
-    },
-    hint: {
-      id: getTrad('EditForm.inputToggle.description.sign-up'),
-      defaultMessage:
-        'When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.',
-    },
+  }),
+  createField({
+    id: 'sign-up',
+    defaultMessage: 'Enable sign-ups',
     name: 'allow_register',
     type: 'boolean',
-    size: 12,
-  },
-  {
-    label: {
-      id: getTrad('EditForm.inputToggle.label.email-reset-password'),
-      defaultMessage: 'Reset password page',
-    },
-    hint: {
-      id: getTrad('EditForm.inputToggle.description.email-reset-password'),
-      defaultMessage: "URL of your application's reset password page.",
-    },
-    placeholder: {
-      id: getTrad('EditForm.inputToggle.placeholder.email-reset-password'),
-      defaultMessage: 'ex: https://youtfrontend.com/reset-password',
-    },
+  }),
+  createField({
+    id: 'email-reset-password',
+    defaultMessage: 'Reset password page',
     name: 'email_reset_password',
-    type: 'string',
-    size: 12,
-  },
-  {
-    label: {
-      id: getTrad('EditForm.inputToggle.label.email-confirmation'),
-      defaultMessage: 'Enable email confirmation',
-    },
-    hint: {
-      id: getTrad('EditForm.inputToggle.description.email-confirmation'),
-      defaultMessage: 'When enabled (ON), new registered users receive a confirmation email.',
-    },
+    placeholder: 'ex: https://youtfrontend.com/reset-password',
+  }),
+  createField({
+    id: 'email-confirmation',
+    defaultMessage: 'Enable email confirmation',
     name: 'email_confirmation',
     type: 'boolean',
-    size: 12,
-  },
-  {
-    label: {
-      id: getTrad('EditForm.inputToggle.label.email-confirmation-redirection'),
-      defaultMessage: 'Redirection url',
-    },
-    hint: {
-      id: getTrad('EditForm.inputToggle.description.email-confirmation-redirection'),
-      defaultMessage: 'After you confirmed your email, choose where you will be redirected.',
-    },
-    placeholder: {
-      id: getTrad('EditForm.inputToggle.placeholder.email-confirmation-redirection'),
-      defaultMessage: 'ex: https://youtfrontend.com/email-confirmation',
-    },
+  }),
+  createField({
+    id: 'email-confirmation-redirection',
+    defaultMessage: 'Redirection url',
     name: 'email_confirmation_redirection',
-    type: 'string',
-    size: 12,
-  },
-  {
-    label: {
-      id: getTrad('EditForm.inputToggle.label.email-confirmation-error-redirection'),
-      defaultMessage: 'Email confirmation error redirect url',
-    },
-    hint: {
-      id: getTrad('EditForm.inputToggle.description.email-confirmation-error-redirection'),
-      defaultMessage: 'Enter the URL to redirect users to if email confirmation fails.',
-    },
-    placeholder: {
-      id: getTrad('EditForm.inputToggle.placeholder.email-confirmation-error-redirection'),
-      defaultMessage: 'e.g. https://yourfrontend.com/email-confirmation-error',
-    },
+    placeholder: 'ex: https://youtfrontend.com/email-confirmation',
+  }),
+  createField({
+    id: 'email-confirmation-error-redirection',
+    defaultMessage: 'Email confirmation error redirect url',
     name: 'email_confirmation_error_redirection',
-    type: 'string',
-    size: 12,
-  },
+    placeholder: 'e.g. https://yourfrontend.com/email-confirmation-error',
+  }),
 ];
 
 export default layout;
