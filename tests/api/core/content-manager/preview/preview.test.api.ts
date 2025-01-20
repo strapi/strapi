@@ -1,6 +1,5 @@
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
-import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 
 const collectionTypeUid = 'api::product.product';
@@ -41,11 +40,7 @@ const singleTypeModel = {
   },
 };
 
-const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-
-// TODO: Remove skip when future flag is removed
-// describeOnCondition(edition === 'EE')('Preview', () => {
-describeOnCondition(false)('Preview', () => {
+describe('Preview', () => {
   const builder = createTestBuilder();
   let strapi;
   let rq;

@@ -32,7 +32,7 @@ const PurchaseContentReleases = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://strapi.io/enterprise?utm_campaign=In-Product-CTA&utm_source=Releases"
+                href="https://strapi.io/features/releases?utm_campaign=In-Product-CTA&utm_source=Releases"
                 isExternal
                 target="_blank"
               >
