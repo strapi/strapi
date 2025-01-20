@@ -59,8 +59,12 @@ type UseDocument = (
    */
   schema?: Schema;
   schemas?: Schema[];
-  validate: (document: Document) => null | FormErrors;
   hasError?: boolean;
+  validate: (document: Document) => null | FormErrors;
+  /**
+   * Get the document's title
+   */
+  getTitle: (mainField: string) => string;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -108,12 +112,30 @@ const useDocument: UseDocument = (args, opts) => {
     skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
   });
 
+  const document = data?.data;
+  const meta = data?.meta;
+
   const {
     components,
     schema,
     schemas,
     isLoading: isLoadingSchema,
   } = useContentTypeSchema(args.model);
+
+  const getTitle = (mainField: string) => {
+    if (mainField !== 'id' && document?.[mainField]) {
+      // Always use mainField if it's not an id
+      return document[mainField];
+    }
+
+    if (schema?.kind === 'singleType' && schema?.info.displayName) {
+      // When it's a singleType without a mainField, use the contentType displayName
+      return schema.info.displayName;
+    }
+
+    // Otherwise, use a fallback
+    return 'Untitled';
+  };
 
   React.useEffect(() => {
     if (error) {
@@ -159,13 +181,14 @@ const useDocument: UseDocument = (args, opts) => {
 
   return {
     components,
-    document: data?.data,
-    meta: data?.meta,
+    document,
+    meta,
     isLoading,
     hasError,
     schema,
     schemas,
     validate,
+    getTitle,
   } satisfies ReturnType<UseDocument>;
 };
 

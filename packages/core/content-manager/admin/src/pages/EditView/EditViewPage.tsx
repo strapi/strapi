@@ -56,6 +56,7 @@ const EditViewPage = () => {
     id,
     model,
     hasError,
+    getTitle,
   } = useDoc();
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
@@ -139,19 +140,6 @@ const EditViewPage = () => {
     }
   };
 
-  /**
-   * We look to see what the mainField is from the configuration, if it's an id
-   * we don't use it because it's a uuid format and not very user friendly.
-   * Instead, we display the schema name for single-type documents
-   * or "Untitled".
-   */
-  let documentTitle = 'Untitled';
-  if (mainField !== 'id' && document?.[mainField]) {
-    documentTitle = document[mainField];
-  } else if (isSingleType && schema?.info.displayName) {
-    documentTitle = schema.info.displayName;
-  }
-
   const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
     const yupSchema = createYupSchema(schema?.attributes, components, {
       status,
@@ -163,7 +151,7 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Page.Title>{documentTitle}</Page.Title>
+      <Page.Title>{getTitle(mainField)}</Page.Title>
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
@@ -183,7 +171,7 @@ const EditViewPage = () => {
             <Header
               isCreating={isCreatingDocument}
               status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-              title={documentTitle}
+              title={getTitle(mainField)}
             />
             <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
               <Tabs.List
