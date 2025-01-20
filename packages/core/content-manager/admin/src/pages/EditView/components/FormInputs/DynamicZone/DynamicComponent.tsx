@@ -11,7 +11,6 @@ import {
   Menu,
   MenuItem,
   BoxComponent,
-  VisuallyHidden,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
