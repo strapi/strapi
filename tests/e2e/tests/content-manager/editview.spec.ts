@@ -696,17 +696,17 @@ test.describe('Edit View', () => {
 
       // Add components add specific locations:
       // - very last position
-      await components[1].getByRole('button', { name: /more actions/i }).click({ force: true });
-      await page.getByRole('menuitem', { name: /add component below/i }).click({ force: true });
-      await page.getByRole('menuitem', { name: /product carousel/i }).click({ force: true });
+      await components[1].getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
+      await page.getByRole('menuitem', { name: /product carousel/i }).dispatchEvent('click');
       // - very first position
-      await components[0].getByRole('button', { name: /more actions/i }).click({ force: true });
-      await page.getByRole('menuitem', { name: /add component above/i }).click({ force: true });
-      await page.getByRole('menuitem', { name: /hero image/i }).click({ force: true });
+      await components[0].getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /add component above/i }).dispatchEvent('click');
+      await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
       // - middle position
-      await components[1].getByRole('button', { name: /more actions/i }).click({ force: true });
-      await page.getByRole('menuitem', { name: /add component below/i }).click({ force: true });
-      await page.getByRole('menuitem', { name: /hero image/i }).click({ force: true });
+      await components[1].getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');
+      await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
 
       // Make sure we get the desired components order
       const updatedComponents = await page
