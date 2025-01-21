@@ -76,7 +76,7 @@ test.describe('Adding content', () => {
                         {
                           type: 'text',
                           name: 'testnewcomponentexistingcategorytext',
-                          advanced: { required: true },
+                          advanced: { required: true, regexp: '^(?!.*fail).*' },
                         },
                       ],
                     },
@@ -177,103 +177,114 @@ test.describe('Adding content', () => {
     expect(before).toBe(true);
   });
 
-  test('when I publish an empty required text field (basic) I see an error', async ({ page }) => {
-    const fields = [
-      {
-        name: 'testtext',
-        type: 'text',
-        value: '',
-      },
-      // publish button doesn't show up until the first field is filled
-      {
-        name: 'testdz',
-        type: 'dz',
-        value: [
-          {
-            category: 'product',
-            name: 'newcomponentexistingcategory',
-            fields: [
-              {
-                type: 'text',
-                name: 'testnewcomponentexistingcategorytext',
-                value: 'some value',
-              },
-            ],
-          },
-        ],
-      },
-    ] satisfies FieldValue[];
+  const testCases = [
+    // Basic type tests
+    {
+      description: 'empty required text field (basic)',
+      fields: [
+        { name: 'testtext', type: 'text', value: '' },
+        { name: 'title', type: 'text', value: 'at least one field requires text' },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (basic)',
+      fields: [{ name: 'testtext', type: 'text', value: 'fail-regexp' }],
+      expectedError: 'The value does not match the regex',
+    },
+    // Component type tests
+    // {
+    //   description: 'empty required text field (component)',
+    //   fields: [
+    //     { name: 'testtext', type: 'text', value: 'fill required text' },
+    //     {
+    //       name: 'testsinglecomp',
+    //       type: 'component',
+    //       value: [
+    //         {
+    //           category: 'product',
+    //           name: 'testsinglecomp',
+    //           fields: [{ name: 'componenttext', type: 'text', value: '' }],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    //   expectedError: 'This value is required',
+    // },
+    // {
+    //   description: 'invalid regexp text field (component)',
+    //   fields: [
+    //     { name: 'testtext', type: 'text', value: 'fill required text' },
+    //     {
+    //       name: 'testcomponent',
+    //       type: 'component',
+    //       value: [
+    //         {
+    //           category: 'product',
+    //           name: 'componentname',
+    //           fields: [{ name: 'componenttext', type: 'text', value: 'fail regexp' }],
+    //         },
+    //       ],
+    //     },
+    //   ],
+    //   expectedError: 'The value does not match the regex',
+    // },
+    // Dynamic Zone (dz) component tests
+    {
+      description: 'empty required text field (dz component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testdz',
+          type: 'dz',
+          value: [
+            {
+              category: 'product',
+              name: 'newcomponentexistingcategory',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'testnewcomponentexistingcategorytext',
+                  value: '',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (dz component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testdz',
+          type: 'dz',
+          value: [
+            {
+              category: 'product',
+              name: 'newcomponentexistingcategory',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'testnewcomponentexistingcategorytext',
+                  value: 'fail regexp',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      expectedError: 'The value does not match the regex',
+    },
+  ] satisfies { description: string; fields: FieldValue[]; expectedError: string }[];
 
-    await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
-
-    expect(page.getByText('This value is required')).toBeVisible();
-  });
-
-  test('when I publish an invalid regexp text field (basic) I see an error', async ({ page }) => {
-    const fields = [
-      {
-        name: 'testtext',
-        type: 'text',
-        value: 'this should fail',
-      },
-      // publish button doesn't show up until the first field is filled
-      {
-        name: 'testdz',
-        type: 'dz',
-        value: [
-          {
-            category: 'product',
-            name: 'newcomponentexistingcategory',
-            fields: [
-              {
-                type: 'text',
-                name: 'testnewcomponentexistingcategorytext',
-                value: 'some value',
-              },
-            ],
-          },
-        ],
-      },
-    ] satisfies FieldValue[];
-
-    await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
-
-    expect(page.getByText('The value does not match the regex')).toBeVisible();
-  });
-
-  // TODO: can this become a loop to test every field? might work best to have a create where every first attempt to enter an attribute is made without a name
-  test('when I publish an empty required text field inside a dz I see an error', async ({
-    page,
-  }) => {
-    const fields = [
-      {
-        name: 'testtext',
-        type: 'text',
-        value: 'some text',
-      },
-      {
-        name: 'testdz',
-        type: 'dz',
-        value: [
-          {
-            category: 'product',
-            name: 'newcomponentexistingcategory',
-            fields: [
-              {
-                type: 'text',
-                name: 'testnewcomponentexistingcategorytext',
-                value: '',
-              },
-            ],
-          },
-        ],
-      },
-    ] satisfies FieldValue[];
-
-    await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
-
-    // TODO: check that aria-invalid=true for this input
-
-    expect(page.getByText('This value is required')).toBeVisible();
-  });
+  for (const { description, fields, expectedError } of testCases) {
+    test(`when I publish ${description} I see an error`, async ({ page }) => {
+      await page.reload();
+      await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
+      expect(page.getByText(expectedError)).toBeVisible();
+    });
+  }
 });
