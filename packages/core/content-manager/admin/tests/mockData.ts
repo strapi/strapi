@@ -695,6 +695,20 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
           sortable: true,
         },
       },
+      name: {
+        edit: {
+          label: 'name',
+          description: '',
+          placeholder: '',
+          visible: true,
+          editable: true,
+        },
+        list: {
+          label: 'name',
+          searchable: true,
+          sortable: true,
+        },
+      },
       postal_code: {
         edit: {
           label: 'postal_code',
@@ -923,6 +937,7 @@ const CM_COLLECTION_TYPE_LAYOUT_MOCK_DATA = {
             name: 'slug',
             size: 6,
           },
+          { name: 'name', size: 6 },
         ],
         [
           {
