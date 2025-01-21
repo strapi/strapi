@@ -371,6 +371,9 @@ const CM_CONTENT_TYPE_MOCK_DATA = [
       id: {
         type: 'string',
       },
+      name: {
+        type: 'string',
+      },
       postal_code: {
         type: 'string',
         pluginOptions: {},
