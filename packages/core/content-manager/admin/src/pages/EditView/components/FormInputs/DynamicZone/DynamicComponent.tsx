@@ -7,7 +7,6 @@ import {
   Flex,
   Grid,
   IconButton,
-  VisuallyHidden,
   useComposedRefs,
   Menu,
   MenuItem,
@@ -150,14 +149,17 @@ const DynamicComponent = ({
         <Drag />
       </IconButton>
       <Menu.Root>
-        <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
-          <More aria-hidden focusable={false} />
-          <VisuallyHidden tag="span">
-            {formatMessage({
+        <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
+          <IconButton
+            variant="ghost"
+            label={formatMessage({
               id: getTranslation('components.DynamicZone.more-actions'),
               defaultMessage: 'More actions',
             })}
-          </VisuallyHidden>
+            tag="span"
+          >
+            <More aria-hidden focusable={false} />
+          </IconButton>
         </Menu.Trigger>
         <Menu.Content>
           <Menu.SubRoot>
