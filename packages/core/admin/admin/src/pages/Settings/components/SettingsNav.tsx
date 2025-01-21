@@ -9,9 +9,38 @@ import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
-
+import { useEffect, useRef, useCallback, Fragment } from "react";
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
+
+
+// Custom hook to handle scroll locking
+const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
+  const handleScroll = useCallback((event: WheelEvent) => {
+    const sidebar = ref.current;
+    if (!sidebar) return;
+
+    const isAtTop = sidebar.scrollTop === 0;
+    const isAtBottom = sidebar.scrollHeight - sidebar.scrollTop === sidebar.clientHeight;
+
+    if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
+      event.preventDefault();
+      event.stopPropagation();  // Prevents bubbling to parent
+    }
+  }, []);
+
+  useEffect(() => {
+    const sidebar = ref.current;
+    if (!sidebar) return;
+
+    sidebar.addEventListener("wheel", handleScroll, { passive: false });
+
+    return () => {
+      sidebar.removeEventListener("wheel", handleScroll);
+    };
+  }, [handleScroll]);
+};
+
 
 const CustomIcon = styled(Lightning)`
   right: 15px;
@@ -38,6 +67,9 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
+
+  const settingsSidebarRef = useRef<HTMLDivElement>(null);
+  usePreventScroll(settingsSidebarRef);
 
   const filteredMenu = menu.filter(
     (section) => !section.links.every((link) => link.isDisplayed === false)
@@ -66,8 +98,10 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
+
+
   return (
-    <SubNav aria-label={label}>
+    <SubNav ref={settingsSidebarRef} aria-label={label}>
       <SubNavHeader label={label} />
       <SubNavSections>
         {sections.map((section) => (

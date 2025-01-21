@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, Fragment } from "react";
+import * as React from 'react';
 
 import {
   Box,
@@ -15,6 +16,8 @@ import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { useLocation } from 'react-router-dom';
+
 
 import { getTrad } from '../../utils/getTrad';
 
@@ -62,6 +65,7 @@ const SubNavLinkCustom = styled(SubNavLink)`
 export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
+  // const { pathname } = useLocation();
   const sidebarRef = useRef<HTMLDivElement>(null);
   usePreventScroll(sidebarRef);
 
@@ -71,7 +75,7 @@ export const ContentTypeBuilderNav = () => {
   });
 
   return (
-    <SubNav  ref={sidebarRef} aria-label={pluginName}>
+    <SubNav  ref={sidebarRef} aria-label={pluginName}> 
       <SubNavHeader 
         searchable
         value={searchValue}
