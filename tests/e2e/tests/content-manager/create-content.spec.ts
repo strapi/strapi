@@ -124,7 +124,7 @@ test.describe('Adding content', () => {
   });
 
   test('I want to set component order when creating content', async ({ page }) => {
-    await page.reload();
+    // TODO: this is flaky and always fails on the first run
 
     const fields = [
       {
@@ -192,43 +192,83 @@ test.describe('Adding content', () => {
       fields: [{ name: 'testtext', type: 'text', value: 'fail-regexp' }],
       expectedError: 'The value does not match the regex',
     },
-    // Component type tests
-    // {
-    //   description: 'empty required text field (component)',
-    //   fields: [
-    //     { name: 'testtext', type: 'text', value: 'fill required text' },
-    //     {
-    //       name: 'testsinglecomp',
-    //       type: 'component',
-    //       value: [
-    //         {
-    //           category: 'product',
-    //           name: 'testsinglecomp',
-    //           fields: [{ name: 'componenttext', type: 'text', value: '' }],
-    //         },
-    //       ],
-    //     },
-    //   ],
-    //   expectedError: 'This value is required',
-    // },
-    // {
-    //   description: 'invalid regexp text field (component)',
-    //   fields: [
-    //     { name: 'testtext', type: 'text', value: 'fill required text' },
-    //     {
-    //       name: 'testcomponent',
-    //       type: 'component',
-    //       value: [
-    //         {
-    //           category: 'product',
-    //           name: 'componentname',
-    //           fields: [{ name: 'componenttext', type: 'text', value: 'fail regexp' }],
-    //         },
-    //       ],
-    //     },
-    //   ],
-    //   expectedError: 'The value does not match the regex',
-    // },
+
+    // Single component type tests
+    {
+      description: 'empty required text field (single component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testsinglecomp',
+          type: 'component',
+          value: [
+            {
+              category: 'product',
+              name: 'testsinglecomp',
+              fields: [{ name: 'testsinglecomp2text', type: 'text', value: '' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (single component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testcomponent',
+          type: 'component',
+          value: [
+            {
+              category: 'product',
+              name: 'testsinglecomp',
+              fields: [{ name: 'testsinglecomp2text', type: 'text', value: 'fail regexp' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'The value does not match the regex',
+    },
+
+    // repeatable component tests
+    {
+      description: 'empty required text field (repeatable component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testrepeatablecomp',
+          type: 'component_repeatable',
+          value: [
+            {
+              category: 'product',
+              name: 'testrepeatablecomp',
+              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: '' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (repeatable component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testrepeatablecomp',
+          type: 'component_repeatable',
+          value: [
+            {
+              category: 'product',
+              name: 'testrepeatablecomp',
+              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: 'fail regexp' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'The value does not match the regex',
+    },
+
     // Dynamic Zone (dz) component tests
     {
       description: 'empty required text field (dz component)',
