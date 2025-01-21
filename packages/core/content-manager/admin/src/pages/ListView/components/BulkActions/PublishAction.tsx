@@ -26,8 +26,8 @@ import { ValidationError } from 'yup';
 
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
 import { useContentTypeSchema } from '../../../../hooks/useContentTypeSchema';
+import { useContentManagerContext, type Document } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
-import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import { contentManagerApi } from '../../../../services/api';
 import {
   useGetAllDocumentsQuery,
@@ -41,7 +41,6 @@ import { DocumentStatus } from '../../../EditView/components/DocumentStatus';
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
 import type { BulkActionComponent } from '../../../../content-manager';
-import type { Document } from '../../../../hooks/useDocument';
 
 const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
@@ -188,10 +187,12 @@ const SelectedEntriesTableContent = ({
   const { formatMessage } = useIntl();
 
   const {
-    list: {
-      settings: { mainField },
+    layout: {
+      list: {
+        settings: { mainField },
+      },
     },
-  } = useDocLayout();
+  } = useContentManagerContext();
 
   const shouldDisplayMainField = mainField != null && mainField !== 'id';
 
