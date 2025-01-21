@@ -1,4 +1,4 @@
-import { isBoolean, kebabCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, Locator, type Page } from '@playwright/test';
@@ -371,6 +371,32 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     if (isBoolean(adv.required)) {
       const checkbox = page.getByRole('checkbox', { name: 'Required field' });
       await ensureCheckbox(checkbox, adv.required);
+    }
+
+    if (isString(adv.regexp)) {
+      await page.getByLabel('Regexp').fill(adv.regexp);
+    }
+
+    if (isBoolean(adv.unique)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Unique field' });
+      await ensureCheckbox(checkbox, adv.unique);
+    }
+
+    if (isBoolean(adv.private)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Private field' });
+      await ensureCheckbox(checkbox, adv.private);
+    }
+
+    if (isNumber(adv.maximum)) {
+      await page.getByLabel('Maximum').fill(adv.maximum.toString());
+    }
+
+    if (isNumber(adv.minimum)) {
+      await page.getByLabel('Minimum').fill(adv.minimum.toString());
+    }
+
+    if (isString(adv.default)) {
+      await page.getByLabel('Default').fill(adv.default);
     }
   }
 };

@@ -18,7 +18,7 @@ test.describe('Adding content', () => {
           {
             type: 'text',
             name: 'testtext',
-            advanced: { required: true },
+            advanced: { required: true, regexp: '^(?!.*fail).*' },
           },
           {
             type: 'component',
@@ -30,7 +30,11 @@ test.describe('Adding content', () => {
                 icon: 'moon',
                 categorySelect: 'product',
                 attributes: [
-                  { type: 'text', name: 'testrepeatablecomp2text', advanced: { required: true } },
+                  {
+                    type: 'text',
+                    name: 'testrepeatablecomp2text',
+                    advanced: { required: true, regexp: '^(?!.*fail).*' },
+                  },
                 ],
               },
             },
@@ -45,7 +49,11 @@ test.describe('Adding content', () => {
                 icon: 'moon',
                 categorySelect: 'product',
                 attributes: [
-                  { type: 'text', name: 'testsinglecomp2text', advanced: { required: true } },
+                  {
+                    type: 'text',
+                    name: 'testsinglecomp2text',
+                    advanced: { required: true, regexp: '^(?!.*fail).*' },
+                  },
                 ],
               },
             },
@@ -199,6 +207,38 @@ test.describe('Adding content', () => {
     await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
 
     expect(page.getByText('This value is required')).toBeVisible();
+  });
+
+  test('when I publish an invalid regexp text field (basic) I see an error', async ({ page }) => {
+    const fields = [
+      {
+        name: 'testtext',
+        type: 'text',
+        value: 'this should fail',
+      },
+      // publish button doesn't show up until the first field is filled
+      {
+        name: 'testdz',
+        type: 'dz',
+        value: [
+          {
+            category: 'product',
+            name: 'newcomponentexistingcategory',
+            fields: [
+              {
+                type: 'text',
+                name: 'testnewcomponentexistingcategorytext',
+                value: 'some value',
+              },
+            ],
+          },
+        ],
+      },
+    ] satisfies FieldValue[];
+
+    await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
+
+    expect(page.getByText('The value does not match the regex')).toBeVisible();
   });
 
   // TODO: can this become a loop to test every field? might work best to have a create where every first attempt to enter an attribute is made without a name
