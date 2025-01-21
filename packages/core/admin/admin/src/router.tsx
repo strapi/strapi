@@ -44,7 +44,7 @@ const getInitialRoutes = (): RouteObject[] => [
   {
     index: true,
     lazy: async () => {
-      const { HomePage } = await import('./pages/HomePage');
+      const { HomePage } = await import('./pages/Home/HomePage');
 
       return {
         Component: HomePage,

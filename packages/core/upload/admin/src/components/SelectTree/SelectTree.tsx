@@ -10,10 +10,10 @@ import ReactSelect, {
 } from 'react-select';
 import { styled, useTheme, DefaultTheme } from 'styled-components';
 
-import Option from './Option';
-import flattenTree, { FlattenedNode } from './utils/flattenTree';
-import getOpenValues from './utils/getOpenValues';
-import getValuesToClose from './utils/getValuesToClose';
+import { Option } from './Option';
+import { flattenTree, FlattenedNode } from './utils/flattenTree';
+import { getOpenValues } from './utils/getOpenValues';
+import { getValuesToClose } from './utils/getValuesToClose';
 
 const hasParent = (option: FlattenedNode<string | number | null>) => !option.parent;
 
@@ -25,7 +25,9 @@ export type OptionSelectTree = {
 
 export interface SelectTreeProps<
   Option = unknown,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   IsMulti extends boolean = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Group extends GroupBase<Option> = GroupBase<Option>,
 > {
   maxDisplayDepth?: number;
@@ -33,7 +35,7 @@ export interface SelectTreeProps<
     value?: string | number | null;
   };
   options: OptionSelectTree[];
-  onChange?: (value: any) => void;
+  onChange?: (value: Record<string, string | number>) => void;
   name?: string;
   menuPortalTarget?: HTMLElement | null;
   inputId?: string;
@@ -43,7 +45,7 @@ export interface SelectTreeProps<
   disabled?: boolean;
 }
 
-const SelectTree = ({
+export const SelectTree = ({
   options: defaultOptions,
   maxDisplayDepth = 5,
   defaultValue,
@@ -280,6 +282,7 @@ const getSelectStyles = (
       paddingRight: theme.spaces[1],
       paddingBottom: theme.spaces[1],
     }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     option(base: any, state: { isFocused: boolean; isSelected: boolean }) {
       let backgroundColor = base?.backgroundColor as string;
 
@@ -326,5 +329,3 @@ const getSelectStyles = (
     }),
   };
 };
-
-export default SelectTree;

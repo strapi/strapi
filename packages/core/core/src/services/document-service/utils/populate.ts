@@ -36,7 +36,9 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
       }
 
       case 'media': {
-        acc[attributeName] = { select: ['id'] };
+        // We populate all media fields for completeness of webhook responses
+        // see https://github.com/strapi/strapi/issues/21546
+        acc[attributeName] = { select: ['*'] };
         break;
       }
 

@@ -1,5 +1,5 @@
-import flattenTree from '../flattenTree';
-import getValuesToClose from '../getValuesToClose';
+import { flattenTree } from '../flattenTree';
+import { getValuesToClose } from '../getValuesToClose';
 
 const FIXTURE = flattenTree([
   {

@@ -3,7 +3,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
-import { TableList, TableListProps } from '../index';
+import { TableList, TableListProps } from '../TableList';
 
 const PROPS_FIXTURE = {
   canUpdate: true,

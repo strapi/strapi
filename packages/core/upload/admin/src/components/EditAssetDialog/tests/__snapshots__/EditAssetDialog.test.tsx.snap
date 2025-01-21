@@ -453,16 +453,27 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c24 svg {
-  font-size: 4.8rem;
-  height: 26.4rem;
+  height: 26px;
 }
 
 .c24 img,
-.c24 video {
+.c24 mux-player {
   margin: 0;
   padding: 0;
   max-height: 26.4rem;
   max-width: 100%;
+}
+
+.c24 mux-player {
+  --play-button: inline-flex;
+  --mute-button: inline-flex;
+  --pip-button: inline-flex;
+  --fullscreen-button: inline-flex;
+  --playback-rate-button: inline-flex;
+  --volume-range: inline-flex;
+  --time-range: inline-flex;
+  --time-display: inline-flex;
+  --duration-display: inline-flex;
 }
 
 .c22 {
@@ -1073,6 +1084,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
             <input
               accept="image/png"
               aria-hidden="true"
+              data-testid="file-input"
               name="file"
               tabindex="-1"
               type="file"
