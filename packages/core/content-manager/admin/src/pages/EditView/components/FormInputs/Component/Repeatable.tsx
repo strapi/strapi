@@ -9,7 +9,6 @@ import {
   Accordion,
   IconButton,
   useComposedRefs,
-  Grid,
   BoxComponent,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
@@ -26,6 +25,7 @@ import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
@@ -273,7 +273,7 @@ const RepeatableComponent = ({
               >
                 {layout.map((row, index) => {
                   return (
-                    <Grid.Root gap={4} key={index}>
+                    <ResponsiveGridRoot gap={4} key={index}>
                       {row.map(({ size, ...field }) => {
                         /**
                          * Layouts are built from schemas so they don't understand the complete
@@ -289,7 +289,7 @@ const RepeatableComponent = ({
                         });
 
                         return (
-                          <Grid.Item
+                          <ResponsiveGridItem
                             col={size}
                             key={completeFieldName}
                             s={12}
@@ -302,10 +302,10 @@ const RepeatableComponent = ({
                               label: translatedLabel,
                               name: completeFieldName,
                             })}
-                          </Grid.Item>
+                          </ResponsiveGridItem>
                         );
                       })}
-                    </Grid.Root>
+                    </ResponsiveGridRoot>
                   );
                 })}
               </Component>

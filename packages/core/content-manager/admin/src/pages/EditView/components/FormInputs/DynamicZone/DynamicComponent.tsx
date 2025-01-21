@@ -24,6 +24,7 @@ import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
 import type { ComponentPickerProps } from './ComponentPicker';
@@ -242,7 +243,7 @@ const DynamicComponent = ({
                           direction="column"
                           alignItems="stretch"
                         >
-                          <Grid.Root gap={4}>
+                          <ResponsiveGridRoot gap={4}>
                             {row.map(({ size, ...field }) => {
                               const fieldName = `${name}.${index}.${field.name}`;
 
@@ -255,7 +256,7 @@ const DynamicComponent = ({
                               };
 
                               return (
-                                <Grid.Item
+                                <ResponsiveGridItem
                                   col={size}
                                   key={fieldName}
                                   s={12}
@@ -268,10 +269,10 @@ const DynamicComponent = ({
                                   ) : (
                                     <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
                                   )}
-                                </Grid.Item>
+                                </ResponsiveGridItem>
                               );
                             })}
-                          </Grid.Root>
+                          </ResponsiveGridRoot>
                         </Grid.Item>
                       ))}
                     </Grid.Root>

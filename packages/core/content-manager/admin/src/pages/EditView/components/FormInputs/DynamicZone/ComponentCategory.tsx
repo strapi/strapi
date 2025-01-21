@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
+import { RESPONSIVE_CONTAINER_BREAKPOINTS } from '../../FormLayout';
 
 interface ComponentCategoryProps {
   category: string;
@@ -68,11 +69,17 @@ const Grid = styled(Box)`
   display: grid;
   grid-template-columns: repeat(auto-fit, 14rem);
   grid-gap: ${({ theme }) => theme.spaces[1]};
+  container-type: inline-size;
 `;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   color: ${({ theme }) => theme.colors.neutral600};
   cursor: pointer;
+  grid-column: span 12;
+
+  @container (min-width: ${() => RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+    grid-column: span 1;
+  }
 
   @media (prefers-reduced-motion: no-preference) {
     transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
