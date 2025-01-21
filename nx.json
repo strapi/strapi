@@ -52,7 +52,7 @@
     }
   },
   "release": {
-    "projects": ["packages/**/*"],
+    "projects": ["packages/**/*", ".github/actions/check-pr-status", "scripts/front"],
     "changelog": {
       "workspaceChangelog": {
         "file": false,
@@ -60,10 +60,10 @@
       }
     },
     "version": {
-      "conventionalCommits": false
-    },
-    "git": {
-      "commitMessage": "release: {version}"
+      "conventionalCommits": false,
+      "git": {
+        "commitMessage": "release: {version}"
+      }
     },
     "conventionalCommits": {
       "types": {

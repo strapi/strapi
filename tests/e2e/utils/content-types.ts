@@ -1,8 +1,8 @@
-import { kebabCase } from 'lodash/fp';
+import { isBoolean, kebabCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
-import { expect, type Page } from '@playwright/test';
-import { clickAndWait, findByRowColumn, navToHeader } from './shared';
+import { expect, Locator, type Page } from '@playwright/test';
+import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
 
 export interface AddAttribute {
   type: string;
@@ -266,7 +266,6 @@ export const addComponentAttribute = async (
   await selectComponentRepeatable(page, attribute.component?.options.repeatable);
 
   if (attrCompOptions.attributes) {
-    // TODO: if "
     const addFirstFieldButton = page.getByRole('button', {
       name: new RegExp('Add first field to the component', 'i'),
     });
@@ -365,7 +364,15 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     await page.locator('textarea[name="enum"]').fill(attribute.enumeration?.values.join('\n'));
   }
 
-  // TODO: add support for advanced options
+  if (attribute.advanced) {
+    const adv = attribute.advanced;
+    await page.getByText('Advanced Settings').click();
+
+    if (isBoolean(adv.required)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Required field' });
+      await ensureCheckbox(checkbox, adv.required);
+    }
+  }
 };
 
 export const addAttributes = async (
