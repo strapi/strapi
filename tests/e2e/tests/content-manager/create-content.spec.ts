@@ -124,8 +124,6 @@ test.describe('Adding content', () => {
   });
 
   test('I want to set component order when creating content', async ({ page }) => {
-    // TODO: this is flaky and always fails on the first run
-
     const fields = [
       {
         name: 'testtext',

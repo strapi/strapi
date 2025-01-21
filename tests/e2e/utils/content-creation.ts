@@ -188,6 +188,7 @@ export const verifyFields = async (page: Page, fields: FieldValue[]): Promise<vo
           }
         }
         break;
+      // TODO: component fields should actually check that they are in the same component
       default:
         const fieldValue = await page.getByLabel(name).inputValue();
         expect(fieldValue).toBe(String(value)); // Verify text/numeric input values
