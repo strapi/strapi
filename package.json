@@ -79,8 +79,7 @@
     "test:unit:watch": "run test:unit --watch"
   },
   "resolutions": {
-    "@types/koa": "2.13.4",
-    "node-gyp": "^11.0.0"
+    "@types/koa": "2.13.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
