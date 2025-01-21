@@ -16,6 +16,11 @@ test.describe('Adding content', () => {
         // TODO: to save the time from a server restart, add these components directly inside the with-admin dataset and remove this
         await addAttributesToContentType(page, 'Article', [
           {
+            type: 'text',
+            name: 'testtext',
+            advanced: { required: true },
+          },
+          {
             type: 'component',
             name: 'testrepeatablecomp',
             component: {
@@ -101,7 +106,7 @@ test.describe('Adding content', () => {
       'Article',
       [
         {
-          name: 'title',
+          name: 'testtext',
           type: 'text',
           value: 'testname',
         },
@@ -111,7 +116,14 @@ test.describe('Adding content', () => {
   });
 
   test('I want to set component order when creating content', async ({ page }) => {
+    await page.reload();
+
     const fields = [
+      {
+        name: 'testtext',
+        type: 'text',
+        value: 'testname',
+      },
       {
         name: 'testdz',
         type: 'dz',
@@ -133,11 +145,6 @@ test.describe('Adding content', () => {
             fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
           },
         ],
-      },
-      {
-        name: 'title',
-        type: 'text',
-        value: 'testname',
       },
     ] satisfies FieldValue[];
 
@@ -162,11 +169,48 @@ test.describe('Adding content', () => {
     expect(before).toBe(true);
   });
 
+  test('when I publish an empty required text field (basic) I see an error', async ({ page }) => {
+    const fields = [
+      {
+        name: 'testtext',
+        type: 'text',
+        value: '',
+      },
+      // publish button doesn't show up until the first field is filled
+      {
+        name: 'testdz',
+        type: 'dz',
+        value: [
+          {
+            category: 'product',
+            name: 'newcomponentexistingcategory',
+            fields: [
+              {
+                type: 'text',
+                name: 'testnewcomponentexistingcategorytext',
+                value: 'some value',
+              },
+            ],
+          },
+        ],
+      },
+    ] satisfies FieldValue[];
+
+    await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
+
+    expect(page.getByText('This value is required')).toBeVisible();
+  });
+
   // TODO: can this become a loop to test every field? might work best to have a create where every first attempt to enter an attribute is made without a name
   test('when I publish an empty required text field inside a dz I see an error', async ({
     page,
   }) => {
     const fields = [
+      {
+        name: 'testtext',
+        type: 'text',
+        value: 'some text',
+      },
       {
         name: 'testdz',
         type: 'dz',
