@@ -694,7 +694,7 @@ test.describe('Edit View', () => {
       expect(components[0]).toHaveText(/product carousel/i);
       expect(components[1]).toHaveText(/content and image/i);
 
-      // Add components add specific locations:
+      // Add components at specific locations:
       // - very last position
       await components[1].getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /add component below/i }).dispatchEvent('click');

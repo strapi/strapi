@@ -574,8 +574,8 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         }
 
         const [key] = generateNKeysBetween(
-          currentField.at(position > 0 ? position - 1 : position)?.__temp_key__,
-          currentField.at(position > 0 ? position : position - 1)?.__temp_key__,
+          position > 0 ? currentField.at(position - 1)?.__temp_key__ : null,
+          currentField.at(position)?.__temp_key__,
           1
         );
 
