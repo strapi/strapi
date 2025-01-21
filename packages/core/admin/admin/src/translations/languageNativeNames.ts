@@ -8,6 +8,7 @@ export const languageNativeNames = {
   'en-GB': 'English (United Kingdom)',
   es: 'Español',
   eu: 'Euskara',
+  fi: 'Suomi',
   uz: 'O`zbekcha',
   ro: 'Română',
   fr: 'Français',
