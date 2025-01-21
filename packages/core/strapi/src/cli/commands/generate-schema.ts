@@ -10,21 +10,17 @@ import type { StrapiCommand } from '../types';
 interface CmdOptions {
   silent?: boolean;
   outDir?: string;
-  typesDir?: string;
 }
 
 // Filter to only include content types where the UID begins with "api::"
 // TODO: temporary restriction to API content types
-const restrictToApiContentTypes = (uid: string) => {
-  let result;
-
+const restrictToApiContentTypes = (uid: string): boolean => {
   try {
-    result = uid.startsWith('api::');
+    return uid.startsWith('api::');
   } catch (e) {
-    console.error('error', e);
+    console.error('Error checking UID:', e);
+    return false;
   }
-
-  return result;
 };
 
 const allCrudOperationNames = ['create', 'update', 'delete', 'findOne', 'find'];
@@ -69,13 +65,12 @@ const action = async ({ silent, outDir }: CmdOptions) => {
       contentTypes(contentType: Struct.CollectionTypeSchema) {
         // Strip private attributes
         const attributes = Object.fromEntries(
-          Object.entries(contentType.attributes).filter(([, attr]) => {
-            return (
+          Object.entries(contentType.attributes).filter(
+            ([, attr]) =>
               attr.type !== 'password' &&
               // @ts-expect-error TODO: fix this
               !attr.private
-            );
-          })
+          )
         );
         return { ...contentType, attributes };
       },
@@ -89,25 +84,25 @@ const action = async ({ silent, outDir }: CmdOptions) => {
       Struct.CollectionTypeSchema | Struct.SingleTypeSchema,
     ][];
 
-  // Generate a single import statement for generated types
+  // Map UIDs to generated type names
   const uidToGeneratedTypeName = new Map<string, string>();
-  const allTypeNames = apiContentTypes.map(
-    ([uid, contentType]: [string, Struct.CollectionTypeSchema | Struct.SingleTypeSchema]) => {
-      const {
-        info: { singularName },
-      } = contentType;
+  const allTypeNames = apiContentTypes.map(([uid, contentType]) => {
+    const {
+      info: { singularName },
+    } = contentType;
 
-      const formattedSingularName = singularName
-        .split('-')
-        .map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join('');
+    const formattedSingularName = singularName
+      .split('-')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
 
-      const typeName = `Api${formattedSingularName}${formattedSingularName}`;
-      uidToGeneratedTypeName.set(uid, typeName);
+    const typeName = `Api${formattedSingularName}${formattedSingularName}`;
+    uidToGeneratedTypeName.set(uid, typeName);
 
-      return typeName;
-    }
-  );
+    return typeName;
+  });
+
+  // Generate a single import statement for generated types
   const combinedImportStatement = `import { ${allTypeNames.join(', ')} } from './generated/contentTypes';`;
 
   // Helper function to generate TypeScript interface definitions
@@ -124,7 +119,7 @@ const action = async ({ silent, outDir }: CmdOptions) => {
 
     const typeName = uidToGeneratedTypeName.get(uid);
     const operationsDefinition = operations
-      .map((op: string) => `${op}(): Promise<${typeName}>;`)
+      .map((op) => `${op}(): Promise<${typeName}>;`)
       .join('\n');
 
     const interfaceNameForCrudTypes = (
