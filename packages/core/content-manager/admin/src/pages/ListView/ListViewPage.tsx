@@ -203,7 +203,12 @@ const ListViewPage = () => {
     return <Page.Error />;
   }
 
-  const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
+  const contentTypeTitle = schema?.info.displayName
+    ? formatMessage({ id: schema.info.displayName, defaultMessage: schema.info.displayName })
+    : formatMessage({
+        id: 'content-manager.entry.untitled',
+        defaultMessage: 'Untitled',
+      });
 
   const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');

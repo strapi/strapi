@@ -15,6 +15,7 @@ import {
   useForm,
 } from '@strapi/admin/strapi-admin';
 import { Modules } from '@strapi/types';
+import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
@@ -107,6 +108,7 @@ type UseDocument = (
 const useDocument: UseDocument = (args, opts) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { formatMessage } = useIntl();
 
   const {
     currentData: data,
@@ -129,18 +131,21 @@ const useDocument: UseDocument = (args, opts) => {
   const isSingleType = schema?.kind === 'singleType';
 
   const getTitle = (mainField: string) => {
+    // Always use mainField if it's not an id
     if (mainField !== 'id' && document?.[mainField]) {
-      // Always use mainField if it's not an id
       return document[mainField];
     }
 
+    // When it's a singleType without a mainField, use the contentType displayName
     if (isSingleType && schema?.info.displayName) {
-      // When it's a singleType without a mainField, use the contentType displayName
       return schema.info.displayName;
     }
 
     // Otherwise, use a fallback
-    return 'Untitled';
+    return formatMessage({
+      id: 'content-manager.entry.untitled',
+      defaultMessage: 'Untitled',
+    });
   };
 
   React.useEffect(() => {
