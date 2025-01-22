@@ -111,7 +111,7 @@ test.describe('Settings', () => {
      */
     await page.getByRole('button', { name: 'There are 2 missing components' }).click();
     await page.getByRole('button', { name: 'Product carousel' }).click();
-    await page.getByRole('button', { name: 'Product carousel' }).click();
+
     await page
       .getByRole('region', { name: /Product carousel/ })
       .getByRole('textbox', { name: 'title' })
