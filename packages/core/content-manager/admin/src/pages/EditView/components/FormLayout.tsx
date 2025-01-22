@@ -8,7 +8,7 @@ import { EditLayout } from '../../../hooks/useDocumentLayout';
 import { InputRenderer } from './InputRenderer';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
-  sm: '440px',
+  sm: '27.5rem', // 440px
 };
 
 export const ResponsiveGridRoot = styled(Grid.Root)`
@@ -17,7 +17,8 @@ export const ResponsiveGridRoot = styled(Grid.Root)`
 
 export const ResponsiveGridItem = styled(Grid.Item)`
   grid-column: span 12;
-  @container (min-width: ${() => RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+
+  @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
     ${({ col }) => col && `grid-column: span ${col};`}
   }
 `;

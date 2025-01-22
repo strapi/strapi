@@ -110,6 +110,9 @@ test.describe('Settings', () => {
      * Create the missing components in the "content" dynamic zone.
      */
     await page.getByRole('button', { name: 'There are 2 missing components' }).click();
+    // Click the button in the DZ component picker
+    await page.getByRole('button', { name: 'Product carousel' }).click();
+    // Click the DZ component toggle button
     await page.getByRole('button', { name: 'Product carousel' }).click();
 
     await page
