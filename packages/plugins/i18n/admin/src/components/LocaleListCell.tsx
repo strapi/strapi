@@ -1,4 +1,3 @@
-import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
 import { Box, Flex, Popover, Typography, useCollator, Button } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -7,39 +6,23 @@ import { Locale } from '../../../shared/contracts/locales';
 import { useGetLocalesQuery } from '../services/locales';
 
 interface LocaleListCellProps {
-  documentId: string;
-  collectionType: string;
+  localizations: { locale: string }[];
   locale: string;
-  model: string;
 }
 
-const LocaleListCell = ({
-  documentId,
-  locale: currentLocale,
-  collectionType,
-  model,
-}: LocaleListCellProps) => {
-  // TODO: avoid loading availableLocales for each row but get that from the BE
-  const { meta, isLoading } = useDocument({
-    documentId,
-    collectionType,
-    model,
-    params: {
-      locale: currentLocale,
-    },
-  });
-
+const LocaleListCell = ({ locale: currentLocale, localizations }: LocaleListCellProps) => {
   const { locale: language } = useIntl();
   const { data: locales = [] } = useGetLocalesQuery();
   const formatter = useCollator(language, {
     sensitivity: 'base',
   });
 
-  if (!Array.isArray(locales) || isLoading) {
+  if (!Array.isArray(locales) || !localizations) {
     return null;
   }
 
-  const availableLocales = meta?.availableLocales.map((doc) => doc.locale) ?? [];
+  const availableLocales = localizations.map((loc) => loc.locale);
+
   const localesForDocument = locales
     .reduce<Locale[]>((acc, locale) => {
       const createdLocale = [currentLocale, ...availableLocales].find((loc) => {

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.3.0",
+  "version": "5.8.0",
   "description": "Create and manage content types",
   "repository": {
     "type": "git",
@@ -58,10 +58,10 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-rc.12",
-    "@strapi/generators": "workspace:*",
-    "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/utils": "workspace:*",
+    "@strapi/design-system": "2.0.0-rc.14",
+    "@strapi/generators": "5.8.0",
+    "@strapi/icons": "2.0.0-rc.14",
+    "@strapi/utils": "5.8.0",
     "date-fns": "2.30.0",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
@@ -73,9 +73,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
-    "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "workspace:*",
+    "@strapi/admin": "5.8.0",
+    "@strapi/pack-up": "5.0.2",
+    "@strapi/types": "5.8.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -90,7 +90,7 @@
     "styled-components": "6.1.8"
   },
   "peerDependencies": {
-    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/admin": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

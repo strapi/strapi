@@ -1,7 +1,5 @@
 export interface FeaturesConfig {
-  future?: {
-    preview?: boolean;
-  };
+  future?: object;
 }
 
 export interface FeaturesService {

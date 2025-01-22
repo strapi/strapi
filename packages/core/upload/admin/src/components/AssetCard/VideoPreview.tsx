@@ -19,7 +19,6 @@ export const VideoPreview = ({
   mime,
   onLoadDuration = () => {},
   alt,
-  size = 'M',
   ...props
 }: VideoPreviewProps) => {
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {

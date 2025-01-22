@@ -6,12 +6,14 @@ import {
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Box, type BoxProps, Flex, IconButton, Typography } from '@strapi/design-system';
+import { IconButton, Tabs, Typography, Grid } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
-import { type MessageDescriptor, useIntl } from 'react-intl';
-import { Link, type To, useNavigate } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+import { Link, type To } from 'react-router-dom';
+import { styled } from 'styled-components';
 
+import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
 import { usePreviewContext } from '../pages/Preview';
 
@@ -20,38 +22,44 @@ import { usePreviewContext } from '../pages/Preview';
  * -----------------------------------------------------------------------------------------------*/
 
 const ClosePreviewButton = () => {
-  const [{ query }] = useQueryParams();
-  const navigate = useNavigate();
+  const [{ query }] = useQueryParams<{
+    plugins?: Record<string, unknown>;
+  }>();
   const { formatMessage } = useIntl();
 
   const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
   const goBack = useHistory('BackButton', (state) => state.goBack);
   const history = useHistory('BackButton', (state) => state.history);
+  const locationIndex = useHistory('BackButton', (state) => state.currentLocationIndex);
 
-  const fallbackUrl: To = {
+  /**
+   * Get the link destination from the history.
+   * Rely on a fallback (the parent edit view page) if there's no page to go back .
+   */
+  const historyTo = canGoBack ? history.at(locationIndex - 2) : undefined;
+  const fallback = {
     pathname: '..',
     search: stringify(query, { encode: false }),
-  };
+  } satisfies To;
+  const toWithFallback = historyTo ?? fallback;
 
   const handleClick = (e: React.MouseEvent) => {
-    /**
-     * Prevent normal link behavior. We only make it an achor for accessibility reasons.
-     * The point of this logic is to act as the browser's back button when possible, and to fallback
-     * to a link behavior to the edit view when no history is available.
-     *  */
-    e.preventDefault();
-
     if (canGoBack) {
+      // Prevent normal link behavior, go back in the history stack instead
+      e.preventDefault();
       goBack();
-    } else {
-      navigate(fallbackUrl);
+      return;
     }
+
+    // Otherwise rely on native link behavior to go back to the edit view. We don't use navigate()
+    // here in order to get the relative="path" functionality from the Link component.
   };
 
   return (
     <IconButton
       tag={Link}
-      to={history.at(-1) ?? fallbackUrl}
+      relative="path"
+      to={toWithFallback}
       onClick={handleClick}
       label={formatMessage({
         id: 'content-manager.preview.header.close',
@@ -64,90 +72,72 @@ const ClosePreviewButton = () => {
 };
 
 /* -------------------------------------------------------------------------------------------------
- * DocumentStatus
+ * Status
  * -----------------------------------------------------------------------------------------------*/
 
-interface StatusData {
-  background: BoxProps['background'];
-  border: BoxProps['borderColor'];
-  text: BoxProps['color'];
-  message: MessageDescriptor;
-}
-
-const getStatusData = (status: ReturnType<typeof getDocumentStatus>): StatusData => {
-  switch (status) {
-    case 'draft':
-      return {
-        background: 'secondary100',
-        border: 'secondary200',
-        text: 'secondary700',
-        message: {
-          id: 'content-manager.containers.List.draft',
-          defaultMessage: 'Draft',
-        },
-      };
-    case 'modified':
-      return {
-        background: 'alternative100',
-        border: 'alternative200',
-        text: 'alternative700',
-        message: {
-          id: 'content-manager.containers.List.modified',
-          defaultMessage: 'Modified',
-        },
-      };
-    case 'published':
-    default:
-      return {
-        background: 'success100',
-        border: 'success200',
-        text: 'success700',
-        message: {
-          id: 'content-manager.containers.List.published',
-          defaultMessage: 'Published',
-        },
-      };
-  }
-};
-
-const DocumentStatus = () => {
-  const { formatMessage } = useIntl();
-
+const Status = () => {
   // Get status
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
-  const status = getDocumentStatus(document, meta);
-
-  const statusData = getStatusData(status);
 
   if (!hasDraftAndPublished) {
     return null;
   }
 
-  /**
-   * TODO: Add an XS size to the Status component from the design system so that we can add
-   * a variant to the VersionsList component.
-   * Then we could reuse it both here and in history's VersionCard component.
-   */
+  const status = getDocumentStatus(document, meta);
+
+  return <DocumentStatus status={status} size="XS" />;
+};
+
+const PreviewTabs = () => {
+  const { formatMessage } = useIntl();
+
+  // URL query params
+  const [{ query }, setQuery] = useQueryParams<{ status: 'draft' | 'published' }>();
+
+  // Get status
+  const document = usePreviewContext('PreviewHeader', (state) => state.document);
+  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const hasDraftAndPublish = schema?.options?.draftAndPublish ?? false;
+  const documentStatus = getDocumentStatus(document, meta);
+
+  const handleTabChange = (status: string) => {
+    if (status === 'published' || status === 'draft') {
+      setQuery({ status }, 'push', true);
+    }
+  };
+
+  if (!hasDraftAndPublish) {
+    return null;
+  }
 
   return (
-    <Box
-      background={statusData.background}
-      borderStyle="solid"
-      borderWidth="1px"
-      borderColor={statusData.border}
-      hasRadius
-      paddingLeft="6px"
-      paddingRight="6px"
-      paddingTop="2px"
-      paddingBottom="2px"
-    >
-      <Typography variant="pi" fontWeight="bold" textColor={statusData.text}>
-        {formatMessage(statusData.message)}
-      </Typography>
-    </Box>
+    <>
+      <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
+        <Tabs.List
+          aria-label={formatMessage({
+            id: 'preview.tabs.label',
+            defaultMessage: 'Document status',
+          })}
+        >
+          <StatusTab value="draft">
+            {formatMessage({
+              id: 'content-manager.containers.List.draft',
+              defaultMessage: 'draft',
+            })}
+          </StatusTab>
+          <StatusTab value="published" disabled={documentStatus === 'draft'}>
+            {formatMessage({
+              id: 'content-manager.containers.List.published',
+              defaultMessage: 'published',
+            })}
+          </StatusTab>
+        </Tabs.List>
+      </Tabs.Root>
+    </>
   );
 };
 
@@ -159,7 +149,20 @@ const PreviewHeader = () => {
   // Get main field
   const mainField = usePreviewContext('PreviewHeader', (state) => state.mainField);
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
-  const title = document[mainField];
+  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+
+  /**
+   * We look to see what the mainField is from the configuration, if it's an id
+   * we don't use it because it's a uuid format and not very user friendly.
+   * Instead, we display the schema name for single-type documents
+   * or "Untitled".
+   */
+  let documentTitle = 'Untitled';
+  if (mainField !== 'id' && document?.[mainField]) {
+    documentTitle = document[mainField];
+  } else if (schema.kind === 'singleType' && schema?.info.displayName) {
+    documentTitle = schema.info.displayName;
+  }
 
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -177,32 +180,52 @@ const PreviewHeader = () => {
   };
 
   return (
-    <Flex
-      justifyContent="space-between"
+    <Grid.Root
+      gap={3}
+      gridCols={3}
+      paddingLeft={2}
+      paddingRight={2}
       background="neutral0"
-      padding={2}
       borderColor="neutral150"
       tag="header"
     >
-      <Flex gap={3}>
+      {/* Title and status */}
+      <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <Typography tag="h1" fontWeight={600} fontSize={2}>
-          {title}
-        </Typography>
-        <DocumentStatus />
-      </Flex>
-      <IconButton
-        type="button"
-        label={formatMessage({
-          id: 'preview.copy.label',
-          defaultMessage: 'Copy preview link',
-        })}
-        onClick={handleCopyLink}
-      >
-        <LinkIcon />
-      </IconButton>
-    </Flex>
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={documentTitle}>
+          {documentTitle}
+        </PreviewTitle>
+        <Status />
+      </Grid.Item>
+      {/* Tabs */}
+      <Grid.Item xs={1} marginBottom="-1px" alignItems="end" margin="auto">
+        <PreviewTabs />
+      </Grid.Item>
+      {/* Copy link */}
+      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2}>
+        <IconButton
+          type="button"
+          label={formatMessage({
+            id: 'preview.copy.label',
+            defaultMessage: 'Copy preview link',
+          })}
+          onClick={handleCopyLink}
+        >
+          <LinkIcon />
+        </IconButton>
+      </Grid.Item>
+    </Grid.Root>
   );
 };
+
+const PreviewTitle = styled(Typography)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const StatusTab = styled(Tabs.Trigger)`
+  text-transform: uppercase;
+`;
 
 export { PreviewHeader };
