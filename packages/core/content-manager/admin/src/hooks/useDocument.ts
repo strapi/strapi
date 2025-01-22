@@ -143,7 +143,7 @@ const useDocument: UseDocument = (args, opts) => {
 
     // Otherwise, use a fallback
     return formatMessage({
-      id: 'content-manager.entry.untitled',
+      id: 'content-manager.containers.untitled',
       defaultMessage: 'Untitled',
     });
   };

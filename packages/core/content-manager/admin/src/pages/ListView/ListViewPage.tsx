@@ -206,7 +206,7 @@ const ListViewPage = () => {
   const contentTypeTitle = schema?.info.displayName
     ? formatMessage({ id: schema.info.displayName, defaultMessage: schema.info.displayName })
     : formatMessage({
-        id: 'content-manager.entry.untitled',
+        id: 'content-manager.containers.untitled',
         defaultMessage: 'Untitled',
       });
 
