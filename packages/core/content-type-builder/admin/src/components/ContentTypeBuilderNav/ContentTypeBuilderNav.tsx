@@ -16,7 +16,6 @@ import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { useLocation } from 'react-router-dom';
 
 
 import { getTrad } from '../../utils/getTrad';
@@ -30,11 +29,14 @@ const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
     const sidebar = ref.current;
     if (!sidebar) return;
 
-    const isAtTop = sidebar.scrollTop === 0;
-    const isAtBottom = sidebar.scrollHeight - sidebar.scrollTop === sidebar.clientHeight;
+    const { scrollTop, scrollHeight, clientHeight } = sidebar;
+    const isAtTop = scrollTop <= 0;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
 
+    // Stop scrolling from affecting other components
     if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
       event.preventDefault();
+      event.stopPropagation(); // Fix:: Ensureed event doesn't bubble to right component
     }
   }, []);
 
@@ -51,6 +53,11 @@ const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
 };
 
 const SubNavLinkCustom = styled(SubNavLink)`
+  overflow: hidden !important;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  display: block; 
   div {
     width: inherit;
     span:nth-child(2) {
@@ -61,6 +68,12 @@ const SubNavLinkCustom = styled(SubNavLink)`
     }
   }
 `;
+
+const SubNavLinkSectionCustom = styled(SubNavLinkSection)`
+  overflow: hidden !important;
+  max-width: 100%;
+`;
+
 
 export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
@@ -101,21 +114,21 @@ export const ContentTypeBuilderNav = () => {
               {section.links.map((link) => {
                 if (link.links) {
                   return (
-                    <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
-                      {link.links.map((subLink: any) => (
-                        <SubNavLink
-                          tag={NavLink}
-                          to={subLink.to}
-                          active={subLink.active}
-                          key={subLink.name}
-                          isSubSectionChild
-                        >
-                          {upperFirst(
-                            formatMessage({ id: subLink.name, defaultMessage: subLink.title })
-                          )}
-                        </SubNavLink>
-                      ))}
-                    </SubNavLinkSection>
+                    <SubNavLinkSectionCustom key={link.name} label={upperFirst(link.title)}>
+                    {link.links.map((subLink: any) => (
+                      <SubNavLinkCustom
+                        tag={NavLink}
+                        to={subLink.to}
+                        active={subLink.active}
+                        key={subLink.name}
+                        isSubSectionChild
+                      >
+                        {upperFirst(
+                          formatMessage({ id: subLink.name, defaultMessage: subLink.title })
+                        )}
+                      </SubNavLinkCustom>
+                    ))}
+                  </SubNavLinkSectionCustom>                  
                   );
                 }
 

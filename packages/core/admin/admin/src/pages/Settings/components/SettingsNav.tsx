@@ -16,16 +16,30 @@ import { SettingsMenu } from '../../../hooks/useSettingsMenu';
 
 // Custom hook to handle scroll locking
 const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
+  // const handleScroll = useCallback((event: WheelEvent) => {
+  //   const sidebar = ref.current;
+  //   if (!sidebar) return;
+
+  //   const isAtTop = sidebar.scrollTop === 0;
+  //   const isAtBottom = sidebar.scrollHeight - sidebar.scrollTop === sidebar.clientHeight;
+
+  //   if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
+  //     event.preventDefault();
+  //     event.stopPropagation();  // Prevents bubbling to parent
+  //   }
+  // }, []);
+
   const handleScroll = useCallback((event: WheelEvent) => {
     const sidebar = ref.current;
     if (!sidebar) return;
 
-    const isAtTop = sidebar.scrollTop === 0;
-    const isAtBottom = sidebar.scrollHeight - sidebar.scrollTop === sidebar.clientHeight;
+    const { scrollTop, scrollHeight, clientHeight } = sidebar;
+    const isAtTop = scrollTop <= 0;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
 
     if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
       event.preventDefault();
-      event.stopPropagation();  // Prevents bubbling to parent
+      event.stopPropagation();
     }
   }, []);
 
@@ -51,6 +65,12 @@ const CustomIcon = styled(Lightning)`
   path {
     fill: ${({ theme }) => theme.colors.warning500};
   }
+`;
+
+const SubNavStyled = styled(SubNav)`
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 100vh;
 `;
 
 const Link = styled(SubNavLink)`
@@ -101,7 +121,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
 
 
   return (
-    <SubNav ref={settingsSidebarRef} aria-label={label}>
+    <SubNavStyled ref={settingsSidebarRef} aria-label={label}>
       <SubNavHeader label={label} />
       <SubNavSections>
         {sections.map((section) => (
@@ -124,7 +144,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
           </SubNavSection>
         ))}
       </SubNavSections>
-    </SubNav>
+    </SubNavStyled>
   );
 };
 
