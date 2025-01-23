@@ -41,9 +41,10 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
-    .max(70, {
-      id: translatedErrors.maxLength.id,
-      defaultMessage: 'Password should be less than 70 characters',
+    .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
+      if (!value) return false;
+      const byteSize = new TextEncoder().encode(value).length;
+      return byteSize <= 72;
     })
     .matches(/[a-z]/, {
       message: {
@@ -102,9 +103,10 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
-    .max(70, {
-      id: translatedErrors.maxLength.id,
-      defaultMessage: 'Password should be less than 70 characters',
+    .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
+      if (!value) return false;
+      const byteSize = new TextEncoder().encode(value).length;
+      return byteSize <= 72;
     })
     .matches(/[a-z]/, {
       message: {

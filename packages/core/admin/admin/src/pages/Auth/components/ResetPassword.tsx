@@ -29,15 +29,12 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
-    .test(
-      'required-byte-size',
-      'Password must be between 8 and 70 bytes',
-      (value) => {
-        if (!value) return false;
-        const byteSize = new TextEncoder().encode(value).length;
-        return byteSize >= 8 && byteSize <= 70;
-      }
-    )
+    // bcrypt has a max length of 72 bytes (not characters!)
+    .test('required-byte-size', 'Password must be less than 73 bytes', (value) => {
+      if (!value) return false;
+      const byteSize = new TextEncoder().encode(value).length;
+      return byteSize <= 72;
+    })
     .matches(/[a-z]/, {
       message: {
         id: 'components.Input.error.contain.lowercase',
@@ -119,9 +116,9 @@ const ResetPassword = () => {
                 {isBaseQueryError(error)
                   ? formatAPIError(error)
                   : formatMessage({
-                    id: 'notification.error',
-                    defaultMessage: 'An error occurred',
-                  })}
+                      id: 'notification.error',
+                      defaultMessage: 'An error occurred',
+                    })}
               </Typography>
             ) : null}
           </Column>

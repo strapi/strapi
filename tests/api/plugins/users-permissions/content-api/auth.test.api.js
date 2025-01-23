@@ -147,5 +147,36 @@ describe('Auth API', () => {
 
       expect(res.statusCode).toBe(200);
     });
+
+    const cases = [
+      {
+        description: 'Password is exactly 73 bytes with valid ASCII characters',
+        password: `a${'b'.repeat(100)}`, // 1 byte ('a') + 72 bytes ('b') = 73 bytes
+        expectedStatus: 400,
+        expectedMessage: 'Password must be less than 73 bytes',
+      },
+      {
+        description: 'Password is 73 bytes but contains a character cut in half (UTF-8)',
+        password: `a${'b'.repeat(100)}\uD83D`, // 1 byte ('a') + 70 bytes ('b') + 3 bytes for half of a surrogate pair
+        expectedStatus: 400,
+        expectedMessage: 'Password must be less than 73 bytes',
+      },
+    ];
+
+    test.each(cases)('$description', async ({ password, expectedStatus, expectedMessage }) => {
+      const res = await rq({
+        method: 'POST',
+        url: '/change-password',
+        body: {
+          password,
+          passwordConfirmation: password,
+          currentPassword: internals.newPassword,
+        },
+      });
+
+      expect(res.statusCode).toBe(expectedStatus);
+      expect(res.body.error.name).toBe('ValidationError');
+      expect(res.body.error.message).toBe(expectedMessage);
+    });
   });
 });
