@@ -1,0 +1,16 @@
+{
+    "color-picker.description": "Selecciona cualquier color",
+    "color-picker.input.aria-label": "Entrada del selector de color",
+    "color-picker.input.format": "HEX",
+    "color-picker.label": "Color",
+    "color-picker.options.advanced.regex": "Patrón RegExp",
+    "color-picker.options.advanced.regex.description": "Proporciona una expresión regular para validar el valor HEX",
+    "color-picker.options.advanced.requiredField": "Campo requerido",
+    "color-picker.options.advanced.requiredField.description": "No podrás crear una entrada si este campo está vacío",
+    "color-picker.settings": "Ajustes",
+    "color-picker.toggle.aria-label": "Conmutar Selector de color",
+    "plugin.description.long": "Un campo personalizado de selección de color mantenido por Strapi. Utiliza los controles deslizantes de saturación y tono para seleccionar un color y guardar el valor en HEX.",
+    "plugin.description.short": "Un campo personalizado de selección de color mantenido por Strapi.",
+    "plugin.name": "Selector de color"
+  }
+  
