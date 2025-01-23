@@ -64,19 +64,28 @@ jest.mock('@strapi/utils', () => {
 
 jest.mock('../../../utils', () => {
   return {
-    getService: jest.fn(() => {
-      return {
-        add: jest.fn((user) => {
-          return user;
-        }),
-        issue: jest.fn(),
-        edit: jest.fn(async (id, data) => {
-          if (id === 1 && data.password) {
-            return { id, ...data };
-          }
-          throw new Error('Failed to edit user');
-        }),
-      };
+    getService: jest.fn((service) => {
+      if (service === 'user') {
+        return {
+          add: jest.fn((user) => {
+            return user;
+          }),
+          edit: jest.fn(async (id, data) => {
+            if (id === 1 && data.password) {
+              return { id };
+            }
+            throw new Error('Failed to edit user');
+          }),
+          validatePassword: jest.fn((password, userPassword) => {
+            return password === userPassword;
+          }),
+        };
+      }
+      if (service === 'jwt') {
+        return {
+          issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
+        };
+      }
     }),
   };
 });
@@ -384,6 +393,7 @@ describe('user-permissions auth', () => {
           code: 'valid-reset-token',
         },
         expectedResponse: {
+          jwt: 'fake-jwt-token-for-user-1',
           user: { id: 1 },
         },
       },
@@ -443,6 +453,101 @@ describe('user-permissions auth', () => {
           expect(ctx.send).toHaveBeenCalledTimes(0);
         } else {
           await authorization.resetPassword(ctx);
+          expect(ctx.send).toHaveBeenCalledWith(expectedResponse);
+        }
+      }
+    );
+  });
+
+  describe('changePassword', () => {
+    const changePasswordCases = [
+      {
+        description: 'Fails if current password is incorrect',
+        body: {
+          currentPassword: 'WrongPassword123',
+          password: 'NewPassword123',
+          passwordConfirmation: 'NewPassword123',
+        },
+        expectedMessage: 'The provided current password is invalid',
+      },
+      {
+        description: 'Fails if new password is the same as the current password',
+        body: {
+          currentPassword: 'CorrectPassword123',
+          password: 'CorrectPassword123',
+          passwordConfirmation: 'CorrectPassword123',
+        },
+        expectedMessage: 'Your new password must be different than your current password',
+      },
+      {
+        description: 'Successfully changes the password with valid input',
+        body: {
+          currentPassword: 'CorrectPassword123',
+          password: 'NewPassword123',
+          passwordConfirmation: 'NewPassword123',
+        },
+        expectedResponse: {
+          jwt: 'fake-jwt-token-for-user-1',
+          user: { id: 1, password: 'CorrectPassword123' },
+        },
+      },
+    ];
+
+    test.each(changePasswordCases)(
+      '$description',
+      async ({ body, expectedMessage, expectedResponse }) => {
+        global.strapi = {
+          ...mockStrapi,
+          db: {
+            query: jest.fn(() => ({
+              findOne: jest.fn(() => {
+                return {
+                  id: 1,
+                  password: 'CorrectPassword123', // Simulated hashed password
+                };
+              }),
+            })),
+          },
+          services: {
+            user: {
+              validatePassword: jest.fn(async (providedPassword, actualPassword) => {
+                return providedPassword === actualPassword; // Simulate password validation
+              }),
+              edit: jest.fn(async (id, data) => {
+                if (id === 1 && data.password) {
+                  return { id, ...data }; // Simulate successful password update
+                }
+                throw new Error('Failed to edit user');
+              }),
+            },
+            jwt: {
+              issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`), // Mock JWT generation
+            },
+          },
+          contentAPI: {
+            sanitize: {
+              output: jest.fn((user) => {
+                return user; // Return user object as-is for sanitization mock
+              }),
+            },
+          },
+        };
+
+        const ctx = {
+          state: {
+            user: { id: 1 }, // Simulate authenticated user
+          },
+          request: { body },
+          send: jest.fn(),
+        };
+
+        const authorization = auth({ strapi: global.strapi });
+
+        if (expectedMessage) {
+          await expect(authorization.changePassword(ctx)).rejects.toThrow(expectedMessage);
+          expect(ctx.send).toHaveBeenCalledTimes(0);
+        } else {
+          await authorization.changePassword(ctx);
           expect(ctx.send).toHaveBeenCalledWith(expectedResponse);
         }
       }
