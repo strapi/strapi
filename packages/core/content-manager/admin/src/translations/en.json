@@ -219,6 +219,7 @@
   "pages.NoContentType.text": "You don't have any content yet, we recommend you to create your first Content-Type.",
   "permissions.not-allowed.create": "You are not allowed to create a document",
   "permissions.not-allowed.update": "You are not allowed to see this document",
+  "plugin.name": "Content Manager",
   "plugin.description.long": "Quick way to see, edit and delete the data in your database.",
   "plugin.description.short": "Quick way to see, edit and delete the data in your database.",
   "popUpWarning.bodyMessage.contentType.delete": "Are you sure to delete Content-Type?",
