@@ -495,6 +495,7 @@
   "app.components.PluginCard.compatible": "Compatible with your app",
   "app.components.PluginCard.compatibleCommunity": "Compatible with the community",
   "app.components.PluginCard.more-details": "More details",
+  "app.components.Select.placeholder": "Select",
   "app.components.ToggleCheckbox.off-label": "False",
   "app.components.ToggleCheckbox.on-label": "True",
   "app.components.Users.MagicLink.connect": "Copy and share this link to give access to this user",
