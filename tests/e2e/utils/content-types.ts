@@ -365,38 +365,38 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
   }
 
   if (attribute.advanced) {
-    const adv = attribute.advanced;
+    const advanced = attribute.advanced;
     await page.getByText('Advanced Settings').click();
 
-    if (isBoolean(adv.required)) {
+    if (isBoolean(advanced.required)) {
       const checkbox = page.getByRole('checkbox', { name: 'Required field' });
-      await ensureCheckbox(checkbox, adv.required);
+      await ensureCheckbox(checkbox, advanced.required);
     }
 
-    if (isString(adv.regexp)) {
-      await page.getByLabel('Regexp').fill(adv.regexp);
+    if (isString(advanced.regexp)) {
+      await page.getByLabel('Regexp').fill(advanced.regexp);
     }
 
-    if (isBoolean(adv.unique)) {
+    if (isBoolean(advanced.unique)) {
       const checkbox = page.getByRole('checkbox', { name: 'Unique field' });
-      await ensureCheckbox(checkbox, adv.unique);
+      await ensureCheckbox(checkbox, advanced.unique);
     }
 
-    if (isBoolean(adv.private)) {
+    if (isBoolean(advanced.private)) {
       const checkbox = page.getByRole('checkbox', { name: 'Private field' });
-      await ensureCheckbox(checkbox, adv.private);
+      await ensureCheckbox(checkbox, advanced.private);
     }
 
-    if (isNumber(adv.maximum)) {
-      await page.getByLabel('Maximum').fill(adv.maximum.toString());
+    if (isNumber(advanced.maximum)) {
+      await page.getByLabel('Maximum').fill(advanced.maximum.toString());
     }
 
-    if (isNumber(adv.minimum)) {
-      await page.getByLabel('Minimum').fill(adv.minimum.toString());
+    if (isNumber(advanced.minimum)) {
+      await page.getByLabel('Minimum').fill(advanced.minimum.toString());
     }
 
-    if (isString(adv.default)) {
-      await page.getByLabel('Default').fill(adv.default);
+    if (isString(advanced.default)) {
+      await page.getByLabel('Default').fill(advanced.default);
     }
   }
 };

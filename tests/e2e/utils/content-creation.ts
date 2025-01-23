@@ -1,12 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import { typeMap } from './content-types';
-import {
-  clickAndWait,
-  findAndClose,
-  locateFirstAfter,
-  locateSequence,
-  navToHeader,
-} from './shared';
+import { clickAndWait, findAndClose, locateSequence, navToHeader } from './shared';
 
 export type FieldValueValue = string | number | boolean | null | Array<ComponentValue>;
 
