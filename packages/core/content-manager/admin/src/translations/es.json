@@ -199,6 +199,7 @@
   "containers.edit.information.document.label": "Creado",
   "containers.edit.information.document.value": "{time}{isAnonymous, select, true {} other { por {author}}}",
   "containers.List.modified": "Modificado",
+  "containers.list.table-headers.status": "Estatus",
   "containers.list.table.row-actions": "Acciones de fila",
   "containers.list.selectedEntriesModal.title": "Publicar entradas",
   "containers.list.selectedEntriesModal.selectedCount.publish": "<b>{publishedCount}</b> {publishedCount, plural, =0 {entradas} one {entrada} other {entradas}} ya publicadas. <b>{draftCount}</b> {draftCount, plural, =0 {entradas} one {entrada} other {entradas}} listas para publicar. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entradas} one {entrada} other {entradas}} esperando acción.",

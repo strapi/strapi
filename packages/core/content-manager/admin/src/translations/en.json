@@ -106,6 +106,7 @@
   "containers.List.modified": "Modified",
   "containers.list.displayedFields": "Displayed Fields",
   "containers.list.items": "{number} {number, plural, =0 {items} one {item} other {items}}",
+  "containers.list.table-headers.status": "Status",
   "containers.list.table.row-actions": "Row actions",
   "containers.list.selectedEntriesModal.title": "Publish entries",
   "containers.list.selectedEntriesModal.selectedCount.publish": "<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{draftCount}</b> {draftCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.",

@@ -200,6 +200,7 @@
   "containers.edit.information.document.value": "{time}{isAnonymous, select, true {} other { tarafından {author}}}",
   "containers.EditView.notification.errors": "Formda bazı hatalar var",
   "containers.List.modified": "Değiştirildi",
+  "containers.list.table-headers.status": "Durum",
   "containers.list.table.row-actions": "Satır işlemleri",
   "containers.list.selectedEntriesModal.title": "Girdileri yayınla",
   "containers.list.selectedEntriesModal.selectedCount.publish": "<b>{publishedCount}</b> {publishedCount, plural, =0 {girdi} one {girdi} other {girdi}} zaten yayınlandı. <b>{draftCount}</b> {draftCount, plural, =0 {girdi} one {girdi} other {girdi}} yayınlanmaya hazır. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {girdi} one {girdi} other {girdi}} işlem bekliyor.",
