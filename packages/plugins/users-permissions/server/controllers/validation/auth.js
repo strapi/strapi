@@ -15,7 +15,7 @@ const createRegisterSchema = (config) =>
       .string()
       .required()
       .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-        if (!value) return false;
+        if (!value) return true;
         const byteSize = new TextEncoder().encode(value).length;
         return byteSize <= 72;
       })
@@ -55,7 +55,7 @@ const createResetPasswordSchema = (config) =>
         .string()
         .required()
         .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-          if (!value) return false;
+          if (!value) return true;
           const byteSize = new TextEncoder().encode(value).length;
           return byteSize <= 72;
         })
@@ -88,7 +88,7 @@ const createChangePasswordSchema = (config) =>
         .string()
         .required()
         .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-          if (!value) return false;
+          if (!value) return true;
           const byteSize = new TextEncoder().encode(value).length;
           return byteSize <= 72;
         })

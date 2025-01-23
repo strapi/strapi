@@ -28,7 +28,7 @@ const COMMON_USER_SCHEMA = {
       values: { min: 8 },
     })
     .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-      if (!value) return false;
+      if (!value) return true;
       const byteSize = new TextEncoder().encode(value).length;
       return byteSize <= 72;
     })
@@ -40,7 +40,7 @@ const COMMON_USER_SCHEMA = {
       id: 'components.Input.error.contain.uppercase',
       defaultMessage: 'Password must contain at least one uppercase character',
     })
-    .matches(/\\d/, {
+    .matches(/\d/, {
       id: 'components.Input.error.contain.number',
       defaultMessage: 'Password must contain at least one number',
     }),

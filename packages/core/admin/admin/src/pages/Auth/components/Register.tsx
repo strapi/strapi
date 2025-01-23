@@ -42,7 +42,7 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
       values: { min: 8 },
     })
     .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-      if (!value) return false;
+      if (!value) return true;
       const byteSize = new TextEncoder().encode(value).length;
       return byteSize <= 72;
     })
@@ -104,7 +104,7 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
       values: { min: 8 },
     })
     .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-      if (!value) return false;
+      if (!value) return true;
       const byteSize = new TextEncoder().encode(value).length;
       return byteSize <= 72;
     })

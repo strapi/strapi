@@ -31,7 +31,7 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     })
     // bcrypt has a max length of 72 bytes (not characters!)
     .test('required-byte-size', 'Password must be less than 73 bytes', (value) => {
-      if (!value) return false;
+      if (!value) return true;
       const byteSize = new TextEncoder().encode(value).length;
       return byteSize <= 72;
     })

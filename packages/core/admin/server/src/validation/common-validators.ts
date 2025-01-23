@@ -24,7 +24,7 @@ export const password = yup
   .string()
   .min(8)
   .test('required-byte-size', 'Password must be less than 73 bytes', (value) => {
-    if (!value) return false;
+    if (!value) return true;
     const byteSize = new TextEncoder().encode(value).length;
     return byteSize <= 72;
   })
