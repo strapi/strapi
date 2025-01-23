@@ -164,7 +164,7 @@
   "Settings.application.customization.modal.upload.next": "Suivant",
   "Settings.application.customization.size-details": "Dimensions maximales : {dimension}×{dimension}, poids maximal : {size}KB",
   "Settings.application.description": "Informations globales du panneau d'administration",
-  "Settings.application.edition-title": "plan actuel",
+  "Settings.application.edition-title": "édition actuel",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Édition Communauté} other {Édition Entreprise}}",
   "Settings.application.get-help": "Obtenir de l'aide",
   "Settings.application.link-pricing": "Voir tous les tarifs",
