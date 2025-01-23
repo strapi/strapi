@@ -179,4 +179,30 @@ describe('Auth API', () => {
       expect(res.body.error.message).toBe(expectedMessage);
     });
   });
+
+  test('Can login with password that previously validated but is now too long', async () => {
+    const longPassword = 'a'.repeat(100);
+    const userInfo = {
+      username: 'longPasswordUser',
+      email: 'longpassworduser@strapi.io',
+      password: longPassword,
+      confirmed: true,
+      provider: 'local',
+    };
+
+    const { user } = await createAuthenticatedUser({ strapi, userInfo });
+
+    const rq = createRequest({ strapi }).setURLPrefix('/api/auth');
+
+    const res = await rq({
+      method: 'POST',
+      url: '/local',
+      body: {
+        identifier: user.email,
+        password: longPassword,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+  });
 });

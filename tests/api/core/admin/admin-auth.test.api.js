@@ -378,6 +378,40 @@ describe('Admin Auth End to End', () => {
       });
     });
 
+    test('Fails on password of 73 bytes', async () => {
+      const res = await rq({
+        url: '/admin/register',
+        method: 'POST',
+        body: {
+          registrationToken: user.registrationToken,
+          userInfo: {
+            firstname: 'test',
+            lastname: 'Strapi',
+            password: `aA1${'b'.repeat(70)}`,
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'userInfo.password must be less than 73 bytes',
+                name: 'ValidationError',
+                path: ['userInfo', 'password'],
+              },
+            ],
+          },
+          message: 'userInfo.password must be less than 73 bytes',
+          name: 'ValidationError',
+        },
+      });
+    });
+
     test('Registers user correctly', async () => {
       const userRegistrationInfo = {
         firstname: 'test',
