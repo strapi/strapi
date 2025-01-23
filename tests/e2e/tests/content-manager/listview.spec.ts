@@ -60,41 +60,26 @@ test.describe('List View', () => {
 
       await page.waitForSelector('text=Ready to publish');
 
-      const verifyPublicationStatus = async (
-        publishedCount: number,
-        readyToPublishCount: number,
-        waitingForActionCount: number,
-        readyToPublishChangesCount: number
-      ) => {
-        const alreadyPublishedElement = await page
-          .getByText('Already Published')
-          .first()
-          .locator('xpath=../following-sibling::*');
-        const readyToPublishElement = await page
-          .getByText('Ready to publish')
-          .first()
-          .locator('xpath=../following-sibling::*');
-        const waitingForActionElement = await page
-          .getByText('Waiting for action')
-          .first()
-          .locator('xpath=../following-sibling::*');
-        const readyToPublishChangesElement = await page
-          .getByText('Ready to publish changes')
-          .first()
-          .locator('xpath=../following-sibling::*');
-
-        const publishedText = await alreadyPublishedElement.textContent();
-        const readyToPublishText = await readyToPublishElement.textContent();
-        const waitingForActionText = await waitingForActionElement.textContent();
-        const readyToPublishChangesText = await readyToPublishChangesElement.textContent();
-
-        expect(publishedText).toBe(publishedCount.toString());
-        expect(readyToPublishText).toBe(readyToPublishCount.toString());
-        expect(waitingForActionText).toBe(waitingForActionCount.toString());
-        expect(readyToPublishChangesText).toBe(readyToPublishChangesCount.toString());
-      };
-
-      await verifyPublicationStatus(0, 2, 0, 0);
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Already published 0',
+        })
+      ).toBeVisible();
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Ready to publish 2',
+        })
+      ).toBeVisible();
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Waiting for action 0',
+        })
+      ).toBeVisible();
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Ready to publish changes 0',
+        })
+      ).toBeVisible();
 
       const entry1 = page
         .getByLabel('Publish entries')
@@ -113,9 +98,26 @@ test.describe('List View', () => {
         .getByRole('checkbox', { name: 'Select all entries' });
       await selectAll.uncheck();
 
-      await page.waitForSelector('text=Ready to publish');
-
-      await verifyPublicationStatus(0, 0, 0, 0);
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Already published 0',
+        })
+      ).toBeVisible();
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Ready to publish 0',
+        })
+      ).toBeVisible();
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Waiting for action 0',
+        })
+      ).toBeVisible();
+      expect(
+        await page.getByRole('gridcell', {
+          name: 'Ready to publish changes 0',
+        })
+      ).toBeVisible();
 
       // Check if the publish button is disabled
       const publishModalButton = page

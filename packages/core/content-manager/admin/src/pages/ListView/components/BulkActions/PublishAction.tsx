@@ -1,25 +1,28 @@
 import * as React from 'react';
 
 import {
-  useQueryParams,
-  Table,
-  useTable,
-  getYupValidationErrors,
   FormErrors,
+  getYupValidationErrors,
+  Table,
+  useQueryParams,
+  useTable,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
-  Typography,
-  Modal,
-  IconButton,
   Flex,
-  Tooltip,
+  IconButton,
   Loader,
+  Modal,
+  Tooltip,
+  Typography,
   TypographyComponent,
-  Grid as GridComponent,
+  RawTable,
+  Tr,
+  Td,
+  Tbody,
 } from '@strapi/design-system';
-import { Pencil, CrossCircle, CheckCircle, ArrowsCounterClockwise } from '@strapi/icons';
+import { ArrowsCounterClockwise, CheckCircle, CrossCircle, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -48,14 +51,15 @@ const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
 `;
 
-const GridRoot = styled(GridComponent.Root)`
-  border-left: 1px solid ${({ theme }) => theme.colors.neutral150};
-  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+const TableComponent = styled(RawTable)`
+  width: 100%;
+  table-layout: fixed;
+  td:first-child {
+    border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+  }
 `;
-
-const GridItem = styled(GridComponent.Item)`
-  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+const TableCell = styled(Td)`
+  padding: 16px !important;
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -320,48 +324,56 @@ const PublicationStatusGrid = ({
   const { formatMessage } = useIntl();
 
   return (
-    <GridRoot hasRadius>
-      <GridItem col={6} padding={4}>
-        <PublicationStatusSummary
-          count={entriesReadyToPublishCount}
-          icon={<CheckCircle fill="success600" />}
-          message={formatMessage({
-            id: 'app.utils.ready-to-publish',
-            defaultMessage: 'Ready to publish',
-          })}
-        />
-      </GridItem>
-      <GridItem col={6} padding={4}>
-        <PublicationStatusSummary
-          count={entriesPublishedCount}
-          icon={<CheckCircle fill="success600" />}
-          message={formatMessage({
-            id: 'app.utils.already-published',
-            defaultMessage: 'Already published',
-          })}
-        />
-      </GridItem>
-      <GridItem col={6} padding={4}>
-        <PublicationStatusSummary
-          count={entriesModifiedCount}
-          icon={<ArrowsCounterClockwise fill="alternative600" />}
-          message={formatMessage({
-            id: 'content-manager.bulk-publish.modified',
-            defaultMessage: 'Ready to publish changes',
-          })}
-        />
-      </GridItem>
-      <GridItem col={6} padding={4}>
-        <PublicationStatusSummary
-          count={entriesWithErrorsCount}
-          icon={<CrossCircle fill="danger600" />}
-          message={formatMessage({
-            id: 'content-manager.bulk-publish.waiting-for-action',
-            defaultMessage: 'Waiting for action',
-          })}
-        />
-      </GridItem>
-    </GridRoot>
+    <Box hasRadius borderColor="neutral150">
+      <TableComponent colCount={2} rowCount={2}>
+        <Tbody>
+          <Tr>
+            <TableCell>
+              <PublicationStatusSummary
+                count={entriesReadyToPublishCount}
+                icon={<CheckCircle fill="success600" />}
+                message={formatMessage({
+                  id: 'app.utils.ready-to-publish',
+                  defaultMessage: 'Ready to publish',
+                })}
+              />
+            </TableCell>
+            <TableCell>
+              <PublicationStatusSummary
+                count={entriesPublishedCount}
+                icon={<CheckCircle fill="success600" />}
+                message={formatMessage({
+                  id: 'app.utils.already-published',
+                  defaultMessage: 'Already published',
+                })}
+              />
+            </TableCell>
+          </Tr>
+          <Tr>
+            <TableCell>
+              <PublicationStatusSummary
+                count={entriesModifiedCount}
+                icon={<ArrowsCounterClockwise fill="alternative600" />}
+                message={formatMessage({
+                  id: 'content-manager.bulk-publish.modified',
+                  defaultMessage: 'Ready to publish changes',
+                })}
+              />
+            </TableCell>
+            <TableCell>
+              <PublicationStatusSummary
+                count={entriesWithErrorsCount}
+                icon={<CrossCircle fill="danger600" />}
+                message={formatMessage({
+                  id: 'content-manager.bulk-publish.waiting-for-action',
+                  defaultMessage: 'Waiting for action',
+                })}
+              />
+            </TableCell>
+          </Tr>
+        </Tbody>
+      </TableComponent>
+    </Box>
   );
 };
 
