@@ -396,6 +396,8 @@
   "app.utils.select-field": "Sélectionner un champ",
   "app.utils.select-filter": "Sélectionner un filtre",
   "app.utils.unpublish": "Annuler la publication",
+  "app.utils.ready-to-publish": "Prêt à publier",
+  "app.utils.already-published": "Déjà publié",
   "clearLabel": "Vider",
   "coming.soon": "Ce contenu est actuellement en construction et sera de retour dans quelques semaines !",
   "component.Input.error.validation.integer": "La valeur doit être un nombre entier",
