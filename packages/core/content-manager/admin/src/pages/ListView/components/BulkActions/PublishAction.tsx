@@ -57,9 +57,9 @@ const TableComponent = styled(RawTable)`
   td:first-child {
     border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   }
-`;
-const TableCell = styled(Td)`
-  padding: 16px !important;
+  td:first-of-type {
+    padding: ${({ theme }) => theme.spaces[4]};
+  }
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ const PublicationStatusGrid = ({
       <TableComponent colCount={2} rowCount={2}>
         <Tbody>
           <Tr>
-            <TableCell>
+            <Td>
               <PublicationStatusSummary
                 count={entriesReadyToPublishCount}
                 icon={<CheckCircle fill="success600" />}
@@ -337,8 +337,8 @@ const PublicationStatusGrid = ({
                   defaultMessage: 'Ready to publish',
                 })}
               />
-            </TableCell>
-            <TableCell>
+            </Td>
+            <Td>
               <PublicationStatusSummary
                 count={entriesPublishedCount}
                 icon={<CheckCircle fill="success600" />}
@@ -347,10 +347,10 @@ const PublicationStatusGrid = ({
                   defaultMessage: 'Already published',
                 })}
               />
-            </TableCell>
+            </Td>
           </Tr>
           <Tr>
-            <TableCell>
+            <Td>
               <PublicationStatusSummary
                 count={entriesModifiedCount}
                 icon={<ArrowsCounterClockwise fill="alternative600" />}
@@ -359,8 +359,8 @@ const PublicationStatusGrid = ({
                   defaultMessage: 'Ready to publish changes',
                 })}
               />
-            </TableCell>
-            <TableCell>
+            </Td>
+            <Td>
               <PublicationStatusSummary
                 count={entriesWithErrorsCount}
                 icon={<CrossCircle fill="danger600" />}
@@ -369,7 +369,7 @@ const PublicationStatusGrid = ({
                   defaultMessage: 'Waiting for action',
                 })}
               />
-            </TableCell>
+            </Td>
           </Tr>
         </Tbody>
       </TableComponent>

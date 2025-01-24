@@ -60,23 +60,23 @@ test.describe('List View', () => {
 
       await page.waitForSelector('text=Ready to publish');
 
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Already published 0',
         })
       ).toBeVisible();
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Ready to publish 2',
         })
       ).toBeVisible();
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Waiting for action 0',
         })
       ).toBeVisible();
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Ready to publish changes 0',
         })
       ).toBeVisible();
@@ -98,23 +98,23 @@ test.describe('List View', () => {
         .getByRole('checkbox', { name: 'Select all entries' });
       await selectAll.uncheck();
 
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Already published 0',
         })
       ).toBeVisible();
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Ready to publish 0',
         })
       ).toBeVisible();
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Waiting for action 0',
         })
       ).toBeVisible();
-      expect(
-        await page.getByRole('gridcell', {
+      await expect(
+        page.getByRole('gridcell', {
           name: 'Ready to publish changes 0',
         })
       ).toBeVisible();
