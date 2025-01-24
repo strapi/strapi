@@ -101,6 +101,8 @@ describe('AssigneeSelect', () => {
       components: {},
       isLoading: false,
       validate: jest.fn(),
+      getInitialFormValues: jest.fn(),
+      getTitle: jest.fn(),
       document: {
         documentId: '12345',
         id: 12345,
