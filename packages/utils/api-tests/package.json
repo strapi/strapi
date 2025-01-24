@@ -1,6 +1,6 @@
 {
   "name": "api-tests",
-  "version": "5.7.0",
+  "version": "5.8.1",
   "private": true,
   "dependencies": {
     "dotenv": "16.4.5",

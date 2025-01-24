@@ -56,6 +56,8 @@ const EditViewPage = () => {
     id,
     model,
     hasError,
+    getTitle,
+    getInitialFormValues,
   } = useDoc();
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
@@ -98,28 +100,7 @@ const EditViewPage = () => {
 
   const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
-  /**
-   * Here we prepare the form for editing, we need to:
-   * - remove prohibited fields from the document (passwords | ADD YOURS WHEN THERES A NEW ONE)
-   * - swap out count objects on relations for empty arrays
-   * - set __temp_key__ on array objects for drag & drop
-   *
-   * We also prepare the form for new documents, so we need to:
-   * - set default values on fields
-   */
-  const initialValues = React.useMemo(() => {
-    if ((!document && !isCreatingDocument && !isSingleType) || !schema) {
-      return undefined;
-    }
-
-    /**
-     * Check that we have an ID so we know the
-     * document has been created in some way.
-     */
-    const form = document?.id ? document : createDefaultForm(schema, components);
-
-    return transformDocument(schema, components)(form);
-  }, [document, isCreatingDocument, isSingleType, schema, components]);
+  const initialValues = getInitialFormValues(isCreatingDocument);
 
   if (hasError) {
     return <Page.Error />;
@@ -139,19 +120,6 @@ const EditViewPage = () => {
     }
   };
 
-  /**
-   * We look to see what the mainField is from the configuration, if it's an id
-   * we don't use it because it's a uuid format and not very user friendly.
-   * Instead, we display the schema name for single-type documents
-   * or "Untitled".
-   */
-  let documentTitle = 'Untitled';
-  if (mainField !== 'id' && document?.[mainField]) {
-    documentTitle = document[mainField];
-  } else if (isSingleType && schema?.info.displayName) {
-    documentTitle = schema.info.displayName;
-  }
-
   const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
     const yupSchema = createYupSchema(schema?.attributes, components, {
       status,
@@ -163,7 +131,7 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Page.Title>{documentTitle}</Page.Title>
+      <Page.Title>{getTitle(mainField)}</Page.Title>
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
@@ -183,7 +151,7 @@ const EditViewPage = () => {
             <Header
               isCreating={isCreatingDocument}
               status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-              title={documentTitle}
+              title={getTitle(mainField)}
             />
             <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
               <Tabs.List
