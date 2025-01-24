@@ -360,7 +360,14 @@ describe('user-permissions auth', () => {
       };
 
       const authorization = auth({ strapi: global.strapi });
+
       await expect(authorization.register(ctx)).rejects.toThrow(errors.ValidationError);
+      try {
+        await authorization.register(ctx);
+      } catch (error) {
+        expect(error.message).toBe(expectedMessage);
+      }
+
       expect(ctx.send).toHaveBeenCalledTimes(0);
     });
   });
@@ -397,6 +404,27 @@ describe('user-permissions auth', () => {
           user: { id: 1 },
         },
       },
+      {
+        description: 'Successfully resets the password when password is exactly 72 bytes',
+        body: {
+          password: 'a'.repeat(72),
+          passwordConfirmation: 'a'.repeat(72),
+          code: 'valid-reset-token',
+        },
+        expectedResponse: {
+          jwt: 'fake-jwt-token-for-user-1',
+          user: { id: 1 },
+        },
+      },
+      {
+        description: 'Fails if password exceeds 72 bytes',
+        body: {
+          password: 'a'.repeat(73),
+          passwordConfirmation: 'a'.repeat(73),
+          code: 'valid-reset-token',
+        },
+        expectedMessage: 'Password must be less than 73 bytes',
+      },
     ];
 
     test.each(resetPasswordCases)(
@@ -424,14 +452,14 @@ describe('user-permissions auth', () => {
               }),
             },
             jwt: {
-              issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`), // Ensure JWT mock works
+              issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
             },
           },
           contentAPI: {
             sanitize: {
               output: jest.fn((user) => {
                 // Simulate sanitizing the user object
-                const { resetPasswordToken, ...sanitizedUser } = user; // Remove token from sanitized output
+                const { resetPasswordToken, ...sanitizedUser } = user;
                 return sanitizedUser;
               }),
             },
@@ -441,7 +469,7 @@ describe('user-permissions auth', () => {
         const ctx = {
           request: { body },
           state: {
-            auth: {}, // Mock auth object
+            auth: {},
           },
           send: jest.fn(),
         };
@@ -491,6 +519,27 @@ describe('user-permissions auth', () => {
           user: { id: 1, password: 'CorrectPassword123' },
         },
       },
+      {
+        description: 'Successfully changes the password when password is exactly 72 bytes',
+        body: {
+          currentPassword: 'CorrectPassword123',
+          password: 'a'.repeat(72),
+          passwordConfirmation: 'a'.repeat(72),
+        },
+        expectedResponse: {
+          jwt: 'fake-jwt-token-for-user-1',
+          user: { id: 1, password: 'CorrectPassword123' },
+        },
+      },
+      {
+        description: 'Fails if password exceeds 72 bytes',
+        body: {
+          currentPassword: 'CorrectPassword123',
+          password: 'a'.repeat(73),
+          passwordConfirmation: 'a'.repeat(73),
+        },
+        expectedMessage: 'Password must be less than 73 bytes',
+      },
     ];
 
     test.each(changePasswordCases)(
@@ -511,23 +560,23 @@ describe('user-permissions auth', () => {
           services: {
             user: {
               validatePassword: jest.fn(async (providedPassword, actualPassword) => {
-                return providedPassword === actualPassword; // Simulate password validation
+                return providedPassword === actualPassword;
               }),
               edit: jest.fn(async (id, data) => {
                 if (id === 1 && data.password) {
-                  return { id, ...data }; // Simulate successful password update
+                  return { id, ...data };
                 }
                 throw new Error('Failed to edit user');
               }),
             },
             jwt: {
-              issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`), // Mock JWT generation
+              issue: jest.fn((payload) => `fake-jwt-token-for-user-${payload.id}`),
             },
           },
           contentAPI: {
             sanitize: {
               output: jest.fn((user) => {
-                return user; // Return user object as-is for sanitization mock
+                return user;
               }),
             },
           },
@@ -535,7 +584,7 @@ describe('user-permissions auth', () => {
 
         const ctx = {
           state: {
-            user: { id: 1 }, // Simulate authenticated user
+            user: { id: 1 },
           },
           request: { body },
           send: jest.fn(),
