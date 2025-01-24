@@ -1,4 +1,4 @@
-import { isBoolean, kebabCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, Locator, type Page } from '@playwright/test';
@@ -365,12 +365,38 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
   }
 
   if (attribute.advanced) {
-    const adv = attribute.advanced;
+    const advanced = attribute.advanced;
     await page.getByText('Advanced Settings').click();
 
-    if (isBoolean(adv.required)) {
+    if (isBoolean(advanced.required)) {
       const checkbox = page.getByRole('checkbox', { name: 'Required field' });
-      await ensureCheckbox(checkbox, adv.required);
+      await ensureCheckbox(checkbox, advanced.required);
+    }
+
+    if (isString(advanced.regexp)) {
+      await page.getByLabel('Regexp').fill(advanced.regexp);
+    }
+
+    if (isBoolean(advanced.unique)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Unique field' });
+      await ensureCheckbox(checkbox, advanced.unique);
+    }
+
+    if (isBoolean(advanced.private)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Private field' });
+      await ensureCheckbox(checkbox, advanced.private);
+    }
+
+    if (isNumber(advanced.maximum)) {
+      await page.getByLabel('Maximum').fill(advanced.maximum.toString());
+    }
+
+    if (isNumber(advanced.minimum)) {
+      await page.getByLabel('Minimum').fill(advanced.minimum.toString());
+    }
+
+    if (isString(advanced.default)) {
+      await page.getByLabel('Default').fill(advanced.default);
     }
   }
 };
