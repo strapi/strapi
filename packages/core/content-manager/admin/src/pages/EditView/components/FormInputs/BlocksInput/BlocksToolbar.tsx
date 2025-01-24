@@ -9,8 +9,10 @@ import {
   Box,
   FlexComponent,
   BoxComponent,
+  Menu,
+  IconButton,
 } from '@strapi/design-system';
-import { Link } from '@strapi/icons';
+import { Link, More } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
@@ -122,7 +124,7 @@ const ToolbarButton = ({
   const enabledColor = isActive ? 'primary600' : 'neutral600';
 
   return (
-    <Tooltip description={labelMessage}>
+    <Tooltip label={labelMessage}>
       <Toolbar.ToggleItem
         value={name}
         data-state={isActive ? 'on' : 'off'}
@@ -511,6 +513,76 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
   );
 };
 
+interface ToolbarRendererProps {
+  children: React.ReactNode;
+  isVisible: boolean;
+  setIsVisible: (isVisible: boolean) => void;
+}
+
+const ToolbarRenderer = ({ children, isVisible, setIsVisible }: ToolbarRendererProps) => {
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const containerEl = containerRef.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerEl) {
+        observer.disconnect();
+      }
+    };
+  }, [setIsVisible]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        visibility: isVisible ? 'visible' : 'hidden',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+const FlexibleItem = ({
+  item,
+  index,
+  isVisible,
+  setVisibleIndexes,
+}: {
+  item: React.ReactNode;
+  index: number;
+  isVisible: boolean;
+  setVisibleIndexes: React.Dispatch<React.SetStateAction<number[]>>;
+}) => {
+  const setIsVisible = React.useCallback(
+    (visible: boolean) => {
+      if (visible) {
+        setVisibleIndexes((prev) => [...prev, index].sort());
+      } else {
+        setVisibleIndexes((prev) => prev.filter((i) => i !== index));
+      }
+    },
+    [index, setVisibleIndexes]
+  );
+
+  return (
+    <ToolbarRenderer isVisible={isVisible} setIsVisible={setIsVisible} key={index}>
+      {item}
+    </ToolbarRenderer>
+  );
+};
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
 
@@ -538,32 +610,77 @@ const BlocksToolbar = () => {
 
   const isButtonDisabled = checkButtonDisabled();
 
+  const flexibleItems: React.ReactNode[] = [
+    ...Object.entries(modifiers).map(([name, modifier]) => (
+      <ToolbarButton
+        key={name}
+        name={name}
+        icon={modifier.icon}
+        label={modifier.label}
+        isActive={modifier.checkIsActive(editor)}
+        handleClick={() => modifier.handleToggle(editor)}
+        disabled={isButtonDisabled}
+      />
+    )),
+    <LinkButton disabled={isButtonDisabled} key="link" />,
+    <Flex direction="row" gap={1} key="list-type">
+      <Separator />
+      <Toolbar.ToggleGroup type="single" asChild>
+        <Flex gap={1}>
+          <ListButton block={blocks['list-unordered']} format="unordered" />
+          <ListButton block={blocks['list-ordered']} format="ordered" />
+        </Flex>
+      </Toolbar.ToggleGroup>
+    </Flex>,
+  ];
+
+  const [visibleIndexes, setVisibleIndexes] = React.useState<number[]>([]);
+  const totalIndexes = [...Array(flexibleItems.length).keys()];
+  const hiddenIndexes = totalIndexes.filter((index) => !visibleIndexes.includes(index));
+  console.log('hiddenIndexes', hiddenIndexes);
+  console.log('visibleIndexes', visibleIndexes);
+  const hasHiddenItems = hiddenIndexes.length > 0;
+
+  if (hasHiddenItems) {
+    flexibleItems.splice(
+      visibleIndexes.length - 1,
+      0,
+      <Menu.Root defaultOpen={false}>
+        <Menu.Trigger endIcon={null} paddingLeft={0} paddingRight={0}>
+          <IconButton variant="ghost" label="more TODO" tag="span">
+            <More aria-hidden focusable={false} />
+          </IconButton>
+        </Menu.Trigger>
+        <Menu.Content>
+          <Toolbar.ToggleGroup type="multiple">
+            <Flex justifyContent="row" gap={1}>
+              {hiddenIndexes.map((index) => flexibleItems[index])}
+            </Flex>
+          </Toolbar.ToggleGroup>
+        </Menu.Content>
+      </Menu.Root>
+    );
+  }
+
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper gap={2} padding={2} width="100%">
         <BlocksDropdown />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1}>
-            {Object.entries(modifiers).map(([name, modifier]) => (
-              <ToolbarButton
-                key={name}
-                name={name}
-                icon={modifier.icon}
-                label={modifier.label}
-                isActive={modifier.checkIsActive(editor)}
-                handleClick={() => modifier.handleToggle(editor)}
-                disabled={isButtonDisabled}
+          <Flex direction="row" gap={1} grow={1} overflow="hidden">
+            {flexibleItems.map((item, index) => (
+              <FlexibleItem
+                isVisible={
+                  visibleIndexes.includes(index) ||
+                  (index === flexibleItems.length - 1 && hasHiddenItems)
+                }
+                setVisibleIndexes={setVisibleIndexes}
+                item={item}
+                index={index}
+                key={index}
               />
             ))}
-            <LinkButton disabled={isButtonDisabled} />
-          </Flex>
-        </Toolbar.ToggleGroup>
-        <Separator />
-        <Toolbar.ToggleGroup type="single" asChild>
-          <Flex gap={1}>
-            <ListButton block={blocks['list-unordered']} format="unordered" />
-            <ListButton block={blocks['list-ordered']} format="ordered" />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>
