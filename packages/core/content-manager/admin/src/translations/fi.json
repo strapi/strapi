@@ -33,7 +33,7 @@
   "components.DynamicZone.delete-label": "Poista {name}",
   "components.DynamicZone.error-message": "Osa sisältää yhden tai useamman virheen",
   "components.DynamicZone.missing-components": "{number, plural, one {# komponentti } other {# komponenttia }} puuttuu",
-  "components.DynamicZone.extra-components": "{numero, monikko, =0 { # lisäkomponenttia} one {on # lisäkomponentti} other {on # lisäkomponenttia}}",
+  "components.DynamicZone.extra-components": "{number, plural, =0 { # lisäkomponenttia} one {# lisäkomponentti} other {# lisäkomponenttia}} löytyy",
   "components.DynamicZone.move-down-label": "Siirrä komponenttia alaspäin",
   "components.DynamicZone.move-up-label": "Siirrä komponenttia ylöspäin",
   "components.DynamicZone.pick-compo": "Valitse komponentti",
