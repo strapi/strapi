@@ -25,7 +25,11 @@ const JsonInput = React.forwardRef<JSONInputRef, InputProps>(
         <JSONInputImpl
           ref={composedRefs}
           value={
-            typeof field.value == 'object' ? JSON.stringify(field.value, null, 2) : field.value
+            typeof field.value == 'object' ||
+            typeof field.value == 'boolean' ||
+            typeof field.value == 'number'
+              ? JSON.stringify(field.value, null, 2)
+              : field.value
           }
           onChange={(json) => {
             // Default to null when the field is not required and there is no input value
