@@ -478,18 +478,22 @@ const RelationsInput = ({
      */
     const [targetField] = name.split('.').slice(-1);
 
-    searchForTrigger({
-      model,
-      targetField,
-      params: {
-        ...buildValidParams(query),
-        id: id ?? '',
-        pageSize: 10,
-        idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
-        idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
-        ...searchParams,
-      },
-    });
+    const timeout = setTimeout(() => {
+      searchForTrigger({
+        model,
+        targetField,
+        params: {
+          ...buildValidParams(query),
+          id: id ?? '',
+          pageSize: 10,
+          idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
+          idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
+          ...searchParams,
+        },
+      });
+    }, 300);
+
+    return () => clearTimeout(timeout);
   }, [
     field.value?.connect,
     field.value?.disconnect,
