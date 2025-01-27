@@ -343,10 +343,12 @@ const isListNode = (node: unknown): node is Block<'list'> => {
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
   format: Block<'list'>['format'];
+  location?: 'toolbar' | 'menu';
 }
 
-const ListButton = ({ block, format }: ListButtonProps) => {
+const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) => {
   const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
+  const { formatMessage } = useIntl();
 
   const isListActive = () => {
     if (!editor.selection) return false;
@@ -433,6 +435,14 @@ const ListButton = ({ block, format }: ListButtonProps) => {
     }
   };
 
+  if (location === 'menu') {
+    return (
+      <Menu.Item onClick={() => toggleList(format)} disabled={isListDisabled()}>
+        {formatMessage(block.label)}
+      </Menu.Item>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={block.icon}
@@ -445,8 +455,15 @@ const ListButton = ({ block, format }: ListButtonProps) => {
   );
 };
 
-const LinkButton = ({ disabled }: { disabled: boolean }) => {
+const LinkButton = ({
+  disabled,
+  location = 'toolbar',
+}: {
+  disabled: boolean;
+  location?: 'toolbar' | 'menu';
+}) => {
   const { editor } = useBlocksEditorContext('LinkButton');
+  const { formatMessage } = useIntl();
 
   const isLinkActive = () => {
     const { selection } = editor;
@@ -498,14 +515,24 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
     insertLink(editor, { url: '' });
   };
 
+  const label = {
+    id: 'components.Blocks.link',
+    defaultMessage: 'Link',
+  } as MessageDescriptor;
+
+  if (location === 'menu') {
+    return (
+      <Menu.Item onClick={addLink} disabled={isLinkDisabled()}>
+        {formatMessage(label)}
+      </Menu.Item>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={Link}
       name="link"
-      label={{
-        id: 'components.Blocks.link',
-        defaultMessage: 'Link',
-      }}
+      label={label}
       isActive={isLinkActive()}
       handleClick={addLink}
       disabled={isLinkDisabled()}
@@ -554,13 +581,13 @@ const ToolbarRenderer = ({ children, isVisible, setIsVisible }: ToolbarRendererP
   );
 };
 
-const FlexibleItem = ({
-  item,
+const FlexibleToolbarItem = ({
+  children,
   index,
   isVisible,
   setVisibleIndexes,
 }: {
-  item: React.ReactNode;
+  children: React.ReactNode;
   index: number;
   isVisible: boolean;
   setVisibleIndexes: React.Dispatch<React.SetStateAction<number[]>>;
@@ -578,13 +605,14 @@ const FlexibleItem = ({
 
   return (
     <ToolbarRenderer isVisible={isVisible} setIsVisible={setIsVisible} key={index}>
-      {item}
+      {children}
     </ToolbarRenderer>
   );
 };
 
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
+  const { formatMessage } = useIntl();
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -610,56 +638,85 @@ const BlocksToolbar = () => {
 
   const isButtonDisabled = checkButtonDisabled();
 
-  const flexibleItems: React.ReactNode[] = [
-    ...Object.entries(modifiers).map(([name, modifier]) => (
-      <ToolbarButton
-        key={name}
-        name={name}
-        icon={modifier.icon}
-        label={modifier.label}
-        isActive={modifier.checkIsActive(editor)}
-        handleClick={() => modifier.handleToggle(editor)}
-        disabled={isButtonDisabled}
-      />
-    )),
-    <LinkButton disabled={isButtonDisabled} key="link" />,
-    <Flex direction="row" gap={1} key="list-type">
-      <Separator />
-      <Toolbar.ToggleGroup type="single" asChild>
-        <Flex gap={1}>
-          <ListButton block={blocks['list-unordered']} format="unordered" />
-          <ListButton block={blocks['list-ordered']} format="ordered" />
+  const flexItems = [
+    ...Object.entries(modifiers).map(([name, modifier]) => ({
+      renderInToolbar: () => (
+        <ToolbarButton
+          key={name}
+          name={name}
+          icon={modifier.icon}
+          label={modifier.label}
+          isActive={modifier.checkIsActive(editor)}
+          handleClick={() => modifier.handleToggle(editor)}
+          disabled={isButtonDisabled}
+        />
+      ),
+      renderInMenu: () => (
+        <Menu.Item onClick={() => modifier.handleToggle(editor)}>
+          {formatMessage(modifier.label)}
+        </Menu.Item>
+      ),
+    })),
+    {
+      renderInToolbar: () => <LinkButton disabled={isButtonDisabled} location="toolbar" />,
+      renderInMenu: () => <LinkButton disabled={isButtonDisabled} location="menu" />,
+    },
+    {
+      renderInToolbar: () => (
+        <Flex direction="row" gap={1}>
+          <Separator />
+          <Toolbar.ToggleGroup type="single" asChild>
+            <Flex gap={1}>
+              <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
+              <ListButton block={blocks['list-ordered']} format="ordered" location="toolbar" />
+            </Flex>
+          </Toolbar.ToggleGroup>
         </Flex>
-      </Toolbar.ToggleGroup>
-    </Flex>,
-  ];
+      ),
+      renderInMenu: () => [
+        <ListButton
+          block={blocks['list-unordered']}
+          format="unordered"
+          location="menu"
+          key="unordered"
+        />,
+        <ListButton
+          block={blocks['list-ordered']}
+          format="ordered"
+          location="menu"
+          key="ordered"
+        />,
+      ],
+    },
+  ] as Array<{
+    renderInToolbar: () => React.ReactNode;
+    renderInMenu: (() => React.ReactNode) | null;
+  }>;
 
   const [visibleIndexes, setVisibleIndexes] = React.useState<number[]>([]);
-  const totalIndexes = [...Array(flexibleItems.length).keys()];
+  const totalIndexes = [...Array(flexItems.length).keys()];
   const hiddenIndexes = totalIndexes.filter((index) => !visibleIndexes.includes(index));
-  console.log('hiddenIndexes', hiddenIndexes);
-  console.log('visibleIndexes', visibleIndexes);
   const hasHiddenItems = hiddenIndexes.length > 0;
 
   if (hasHiddenItems) {
-    flexibleItems.splice(
-      visibleIndexes.length - 1,
-      0,
-      <Menu.Root defaultOpen={false}>
-        <Menu.Trigger endIcon={null} paddingLeft={0} paddingRight={0}>
-          <IconButton variant="ghost" label="more TODO" tag="span">
-            <More aria-hidden focusable={false} />
-          </IconButton>
-        </Menu.Trigger>
-        <Menu.Content>
-          <Toolbar.ToggleGroup type="multiple">
-            <Flex justifyContent="row" gap={1}>
-              {hiddenIndexes.map((index) => flexibleItems[index])}
-            </Flex>
-          </Toolbar.ToggleGroup>
-        </Menu.Content>
-      </Menu.Root>
-    );
+    flexItems.splice(visibleIndexes.length - 1, 0, {
+      renderInToolbar: () => (
+        <Menu.Root defaultOpen={false}>
+          <Menu.Trigger endIcon={null} paddingLeft={0} paddingRight={0}>
+            <IconButton variant="ghost" label="more TODO" tag="span">
+              <More aria-hidden focusable={false} />
+            </IconButton>
+          </Menu.Trigger>
+          <Menu.Content>
+            {hiddenIndexes
+              .map((index) => flexItems[index].renderInMenu)
+              .filter((render) => render !== null)
+              .map((render) => render())}
+          </Menu.Content>
+        </Menu.Root>
+      ),
+      renderInMenu: null,
+    });
   }
 
   return (
@@ -669,17 +726,18 @@ const BlocksToolbar = () => {
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden">
-            {flexibleItems.map((item, index) => (
-              <FlexibleItem
+            {flexItems.map((item, index) => (
+              <FlexibleToolbarItem
                 isVisible={
                   visibleIndexes.includes(index) ||
-                  (index === flexibleItems.length - 1 && hasHiddenItems)
+                  (index === flexItems.length - 1 && hasHiddenItems)
                 }
                 setVisibleIndexes={setVisibleIndexes}
-                item={item}
                 index={index}
                 key={index}
-              />
+              >
+                {item.renderInToolbar()}
+              </FlexibleToolbarItem>
             ))}
           </Flex>
         </Toolbar.ToggleGroup>
