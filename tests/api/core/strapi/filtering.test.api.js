@@ -114,7 +114,7 @@ describe('Filtering API', () => {
     await builder.cleanup();
   });
 
-  describe.only('Basic filters', () => {
+  describe('Basic filters', () => {
     describe('Filter $and', () => {
       test('Should return an array with matching entities', async () => {
         const res = await rq({

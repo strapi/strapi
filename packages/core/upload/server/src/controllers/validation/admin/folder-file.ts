@@ -4,6 +4,8 @@ import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
 import { isFolderOrChild } from '../../utils/folders';
 
+import type { Folder } from '../../../types';
+
 const validateDeleteManyFoldersFilesSchema = yup
   .object()
   .shape({
@@ -67,14 +69,14 @@ const validateMoveFoldersNotInsideThemselvesSchema = yup
         where: { id: destinationFolderId },
       });
 
-      const folders = await strapi.db.query(FOLDER_MODEL_UID).findMany({
+      const folders: Folder[] = await strapi.db.query(FOLDER_MODEL_UID).findMany({
         select: ['name', 'path'],
         where: { id: { $in: folderIds } },
       });
 
       const unmovableFoldersNames = folders
-        .filter((folder: any) => isFolderOrChild(destinationFolder, folder))
-        .map((f: any) => f.name);
+        .filter((folder) => isFolderOrChild(destinationFolder, folder))
+        .map((f) => f.name);
 
       if (unmovableFoldersNames.length > 0) {
         return this.createError({

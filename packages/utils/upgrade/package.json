@@ -49,7 +49,7 @@
     "resources"
   ],
   "scripts": {
-    "build": "run-p build:code build:types",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
     "build:code": "run -T rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",

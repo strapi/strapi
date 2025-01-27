@@ -11,8 +11,6 @@ const command: StrapiCommand = () => {
   return createCommand('version')
     .description('Output the version of Strapi')
     .action(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-
       process.stdout.write(`${version}\n`);
       process.exit(0);
     });

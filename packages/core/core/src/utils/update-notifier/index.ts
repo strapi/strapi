@@ -7,7 +7,6 @@ import chalk from 'chalk';
 import { env } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 import pkg from '../../../package.json';
 
 const CHECK_INTERVAL = 1000 * 60 * 60 * 24 * 1; // 1 day
