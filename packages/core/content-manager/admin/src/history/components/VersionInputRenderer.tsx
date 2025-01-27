@@ -12,6 +12,7 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -173,19 +174,51 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
  * CustomMediaInput
  * -----------------------------------------------------------------------------------------------*/
 
+//  Create an object with value at key path (i.e. 'a.b.c')
+const createInitialValuesForPath = (keyPath: string, value: any) => {
+  const keys = keyPath.split('.');
+  // The root level object
+  const root: Record<string, any> = {};
+
+  // Make the first node the root
+  let node = root;
+  keys.forEach((key, index) => {
+    // Skip prototype pollution keys
+    if (key === '__proto__' || key === 'constructor') return;
+    // If it's the last key, set the node value
+    if (index === keys.length - 1) {
+      node[key] = value;
+    } else {
+      // Ensure the key exists and is an object
+      node[key] = node[key] || {};
+    }
+
+    // Traverse down the tree
+    node = node[key];
+  });
+
+  return root;
+};
+
 const CustomMediaInput = (props: VersionInputRendererProps) => {
   const { value } = useField(props.name);
-  const results = value ? value.results : [];
-  const meta = value ? value.meta : { missingCount: 0 };
+  const results = value?.results ?? [];
+  const meta = value?.meta ?? { missingCount: 0 };
+
   const { formatMessage } = useIntl();
 
   const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
   const MediaLibrary = fields.media as React.ComponentType<
     VersionInputRendererProps & { multiple: boolean }
   >;
+
   return (
     <Flex direction="column" gap={2} alignItems="stretch">
-      <Form method="PUT" disabled={true} initialValues={{ [props.name]: results }}>
+      <Form
+        method="PUT"
+        disabled={true}
+        initialValues={createInitialValuesForPath(props.name, results)}
+      >
         <MediaLibrary {...props} disabled={true} multiple={results.length > 1} />
       </Form>
       {meta.missingCount > 0 && (
@@ -447,7 +480,9 @@ const VersionInputRenderer = ({
           hint={hint}
           labelAction={customLabelAction}
           disabled={fieldIsDisabled}
-        />
+        >
+          {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
+        </DynamicZone>
       );
     case 'relation':
       return (

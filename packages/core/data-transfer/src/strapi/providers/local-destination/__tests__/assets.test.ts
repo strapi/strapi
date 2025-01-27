@@ -37,6 +37,10 @@ const createStrapi = getStrapiFactory({
     query() {
       return {};
     },
+    lifecycles: {
+      enable: jest.fn(),
+      disable: jest.fn(),
+    },
   },
   config: {
     get(service: string) {
@@ -132,6 +136,10 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
           db: {
             transaction,
             query: mockQuery,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
+            },
           },
         }),
       strategy: 'restore',

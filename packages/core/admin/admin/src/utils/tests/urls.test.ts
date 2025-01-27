@@ -19,7 +19,7 @@ describe('urls', () => {
     });
 
     it('should handle protocol relative URLs', () => {
-      expect(createAbsoluteUrl('//example.com')).toMatchInlineSnapshot(`"http://example.com/"`);
+      expect(createAbsoluteUrl('//example.com')).toMatchInlineSnapshot(`"http://example.com"`);
     });
   });
 });
