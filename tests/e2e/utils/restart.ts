@@ -53,27 +53,30 @@ export const waitForRestart = async (page, timeout = 60000) => {
 
 // TODO: Find a better way to restart a Strapi test app (signal, etc...)
 export const restart = async () => {
-  if (process.env.TEST_APP_PATH) {
-    const filepath = 'src/force-restart-from-playwright-instance.js';
-
-    console.log('Forcing a restart...');
-
-    await execa('touch', [filepath], {
-      stdio: 'inherit',
-      cwd: process.env.TEST_APP_PATH,
-    });
-
-    await delay(1);
-
-    await execa('rm', [filepath], {
-      stdio: 'inherit',
-      cwd: process.env.TEST_APP_PATH,
-    });
-
-    // TODO:  This is both a waste of time and flaky.
-    //        We need to find a way to access playwright server output and watch for the "up" log to appear
-    await pollHealthCheck();
+  if (!process.env.TEST_APP_PATH) {
+    console.warn('Could not restart the application because TEST_APP_PATH not set');
+    return;
   }
+
+  const filepath = 'src/force-restart-from-playwright-instance.js';
+
+  console.log('Forcing a restart...');
+
+  await execa('touch', [filepath], {
+    stdio: 'inherit',
+    cwd: process.env.TEST_APP_PATH,
+  });
+
+  await delay(1);
+
+  await execa('rm', [filepath], {
+    stdio: 'inherit',
+    cwd: process.env.TEST_APP_PATH,
+  });
+
+  // TODO:  This is both a waste of time and flaky.
+  //        We need to find a way to access playwright server output and watch for the "up" log to appear
+  await pollHealthCheck();
 };
 
 export const delay = (seconds: number) => {
