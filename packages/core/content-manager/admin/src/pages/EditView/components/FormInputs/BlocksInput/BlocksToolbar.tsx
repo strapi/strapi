@@ -540,13 +540,28 @@ const LinkButton = ({
   );
 };
 
-interface ToolbarRendererProps {
+const ObservedToolbarItem = ({
+  children,
+  index,
+  isVisible,
+  setVisibleIndexes,
+}: {
   children: React.ReactNode;
+  index: number;
   isVisible: boolean;
-  setIsVisible: (isVisible: boolean) => void;
-}
+  setVisibleIndexes: React.Dispatch<React.SetStateAction<number[]>>;
+}) => {
+  const setIsVisible = React.useCallback(
+    (visible: boolean) => {
+      if (visible) {
+        setVisibleIndexes((prev) => [...prev, index].sort());
+      } else {
+        setVisibleIndexes((prev) => prev.filter((i) => i !== index));
+      }
+    },
+    [index, setVisibleIndexes]
+  );
 
-const ToolbarRenderer = ({ children, isVisible, setIsVisible }: ToolbarRendererProps) => {
   const containerRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -573,40 +588,17 @@ const ToolbarRenderer = ({ children, isVisible, setIsVisible }: ToolbarRendererP
     <div
       ref={containerRef}
       style={{
+        /**
+         * Use visibility so that the element occupies the space if requires even when there's not
+         * enough room for it to be visible. The empty reserved space will be clipped by the
+         * overflow:hidden rule on the parent, so it doesn't affect the UI.
+         * This way we can keep observing its visiblity and react to browser resize events.
+         */
         visibility: isVisible ? 'visible' : 'hidden',
       }}
     >
       {children}
     </div>
-  );
-};
-
-const FlexibleToolbarItem = ({
-  children,
-  index,
-  isVisible,
-  setVisibleIndexes,
-}: {
-  children: React.ReactNode;
-  index: number;
-  isVisible: boolean;
-  setVisibleIndexes: React.Dispatch<React.SetStateAction<number[]>>;
-}) => {
-  const setIsVisible = React.useCallback(
-    (visible: boolean) => {
-      if (visible) {
-        setVisibleIndexes((prev) => [...prev, index].sort());
-      } else {
-        setVisibleIndexes((prev) => prev.filter((i) => i !== index));
-      }
-    },
-    [index, setVisibleIndexes]
-  );
-
-  return (
-    <ToolbarRenderer isVisible={isVisible} setIsVisible={setIsVisible} key={index}>
-      {children}
-    </ToolbarRenderer>
   );
 };
 
@@ -638,7 +630,13 @@ const BlocksToolbar = () => {
 
   const isButtonDisabled = checkButtonDisabled();
 
-  const flexItems = [
+  /**
+   * Observed items are ones that may or may not be visible in the toolbar, depending on the
+   * available space. They provide two render props:
+   * - renderInToolbar: for when we try to render the item in the toolbar (may be hidden)
+   * - renderInMenu: for when the item didn't fit in the toolbar and is relegated to the "more" menu
+   */
+  const observedItems = [
     ...Object.entries(modifiers).map(([name, modifier]) => ({
       renderInToolbar: () => (
         <ToolbarButton
@@ -694,12 +692,12 @@ const BlocksToolbar = () => {
   }>;
 
   const [visibleIndexes, setVisibleIndexes] = React.useState<number[]>([]);
-  const totalIndexes = [...Array(flexItems.length).keys()];
+  const totalIndexes = [...Array(observedItems.length).keys()];
   const hiddenIndexes = totalIndexes.filter((index) => !visibleIndexes.includes(index));
   const hasHiddenItems = hiddenIndexes.length > 0;
 
   if (hasHiddenItems) {
-    flexItems.splice(visibleIndexes.length - 1, 0, {
+    observedItems.splice(visibleIndexes.length - 1, 0, {
       renderInToolbar: () => (
         <Menu.Root defaultOpen={false}>
           <Menu.Trigger endIcon={null} paddingLeft={0} paddingRight={0}>
@@ -709,7 +707,7 @@ const BlocksToolbar = () => {
           </Menu.Trigger>
           <Menu.Content>
             {hiddenIndexes
-              .map((index) => flexItems[index].renderInMenu)
+              .map((index) => observedItems[index].renderInMenu)
               .filter((render) => render !== null)
               .map((render) => render())}
           </Menu.Content>
@@ -726,18 +724,18 @@ const BlocksToolbar = () => {
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden">
-            {flexItems.map((item, index) => (
-              <FlexibleToolbarItem
+            {observedItems.map((item, index) => (
+              <ObservedToolbarItem
                 isVisible={
                   visibleIndexes.includes(index) ||
-                  (index === flexItems.length - 1 && hasHiddenItems)
+                  (index === observedItems.length - 1 && hasHiddenItems)
                 }
                 setVisibleIndexes={setVisibleIndexes}
                 index={index}
                 key={index}
               >
                 {item.renderInToolbar()}
-              </FlexibleToolbarItem>
+              </ObservedToolbarItem>
             ))}
           </Flex>
         </Toolbar.ToggleGroup>
