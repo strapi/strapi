@@ -36,6 +36,7 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
+import { useDebounce } from '../../../../hooks/useDebounce';
 import { useDoc } from '../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../hooks/useDocumentLayout';
 import {
@@ -461,6 +462,7 @@ const RelationsInput = ({
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const field = useField<RelationsFormValue>(name);
 
+  const searchParamsDebounced = useDebounce(searchParams, 300);
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
 
   /**
@@ -478,22 +480,18 @@ const RelationsInput = ({
      */
     const [targetField] = name.split('.').slice(-1);
 
-    const timeout = setTimeout(() => {
-      searchForTrigger({
-        model,
-        targetField,
-        params: {
-          ...buildValidParams(query),
-          id: id ?? '',
-          pageSize: 10,
-          idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
-          idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
-          ...searchParams,
-        },
-      });
-    }, 300);
-
-    return () => clearTimeout(timeout);
+    searchForTrigger({
+      model,
+      targetField,
+      params: {
+        ...buildValidParams(query),
+        id: id ?? '',
+        pageSize: 10,
+        idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
+        idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
+        ...searchParamsDebounced,
+      },
+    });
   }, [
     field.value?.connect,
     field.value?.disconnect,
@@ -502,7 +500,7 @@ const RelationsInput = ({
     name,
     query,
     searchForTrigger,
-    searchParams,
+    searchParamsDebounced,
   ]);
 
   const handleSearch = async (search: string) => {
