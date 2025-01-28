@@ -540,6 +540,35 @@ const LinkButton = ({
   );
 };
 
+/**
+ * Hook that returns a ref to an element and a boolean indicating if the element is in the viewport
+ * or in the element specified in `options.root`.
+ */
+const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
+  callback: IntersectionObserverCallback,
+  options?: IntersectionObserverInit
+): React.RefObject<TElement> => {
+  const containerRef = React.useRef<TElement>(null);
+  const id = React.useId();
+
+  React.useEffect(() => {
+    const containerEl = containerRef.current;
+    const observer = new IntersectionObserver(callback, options);
+
+    if (containerEl) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerEl) {
+        observer.disconnect();
+      }
+    };
+  }, [containerRef, options, callback, id]);
+
+  return containerRef;
+};
+
 interface ObservedToolbarItemProps {
   index: number;
   lastVisibleIndex: number;
@@ -556,40 +585,19 @@ const ObservedToolbarItem = ({
   children,
 }: ObservedToolbarItemProps) => {
   const isVisible = index <= lastVisibleIndex;
-  const setIsVisible = React.useCallback(
-    (visible: boolean) => {
+
+  const containerRef = useElementOnScreen<HTMLDivElement>(
+    ([entry]) => {
       /**
        * It's the MoreMenu's job to make an item not visible when there's not room for it.
        * But we need to react here to the element becoming visible again.
        */
-      if (visible) {
+      if (entry.isIntersecting) {
         setLastVisibleIndex((prev) => Math.max(prev, index));
       }
     },
-    [index, setLastVisibleIndex]
+    { threshold: 1, root: rootRef.current }
   );
-
-  const containerRef = React.useRef(null);
-
-  React.useEffect(() => {
-    const containerEl = containerRef.current;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 1, root: rootRef.current }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerEl) {
-        observer.disconnect();
-      }
-    };
-  }, [setIsVisible, rootRef]);
 
   return (
     <div
@@ -622,34 +630,20 @@ interface MoreMenuProps {
 }
 
 const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
-  const containerRef = React.useRef(null);
-
-  React.useEffect(() => {
-    const containerEl = containerRef.current;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        // We only react to the menu becoming invisible. When that happens, we hide the last item.
-        if (!entry.isIntersecting) {
-          /**
-           * If there's no room for any item, the index can be -1.
-           * This is intentional, in that case only the more menu will be visible.
-           **/
-          setLastVisibleIndex((prev) => prev - 1);
-        }
-      },
-      { threshold: 1, root: rootRef.current }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerEl) {
-        observer.disconnect();
+  const { formatMessage } = useIntl();
+  const containerRef = useElementOnScreen<HTMLButtonElement>(
+    ([entry]) => {
+      // We only react to the menu becoming invisible. When that happens, we hide the last item.
+      if (!entry.isIntersecting) {
+        /**
+         * If there's no room for any item, the index can be -1.
+         * This is intentional, in that case only the more menu will be visible.
+         **/
+        setLastVisibleIndex((prev) => prev - 1);
       }
-    };
-  }, [setLastVisibleIndex, rootRef]);
+    },
+    { threshold: 1, root: rootRef.current }
+  );
 
   return (
     <Menu.Root defaultOpen={false}>
@@ -660,7 +654,11 @@ const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: Mo
         ref={containerRef}
         style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
       >
-        <IconButton variant="ghost" label="more TODO" tag="span">
+        <IconButton
+          variant="ghost"
+          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
+          tag="span"
+        >
           <More aria-hidden focusable={false} />
         </IconButton>
       </Menu.Trigger>
