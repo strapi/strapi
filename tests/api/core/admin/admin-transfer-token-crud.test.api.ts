@@ -87,13 +87,13 @@ describe('Admin Transfer Token CRUD (api)', () => {
               message: 'name must be at least 1 characters',
               name: 'ValidationError',
               path: ['name'],
-              value: "",
+              value: '',
             },
             {
               path: ['name'],
               name: 'ValidationError',
               message: 'name is a required field',
-              value: "",
+              value: '',
             },
             {
               path: ['permissions'],

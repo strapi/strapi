@@ -160,48 +160,51 @@ describe('Content Type Builder - Content types', () => {
       ['pluralName', 'singularName', 'dog'],
       ['pluralName', 'pluralName', 'dogs'],
       ['pluralName', 'collectionName', 'dogs-collection'],
-    ])(`Cannot use %p that exists as another type's %p`, async (sourceField, matchField, sourceValue) => {
-      const body = {
-        contentType: {
-          displayName: 'Frogs Frogs Frogs',
-          pluralName: 'safe-plural-name',
-          singularName: 'safe-singular-name',
-          collectionName: 'safe-collection-name',
-          attributes: {
-            name: {
-              type: 'string',
+    ])(
+      `Cannot use %p that exists as another type's %p`,
+      async (sourceField, matchField, sourceValue) => {
+        const body = {
+          contentType: {
+            displayName: 'Frogs Frogs Frogs',
+            pluralName: 'safe-plural-name',
+            singularName: 'safe-singular-name',
+            collectionName: 'safe-collection-name',
+            attributes: {
+              name: {
+                type: 'string',
+              },
             },
           },
-        },
-      };
+        };
 
-      // set the conflicting name in the given field
-      body.contentType[sourceField] = localTestData.models.dog[matchField];
+        // set the conflicting name in the given field
+        body.contentType[sourceField] = localTestData.models.dog[matchField];
 
-      const res = await rq({
-        method: 'POST',
-        url: '/content-type-builder/content-types',
-        body,
-      });
+        const res = await rq({
+          method: 'POST',
+          url: '/content-type-builder/content-types',
+          body,
+        });
 
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toEqual({
-        error: {
-          details: {
-            errors: [
-              {
-                message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
-                name: 'ValidationError',
-                path: ['contentType', sourceField],
-                value: sourceValue
-              },
-            ],
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toEqual({
+          error: {
+            details: {
+              errors: [
+                {
+                  message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
+                  name: 'ValidationError',
+                  path: ['contentType', sourceField],
+                  value: sourceValue,
+                },
+              ],
+            },
+            message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
+            name: 'ValidationError',
           },
-          message: `contentType: name \`${body.contentType[sourceField]}\` is already being used by another content type.`,
-          name: 'ValidationError',
-        },
-      });
-    });
+        });
+      }
+    );
 
     test.each(['strapi', '_strapi', '__strapi'])(
       'Cannot use %s prefix for content type name',
@@ -234,7 +237,7 @@ describe('Content Type Builder - Content types', () => {
                   name: 'ValidationError',
                   path: ['contentType', 'attributes', prefix],
                   value: {
-                    type: "string"
+                    type: 'string',
                   },
                 },
                 {
@@ -242,14 +245,14 @@ describe('Content Type Builder - Content types', () => {
                     'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
                   name: 'ValidationError',
                   path: ['contentType', 'singularName'],
-                  value: "strapi-singular",
+                  value: 'strapi-singular',
                 },
                 {
                   message:
                     'Content Type name cannot be one of boolean, date, date_time, time, upload, document, then, strapi*, _strapi*, __strapi*',
                   name: 'ValidationError',
                   path: ['contentType', 'pluralName'],
-                  value: "strapi-plural",
+                  value: 'strapi-plural',
                 },
               ],
             },
@@ -296,7 +299,7 @@ describe('Content Type Builder - Content types', () => {
                       type: 'string',
                     },
                   },
-                }
+                },
               },
             ],
           },
@@ -353,7 +356,7 @@ describe('Content Type Builder - Content types', () => {
                       type: 'string',
                     },
                   },
-                }
+                },
               },
             ],
           },
