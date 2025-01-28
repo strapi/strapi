@@ -543,31 +543,26 @@ const LinkButton = ({
 const ObservedToolbarItem = ({
   children,
   index,
-  isMoreMenu,
   lastVisibleIndex,
   setLastVisibleIndex,
 }: {
   children: React.ReactNode;
   index: number;
   lastVisibleIndex: number;
-  isMoreMenu: boolean;
   setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
 }) => {
-  const isVisible = index <= lastVisibleIndex || isMoreMenu;
+  const isVisible = index <= lastVisibleIndex;
   const setIsVisible = React.useCallback(
     (visible: boolean) => {
-      // Ignore the more menu case as this one will always be visible if it's in the list to render
-      if (isMoreMenu) {
-        return;
-      }
-
+      /**
+       * It's the MoreMenu's job to make an item not visible when there's not room for it.
+       * But we need to react here to the element becoming visible again.
+       */
       if (visible) {
         setLastVisibleIndex((prev) => Math.max(prev, index));
-      } else {
-        setLastVisibleIndex((prev) => Math.min(prev, index - 1));
       }
     },
-    [index, isMoreMenu, setLastVisibleIndex]
+    [index, setLastVisibleIndex]
   );
 
   const containerRef = React.useRef(null);
@@ -616,20 +611,26 @@ interface ObservedItem {
 }
 
 interface MoreMenuProps {
-  observedItems: ObservedItem[];
-  lastVisibleIndex: number;
   setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
+  hasHiddenItems: boolean;
+  children: React.ReactNode;
 }
 
-const MoreMenu = ({ observedItems, lastVisibleIndex, setLastVisibleIndex }: MoreMenuProps) => {
+const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, children }: MoreMenuProps) => {
   const containerRef = React.useRef(null);
 
   React.useEffect(() => {
     const containerEl = containerRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log('more callback', entry.isIntersecting);
-        setLastVisibleIndex((prev) => (entry.isIntersecting ? prev : prev - 1));
+        // We only react to the menu becoming invisible. When that happens, we hide the last item.
+        if (!entry.isIntersecting) {
+          /**
+           * If there's no room for any item, the index can be -1.
+           * This is intentional, in that case only the more menu will be visible.
+           **/
+          setLastVisibleIndex((prev) => prev - 1);
+        }
       },
       { threshold: 1 }
     );
@@ -647,14 +648,18 @@ const MoreMenu = ({ observedItems, lastVisibleIndex, setLastVisibleIndex }: More
 
   return (
     <Menu.Root defaultOpen={false}>
-      <Menu.Trigger endIcon={null} paddingLeft={0} paddingRight={0} ref={containerRef}>
+      <Menu.Trigger
+        endIcon={null}
+        paddingLeft={0}
+        paddingRight={0}
+        ref={containerRef}
+        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
+      >
         <IconButton variant="ghost" label="more TODO" tag="span">
           <More aria-hidden focusable={false} />
         </IconButton>
       </Menu.Trigger>
-      <Menu.Content>
-        {observedItems.slice(lastVisibleIndex + 1).map((item) => item.renderInMenu())}
-      </Menu.Content>
+      <Menu.Content>{children}</Menu.Content>
     </Menu.Root>
   );
 };
@@ -748,8 +753,6 @@ const BlocksToolbar = () => {
   const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(observedItems.length - 1);
   const hasHiddenItems = lastVisibleIndex < observedItems.length - 1;
 
-  console.log('lastVisibleIndex', lastVisibleIndex);
-
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper gap={2} padding={2} width="100%">
@@ -757,30 +760,29 @@ const BlocksToolbar = () => {
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden">
-            {observedItems.map((item, index) => {
-              const shouldAppendMenu = hasHiddenItems && index === lastVisibleIndex;
-
-              return (
-                <>
-                  <ObservedToolbarItem
-                    isMoreMenu={hasHiddenItems && index === observedItems.length - 1}
-                    lastVisibleIndex={lastVisibleIndex}
-                    setLastVisibleIndex={setLastVisibleIndex}
-                    index={index}
-                    key={index}
-                  >
-                    {item.renderInToolbar()}
-                  </ObservedToolbarItem>
-                  {shouldAppendMenu && (
-                    <MoreMenu
-                      observedItems={observedItems}
-                      lastVisibleIndex={lastVisibleIndex}
-                      setLastVisibleIndex={setLastVisibleIndex}
-                    />
-                  )}
-                </>
-              );
-            })}
+            {observedItems
+              .map((item, index) => (
+                <ObservedToolbarItem
+                  lastVisibleIndex={lastVisibleIndex}
+                  setLastVisibleIndex={setLastVisibleIndex}
+                  index={index}
+                  key={index}
+                >
+                  {item.renderInToolbar()}
+                </ObservedToolbarItem>
+              ))
+              /**
+               * Display the "more" menu in the right position among the items.
+               * We splice here after the map above to avoid messing with the indexes,
+               * since the ObservedToolbarItem component relies on them.
+               */
+              .toSpliced(
+                lastVisibleIndex + 1,
+                0,
+                <MoreMenu setLastVisibleIndex={setLastVisibleIndex} hasHiddenItems={hasHiddenItems}>
+                  {observedItems.slice(lastVisibleIndex + 1).map((item) => item.renderInMenu())}
+                </MoreMenu>
+              )}
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>
