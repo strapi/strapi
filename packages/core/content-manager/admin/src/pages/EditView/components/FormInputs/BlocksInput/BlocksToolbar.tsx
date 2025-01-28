@@ -543,23 +543,31 @@ const LinkButton = ({
 const ObservedToolbarItem = ({
   children,
   index,
-  isVisible,
-  setVisibleIndexes,
+  isMoreMenu,
+  lastVisibleIndex,
+  setLastVisibleIndex,
 }: {
   children: React.ReactNode;
   index: number;
-  isVisible: boolean;
-  setVisibleIndexes: React.Dispatch<React.SetStateAction<number[]>>;
+  lastVisibleIndex: number;
+  isMoreMenu: boolean;
+  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
 }) => {
+  const isVisible = index <= lastVisibleIndex || isMoreMenu;
   const setIsVisible = React.useCallback(
     (visible: boolean) => {
+      // Ignore the more menu case as this one will always be visible if it's in the list to render
+      if (isMoreMenu) {
+        return;
+      }
+
       if (visible) {
-        setVisibleIndexes((prev) => [...prev, index].sort());
+        setLastVisibleIndex((prev) => Math.max(prev, index));
       } else {
-        setVisibleIndexes((prev) => prev.filter((i) => i !== index));
+        setLastVisibleIndex((prev) => Math.min(prev, index - 1));
       }
     },
-    [index, setVisibleIndexes]
+    [index, isMoreMenu, setLastVisibleIndex]
   );
 
   const containerRef = React.useRef(null);
@@ -599,6 +607,55 @@ const ObservedToolbarItem = ({
     >
       {children}
     </div>
+  );
+};
+
+interface ObservedItem {
+  renderInToolbar: () => React.ReactNode;
+  renderInMenu: () => React.ReactNode;
+}
+
+interface MoreMenuProps {
+  observedItems: ObservedItem[];
+  lastVisibleIndex: number;
+  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
+}
+
+const MoreMenu = ({ observedItems, lastVisibleIndex, setLastVisibleIndex }: MoreMenuProps) => {
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const containerEl = containerRef.current;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        console.log('more callback', entry.isIntersecting);
+        setLastVisibleIndex((prev) => (entry.isIntersecting ? prev : prev - 1));
+      },
+      { threshold: 1 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerEl) {
+        observer.disconnect();
+      }
+    };
+  }, [setLastVisibleIndex]);
+
+  return (
+    <Menu.Root defaultOpen={false}>
+      <Menu.Trigger endIcon={null} paddingLeft={0} paddingRight={0} ref={containerRef}>
+        <IconButton variant="ghost" label="more TODO" tag="span">
+          <More aria-hidden focusable={false} />
+        </IconButton>
+      </Menu.Trigger>
+      <Menu.Content>
+        {observedItems.slice(lastVisibleIndex + 1).map((item) => item.renderInMenu())}
+      </Menu.Content>
+    </Menu.Root>
   );
 };
 
@@ -686,36 +743,12 @@ const BlocksToolbar = () => {
         />,
       ],
     },
-  ] as Array<{
-    renderInToolbar: () => React.ReactNode;
-    renderInMenu: (() => React.ReactNode) | null;
-  }>;
+  ] as Array<ObservedItem>;
 
-  const [visibleIndexes, setVisibleIndexes] = React.useState<number[]>([]);
-  const totalIndexes = [...Array(observedItems.length).keys()];
-  const hiddenIndexes = totalIndexes.filter((index) => !visibleIndexes.includes(index));
-  const hasHiddenItems = hiddenIndexes.length > 0;
+  const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(observedItems.length - 1);
+  const hasHiddenItems = lastVisibleIndex < observedItems.length - 1;
 
-  if (hasHiddenItems) {
-    observedItems.splice(visibleIndexes.length - 1, 0, {
-      renderInToolbar: () => (
-        <Menu.Root defaultOpen={false}>
-          <Menu.Trigger endIcon={null} paddingLeft={0} paddingRight={0}>
-            <IconButton variant="ghost" label="more TODO" tag="span">
-              <More aria-hidden focusable={false} />
-            </IconButton>
-          </Menu.Trigger>
-          <Menu.Content>
-            {hiddenIndexes
-              .map((index) => observedItems[index].renderInMenu)
-              .filter((render) => render !== null)
-              .map((render) => render())}
-          </Menu.Content>
-        </Menu.Root>
-      ),
-      renderInMenu: null,
-    });
-  }
+  console.log('lastVisibleIndex', lastVisibleIndex);
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
@@ -724,19 +757,30 @@ const BlocksToolbar = () => {
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden">
-            {observedItems.map((item, index) => (
-              <ObservedToolbarItem
-                isVisible={
-                  visibleIndexes.includes(index) ||
-                  (index === observedItems.length - 1 && hasHiddenItems)
-                }
-                setVisibleIndexes={setVisibleIndexes}
-                index={index}
-                key={index}
-              >
-                {item.renderInToolbar()}
-              </ObservedToolbarItem>
-            ))}
+            {observedItems.map((item, index) => {
+              const shouldAppendMenu = hasHiddenItems && index === lastVisibleIndex;
+
+              return (
+                <>
+                  <ObservedToolbarItem
+                    isMoreMenu={hasHiddenItems && index === observedItems.length - 1}
+                    lastVisibleIndex={lastVisibleIndex}
+                    setLastVisibleIndex={setLastVisibleIndex}
+                    index={index}
+                    key={index}
+                  >
+                    {item.renderInToolbar()}
+                  </ObservedToolbarItem>
+                  {shouldAppendMenu && (
+                    <MoreMenu
+                      observedItems={observedItems}
+                      lastVisibleIndex={lastVisibleIndex}
+                      setLastVisibleIndex={setLastVisibleIndex}
+                    />
+                  )}
+                </>
+              );
+            })}
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>
