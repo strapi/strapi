@@ -69,6 +69,43 @@ const syncAPITokensPermissions = async () => {
   }
 };
 
+/**
+ * Ensures the creation of default API tokens during the app creation.
+ *
+ * Checks the database for existing users and API tokens:
+ * - If there are no users and no API tokens, it creates two default API tokens:
+ *   1. A "Read Only" API token with permissions for accessing resources.
+ *   2. A "Full Access" API token with permissions for accessing and modifying resources.
+ *
+ * @sideEffects Creates new API tokens in the database if conditions are met.
+ */
+
+const createDefaultAPITokensIfNeeded = async () => {
+  const userService = getService('user');
+  const apiTokenService = getService('api-token');
+
+  const usersCount = await userService.count();
+  const apiTokenCount = await apiTokenService.count();
+
+  if (usersCount === 0 && apiTokenCount === 0) {
+    await apiTokenService.create({
+      name: 'Read Only',
+      description:
+        'A default API token with read-only permissions, only used for accessing resources',
+      type: 'read-only',
+      lifespan: null,
+    });
+
+    await apiTokenService.create({
+      name: 'Full Access',
+      description:
+        'A default API token with full access permissions, used for accessing or modifying resources',
+      type: 'full-access',
+      lifespan: null,
+    });
+  }
+};
+
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   await registerAdminConditions();
   await registerPermissionActions();
@@ -98,4 +135,6 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   apiTokenService.checkSaltIsDefined();
   transferService.token.checkSaltIsDefined();
   tokenService.checkSecretIsDefined();
+
+  await createDefaultAPITokensIfNeeded();
 };
