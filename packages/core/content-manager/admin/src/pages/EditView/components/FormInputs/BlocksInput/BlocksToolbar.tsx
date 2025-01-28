@@ -540,17 +540,21 @@ const LinkButton = ({
   );
 };
 
-const ObservedToolbarItem = ({
-  children,
-  index,
-  lastVisibleIndex,
-  setLastVisibleIndex,
-}: {
-  children: React.ReactNode;
+interface ObservedToolbarItemProps {
   index: number;
   lastVisibleIndex: number;
   setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-}) => {
+  rootRef: React.RefObject<HTMLElement>;
+  children: React.ReactNode;
+}
+
+const ObservedToolbarItem = ({
+  index,
+  lastVisibleIndex,
+  setLastVisibleIndex,
+  rootRef,
+  children,
+}: ObservedToolbarItemProps) => {
   const isVisible = index <= lastVisibleIndex;
   const setIsVisible = React.useCallback(
     (visible: boolean) => {
@@ -573,7 +577,7 @@ const ObservedToolbarItem = ({
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-      { threshold: 1 }
+      { threshold: 1, root: rootRef.current }
     );
 
     if (containerRef.current) {
@@ -585,7 +589,7 @@ const ObservedToolbarItem = ({
         observer.disconnect();
       }
     };
-  }, [setIsVisible]);
+  }, [setIsVisible, rootRef]);
 
   return (
     <div
@@ -613,10 +617,11 @@ interface ObservedItem {
 interface MoreMenuProps {
   setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
   hasHiddenItems: boolean;
+  rootRef: React.RefObject<HTMLElement>;
   children: React.ReactNode;
 }
 
-const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, children }: MoreMenuProps) => {
+const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
   const containerRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -632,7 +637,7 @@ const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, children }: MoreMenuPro
           setLastVisibleIndex((prev) => prev - 1);
         }
       },
-      { threshold: 1 }
+      { threshold: 1, root: rootRef.current }
     );
 
     if (containerRef.current) {
@@ -644,7 +649,7 @@ const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, children }: MoreMenuPro
         observer.disconnect();
       }
     };
-  }, [setLastVisibleIndex]);
+  }, [setLastVisibleIndex, rootRef]);
 
   return (
     <Menu.Root defaultOpen={false}>
@@ -722,6 +727,7 @@ const BlocksToolbar = () => {
       renderInMenu: () => <LinkButton disabled={isButtonDisabled} location="menu" />,
     },
     {
+      // List buttons can only be rendered together when in the toolbar
       renderInToolbar: () => (
         <Flex direction="row" gap={1}>
           <Separator />
@@ -750,6 +756,7 @@ const BlocksToolbar = () => {
     },
   ] as Array<ObservedItem>;
 
+  const toolbarRef = React.useRef<HTMLElement>(null);
   const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(observedItems.length - 1);
   const hasHiddenItems = lastVisibleIndex < observedItems.length - 1;
 
@@ -759,13 +766,14 @@ const BlocksToolbar = () => {
         <BlocksDropdown />
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex direction="row" gap={1} grow={1} overflow="hidden">
+          <Flex direction="row" gap={1} grow={1} overflow="hidden" ref={toolbarRef}>
             {observedItems
               .map((item, index) => (
                 <ObservedToolbarItem
                   lastVisibleIndex={lastVisibleIndex}
                   setLastVisibleIndex={setLastVisibleIndex}
                   index={index}
+                  rootRef={toolbarRef}
                   key={index}
                 >
                   {item.renderInToolbar()}
@@ -779,7 +787,11 @@ const BlocksToolbar = () => {
               .toSpliced(
                 lastVisibleIndex + 1,
                 0,
-                <MoreMenu setLastVisibleIndex={setLastVisibleIndex} hasHiddenItems={hasHiddenItems}>
+                <MoreMenu
+                  setLastVisibleIndex={setLastVisibleIndex}
+                  hasHiddenItems={hasHiddenItems}
+                  rootRef={toolbarRef}
+                >
                   {observedItems.slice(lastVisibleIndex + 1).map((item) => item.renderInMenu())}
                 </MoreMenu>
               )}
