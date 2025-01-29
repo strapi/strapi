@@ -34,6 +34,7 @@ describe('Auth API', () => {
   });
 
   afterAll(async () => {
+    await strapi.db.query('plugin::users-permissions.user').deleteMany();
     await strapi.destroy();
   });
 

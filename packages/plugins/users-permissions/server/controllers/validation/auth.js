@@ -14,16 +14,14 @@ const createRegisterSchema = (config) =>
     password: yup
       .string()
       .required()
-      .test(
-        'max-bytes',
-        {
-          message: 'Password must be less than 73 bytes',
-        },
-        (value) => {
-          if (!value) return true;
-          return new TextEncoder().encode(value).length <= 72;
+      .test(function (value) {
+        if (!value) return true;
+        const isValid = new TextEncoder().encode(value).length <= 72;
+        if (!isValid) {
+          return this.createError({ message: 'Password must be less than 73 bytes' });
         }
-      )
+        return true;
+      })
       .test(async function (value) {
         if (typeof config?.validatePassword === 'function') {
           try {
@@ -59,16 +57,14 @@ const createResetPasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test(
-          'max-bytes',
-          {
-            message: 'Password must be less than 73 bytes',
-          },
-          (value) => {
-            if (!value) return true;
-            return new TextEncoder().encode(value).length <= 72;
+        .test(function (value) {
+          if (!value) return true;
+          const isValid = new TextEncoder().encode(value).length <= 72;
+          if (!isValid) {
+            return this.createError({ message: 'Password must be less than 73 bytes' });
           }
-        )
+          return true;
+        })
         .test(async function (value) {
           if (typeof config?.validatePassword === 'function') {
             try {
@@ -97,16 +93,14 @@ const createChangePasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test(
-          'max-bytes',
-          {
-            message: 'Password must be less than 73 bytes',
-          },
-          (value) => {
-            if (!value) return true;
-            return new TextEncoder().encode(value).length <= 72;
+        .test(function (value) {
+          if (!value) return true;
+          const isValid = new TextEncoder().encode(value).length <= 72;
+          if (!isValid) {
+            return this.createError({ message: 'Password must be less than 73 bytes' });
           }
-        )
+          return true;
+        })
         .test(async function (value) {
           if (typeof config?.validatePassword === 'function') {
             try {

@@ -477,7 +477,12 @@ describe('user-permissions auth', () => {
         const authorization = auth({ strapi: global.strapi });
 
         if (expectedMessage) {
-          await expect(authorization.resetPassword(ctx)).rejects.toThrow(expectedMessage);
+          await expect(authorization.resetPassword(ctx)).rejects.toThrowError(
+            expect.objectContaining({
+              name: 'ValidationError',
+              message: expectedMessage,
+            })
+          );
           expect(ctx.send).toHaveBeenCalledTimes(0);
         } else {
           await authorization.resetPassword(ctx);

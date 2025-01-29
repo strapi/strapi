@@ -33,7 +33,7 @@ const COMMON_USER_SCHEMA = {
         id: 'components.Input.error.contain.maxBytes',
         defaultMessage: 'Password must be less than 73 bytes',
       },
-      (value) => {
+      function (value) {
         if (!value) return true;
         return new TextEncoder().encode(value).length <= 72;
       }
