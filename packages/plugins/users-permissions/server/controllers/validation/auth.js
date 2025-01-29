@@ -14,11 +14,16 @@ const createRegisterSchema = (config) =>
     password: yup
       .string()
       .required()
-      .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-        if (!value) return true;
-        const byteSize = new TextEncoder().encode(value).length;
-        return byteSize <= 72;
-      })
+      .test(
+        'max-bytes',
+        {
+          message: 'Password must be less than 73 bytes',
+        },
+        (value) => {
+          if (!value) return true;
+          return new TextEncoder().encode(value).length <= 72;
+        }
+      )
       .test(async function (value) {
         if (typeof config?.validatePassword === 'function') {
           try {
@@ -54,11 +59,16 @@ const createResetPasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-          if (!value) return true;
-          const byteSize = new TextEncoder().encode(value).length;
-          return byteSize <= 72;
-        })
+        .test(
+          'max-bytes',
+          {
+            message: 'Password must be less than 73 bytes',
+          },
+          (value) => {
+            if (!value) return true;
+            return new TextEncoder().encode(value).length <= 72;
+          }
+        )
         .test(async function (value) {
           if (typeof config?.validatePassword === 'function') {
             try {
@@ -87,11 +97,16 @@ const createChangePasswordSchema = (config) =>
       password: yup
         .string()
         .required()
-        .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-          if (!value) return true;
-          const byteSize = new TextEncoder().encode(value).length;
-          return byteSize <= 72;
-        })
+        .test(
+          'max-bytes',
+          {
+            message: 'Password must be less than 73 bytes',
+          },
+          (value) => {
+            if (!value) return true;
+            return new TextEncoder().encode(value).length <= 72;
+          }
+        )
         .test(async function (value) {
           if (typeof config?.validatePassword === 'function') {
             try {

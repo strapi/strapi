@@ -587,6 +587,7 @@
   "components.Input.error.attribute.taken": "This field name already exists",
   "components.Input.error.contain.lowercase": "Password must contain at least one lowercase character",
   "components.Input.error.contain.number": "Password must contain at least one number",
+  "components.Input.error.contain.maxBytes": "Password must be less than 73 bytes",
   "components.Input.error.contain.uppercase": "Password must contain at least one uppercase character",
   "components.Input.error.contentTypeName.taken": "This name already exists",
   "components.Input.error.custom-error": "{errorMessage} ",

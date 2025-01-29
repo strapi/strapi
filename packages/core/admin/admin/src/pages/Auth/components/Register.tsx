@@ -41,11 +41,17 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
-    .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-      if (!value) return true;
-      const byteSize = new TextEncoder().encode(value).length;
-      return byteSize <= 72;
-    })
+    .test(
+      'max-bytes',
+      {
+        id: 'components.Input.error.contain.maxBytes',
+        defaultMessage: 'Password must be less than 73 bytes',
+      },
+      (value) => {
+        if (!value) return true;
+        return new TextEncoder().encode(value).length <= 72;
+      }
+    )
     .matches(/[a-z]/, {
       message: {
         id: 'components.Input.error.contain.lowercase',
@@ -103,11 +109,17 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
-    .test('max-bytes', 'Password must be less than 73 bytes', (value) => {
-      if (!value) return true;
-      const byteSize = new TextEncoder().encode(value).length;
-      return byteSize <= 72;
-    })
+    .test(
+      'max-bytes',
+      {
+        id: 'components.Input.error.contain.maxBytes',
+        defaultMessage: 'Password must be less than 73 bytes',
+      },
+      (value) => {
+        if (!value) return true;
+        return new TextEncoder().encode(value).length <= 72;
+      }
+    )
     .matches(/[a-z]/, {
       message: {
         id: 'components.Input.error.contain.lowercase',
