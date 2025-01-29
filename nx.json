@@ -2,7 +2,6 @@
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
     "production": [
-      "default",
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/*.test.js",
       "!{projectRoot}/**/*.test.api.js",
@@ -21,8 +20,20 @@
   },
   "targetDefaults": {
     "build": {
-      "inputs": ["production", "^production"],
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
       "dependsOn": ["^build"],
+      "cache": true
+    },
+    "build:code": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "build:types": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build:types"],
       "cache": true
     },
     "test:unit": {
@@ -46,6 +57,7 @@
     }
   },
   "useInferencePlugins": false,
+  "parallel": 8,
   "pluginsConfig": {
     "@nx/js": {
       "analyzeSourceFiles": false

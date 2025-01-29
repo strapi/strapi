@@ -35,14 +35,16 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build && run copy-files",
+    "build": "run -T npm-run-all clean --parallel build:code build:types copy-files",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
@@ -56,7 +58,6 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
     "@types/fs-extra": "11.0.4",
     "eslint-config-custom": "5.9.0",
     "tsconfig": "5.9.0"

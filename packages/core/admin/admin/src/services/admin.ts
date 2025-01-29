@@ -48,7 +48,7 @@ const admin = adminApi
           url: '/admin/telemetry-properties',
           method: 'GET',
           config: {
-            validateStatus: (status) => status < 500,
+            validateStatus: (status: number) => status < 500,
           },
         }),
         transformResponse(res: TelemetryProperties.Response) {
