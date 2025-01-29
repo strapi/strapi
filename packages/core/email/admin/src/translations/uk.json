@@ -1,1 +1,23 @@
-{}
+{
+  "link": "Посилання",
+  "Settings.email.plugin.button.test-email": "Надіслати тестовий лист",
+  "Settings.email.plugin.label.defaultFrom": "Електронна адреса відправника за замовчуванням",
+  "Settings.email.plugin.label.defaultReplyTo": "Електронна адреса для відповіді за замовчуванням",
+  "Settings.email.plugin.label.provider": "Провайдер електронної пошти",
+  "Settings.email.plugin.label.testAddress": "Електронна адреса одержувача",
+  "Settings.email.plugin.notification.config.error": "Не вдалося отримати конфігурацію електронної пошти",
+  "Settings.email.plugin.notification.data.loaded": "Дані налаштувань електронної пошти завантажено",
+  "Settings.email.plugin.notification.test.error": "Не вдалося надіслати тестовий лист на {to}",
+  "Settings.email.plugin.notification.test.success": "Тест електронної пошти успішний, перевірте поштову скриньку {to}",
+  "Settings.email.plugin.placeholder.defaultFrom": "напр.: Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "напр.: Strapi <example@strapi.io>",
+  "Settings.email.plugin.placeholder.testAddress": "напр.: developer@example.com",
+  "Settings.email.plugin.subTitle": "Перевірте налаштування плагіна електронної пошти",
+  "Settings.email.plugin.text.configuration": "Плагін налаштовується через файл {file}, перегляньте {link} для документації.",
+  "Settings.email.plugin.title": "Конфігурація",
+  "Settings.email.plugin.title.config": "Конфігурація",
+  "Settings.email.plugin.title.test": "Перевірка доставки електронної пошти",
+  "SettingsNav.link.settings": "Налаштування",
+  "SettingsNav.section-label": "Плагін електронної пошти",
+  "components.Input.error.validation.email": "Це недійсна електронна адреса"
+}
