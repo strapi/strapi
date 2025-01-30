@@ -592,6 +592,7 @@ const ObservedToolbarItem = ({
 interface ObservedItem {
   renderInToolbar: () => React.ReactNode;
   renderInMenu: () => React.ReactNode;
+  key: string;
 }
 
 interface MoreMenuProps {
@@ -691,10 +692,12 @@ const BlocksToolbar = () => {
           {formatMessage(modifier.label)}
         </Menu.Item>
       ),
+      key: `modifier.${name}`,
     })),
     {
       renderInToolbar: () => <LinkButton disabled={isButtonDisabled} location="toolbar" />,
       renderInMenu: () => <LinkButton disabled={isButtonDisabled} location="menu" />,
+      key: 'block.link',
     },
     {
       // List buttons can only be rendered together when in the toolbar
@@ -709,20 +712,13 @@ const BlocksToolbar = () => {
           </Toolbar.ToggleGroup>
         </Flex>
       ),
-      renderInMenu: () => [
-        <ListButton
-          block={blocks['list-unordered']}
-          format="unordered"
-          location="menu"
-          key="unordered"
-        />,
-        <ListButton
-          block={blocks['list-ordered']}
-          format="ordered"
-          location="menu"
-          key="ordered"
-        />,
-      ],
+      renderInMenu: () => (
+        <>
+          <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
+          <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
+        </>
+      ),
+      key: 'block.list',
     },
   ] as Array<ObservedItem>;
 
@@ -744,7 +740,7 @@ const BlocksToolbar = () => {
                   setLastVisibleIndex={setLastVisibleIndex}
                   index={index}
                   rootRef={toolbarRef}
-                  key={index}
+                  key={item.key}
                 >
                   {item.renderInToolbar()}
                 </ObservedToolbarItem>
@@ -761,8 +757,11 @@ const BlocksToolbar = () => {
                   setLastVisibleIndex={setLastVisibleIndex}
                   hasHiddenItems={hasHiddenItems}
                   rootRef={toolbarRef}
+                  key="more-menu"
                 >
-                  {observedItems.slice(lastVisibleIndex + 1).map((item) => item.renderInMenu())}
+                  {observedItems.slice(lastVisibleIndex + 1).map((item) => (
+                    <React.Fragment key={item.key}>{item.renderInMenu()}</React.Fragment>
+                  ))}
                 </MoreMenu>
               )}
           </Flex>
