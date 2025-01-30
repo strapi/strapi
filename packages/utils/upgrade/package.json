@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "5.4.2",
+  "version": "5.9.0",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -49,24 +49,26 @@
     "resources"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.4.2",
+    "@strapi/utils": "5.9.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "esbuild-register": "3.5.0",
     "fast-glob": "3.3.2",
     "fs-extra": "11.2.0",
-    "jscodeshift": "0.15.1",
+    "jscodeshift": "17.1.2",
     "lodash": "4.17.21",
     "memfs": "4.6.0",
     "ora": "5.4.1",
@@ -75,16 +77,14 @@
     "simple-git": "3.21.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
-    "@strapi/types": "5.4.2",
+    "@strapi/types": "5.9.0",
     "@types/fs-extra": "11.0.4",
-    "@types/jscodeshift": "0.11.10",
-    "eslint-config-custom": "5.4.2",
+    "@types/jscodeshift": "0.12.0",
+    "eslint-config-custom": "5.9.0",
     "rimraf": "5.0.5"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }

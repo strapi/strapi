@@ -11,7 +11,13 @@ export const runCLI = async () => {
     },
     (env) => {
       const argv = process.argv.slice(2); // Extract command-line arguments
-      Plop.execute(env, argv, (env, argv) => run(env, argv, true)); // Pass the third argument 'true' for passArgsBeforeDashes
+      Plop.execute(env, argv, (env, argv) => {
+        const options = {
+          ...env,
+          dest: join(process.cwd(), 'src'), // this will make the destination path to be based on the cwd when calling the wrapper
+        };
+        return run(options, argv, true); // Pass the third argument 'true' for passArgsBeforeDashes
+      });
     }
   );
 };

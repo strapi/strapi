@@ -36,7 +36,6 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
       pressEnterTwiceToExit(editor);
     },
     snippets: ['>'],
-    dragHandleTopMargin: '6px',
   },
 };
 
