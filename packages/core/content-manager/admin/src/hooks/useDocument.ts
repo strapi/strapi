@@ -14,7 +14,6 @@ import {
   getYupValidationErrors,
   useForm,
 } from '@strapi/admin/strapi-admin';
-import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
@@ -31,6 +30,7 @@ import { useDocumentLayout } from './useDocumentLayout';
 
 import type { FindOne } from '../../../shared/contracts/collection-types';
 import type { ContentType } from '../../../shared/contracts/content-types';
+import type { Modules } from '@strapi/types';
 
 interface UseDocumentArgs {
   collectionType: string;
@@ -292,7 +292,7 @@ const useContentManagerContext = () => {
 
   const layout = useDocumentLayout(model);
 
-  const form = useForm('useContentManagerContext', (state) => state);
+  const form = useForm<unknown>('useContentManagerContext', (state) => state);
 
   const isSingleType = collectionType === SINGLE_TYPES;
   const slug = model;
