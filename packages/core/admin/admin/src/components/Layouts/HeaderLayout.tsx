@@ -106,16 +106,11 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = React.useState(true);
 
-  const containerRef = useElementOnScreen<HTMLDivElement>(
-    ([entry]) => {
-      setIsVisible(entry.isIntersecting);
-    },
-    {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0,
-    }
-  );
+  const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0,
+  });
 
   useResizeObserver(containerRef, () => {
     if (containerRef.current) {

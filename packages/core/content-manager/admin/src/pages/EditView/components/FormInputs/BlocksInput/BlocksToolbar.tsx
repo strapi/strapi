@@ -559,12 +559,12 @@ const ObservedToolbarItem = ({
   const isVisible = index <= lastVisibleIndex;
 
   const containerRef = useElementOnScreen<HTMLDivElement>(
-    ([entry]) => {
+    (isVisible) => {
       /**
        * It's the MoreMenu's job to make an item not visible when there's not room for it.
        * But we need to react here to the element becoming visible again.
        */
-      if (entry.isIntersecting) {
+      if (isVisible) {
         setLastVisibleIndex((prev) => Math.max(prev, index));
       }
     },
@@ -605,9 +605,9 @@ interface MoreMenuProps {
 const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
   const { formatMessage } = useIntl();
   const containerRef = useElementOnScreen<HTMLButtonElement>(
-    ([entry]) => {
+    (isVisible) => {
       // We only react to the menu becoming invisible. When that happens, we hide the last item.
-      if (!entry.isIntersecting) {
+      if (!isVisible) {
         /**
          * If there's no room for any item, the index can be -1.
          * This is intentional, in that case only the more menu will be visible.

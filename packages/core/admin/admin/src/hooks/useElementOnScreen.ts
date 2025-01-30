@@ -5,15 +5,16 @@ import * as React from 'react';
  * or in the element specified in `options.root`.
  */
 const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
-  callback: IntersectionObserverCallback,
+  onVisiblityChange: (isVisible: boolean) => void,
   options?: IntersectionObserverInit
 ): React.RefObject<TElement> => {
   const containerRef = React.useRef<TElement>(null);
-  const id = React.useId();
 
   React.useEffect(() => {
     const containerEl = containerRef.current;
-    const observer = new IntersectionObserver(callback, options);
+    const observer = new IntersectionObserver(([entry]) => {
+      onVisiblityChange(entry.isIntersecting);
+    }, options);
 
     if (containerEl) {
       observer.observe(containerRef.current);
@@ -24,7 +25,7 @@ const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
         observer.disconnect();
       }
     };
-  }, [containerRef, options, callback, id]);
+  }, [containerRef, options, onVisiblityChange]);
 
   return containerRef;
 };
