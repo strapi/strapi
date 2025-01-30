@@ -1,6 +1,4 @@
-import { useEffect, useRef, useCallback, Fragment } from "react";
 import * as React from 'react';
-
 import {
   Box,
   TextButton,
@@ -17,43 +15,11 @@ import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-
 import { getTrad } from '../../utils/getTrad';
-
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
-
-
-// Custom hook to handle scroll locking
-const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
-  const handleScroll = useCallback((event: WheelEvent) => {
-    const sidebar = ref.current;
-    if (!sidebar) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = sidebar;
-    const isAtTop = scrollTop <= 0;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
-
-    // Stop scrolling from affecting other components
-    if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
-      event.preventDefault();
-      event.stopPropagation(); // Fix:: Ensureed event doesn't bubble to right component
-    }
-  }, []);
-
-  useEffect(() => {
-    const sidebar = ref.current;
-    if (!sidebar) return;
-
-    sidebar.addEventListener("wheel", handleScroll, { passive: false });
-
-    return () => {
-      sidebar.removeEventListener("wheel", handleScroll);
-    };
-  }, [handleScroll]);
-};
-
+import usePreventScroll from '../../hooks/usePreventScroll';
 const SubNavLinkCustom = styled(SubNavLink)`
-  overflow: hidden !important;
+  overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   width: 100%;
@@ -70,16 +36,14 @@ const SubNavLinkCustom = styled(SubNavLink)`
 `;
 
 const SubNavLinkSectionCustom = styled(SubNavLinkSection)`
-  overflow: hidden !important;
+  overflow: hidden;
   max-width: 100%;
 `;
-
 
 export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
-  // const { pathname } = useLocation();
-  const sidebarRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
   usePreventScroll(sidebarRef);
 
   const pluginName = formatMessage({
@@ -102,7 +66,7 @@ export const ContentTypeBuilderNav = () => {
       />
       <SubNavSections>
         {menu.map((section) => (
-          <Fragment key={section.name}>
+          <React.Fragment key={section.name}>
             <SubNavSection
               label={formatMessage({
                 id: section.title.id,
@@ -160,7 +124,7 @@ export const ContentTypeBuilderNav = () => {
                 </TextButton>
               </Box>
             )}
-          </Fragment>
+          </React.Fragment>
         ))}
       </SubNavSections>
     </SubNav>

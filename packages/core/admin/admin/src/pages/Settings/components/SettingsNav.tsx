@@ -9,52 +9,10 @@ import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
-import { useEffect, useRef, useCallback, Fragment } from "react";
+import * as React from 'react';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
-
-
-// Custom hook to handle scroll locking
-const usePreventScroll = (ref: React.RefObject<HTMLDivElement>) => {
-  // const handleScroll = useCallback((event: WheelEvent) => {
-  //   const sidebar = ref.current;
-  //   if (!sidebar) return;
-
-  //   const isAtTop = sidebar.scrollTop === 0;
-  //   const isAtBottom = sidebar.scrollHeight - sidebar.scrollTop === sidebar.clientHeight;
-
-  //   if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
-  //     event.preventDefault();
-  //     event.stopPropagation();  // Prevents bubbling to parent
-  //   }
-  // }, []);
-
-  const handleScroll = useCallback((event: WheelEvent) => {
-    const sidebar = ref.current;
-    if (!sidebar) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = sidebar;
-    const isAtTop = scrollTop <= 0;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
-
-    if ((isAtTop && event.deltaY < 0) || (isAtBottom && event.deltaY > 0)) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }, []);
-
-  useEffect(() => {
-    const sidebar = ref.current;
-    if (!sidebar) return;
-
-    sidebar.addEventListener("wheel", handleScroll, { passive: false });
-
-    return () => {
-      sidebar.removeEventListener("wheel", handleScroll);
-    };
-  }, [handleScroll]);
-};
-
+import usePreventScroll from '../../../hooks/usePreventScroll';
 
 const CustomIcon = styled(Lightning)`
   right: 15px;
@@ -68,8 +26,8 @@ const CustomIcon = styled(Lightning)`
 `;
 
 const SubNavStyled = styled(SubNav)`
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  overflow-y: auto;
+  overflow-x: hidden;
   max-height: 100vh;
 `;
 
@@ -88,7 +46,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
 
-  const settingsSidebarRef = useRef<HTMLDivElement>(null);
+  const settingsSidebarRef = React.useRef<HTMLDivElement>(null);
   usePreventScroll(settingsSidebarRef);
 
   const filteredMenu = menu.filter(

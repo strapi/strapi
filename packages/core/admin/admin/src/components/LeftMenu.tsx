@@ -71,7 +71,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   );
   const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
-  // Left Menu Scroll Fix 20-01-2025
+
   React.useEffect(() => {
     const preventScroll = (event: Event) => event.preventDefault(); 
   
@@ -103,7 +103,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
       };
     }
   }, [pathname]);
-// scroll fix end
+
   return (
     <MainNav>
       <NavBrand />
