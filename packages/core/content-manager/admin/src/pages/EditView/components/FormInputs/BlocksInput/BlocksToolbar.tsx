@@ -541,7 +541,7 @@ const LinkButton = ({
   );
 };
 
-interface ObservedToolbarItemProps {
+interface ObservedToolbarComponentProps {
   index: number;
   lastVisibleIndex: number;
   setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
@@ -549,13 +549,13 @@ interface ObservedToolbarItemProps {
   children: React.ReactNode;
 }
 
-const ObservedToolbarItem = ({
+const ObservedToolbarComponent = ({
   index,
   lastVisibleIndex,
   setLastVisibleIndex,
   rootRef,
   children,
-}: ObservedToolbarItemProps) => {
+}: ObservedToolbarComponentProps) => {
   const isVisible = index <= lastVisibleIndex;
 
   const containerRef = useElementOnScreen<HTMLDivElement>(
@@ -589,9 +589,9 @@ const ObservedToolbarItem = ({
   );
 };
 
-interface ObservedItem {
-  renderInToolbar: () => React.ReactNode;
-  renderInMenu: () => React.ReactNode;
+interface ObservedComponent {
+  toolbar: React.ReactNode;
+  menu: React.ReactNode;
   key: string;
 }
 
@@ -669,14 +669,15 @@ const BlocksToolbar = () => {
   const isButtonDisabled = checkButtonDisabled();
 
   /**
-   * Observed items are ones that may or may not be visible in the toolbar, depending on the
+   * Observed components are ones that may or may not be visible in the toolbar, depending on the
    * available space. They provide two render props:
-   * - renderInToolbar: for when we try to render the item in the toolbar (may be hidden)
-   * - renderInMenu: for when the item didn't fit in the toolbar and is relegated to the "more" menu
+   * - renderInToolbar: for when we try to render the component in the toolbar (may be hidden)
+   * - renderInMenu: for when the component didn't fit in the toolbar and is relegated
+   *   to the "more" menu
    */
-  const observedItems = [
+  const observedComponents: ObservedComponent[] = [
     ...Object.entries(modifiers).map(([name, modifier]) => ({
-      renderInToolbar: () => (
+      toolbar: (
         <ToolbarButton
           key={name}
           name={name}
@@ -687,7 +688,7 @@ const BlocksToolbar = () => {
           disabled={isButtonDisabled}
         />
       ),
-      renderInMenu: () => (
+      menu: (
         <Menu.Item onClick={() => modifier.handleToggle(editor)}>
           {formatMessage(modifier.label)}
         </Menu.Item>
@@ -695,13 +696,13 @@ const BlocksToolbar = () => {
       key: `modifier.${name}`,
     })),
     {
-      renderInToolbar: () => <LinkButton disabled={isButtonDisabled} location="toolbar" />,
-      renderInMenu: () => <LinkButton disabled={isButtonDisabled} location="menu" />,
+      toolbar: <LinkButton disabled={isButtonDisabled} location="toolbar" />,
+      menu: <LinkButton disabled={isButtonDisabled} location="menu" />,
       key: 'block.link',
     },
     {
       // List buttons can only be rendered together when in the toolbar
-      renderInToolbar: () => (
+      toolbar: (
         <Flex direction="row" gap={1}>
           <Separator />
           <Toolbar.ToggleGroup type="single" asChild>
@@ -712,7 +713,7 @@ const BlocksToolbar = () => {
           </Toolbar.ToggleGroup>
         </Flex>
       ),
-      renderInMenu: () => (
+      menu: (
         <>
           <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
           <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
@@ -720,11 +721,14 @@ const BlocksToolbar = () => {
       ),
       key: 'block.list',
     },
-  ] as Array<ObservedItem>;
+  ];
 
   const toolbarRef = React.useRef<HTMLElement>(null);
-  const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(observedItems.length - 1);
-  const hasHiddenItems = lastVisibleIndex < observedItems.length - 1;
+  const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(
+    observedComponents.length - 1
+  );
+  const hasHiddenItems = lastVisibleIndex < observedComponents.length - 1;
+  const menuIndex = lastVisibleIndex + 1;
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
@@ -733,25 +737,25 @@ const BlocksToolbar = () => {
         <Separator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden" ref={toolbarRef}>
-            {observedItems
-              .map((item, index) => (
-                <ObservedToolbarItem
+            {observedComponents
+              .map((component, index) => (
+                <ObservedToolbarComponent
                   lastVisibleIndex={lastVisibleIndex}
                   setLastVisibleIndex={setLastVisibleIndex}
                   index={index}
                   rootRef={toolbarRef}
-                  key={item.key}
+                  key={component.key}
                 >
-                  {item.renderInToolbar()}
-                </ObservedToolbarItem>
+                  {component.toolbar}
+                </ObservedToolbarComponent>
               ))
               /**
                * Display the "more" menu in the right position among the items.
                * We splice here after the map above to avoid messing with the indexes,
-               * since the ObservedToolbarItem component relies on them.
+               * since the ObservedToolbarComponent component relies on them.
                */
               .toSpliced(
-                lastVisibleIndex + 1,
+                menuIndex,
                 0,
                 <MoreMenu
                   setLastVisibleIndex={setLastVisibleIndex}
@@ -759,8 +763,8 @@ const BlocksToolbar = () => {
                   rootRef={toolbarRef}
                   key="more-menu"
                 >
-                  {observedItems.slice(lastVisibleIndex + 1).map((item) => (
-                    <React.Fragment key={item.key}>{item.renderInMenu()}</React.Fragment>
+                  {observedComponents.slice(menuIndex).map((component) => (
+                    <React.Fragment key={component.key}>{component.menu}</React.Fragment>
                   ))}
                 </MoreMenu>
               )}
