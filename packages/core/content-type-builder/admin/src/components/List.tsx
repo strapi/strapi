@@ -226,7 +226,7 @@ export const List = ({
       </Box>
 
       {isMain && isInDevelopmentMode && (
-        <TFooter icon={<Plus />} onClick={onClickAddField}>
+        <TFooter cursor="pointer" icon={<Plus />} onClick={onClickAddField}>
           {formatMessage({
             id: getTrad(
               `form.button.add.field.to.${

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.5.2",
+  "version": "5.9.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -31,20 +31,21 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "lodash": "4.17.21",
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
-    "eslint-config-custom": "5.5.2",
-    "tsconfig": "5.5.2"
+    "eslint-config-custom": "5.9.0",
+    "tsconfig": "5.9.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

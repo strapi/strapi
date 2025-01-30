@@ -26,7 +26,7 @@ const DEFAULT_FEATURES = {
   ],
 };
 
-const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
+const publicKey = fs.readFileSync(resolve(__dirname, '../resources/key.pub'));
 
 class LicenseCheckError extends Error {
   shouldFallback = false;

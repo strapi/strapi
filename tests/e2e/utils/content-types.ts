@@ -1,12 +1,13 @@
-import { kebabCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
-import { expect, type Page } from '@playwright/test';
-import { clickAndWait, findByRowColumn } from './shared';
+import { expect, Locator, type Page } from '@playwright/test';
+import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
 
 export interface AddAttribute {
   type: string;
   name: string;
+  advanced?: AdvancedAttributeSettings;
   number?: { format: numberFormat };
   date?: { format: dateFormat };
   media?: { multiple: boolean };
@@ -14,8 +15,19 @@ export interface AddAttribute {
   component?: { useExisting?: string; options: Partial<AddComponentOptions> };
   dz?: {
     components: AddComponentAttribute[];
-    options: Partial<AddDynamicZoneOptions>;
   };
+}
+
+// Advanced Settings for all types
+// TODO: split this into settings based on the attribute type
+interface AdvancedAttributeSettings {
+  required?: boolean;
+  unique?: boolean;
+  maximum?: number;
+  minimum?: number;
+  private?: boolean;
+  default?: any;
+  regexp?: string;
 }
 
 interface AddComponentAttribute extends AddAttribute {
@@ -68,14 +80,12 @@ type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
 
-type AddDynamicZoneOptions = {};
-
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
 // This is necessary because the labels used for each attribute type differ based on
 // their other attribute options
-const typeMap = {
+export const typeMap = {
   text: { buttonName: 'Text', listLabel: 'Text' },
   boolean: { buttonName: 'Boolean', listLabel: 'Boolean' },
   blocks: { buttonName: 'Rich text (blocks)', listLabel: 'Rich text (blocks)' },
@@ -124,15 +134,24 @@ export const selectComponentIcon = async (page: Page, icon: string) => {
 };
 
 // open the component builder
-const openComponentBuilder = async (page: Page) => {
+export const openComponentBuilder = async (page: Page) => {
   await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   await clickAndWait(page, page.getByRole('button', { name: 'Create new component' }));
 };
 
 // The initial "create a component" screen from the content type builder nav
+// also supports "create a component" from within a dz
 export const fillCreateComponent = async (page: Page, options: Partial<CreateComponentOptions>) => {
   if (options.name) {
-    await page.getByLabel('Display name').fill(options.name);
+    const displayNameLocator = page.getByLabel('Display name');
+    if (await displayNameLocator.isVisible({ timeout: 0 })) {
+      await displayNameLocator.fill(options.name);
+    } else {
+      const nameLocator = page.getByLabel('Name', { exact: true });
+      if (await nameLocator.isVisible({ timeout: 0 })) {
+        await nameLocator.fill(options.name);
+      }
+    }
   }
 
   if (options.icon) {
@@ -162,7 +181,7 @@ export const fillAddComponentAttribute = async (
   component: AddAttribute['component']
 ) => {
   if (component.options.name) {
-    await page.getByLabel('Name').fill(component.options.name);
+    await fillComponentName(page, component.options.name);
   }
 
   // if existing component, select it
@@ -176,16 +195,40 @@ export const fillAddComponentAttribute = async (
 
     await item.scrollIntoViewIfNeeded();
     await item.click();
+
+    // close the select menu
+    if (await page.getByText('component selected').isVisible({ timeout: 0 })) {
+      await page.getByText('component selected').click({ force: true });
+    }
   }
 
-  // Select repeatable or single
-  const repeatableValue = component.options.repeatable ? 'true' : 'false';
-  await page.click(`label[for="${repeatableValue}"]`);
+  await selectComponentRepeatable(page, component.options.repeatable);
 };
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+export const fillComponentName = async (page: Page, name: string) => {
+  const displayNameLocator = page.getByLabel('Display name');
+  if (await displayNameLocator.isVisible({ timeout: 0 })) {
+    await displayNameLocator.fill(name);
+  } else {
+    const nameLocator = page.getByLabel('Name', { exact: true });
+    if (await nameLocator.isVisible({ timeout: 0 })) {
+      await nameLocator.fill(name);
+    }
+  }
+};
+
+export const selectComponentRepeatable = async (page: Page, value: boolean) => {
+  // Check if the "repeatable" options are present
+  if (await page.locator('input[name="repeatable"]').first().isVisible({ timeout: 0 })) {
+    const repeatableValue = value ? 'true' : 'false';
+    const radioButton = page.locator(`input[name="repeatable"][value="${repeatableValue}"]`);
+    await radioButton.click({ force: true });
+  }
+};
 
 export const addComponentAttribute = async (
   page: Page,
@@ -193,41 +236,73 @@ export const addComponentAttribute = async (
   options: any = {}
 ) => {
   const attrCompOptions = attribute.component.options;
-  await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
 
-  const useExisting = attribute.component.useExisting ? 'false' : 'true';
-  await page.click(`label[for="${useExisting}"]`);
+  const useExistingLabel = attribute.component.useExisting ? 'false' : 'true';
+  await page.click(`label[for="${useExistingLabel}"]`);
 
-  if (!options?.fromDz) {
-    if (attribute.component.useExisting) {
-      await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
-    } else {
-      await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
-    }
-
+  // if "select a component"
+  if (await page.getByRole('button', { name: 'Select a component' }).isVisible({ timeout: 0 })) {
+    await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
     await fillAddComponentAttribute(page, attribute.component);
   }
+  // if "configure a component"
+  else if (
+    await page.getByRole('button', { name: 'Configure the component' }).isVisible({ timeout: 0 })
+  ) {
+    await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
+    await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
+  }
+  // if using an existing component
+  else if (attribute.component.useExisting) {
+    await fillAddComponentAttribute(page, attribute.component);
+  }
+  //??
+  else {
+    await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
+  }
+
+  await fillComponentName(page, attribute.name);
+
+  await selectComponentRepeatable(page, attribute.component?.options.repeatable);
 
   if (attrCompOptions.attributes) {
-    await clickAndWait(
-      page,
-      page.getByRole('button', { name: new RegExp('Add first field to the component', 'i') })
-    );
+    const addFirstFieldButton = page.getByRole('button', {
+      name: new RegExp('Add first field to the component', 'i'),
+    });
+    const addAnotherFieldButton = page.getByRole('button', {
+      name: new RegExp('Add another field', 'i'),
+    });
+
+    if (await addFirstFieldButton.isVisible({ timeout: 0 })) {
+      await clickAndWait(page, addFirstFieldButton);
+    } else if (await addAnotherFieldButton.isVisible({ timeout: 0 })) {
+      await clickAndWait(page, addAnotherFieldButton);
+    }
+
     await addAttributes(page, attrCompOptions.attributes, { clickFinish: false, ...options });
   }
 };
 
 export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZoneAttribute) => {
-  const options = attribute.dz.options;
-
+  // Fill the name of the dynamic zone
   await page.getByLabel('Name', { exact: true }).fill(attribute.name);
 
+  // Click the "Add components to the zone" button to start adding components
   await clickAndWait(
     page,
     page.getByRole('button', { name: new RegExp('Add components to the zone', 'i') })
   );
 
-  await addAttributes(page, attribute.dz.components, { clickFinish: false, fromDz: true });
+  // Add the components to the dynamic zone
+  await addAttributes(page, attribute.dz.components, {
+    fromDz: attribute.name, // Pass the DZ name to ensure subsequent components are added to the DZ
+  });
+
+  // Finish the dynamic zone creation
+  const finishButton = page.getByRole('button', { name: 'Finish' });
+  if (await finishButton.isVisible({ timeout: 0 })) {
+    await finishButton.click();
+  }
 };
 
 export const fillAttribute = async (page: Page, attribute: AddAttribute, options?: any) => {
@@ -289,45 +364,77 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     await page.locator('textarea[name="enum"]').fill(attribute.enumeration?.values.join('\n'));
   }
 
-  // TODO: add support for advanced options
+  if (attribute.advanced) {
+    const advanced = attribute.advanced;
+    await page.getByText('Advanced Settings').click();
+
+    if (isBoolean(advanced.required)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Required field' });
+      await ensureCheckbox(checkbox, advanced.required);
+    }
+
+    if (isString(advanced.regexp)) {
+      await page.getByLabel('Regexp').fill(advanced.regexp);
+    }
+
+    if (isBoolean(advanced.unique)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Unique field' });
+      await ensureCheckbox(checkbox, advanced.unique);
+    }
+
+    if (isBoolean(advanced.private)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Private field' });
+      await ensureCheckbox(checkbox, advanced.private);
+    }
+
+    if (isNumber(advanced.maximum)) {
+      await page.getByLabel('Maximum').fill(advanced.maximum.toString());
+    }
+
+    if (isNumber(advanced.minimum)) {
+      await page.getByLabel('Minimum').fill(advanced.minimum.toString());
+    }
+
+    if (isString(advanced.default)) {
+      await page.getByLabel('Default').fill(advanced.default);
+    }
+  }
 };
 
-export const addAttributes = async (page: Page, attributes: AddAttribute[], options?: any) => {
+export const addAttributes = async (
+  page: Page,
+  attributes: AddAttribute[],
+  options?: { fromDz?: string } // fromDz is now a string for DZ name
+) => {
   for (let i = 0; i < attributes.length; i++) {
     const attribute = attributes[i];
     await fillAttribute(page, attribute, options);
 
     if (i < attributes.length - 1) {
-      // Not the last attribute, click 'Add Another Field'
-      // NOTE: Fields after components only work because 'Add Another Field' is the button text on both the page Add and the modal Add button
-      await clickAndWait(
-        page,
-        page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
-      );
+      if (options?.fromDz) {
+        // Locate the row containing the DZ name
+        const dzRow = page.locator('tr').filter({ hasText: options.fromDz }).first();
+
+        // Locate the next sibling row and find the "Add a component" button
+        const nextRow = dzRow.locator('xpath=following-sibling::tr[1]');
+        const addComponentButton = nextRow.locator('button:has-text("Add a component")');
+
+        // Click the button
+        await clickAndWait(page, addComponentButton);
+      } else {
+        // Regular attribute: click 'Add Another Field'
+        await clickAndWait(
+          page,
+          page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
+        );
+      }
     } else {
-      // Last attribute, click 'Finish'
-      // TODO: ...but only if it's visible; this covers a bug (in the test utils or in strapi) where modal gets closed from a previous finish
+      // Last attribute, click 'Finish' only if it's visible
       if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
         await page.getByRole('button', { name: 'Finish' }).click({ force: true });
       }
     }
   }
-};
-
-// attempt to submit a component but don't check for errors so that they can be checked by the caller
-export const submitComponent = async (page: Page, options: CreateComponentOptions) => {
-  await openComponentBuilder(page);
-
-  await fillCreateComponent(page, options);
-
-  await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-
-  if (options.attributes) {
-    await addAttributes(page, options.attributes);
-  }
-
-  // Save the component
-  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 };
 
 const saveAndVerifyContent = async (
@@ -345,12 +452,13 @@ const saveAndVerifyContent = async (
 
   for (let i = 0; i < options.attributes.length; i++) {
     const attribute = options.attributes[i];
-    const name = attribute.component?.options.name || attribute.name;
+    const name = attribute.name || attribute.component?.options.name;
     const typeCell = await findByRowColumn(page, name, 'Type');
 
     if (!getAttributeIdentifiers(attribute).buttonName) {
       throw new Error('unknown type ' + attribute.type);
     }
+
     await expect(typeCell).toContainText(getAttributeIdentifiers(attribute).listLabel, {
       ignoreCase: true,
     });
@@ -384,7 +492,7 @@ const createContentType = async (
   await page.getByRole('button', { name: buttonName }).click();
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
-  const displayName = page.getByLabel('Display name');
+  const displayName = page.getByLabel('Name');
   await displayName.fill(name);
 
   const singularIdField = page.getByLabel('API ID (Singular)');
@@ -432,6 +540,22 @@ export const addAttributeToComponent = async (
     name: componentName,
     attributes: [attribute],
   });
+};
+
+export const addAttributesToContentType = async (
+  page: Page,
+  ctName: string,
+  attributes: AddAttribute[]
+) => {
+  await navToHeader(page, ['Content-Type Builder', ctName], ctName);
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add another field', exact: true }));
+
+  await addAttributes(page, attributes);
+
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  await waitForRestart(page);
 };
 
 export const removeAttributeFromComponent = async (
