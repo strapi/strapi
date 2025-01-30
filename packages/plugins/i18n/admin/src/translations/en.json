@@ -57,6 +57,7 @@
   "Settings.locales.modal.edit.confirmation": "Finish",
   "Settings.locales.modal.edit.success": "Locale successfully edited",
   "Settings.locales.modal.edit.tab.label": "Navigating between the I18N basic settings and advanced settings",
+ "Settings.locales.modal.locales.label": "Locale",
   "Settings.locales.modal.title": "Configuration",
   "Settings.locales.row.default-locale": "Default locale",
   "Settings.locales.row.displayName": "Display name",
@@ -72,5 +73,6 @@
   "plugin.schema.i18n.localized.description-content-type": "Allows translating an entry into different languages",
   "plugin.schema.i18n.localized.description-field": "The field can have different values in each language",
   "plugin.schema.i18n.localized.label-content-type": "Internationalization",
-  "plugin.schema.i18n.localized.label-field": "Enable localization for this field"
+  "plugin.schema.i18n.localized.label-field": "Enable localization for this field",
+  "list-view.table.header.label": "Available in"
 }
