@@ -6,7 +6,7 @@ import {
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { IconButton, Tabs, Typography, Grid } from '@strapi/design-system';
+import { IconButton, Tabs, Typography, Grid, Flex } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -57,6 +57,7 @@ const ClosePreviewButton = () => {
 
   return (
     <IconButton
+      style={{ border: 'none' }}
       tag={Link}
       relative="path"
       to={toWithFallback}
@@ -145,6 +146,62 @@ const PreviewTabs = () => {
  * PreviewHeader
  * -----------------------------------------------------------------------------------------------*/
 
+const UnstablePreviewHeader = () => {
+  // Get the document title
+  const title = usePreviewContext('PreviewHeader', (state) => state.title);
+
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
+
+  const handleCopyLink = () => {
+    copy(window.location.href);
+    toggleNotification({
+      message: formatMessage({
+        id: 'content-manager.preview.copy.success',
+        defaultMessage: 'Copied preview link',
+      }),
+      type: 'success',
+    });
+  };
+
+  return (
+    <Flex gap={4} background="neutral0" borderColor="neutral150" tag="header">
+      {/* Title and status */}
+      <TitleContainer height="100%" paddingLeft={2} paddingRight={4}>
+        <ClosePreviewButton />
+        <PreviewTitle
+          tag="h1"
+          title={title}
+          maxWidth="200px"
+          fontSize={2}
+          paddingLeft={2}
+          paddingRight={3}
+          fontWeight={600}
+        >
+          {title}
+        </PreviewTitle>
+        <Status />
+      </TitleContainer>
+
+      {/* Tabs and actions */}
+      <Flex flex={1} paddingRight={2} justifyContent="space-between">
+        <PreviewTabs />
+        <IconButton
+          type="button"
+          label={formatMessage({
+            id: 'preview.copy.label',
+            defaultMessage: 'Copy preview link',
+          })}
+          onClick={handleCopyLink}
+        >
+          <LinkIcon />
+        </IconButton>
+      </Flex>
+    </Flex>
+  );
+};
+
 const PreviewHeader = () => {
   // Get the document title
   const title = usePreviewContext('PreviewHeader', (state) => state.title);
@@ -213,4 +270,8 @@ const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
 `;
 
-export { PreviewHeader };
+const TitleContainer = styled(Flex)`
+  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+export { PreviewHeader, UnstablePreviewHeader };
