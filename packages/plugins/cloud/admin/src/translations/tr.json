@@ -1,0 +1,17 @@
+{
+  "plugin.name": "Dağıtım",
+  "Homepage.title": "Strapi Projeniz için Tam Yönetilen Bulut Barındırma",
+  "Homepage.subTitle": "Strapi'yi Üretimde Çalıştırmak İçin İhtiyacınız Olan Her Şeyi Almak İçin Bu 2 Adımlı Süreci Takip Edin.",
+  "Homepage.githubBox.title.versioned": "Proje GitHub'a Yüklendi",
+  "Homepage.githubBox.title.not-versioned": "Projenizi GitHub'a Yükleyin",
+  "Homepage.githubBox.subTitle.versioned": "Başardınız! Projenizi çevrimiçi olarak barındırmaya bir adım kaldı.",
+  "Homepage.githubBox.subTitle.not-versioned": "Projenizi Strapi Cloud'da dağıtmadan önce GitHub'da sürümlemelisiniz.",
+  "Homepage.githubBox.buttonText": "GitHub'a Yükle",
+  "Homepage.cloudBox.title": "Strapi Cloud'a Dağıtım",
+  "Homepage.cloudBox.subTitle": "Veritabanı, e-posta sağlayıcı ve CDN içeren Strapi için optimize edilmiş bir yığın keyfini çıkarın.",
+  "Homepage.cloudBox.buttonText": "Strapi Cloud'a Dağıtım",
+  "Homepage.textBox.label.versioned": "Strapi Cloud'u Ücretsiz Deneyin!",
+  "Homepage.textBox.label.not-versioned": "Projemi Neden GitHub'a Yüklemeliyim?",
+  "Homepage.textBox.text.versioned": "Strapi Cloud, tüm özellikleri içeren projeyi bulutta denemeniz için size 14 günlük ücretsiz deneme sunar.",
+  "Homepage.textBox.text.not-versioned": "Strapi Cloud, projenizi GitHub deposundan alıp dağıtır. Bu, projenizi sürümlemek, yönetmek ve dağıtmak için en iyi yoldur. Başarıyla yüklemek için GitHub'daki adımları izleyin."
+}
