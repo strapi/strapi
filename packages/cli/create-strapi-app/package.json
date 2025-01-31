@@ -60,7 +60,7 @@
     "lodash": "4.17.21",
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.1",
-    "rollup": "4.19.1",
+    "rollup": "4.32.1",
     "semver": "7.5.4",
     "sort-package-json": "2.10.0",
     "tar": "7.4.3"

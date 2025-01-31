@@ -80,8 +80,11 @@
     "@strapi/types": "5.9.0",
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "0.12.0",
+    "esbuild": "0.24.2",
     "eslint-config-custom": "5.9.0",
-    "rimraf": "5.0.5"
+    "memfs": "4.6.0",
+    "rimraf": "5.0.5",
+    "tslib": "2.8.1"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

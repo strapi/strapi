@@ -161,11 +161,10 @@ export default ({ action, ability, model }: any) => {
   };
 
   const wrapSanitize = (createSanitizeFunction: any) => {
-    // TODO
-    // @ts-expect-error define the correct return type
+    // TODO define the correct return type
     const wrappedSanitize = async (data: unknown, options = {} as any) => {
       if (isArray(data)) {
-        return Promise.all(data.map((entity: unknown) => wrappedSanitize(entity, options)));
+        return Promise.all(data.map((entity: unknown): any => wrappedSanitize(entity, options)));
       }
 
       const { subject, action: actionOverride } = getDefaultOptions(data, options);

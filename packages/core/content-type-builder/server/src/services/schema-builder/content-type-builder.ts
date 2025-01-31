@@ -86,7 +86,7 @@ export default function createComponentBuilder() {
 
       this.contentTypes.set(uid, contentType);
 
-      // support self referencing content type relation
+      // support self-referencing content-type relation
       Object.keys(infos.attributes).forEach((key) => {
         const { target } = infos.attributes[key];
         if (target === '__self__') {
@@ -119,18 +119,14 @@ export default function createComponentBuilder() {
         const attribute = infos.attributes[key];
 
         if (isRelation(attribute)) {
-          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
-            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
-              // self referencing relation
-              const targetAttribute = infos.attributes[attribute.targetAttribute];
+          if (attribute.relation === 'manyToMany' || attribute.relation === 'oneToOne') {
+            if (attribute.target === uid && (attribute as any).targetAttribute !== undefined) {
+              // self-referencing relation
+              const targetAttribute = infos.attributes[(attribute as any).targetAttribute];
 
-              if (targetAttribute.dominant === undefined) {
-                attribute.dominant = true;
-              } else {
-                attribute.dominant = false;
-              }
+              (attribute as any).dominant = targetAttribute.dominant === undefined;
             } else {
-              attribute.dominant = true;
+              (attribute as any).dominant = true;
             }
           }
 
@@ -193,10 +189,12 @@ export default function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
-          const oldTargetAttributeName = oldAttribute.inversedBy || oldAttribute.mappedBy;
+          const oldTargetAttributeName =
+            (oldAttribute as any).inversedBy ?? (oldAttribute as any).mappedBy;
 
           const sameRelation = oldAttribute.relation === newAttribute.relation;
-          const targetAttributeHasChanged = oldTargetAttributeName !== newAttribute.targetAttribute;
+          const targetAttributeHasChanged =
+            oldTargetAttributeName !== (newAttribute as any).targetAttribute;
 
           if (!sameRelation || targetAttributeHasChanged) {
             this.unsetRelation(oldAttribute);
@@ -205,10 +203,10 @@ export default function createComponentBuilder() {
           // keep extra options that were set manually on oldAttribute
           reuseUnsetPreviousProperties(newAttribute, oldAttribute);
 
-          if (oldAttribute.inversedBy) {
-            newAttribute.dominant = true;
-          } else if (oldAttribute.mappedBy) {
-            newAttribute.dominant = false;
+          if ((oldAttribute as any).inversedBy) {
+            (newAttribute as any).dominant = true;
+          } else if ((oldAttribute as any).mappedBy) {
+            (newAttribute as any).dominant = false;
           }
 
           return this.setRelation({
@@ -224,18 +222,14 @@ export default function createComponentBuilder() {
         const attribute = newAttributes[key];
 
         if (isRelation(attribute)) {
-          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
-            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
-              // self referencing relation
-              const targetAttribute = newAttributes[attribute.targetAttribute];
+          if (attribute.relation === 'manyToMany' || attribute.relation === 'oneToOne') {
+            if (attribute.target === uid && (attribute as any).targetAttribute !== undefined) {
+              // self-referencing relation
+              const targetAttribute = newAttributes[(attribute as any).targetAttribute];
 
-              if (targetAttribute.dominant === undefined) {
-                attribute.dominant = true;
-              } else {
-                attribute.dominant = false;
-              }
+              (attribute as any).dominant = targetAttribute.dominant === undefined;
             } else {
-              attribute.dominant = true;
+              (attribute as any).dominant = true;
             }
           }
 

@@ -54,7 +54,7 @@
     "koa": "2.15.2",
     "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
-    "typedoc": "0.25.10",
+    "typedoc": "0.27.6",
     "typedoc-github-wiki-theme": "1.1.0",
     "typedoc-plugin-markdown": "3.17.1"
   },
@@ -65,9 +65,10 @@
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.7",
     "eslint-config-custom": "5.9.0",
+    "jest": "29.6.0",
     "lodash": "4.17.21",
     "tsconfig": "5.9.0",
-    "typescript": "5.4.4",
+    "typescript": "5.7.3",
     "undici": "6.19.2"
   },
   "engines": {
