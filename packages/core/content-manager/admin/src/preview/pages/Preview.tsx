@@ -11,8 +11,8 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../utils/api';
-import { PreviewContent } from '../components/PreviewContent';
-import { PreviewHeader } from '../components/PreviewHeader';
+import { PreviewContent, UnstablePreviewContent } from '../components/PreviewContent';
+import { PreviewHeader, UnstablePreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 
 import type { UID } from '@strapi/types';
@@ -132,8 +132,17 @@ const PreviewPage = () => {
         schema={documentResponse.schema}
       >
         <Flex direction="column" height="100%" alignItems="stretch">
-          <PreviewHeader />
-          <PreviewContent />
+          {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
+            <>
+              <UnstablePreviewHeader />
+              <UnstablePreviewContent />
+            </>
+          ) : (
+            <>
+              <PreviewHeader />
+              <PreviewContent />
+            </>
+          )}
         </Flex>
       </PreviewProvider>
     </>
