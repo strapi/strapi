@@ -1,10 +1,6 @@
 import { test } from '@playwright/test';
 import { resetFiles } from '../../../utils/file-reset';
-import {
-  createCollectionType,
-  createSingleType,
-  type AddAttribute,
-} from '../../../utils/content-types';
+import { createSingleType, type AddAttribute } from '../../../utils/content-types';
 import { sharedSetup } from '../../../utils/setup';
 import { clickAndWait } from '../../../utils/shared';
 

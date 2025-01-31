@@ -15,8 +15,16 @@ import {
   Layouts,
   useTable,
 } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Typography, ButtonProps } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  Typography,
+  ButtonProps,
+  Box,
+  EmptyStateLayout,
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -217,6 +225,40 @@ const ListViewPage = () => {
       search: stringify({ plugins: query.plugins }),
     });
   };
+
+  if (!isFetching && results.length === 0) {
+    return (
+      <Page.Main>
+        <Page.Title>{`${contentTypeTitle}`}</Page.Title>
+        <LayoutsHeaderCustom
+          primaryAction={canCreate ? <CreateButton /> : null}
+          subtitle={formatMessage(
+            {
+              id: getTranslation('pages.ListView.header-subtitle'),
+              defaultMessage:
+                '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+            },
+            { number: pagination?.total }
+          )}
+          title={contentTypeTitle}
+          navigationAction={<BackButton />}
+        />
+        <Layouts.Content>
+          <Box background="neutral0" shadow="filterShadow" hasRadius>
+            <EmptyStateLayout
+              action={canCreate ? <CreateButton variant="secondary" /> : null}
+              content={formatMessage({
+                id: getTranslation('pages.ListView.empty-state.content'),
+                defaultMessage: 'No entries found',
+              })}
+              hasRadius
+              icon={<EmptyDocuments width="16rem" />}
+            />
+          </Box>
+        </Layouts.Content>
+      </Page.Main>
+    );
+  }
 
   return (
     <Page.Main>
