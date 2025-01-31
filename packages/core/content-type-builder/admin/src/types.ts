@@ -48,9 +48,7 @@ export type Components = Record<string, Component>;
 export type ContentTypes = Record<string, ContentType>;
 export interface DataManagerStateType {
   components: Components;
-  contentTypes?: ContentTypes;
-  initialComponents: Components;
-  initialContentTypes: ContentTypes;
+  contentTypes: ContentTypes;
   initialData: Record<string, any>;
   modifiedData: {
     components: Components;
@@ -60,6 +58,5 @@ export interface DataManagerStateType {
   };
   reservedNames: Record<string, string>;
   isLoading: boolean;
-  isLoadingForDataToBeSet: boolean;
   [key: string]: any;
 }

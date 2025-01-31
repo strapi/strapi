@@ -43,19 +43,8 @@ import { SingularName } from '../SingularName';
 import { TabForm } from '../TabForm';
 import { TextareaEnum } from '../TextareaEnum';
 
-import {
-  ON_CHANGE,
-  RESET_PROPS,
-  RESET_PROPS_AND_SAVE_CURRENT_DATA,
-  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
-  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
-  SET_ATTRIBUTE_DATA_SCHEMA,
-  SET_CUSTOM_FIELD_DATA_SCHEMA,
-  SET_DATA_TO_EDIT,
-  SET_DYNAMIC_ZONE_DATA_SCHEMA,
-  SET_ERRORS,
-} from './constants';
 import { forms } from './forms/forms';
+import { actions } from './reducer';
 import { makeSelectFormModal } from './selectors';
 import { canEditContentType } from './utils/canEditContentType';
 import { createComponentUid, createUid } from './utils/createUid';
@@ -171,27 +160,24 @@ export const FormModal = () => {
 
       // Edit category
       if (modalType === 'editCategory' && actionType === 'edit') {
-        dispatch({
-          type: SET_DATA_TO_EDIT,
-          modalType,
-          actionType,
-          data: {
-            name: categoryName,
-          },
-        });
+        dispatch(
+          actions.setDataToEdit({
+            data: {
+              name: categoryName,
+            },
+          })
+        );
       }
 
       // Create content type we need to add the default option draftAndPublish
       if (modalType === 'contentType' && actionType === 'create') {
-        dispatch({
-          type: SET_DATA_TO_EDIT,
-          modalType,
-          actionType,
-          data: {
-            draftAndPublish: true,
-          },
-          pluginOptions: {},
-        });
+        dispatch(
+          actions.setDataToEdit({
+            data: {
+              draftAndPublish: true,
+            },
+          })
+        );
       }
 
       // Edit content type
@@ -207,35 +193,33 @@ export const FormModal = () => {
           }
         );
 
-        dispatch({
-          type: SET_DATA_TO_EDIT,
-          actionType,
-          modalType,
-          data: {
-            displayName,
-            draftAndPublish,
-            kind,
-            pluginOptions,
-            pluralName,
-            singularName,
-          },
-        });
+        dispatch(
+          actions.setDataToEdit({
+            data: {
+              displayName,
+              draftAndPublish,
+              kind,
+              pluginOptions,
+              pluralName,
+              singularName,
+            },
+          })
+        );
       }
 
       // Edit component
       if (modalType === 'component' && actionType === 'edit') {
         const data = get(allDataSchema, pathToSchema, {});
 
-        dispatch({
-          type: SET_DATA_TO_EDIT,
-          actionType,
-          modalType,
-          data: {
-            displayName: data.schema.displayName,
-            category: data.category,
-            icon: data.schema.icon,
-          },
-        });
+        dispatch(
+          actions.setDataToEdit({
+            data: {
+              displayName: data.schema.displayName,
+              category: data.category,
+              icon: data.schema.icon,
+            },
+          })
+        );
       }
 
       // Special case for the dynamic zone
@@ -250,10 +234,11 @@ export const FormModal = () => {
           componentToCreate: { type: 'component' },
         };
 
-        dispatch({
-          type: SET_DYNAMIC_ZONE_DATA_SCHEMA,
-          attributeToEdit,
-        });
+        dispatch(
+          actions.setDynamicZoneDataSchema({
+            attributeToEdit,
+          })
+        );
       }
 
       // Set the predefined data structure to create an attribute
@@ -276,29 +261,38 @@ export const FormModal = () => {
         }
 
         if (modalType === 'customField') {
-          dispatch({
-            type: SET_CUSTOM_FIELD_DATA_SCHEMA,
-            customField,
-            isEditing: actionType === 'edit',
-            modifiedDataToSetForEditing: attributeToEdit,
-            // NOTE: forTarget is used in the i18n middleware
-            forTarget,
-          });
+          if (actionType === 'edit') {
+            dispatch(
+              actions.setCustomFieldDataSchema({
+                isEditing: true,
+                modifiedDataToSetForEditing: attributeToEdit,
+              })
+            );
+          } else {
+            dispatch(
+              actions.setCustomFieldDataSchema({
+                customField: customField!,
+                isEditing: false,
+                modifiedDataToSetForEditing: attributeToEdit,
+              })
+            );
+          }
         } else {
-          dispatch({
-            type: SET_ATTRIBUTE_DATA_SCHEMA,
-            attributeType,
-            nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
-            targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
-            isEditing: actionType === 'edit',
-            modifiedDataToSetForEditing: attributeToEdit,
-            step,
-            forTarget,
-          });
+          dispatch(
+            actions.setAttributeDataSchema({
+              attributeType,
+              nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
+              targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
+              isEditing: actionType === 'edit',
+              modifiedDataToSetForEditing: attributeToEdit,
+              step,
+              // forTarget,
+            })
+          );
         }
       }
     } else {
-      dispatch({ type: RESET_PROPS });
+      dispatch(actions.resetProps());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -486,17 +480,18 @@ export const FormModal = () => {
       // Since the onBlur is deactivated we remove the errors directly when changing an input
       delete clonedErrors[name];
 
-      dispatch({
-        type: SET_ERRORS,
-        errors: clonedErrors,
-      });
+      dispatch(
+        actions.setErrors({
+          errors: clonedErrors,
+        })
+      );
 
-      dispatch({
-        type: ON_CHANGE,
-        keys: name.split('.'),
-        value: val,
-        ...rest,
-      });
+      dispatch(
+        actions.onChange({
+          keys: name.split('.'),
+          value: val,
+        })
+      );
     },
     [dispatch, formErrors]
   );
@@ -612,9 +607,7 @@ export const FormModal = () => {
           // so the search is different
           if (isCreating) {
             // Step 1 of adding a component to a DZ, the user has the option to create a component
-            dispatch({
-              type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
-            });
+            dispatch(actions.resetPropsAndSetTheFormForAddingACompoToADz());
 
             setActiveTab('basic');
             onNavigateToAddCompoToDZModal({ dynamicZoneTarget: modifiedData.name });
@@ -651,10 +644,7 @@ export const FormModal = () => {
           // This way we don't have to add some logic to re-run the useEffect
           // The first step is either needed to create a component or just to navigate
           // To the modal for adding a "common field"
-          dispatch({
-            type: RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
-            forTarget,
-          });
+          dispatch(actions.resetPropsAndSetFormForAddingAnExistingCompo({}));
 
           // We don't want all the props to be reset
           return;
@@ -668,7 +658,7 @@ export const FormModal = () => {
           forTarget,
           targetUid,
           // This change the dispatched type
-          // either 'EDIT_ATTRIBUTE' or 'ADD_ATTRIBUTE' in the DataManagerProvider
+          // either 'editAttribute' or 'addAttribute' in the DataManagerProvider
           actionType === 'edit',
           // This is for the edit part
           initialData,
@@ -703,10 +693,7 @@ export const FormModal = () => {
 
           // Here we clear the reducer state but we also keep the created component
           // If we were to create the component before
-          dispatch({
-            type: RESET_PROPS_AND_SAVE_CURRENT_DATA,
-            forTarget,
-          });
+          dispatch(actions.resetPropsAndSaveCurrentData({}));
 
           onNavigateToCreateComponentStep2();
 
@@ -738,7 +725,7 @@ export const FormModal = () => {
         // Add the field to the schema
         addAttribute(modifiedData, forTarget, targetUid, false);
 
-        dispatch({ type: RESET_PROPS });
+        dispatch(actions.resetProps());
 
         // Open modal attribute for adding attr to component
         if (shouldContinue) {
@@ -792,16 +779,15 @@ export const FormModal = () => {
         return;
       }
 
-      dispatch({
-        type: RESET_PROPS,
-      });
+      dispatch(actions.resetProps());
     } catch (err: any) {
       const errors = getYupInnerErrors(err);
 
-      dispatch({
-        type: SET_ERRORS,
-        errors,
-      });
+      dispatch(
+        actions.setErrors({
+          errors,
+        })
+      );
     }
   };
 
@@ -816,10 +802,7 @@ export const FormModal = () => {
 
     if (confirm) {
       onCloseModal();
-
-      dispatch({
-        type: RESET_PROPS,
-      });
+      dispatch(actions.resetProps());
     }
   };
 
@@ -830,9 +813,7 @@ export const FormModal = () => {
     } else {
       onCloseModal();
       // Reset the reducer
-      dispatch({
-        type: RESET_PROPS,
-      });
+      dispatch(actions.resetProps());
     }
   };
 

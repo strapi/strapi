@@ -14,6 +14,8 @@ import { AttributeIcon, IconByType } from './AttributeIcon';
 import { DisplayedType } from './DisplayedType';
 import { UpperFirst } from './UpperFirst';
 
+import type { SchemaType } from '../types';
+
 export const BoxWrapper = styled(Box)`
   position: relative;
 `;
@@ -21,7 +23,7 @@ export const BoxWrapper = styled(Box)`
 type ListRowProps = {
   configurable?: boolean;
   customField?: string | null;
-  editTarget: string;
+  editTarget: SchemaType;
   firstLoopComponentUid?: string | null;
   isFromDynamicZone?: boolean;
   name: string;

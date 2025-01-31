@@ -1,7 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 
-import { EDIT_CUSTOM_FIELD_ATTRIBUTE } from '../constants';
-import { initialState, reducer } from '../reducer';
+import { initialState, reducer, actions } from '../reducer';
 
 describe('CTB | components | DataManagerProvider | reducer | EDIT_CUSTOM_FIELD_ATTRIBUTE', () => {
   it('edits a custom field attribute on a content type', () => {
@@ -42,14 +41,12 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_CUSTOM_FIELD_A
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action: any = {
-      type: EDIT_CUSTOM_FIELD_ATTRIBUTE,
+    const action = actions.editCustomFieldAttribute({
       attributeToSet: updatedCustomFieldAttribute,
       forTarget: 'contentType',
       targetUid: contentTypeUID,
       initialAttribute: initialCustomFieldAttribute,
-      shouldAddComponentToData: false,
-    };
+    });
 
     const updatedContentType = cloneDeep(contentType);
     updatedContentType.schema.attributes = [
