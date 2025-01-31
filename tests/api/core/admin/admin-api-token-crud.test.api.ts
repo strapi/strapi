@@ -122,6 +122,7 @@ describe('Admin API Token v2 CRUD (api)', () => {
               path: ['type'],
               name: 'ValidationError',
               message: 'type must be one of the following values: read-only, full-access, custom',
+              value: 'invalid-type',
             },
           ],
         },
