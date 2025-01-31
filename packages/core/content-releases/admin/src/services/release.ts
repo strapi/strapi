@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import {
   CreateReleaseAction,
+  CreateManyReleaseActions,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import { pluginId } from '../pluginId';
@@ -21,6 +22,7 @@ import type {
   UpdateRelease,
   GetRelease,
   PublishRelease,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 
 export interface GetReleasesQueryParams {
@@ -49,7 +51,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: axiosBaseQuery,
-  tagTypes: ['Release', 'ReleaseAction'],
+  tagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
   endpoints: (build) => {
     return {
       getReleasesForEntry: build.query<
@@ -185,6 +187,23 @@ const releaseApi = createApi({
           { type: 'ReleaseAction', id: 'LIST' },
         ],
       }),
+      createManyReleaseActions: build.mutation<
+        CreateManyReleaseActions.Response,
+        CreateManyReleaseActions.Request
+      >({
+        query({ body, params }) {
+          return {
+            url: `/content-releases/${params.releaseId}/actions/bulk`,
+            method: 'POST',
+            data: body,
+          };
+        },
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+          { type: 'EntriesInRelease' },
+        ],
+      }),
       updateReleaseAction: build.mutation<
         UpdateReleaseAction.Response,
         UpdateReleaseAction.Request & { query: GetReleaseActions.Request['query'] } & {
@@ -234,9 +253,11 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: [
+        invalidatesTags: (result, error, arg) => [
           { type: 'Release', id: 'LIST' },
+          { type: 'Release', id: arg.params.releaseId },
           { type: 'ReleaseAction', id: 'LIST' },
+          { type: 'EntriesInRelease' },
         ],
       }),
       publishRelease: build.mutation<PublishRelease.Response, PublishRelease.Request['params']>({
@@ -255,7 +276,25 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+        invalidatesTags: () => [{ type: 'Release', id: 'LIST' }, { type: 'EntriesInRelease' }],
+      }),
+      getMappedEntriesInReleases: build.query<
+        MapEntriesToReleases.Response['data'],
+        MapEntriesToReleases.Request['query']
+      >({
+        query(params) {
+          return {
+            url: '/content-releases/mapEntriesToReleases',
+            method: 'GET',
+            config: {
+              params,
+            },
+          };
+        },
+        transformResponse(response: MapEntriesToReleases.Response) {
+          return response.data;
+        },
+        providesTags: [{ type: 'EntriesInRelease' }],
       }),
     };
   },
@@ -268,11 +307,13 @@ const {
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
+  useGetMappedEntriesInReleasesQuery,
 } = releaseApi;
 
 export {
@@ -282,10 +323,12 @@ export {
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
+  useGetMappedEntriesInReleasesQuery,
   releaseApi,
 };

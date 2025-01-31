@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
@@ -8,8 +10,7 @@ import { mockReleasesPageData } from './mockReleasesPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+  CheckPermissions: jest.fn(({ children }: { children: ReactNode }) => children),
 }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
@@ -70,8 +71,8 @@ describe('Releases home page', () => {
 
     const { user } = render(<ReleasesPage />);
 
-    const releaseSubtitle = await screen.findByText('17 releases');
-    expect(releaseSubtitle).toBeInTheDocument();
+    const pendingTab = await screen.findByText('Pending (17)');
+    expect(pendingTab).toBeInTheDocument();
 
     const firstEntry = screen.getByRole('heading', { level: 3, name: 'entry 1' });
     expect(firstEntry).toBeInTheDocument();

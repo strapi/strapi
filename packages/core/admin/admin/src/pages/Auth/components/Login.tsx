@@ -40,7 +40,7 @@ const Login = ({ children }: LoginProps) => {
   const query = useQuery();
   const { push } = useHistory();
 
-  const login = useAuth('Login', (state) => state.login);
+  const { login } = useAuth('Login');
 
   const handleLogin = async (body: Parameters<typeof login>[0]) => {
     setApiError(undefined);

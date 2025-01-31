@@ -1,6 +1,7 @@
 'use strict';
 
 const { factory } = require('typescript');
+const { values, pipe, map, sortBy } = require('lodash/fp');
 
 const { models } = require('../common');
 const { emitDefinitions, format, generateSharedExtensionDefinition } = require('../utils');
@@ -18,10 +19,14 @@ const generateContentTypesDefinitions = async (options = {}) => {
 
   const { contentTypes } = strapi;
 
-  const contentTypesDefinitions = Object.values(contentTypes).map((contentType) => ({
-    uid: contentType.uid,
-    definition: models.schema.generateSchemaDefinition(contentType),
-  }));
+  const contentTypesDefinitions = pipe(
+    values,
+    sortBy('uid'),
+    map((contentType) => ({
+      uid: contentType.uid,
+      definition: models.schema.generateSchemaDefinition(contentType),
+    }))
+  )(contentTypes);
 
   const formattedSchemasDefinitions = contentTypesDefinitions.reduce((acc, def) => {
     acc.push(

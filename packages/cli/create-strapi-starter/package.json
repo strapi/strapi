@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "4.20.3",
+  "version": "4.25.20",
   "description": "Generate a new Strapi application.",
   "keywords": [
     "create-strapi-starter",
@@ -43,7 +43,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/generate-new": "4.20.3",
+    "@strapi/generate-new": "4.25.20",
     "chalk": "4.1.2",
     "ci-info": "3.8.0",
     "commander": "8.3.0",
@@ -53,9 +53,9 @@
     "ora": "5.4.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.20.3",
-    "eslint-config-custom": "4.20.3",
-    "tsconfig": "4.20.3"
+    "@strapi/pack-up": "4.23.0",
+    "eslint-config-custom": "4.25.20",
+    "tsconfig": "4.25.20"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

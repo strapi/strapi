@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "4.20.3",
+  "version": "4.25.20",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -39,7 +39,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "4.20.3",
+    "@strapi/utils": "4.25.20",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
     "fs-extra": "10.0.0",
@@ -49,9 +49,9 @@
     "umzug": "3.2.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "4.20.3",
-    "eslint-config-custom": "4.20.3",
-    "tsconfig": "4.20.3"
+    "@strapi/pack-up": "4.23.0",
+    "eslint-config-custom": "4.25.20",
+    "tsconfig": "4.25.20"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

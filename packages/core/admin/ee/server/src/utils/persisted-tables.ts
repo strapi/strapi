@@ -24,7 +24,6 @@ const transformTableName = (table: string | PersistedTable) => {
  * @returns {Promise<string[]>}
  */
 export async function findTables({ strapi }: { strapi: LoadedStrapi }, regex: any) {
-  // @ts-expect-error - getTables is not typed into the schema inspector
   const tables = await strapi.db.dialect.schemaInspector.getTables();
   return tables.filter((tableName: string) => regex.test(tableName));
 }

@@ -121,7 +121,26 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
   verifyAuth(this: PushHandler) {
     return proto.verifyAuth.call(this, TRANSFER_KIND);
   },
-
+  onInfo(message) {
+    this.diagnostics?.report({
+      details: {
+        message,
+        origin: 'push-handler',
+        createdAt: new Date(),
+      },
+      kind: 'info',
+    });
+  },
+  onWarning(message) {
+    this.diagnostics?.report({
+      details: {
+        message,
+        createdAt: new Date(),
+        origin: 'push-handler',
+      },
+      kind: 'warning',
+    });
+  },
   cleanup(this: PushHandler) {
     proto.cleanup.call(this);
 
@@ -219,7 +238,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     // Regular command message (init, end, status)
     if (type === 'command') {
       const { command } = msg;
-
+      this.onInfo(`received command:${command} uuid:${uuid}`);
       await this.executeAndRespond(uuid, () => {
         this.assertValidTransferCommand(command);
 
@@ -234,6 +253,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
 
     // Transfer message (the transfer must be init first)
     else if (type === 'transfer') {
+      this.onInfo(`received transfer action:${msg.action} step:${msg.kind} uuid:${uuid}`);
       await this.executeAndRespond(uuid, async () => {
         await this.verifyAuth();
 
@@ -370,6 +390,9 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       this.flow?.set(step);
     }
 
+    if (action === 'bootstrap') {
+      return this.provider?.[action](this.diagnostics);
+    }
     return this.provider?.[action]();
   },
 
@@ -453,7 +476,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     });
 
     this.provider.onWarning = (message) => {
-      // TODO send a warning message to the client
+      this.onWarning(message);
       strapi.log.warn(message);
     };
 

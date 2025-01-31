@@ -27,6 +27,7 @@ const command = ({ command }: { command: Command }) => {
       ).argParser(parseURL)
     )
     .addOption(new Option('--to-token <token>', `Transfer token for the remote Strapi destination`))
+    .addOption(new Option('--verbose', 'Enable verbose logs'))
     .addOption(forceOption)
     .addOption(excludeOption)
     .addOption(onlyOption)

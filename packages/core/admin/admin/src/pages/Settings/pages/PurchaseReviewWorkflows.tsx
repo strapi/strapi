@@ -25,7 +25,7 @@ const PurchaseReviewWorkflows = () => {
             content={formatMessage({
               id: 'Settings.review-workflows.not-available',
               defaultMessage:
-                'Review Workflows is only available as part of the Enterprise Edition. Upgrade to create and manage workflows.',
+                'Review Workflows is only available as part of a paid plan. Upgrade to create and manage workflows.',
             })}
             action={
               <LinkButton

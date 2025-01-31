@@ -128,4 +128,13 @@ module.exports = (baseURL) => ({
     callback: `${baseURL}/patreon/callback`,
     scope: ['identity', 'identity[email]'],
   },
+  keycloak: {
+    enabled: false,
+    icon: '',
+    key: '',
+    secret: '',
+    subdomain: 'myKeycloakProvider.com/realms/myrealm',
+    callback: `${baseURL}/keycloak/callback`,
+    scope: ['openid', 'email', 'profile'],
+  },
 });

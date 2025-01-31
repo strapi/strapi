@@ -25,4 +25,21 @@ describe('filePathToPropPath', () => {
     expect(filePathToPropPath('./config/test.js', false)).toEqual(['config']);
     expect(filePathToPropPath('./config/test.key.js', false)).toEqual(['config', 'test']);
   });
+
+  describe('Separators', () => {
+    test('Win32 Separators', () => {
+      expect(filePathToPropPath('config\\test.js')).toEqual(['config', 'test']);
+      expect(filePathToPropPath('.\\config\\test.js')).toEqual(['config', 'test']);
+    });
+
+    test('Posix Separators', () => {
+      expect(filePathToPropPath('config/test.js')).toEqual(['config', 'test']);
+      expect(filePathToPropPath('./config/test.js')).toEqual(['config', 'test']);
+    });
+
+    test('Mixed Separators (win32 + posix)', () => {
+      expect(filePathToPropPath('src\\config/test.js')).toEqual(['src', 'config', 'test']);
+      expect(filePathToPropPath('.\\config/test.js')).toEqual(['config', 'test']);
+    });
+  });
 });

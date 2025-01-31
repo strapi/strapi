@@ -30,7 +30,13 @@ const strapiFactory = getStrapiFactory({
       public: 'static/public/assets',
     },
   },
-  db: { transaction },
+  db: {
+    transaction,
+    lifecycles: {
+      enable: jest.fn(),
+      disable: jest.fn(),
+    },
+  },
   config: {
     get(service) {
       if (service === 'plugin.upload') {

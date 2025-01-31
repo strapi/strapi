@@ -110,7 +110,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c26 {
   background: #ffffff;
+  padding-top: 4px;
   padding-right: 12px;
+  padding-bottom: 4px;
   padding-left: 12px;
   border-radius: 4px;
   position: relative;

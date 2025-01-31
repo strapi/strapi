@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 
 export interface TransferTokenPermission {
-  id: number | string;
+  id: number | `${number}`;
   action: 'push' | 'pull' | 'push-pull';
   token: TransferToken | number;
 }
@@ -12,7 +12,7 @@ export interface DatabaseTransferToken {
   description: string;
   accessKey: string;
   lastUsedAt?: number;
-  lifespan: number | null;
+  lifespan: string | number | null;
   expiresAt: number;
   permissions: TransferTokenPermission[];
 }

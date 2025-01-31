@@ -5,6 +5,13 @@ import type { Release, CreateRelease, UpdateRelease } from '../../../shared/cont
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
 
+export class AlreadyOnReleaseError extends errors.ApplicationError<'AlreadyOnReleaseError'> {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AlreadyOnReleaseError';
+  }
+}
+
 const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async validateUniqueEntry(
     releaseId: CreateReleaseAction.Request['params']['releaseId'],
@@ -29,7 +36,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     );
 
     if (isEntryInRelease) {
-      throw new errors.ValidationError(
+      throw new AlreadyOnReleaseError(
         `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
       );
     }

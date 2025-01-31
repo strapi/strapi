@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { buildStrapiCloudCommands } from '@strapi/cloud-cli';
 
 import createAdminUser from './actions/admin/create-user/command';
 import resetAdminUserPassword from './actions/admin/reset-user-password/command';
@@ -63,6 +64,10 @@ const strapiCommands = {
   versionCommand,
   watchAdminCommand,
   /**
+   * Cloud
+   */
+  buildStrapiCloudCommands,
+  /**
    * Plugins
    */
   buildPluginCommand,
@@ -114,14 +119,14 @@ const buildStrapiCommand = async (argv: string[], command = new Command()) => {
   } satisfies CLIContext;
 
   // Load all commands
-  keys.forEach((name) => {
+  for (const name of keys) {
     try {
       // Add this command to the Commander command object
-      strapiCommands[name]({ command, argv, ctx });
+      await strapiCommands[name]({ command, argv, ctx });
     } catch (e) {
       console.error(`Failed to load command ${name}`, e);
     }
-  });
+  }
 
   return command;
 };

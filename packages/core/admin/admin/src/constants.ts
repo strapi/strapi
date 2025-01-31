@@ -125,7 +125,8 @@ export const HOOKS = {
 
 export interface SettingsMenuLink
   extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'lockIcon'> {
-  lockIcon?: boolean;
+  // TODO: to replace with another name in v5
+  lockIcon?: boolean; // TODO: to replace with another name in v5
 }
 
 export type SettingsMenu = {
@@ -155,7 +156,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
       to: '/settings/transfer-tokens?sort=name:ASC',
       id: 'transfer-tokens',
     },
-    // If the Enterprise feature is not enabled and if the config doesn't disable it, we promote the Enterprise feature by displaying them in the settings menu.
+    // If the Enterprise/Cloud feature is not enabled and if the config doesn't disable it, we promote the Enterprise/Cloud feature by displaying them in the settings menu.
     // Disable this by adding "promoteEE: false" to your `./config/admin.js` file
     ...(!window.strapi.features.isEnabled(window.strapi.features.SSO) &&
     window.strapi?.flags?.promoteEE
@@ -163,8 +164,8 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
           {
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/purchase-single-sign-on',
-            id: 'sso',
-            lockIcon: true,
+            id: 'sso-purchase-page',
+            lockIcon: true, // TODO: to replace with another name in v5
           },
         ]
       : []),
@@ -178,8 +179,8 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
               defaultMessage: 'Review Workflows',
             },
             to: '/settings/purchase-review-workflows',
-            id: 'review-workflows',
-            lockIcon: true,
+            id: 'review-workflows-purchase-page',
+            lockIcon: true, // TODO: to replace with another name in v5
           },
         ]
       : []),
@@ -203,8 +204,8 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
           {
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/purchase-audit-logs',
-            id: 'auditLogs',
-            lockIcon: true,
+            id: 'auditLogs-purchase-page',
+            lockIcon: true, // TODO: to replace with another name in v5
           },
         ]
       : []),

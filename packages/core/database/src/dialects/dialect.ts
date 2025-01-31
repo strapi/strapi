@@ -3,6 +3,7 @@ import type { Schema } from '../schema';
 
 export interface SchemaInspector {
   getSchema(): Promise<Schema>;
+  getTables(): Promise<string[]>;
 }
 
 export default class Dialect {
@@ -20,6 +21,10 @@ export default class Dialect {
   configure() {}
 
   initialize() {}
+
+  getTables() {
+    throw new Error('getTables not implemented for this dialect');
+  }
 
   getSqlType(type: unknown) {
     return type;

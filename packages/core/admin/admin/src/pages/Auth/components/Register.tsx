@@ -144,7 +144,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
 
   const [registerAdmin] = useRegisterAdminMutation();
   const [registerUser] = useRegisterUserMutation();
-  const setToken = useAuth('Register', (state) => state.setToken);
+  const { setToken } = useAuth('Register');
 
   const handleRegisterAdmin = async (
     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },

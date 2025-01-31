@@ -25,7 +25,7 @@ const PurchaseContentReleases = () => {
             content={formatMessage({
               id: 'content-releases.pages.PurchaseRelease.not-available',
               defaultMessage:
-                'Releases is only available as part of the Enterprise Edition. Upgrade to create and manage releases.',
+                'Releases is only available as part of a paid plan. Upgrade to create and manage releases.',
             })}
             action={
               <LinkButton

@@ -25,15 +25,15 @@ const sendUpdateProjectInformation = async () => {
   }
 
   if (EE.features.isEnabled('cms-content-releases')) {
-    const numberOfContentReleases = await strapi.entityService.count(
-      'plugin::content-releases.release'
-    );
-    const numberOfPublishedContentReleases = await strapi.entityService.count(
-      'plugin::content-releases.release',
-      {
-        filters: { $not: { releasedAt: null } },
-      }
-    );
+    const numberOfContentReleases = await strapi.db
+      .query('plugin::content-releases.release')
+      .count();
+
+    const numberOfPublishedContentReleases = await strapi.db
+      .query('plugin::content-releases.release')
+      .count({
+        filters: { releasedAt: { $notNull: true } },
+      });
 
     groupProperties = assign(groupProperties, {
       numberOfContentReleases,

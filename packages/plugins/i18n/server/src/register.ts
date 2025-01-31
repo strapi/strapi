@@ -26,12 +26,17 @@ export default ({ strapi }: { strapi: Strapi }) => {
 const isUrlForCreation = (url: string) => {
   if (!url) return false;
 
+  // Remove any query params
+  // /content-manager/collection-types/api::category.category/?locale=en
+  const path = url.split('?')[0];
+
   // Split path and remove empty strings
   // [ 'content-manager', 'collection-types', 'api::category.category' ]
-  const splitUrl = url.split('/').filter(Boolean);
+  const splitUrl = path.split('/').filter(Boolean);
 
   // Get the last element of the array
   // api::category.category / 1 / publish
+
   const model = splitUrl[splitUrl.length - 1];
 
   // If the model contains :: it means it's a uid

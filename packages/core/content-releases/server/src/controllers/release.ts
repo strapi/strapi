@@ -11,6 +11,7 @@ import type {
   DeleteRelease,
   GetContentTypeEntryReleases,
   GetReleases,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -62,7 +63,13 @@ const releaseController = {
         };
       });
 
-      ctx.body = { data, meta: { pagination } };
+      const pendingReleasesCount = await strapi.query(RELEASE_MODEL_UID).count({
+        where: {
+          releasedAt: null,
+        },
+      });
+
+      ctx.body = { data, meta: { pagination, pendingReleasesCount } };
     }
   },
 
@@ -98,6 +105,40 @@ const releaseController = {
     };
 
     ctx.body = { data };
+  },
+
+  async mapEntriesToReleases(ctx: Koa.Context) {
+    const { contentTypeUid, entriesIds } = ctx.query;
+
+    if (!contentTypeUid || !entriesIds) {
+      throw new errors.ValidationError('Missing required query parameters');
+    }
+
+    const releaseService = getService('release', { strapi });
+
+    const releasesWithActions = await releaseService.findManyWithContentTypeEntryAttached(
+      contentTypeUid,
+      entriesIds
+    );
+
+    const mappedEntriesInReleases = releasesWithActions.reduce(
+      (acc: MapEntriesToReleases.Response['data']['mappedEntriesInReleases'], release: Release) => {
+        release.actions.forEach((action) => {
+          if (!acc[action.entry.id]) {
+            acc[action.entry.id] = [{ id: release.id, name: release.name }];
+          } else {
+            acc[action.entry.id].push({ id: release.id, name: release.name });
+          }
+        });
+
+        return acc;
+      },
+      {} as MapEntriesToReleases.Response['data']['mappedEntriesInReleases']
+    );
+
+    ctx.body = {
+      data: mappedEntriesInReleases,
+    };
   },
 
   async create(ctx: Koa.Context) {

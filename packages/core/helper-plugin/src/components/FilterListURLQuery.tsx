@@ -111,8 +111,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }: Attribute
 
   const { fieldSchema } = attribute;
 
-  const type =
-    fieldSchema.type === 'relation' ? fieldSchema?.mainField?.schema?.type : fieldSchema.type;
+  const type = fieldSchema.type === 'relation' ? fieldSchema?.mainField?.type : fieldSchema.type;
 
   let formattedValue = value;
 

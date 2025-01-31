@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { useRBAC } from '@strapi/helper-plugin';
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
@@ -9,11 +11,43 @@ import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+  CheckPermissions: jest.fn(({ children }: { children: ReactNode }) => children),
   useRBAC: jest.fn(() => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true },
+  })),
+  useStrapiApp: jest.fn(() => ({
+    runHookWaterfall: jest.fn().mockReturnValue({
+      displayedHeaders: [
+        {
+          key: '__name__',
+          fieldSchema: { type: 'string' },
+          metadatas: {
+            label: {
+              id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+              defaultMessage: 'name',
+            },
+            searchable: false,
+            sortable: false,
+          },
+          name: 'name',
+        },
+        {
+          key: '__locale__',
+          fieldSchema: { type: 'string' },
+          metadatas: {
+            label: {
+              id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+              defaultMessage: 'locale',
+            },
+            searchable: false,
+            sortable: false,
+          },
+          name: 'locale',
+        },
+      ],
+      hasI18nEnabled: true,
+    }),
   })),
 }));
 
@@ -51,6 +85,9 @@ describe('Releases details page', () => {
 
     const releaseSubtitle = await screen.findAllByText('No entries');
     expect(releaseSubtitle[0]).toBeInTheDocument();
+
+    const releaseStatus = screen.getByText('empty');
+    expect(releaseStatus).toBeInTheDocument();
 
     const moreButton = screen.getByRole('button', { name: 'Release edit and delete menu' });
     expect(moreButton).toBeInTheDocument();
@@ -146,7 +183,7 @@ describe('Releases details page', () => {
     expect(tables).toHaveLength(2);
   });
 
-  it('shows the right status', async () => {
+  it('shows the right status for unpublished release', async () => {
     server.use(
       rest.get('/content-releases/:releaseId', (req, res, ctx) =>
         res(ctx.json(mockReleaseDetailsPageData.withActionsHeaderData))
@@ -160,13 +197,17 @@ describe('Releases details page', () => {
     );
 
     render(<ReleaseDetailsPage />, {
-      initialEntries: [{ pathname: `/content-releases/1` }],
+      initialEntries: [{ pathname: `/content-releases/2` }],
     });
 
     const releaseTitle = await screen.findByText(
       mockReleaseDetailsPageData.withActionsHeaderData.data.name
     );
     expect(releaseTitle).toBeInTheDocument();
+
+    const releaseStatus = screen.getByText('ready');
+    expect(releaseStatus).toBeInTheDocument();
+    expect(releaseStatus).toHaveStyle(`color: #328048`);
 
     const cat1Row = screen.getByRole('row', { name: /cat1/i });
     expect(within(cat1Row).getByRole('gridcell', { name: 'Ready to publish' })).toBeInTheDocument();
@@ -180,5 +221,32 @@ describe('Releases details page', () => {
     expect(
       within(add1Row).getByRole('gridcell', { name: 'Already published' })
     ).toBeInTheDocument();
+  });
+
+  it('shows the right release status for published release', async () => {
+    server.use(
+      rest.get('/content-releases/:releaseId', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withActionsAndPublishedHeaderData))
+      )
+    );
+
+    server.use(
+      rest.get('/content-releases/:releaseId/actions', (req, res, ctx) =>
+        res(ctx.json(mockReleaseDetailsPageData.withMultipleActionsBodyData))
+      )
+    );
+
+    render(<ReleaseDetailsPage />, {
+      initialEntries: [{ pathname: `/content-releases/3` }],
+    });
+
+    const releaseTitle = await screen.findByText(
+      mockReleaseDetailsPageData.withActionsAndPublishedHeaderData.data.name
+    );
+    expect(releaseTitle).toBeInTheDocument();
+
+    const releaseStatus = screen.getByText('done');
+    expect(releaseStatus).toBeInTheDocument();
+    expect(releaseStatus).toHaveStyle(`color: #4945ff`);
   });
 });

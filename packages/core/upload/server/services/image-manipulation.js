@@ -8,7 +8,7 @@ const { join } = require('path');
 const sharp = require('sharp');
 
 const {
-  file: { bytesToKbytes, writableDiscardStream },
+  file: { bytesToKbytes },
 } = require('@strapi/utils');
 const { getService } = require('../utils');
 
@@ -26,15 +26,21 @@ const writeStreamToFile = (stream, path) =>
     writeStream.on('error', reject);
   });
 
-const getMetadata = (file) =>
-  new Promise((resolve, reject) => {
-    const pipeline = sharp();
-    pipeline.metadata().then(resolve).catch(reject);
-    file.getStream().pipe(pipeline);
-  });
+const getMetadata = async (file) => {
+  if (!file.filepath) {
+    return new Promise((resolve, reject) => {
+      const pipeline = sharp();
+      pipeline.metadata().then(resolve).catch(reject);
+      file.getStream().pipe(pipeline);
+    });
+  }
+
+  return sharp(file.filepath).metadata();
+};
 
 const getDimensions = async (file) => {
   const { width = null, height = null } = await getMetadata(file);
+
   return { width, height };
 };
 
@@ -47,19 +53,32 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 const resizeFileTo = async (file, options, { name, hash }) => {
   const filePath = join(file.tmpWorkingDirectory, hash);
 
-  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
+  let newInfo;
+  if (!file.filepath) {
+    const transform = sharp()
+      .resize(options)
+      .on('info', (info) => {
+        newInfo = info;
+      });
+
+    await writeStreamToFile(file.getStream().pipe(transform), filePath);
+  } else {
+    newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
+  }
+
+  const { width, height, size } = newInfo;
+
   const newFile = {
     name,
     hash,
     ext: file.ext,
     mime: file.mime,
+    filepath: filePath,
     path: file.path || null,
     getStream: () => fs.createReadStream(filePath),
   };
 
-  const { width, height, size } = await getMetadata(newFile);
-
-  Object.assign(newFile, { width, height, size: bytesToKbytes(size) });
+  Object.assign(newFile, { width, height, size: bytesToKbytes(size), sizeInBytes: size });
   return newFile;
 };
 
@@ -89,12 +108,16 @@ const optimize = async (file) => {
     'upload'
   ).getSettings();
 
-  const newFile = { ...file };
-
-  const { width, height, size, format } = await getMetadata(newFile);
+  const { format, size } = await getMetadata(file);
 
   if (sizeOptimization || autoOrientation) {
-    const transformer = sharp();
+    let transformer;
+    if (!file.filepath) {
+      transformer = sharp();
+    } else {
+      transformer = sharp(file.filepath);
+    }
+
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
     // rotate image based on EXIF data
@@ -103,23 +126,38 @@ const optimize = async (file) => {
     }
     const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
 
-    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    let newInfo;
+    if (!file.filepath) {
+      transformer.on('info', (info) => {
+        newInfo = info;
+      });
+
+      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    } else {
+      newInfo = await transformer.toFile(filePath);
+    }
+
+    const { width: newWidth, height: newHeight, size: newSize } = newInfo;
+
+    const newFile = { ...file };
 
     newFile.getStream = () => fs.createReadStream(filePath);
+    newFile.filepath = filePath;
+
+    if (newSize > size) {
+      // Ignore optimization if output is bigger than original
+      return file;
+    }
+
+    return Object.assign(newFile, {
+      width: newWidth,
+      height: newHeight,
+      size: bytesToKbytes(newSize),
+      sizeInBytes: newSize,
+    });
   }
 
-  const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
-
-  if (newSize > size) {
-    // Ignore optimization if output is bigger than original
-    return { ...file, width, height, size: bytesToKbytes(size) };
-  }
-
-  return Object.assign(newFile, {
-    width: newWidth,
-    height: newHeight,
-    size: bytesToKbytes(newSize),
-  });
+  return file;
 };
 
 const DEFAULT_BREAKPOINTS = {
@@ -186,16 +224,22 @@ const isSupportedImage = (...args) => {
 /**
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
-const isFaultyImage = (file) =>
-  new Promise((resolve) => {
-    file
-      .getStream()
-      .pipe(sharp().rotate())
-      .on('error', () => resolve(true))
-      .pipe(writableDiscardStream())
-      .on('error', () => resolve(true))
-      .on('close', () => resolve(false));
-  });
+const isFaultyImage = async (file) => {
+  if (!file.filepath) {
+    return new Promise((resolve, reject) => {
+      const pipeline = sharp();
+      pipeline.stats().then(resolve).catch(reject);
+      file.getStream().pipe(pipeline);
+    });
+  }
+
+  try {
+    await sharp(file.filepath).stats();
+    return false;
+  } catch (e) {
+    return true;
+  }
+};
 
 const isOptimizableImage = async (file) => {
   let format;

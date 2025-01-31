@@ -118,7 +118,7 @@ export const permission = yup
           return isNil(subject);
         }
 
-        if (isArray(action.subjects)) {
+        if (isArray(action.subjects) && !isNil(subject)) {
           return action.subjects.includes(subject);
         }
 

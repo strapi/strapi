@@ -1,7 +1,7 @@
 import { errors } from '@strapi/utils';
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../test/helpers/create-context';
+import createContext from '../../../../../../../tests/helpers/create-context';
 import userController from '../user';
 
 describe('User Controller', () => {

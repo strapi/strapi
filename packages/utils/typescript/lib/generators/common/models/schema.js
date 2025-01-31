@@ -22,9 +22,11 @@ const { addImport } = require('../imports');
 const generateAttributePropertySignature = (schema) => {
   const { attributes } = schema;
 
-  const properties = Object.entries(attributes).map(([attributeName, attribute]) => {
-    return attributeToPropertySignature(schema, attributeName, attribute);
-  });
+  const properties = Object.entries(attributes)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([attributeName, attribute]) => {
+      return attributeToPropertySignature(schema, attributeName, attribute);
+    });
 
   return factory.createPropertySignature(
     undefined,

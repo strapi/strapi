@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { has, omit, pipe, assign } from 'lodash/fp';
+import { get, has, omit, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, mapAsync, errors } from '@strapi/utils';
-import type { Attribute, Common, Schema, Utils, EntityService } from '@strapi/types';
+import type { Attribute, Common, Schema, Utils, EntityService, LoadedStrapi } from '@strapi/types';
 
 type LoadedComponents<TUID extends Common.UID.Schema> = Attribute.GetValues<
   TUID,
@@ -596,6 +596,56 @@ const cloneComponent = async <TUID extends Common.UID.Component>(
   return strapi.query(uid).clone(data.id, { data: transform(data) });
 };
 
+/**
+ * Resolve the component UID of an entity's attribute based
+ * on a given path (components & dynamic zones only)
+ */
+const resolveComponentUID = ({
+  paths,
+  strapi,
+  data,
+  contentType,
+}: {
+  paths: string[];
+  strapi: LoadedStrapi;
+  data: any;
+  contentType: Schema.ContentType;
+}): Common.UID.Schema | undefined => {
+  let value: unknown = data;
+  let cType:
+    | Schema.ContentType
+    | Schema.Component
+    | ((...opts: any[]) => Schema.ContentType | Schema.Component) = contentType;
+  for (const path of paths) {
+    value = get(path, value);
+
+    // Needed when the value of cType should be computed
+    // based on the next value (eg: dynamic zones)
+    if (typeof cType === 'function') {
+      cType = cType(value);
+    }
+
+    if (path in cType.attributes) {
+      const attribute: Attribute.Any = cType.attributes[path];
+
+      if (attribute.type === 'component') {
+        cType = strapi.getModel(attribute.component);
+      }
+
+      if (attribute.type === 'dynamiczone') {
+        cType = ({ __component }: { __component: Common.UID.Component }) =>
+          strapi.getModel(__component);
+      }
+    }
+  }
+
+  if ('uid' in cType) {
+    return cType.uid;
+  }
+
+  return undefined;
+};
+
 export {
   omitComponentData,
   getComponents,
@@ -604,4 +654,5 @@ export {
   deleteComponents,
   deleteComponent,
   cloneComponents,
+  resolveComponentUID,
 };

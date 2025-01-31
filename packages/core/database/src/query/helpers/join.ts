@@ -54,13 +54,68 @@ const createPivotJoin = (
 };
 
 const createJoin = (ctx: Ctx, { alias, refAlias, attributeName, attribute }: JoinOptions) => {
-  const { db, qb } = ctx;
+  const { db, qb, uid } = ctx;
 
   if (attribute.type !== 'relation') {
     throw new Error(`Cannot join on non relational field ${attributeName}`);
   }
 
   const targetMeta = db.metadata.get(attribute.target);
+
+  if (['morphOne', 'morphMany'].includes(attribute.relation)) {
+    const targetAttribute = targetMeta.attributes[attribute.morphBy];
+
+    // @ts-expect-error - morphBy is not defined on the attribute
+    const { joinTable, morphColumn } = targetAttribute;
+
+    if (morphColumn) {
+      const subAlias = refAlias || qb.getAlias();
+
+      qb.join({
+        alias: subAlias,
+        referencedTable: targetMeta.tableName,
+        referencedColumn: morphColumn.idColumn.name,
+        rootColumn: morphColumn.idColumn.referencedColumn,
+        rootTable: alias,
+        on: {
+          [morphColumn.typeColumn.name]: uid,
+          ...morphColumn.on,
+        },
+      });
+
+      return subAlias;
+    }
+
+    if (joinTable) {
+      const joinAlias = qb.getAlias();
+
+      qb.join({
+        alias: joinAlias,
+        referencedTable: joinTable.name,
+        referencedColumn: joinTable.morphColumn.idColumn.name,
+        rootColumn: joinTable.morphColumn.idColumn.referencedColumn,
+        rootTable: alias,
+        on: {
+          [joinTable.morphColumn.typeColumn.name]: uid,
+          field: attributeName,
+        },
+      });
+
+      const subAlias = refAlias || qb.getAlias();
+
+      qb.join({
+        alias: subAlias,
+        referencedTable: targetMeta.tableName,
+        referencedColumn: joinTable.joinColumn.referencedColumn,
+        rootColumn: joinTable.joinColumn.name,
+        rootTable: joinAlias,
+      });
+
+      return subAlias;
+    }
+
+    return alias;
+  }
 
   const { joinColumn } = attribute;
 

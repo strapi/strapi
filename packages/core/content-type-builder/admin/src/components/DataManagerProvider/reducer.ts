@@ -542,6 +542,10 @@ const reducer = (state = initialState, action: Action) =>
         draftState.contentTypes = action.contentTypes;
         draftState.reservedNames = action.reservedNames;
         draftState.isLoading = false;
+        break;
+      }
+      case actions.UPDATE_INITIAL_STATE: {
+        draftState.initialData = draftState.modifiedData;
 
         break;
       }

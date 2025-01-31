@@ -8,6 +8,7 @@ export interface Release extends Entity {
   name: string;
   releasedAt: string | null;
   scheduledAt: string | null;
+  status: 'ready' | 'blocked' | 'failed' | 'done' | 'empty';
   // We save scheduledAt always in UTC, but users can set the release in a different timezone to show that in the UI for everyone
   timezone: string | null;
   actions: ReleaseAction[];
@@ -26,7 +27,7 @@ export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
 }
 
 export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {
-  action: ReleaseAction;
+  actions: ReleaseAction[];
 }
 
 /**
@@ -44,6 +45,7 @@ export declare namespace GetReleases {
     data: ReleaseDataResponse[];
     meta: {
       pagination?: Pagination;
+      pendingReleasesCount?: number;
     };
     error?: errors.ApplicationError;
   }
@@ -67,6 +69,24 @@ export declare namespace GetContentTypeEntryReleases {
   export interface Response {
     data: ReleaseForContentTypeEntryDataResponse[];
     error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * GET /content-releases/mapEntriesToReleases - Map entries to releases
+ */
+export declare namespace MapEntriesToReleases {
+  export interface Request {
+    query: {
+      contentTypeUid: ReleaseAction['contentType'];
+      entriesIds: ReleaseAction['entry']['id'][];
+    };
+  }
+
+  export interface Response {
+    data: {
+      [entryId: ReleaseAction['entry']['id']]: Pick<Release, 'id' | 'name'>[];
+    };
   }
 }
 

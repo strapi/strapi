@@ -15,10 +15,17 @@ module.exports = ({ strapi }) => ({
       file.stream = file.getStream();
       await strapi.plugin('upload').provider.uploadStream(file);
       delete file.stream;
+
+      if ('filepath' in file) {
+        delete file.filepath;
+      }
     } else {
       file.buffer = await streamToBuffer(file.getStream());
       await strapi.plugin('upload').provider.upload(file);
       delete file.buffer;
+      if ('filepath' in file) {
+        delete file.filepath;
+      }
     }
   },
 });

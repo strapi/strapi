@@ -8,12 +8,12 @@ const providerMethods = [
   'appliesToProperty',
   'delete',
   'get',
-  'getWhere',
   'values',
   'keys',
   'has',
   'size',
   'clear',
+  'unstable_aliases',
 ];
 
 describe('Action Provider', () => {
@@ -369,6 +369,145 @@ describe('Action Provider', () => {
             subject: 'foo',
           })
         );
+      });
+    });
+    describe('Aliases', () => {
+      test('Return an empty array when there is no alias pointing to the given action', async () => {
+        const provider = createActionProvider();
+        const actions = [
+          {
+            section: 'settings',
+            displayName: 'Foo bar',
+            uid: 'foo',
+            pluginName: 'bar',
+            category: 'category',
+            subCategory: 'subcategory',
+          },
+          {
+            section: 'settings',
+            displayName: 'Bar foo',
+            category: 'category',
+            uid: 'bar',
+          },
+        ];
+
+        await provider.registerMany(actions);
+
+        const aliases = provider.unstable_aliases('plugin::bar.foo');
+
+        expect(aliases).toStrictEqual([]);
+      });
+
+      test(`Return an empty array when there is an alias but the subject don't match`, async () => {
+        const provider = createActionProvider();
+        const actions = [
+          {
+            section: 'settings',
+            displayName: 'Foo bar',
+            uid: 'foo',
+            pluginName: 'bar',
+            category: 'category',
+            subCategory: 'subcategory',
+          },
+          {
+            section: 'settings',
+            displayName: 'Bar foo',
+            category: 'category',
+            uid: 'bar',
+            aliases: [{ actionId: 'plugin::bar.foo', subjects: ['baz'] }],
+          },
+        ];
+
+        await provider.registerMany(actions);
+
+        const aliases = provider.unstable_aliases('plugin::bar.foo', 'bar');
+
+        expect(aliases).toStrictEqual([]);
+        expect(aliases).toHaveLength(0);
+      });
+
+      test(`Return an empty array when there is an alias but no subject is passed (when required)`, async () => {
+        const provider = createActionProvider();
+        const actions = [
+          {
+            section: 'settings',
+            displayName: 'Foo bar',
+            uid: 'foo',
+            pluginName: 'bar',
+            category: 'category',
+            subCategory: 'subcategory',
+          },
+          {
+            section: 'settings',
+            displayName: 'Bar foo',
+            category: 'category',
+            uid: 'bar',
+            aliases: [{ actionId: 'plugin::bar.foo', subjects: ['baz'] }],
+          },
+        ];
+
+        await provider.registerMany(actions);
+
+        const aliases = provider.unstable_aliases('plugin::bar.foo');
+
+        expect(aliases).toStrictEqual([]);
+        expect(aliases).toHaveLength(0);
+      });
+
+      test('Return 1 result when there is a valid alias pointing to the given action', async () => {
+        const provider = createActionProvider();
+        const actions = [
+          {
+            section: 'settings',
+            displayName: 'Foo bar',
+            uid: 'foo',
+            pluginName: 'bar',
+            category: 'category',
+            subCategory: 'subcategory',
+          },
+          {
+            section: 'settings',
+            displayName: 'Bar foo',
+            category: 'category',
+            uid: 'bar',
+            aliases: [{ actionId: 'plugin::bar.foo' }],
+          },
+        ];
+
+        await provider.registerMany(actions);
+
+        const aliases = provider.unstable_aliases('plugin::bar.foo');
+
+        expect(aliases).toHaveLength(1);
+        expect(aliases).toStrictEqual(['api::bar']);
+      });
+
+      test('Return 1 result when there is a valid alias pointing to the given action with a valid subject', async () => {
+        const provider = createActionProvider();
+        const actions = [
+          {
+            section: 'settings',
+            displayName: 'Foo bar',
+            uid: 'foo',
+            pluginName: 'bar',
+            category: 'category',
+            subCategory: 'subcategory',
+          },
+          {
+            section: 'settings',
+            displayName: 'Bar foo',
+            category: 'category',
+            uid: 'bar',
+            aliases: [{ actionId: 'plugin::bar.foo', subjects: ['baz'] }],
+          },
+        ];
+
+        await provider.registerMany(actions);
+
+        const aliases = provider.unstable_aliases('plugin::bar.foo', 'baz');
+
+        expect(aliases).toHaveLength(1);
+        expect(aliases).toStrictEqual(['api::bar']);
       });
     });
   });

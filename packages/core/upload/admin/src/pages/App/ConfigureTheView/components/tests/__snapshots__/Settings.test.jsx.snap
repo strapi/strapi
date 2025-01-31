@@ -48,7 +48,9 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c7 {
   background: #ffffff;
+  padding-top: 4px;
   padding-right: 12px;
+  padding-bottom: 4px;
   padding-left: 12px;
   border-radius: 4px;
   position: relative;

@@ -39,10 +39,10 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useMutation, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
 import { useHistory, useLocation, Link as ReactRouterLink } from 'react-router-dom';
 
 import { InjectionZone } from '../../../components/InjectionZone';
@@ -63,7 +63,7 @@ import {
   AutoCloneFailureModal,
   type ProhibitedCloningField,
 } from './components/AutoCloneFailureModal';
-import { BulkActionButtons } from './components/BulkActions/Buttons';
+import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { Filter } from './components/Filter';
 import { Table } from './components/Table';
 import { CellContent } from './components/TableCells/CellContent';
@@ -411,67 +411,6 @@ const ListViewPage = ({
     }
   );
 
-  const bulkUnpublishMutation = useMutation<
-    Contracts.CollectionTypes.BulkUnpublish.Response,
-    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkUnpublish.Response, 'error'>>>,
-    Contracts.CollectionTypes.BulkUnpublish.Request['body']
-  >(
-    async (body) => {
-      const { data } = await post<
-        Contracts.CollectionTypes.BulkUnpublish.Response,
-        AxiosResponse<Contracts.CollectionTypes.BulkUnpublish.Response>,
-        Contracts.CollectionTypes.BulkUnpublish.Request['body']
-      >(`/content-manager/collection-types/${contentType.uid}/actions/bulkUnpublish`, body);
-
-      return data;
-    },
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: {
-            id: 'content-manager.success.record.unpublish',
-            defaultMessage: 'Unpublished',
-          },
-        });
-
-        refetch();
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
-    }
-  );
-
-  const handleConfirmDeleteAllData = React.useCallback(
-    async (ids: Contracts.CollectionTypes.BulkDelete.Request['body']['ids']) => {
-      try {
-        await post<
-          Contracts.CollectionTypes.BulkDelete.Response,
-          AxiosResponse<Contracts.CollectionTypes.BulkDelete.Response>,
-          Contracts.CollectionTypes.BulkDelete.Request['body']
-        >(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
-          ids,
-        });
-
-        await refetch();
-
-        trackUsage('didBulkDeleteEntries');
-      } catch (err) {
-        if (err instanceof AxiosError) {
-          toggleNotification({
-            type: 'warning',
-            message: formatAPIError(err),
-          });
-        }
-      }
-    },
-    [post, slug, refetch, trackUsage, toggleNotification, formatAPIError]
-  );
-
   const handleConfirmDeleteData = React.useCallback(
     async (idToDelete: Contracts.CollectionTypes.Delete.Params['id']) => {
       try {
@@ -496,12 +435,6 @@ const ListViewPage = ({
     },
     [slug, toggleNotification, formatAPIError, del, refetch]
   );
-
-  const handleConfirmUnpublishAllData = async (
-    selectedEntries: Contracts.CollectionTypes.BulkUnpublish.Request['body']['ids']
-  ) => {
-    await bulkUnpublishMutation.mutateAsync({ ids: selectedEntries });
-  };
 
   const defaultHeaderLayoutTitle = formatMessage({
     id: getTranslation('header.name'),
@@ -712,13 +645,7 @@ const ListViewPage = ({
           <Flex gap={4} direction="column" alignItems="stretch">
             <HelperPluginTable.Root rows={data} isLoading={isLoading} colCount={colCount}>
               <HelperPluginTable.ActionBar>
-                <BulkActionButtons
-                  showPublish={canPublish && hasDraftAndPublish}
-                  showDelete={canDelete}
-                  onConfirmDeleteAll={handleConfirmDeleteAllData}
-                  onConfirmUnpublishAll={handleConfirmUnpublishAllData}
-                  refetchData={refetch}
-                />
+                <BulkActionsRenderer />
               </HelperPluginTable.ActionBar>
               <HelperPluginTable.Content>
                 <HelperPluginTable.Head>

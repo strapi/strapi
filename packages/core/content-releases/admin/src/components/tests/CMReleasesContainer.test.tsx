@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { screen, within } from '@testing-library/react';
 import { render, server, waitFor } from '@tests/utils';
@@ -7,8 +9,7 @@ import { CMReleasesContainer } from '../CMReleasesContainer';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+  CheckPermissions: jest.fn(({ children }: { children: ReactNode }) => children),
   useCMEditViewDataManager: jest.fn().mockReturnValue({
     isCreatingEntry: false,
     hasDraftAndPublish: true,
@@ -107,7 +108,7 @@ describe('CMReleasesContainer', () => {
       rest.get('/content-releases', (req, res, ctx) => {
         return res(
           ctx.json({
-            data: [{ name: 'release1', id: '1', action: { type: 'publish' } }],
+            data: [{ name: 'release1', id: '1', actions: [{ type: 'publish' }] }],
           })
         );
       })
@@ -134,8 +135,8 @@ describe('CMReleasesContainer', () => {
         return res(
           ctx.json({
             data: [
-              { name: 'release1', id: '1', action: { type: 'publish' } },
-              { name: 'release2', id: '2', action: { type: 'unpublish' } },
+              { name: 'release1', id: '1', actions: [{ type: 'publish' }] },
+              { name: 'release2', id: '2', actions: [{ type: 'unpublish' }] },
             ],
           })
         );
@@ -161,7 +162,7 @@ describe('CMReleasesContainer', () => {
               {
                 name: 'release1',
                 id: '1',
-                action: { type: 'publish' },
+                actions: [{ type: 'publish' }],
                 scheduledAt: '2024-01-01T10:00:00.000Z',
                 timezone: 'Europe/Paris',
               },

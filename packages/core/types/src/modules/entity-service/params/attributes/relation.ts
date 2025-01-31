@@ -11,7 +11,7 @@ interface PositionalArguments {
   end?: boolean;
 }
 
-type WithPositionArguments<T> = T & PositionalArguments;
+type WithPositionArguments<T> = T & { position?: PositionalArguments };
 
 type Set = { set: ShortHand[] | LongHand[] | null };
 type Connect = { connect: ShortHand[] | WithPositionArguments<LongHand>[] };

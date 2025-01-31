@@ -3,8 +3,9 @@ import React from 'react';
 import { useRBAC } from '@strapi/helper-plugin';
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
-import { render, waitFor, server } from '@tests/utils';
+import { render, waitFor, server, screen } from '@tests/utils';
 import { rest } from 'msw';
+import { useLocation } from 'react-router-dom';
 
 import { ListPage } from '../ListPage';
 
@@ -16,6 +17,12 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
   useFocusWhenNavigate: jest.fn(),
 }));
+
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <span data-testId="location">{location.pathname}</span>;
+};
 
 describe('Webhooks | ListPage', () => {
   beforeEach(() => {
@@ -147,5 +154,35 @@ describe('Webhooks | ListPage', () => {
     await waitFor(async () => {
       expect(enableSwitches[0]).toHaveAttribute('aria-checked', 'false');
     });
+  });
+
+  it('should allow to create a new webhook on empty state screen by clicking on the button', async () => {
+    server.use(
+      rest.get('/admin/webhooks', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: [],
+          })
+        );
+      })
+    );
+
+    const { getByRole, findByText, user } = render(<ListPage />, {
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <LocationDisplay />
+            </>
+          );
+        },
+      },
+    });
+
+    await findByText('No webhooks found');
+    expect(screen.getByTestId('location')).not.toHaveTextContent('/create');
+    await user.click(getByRole('button', { name: 'Create new webhook' }));
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/create'));
   });
 });

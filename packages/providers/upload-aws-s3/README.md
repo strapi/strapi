@@ -113,7 +113,7 @@ module.exports = ({ env }) => ({
 
 #### Configuration for S3 compatible services
 
-This plugin may work with S3 compatible services by using the `endpoint` option instead of `region`. Scaleway example:
+This plugin may work with S3 compatible services by using the `endpoint`. Scaleway example:
 `./config/plugins.js`
 
 ```js
@@ -127,7 +127,8 @@ module.exports = ({ env }) => ({
           accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
           secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
         },
-        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
+        region: env('SCALEWAY_REGION'), // e.g "fr-par"
+        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "https://s3.fr-par.scw.cloud"
         params: {
           Bucket: env('SCALEWAY_BUCKET'),
         },
@@ -177,7 +178,7 @@ module.exports = [
 ];
 ```
 
-If you use dots in your bucket name, the url of the resource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg` so in that case the img-src and media-src directives to add will be `s3.yourRegion.amazonaws.com` without the bucket name in the url.
+If you use dots in your bucket name (`forcePathStyle set to false`), the url of the resource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg` so in that case the img-src and media-src directives to add will be `s3.yourRegion.amazonaws.com` without the bucket name in the url.
 
 ## Bucket CORS Configuration
 

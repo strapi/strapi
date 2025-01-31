@@ -81,7 +81,7 @@ const ProfilePage = () => {
 
   useFocusWhenNavigate();
 
-  const user = useAuth('ProfilePage', (state) => state.user);
+  const { user } = useAuth('ProfilePage');
 
   React.useEffect(() => {
     if (user) {

@@ -229,14 +229,15 @@ const Notification = ({
       title={alertTitle}
       variant={variant}
     >
-      {formatMessage(
-        {
-          id: typeof message === 'object' ? message.id : message,
-          defaultMessage:
-            typeof message === 'object' ? message.defaultMessage ?? message.id : message,
-        },
-        typeof message === 'object' ? message.values : undefined
-      )}
+      {message && typeof message === 'object'
+        ? formatMessage(
+            {
+              id: message.id,
+              defaultMessage: message.defaultMessage ?? message.id,
+            },
+            message.values
+          )
+        : message}
     </Alert>
   );
 };

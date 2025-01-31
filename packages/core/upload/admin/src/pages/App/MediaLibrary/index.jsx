@@ -259,7 +259,7 @@ export const MediaLibrary = () => {
           endActions={
             <>
               <CheckPermissions permissions={PERMISSIONS.configureView}>
-                <ActionContainer paddingTop={1} paddingBottom={1}>
+                <ActionContainer>
                   <IconButton
                     forwardedAs={ReactRouterLink}
                     to={{
@@ -274,7 +274,7 @@ export const MediaLibrary = () => {
                   />
                 </ActionContainer>
               </CheckPermissions>
-              <ActionContainer paddingTop={1} paddingBottom={1}>
+              <ActionContainer>
                 <IconButton
                   icon={isGridView ? <List /> : <Grid />}
                   label={

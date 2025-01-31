@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-manager",
-  "version": "4.20.3",
+  "version": "4.25.20",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -49,15 +49,15 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/types": "4.20.3",
-    "@strapi/utils": "4.20.3",
+    "@strapi/types": "4.25.20",
+    "@strapi/utils": "4.25.20",
     "koa": "2.13.4",
     "koa-bodyparser": "4.4.1",
     "lodash": "4.17.21",
     "qs": "6.11.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
+    "@strapi/pack-up": "4.23.0",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191"
   },

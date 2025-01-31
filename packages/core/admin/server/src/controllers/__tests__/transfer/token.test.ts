@@ -2,7 +2,7 @@ import { errors } from '@strapi/utils';
 import { omit } from 'lodash/fp';
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../../test/helpers/create-context';
+import createContext from '../../../../../../../../tests/helpers/create-context';
 import constants from '../../../services/constants';
 import transferTokenController from '../../transfer/token';
 
