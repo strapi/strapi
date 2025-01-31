@@ -12,7 +12,7 @@ import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/rel
 
 import type { Schema } from '@strapi/types';
 
-type State = {
+export type State = {
   formErrors: Record<string, any>;
   modifiedData: Record<string, any>;
   initialData: Record<string, any>;
