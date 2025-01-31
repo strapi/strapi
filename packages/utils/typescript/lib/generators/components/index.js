@@ -18,11 +18,22 @@ const NO_COMPONENT_PLACEHOLDER_COMMENT = `/*
  * @param {object} options.strapi
  * @param {object} options.logger
  * @param {string} options.pwd
+ * @param {Function} [filter] - Optional function to filter components
+ * @param {Function} [transform] - Optional function to transform components
  */
 const generateComponentsDefinitions = async (options = {}) => {
-  const { strapi } = options;
+  const { strapi, filter, transform } = options;
 
   const { components } = strapi;
+
+  // Apply filter and transform
+  const filteredComponents = filter
+    ? Object.entries(components).filter(([, component]) => filter(component))
+    : Object.entries(components);
+
+  const transformedComponents = transform
+    ? filteredComponents.map(([uid, component]) => [uid, transform(component)])
+    : filteredComponents;
 
   const componentsDefinitions = pipe(
     values,
@@ -31,7 +42,7 @@ const generateComponentsDefinitions = async (options = {}) => {
       uid: component.uid,
       definition: models.schema.generateSchemaDefinition(component),
     }))
-  )(components);
+  )(Object.fromEntries(transformedComponents));
 
   options.logger.debug(`Found ${componentsDefinitions.length} components.`);
 

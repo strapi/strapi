@@ -18,11 +18,22 @@ const NO_CONTENT_TYPE_PLACEHOLDER_COMMENT = `/*
  * @param {object} options.strapi
  * @param {object} options.logger
  * @param {string} options.pwd
+ * @param {Function} [filter] - Optional function to filter content types
+ * @param {Function} [transform] - Optional function to transform content types
  */
 const generateContentTypesDefinitions = async (options = {}) => {
-  const { strapi } = options;
+  const { strapi, filter, transform } = options;
 
   const { contentTypes } = strapi;
+
+  // Apply filter and transform
+  const filteredContentTypes = filter
+    ? Object.entries(contentTypes).filter(([, contentType]) => filter(contentType))
+    : Object.entries(contentTypes);
+
+  const transformedContentTypes = transform
+    ? filteredContentTypes.map(([uid, contentType]) => [uid, transform(contentType)])
+    : filteredContentTypes;
 
   const contentTypesDefinitions = pipe(
     values,
@@ -31,7 +42,7 @@ const generateContentTypesDefinitions = async (options = {}) => {
       uid: contentType.uid,
       definition: models.schema.generateSchemaDefinition(contentType),
     }))
-  )(contentTypes);
+  )(Object.fromEntries(transformedContentTypes));
 
   options.logger.debug(`Found ${contentTypesDefinitions.length} content-types.`);
 

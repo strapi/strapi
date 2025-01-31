@@ -29,6 +29,12 @@ const GENERATORS = {
  * @property {boolean} [logger.silent]
  * @property {boolean} [logger.debug]
  * @property {boolean} [logger.verbose]
+ * @property {object} [filters] - Optional filter functions for each artifact type
+ * @property {Function} [filters.contentTypes] - Filter function for content types
+ * @property {Function} [filters.components] - Filter function for components
+ * @property {object} [transforms] - Optional transform functions for each artifact type
+ * @property {Function} [transforms.contentTypes] - Transform function for content types
+ * @property {Function} [transforms.components] - Transform function for components
  */
 
 /**
@@ -37,7 +43,15 @@ const GENERATORS = {
  * @param {GenerateConfig} [config]
  */
 const generate = async (config = {}) => {
-  const { pwd, rootDir = TYPES_ROOT_DIR, strapi, artifacts = {}, logger: loggerConfig } = config;
+  const {
+    pwd,
+    rootDir = TYPES_ROOT_DIR,
+    strapi,
+    logger: loggerConfig,
+    artifacts = {},
+    filters = {},
+    transforms = {},
+  } = config;
   const reports = {};
   const logger = createLogger(loggerConfig);
   const psTimer = timer().start();
@@ -74,7 +88,18 @@ const generate = async (config = {}) => {
       try {
         const artifactGenTimer = timer().start();
 
-        reports[artifact] = await generator(generatorConfig);
+        // Create a copy of generatorConfig to avoid modifying the original
+        const currentGeneratorConfig = { ...generatorConfig };
+
+        // Pass specific filter and transform to the currentGeneratorConfig if they exist
+        if (filters[artifact]) {
+          currentGeneratorConfig.filter = filters[artifact];
+        }
+        if (transforms[artifact]) {
+          currentGeneratorConfig.transform = transforms[artifact];
+        }
+
+        reports[artifact] = await generator(currentGeneratorConfig);
 
         artifactGenTimer.end();
 
