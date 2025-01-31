@@ -18,7 +18,7 @@ import { Link, More } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
 import {
   type BlocksStore,
@@ -438,10 +438,17 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
   };
 
   if (location === 'menu') {
+    const Icon = block.icon;
+
     return (
-      <Menu.Item onClick={() => toggleList(format)} disabled={isListDisabled()}>
+      <StyledMenuItem
+        onClick={() => toggleList(format)}
+        isActive={isListActive()}
+        disabled={isListDisabled()}
+      >
+        <Icon />
         {formatMessage(block.label)}
-      </Menu.Item>
+      </StyledMenuItem>
     );
   }
 
@@ -524,9 +531,10 @@ const LinkButton = ({
 
   if (location === 'menu') {
     return (
-      <Menu.Item onClick={addLink} disabled={isLinkDisabled()}>
+      <StyledMenuItem onClick={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
+        <Link />
         {formatMessage(label)}
-      </Menu.Item>
+      </StyledMenuItem>
     );
   }
 
@@ -651,6 +659,32 @@ const MenuDivider = styled(Divider)`
   }
 `;
 
+const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary100};
+  }
+
+  ${(props) =>
+    props.isActive &&
+    css`
+      font-weight: bold;
+      background-color: ${({ theme }) => theme.colors.primary100};
+      color: ${({ theme }) => theme.colors.primary600};
+      font-weight: bold;
+    `}
+
+  > span {
+    display: inline-flex;
+    gap: ${({ theme }) => theme.spaces[2]};
+    align-items: center;
+  }
+
+  svg {
+    fill: ${({ theme, isActive }) =>
+      isActive ? theme.colors.primary600 : theme.colors.neutral600};
+  }
+`;
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
   const { formatMessage } = useIntl();
@@ -687,25 +721,32 @@ const BlocksToolbar = () => {
    *   to the "more" menu
    */
   const observedComponents: ObservedComponent[] = [
-    ...Object.entries(modifiers).map(([name, modifier]) => ({
-      toolbar: (
-        <ToolbarButton
-          key={name}
-          name={name}
-          icon={modifier.icon}
-          label={modifier.label}
-          isActive={modifier.checkIsActive(editor)}
-          handleClick={() => modifier.handleToggle(editor)}
-          disabled={isButtonDisabled}
-        />
-      ),
-      menu: (
-        <Menu.Item onClick={() => modifier.handleToggle(editor)}>
-          {formatMessage(modifier.label)}
-        </Menu.Item>
-      ),
-      key: `modifier.${name}`,
-    })),
+    ...Object.entries(modifiers).map(([name, modifier]) => {
+      const Icon = modifier.icon;
+      const isActive = modifier.checkIsActive(editor);
+      const handleClick = () => modifier.handleToggle(editor);
+
+      return {
+        toolbar: (
+          <ToolbarButton
+            key={name}
+            name={name}
+            icon={modifier.icon}
+            label={modifier.label}
+            isActive={modifier.checkIsActive(editor)}
+            handleClick={handleClick}
+            disabled={isButtonDisabled}
+          />
+        ),
+        menu: (
+          <StyledMenuItem onClick={handleClick} isActive={isActive}>
+            <Icon />
+            {formatMessage(modifier.label)}
+          </StyledMenuItem>
+        ),
+        key: `modifier.${name}`,
+      };
+    }),
     {
       toolbar: <LinkButton disabled={isButtonDisabled} location="toolbar" />,
       menu: <LinkButton disabled={isButtonDisabled} location="menu" />,
