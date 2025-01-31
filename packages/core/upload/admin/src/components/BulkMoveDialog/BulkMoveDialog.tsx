@@ -151,12 +151,12 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
 
             <Modal.Footer>
               <Modal.Close>
-                <Button variant="tertiary" name="cancel">
-                  {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                <Button variant="tertiary">
+                  {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
                 </Button>
               </Modal.Close>
               <Button type="submit" loading={isLoading}>
-                {formatMessage({ id: 'modal.folder.move.submit', defaultMessage: 'Move' })}
+                {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
               </Button>
             </Modal.Footer>
           </Form>
