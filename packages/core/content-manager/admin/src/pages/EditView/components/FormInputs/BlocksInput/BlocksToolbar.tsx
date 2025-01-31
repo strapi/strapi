@@ -642,9 +642,13 @@ const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: Mo
 };
 
 const MenuDivider = styled(Divider)`
-  width: calc(100% + ${({ theme }) => theme.spaces[2]});
   /* Negative horizontal margin to compensate Menu.Content's padding */
   margin: ${({ theme }) => theme.spaces[1]} -${({ theme }) => theme.spaces[1]};
+  width: calc(100% + ${({ theme }) => theme.spaces[2]});
+  /* Hide divider if there's nothing above in the menu */
+  &:first-child {
+    display: none;
+  }
 `;
 
 const BlocksToolbar = () => {
