@@ -80,6 +80,7 @@ interface GenericInputProps<
   // TODO: The value depends on the input type, too complicated to handle all cases here
   value?: Schema.Attribute.Value<TAttribute>;
   isNullable?: boolean;
+  autoFocus?: boolean;
 }
 
 const GenericInput = ({
@@ -99,6 +100,7 @@ const GenericInput = ({
   type,
   value: defaultValue,
   isNullable,
+  autoFocus,
   attribute,
   ...rest
 }: GenericInputProps) => {
@@ -198,6 +200,7 @@ const GenericInput = ({
         placeholder={placeholder}
         type={type}
         value={value}
+        autoFocus={autoFocus}
       />
     );
   }
@@ -317,6 +320,7 @@ const GenericInput = ({
             placeholder={formattedPlaceholder}
             step={step}
             value={value}
+            autoFocus={autoFocus}
           />
         );
       }
@@ -331,6 +335,7 @@ const GenericInput = ({
             placeholder={formattedPlaceholder}
             type="email"
             value={valueWithEmptyStringFallback}
+            autoFocus={autoFocus}
           />
         );
       }
@@ -347,6 +352,7 @@ const GenericInput = ({
             placeholder={formattedPlaceholder}
             type="text"
             value={valueWithEmptyStringFallback}
+            autoFocus={autoFocus}
           />
         );
       }

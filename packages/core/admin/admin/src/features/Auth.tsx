@@ -84,6 +84,13 @@ const AuthProvider = ({
   const location = useLocation();
   const [{ rawQuery }] = useQueryParams();
 
+  const locationRef = React.useRef(location);
+
+  // Update ref without causing re-render
+  React.useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
+
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
   const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
@@ -239,7 +246,7 @@ const AuthProvider = ({
         {
           user,
           permissions: userPermissions,
-          pathname: location.pathname,
+          pathname: locationRef.current.pathname,
           search: (rawQueryContext || rawQuery).split('?')[1] ?? '',
         },
         matchingPermissions
@@ -266,7 +273,7 @@ const AuthProvider = ({
         return middlewaredPermissions.filter((_, index) => data?.data[index] === true);
       }
     },
-    [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
+    [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
   const isLoading = isLoadingUser || isLoadingPermissions;

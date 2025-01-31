@@ -5,6 +5,9 @@ import { Button } from '@strapi/design-system';
 import { ListPlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
+import { styled } from 'styled-components';
+
+import type { Component, ContentType } from '../../types';
 
 const cmPermissions: Record<string, Permission[]> = {
   collectionTypesConfigurations: [
@@ -27,15 +30,9 @@ const cmPermissions: Record<string, Permission[]> = {
   ],
 };
 
-const getPermission = ({
-  isInContentTypeView,
-  contentTypeKind,
-}: {
-  isInContentTypeView: boolean;
-  contentTypeKind: string;
-}) => {
-  if (isInContentTypeView) {
-    if (contentTypeKind === 'singleType') {
+const getPermission = (type: Component | ContentType) => {
+  if (type.modelType === 'contentType') {
+    if (type.kind === 'singleType') {
       return cmPermissions.singleTypesConfigurations;
     }
 
@@ -47,57 +44,67 @@ const getPermission = ({
 
 interface LinkToCMSettingsViewProps {
   disabled: boolean;
-  contentTypeKind?: string;
-  isInContentTypeView?: boolean;
-  targetUid?: string;
+  type: Component | ContentType;
 }
 
-export const LinkToCMSettingsView = memo(
-  ({
-    disabled,
-    isInContentTypeView = true,
-    contentTypeKind = 'collectionType',
-    targetUid = '',
-  }: LinkToCMSettingsViewProps) => {
-    const { formatMessage } = useIntl();
-    const navigate = useNavigate();
-    const permissionsToApply = getPermission({ isInContentTypeView, contentTypeKind });
-
-    const label = formatMessage({
-      id: 'content-type-builder.form.button.configure-view',
-      defaultMessage: 'Configure the view',
-    });
-
-    const handleClick = () => {
-      if (disabled) {
-        return false;
+const getLink = (type: Component | ContentType) => {
+  switch (type.modelType) {
+    case 'contentType':
+      switch (type.kind) {
+        case 'singleType':
+          return `/content-manager/single-types/${type.uid}/configurations/edit`;
+        case 'collectionType':
+          return `/content-manager/collection-types/${type.uid}/configurations/edit`;
       }
-
-      if (isInContentTypeView) {
-        navigate(`/content-manager/collection-types/${targetUid}/configurations/edit`);
-      } else {
-        navigate(`/content-manager/components/${targetUid}/configurations/edit`);
-      }
-
-      return false;
-    };
-
-    const { isLoading, allowedActions } = useRBAC({
-      viewConfig: permissionsToApply,
-    });
-
-    if (isLoading) {
-      return null;
-    }
-
-    if (!allowedActions.canConfigureView && !allowedActions.canConfigureLayout) {
-      return null;
-    }
-
-    return (
-      <Button startIcon={<ListPlus />} variant="tertiary" onClick={handleClick} disabled={disabled}>
-        {label}
-      </Button>
-    );
+    case 'component':
+      return `/content-manager/components/${type.uid}/configurations/edit`;
   }
-);
+};
+
+const StyledButton = styled(Button)`
+  white-space: nowrap;
+`;
+
+export const LinkToCMSettingsView = memo(({ disabled, type }: LinkToCMSettingsViewProps) => {
+  const { formatMessage } = useIntl();
+  const navigate = useNavigate();
+  const permissionsToApply = getPermission(type);
+
+  const label = formatMessage({
+    id: 'content-type-builder.form.button.configure-view',
+    defaultMessage: 'Configure the view',
+  });
+
+  const handleClick = () => {
+    if (disabled) {
+      return false;
+    }
+
+    const link = getLink(type);
+
+    navigate(link);
+
+    return false;
+  };
+
+  const { isLoading, allowedActions } = useRBAC(permissionsToApply);
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (!allowedActions.canConfigureView && !allowedActions.canConfigureLayout) {
+    return null;
+  }
+
+  return (
+    <StyledButton
+      startIcon={<ListPlus />}
+      variant="tertiary"
+      onClick={handleClick}
+      disabled={disabled}
+    >
+      {label}
+    </StyledButton>
+  );
+});
