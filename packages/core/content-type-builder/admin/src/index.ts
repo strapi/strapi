@@ -19,7 +19,7 @@ export default {
       icon: Layout,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
-        defaultMessage: 'Content Types Builder',
+        defaultMessage: 'Content-Type Builder',
       },
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App'),

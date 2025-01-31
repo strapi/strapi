@@ -115,6 +115,22 @@ describe('useDocumentLayout', () => {
               "unique": false,
               "visible": true,
             },
+            {
+              "attribute": {
+                "type": "string",
+              },
+              "disabled": false,
+              "hint": "",
+              "label": "name",
+              "mainField": undefined,
+              "name": "name",
+              "placeholder": "",
+              "required": false,
+              "size": 6,
+              "type": "string",
+              "unique": false,
+              "visible": true,
+            },
           ],
         ],
         [

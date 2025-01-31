@@ -176,7 +176,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async connect(ctx, next) {
-    const grant = require('grant-koa');
+    const grant = require('grant').koa();
 
     const providers = await strapi
       .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })

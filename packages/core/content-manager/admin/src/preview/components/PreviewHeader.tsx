@@ -6,7 +6,7 @@ import {
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { IconButton, Tabs, Typography, Grid } from '@strapi/design-system';
+import { IconButton, Tabs, Typography, Grid, Flex } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -57,6 +57,7 @@ const ClosePreviewButton = () => {
 
   return (
     <IconButton
+      variant="ghost"
       tag={Link}
       relative="path"
       to={toWithFallback}
@@ -145,24 +146,65 @@ const PreviewTabs = () => {
  * PreviewHeader
  * -----------------------------------------------------------------------------------------------*/
 
-const PreviewHeader = () => {
-  // Get main field
-  const mainField = usePreviewContext('PreviewHeader', (state) => state.mainField);
-  const document = usePreviewContext('PreviewHeader', (state) => state.document);
-  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+const UnstablePreviewHeader = () => {
+  // Get the document title
+  const title = usePreviewContext('PreviewHeader', (state) => state.title);
 
-  /**
-   * We look to see what the mainField is from the configuration, if it's an id
-   * we don't use it because it's a uuid format and not very user friendly.
-   * Instead, we display the schema name for single-type documents
-   * or "Untitled".
-   */
-  let documentTitle = 'Untitled';
-  if (mainField !== 'id' && document?.[mainField]) {
-    documentTitle = document[mainField];
-  } else if (schema.kind === 'singleType' && schema?.info.displayName) {
-    documentTitle = schema.info.displayName;
-  }
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
+
+  const handleCopyLink = () => {
+    copy(window.location.href);
+    toggleNotification({
+      message: formatMessage({
+        id: 'content-manager.preview.copy.success',
+        defaultMessage: 'Copied preview link',
+      }),
+      type: 'success',
+    });
+  };
+
+  return (
+    <Flex gap={4} background="neutral0" borderColor="neutral150" tag="header">
+      {/* Title and status */}
+      <TitleContainer height="100%" paddingLeft={2} paddingRight={4}>
+        <ClosePreviewButton />
+        <PreviewTitle
+          tag="h1"
+          title={title}
+          maxWidth="200px"
+          fontSize={2}
+          paddingLeft={2}
+          paddingRight={3}
+          fontWeight={600}
+        >
+          {title}
+        </PreviewTitle>
+        <Status />
+      </TitleContainer>
+
+      {/* Tabs and actions */}
+      <Flex flex={1} paddingRight={2} justifyContent="space-between">
+        <PreviewTabs />
+        <IconButton
+          type="button"
+          label={formatMessage({
+            id: 'preview.copy.label',
+            defaultMessage: 'Copy preview link',
+          })}
+          onClick={handleCopyLink}
+        >
+          <LinkIcon />
+        </IconButton>
+      </Flex>
+    </Flex>
+  );
+};
+
+const PreviewHeader = () => {
+  // Get the document title
+  const title = usePreviewContext('PreviewHeader', (state) => state.title);
 
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -192,8 +234,8 @@ const PreviewHeader = () => {
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={documentTitle}>
-          {documentTitle}
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={title}>
+          {title}
         </PreviewTitle>
         <Status />
       </Grid.Item>
@@ -228,4 +270,8 @@ const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
 `;
 
-export { PreviewHeader };
+const TitleContainer = styled(Flex)`
+  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+export { PreviewHeader, UnstablePreviewHeader };

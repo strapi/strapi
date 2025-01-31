@@ -68,7 +68,7 @@ const TableActions = ({ document }: TableActionsProps) => {
             actions={tableRowActions}
             label={formatMessage({
               id: 'content-manager.containers.list.table.row-actions',
-              defaultMessage: 'Row action',
+              defaultMessage: 'Row actions',
             })}
             variant="ghost"
           />

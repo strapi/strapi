@@ -16,6 +16,11 @@ test.describe('Adding content', () => {
         // TODO: to save the time from a server restart, add these components directly inside the with-admin dataset and remove this
         await addAttributesToContentType(page, 'Article', [
           {
+            type: 'text',
+            name: 'testtext',
+            advanced: { required: true, regexp: '^(?!.*fail).*' },
+          },
+          {
             type: 'component',
             name: 'testrepeatablecomp',
             component: {
@@ -24,7 +29,13 @@ test.describe('Adding content', () => {
                 name: 'testrepeatablecomp2',
                 icon: 'moon',
                 categorySelect: 'product',
-                attributes: [{ type: 'text', name: 'testrepeatablecomp2text' }],
+                attributes: [
+                  {
+                    type: 'text',
+                    name: 'testrepeatablecomp2text',
+                    advanced: { required: true, regexp: '^(?!.*fail).*' },
+                  },
+                ],
               },
             },
           },
@@ -37,7 +48,13 @@ test.describe('Adding content', () => {
                 name: 'testsinglecomp2',
                 icon: 'moon',
                 categorySelect: 'product',
-                attributes: [{ type: 'text', name: 'testsinglecomp2text' }],
+                attributes: [
+                  {
+                    type: 'text',
+                    name: 'testsinglecomp2text',
+                    advanced: { required: true, regexp: '^(?!.*fail).*' },
+                  },
+                ],
               },
             },
           },
@@ -55,14 +72,20 @@ test.describe('Adding content', () => {
                       name: 'testnewcomponentrepeatable',
                       icon: 'moon',
                       categorySelect: 'product',
-                      attributes: [{ type: 'text', name: 'testnewcomponentexistingcategorytext' }],
+                      attributes: [
+                        {
+                          type: 'text',
+                          name: 'testnewcomponentexistingcategorytext',
+                          advanced: { required: true, regexp: '^(?!.*fail).*' },
+                        },
+                      ],
                     },
                   },
                 },
                 // Existing component with existing category
                 {
                   type: 'component',
-                  name: 'testexistingcomponentexistingcategory', // TODO: is this used?
+                  name: 'testexistingcomponentexistingcategory',
                   component: {
                     useExisting: 'variations',
                     options: {
@@ -91,7 +114,7 @@ test.describe('Adding content', () => {
       'Article',
       [
         {
-          name: 'title',
+          name: 'testtext',
           type: 'text',
           value: 'testname',
         },
@@ -102,6 +125,11 @@ test.describe('Adding content', () => {
 
   test('I want to set component order when creating content', async ({ page }) => {
     const fields = [
+      {
+        name: 'testtext',
+        type: 'text',
+        value: 'testname',
+      },
       {
         name: 'testdz',
         type: 'dz',
@@ -123,11 +151,6 @@ test.describe('Adding content', () => {
             fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
           },
         ],
-      },
-      {
-        name: 'title',
-        type: 'text',
-        value: 'testname',
       },
     ] satisfies FieldValue[];
 
@@ -151,4 +174,154 @@ test.describe('Adding content', () => {
     const before = await isElementBefore(source, target);
     expect(before).toBe(true);
   });
+
+  const testCases = [
+    // Basic type tests
+    {
+      description: 'empty required text field (basic)',
+      fields: [
+        { name: 'testtext', type: 'text', value: '' },
+        { name: 'title', type: 'text', value: 'at least one field requires text' },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (basic)',
+      fields: [{ name: 'testtext', type: 'text', value: 'fail-regexp' }],
+      expectedError: 'The value does not match the regex',
+    },
+
+    // Single component type tests
+    {
+      description: 'empty required text field (single component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testsinglecomp',
+          type: 'component',
+          value: [
+            {
+              category: 'product',
+              name: 'testsinglecomp',
+              fields: [{ name: 'testsinglecomp2text', type: 'text', value: '' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (single component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testcomponent',
+          type: 'component',
+          value: [
+            {
+              category: 'product',
+              name: 'testsinglecomp',
+              fields: [{ name: 'testsinglecomp2text', type: 'text', value: 'fail regexp' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'The value does not match the regex',
+    },
+
+    // repeatable component tests
+    {
+      description: 'empty required text field (repeatable component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testrepeatablecomp',
+          type: 'component_repeatable',
+          value: [
+            {
+              category: 'product',
+              name: 'testrepeatablecomp',
+              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: '' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (repeatable component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testrepeatablecomp',
+          type: 'component_repeatable',
+          value: [
+            {
+              category: 'product',
+              name: 'testrepeatablecomp',
+              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: 'fail regexp' }],
+            },
+          ],
+        },
+      ],
+      expectedError: 'The value does not match the regex',
+    },
+
+    // Dynamic Zone (dz) component tests
+    {
+      description: 'empty required text field (dz component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testdz',
+          type: 'dz',
+          value: [
+            {
+              category: 'product',
+              name: 'newcomponentexistingcategory',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'testnewcomponentexistingcategorytext',
+                  value: '',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      expectedError: 'This value is required',
+    },
+    {
+      description: 'invalid regexp text field (dz component)',
+      fields: [
+        { name: 'testtext', type: 'text', value: 'fill required text' },
+        {
+          name: 'testdz',
+          type: 'dz',
+          value: [
+            {
+              category: 'product',
+              name: 'newcomponentexistingcategory',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'testnewcomponentexistingcategorytext',
+                  value: 'fail regexp',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      expectedError: 'The value does not match the regex',
+    },
+  ] satisfies { description: string; fields: FieldValue[]; expectedError: string }[];
+
+  for (const { description, fields, expectedError } of testCases) {
+    test(`when I publish ${description} I see an error`, async ({ page }) => {
+      await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
+      expect(page.getByText(expectedError)).toBeVisible();
+    });
+  }
 });

@@ -1,8 +1,8 @@
-import { kebabCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
-import { expect, type Page } from '@playwright/test';
-import { clickAndWait, findByRowColumn, navToHeader } from './shared';
+import { expect, Locator, type Page } from '@playwright/test';
+import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
 
 export interface AddAttribute {
   type: string;
@@ -79,8 +79,6 @@ export interface CategorySelectOption {
 type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
-
-type AddDynamicZoneOptions = {};
 
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
@@ -268,7 +266,6 @@ export const addComponentAttribute = async (
   await selectComponentRepeatable(page, attribute.component?.options.repeatable);
 
   if (attrCompOptions.attributes) {
-    // TODO: if "
     const addFirstFieldButton = page.getByRole('button', {
       name: new RegExp('Add first field to the component', 'i'),
     });
@@ -367,7 +364,41 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     await page.locator('textarea[name="enum"]').fill(attribute.enumeration?.values.join('\n'));
   }
 
-  // TODO: add support for advanced options
+  if (attribute.advanced) {
+    const advanced = attribute.advanced;
+    await page.getByText('Advanced Settings').click();
+
+    if (isBoolean(advanced.required)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Required field' });
+      await ensureCheckbox(checkbox, advanced.required);
+    }
+
+    if (isString(advanced.regexp)) {
+      await page.getByLabel('Regexp').fill(advanced.regexp);
+    }
+
+    if (isBoolean(advanced.unique)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Unique field' });
+      await ensureCheckbox(checkbox, advanced.unique);
+    }
+
+    if (isBoolean(advanced.private)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Private field' });
+      await ensureCheckbox(checkbox, advanced.private);
+    }
+
+    if (isNumber(advanced.maximum)) {
+      await page.getByLabel('Maximum').fill(advanced.maximum.toString());
+    }
+
+    if (isNumber(advanced.minimum)) {
+      await page.getByLabel('Minimum').fill(advanced.minimum.toString());
+    }
+
+    if (isString(advanced.default)) {
+      await page.getByLabel('Default').fill(advanced.default);
+    }
+  }
 };
 
 export const addAttributes = async (
