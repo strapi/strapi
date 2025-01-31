@@ -8,13 +8,12 @@ import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
-import { useDataManager } from '../hooks/useDataManager';
-import { useFormModalNavigation } from '../hooks/useFormModalNavigation';
 import { getTrad } from '../utils';
 
 import { AttributeIcon, IconByType } from './AttributeIcon';
+import { useDataManager } from './DataManager/useDataManager';
+import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';
 
-import type { SchemaType } from '../types';
 import type { Internal } from '@strapi/types';
 
 interface Header {
@@ -22,25 +21,27 @@ interface Header {
   info?: { category: string; name: string };
 }
 
-interface FormModalHeaderProps {
+type BaseProps = {
   actionType?: string | null;
   attributeName: string;
   attributeType: IconByType;
-  categoryName: string;
   contentTypeKind: IconByType;
   dynamicZoneTarget: string;
-  forTarget: SchemaType;
   modalType: string | null;
-  targetUid: Internal.UID.Schema;
   customFieldUid?: string | null;
   showBackLink?: boolean;
-}
+};
+
+type FormModalHeaderProps = BaseProps &
+  (
+    | { forTarget: 'component'; targetUid: Internal.UID.Component }
+    | { forTarget: 'contentType'; targetUid: Internal.UID.ContentType }
+  );
 
 export const FormModalHeader = ({
   actionType = null,
   attributeName,
   attributeType,
-  categoryName,
   contentTypeKind,
   dynamicZoneTarget,
   forTarget,
@@ -50,20 +51,21 @@ export const FormModalHeader = ({
   showBackLink = false,
 }: FormModalHeaderProps) => {
   const { formatMessage } = useIntl();
-  const { modifiedData } = useDataManager();
+  const { components, contentTypes } = useDataManager();
   const { onOpenModalAddField } = useFormModalNavigation();
 
   let icon: IconByType = 'component';
   let headers: Header[] = [];
 
-  const schema = modifiedData?.[forTarget]?.[targetUid] || modifiedData?.[forTarget] || null;
-  const displayName = schema?.schema.displayName;
+  const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
+
+  const displayName = type?.schema.displayName;
 
   if (modalType === 'contentType') {
     icon = contentTypeKind;
   }
 
-  if (['component', 'editCategory'].includes(modalType || '')) {
+  if (['component'].includes(modalType || '')) {
     icon = 'component';
   }
 
@@ -97,12 +99,12 @@ export const FormModalHeader = ({
   headers = [
     {
       label: displayName,
-      info: { category: schema?.category || null, name: schema?.schema.displayName },
+      info: { category: type?.category || null, name: type?.schema.displayName },
     },
   ];
 
   if (modalType === 'chooseAttribute') {
-    icon = ['component', 'components'].includes(forTarget) ? 'component' : schema.schema.kind;
+    icon = forTarget === 'component' ? 'component' : type.schema.kind;
   }
 
   if (modalType === 'addComponentToDynamicZone') {
@@ -113,15 +115,6 @@ export const FormModalHeader = ({
   if (modalType === 'attribute' || modalType === 'customField') {
     icon = attributeType;
     headers.push({ label: attributeName });
-  }
-
-  if (modalType === 'editCategory') {
-    const label = formatMessage({
-      id: getTrad('modalForm.header.categories'),
-      defaultMessage: 'Categories',
-    });
-
-    headers = [{ label }, { label: categoryName }];
   }
 
   return (

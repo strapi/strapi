@@ -3,18 +3,20 @@ import { memo } from 'react';
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Lock, Pencil, Trash } from '@strapi/icons';
 import get from 'lodash/get';
+import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDataManager } from '../hooks/useDataManager';
 import { Curve } from '../icons/Curve';
 import { getTrad } from '../utils/getTrad';
 
 import { AttributeIcon, IconByType } from './AttributeIcon';
+import { useDataManager } from './DataManager/useDataManager';
 import { DisplayedType } from './DisplayedType';
-import { UpperFirst } from './UpperFirst';
+import { Status } from './Status';
 
-import type { SchemaType } from '../types';
+import type { SchemaType, Status as StatusType } from '../types';
+import type { Internal } from '@strapi/types';
 
 export const BoxWrapper = styled(Box)`
   position: relative;
@@ -38,8 +40,10 @@ type ListRowProps = {
   repeatable?: boolean;
   secondLoopComponentUid?: string | null;
   target?: string | null;
-  targetUid?: string | null;
+  targetUid?: Internal.UID.Schema | null;
   type: IconByType;
+  status: StatusType;
+  component?: Internal.UID.Component;
 };
 
 export const ListRow = memo(
@@ -57,6 +61,8 @@ export const ListRow = memo(
     target = null,
     targetUid = null,
     type,
+    status,
+    component,
   }: ListRowProps) => {
     const { contentTypes, isInDevelopmentMode, removeAttribute } = useDataManager();
     const { formatMessage } = useIntl();
@@ -110,8 +116,13 @@ export const ListRow = memo(
           {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
           <Flex paddingLeft={2} gap={4}>
             <AttributeIcon type={src} customField={customField} />
-            <Typography textColor="neutral800" fontWeight="bold">
+            <Typography textColor="neutral800" fontWeight="semiBold">
               {name}
+              {component && (
+                <Typography textColor="neutral600" fontWeight="normal">
+                  &nbsp;({component})
+                </Typography>
+              )}
             </Typography>
           </Flex>
         </td>
@@ -126,7 +137,7 @@ export const ListRow = memo(
               })}
               &nbsp;
               <span style={{ fontStyle: 'italic' }}>
-                <UpperFirst content={contentTypeFriendlyName} />
+                {upperFirst(contentTypeFriendlyName)}
                 &nbsp;
                 {isPluginContentType &&
                   `(${formatMessage({
@@ -159,11 +170,12 @@ export const ListRow = memo(
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeAttribute(
-                        editTarget,
-                        name,
-                        secondLoopComponentUid || firstLoopComponentUid || ''
-                      );
+
+                      removeAttribute({
+                        forTarget: editTarget,
+                        targetUid: targetUid!,
+                        attributeToRemoveName: name,
+                      });
                     }}
                     label={`${formatMessage({
                       id: 'global.delete',
@@ -173,6 +185,7 @@ export const ListRow = memo(
                   >
                     <Trash />
                   </IconButton>
+                  <Status status={status} />
                 </Flex>
               ) : (
                 <Lock />

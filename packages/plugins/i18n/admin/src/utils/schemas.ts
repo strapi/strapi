@@ -8,24 +8,35 @@ import type { Schema } from '@strapi/types';
  * mutateCTBContentTypeSchema
  * -----------------------------------------------------------------------------------------------*/
 
+// TODO: refactor for CTB refactors
 const mutateCTBContentTypeSchema = (
-  nextSchema: Schema.ContentType,
+  nextSchema: {
+    schema: {
+      pluginOptions: Schema.ContentType['pluginOptions'];
+      attributes: Schema.Attribute.AnyAttribute[];
+    };
+    uid?: string;
+  },
   prevSchema?: {
-    apiID?: string;
-    schema?: Schema.ContentType;
+    schema: {
+      pluginOptions: Schema.ContentType['pluginOptions'];
+      attributes: Schema.Attribute.AnyAttribute[];
+    };
     uid?: string;
   }
 ) => {
-  // Don't perform mutations components
-  if (!doesPluginOptionsHaveI18nLocalized(nextSchema.pluginOptions)) {
+  if (!prevSchema) {
     return nextSchema;
   }
 
-  const isNextSchemaLocalized = nextSchema.pluginOptions.i18n.localized;
-  const isPrevSchemaLocalized = doesPluginOptionsHaveI18nLocalized(
-    prevSchema?.schema?.pluginOptions
-  )
-    ? prevSchema?.schema?.pluginOptions.i18n.localized
+  // Don't perform mutations components
+  if (!doesPluginOptionsHaveI18nLocalized(nextSchema.schema.pluginOptions)) {
+    return nextSchema;
+  }
+
+  const isNextSchemaLocalized = nextSchema.schema.pluginOptions.i18n.localized;
+  const isPrevSchemaLocalized = doesPluginOptionsHaveI18nLocalized(prevSchema.schema?.pluginOptions)
+    ? prevSchema.schema?.pluginOptions.i18n.localized
     : false;
 
   // No need to perform modification on the schema, if the i18n feature was not changed
@@ -35,17 +46,30 @@ const mutateCTBContentTypeSchema = (
   }
 
   if (isNextSchemaLocalized) {
-    const attributes = addLocalisationToFields(nextSchema.attributes);
+    const attributes = addLocalisationToFields(nextSchema.schema.attributes);
 
-    return { ...nextSchema, attributes };
+    return {
+      ...nextSchema,
+      schema: {
+        ...nextSchema.schema,
+        attributes,
+      },
+    };
   }
 
   // Remove the i18n object from the pluginOptions
   if (!isNextSchemaLocalized) {
-    const pluginOptions = omit(nextSchema.pluginOptions, 'i18n');
-    const attributes = disableAttributesLocalisation(nextSchema.attributes);
+    const pluginOptions = omit(nextSchema.schema.pluginOptions, 'i18n');
+    const attributes = disableAttributesLocalisation(nextSchema.schema.attributes);
 
-    return { ...nextSchema, pluginOptions, attributes };
+    return {
+      ...nextSchema,
+      schema: {
+        ...nextSchema.schema,
+        pluginOptions,
+        attributes,
+      },
+    };
   }
 
   return nextSchema;
@@ -55,10 +79,8 @@ const mutateCTBContentTypeSchema = (
  * addLocalisationToFields
  * -----------------------------------------------------------------------------------------------*/
 
-const addLocalisationToFields = (attributes: Schema.ContentType['attributes']) =>
-  Object.keys(attributes).reduce<Schema.ContentType['attributes']>((acc, current) => {
-    const currentAttribute = attributes[current];
-
+const addLocalisationToFields = (attributes: Schema.Attribute.AnyAttribute[]) => {
+  return attributes.map((currentAttribute) => {
     if (LOCALIZED_FIELDS.includes(currentAttribute.type)) {
       const i18n = { localized: true };
 
@@ -66,29 +88,21 @@ const addLocalisationToFields = (attributes: Schema.ContentType['attributes']) =
         ? { ...currentAttribute.pluginOptions, i18n }
         : { i18n };
 
-      acc[current] = { ...currentAttribute, pluginOptions };
-
-      return acc;
+      return { ...currentAttribute, pluginOptions };
     }
 
-    acc[current] = currentAttribute;
-
-    return acc;
-  }, {});
+    return currentAttribute;
+  });
+};
 
 /* -------------------------------------------------------------------------------------------------
  * disableAttributesLocalisation
  * -----------------------------------------------------------------------------------------------*/
 
-type OmitByPath<T extends object, K extends string[]> = Pick<T, Exclude<keyof T, K[number]>>;
-
-const disableAttributesLocalisation = (attributes: Schema.ContentType['attributes']) =>
-  Object.keys(attributes).reduce<
-    Record<string, OmitByPath<Schema.ContentType['attributes'][string], ['pluginOptions', 'i18n']>>
-  >((acc, current) => {
-    acc[current] = omit(attributes[current], 'pluginOptions.i18n');
-
-    return acc;
-  }, {});
+const disableAttributesLocalisation = (attributes: Schema.Attribute.AnyAttribute[]) => {
+  return attributes.map((currentAttribute) => {
+    return omit(currentAttribute, 'pluginOptions.i18n');
+  });
+};
 
 export { mutateCTBContentTypeSchema };

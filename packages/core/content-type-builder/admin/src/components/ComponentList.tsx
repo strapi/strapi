@@ -1,7 +1,6 @@
 import get from 'lodash/get';
 
-import { useDataManager } from '../hooks/useDataManager';
-
+import { useDataManager } from './DataManager/useDataManager';
 import { List } from './List';
 import { Tr } from './Tr';
 
@@ -13,6 +12,8 @@ interface ComponentListProps {
   firstLoopComponentUid?: string;
   isFromDynamicZone?: boolean;
   isNestedInDZComponent?: boolean;
+  forTarget?: string;
+  targetUid?: string;
 }
 
 export const ComponentList = ({
@@ -22,22 +23,16 @@ export const ComponentList = ({
   isNestedInDZComponent = false,
   firstLoopComponentUid,
 }: ComponentListProps) => {
-  const { modifiedData } = useDataManager();
-  const {
-    schema: { attributes },
-  } = get(modifiedData, ['components', component], {
-    schema: { attributes: [] },
-  });
+  const { components } = useDataManager();
+  const type = get(components, component);
 
   return (
     <Tr $isChildOfDynamicZone={isFromDynamicZone} className="component-row">
       <td colSpan={12}>
         <List
           customRowComponent={customRowComponent}
-          items={attributes}
-          targetUid={component}
+          type={type}
           firstLoopComponentUid={firstLoopComponentUid || component}
-          editTarget="components"
           isFromDynamicZone={isFromDynamicZone}
           isNestedInDZComponent={isNestedInDZComponent}
           isSub

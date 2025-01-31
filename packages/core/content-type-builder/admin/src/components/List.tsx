@@ -18,92 +18,52 @@ import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
-import { useDataManager } from '../hooks/useDataManager';
-import { useFormModalNavigation } from '../hooks/useFormModalNavigation';
 import { getTrad } from '../utils/getTrad';
 
 import { BoxWrapper } from './BoxWrapper';
 import { ComponentList } from './ComponentList';
+import { useDataManager } from './DataManager/useDataManager';
 import { DynamicZoneList } from './DynamicZoneList';
+import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';
 import { NestedTFooter } from './NestedFooter';
 
-import type { SchemaType } from '../types';
-import type { Internal } from '@strapi/types';
+import type { Component, ContentType } from '../types';
 
-interface ListProps {
+type ListProps = {
   addComponentToDZ?: () => void;
   customRowComponent: ComponentType<any>;
-  editTarget: SchemaType;
   firstLoopComponentUid?: string;
   isFromDynamicZone?: boolean;
   isNestedInDZComponent?: boolean;
   isMain?: boolean;
-  items: any[];
   secondLoopComponentUid?: string | null;
-  targetUid?: Internal.UID.Schema;
   isSub?: boolean;
-}
+  type: ContentType | Component;
+};
 
 export const List = ({
   addComponentToDZ,
   customRowComponent,
-  editTarget,
   firstLoopComponentUid,
   isFromDynamicZone = false,
   isMain = false,
   isNestedInDZComponent = false,
   isSub = false,
-  items = [],
   secondLoopComponentUid,
-  targetUid,
+  type,
 }: ListProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { isInDevelopmentMode, modifiedData, isInContentTypeView } = useDataManager();
+  const { isInDevelopmentMode, isInContentTypeView } = useDataManager();
 
   const { onOpenModalAddField } = useFormModalNavigation();
   const onClickAddField = () => {
     trackUsage('hasClickedCTBAddFieldBanner');
 
-    onOpenModalAddField({ forTarget: editTarget, targetUid });
+    onOpenModalAddField({ forTarget: type.schema.modelType, targetUid: type.uid });
   };
 
-  if (!targetUid) {
-    return (
-      <Table colCount={2} rowCount={2}>
-        <Thead>
-          <Tr>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
-              </Typography>
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td colSpan={2}>
-              <EmptyStateLayout
-                content={formatMessage({
-                  id: getTrad('table.content.create-first-content-type'),
-                  defaultMessage: 'Create your first Collection-Type',
-                })}
-                hasRadius
-                icon={<EmptyDocuments width="16rem" />}
-              />
-            </Td>
-          </Tr>
-        </Tbody>
-      </Table>
-    );
-  }
-
-  if (items.length === 0 && isMain) {
+  if (type.schema.attributes.length === 0 && isMain) {
     return (
       <Table colCount={2} rowCount={2}>
         <Thead>
@@ -183,8 +143,7 @@ export const List = ({
             </thead>
           )}
           <tbody>
-            {items.map((item) => {
-              const { type } = item;
+            {type.schema.attributes.map((item: any) => {
               const CustomRow = customRowComponent;
 
               return (
@@ -192,30 +151,29 @@ export const List = ({
                   <CustomRow
                     {...item}
                     isNestedInDZComponent={isNestedInDZComponent}
-                    targetUid={targetUid}
-                    editTarget={editTarget}
+                    targetUid={type.uid}
+                    editTarget={type.schema.modelType}
                     firstLoopComponentUid={firstLoopComponentUid}
                     isFromDynamicZone={isFromDynamicZone}
                     secondLoopComponentUid={secondLoopComponentUid}
                   />
-
-                  {type === 'component' && (
+                  {item.type === 'component' && (
                     <ComponentList
                       {...item}
                       customRowComponent={customRowComponent}
-                      targetUid={targetUid}
                       isNestedInDZComponent={isFromDynamicZone}
-                      editTarget={editTarget}
                       firstLoopComponentUid={firstLoopComponentUid}
                     />
                   )}
 
-                  {type === 'dynamiczone' && (
+                  {item.type === 'dynamiczone' && (
                     <DynamicZoneList
-                      {...item}
+                      name={item.name}
+                      components={item.components}
                       customRowComponent={customRowComponent}
-                      addComponent={addComponentToDZ}
-                      targetUid={targetUid}
+                      addComponent={addComponentToDZ!}
+                      forTarget={type.schema.modelType}
+                      targetUid={type.uid}
                     />
                   )}
                 </Fragment>
@@ -230,9 +188,7 @@ export const List = ({
           {formatMessage({
             id: getTrad(
               `form.button.add.field.to.${
-                modifiedData.contentType
-                  ? modifiedData.contentType.schema.kind
-                  : editTarget || 'collectionType'
+                type.schema.modelType === 'component' ? 'component' : type?.schema.kind
               }`
             ),
             defaultMessage: 'Add another field',

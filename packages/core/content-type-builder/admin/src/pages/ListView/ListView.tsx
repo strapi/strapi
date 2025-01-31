@@ -1,34 +1,38 @@
 import { BackButton, useTracking, Layouts } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex } from '@strapi/design-system';
-import { Check, Pencil, Plus } from '@strapi/icons';
+import { Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
-import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useDataManager } from '../../components/DataManager/useDataManager';
+import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
 import { List } from '../../components/List';
 import { ListRow } from '../../components/ListRow';
-import { useDataManager } from '../../hooks/useDataManager';
-import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { getAttributeDisplayedType } from '../../utils/getAttributeDisplayedType';
 import { getTrad } from '../../utils/getTrad';
 
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
+
+import type { SchemaType } from '../../types';
+import type { Internal } from '@strapi/types';
 
 const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
 `;
 
 const ListView = () => {
-  const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
-    useDataManager();
+  const { isInDevelopmentMode, contentTypes, components } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const match = useMatch('/plugins/content-type-builder/:kind/:currentUID');
+  const { contentTypeUid, componentUid } = useParams<{
+    contentTypeUid: Internal.UID.ContentType;
+    componentUid: Internal.UID.Component;
+  }>();
 
   const {
     onOpenModalAddComponentsToDZ,
@@ -38,25 +42,33 @@ const ListView = () => {
     onOpenModalEditCustomField,
   } = useFormModalNavigation();
 
-  const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
-  const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
-  const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
-  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
-  const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
+  const type = contentTypeUid
+    ? contentTypes[contentTypeUid]
+    : componentUid
+      ? components[componentUid]
+      : null;
 
-  const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
-  const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
-  const hasModelBeenModified = !isEqual(modifiedData, initialData);
+  if (!type) {
+    return null;
+  }
 
-  const forTarget = isInContentTypeView ? 'contentType' : 'component';
+  const isTemporary = get(type, ['isTemporary'], false);
+
+  const isFromPlugin = has(type, ['plugin']);
+
+  const forTarget = contentTypeUid ? 'contentType' : 'component';
+
+  const label = get(type, ['schema', 'displayName'], '');
+
+  const canEdit = isInDevelopmentMode && !isFromPlugin;
 
   const handleClickAddComponentToDZ = (dynamicZoneTarget?: string) => {
-    onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
+    onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid: type.uid });
   };
 
   const handleClickEditField = async (
-    forTarget: string,
-    targetUid: string,
+    forTarget: SchemaType,
+    targetUid: Internal.UID.Schema,
     attributeName: string,
     type: string,
     customField: any
@@ -83,80 +95,55 @@ const ListView = () => {
     }
   };
 
-  let label = get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '');
-  const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
-
-  const isCreatingFirstContentType = match?.params.currentUID === 'create-content-type';
-
-  if (!label && isCreatingFirstContentType) {
-    label = formatMessage({
-      id: getTrad('button.model.create'),
-      defaultMessage: 'Create new collection type',
-    });
-  }
-
   const onEdit = () => {
-    const contentType = kind || firstMainDataPath;
-
-    if (contentType === 'collectionType') {
+    if (type?.schema?.kind === 'collectionType') {
       trackUsage('willEditNameOfContentType');
     }
-    if (contentType === 'singleType') {
+
+    if (type?.schema?.kind === 'singleType') {
       trackUsage('willEditNameOfSingleType');
     }
 
     onOpenModalEditSchema({
-      modalType: firstMainDataPath,
-      forTarget: firstMainDataPath,
-      targetUid,
-      kind: contentType,
+      modalType: forTarget,
+      forTarget: forTarget,
+      targetUid: type.uid,
+      kind: type?.schema?.kind,
     });
   };
 
-  usePrompt({
-    when: hasModelBeenModified,
-    message: formatMessage({ id: getTrad('prompt.unsaved'), defaultMessage: 'Are you sure?' }),
+  const addNewFieldLabel = formatMessage({
+    id: getTrad('table.button.no-fields'),
+    defaultMessage: 'Add new field',
+  });
+
+  const addAnotherFieldLabel = formatMessage({
+    id: getTrad('button.attributes.add.another'),
+    defaultMessage: 'Add another field',
   });
 
   const primaryAction = isInDevelopmentMode && (
     <Flex gap={2} marginLeft={2}>
-      {/* DON'T display the add field button when the content type has not been created */}
-      {!isCreatingFirstContentType && (
+      {
         <Button
           startIcon={<Plus />}
           variant="secondary"
           minWidth="max-content"
           onClick={() => {
-            onOpenModalAddField({ forTarget, targetUid });
+            onOpenModalAddField({ forTarget, targetUid: type.uid });
           }}
         >
-          {formatMessage({
-            id: getTrad('button.attributes.add.another'),
-            defaultMessage: 'Add another field',
-          })}
+          {type.schema.attributes.length === 0 ? addNewFieldLabel : addAnotherFieldLabel}
         </Button>
-      )}
-      <Button
-        startIcon={<Check />}
-        onClick={async () => await submitData()}
-        type="submit"
-        disabled={isEqual(modifiedData, initialData)}
-      >
+      }
+      <LinkToCMSettingsView key="link-to-cm-settings-view" type={type} disabled={isTemporary} />
+      <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit} disabled={!canEdit}>
         {formatMessage({
-          id: 'global.save',
-          defaultMessage: 'Save',
+          id: 'app.utils.edit',
+          defaultMessage: 'Edit',
         })}
       </Button>
     </Flex>
-  );
-
-  const secondaryAction = isInDevelopmentMode && !isFromPlugin && !isCreatingFirstContentType && (
-    <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
-      {formatMessage({
-        id: 'app.utils.edit',
-        defaultMessage: 'Edit',
-      })}
-    </Button>
   );
 
   return (
@@ -164,7 +151,6 @@ const ListView = () => {
       <LayoutsHeaderCustom
         id="title"
         primaryAction={primaryAction}
-        secondaryAction={secondaryAction}
         title={upperFirst(label)}
         subtitle={formatMessage({
           id: getTrad('listView.headerLayout.description'),
@@ -173,29 +159,14 @@ const ListView = () => {
         navigationAction={<BackButton />}
       />
       <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={4}>
-          <Flex justifyContent="flex-end">
-            <Flex gap={2}>
-              <LinkToCMSettingsView
-                key="link-to-cm-settings-view"
-                targetUid={targetUid}
-                isInContentTypeView={isInContentTypeView}
-                contentTypeKind={contentTypeKind}
-                disabled={isCreatingFirstContentType || isTemporary}
-              />
-            </Flex>
-          </Flex>
-          <Box background="neutral0" shadow="filterShadow" hasRadius>
-            <List
-              items={attributes}
-              customRowComponent={(props) => <ListRow {...props} onClick={handleClickEditField} />}
-              addComponentToDZ={handleClickAddComponentToDZ}
-              targetUid={targetUid}
-              editTarget={forTarget}
-              isMain
-            />
-          </Box>
-        </Flex>
+        <Box background="neutral0" shadow="filterShadow" hasRadius>
+          <List
+            type={type}
+            customRowComponent={(props) => <ListRow {...props} onClick={handleClickEditField} />}
+            addComponentToDZ={handleClickAddComponentToDZ}
+            isMain
+          />
+        </Box>
       </Layouts.Content>
     </>
   );

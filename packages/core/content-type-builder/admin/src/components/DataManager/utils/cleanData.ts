@@ -7,7 +7,14 @@ import sortBy from 'lodash/sortBy';
 import { pluginId } from '../../../pluginId';
 import { makeUnique } from '../../../utils/makeUnique';
 
-import type { Components, Component, AttributeType, ContentTypes } from '../../../types';
+import type {
+  Components,
+  Component,
+  AttributeType,
+  ContentTypes,
+  DataManagerStateType,
+  ContentType,
+} from '../../../types';
 import type { Internal } from '@strapi/types';
 
 const getCreatedAndModifiedComponents = (
@@ -54,23 +61,23 @@ const formatComponent = (
   return formattedComponent;
 };
 
-const formatMainDataType = (data: any, isComponent = false) => {
-  const mainDataUID = get(data, 'uid', null);
+// const formatMainDataType = (data: any, isComponent = false) => {
+//   const mainDataUID = get(data, 'uid', null);
 
-  const formattedAttributes = formatAttributes(get(data, 'schema.attributes', []), mainDataUID);
-  const initObj = isComponent ? { category: get(data, 'category', '') } : {};
+//   const formattedAttributes = formatAttributes(get(data, 'schema.attributes', []), mainDataUID);
+//   const initObj = isComponent ? { category: get(data, 'category', '') } : {};
 
-  const formattedContentType = Object.assign(initObj, omit(data.schema, 'attributes'), {
-    attributes: formattedAttributes,
-  });
+//   const formattedContentType = Object.assign(initObj, omit(data.schema, 'attributes'), {
+//     attributes: formattedAttributes,
+//   });
 
-  delete formattedContentType.uid;
-  delete formattedContentType.isTemporary;
-  delete formattedContentType.visible;
-  delete formattedContentType.restrictRelationsTo;
+//   delete formattedContentType.uid;
+//   delete formattedContentType.isTemporary;
+//   delete formattedContentType.visible;
+//   delete formattedContentType.restrictRelationsTo;
 
-  return formattedContentType;
-};
+//   return formattedContentType;
+// };
 
 /**
  *
@@ -144,8 +151,8 @@ const getComponentsToPost = (
   return formattedComponents;
 };
 
-const sortContentType = (types: ContentTypes) =>
-  sortBy(
+const sortContentType = (types: ContentTypes) => {
+  return sortBy(
     Object.keys(types)
       .map((uid) => ({
         visible: types[uid].schema.visible,
@@ -156,14 +163,80 @@ const sortContentType = (types: ContentTypes) =>
         to: `/plugins/${pluginId}/content-types/${uid}`,
         kind: types[uid].schema.kind,
         restrictRelationsTo: types[uid].schema.restrictRelationsTo,
+        status: types[uid].status,
       }))
       .filter((obj) => obj !== null),
     (obj) => camelCase(obj.title)
   );
+};
+
+const stateToRequestData = (state: DataManagerStateType) => {
+  const { components, contentTypes } = state;
+
+  return {
+    components: Object.values(components)
+      .filter((compo) => {
+        return compo.status !== 'UNCHANGED';
+      })
+      .map(formatTypeForRequest),
+    contentTypes: Object.values(contentTypes)
+      .filter((ct) => {
+        return ct.status !== 'UNCHANGED';
+      })
+      .map(formatTypeForRequest),
+  };
+};
+
+const formatTypeForRequest = (type: ContentType | Component) => {
+  let action;
+  // should we do a diff with the initial data instead of trusting the state status ??
+  switch (type.status) {
+    case 'NEW':
+      action = 'create';
+      break;
+    case 'CHANGED':
+      action = 'update';
+      break;
+    case 'REMOVED':
+      return { action: 'delete', uid: type.uid };
+    default:
+      throw new Error('Invalid status');
+  }
+
+  return {
+    action,
+    uid: type.uid,
+    category: type.category,
+    ...omit(type.schema, ['visible', 'uid', 'restrictRelationsTo', 'isTemporary']),
+    attributes: type.schema.attributes.map((attr) => {
+      let action;
+      // should we do a diff with the initial data instead of trusting the state status ??
+      switch (attr.status) {
+        case 'UNCHANGED':
+          action = 'modify';
+        case 'NEW':
+          action = 'add';
+          break;
+        case 'CHANGED':
+          action = 'modify';
+          break;
+        case 'REMOVED':
+          return { action: 'delete', name: attr.name };
+      }
+
+      return {
+        action,
+        name: attr.name,
+        properties: omit(attr, ['status', 'name']),
+      };
+    }),
+  };
+};
 
 export {
+  stateToRequestData,
   formatComponent,
-  formatMainDataType,
+  // formatMainDataType,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
   sortContentType,

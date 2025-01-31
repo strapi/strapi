@@ -2,31 +2,22 @@ import { useState, MouseEvent } from 'react';
 
 import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import { useCollator, useFilter } from '@strapi/design-system';
-import isEqual from 'lodash/isEqual';
+// import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
-import { useDataManager } from '../../hooks/useDataManager';
-import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
+import { useDataManager } from '../DataManager/useDataManager';
+import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
-import type { Internal } from '@strapi/types';
+// import type { Internal } from '@strapi/types';
 
 export const useContentTypeBuilderMenu = () => {
-  const {
-    components,
-    componentsGroupedByCategory,
-    contentTypes,
-    isInDevelopmentMode,
-    sortedContentTypesList,
-    modifiedData,
-    initialData,
-  } = useDataManager();
-  const { toggleNotification } = useNotification();
-  const { formatMessage } = useIntl();
+  const { componentsGroupedByCategory, isInDevelopmentMode, sortedContentTypesList } =
+    useDataManager();
   const { trackUsage } = useTracking();
   const [searchValue, setSearchValue] = useState('');
-  const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
+  const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();
 
   const { startsWith } = useFilter(locale, {
@@ -37,74 +28,44 @@ export const useContentTypeBuilderMenu = () => {
     sensitivity: 'base',
   });
 
-  // TODO: Allow creating mutliple schemas in parallel
-  const canOpenModalCreateCTorComponent =
-    !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
-    !Object.keys(components).some(
-      (component) => components[component as Internal.UID.Component].isTemporary === true
-    ) &&
-    isEqual(modifiedData, initialData);
-
   const handleClickOpenModalCreateCollectionType = () => {
-    if (canOpenModalCreateCTorComponent) {
-      // TODO: Review tracking with product
-      trackUsage(`willCreateContentType`);
+    // TODO: Review tracking with product
+    trackUsage(`willCreateContentType`);
 
-      const nextState = {
-        modalType: 'contentType',
-        kind: 'collectionType',
-        actionType: 'create',
-        forTarget: 'contentType',
-      };
+    const nextState = {
+      modalType: 'contentType',
+      kind: 'collectionType',
+      actionType: 'create',
+      forTarget: 'contentType',
+    };
 
-      onOpenModalCreateSchema(nextState);
-    } else {
-      toggleNotificationCannotCreateSchema();
-    }
+    onOpenModalCreateSchema(nextState);
   };
 
   const handleClickOpenModalCreateSingleType = () => {
-    if (canOpenModalCreateCTorComponent) {
-      trackUsage(`willCreateSingleType`);
+    trackUsage(`willCreateSingleType`);
 
-      const nextState = {
-        modalType: 'contentType',
-        kind: 'singleType',
-        actionType: 'create',
-        forTarget: 'contentType',
-      };
+    const nextState = {
+      modalType: 'contentType',
+      kind: 'singleType',
+      actionType: 'create',
+      forTarget: 'contentType',
+    };
 
-      onOpenModalCreateSchema(nextState);
-    } else {
-      toggleNotificationCannotCreateSchema();
-    }
+    onOpenModalCreateSchema(nextState);
   };
 
   const handleClickOpenModalCreateComponent = () => {
-    if (canOpenModalCreateCTorComponent) {
-      trackUsage('willCreateComponent');
+    trackUsage('willCreateComponent');
 
-      const nextState = {
-        modalType: 'component',
-        kind: null,
-        actionType: 'create',
-        forTarget: 'component',
-      };
+    const nextState = {
+      modalType: 'component',
+      kind: null,
+      actionType: 'create',
+      forTarget: 'component',
+    };
 
-      onOpenModalCreateSchema(nextState);
-    } else {
-      toggleNotificationCannotCreateSchema();
-    }
-  };
-
-  const toggleNotificationCannotCreateSchema = () => {
-    toggleNotification({
-      type: 'info',
-      message: formatMessage({
-        id: getTrad('notification.info.creating.notSaved'),
-        defaultMessage: 'Please save your work before creating a new collection type or component',
-      }),
-    });
+    onOpenModalCreateSchema(nextState);
   };
 
   const componentsData = Object.entries(componentsGroupedByCategory)
@@ -112,21 +73,12 @@ export const useContentTypeBuilderMenu = () => {
       name: category,
       title: category,
       isEditable: isInDevelopmentMode,
-      // TODO: re-add functionality to edit category name
-      onClickEdit(e: MouseEvent, data: any) {
-        e.stopPropagation();
-
-        if (canOpenModalCreateCTorComponent) {
-          onOpenModalEditCategory(data.name);
-        } else {
-          toggleNotificationCannotCreateSchema();
-        }
-      },
       links: components
         .map((component) => ({
           name: component.uid,
           to: `/plugins/${pluginId}/component-categories/${category}/${component.uid}`,
           title: component.schema.displayName,
+          status: component.status,
         }))
         .sort((a, b) => formatter.compare(a.title, b.title)),
     }))
@@ -141,11 +93,13 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.models.name')}`,
         defaultMessage: 'Collection Types',
       },
-      customLink: isInDevelopmentMode && {
-        id: `${getTrad('button.model.create')}`,
-        defaultMessage: 'Create new collection type',
-        onClick: handleClickOpenModalCreateCollectionType,
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            id: `${getTrad('button.model.create')}`,
+            defaultMessage: 'Create new collection type',
+            onClick: handleClickOpenModalCreateCollectionType,
+          }
+        : undefined,
       links: displayedContentTypes.filter((contentType) => contentType.kind === 'collectionType'),
     },
     {
@@ -154,11 +108,13 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.single-types.name')}`,
         defaultMessage: 'Single Types',
       },
-      customLink: isInDevelopmentMode && {
-        id: `${getTrad('button.single-types.create')}`,
-        defaultMessage: 'Create new single type',
-        onClick: handleClickOpenModalCreateSingleType,
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            id: `${getTrad('button.single-types.create')}`,
+            defaultMessage: 'Create new single type',
+            onClick: handleClickOpenModalCreateSingleType,
+          }
+        : undefined,
       links: displayedContentTypes.filter((singleType) => singleType.kind === 'singleType'),
     },
     {
@@ -167,11 +123,13 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.components.name')}`,
         defaultMessage: 'Components',
       },
-      customLink: isInDevelopmentMode && {
-        id: `${getTrad('button.component.create')}`,
-        defaultMessage: 'Create a new component',
-        onClick: handleClickOpenModalCreateComponent,
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            id: `${getTrad('button.component.create')}`,
+            defaultMessage: 'Create a new component',
+            onClick: handleClickOpenModalCreateComponent,
+          }
+        : undefined,
       links: componentsData,
     },
   ].map((section) => {
