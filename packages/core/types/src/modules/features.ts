@@ -1,5 +1,7 @@
 export interface FeaturesConfig {
-  future?: object;
+  future?: {
+    relationsOnTheFlyEnabled?: boolean;
+  };
 }
 
 export interface FeaturesService {
