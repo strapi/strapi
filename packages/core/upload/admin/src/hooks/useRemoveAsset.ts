@@ -1,12 +1,16 @@
-import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { useNotification, useFetchClient, FetchResponse } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient, UseMutationResult } from 'react-query';
 
 import { pluginId } from '../pluginId';
 
 import type { DeleteFile } from '../../../shared/contracts/files';
 
-export const useRemoveAsset = (onSuccess: () => void) => {
+type UseRemoveAsset = {
+  removeAsset: (assetId: number) => Promise<void>;
+} & UseMutationResult<FetchResponse<DeleteFile.Response>, Error, number>;
+
+export const useRemoveAsset = (onSuccess: () => void): UseRemoveAsset => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
