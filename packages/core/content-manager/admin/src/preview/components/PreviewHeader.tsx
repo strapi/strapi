@@ -57,7 +57,7 @@ const ClosePreviewButton = () => {
 
   return (
     <IconButton
-      style={{ border: 'none' }}
+      variant="ghost"
       tag={Link}
       relative="path"
       to={toWithFallback}
