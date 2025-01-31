@@ -11,7 +11,7 @@
   "control-card.save": "Зберегти",
   "filter.add": "Додати фільтр",
   "form.button.replace-media": "Замінити медіа",
-  "form.input.decription.file-alt": "Цей текст буде показаний якщо файл не може бути показаний",
+  "form.input.description.file-alt": "Цей текст буде показаний якщо файл не може бути показаний",
   "form.input.label.file-alt": "Альтернативний текст (alt)",
   "form.input.label.file-caption": "Підпис",
   "form.input.label.file-name": "Назва файлу",

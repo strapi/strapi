@@ -12,7 +12,7 @@
   "control-card.save": "บันทึก",
   "filter.add": "เพิ่มตัวกรอง",
   "form.button.replace-media": "แทนที่สื่อ",
-  "form.input.decription.file-alt": "ข้อความนี้จะถูกแสดงหากไฟล์ไม่สามารถแสดงผลได้.",
+  "form.input.description.file-alt": "ข้อความนี้จะถูกแสดงหากไฟล์ไม่สามารถแสดงผลได้.",
   "form.input.label.file-alt": "ข้อความทางเลือก",
   "form.input.label.file-caption": "คำบรรยาย",
   "form.input.label.file-name": "ชื่อไฟล์",
