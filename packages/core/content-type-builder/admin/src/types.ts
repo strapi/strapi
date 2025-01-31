@@ -6,7 +6,7 @@ export type IntlLabel = {
   values?: Record<string, any>;
 };
 
-export type SchemaType = 'contentType' | 'component' | 'components';
+export type SchemaType = 'contentType' | 'component';
 
 export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
 
@@ -20,12 +20,19 @@ export type AttributeType = Schema.Attribute.AnyAttribute & {
   [key: string]: any;
 };
 
+type Schema = {
+  modelType: 'contentType' | 'component';
+  attributes: any[];
+  [key: string]: any;
+};
+
 export interface Component {
   uid: Internal.UID.Component;
   category?: string;
-  schema: any;
+  schema: Schema;
   isTemporary?: boolean;
   attributes?: AttributeType[];
+  status?: 'UNCHANGED' | 'CHANGED' | 'REMOVED' | 'NEW';
   [key: string]: any;
 }
 
@@ -37,9 +44,9 @@ export interface ContentType {
   title?: string;
   plugin?: string;
   to?: string;
-  kind?: 'singleType' | 'collectionType';
   restrictRelationsTo?: unknown;
-  schema?: any;
+  schema: Schema;
+  status?: 'UNCHANGED' | 'CHANGED' | 'REMOVED' | 'NEW';
   [key: string]: any;
 }
 
@@ -48,15 +55,13 @@ export type Components = Record<string, Component>;
 export type ContentTypes = Record<string, ContentType>;
 export interface DataManagerStateType {
   components: Components;
+  initialComponents: Components;
   contentTypes: ContentTypes;
-  initialData: Record<string, any>;
-  modifiedData: {
-    components: Components;
-    contentTypes: ContentTypes;
-    contentType?: ContentType;
-    component?: Component;
+  initialContentTypes: ContentTypes;
+  reservedNames: {
+    models: string[];
+    attributes: string[];
   };
-  reservedNames: Record<string, string>;
   isLoading: boolean;
   [key: string]: any;
 }

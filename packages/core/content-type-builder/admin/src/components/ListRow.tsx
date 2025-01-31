@@ -3,18 +3,19 @@ import { memo } from 'react';
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Lock, Pencil, Trash } from '@strapi/icons';
 import get from 'lodash/get';
+import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDataManager } from '../hooks/useDataManager';
 import { Curve } from '../icons/Curve';
 import { getTrad } from '../utils/getTrad';
 
 import { AttributeIcon, IconByType } from './AttributeIcon';
+import { useDataManager } from './DataManager/useDataManager';
 import { DisplayedType } from './DisplayedType';
-import { UpperFirst } from './UpperFirst';
 
 import type { SchemaType } from '../types';
+import type { Internal } from '@strapi/types';
 
 export const BoxWrapper = styled(Box)`
   position: relative;
@@ -38,7 +39,7 @@ type ListRowProps = {
   repeatable?: boolean;
   secondLoopComponentUid?: string | null;
   target?: string | null;
-  targetUid?: string | null;
+  targetUid?: Internal.UID.Schema | null;
   type: IconByType;
 };
 
@@ -126,7 +127,7 @@ export const ListRow = memo(
               })}
               &nbsp;
               <span style={{ fontStyle: 'italic' }}>
-                <UpperFirst content={contentTypeFriendlyName} />
+                {upperFirst(contentTypeFriendlyName)}
                 &nbsp;
                 {isPluginContentType &&
                   `(${formatMessage({
@@ -159,11 +160,12 @@ export const ListRow = memo(
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeAttribute(
-                        editTarget,
-                        name,
-                        secondLoopComponentUid || firstLoopComponentUid || ''
-                      );
+
+                      removeAttribute({
+                        forTarget: editTarget,
+                        targetUid: targetUid!,
+                        attributeToRemoveName: name,
+                      });
                     }}
                     label={`${formatMessage({
                       id: 'global.delete',

@@ -2,13 +2,14 @@ import { Menu } from '@strapi/design-system';
 import { useDispatch } from 'react-redux';
 import { styled } from 'styled-components';
 
-import { useDataManager } from '../../../../hooks/useDataManager';
 import { isAllowedContentTypesForRelations } from '../../../../utils';
+import { useDataManager } from '../../../DataManager/useDataManager';
 import { actions } from '../../../FormModal/reducer';
 
+import type { Internal } from '@strapi/types';
 interface RelationTargetPickerProps {
   oneThatIsCreatingARelationWithAnother: string;
-  target: string;
+  target: Internal.UID.ContentType;
 }
 
 export const RelationTargetPicker = ({

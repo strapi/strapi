@@ -156,6 +156,7 @@ const sortContentType = (types: ContentTypes) =>
         to: `/plugins/${pluginId}/content-types/${uid}`,
         kind: types[uid].schema.kind,
         restrictRelationsTo: types[uid].schema.restrictRelationsTo,
+        status: types[uid].status,
       }))
       .filter((obj) => obj !== null),
     (obj) => camelCase(obj.title)
