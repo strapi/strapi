@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 
-import { useFormModalNavigation } from '../../../hooks/useFormModalNavigation';
+import { useFormModalNavigation } from '../useFormModalNavigation';
 import { INITIAL_STATE_DATA } from '../constants';
 import { FormModalNavigationProvider, State } from '../FormModalNavigationProvider';
 

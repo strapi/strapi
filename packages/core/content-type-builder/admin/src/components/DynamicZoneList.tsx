@@ -1,25 +1,27 @@
-import { useState } from 'react';
+import { ComponentType, useState } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDataManager } from '../hooks/useDataManager';
 import { getTrad } from '../utils/getTrad';
 
 import { ComponentCard } from './ComponentCard';
 import { ComponentList } from './ComponentList';
+import { useDataManager } from './DataManager/useDataManager';
 import { Tr } from './Tr';
 
+import type { SchemaType } from '../types';
 import type { Internal } from '@strapi/types';
 
 interface DynamicZoneListProps {
   addComponent: (name?: string) => void;
-  components: Array<string>;
-  customRowComponent?: () => void;
+  components: Array<Internal.UID.Component>;
+  customRowComponent?: ComponentType<any>;
   name?: string;
-  targetUid: Internal.UID.Component;
+  forTarget: SchemaType;
+  targetUid: Internal.UID.Schema;
 }
 
 const StyledAddIcon = styled(Plus)`
@@ -63,6 +65,7 @@ export const DynamicZoneList = ({
   components = [],
   addComponent,
   name,
+  forTarget,
   targetUid,
 }: DynamicZoneListProps) => {
   const { isInDevelopmentMode } = useDataManager();
@@ -108,6 +111,8 @@ export const DynamicZoneList = ({
                     isActive={activeTab === index}
                     isInDevelopmentMode={isInDevelopmentMode}
                     onClick={() => toggle(index)}
+                    forTarget={forTarget}
+                    targetUid={targetUid}
                   />
                 );
               })}
@@ -116,11 +121,6 @@ export const DynamicZoneList = ({
         </FixedBox>
         <ComponentContentBox>
           {components.map((component, index) => {
-            const props = {
-              customRowComponent,
-              component,
-            };
-
             return (
               <Box
                 id={`dz-${name}-panel-${index}`}
@@ -132,9 +132,9 @@ export const DynamicZoneList = ({
                 <table>
                   <tbody>
                     <ComponentList
-                      {...props}
                       isFromDynamicZone
-                      component={targetUid}
+                      component={component}
+                      customRowComponent={customRowComponent}
                       key={component}
                     />
                   </tbody>

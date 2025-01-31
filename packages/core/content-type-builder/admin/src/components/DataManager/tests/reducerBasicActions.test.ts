@@ -177,6 +177,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       };
 
       const action = actions.changeDynamicZoneComponents({
+        forTarget,
+        targetUid,
         dynamicZoneTarget: 'dz',
         newComponents: ['default.dish'],
       });
@@ -213,6 +215,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       const componentToAddUid = 'default.closingperiod';
 
       const action = actions.changeDynamicZoneComponents({
+        forTarget,
+        targetUid,
         dynamicZoneTarget: 'dz',
         newComponents: [componentToAddUid],
       });
@@ -359,44 +363,6 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
     });
   });
 
-  describe('DELETE_NOT_SAVED_TYPE', () => {
-    it('Should reset the components and and contentTypes object', () => {
-      const state: any = {
-        ...initialState,
-        components: {
-          foo: {},
-          bar: {},
-        },
-        initialComponents: { foo: {} },
-        contentTypes: {
-          baz: {},
-          bat: {},
-        },
-        initialContentTypes: {
-          baz: {},
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        components: {
-          foo: {},
-        },
-        initialComponents: { foo: {} },
-        contentTypes: {
-          baz: {},
-        },
-        initialContentTypes: {
-          baz: {},
-        },
-      };
-
-      const action = actions.deleteNotSavedType();
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
   describe('RELOAD_PLUGIN', () => {
     it('Should return the initial state constant', () => {
       const state = { ...initialState, component: { foo: {} } };
@@ -532,146 +498,6 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
     });
   });
 
-  describe('REMOVE_FIELD_FROM_DISPLAYED_COMPONENT', () => {
-    it('Should remove the selected field', () => {
-      const state: any = {
-        ...initialState,
-        modifiedData: {
-          components: {
-            'default.test': {
-              schema: {
-                attributes: [
-                  {
-                    name: 'text',
-                    type: 'text',
-                  },
-                  {
-                    name: 'other',
-                    type: 'string',
-                  },
-                  {
-                    name: 'last',
-                    type: 'integer',
-                  },
-                ],
-              },
-            },
-          },
-        },
-      };
-
-      const action = actions.removeFieldFromDisplayedComponent({
-        componentUid: 'default.test',
-        attributeToRemoveName: 'other',
-      });
-
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          components: {
-            'default.test': {
-              schema: {
-                attributes: [
-                  {
-                    name: 'text',
-                    type: 'text',
-                  },
-                  {
-                    name: 'last',
-                    type: 'integer',
-                  },
-                ],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('SET_MODIFIED_DATA', () => {
-    it('Should set the modifiedData object correctly if the user did create a new type', () => {
-      const schemaToSet = {
-        components: {},
-        contentType: {
-          uid: 'test' as Internal.UID.ContentType,
-        },
-      };
-
-      const state: any = {
-        ...initialState,
-        modifiedData: null,
-        initialData: null,
-      };
-
-      const expected = {
-        ...initialState,
-        modifiedData: {
-          contentTypes: {},
-          ...schemaToSet,
-        },
-        initialData: {
-          contentTypes: {},
-          ...schemaToSet,
-        },
-      };
-
-      expect(
-        reducer(
-          state,
-          actions.setModifiedData({
-            schemaToSet,
-            hasJustCreatedSchema: true,
-          })
-        )
-      ).toEqual(expected);
-    });
-
-    it('Should set the modifiedData object correctly if the user did not create a new type', () => {
-      const schemaToSet = {
-        components: {},
-        contentType: {
-          uid: 'test' as Internal.UID.ContentType,
-        },
-      };
-
-      const state: any = {
-        ...initialState,
-        initialComponents: { ok: true },
-        initialContentTypes: { ok: false },
-        initialData: null,
-        modifiedData: null,
-      };
-      const expected = {
-        ...initialState,
-        initialComponents: { ok: true },
-        initialContentTypes: { ok: false },
-        components: { ok: true },
-        contentTypes: { ok: false },
-        initialData: {
-          contentTypes: {},
-          ...schemaToSet,
-        },
-        modifiedData: {
-          contentTypes: {},
-          ...schemaToSet,
-        },
-      };
-
-      expect(
-        reducer(
-          state,
-          actions.setModifiedData({
-            schemaToSet,
-            hasJustCreatedSchema: false,
-          })
-        )
-      ).toEqual(expected);
-    });
-  });
-
   describe('UPDATE_SCHEMA', () => {
     it('Should update the modified data correctly if the schemaType is a content type', () => {
       const data = {
@@ -697,7 +523,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = actions.updateSchema({
+      const action = actions.updateComponentSchema({
         data,
         schemaType: 'contentType',
       });
@@ -767,7 +593,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action = actions.updateSchema({
+      const action = actions.updateComponentSchema({
         data,
         schemaType: 'component',
         uid: 'test',

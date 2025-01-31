@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { getOr } from 'lodash/fp';
+import { getOr, omit } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
 import type { UID, Struct } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
@@ -33,7 +33,7 @@ export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) =>
  * Format a contentType info to be used by the front-end
  */
 export const formatContentType = (contentType: any) => {
-  const { uid, kind, modelName, plugin, collectionName, info } = contentType;
+  const { uid, kind, modelName, plugin, collectionName, info, modelType } = contentType;
 
   return {
     uid,
@@ -51,8 +51,131 @@ export const formatContentType = (contentType: any) => {
       attributes: formatAttributes(contentType),
       visible: isContentTypeVisible(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),
+      modelType,
     },
   };
+};
+
+export const updateSchema = async (schema: any) => {
+  const builder = createBuilder();
+  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
+
+  const { components, contentTypes } = schema;
+
+  // TODO: only necessary
+  // const uidMap = builder.createNewComponentUIDMap(components || []);
+  // const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
+
+  for (const component of components) {
+    const { action, uid } = component;
+
+    if (action === 'create') {
+      builder.createComponent({
+        ...component,
+        attributes: component.attributes.reduce((acc: any, attr: any) => {
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {}),
+      });
+    } else if (action === 'update') {
+      builder.editComponent({
+        ...component,
+
+        attributes: component.attributes.reduce((acc: any, attr: any) => {
+          // // TODO: handle renaming migrations
+          // if ('newName' in attr.properties) {
+          //   acc[attr.properties.newName] = omit(['newName'], attr.properties);
+          // }
+
+          if (attr.action === 'delete') {
+            return acc;
+          }
+
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {}),
+      });
+    } else if (action === 'delete') {
+      builder.deleteComponent(uid);
+    }
+  }
+
+  const APIsToDelete = contentTypes
+    .filter((ct: any) => ct.action === 'delete')
+    .map((ct: any) => ct.uid);
+
+  for (const contentType of contentTypes) {
+    const { action, uid } = contentType;
+
+    if (action === 'create') {
+      builder.createContentType({
+        ...contentType,
+        attributes: contentType.attributes.reduce((acc: any, attr: any) => {
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {}),
+      });
+
+      await generateAPI({
+        displayName: contentType!.displayName || contentType!.info.displayName,
+        singularName: contentType!.singularName,
+        pluralName: contentType!.pluralName,
+        kind: contentType!.kind,
+      });
+    }
+
+    if (action === 'update') {
+      builder.editContentType({
+        ...contentType,
+        attributes: contentType.attributes.reduce((acc: any, attr: any) => {
+          // // TODO: handle renaming migrations
+          // if ('newName' in attr.properties) {
+          //   acc[attr.properties.newName] = omit(['newName'], attr.properties);
+          // }
+
+          if (attr.action === 'delete') {
+            return acc;
+          }
+
+          acc[attr.name] = attr.properties;
+          return acc;
+        }, {}),
+      });
+    }
+
+    if (action === 'delete') {
+      builder.deleteContentType(uid);
+      await apiHandler.backup(uid);
+    }
+  }
+
+  await builder.writeFiles();
+
+  try {
+    for (const uid of APIsToDelete) {
+      await apiHandler.clear(uid);
+    }
+  } catch (error) {
+    strapi.log.error(error);
+    for (const uid of APIsToDelete) {
+      await apiHandler.rollback(uid);
+    }
+  }
+
+  // TODO: send events
+  // for (const contentType of contentTypes) {
+  //   if (contentType.action === 'delete') {
+  //     // strapi.eventHub.emit('content-type.delete', { contentType });
+  //   }
+
+  //   if (contentType.action === 'update') {
+  //     // strapi.eventHub.emit('content-type.update', { contentType });
+  //   }
+
+  //   if (contentType.action === 'create') {
+  //     // strapi.eventHub.emit('content-type.create', { contentType });
+  //   }
+  // }
 };
 
 export const createContentTypes = async (contentTypes: any[]) => {

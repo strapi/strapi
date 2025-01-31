@@ -8,7 +8,7 @@ import createBuilder from './schema-builder';
  * Formats a component attributes
  */
 export const formatComponent = (component: any) => {
-  const { uid, modelName, connection, collectionName, info, category } = component;
+  const { uid, modelName, connection, collectionName, info, category, modelType } = component;
 
   return {
     uid,
@@ -22,6 +22,7 @@ export const formatComponent = (component: any) => {
       collectionName,
       pluginOptions: component.pluginOptions,
       attributes: formatAttributes(component),
+      modelType,
     },
   };
 };

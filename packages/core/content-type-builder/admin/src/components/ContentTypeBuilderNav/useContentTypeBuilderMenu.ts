@@ -2,31 +2,31 @@ import { useState, MouseEvent } from 'react';
 
 import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import { useCollator, useFilter } from '@strapi/design-system';
-import isEqual from 'lodash/isEqual';
+// import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
-import { useDataManager } from '../../hooks/useDataManager';
-import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
+import { useDataManager } from '../DataManager/useDataManager';
+import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
-import type { Internal } from '@strapi/types';
+// import type { Internal } from '@strapi/types';
 
 export const useContentTypeBuilderMenu = () => {
   const {
-    components,
+    // components,
     componentsGroupedByCategory,
-    contentTypes,
+    // contentTypes,
     isInDevelopmentMode,
     sortedContentTypesList,
-    modifiedData,
-    initialData,
+    // modifiedData,
+    // initialData,
   } = useDataManager();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const [searchValue, setSearchValue] = useState('');
-  const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
+  const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();
 
   const { startsWith } = useFilter(locale, {
@@ -38,12 +38,12 @@ export const useContentTypeBuilderMenu = () => {
   });
 
   // TODO: Allow creating mutliple schemas in parallel
-  const canOpenModalCreateCTorComponent =
-    !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
-    !Object.keys(components).some(
-      (component) => components[component as Internal.UID.Component].isTemporary === true
-    ) &&
-    isEqual(modifiedData, initialData);
+  const canOpenModalCreateCTorComponent = true;
+  // !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
+  // !Object.keys(components).some(
+  //   (component) => components[component as Internal.UID.Component].isTemporary === true
+  // ) &&
+  // isEqual(modifiedData, initialData);
 
   const handleClickOpenModalCreateCollectionType = () => {
     if (canOpenModalCreateCTorComponent) {
@@ -112,21 +112,12 @@ export const useContentTypeBuilderMenu = () => {
       name: category,
       title: category,
       isEditable: isInDevelopmentMode,
-      // TODO: re-add functionality to edit category name
-      onClickEdit(e: MouseEvent, data: any) {
-        e.stopPropagation();
-
-        if (canOpenModalCreateCTorComponent) {
-          onOpenModalEditCategory(data.name);
-        } else {
-          toggleNotificationCannotCreateSchema();
-        }
-      },
       links: components
         .map((component) => ({
           name: component.uid,
           to: `/plugins/${pluginId}/component-categories/${category}/${component.uid}`,
           title: component.schema.displayName,
+          status: component.status,
         }))
         .sort((a, b) => formatter.compare(a.title, b.title)),
     }))

@@ -3,8 +3,6 @@ import { commonBaseForm } from '../attributes/commonBaseForm';
 import { attributesForm } from '../attributes/form';
 import { nameField } from '../attributes/nameField';
 import { attributeTypes } from '../attributes/types';
-import { createCategorySchema } from '../category/createCategorySchema';
-import { categoryForm } from '../category/form';
 import { componentForm } from '../component/componentForm';
 import { createComponentSchema } from '../component/createComponentSchema';
 import { contentTypeForm } from '../contentType/contentTypeForm';
@@ -15,15 +13,8 @@ import { addItemsToFormSection, FormTypeOptions } from './utils/addItemsToFormSe
 import { createComponentCollectionName } from './utils/createCollectionName';
 import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
+import type { ContentType } from '../../../types';
 import type { Internal } from '@strapi/types';
-
-type ContentType = {
-  schema: {
-    singularName: string;
-    pluralName: string;
-    collectionName: string;
-  };
-};
 
 export type SchemaParams = {
   schemaAttributes: any;
@@ -214,7 +205,7 @@ export const forms = {
         models: any;
       },
       extensions: any,
-      contentTypes: Record<string, ContentType>
+      contentTypes: Record<Internal.UID.ContentType, ContentType>
     ) {
       const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.schema.singularName;
@@ -363,21 +354,6 @@ export const forms = {
         }
 
         return dynamiczoneForm.base.default();
-      },
-    },
-  },
-  editCategory: {
-    schema(allCategories: Array<any>, initialData: any) {
-      const allowedCategories = allCategories
-        .filter((cat) => cat !== initialData.name)
-        .map((cat) => cat.toLowerCase());
-
-      return createCategorySchema(allowedCategories);
-    },
-    form: {
-      advanced: () => ({ sections: [] }),
-      base() {
-        return categoryForm.base;
       },
     },
   },

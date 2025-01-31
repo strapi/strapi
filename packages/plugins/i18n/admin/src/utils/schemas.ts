@@ -8,6 +8,7 @@ import type { Schema } from '@strapi/types';
  * mutateCTBContentTypeSchema
  * -----------------------------------------------------------------------------------------------*/
 
+// TODO: refactor for CTB refactors
 const mutateCTBContentTypeSchema = (
   nextSchema: Schema.ContentType,
   prevSchema?: {

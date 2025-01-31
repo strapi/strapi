@@ -170,5 +170,18 @@ export default {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/update-schema',
+      handler: 'schema.updateSchema',
+      config: {
+        policies: [
+          {
+            name: 'admin::hasPermissions',
+            config: { actions: ['plugin::content-type-builder.read'] },
+          },
+        ],
+      },
+    },
   ],
 };
