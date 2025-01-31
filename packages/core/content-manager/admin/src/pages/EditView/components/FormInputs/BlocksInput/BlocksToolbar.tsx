@@ -12,6 +12,7 @@ import {
   BoxComponent,
   Menu,
   IconButton,
+  Divider,
 } from '@strapi/design-system';
 import { Link, More } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -35,7 +36,7 @@ const ToolbarWrapper = styled<FlexComponent>(Flex)`
   }
 `;
 
-const Separator = styled(Toolbar.Separator)`
+const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
@@ -640,6 +641,12 @@ const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: Mo
   );
 };
 
+const MenuDivider = styled(Divider)`
+  width: calc(100% + ${({ theme }) => theme.spaces[2]});
+  /* Negative horizontal margin to compensate Menu.Content's padding */
+  margin: ${({ theme }) => theme.spaces[1]} -${({ theme }) => theme.spaces[1]};
+`;
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
   const { formatMessage } = useIntl();
@@ -704,7 +711,7 @@ const BlocksToolbar = () => {
       // List buttons can only be rendered together when in the toolbar
       toolbar: (
         <Flex direction="row" gap={1}>
-          <Separator />
+          <ToolbarSeparator />
           <Toolbar.ToggleGroup type="single" asChild>
             <Flex gap={1}>
               <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
@@ -715,6 +722,7 @@ const BlocksToolbar = () => {
       ),
       menu: (
         <>
+          <MenuDivider />
           <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
           <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
         </>
@@ -734,7 +742,7 @@ const BlocksToolbar = () => {
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper gap={2} padding={2} width="100%">
         <BlocksDropdown />
-        <Separator />
+        <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden" ref={toolbarRef}>
             {observedComponents
