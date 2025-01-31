@@ -100,21 +100,10 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const queryString = React.useMemo(
-    () => stringify(params, { encode: true, encodeValuesOnly: true }),
-    [params]
-  );
-  const paramObject = React.useMemo(() => {
-    const pairs = queryString.split('&').map((param) => {
-      const [key, value] = param.split('=');
-      return { [key]: value };
-    });
-    return Object.assign({}, ...pairs);
-  }, [queryString]);
 
   const { data, error, isFetching } = useGetAllDocumentsQuery({
     model,
-    params: paramObject,
+    params,
   });
 
   /**
@@ -214,7 +203,12 @@ const ListViewPage = () => {
     return <Page.Error />;
   }
 
-  const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
+  const contentTypeTitle = schema?.info.displayName
+    ? formatMessage({ id: schema.info.displayName, defaultMessage: schema.info.displayName })
+    : formatMessage({
+        id: 'content-manager.containers.untitled',
+        defaultMessage: 'Untitled',
+      });
 
   const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
@@ -337,7 +331,7 @@ const ListViewPage = () => {
                           </Table.Cell>
                         );
                       })}
-                      {/* we stop propogation here to allow the menu to trigger it's events without triggering the row redirect */}
+                      {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
                       <ActionsCell onClick={(e) => e.stopPropagation()}>
                         <TableActions document={row} />
                       </ActionsCell>

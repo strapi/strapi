@@ -9,6 +9,8 @@ const write = jest.fn((_chunk, _encoding, callback) => {
   callback();
 });
 
+const uploadStream = jest.fn(() => null);
+
 const createWriteStreamMock = jest.fn(() => {
   return new Writable({
     objectMode: true,
@@ -30,9 +32,18 @@ const createStrapi = getStrapiFactory({
       public: 'static/public/assets',
     },
   },
-  db: { transaction },
+  db: {
+    transaction,
+    query() {
+      return {};
+    },
+    lifecycles: {
+      enable: jest.fn(),
+      disable: jest.fn(),
+    },
+  },
   config: {
-    get(service) {
+    get(service: string) {
       if (service === 'plugin::upload') {
         return {
           provider: 'local',
@@ -40,6 +51,15 @@ const createStrapi = getStrapiFactory({
       }
       return {};
     },
+  },
+  plugin(plugin: string) {
+    if (plugin === 'upload') {
+      return {
+        provider: {
+          uploadStream,
+        },
+      };
+    }
   },
 });
 
@@ -85,7 +105,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     );
   });
 
-  test('Writes on the strapi assets path', async () => {
+  test('uploading file to strapi fails incase file ID is not found', async () => {
     (fse.createWriteStream as jest.Mock).mockImplementationOnce(createWriteStreamMock);
     const assetsDirectory = 'static/public/assets';
     const file: IAsset = {
@@ -93,13 +113,32 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
       filepath: 'strapi-import-folder/assets',
       stats: { size: 200 },
       stream: Readable.from(['test', 'test-2']),
+      metadata: {
+        hash: 'hash',
+        name: 'test-photo',
+        id: 1,
+        url: 'test-photo.jpg',
+        size: 200,
+        mime: 'test-photo.jpg',
+      },
     };
+    const mockFindOne = jest.fn().mockResolvedValue({ ...file.metadata });
+    const mockUpdate = jest.fn().mockResolvedValue(null);
+    const mockQuery = jest.fn(() => ({ findOne: mockFindOne, update: mockUpdate }));
     const provider = createLocalStrapiDestinationProvider({
       getStrapi: () =>
         createStrapi({
           dirs: {
             static: {
               public: assetsDirectory,
+            },
+          },
+          db: {
+            transaction,
+            query: mockQuery,
+            lifecycles: {
+              enable: jest.fn(),
+              disable: jest.fn(),
             },
           },
         }),
@@ -111,16 +150,18 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
 
     await provider.bootstrap();
     const stream = await provider.createAssetsWriteStream();
-
-    const error = await new Promise<Error | null | undefined>((resolve) => {
-      stream.write(file, resolve);
+    await new Promise<void>((resolve, reject) => {
+      stream.on('error', reject);
+      stream.write(file, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    }).catch((error) => {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe('File ID not found for ID: 1'); // Customize as needed
     });
-
-    expect(error).not.toBeInstanceOf(Error);
-
-    expect(write).toHaveBeenCalled();
-    expect(createWriteStreamMock).toHaveBeenCalledWith(
-      `${assetsDirectory}/uploads/${file.filename}`
-    );
   });
 });

@@ -3,7 +3,7 @@ import { chain } from 'stream-chain';
 import type { Core, Struct } from '@strapi/types';
 
 import type { IMetadata, ISourceProvider, ProviderType } from '../../../../types';
-import type { IDiagnosticReporter } from '../../../engine/diagnostic';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 import { createEntitiesStream, createEntitiesTransformStream } from './entities';
 import { createLinksStream } from './links';
 import { createConfigurationStream } from './configuration';
@@ -39,6 +39,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
     this.#diagnostics = diagnostics;
     this.strapi = await this.options.getStrapi();
+    this.strapi.db.lifecycles.disable();
   }
 
   #reportInfo(message: string) {
@@ -46,7 +47,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
       details: {
         createdAt: new Date(),
         message,
-        source: 'local-source-provider',
+        origin: 'local-source-provider',
       },
       kind: 'info',
     });
@@ -54,7 +55,8 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
-
+    assertValidStrapi(this.strapi);
+    this.strapi.db.lifecycles.enable();
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
       await this.strapi?.destroy();

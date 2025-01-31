@@ -1,6 +1,6 @@
 {
   "name": "@strapi/core",
-  "version": "5.4.1",
+  "version": "5.9.0",
   "description": "Core of Strapi",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -23,6 +23,10 @@
       "url": "https://strapi.io"
     }
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -33,37 +37,33 @@
     },
     "./package.json": "./package.json"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "source": "./src/index.ts",
-  "types": "./dist/index.d.ts",
   "files": [
     "dist/",
     "resources/"
   ],
   "scripts": {
-    "build": "pack-up build && run copy-files",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "watch": "run -T rollup -c -w",
     "clean": "run -T rimraf ./dist",
-    "copy-files": "copyfiles -u 1 -a 'src/**/*.html' 'src/**/*.png'  dist",
     "lint": "run -T eslint .",
     "prepublishOnly": "yarn clean && yarn build",
     "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "test:unit:watch": "run -T jest --watch"
   },
   "dependencies": {
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/admin": "5.4.1",
-    "@strapi/database": "5.4.1",
-    "@strapi/generators": "5.4.1",
-    "@strapi/logger": "5.4.1",
-    "@strapi/pack-up": "5.0.0",
-    "@strapi/permissions": "5.4.1",
-    "@strapi/types": "5.4.1",
-    "@strapi/typescript-utils": "5.4.1",
-    "@strapi/utils": "5.4.1",
+    "@strapi/admin": "5.9.0",
+    "@strapi/database": "5.9.0",
+    "@strapi/generators": "5.9.0",
+    "@strapi/logger": "5.9.0",
+    "@strapi/permissions": "5.9.0",
+    "@strapi/types": "5.9.0",
+    "@strapi/typescript-utils": "5.9.0",
+    "@strapi/utils": "5.9.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -102,13 +102,13 @@
     "resolve.exports": "2.0.2",
     "semver": "7.5.4",
     "statuses": "2.0.1",
-    "typescript": "5.3.2",
+    "typescript": "5.4.4",
     "undici": "6.19.2",
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
     "@strapi/ts-zen": "^0.2.0",
+    "@swc/core": "1.9.3",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
     "@types/delegates": "1.0.0",
@@ -126,13 +126,12 @@
     "@types/node": "18.19.24",
     "@types/node-schedule": "2.1.7",
     "@types/statuses": "2.0.1",
-    "eslint-config-custom": "5.4.1",
+    "eslint-config-custom": "5.9.0",
     "supertest": "6.3.3",
-    "tsconfig": "5.4.1"
+    "tsconfig": "5.9.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "5.4.1",
+  "version": "5.9.0",
   "description": "Protect your API with a full-authentication process based on JWT",
   "repository": {
     "type": "git",
@@ -28,13 +28,15 @@
     },
     "./strapi-server": {
       "source": "./server/index.js",
-      "require": "./server/index.js",
-      "default": "./server/index.js"
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean build:code",
+    "build:code": "run -T rollup -c",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -43,15 +45,15 @@
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.13",
-    "@strapi/icons": "2.0.0-rc.13",
-    "@strapi/utils": "5.4.1",
+    "@strapi/design-system": "2.0.0-rc.14",
+    "@strapi/icons": "2.0.0-rc.14",
+    "@strapi/utils": "5.9.0",
     "bcryptjs": "2.4.3",
     "formik": "2.4.5",
-    "grant-koa": "5.4.8",
+    "grant": "^5.4.8",
     "immer": "9.0.21",
     "jsonwebtoken": "9.0.0",
     "jwk-to-pem": "2.0.5",
@@ -67,8 +69,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
-    "@strapi/strapi": "5.4.1",
+    "@strapi/strapi": "5.9.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -95,6 +96,5 @@
     "description": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
     "required": true,
     "kind": "plugin"
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }

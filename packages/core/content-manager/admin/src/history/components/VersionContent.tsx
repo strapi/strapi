@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Form, Layouts } from '@strapi/admin/strapi-admin';
 import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
-import { Schema } from '@strapi/types';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
@@ -20,6 +19,7 @@ import type { Metadatas } from '../../../../shared/contracts/content-types';
 import type { GetInitData } from '../../../../shared/contracts/init';
 import type { ComponentsDictionary, Document } from '../../hooks/useDocument';
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
+import type { Schema } from '@strapi/types';
 
 const createLayoutFromFields = <T extends EditFieldLayout | UnknownField>(fields: T[]) => {
   return (
@@ -204,6 +204,7 @@ const VersionContent = () => {
       (schemaAttributes: Schema.Attributes, components: ComponentsDictionary = {}) =>
       (document: Omit<Document, 'id'>) => {
         const schema = { attributes: schemaAttributes };
+
         const transformations = pipe(
           removeFieldsThatDontExistOnSchema(schema),
           prepareTempKeys(schema, components)

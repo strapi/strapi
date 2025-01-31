@@ -33,7 +33,7 @@ const PurchaseSingleSignOn = () => {
               <LinkButton
                 variant="default"
                 endIcon={<ExternalLink />}
-                href="https://strp.cc/46Fk1BA"
+                href="https://strapi.io/features/single-sign-on-sso?utm_campaign=In-Product-CTA&utm_source=Single-sign-on"
                 isExternal
                 target="_blank"
               >

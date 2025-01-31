@@ -22,7 +22,9 @@ module.exports = ({ env }) => ({
     enabled: env.bool('PREVIEW_ENABLED', true),
     config: {
       handler: (uid, { documentId, locale, status }) => {
-        return `/admin/preview/${uid}/${documentId}/${locale}/${status}`;
+        const kind =
+          strapi.contentType(uid).kind === 'collectionType' ? 'collection-types' : 'single-types';
+        return `/admin/preview/${kind}/${uid}/${documentId}/${locale}/${status}`;
       },
     },
   },

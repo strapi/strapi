@@ -94,7 +94,7 @@
   "Settings.tokens.types.full-access": "Acceso completo",
   "Settings.tokens.types.read-only": "Solo lectura",
   "Settings.application.description": "Información global del panel de administración",
-  "Settings.application.edition-title": "plan actual",
+  "Settings.application.edition-title": "Edición actual",
   "Settings.application.get-help": "Consigue ayuda",
   "Settings.application.link-pricing": "Ver todos los planes",
   "Settings.application.link-upgrade": "Actualiza tu panel de administración",
@@ -453,7 +453,7 @@
   "light": "Claro",
   "dark": "Oscuro",
   "Usecase.back-end": "Desarrollador Back-end",
-  "Usecase.button.skip": "Skip this question",
+  "Usecase.button.skip": "Saltar esta pregunta",
   "Usecase.content-creator": "Creador de Contenido",
   "Usecase.front-end": "Desarrollador Front-end",
   "Usecase.full-stack": "Desarrollador Full-stack",
@@ -572,5 +572,12 @@
   "global.table.header.username": "Nombre de usuario",
   "global.type": "Tipo",
   "global.users": "Usuarios",
-  "notification.warning.404": "404 - No Encontrado"
+  "notification.warning.404": "404 - No Encontrado",
+  "components.Blocks.blocks.heading1": "Título 1",
+  "components.Blocks.blocks.heading2": "Título 2",
+  "components.Blocks.blocks.heading3": "Título 3",
+  "components.Blocks.blocks.heading4": "Título 4",
+  "components.Blocks.blocks.heading5": "Título 5",
+  "components.Blocks.blocks.heading6": "Título 6",
+  "components.Blocks.blocks.image": "Imagen"
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   IconButton,
@@ -52,7 +52,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
         </Tr>
       </Thead>
       <Tbody>
-        <Tr onClick={() => onEditClick('reset_password')}>
+        <Tr cursor="pointer" onClick={() => onEditClick('reset_password')}>
           <Td>
             <Box width="3.2rem" height="3.2rem" padding="0.8rem">
               <Refresh
@@ -85,7 +85,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             </IconButton>
           </Td>
         </Tr>
-        <Tr onClick={() => onEditClick('email_confirmation')}>
+        <Tr cursor="pointer" onClick={() => onEditClick('email_confirmation')}>
           <Td>
             <Box width="3.2rem" height="3.2rem" padding="0.8rem">
               <Check
