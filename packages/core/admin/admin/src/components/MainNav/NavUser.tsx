@@ -14,20 +14,18 @@ export interface NavUserProps extends ButtonProps {
 }
 
 const MenuTrigger = styled(Menu.Trigger)`
-  height: 100%;
-  border-radius: 0;
-  border-width: 1px 0 0 0;
-  border-color: ${({ theme }) => theme.colors.neutral150};
-  border-style: solid;
-  padding: ${({ theme }) => theme.spaces[3]};
-  // padding 12px - 1px border width
-  padding-top: 11px;
+  height: ${({ theme }) => theme.spaces[7]};
+  width: ${({ theme }) => theme.spaces[7]};
+  border: none;
+  border-radius: 50%;
+  // Removes inherited 16px padding
+  padding: 0;
   // Prevent empty pixel from appearing below the main nav
   overflow: hidden;
 `;
 
 const MenuContent = styled(Menu.Content)`
-  left: ${({ theme }) => theme.spaces[5]};
+  left: ${({ theme }) => theme.spaces[3]};
 `;
 
 const MenuItem = styled(Menu.Item)`
@@ -42,9 +40,10 @@ const MenuItem = styled(Menu.Item)`
 
 const MenuItemDanger = styled(MenuItem)`
   &:hover {
-  ${({ theme }) => `
+    ${({ theme }) => `
     background: ${theme.colors.danger100};
   `}
+  }
 `;
 
 export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
@@ -60,7 +59,14 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   };
 
   return (
-    <Flex justifyContent="center" {...props}>
+    <Flex
+      justifyContent="center"
+      padding={3}
+      borderStyle="solid"
+      borderWidth="1px 0 0 0"
+      borderColor="neutral150"
+      {...props}
+    >
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Avatar.Item delayMs={0} fallback={initials} />
