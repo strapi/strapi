@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.3.0",
+  "version": "5.9.0",
   "description": "Create and manage content types",
   "repository": {
     "type": "git",
@@ -42,7 +42,11 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -53,15 +57,15 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-rc.12",
-    "@strapi/generators": "workspace:*",
-    "@strapi/icons": "2.0.0-rc.12",
-    "@strapi/utils": "workspace:*",
+    "@strapi/design-system": "2.0.0-rc.14",
+    "@strapi/generators": "5.9.0",
+    "@strapi/icons": "2.0.0-rc.14",
+    "@strapi/utils": "5.9.0",
     "date-fns": "2.30.0",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
@@ -73,9 +77,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
-    "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "workspace:*",
+    "@strapi/admin": "5.9.0",
+    "@strapi/types": "5.9.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -90,7 +93,7 @@
     "styled-components": "6.1.8"
   },
   "peerDependencies": {
-    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "@strapi/admin": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

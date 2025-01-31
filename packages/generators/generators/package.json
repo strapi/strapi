@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generators",
-  "version": "5.3.0",
+  "version": "5.9.0",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",
@@ -35,19 +35,21 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build && run copy-files",
+    "build": "run -T npm-run-all clean --parallel build:code build:types copy-files",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/typescript-utils": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/typescript-utils": "5.9.0",
+    "@strapi/utils": "5.9.0",
     "chalk": "4.1.2",
     "copyfiles": "2.4.1",
     "fs-extra": "11.2.0",
@@ -56,10 +58,9 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0",
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*"
+    "eslint-config-custom": "5.9.0",
+    "tsconfig": "5.9.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

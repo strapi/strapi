@@ -374,8 +374,13 @@ const update = async (
   };
 };
 
+const count = async (where = {}): Promise<number> => {
+  return strapi.db.query('admin::api-token').count({ where });
+};
+
 export {
   create,
+  count,
   regenerate,
   exists,
   checkSaltIsDefined,

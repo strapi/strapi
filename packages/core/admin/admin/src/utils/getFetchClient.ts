@@ -1,7 +1,20 @@
 import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
 
-import type { ApiError } from '../hooks/useAPIErrorHandler';
+import type { errors } from '@strapi/utils';
+
+export type ApiError =
+  | errors.ApplicationError
+  | errors.ForbiddenError
+  | errors.NotFoundError
+  | errors.NotImplementedError
+  | errors.PaginationError
+  | errors.PayloadTooLargeError
+  | errors.PolicyError
+  | errors.RateLimitError
+  | errors.UnauthorizedError
+  | errors.ValidationError
+  | errors.YupValidationError;
 
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
@@ -150,6 +163,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     <Param = unknown>(params?: Param) =>
     (url: string) => {
       if (params) {
+        if (typeof params === 'string') {
+          return `${url}?${params}`;
+        }
+
+        /**
+         * TODO V6: Encoding should be enabled in this step
+         * So the rest of the app doesn't have to worry about it,
+         * It's considered a breaking change because it impacts any API request, including the user's custom code
+         */
         const serializedParams = qs.stringify(params, { encode: false });
         return `${url}?${serializedParams}`;
       }

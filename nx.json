@@ -2,7 +2,6 @@
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
     "production": [
-      "default",
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/*.test.js",
       "!{projectRoot}/**/*.test.api.js",
@@ -21,8 +20,20 @@
   },
   "targetDefaults": {
     "build": {
-      "inputs": ["production", "^production"],
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
       "dependsOn": ["^build"],
+      "cache": true
+    },
+    "build:code": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "build:types": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build:types"],
       "cache": true
     },
     "test:unit": {
@@ -45,5 +56,61 @@
       "cache": true
     }
   },
-  "useInferencePlugins": false
+  "useInferencePlugins": false,
+  "parallel": 8,
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": false
+    }
+  },
+  "release": {
+    "projects": ["packages/**/*", ".github/actions/check-pr-status", "scripts/front"],
+    "changelog": {
+      "workspaceChangelog": {
+        "file": false,
+        "createRelease": "github"
+      }
+    },
+    "version": {
+      "conventionalCommits": false,
+      "git": {
+        "commitMessage": "release: {version}"
+      }
+    },
+    "conventionalCommits": {
+      "types": {
+        "docs": {
+          "changelog": {
+            "title": "📚 Documentation Changes"
+          }
+        },
+        "enhancement": {
+          "changelog": {
+            "title": "💅 Enhancement"
+          }
+        },
+        "feat": {
+          "changelog": {
+            "title": "🚀 New feature"
+          }
+        },
+        "fix": {
+          "changelog": {
+            "title": "🔥 Bug fix"
+          }
+        },
+        "security": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "🚨 Security"
+          }
+        },
+        "chore": {
+          "changelog": {
+            "title": "⚙️ Chore"
+          }
+        }
+      }
+    }
+  }
 }

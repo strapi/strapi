@@ -14,11 +14,13 @@ import {
   getYupValidationErrors,
   useForm,
 } from '@strapi/admin/strapi-admin';
-import { Modules } from '@strapi/types';
+import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
 import { SINGLE_TYPES } from '../constants/collections';
+import { type AnyData, transformDocument } from '../pages/EditView/utils/data';
+import { createDefaultForm } from '../pages/EditView/utils/forms';
 import { useGetDocumentQuery } from '../services/documents';
 import { buildValidParams } from '../utils/api';
 import { createYupSchema } from '../utils/validation';
@@ -28,6 +30,7 @@ import { useDocumentLayout } from './useDocumentLayout';
 
 import type { FindOne } from '../../../shared/contracts/collection-types';
 import type { ContentType } from '../../../shared/contracts/content-types';
+import type { Modules } from '@strapi/types';
 
 interface UseDocumentArgs {
   collectionType: string;
@@ -59,8 +62,16 @@ type UseDocument = (
    */
   schema?: Schema;
   schemas?: Schema[];
-  validate: (document: Document) => null | FormErrors;
   hasError?: boolean;
+  validate: (document: Document) => null | FormErrors;
+  /**
+   * Get the document's title
+   */
+  getTitle: (mainField: string) => string;
+  /**
+   * Get the initial form values for the document
+   */
+  getInitialFormValues: (isCreatingDocument?: boolean) => AnyData | undefined;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -97,6 +108,7 @@ type UseDocument = (
 const useDocument: UseDocument = (args, opts) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const { formatMessage } = useIntl();
 
   const {
     currentData: data,
@@ -107,6 +119,8 @@ const useDocument: UseDocument = (args, opts) => {
     ...opts,
     skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
   });
+  const document = data?.data;
+  const meta = data?.meta;
 
   const {
     components,
@@ -114,6 +128,25 @@ const useDocument: UseDocument = (args, opts) => {
     schemas,
     isLoading: isLoadingSchema,
   } = useContentTypeSchema(args.model);
+  const isSingleType = schema?.kind === 'singleType';
+
+  const getTitle = (mainField: string) => {
+    // Always use mainField if it's not an id
+    if (mainField !== 'id' && document?.[mainField]) {
+      return document[mainField];
+    }
+
+    // When it's a singleType without a mainField, use the contentType displayName
+    if (isSingleType && schema?.info.displayName) {
+      return schema.info.displayName;
+    }
+
+    // Otherwise, use a fallback
+    return formatMessage({
+      id: 'content-manager.containers.untitled',
+      defaultMessage: 'Untitled',
+    });
+  };
 
   React.useEffect(() => {
     if (error) {
@@ -154,18 +187,46 @@ const useDocument: UseDocument = (args, opts) => {
     [validationSchema]
   );
 
+  /**
+   * Here we prepare the form for editing, we need to:
+   * - remove prohibited fields from the document (passwords | ADD YOURS WHEN THERES A NEW ONE)
+   * - swap out count objects on relations for empty arrays
+   * - set __temp_key__ on array objects for drag & drop
+   *
+   * We also prepare the form for new documents, so we need to:
+   * - set default values on fields
+   */
+  const getInitialFormValues = React.useCallback(
+    (isCreatingDocument: boolean = false) => {
+      if ((!document && !isCreatingDocument && !isSingleType) || !schema) {
+        return undefined;
+      }
+
+      /**
+       * Check that we have an ID so we know the
+       * document has been created in some way.
+       */
+      const form = document?.id ? document : createDefaultForm(schema, components);
+
+      return transformDocument(schema, components)(form);
+    },
+    [document, isSingleType, schema, components]
+  );
+
   const isLoading = isLoadingDocument || isFetchingDocument || isLoadingSchema;
   const hasError = !!error;
 
   return {
     components,
-    document: data?.data,
-    meta: data?.meta,
+    document,
+    meta,
     isLoading,
     hasError,
     schema,
     schemas,
     validate,
+    getTitle,
+    getInitialFormValues,
   } satisfies ReturnType<UseDocument>;
 };
 
@@ -231,7 +292,7 @@ const useContentManagerContext = () => {
 
   const layout = useDocumentLayout(model);
 
-  const form = useForm('useContentManagerContext', (state) => state);
+  const form = useForm<unknown>('useContentManagerContext', (state) => state);
 
   const isSingleType = collectionType === SINGLE_TYPES;
   const slug = model;

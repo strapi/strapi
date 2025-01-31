@@ -6,11 +6,12 @@ import {
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Flex, IconButton, Typography } from '@strapi/design-system';
+import { IconButton, Tabs, Typography, Grid } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Link, type To, useNavigate } from 'react-router-dom';
+import { Link, type To } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
@@ -21,38 +22,44 @@ import { usePreviewContext } from '../pages/Preview';
  * -----------------------------------------------------------------------------------------------*/
 
 const ClosePreviewButton = () => {
-  const [{ query }] = useQueryParams();
-  const navigate = useNavigate();
+  const [{ query }] = useQueryParams<{
+    plugins?: Record<string, unknown>;
+  }>();
   const { formatMessage } = useIntl();
 
   const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
   const goBack = useHistory('BackButton', (state) => state.goBack);
   const history = useHistory('BackButton', (state) => state.history);
+  const locationIndex = useHistory('BackButton', (state) => state.currentLocationIndex);
 
-  const fallbackUrl: To = {
+  /**
+   * Get the link destination from the history.
+   * Rely on a fallback (the parent edit view page) if there's no page to go back .
+   */
+  const historyTo = canGoBack ? history.at(locationIndex - 2) : undefined;
+  const fallback = {
     pathname: '..',
     search: stringify(query, { encode: false }),
-  };
+  } satisfies To;
+  const toWithFallback = historyTo ?? fallback;
 
   const handleClick = (e: React.MouseEvent) => {
-    /**
-     * Prevent normal link behavior. We only make it an achor for accessibility reasons.
-     * The point of this logic is to act as the browser's back button when possible, and to fallback
-     * to a link behavior to the edit view when no history is available.
-     *  */
-    e.preventDefault();
-
     if (canGoBack) {
+      // Prevent normal link behavior, go back in the history stack instead
+      e.preventDefault();
       goBack();
-    } else {
-      navigate(fallbackUrl);
+      return;
     }
+
+    // Otherwise rely on native link behavior to go back to the edit view. We don't use navigate()
+    // here in order to get the relative="path" functionality from the Link component.
   };
 
   return (
     <IconButton
       tag={Link}
-      to={history.at(-1) ?? fallbackUrl}
+      relative="path"
+      to={toWithFallback}
       onClick={handleClick}
       label={formatMessage({
         id: 'content-manager.preview.header.close',
@@ -84,15 +91,63 @@ const Status = () => {
   return <DocumentStatus status={status} size="XS" />;
 };
 
+const PreviewTabs = () => {
+  const { formatMessage } = useIntl();
+
+  // URL query params
+  const [{ query }, setQuery] = useQueryParams<{ status: 'draft' | 'published' }>();
+
+  // Get status
+  const document = usePreviewContext('PreviewHeader', (state) => state.document);
+  const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const hasDraftAndPublish = schema?.options?.draftAndPublish ?? false;
+  const documentStatus = getDocumentStatus(document, meta);
+
+  const handleTabChange = (status: string) => {
+    if (status === 'published' || status === 'draft') {
+      setQuery({ status }, 'push', true);
+    }
+  };
+
+  if (!hasDraftAndPublish) {
+    return null;
+  }
+
+  return (
+    <>
+      <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
+        <Tabs.List
+          aria-label={formatMessage({
+            id: 'preview.tabs.label',
+            defaultMessage: 'Document status',
+          })}
+        >
+          <StatusTab value="draft">
+            {formatMessage({
+              id: 'content-manager.containers.List.draft',
+              defaultMessage: 'draft',
+            })}
+          </StatusTab>
+          <StatusTab value="published" disabled={documentStatus === 'draft'}>
+            {formatMessage({
+              id: 'content-manager.containers.List.published',
+              defaultMessage: 'published',
+            })}
+          </StatusTab>
+        </Tabs.List>
+      </Tabs.Root>
+    </>
+  );
+};
+
 /* -------------------------------------------------------------------------------------------------
  * PreviewHeader
  * -----------------------------------------------------------------------------------------------*/
 
 const PreviewHeader = () => {
-  // Get main field
-  const mainField = usePreviewContext('PreviewHeader', (state) => state.mainField);
-  const document = usePreviewContext('PreviewHeader', (state) => state.document);
-  const title = document[mainField];
+  // Get the document title
+  const title = usePreviewContext('PreviewHeader', (state) => state.title);
 
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -110,32 +165,52 @@ const PreviewHeader = () => {
   };
 
   return (
-    <Flex
-      justifyContent="space-between"
+    <Grid.Root
+      gap={3}
+      gridCols={3}
+      paddingLeft={2}
+      paddingRight={2}
       background="neutral0"
-      padding={2}
       borderColor="neutral150"
       tag="header"
     >
-      <Flex gap={3}>
+      {/* Title and status */}
+      <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <Typography tag="h1" fontWeight={600} fontSize={2}>
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={title}>
           {title}
-        </Typography>
+        </PreviewTitle>
         <Status />
-      </Flex>
-      <IconButton
-        type="button"
-        label={formatMessage({
-          id: 'preview.copy.label',
-          defaultMessage: 'Copy preview link',
-        })}
-        onClick={handleCopyLink}
-      >
-        <LinkIcon />
-      </IconButton>
-    </Flex>
+      </Grid.Item>
+      {/* Tabs */}
+      <Grid.Item xs={1} marginBottom="-1px" alignItems="end" margin="auto">
+        <PreviewTabs />
+      </Grid.Item>
+      {/* Copy link */}
+      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2}>
+        <IconButton
+          type="button"
+          label={formatMessage({
+            id: 'preview.copy.label',
+            defaultMessage: 'Copy preview link',
+          })}
+          onClick={handleCopyLink}
+        >
+          <LinkIcon />
+        </IconButton>
+      </Grid.Item>
+    </Grid.Root>
   );
 };
+
+const PreviewTitle = styled(Typography)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const StatusTab = styled(Tabs.Trigger)`
+  text-transform: uppercase;
+`;
 
 export { PreviewHeader };

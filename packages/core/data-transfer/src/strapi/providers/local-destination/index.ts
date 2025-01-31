@@ -11,6 +11,7 @@ import type {
   ProviderType,
   Transaction,
 } from '../../../../types';
+import type { IDiagnosticReporter } from '../../../utils/diagnostic';
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';
@@ -47,6 +48,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   onWarning?: ((message: string) => void) | undefined;
 
+  #diagnostics?: IDiagnosticReporter;
+
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
@@ -58,13 +61,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     this.uploadsBackupDirectoryName = `uploads_backup_${Date.now()}`;
   }
 
-  async bootstrap(): Promise<void> {
+  async bootstrap(diagnostics?: IDiagnosticReporter): Promise<void> {
+    this.#diagnostics = diagnostics;
     this.#validateOptions();
     this.strapi = await this.options.getStrapi();
     if (!this.strapi) {
       throw new ProviderInitializationError('Could not access local strapi');
     }
-
+    this.strapi.db.lifecycles.disable();
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
 
@@ -84,10 +88,22 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     return !excluded && !notIncluded;
   };
 
+  #reportInfo(message: string) {
+    this.#diagnostics?.report({
+      details: {
+        createdAt: new Date(),
+        message,
+        origin: 'local-destination-provider',
+      },
+      kind: 'info',
+    });
+  }
+
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
+    assertValidStrapi(this.strapi);
     this.transaction?.end();
-
+    this.strapi.db.lifecycles.enable();
     // Basically `!== false` but more deterministic
     if (autoDestroy === undefined || autoDestroy === true) {
       await this.strapi?.destroy();
@@ -95,6 +111,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   #validateOptions() {
+    this.#reportInfo('validating options');
     if (!VALID_CONFLICT_STRATEGIES.includes(this.options.strategy)) {
       throw new ProviderValidationError(`Invalid strategy ${this.options.strategy}`, {
         check: 'strategy',
@@ -114,12 +131,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.options.restore) {
       throw new ProviderValidationError('Missing restore options');
     }
+    this.#reportInfo('deleting record ');
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
   async #deleteAllAssets(trx?: Knex.Transaction) {
     assertValidStrapi(this.strapi);
-
+    this.#reportInfo('deleting all assets');
     // if we're not restoring files, don't touch the files
     if (!this.#areAssetsIncluded()) {
       return;
@@ -144,10 +162,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         }
       }
     }
+
+    this.#reportInfo('deleted all assets');
   }
 
   async rollback() {
+    this.#reportInfo('Rolling back transaction');
     await this.transaction?.rollback();
+    this.#reportInfo('Rolled back transaction');
   }
 
   async beforeTransfer() {
@@ -169,6 +191,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getMetadata(): IMetadata {
+    this.#reportInfo('getting metadata');
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
     const strapiVersion = this.strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
@@ -182,6 +205,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getSchemas(): Record<string, Struct.Schema> {
+    this.#reportInfo('getting schema');
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
 
     const schemas = utils.schema.schemasToValidJSON({
@@ -194,6 +218,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   createEntitiesWriteStream(): Writable {
     assertValidStrapi(this.strapi, 'Not able to import entities');
+    this.#reportInfo('creating entities stream');
     const { strategy } = this.options;
 
     const updateMappingTable = (type: string, oldID: number, newID: number) => {
@@ -228,6 +253,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     if (this.strapi.config.get<{ provider: string }>('plugin::upload').provider === 'local') {
+      this.#reportInfo('creating assets backup directory');
       const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -248,6 +274,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         await fse.mkdir(assetsDirectory);
         // Create a .gitkeep file to ensure the directory is not empty
         await fse.outputFile(path.join(assetsDirectory, '.gitkeep'), '');
+        this.#reportInfo(`created assets backup directory ${backupDirectory}`);
       } catch (err) {
         throw new ProviderTransferError(
           'The backup folder for the assets could not be created inside the public folder. Please ensure Strapi has write permissions on the public directory',
@@ -266,22 +293,23 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     if (!this.#areAssetsIncluded()) {
       return;
     }
-
     // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
     if (this.strapi.config.get<{ provider: string }>('plugin::upload').provider === 'local') {
+      this.#reportInfo('removing assets backup');
       assertValidStrapi(this.strapi);
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
         this.uploadsBackupDirectoryName
       );
       await fse.rm(backupDirectory, { recursive: true, force: true });
+      this.#reportInfo('successfully removed assets backup');
     }
   }
 
   // TODO: Move this logic to the restore strategy
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
-
+    this.#reportInfo('creating assets write stream');
     if (!this.#areAssetsIncluded()) {
       throw new ProviderTransferError(
         'Attempting to transfer assets when `assets` is not set in restore options'
@@ -291,7 +319,6 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
     const strapi = this.strapi;
     const transaction = this.transaction;
-    const backupDirectory = this.uploadsBackupDirectoryName;
     const fileEntitiesMapper = this.#entitiesMapper['plugin::upload.file'];
 
     const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
@@ -305,41 +332,6 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
       },
       async write(chunk: IAsset, _encoding, callback) {
         await transaction?.attach(async () => {
-          // TODO: Remove this logic in V5
-          if (!chunk.metadata) {
-            // If metadata does not exist is because it is an old backup file
-            const assetsDirectory = path.join(strapi.dirs.static.public, 'uploads');
-            const entryPath = path.join(assetsDirectory, chunk.filename);
-            const writableStream = fse.createWriteStream(entryPath);
-            chunk.stream
-              .pipe(writableStream)
-              .on('close', () => {
-                callback(null);
-              })
-              .on('error', async (error: NodeJS.ErrnoException) => {
-                const errorMessage =
-                  error.code === 'ENOSPC'
-                    ? " Your server doesn't have space to proceed with the import. "
-                    : ' ';
-
-                try {
-                  await fse.rm(assetsDirectory, { recursive: true, force: true });
-                  this.destroy(
-                    new ProviderTransferError(
-                      `There was an error during the transfer process.${errorMessage}The original files have been restored to ${assetsDirectory}`
-                    )
-                  );
-                } catch (err) {
-                  throw new ProviderTransferError(
-                    `There was an error doing the rollback process. The original files are in ${backupDirectory}, but we failed to restore them to ${assetsDirectory}`
-                  );
-                } finally {
-                  callback(error);
-                }
-              });
-            return;
-          }
-
           const uploadData = {
             ...chunk.metadata,
             stream: Readable.from(chunk.stream),
@@ -347,6 +339,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
           };
 
           const provider = strapi.config.get<{ provider: string }>('plugin::upload').provider;
+
+          const fileId = fileEntitiesMapper?.[uploadData.id];
+          if (!fileId) {
+            callback(new Error(`File ID not found for ID: ${uploadData.id}`));
+          }
 
           try {
             await strapi.plugin('upload').provider.uploadStream(uploadData);
@@ -358,13 +355,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
-              // Support usage of main hash for older versions
-              const condition = uploadData?.id
-                ? { id: fileEntitiesMapper[uploadData.id] }
-                : { hash: uploadData.mainHash };
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: condition,
+                where: { id: fileId },
               });
+              if (!entry) {
+                throw new Error('file not found');
+              }
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
                 specificFormat.url = uploadData.url;
@@ -378,9 +374,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               });
               return callback();
             }
+
             const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { id: fileEntitiesMapper[uploadData.id] },
+              where: { id: fileId },
             });
+            if (!entry) {
+              throw new Error('file not found');
+            }
             entry.url = uploadData.url;
             await strapi.db.query('plugin::upload.file').update({
               where: { id: entry.id },
@@ -400,7 +400,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   async createConfigurationWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Configurations');
-
+    this.#reportInfo('creating configuration write stream');
     const { strategy } = this.options;
 
     if (strategy === 'restore') {
@@ -415,6 +415,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async createLinksWriteStream(): Promise<Writable> {
+    this.#reportInfo('creating links write stream');
     if (!this.strapi) {
       throw new Error('Not able to stream links. Strapi instance not found');
     }
