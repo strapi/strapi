@@ -86,6 +86,8 @@
     "@testing-library/jest-dom": "6.4.5",
     "eslint-config-custom": "5.9.0",
     "jest-environment-jsdom": "29.6.1",
+    "react": "^18",
+    "react-dom": "^18",
     "styled-components": "6.1.8",
     "tsconfig": "5.9.0"
   },

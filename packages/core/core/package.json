@@ -127,6 +127,7 @@
     "@types/node-schedule": "2.1.7",
     "@types/statuses": "2.0.1",
     "eslint-config-custom": "5.9.0",
+    "jest": "29.6.0",
     "supertest": "6.3.3",
     "tsconfig": "5.9.0"
   },

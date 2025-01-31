@@ -54,7 +54,8 @@
     "@types/jest": "29.5.2",
     "eslint-config-custom": "5.9.0",
     "memfs": "4.6.0",
-    "tsconfig": "5.9.0"
+    "tsconfig": "5.9.0",
+    "tslib": "2.8.1"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
