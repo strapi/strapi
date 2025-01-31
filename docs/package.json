@@ -39,7 +39,7 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.5.2",
     "docusaurus-plugin-typedoc": "0.22.0",
-    "typedoc": "0.25.9",
+    "typedoc": "0.27.6",
     "typedoc-plugin-markdown": "3.17.1",
     "typescript": "5.7.3"
   }
