@@ -217,3 +217,4 @@ export {
   removeFieldsThatDontExistOnSchema,
   transformDocument,
 };
+export type { AnyData };

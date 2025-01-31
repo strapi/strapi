@@ -70,7 +70,7 @@ export default {
       try {
         const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
 
-        const layout = (await import('../public/index.html?raw')).default;
+        const layout = (await import('../public/index.html')).default;
 
         const filledLayout = _.template(layout)({
           backendUrl: strapi.config.server.url,
@@ -119,7 +119,7 @@ export default {
     const { error } = ctx.query;
 
     try {
-      const layout = (await import('../public/login.html?raw')).default;
+      const layout = (await import('../public/login.html')).default;
 
       const filledLayout = _.template(layout.toString())({
         actionUrl: `${strapi.config.server.url}/documentation/login`,
