@@ -15,12 +15,15 @@ interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
 }
 
 const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
+  const isRelationOrComponent = ['relation', 'component'].includes(attribute.type);
+  const horizontalPadding = isRelationOrComponent ? '1.6rem' : 0;
+
   if (!hasContent(content, mainField, attribute)) {
     return (
       <Typography
         textColor="neutral800"
-        paddingLeft={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
-        paddingRight={attribute.type === ('relation' || 'component') ? '1.6rem' : 0}
+        paddingLeft={horizontalPadding}
+        paddingRight={horizontalPadding}
       >
         -
       </Typography>
