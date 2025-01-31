@@ -58,6 +58,12 @@ import { useComponent } from './ComponentContext';
 
 import type { Schema } from '@strapi/types';
 
+const CustomTextButton = styled(TextButton)`
+  & > span {
+    font-size: ${({ theme }) => theme.fontSizes[2]};
+  }
+`;
+
 /**
  * Remove a relation, whether it's been already saved or not.
  * It's used both in RelationsList, where the "remove relation" button is, and in the input,
@@ -964,6 +970,9 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     dragPreviewRef(getEmptyImage());
   }, [dragPreviewRef]);
 
+  // TODO: to remove when we are ready to release relations on the fly
+  const isRelationsOnTheFlyEnabled = window.strapi.future.isEnabled('relationsOnTheFlyEnabled');
+
   return (
     <Box
       style={style}
@@ -1007,17 +1016,26 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             ) : null}
             <Flex width="100%" minWidth={0} justifyContent="space-between">
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                <Tooltip description={label}>
-                  {href ? (
-                    <LinkEllipsis tag={NavLink} to={href} isExternal={false}>
+                {isRelationsOnTheFlyEnabled ? (
+                  <Tooltip description={label}>
+                    {/*  eslint-disable-next-line no-console */}
+                    <CustomTextButton onClick={() => console.log('OPEN MODAL')}>
                       {label}
-                    </LinkEllipsis>
-                  ) : (
-                    <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
-                      {label}
-                    </Typography>
-                  )}
-                </Tooltip>
+                    </CustomTextButton>
+                  </Tooltip>
+                ) : (
+                  <Tooltip description={label}>
+                    {href ? (
+                      <LinkEllipsis tag={NavLink} to={href} isExternal={false}>
+                        {label}
+                      </LinkEllipsis>
+                    ) : (
+                      <Typography textColor={disabled ? 'neutral600' : 'primary600'} ellipsis>
+                        {label}
+                      </Typography>
+                    )}
+                  </Tooltip>
+                )}
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
             </Flex>
