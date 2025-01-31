@@ -137,7 +137,7 @@
     "scheduler": "0.23.0",
     "semver": "7.5.4",
     "sift": "16.0.1",
-    "typescript": "5.4.4",
+    "typescript": "5.7.3",
     "use-context-selector": "1.4.1",
     "yup": "0.32.9",
     "zod": "^3.22.4"
