@@ -49,6 +49,7 @@ export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
+export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useAdminUsers } from './services/users';
 
 /**
