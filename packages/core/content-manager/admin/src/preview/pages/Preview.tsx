@@ -11,8 +11,8 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../utils/api';
-import { PreviewContent } from '../components/PreviewContent';
-import { PreviewHeader } from '../components/PreviewHeader';
+import { PreviewContent, UnstablePreviewContent } from '../components/PreviewContent';
+import { PreviewHeader, UnstablePreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 
 import type { UID } from '@strapi/types';
@@ -23,7 +23,7 @@ import type { UID } from '@strapi/types';
 
 interface PreviewContextValue {
   url: string;
-  mainField: string;
+  title: string;
   document: NonNullable<ReturnType<UseDocument>['document']>;
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
@@ -109,6 +109,8 @@ const PreviewPage = () => {
     return <Page.NoData />;
   }
 
+  const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
+
   return (
     <>
       <Page.Title>
@@ -118,20 +120,29 @@ const PreviewPage = () => {
             defaultMessage: '{contentType} preview',
           },
           {
-            contentType: documentLayoutResponse.edit.settings.displayName,
+            contentType: documentTitle,
           }
         )}
       </Page.Title>
       <PreviewProvider
         url={previewUrlResponse.data.data.url}
-        mainField={documentLayoutResponse.edit.settings.mainField}
         document={documentResponse.document}
+        title={documentTitle}
         meta={documentResponse.meta}
         schema={documentResponse.schema}
       >
-        <Flex direction="column" height="100%" alignItems={'stretch'}>
-          <PreviewHeader />
-          <PreviewContent />
+        <Flex direction="column" height="100%" alignItems="stretch">
+          {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
+            <>
+              <UnstablePreviewHeader />
+              <UnstablePreviewContent />
+            </>
+          ) : (
+            <>
+              <PreviewHeader />
+              <PreviewContent />
+            </>
+          )}
         </Flex>
       </PreviewProvider>
     </>
