@@ -1,10 +1,10 @@
 import get from 'lodash/get';
 
-import type { ContentType, Components } from '../../../types';
+import type { ContentType, Components, Component } from '../../../types';
 import type { Internal } from '@strapi/types';
 
 export const createModifiedDataSchema = (
-  contentTypeSchema: ContentType,
+  contentTypeSchema: ContentType | Component,
   retrievedComponents: Internal.UID.Component[],
   allComponentsSchema: Components,
   isInContentTypeView: boolean

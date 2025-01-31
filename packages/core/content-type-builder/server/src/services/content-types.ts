@@ -33,7 +33,7 @@ export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) =>
  * Format a contentType info to be used by the front-end
  */
 export const formatContentType = (contentType: any) => {
-  const { uid, kind, modelName, plugin, collectionName, info } = contentType;
+  const { uid, kind, modelName, plugin, collectionName, info, modelType } = contentType;
 
   return {
     uid,
@@ -51,6 +51,7 @@ export const formatContentType = (contentType: any) => {
       attributes: formatAttributes(contentType),
       visible: isContentTypeVisible(contentType),
       restrictRelationsTo: getRestrictRelationsTo(contentType),
+      modelType,
     },
   };
 };

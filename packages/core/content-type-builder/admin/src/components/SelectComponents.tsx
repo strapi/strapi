@@ -1,11 +1,13 @@
 import { Field, MultiSelectNested } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useDataManager } from '../hooks/useDataManager';
 import { getTrad } from '../utils';
 import { findAttribute } from '../utils/findAttribute';
 
+import { useDataManager } from './DataManager/useDataManager';
+
 import type { Component } from '../types';
+import type { Internal } from '@strapi/types';
 
 type SelectComponentsProps = {
   dynamicZoneTarget: string;
@@ -23,6 +25,7 @@ type SelectComponentsProps = {
     };
   }) => void;
   value: string[];
+  targetUid: Internal.UID.ContentType;
 };
 
 export const SelectComponents = ({
@@ -31,11 +34,13 @@ export const SelectComponents = ({
   name,
   onChange,
   value,
+  targetUid,
 }: SelectComponentsProps) => {
   const { formatMessage } = useIntl();
-  const { componentsGroupedByCategory, modifiedData } = useDataManager();
-  const dzSchema = findAttribute(modifiedData.contentType.schema.attributes, dynamicZoneTarget);
+  const { componentsGroupedByCategory, contentTypes } = useDataManager();
+  const dzSchema = findAttribute(contentTypes[targetUid].schema.attributes, dynamicZoneTarget);
   const alreadyUsedComponents = dzSchema?.components || [];
+
   const filteredComponentsGroupedByCategory = Object.keys(componentsGroupedByCategory).reduce(
     (acc, current) => {
       const filteredComponents = componentsGroupedByCategory[current].filter(({ uid }) => {

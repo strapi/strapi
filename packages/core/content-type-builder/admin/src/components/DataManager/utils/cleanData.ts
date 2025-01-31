@@ -54,23 +54,23 @@ const formatComponent = (
   return formattedComponent;
 };
 
-const formatMainDataType = (data: any, isComponent = false) => {
-  const mainDataUID = get(data, 'uid', null);
+// const formatMainDataType = (data: any, isComponent = false) => {
+//   const mainDataUID = get(data, 'uid', null);
 
-  const formattedAttributes = formatAttributes(get(data, 'schema.attributes', []), mainDataUID);
-  const initObj = isComponent ? { category: get(data, 'category', '') } : {};
+//   const formattedAttributes = formatAttributes(get(data, 'schema.attributes', []), mainDataUID);
+//   const initObj = isComponent ? { category: get(data, 'category', '') } : {};
 
-  const formattedContentType = Object.assign(initObj, omit(data.schema, 'attributes'), {
-    attributes: formattedAttributes,
-  });
+//   const formattedContentType = Object.assign(initObj, omit(data.schema, 'attributes'), {
+//     attributes: formattedAttributes,
+//   });
 
-  delete formattedContentType.uid;
-  delete formattedContentType.isTemporary;
-  delete formattedContentType.visible;
-  delete formattedContentType.restrictRelationsTo;
+//   delete formattedContentType.uid;
+//   delete formattedContentType.isTemporary;
+//   delete formattedContentType.visible;
+//   delete formattedContentType.restrictRelationsTo;
 
-  return formattedContentType;
-};
+//   return formattedContentType;
+// };
 
 /**
  *
@@ -156,6 +156,7 @@ const sortContentType = (types: ContentTypes) =>
         to: `/plugins/${pluginId}/content-types/${uid}`,
         kind: types[uid].schema.kind,
         restrictRelationsTo: types[uid].schema.restrictRelationsTo,
+        status: types[uid].status,
       }))
       .filter((obj) => obj !== null),
     (obj) => camelCase(obj.title)
@@ -163,7 +164,7 @@ const sortContentType = (types: ContentTypes) =>
 
 export {
   formatComponent,
-  formatMainDataType,
+  // formatMainDataType,
   getComponentsToPost,
   getCreatedAndModifiedComponents,
   sortContentType,
