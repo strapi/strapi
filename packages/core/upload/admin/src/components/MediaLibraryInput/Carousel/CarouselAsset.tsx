@@ -1,5 +1,4 @@
 import { Box, Flex } from '@strapi/design-system';
-import { File, FilePdf } from '@strapi/icons';
 import { styled } from 'styled-components';
 
 import { AssetType } from '../../../constants';
@@ -8,6 +7,7 @@ import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 
 import type { File as FileAsset } from '../../../../../shared/contracts/files';
+import { getFileIconComponent } from '../../../utils/icons';
 
 const DocAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
@@ -66,11 +66,17 @@ export const CarouselAsset = ({ asset }: { asset: FileAsset }) => {
 
   return (
     <DocAsset width="100%" height="100%" justifyContent="center" hasRadius>
-      {asset.ext?.includes('pdf') ? (
-        <FilePdf aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
-      ) : (
-        <File aria-label={asset.alternativeText || asset.name} width="24px" height="32px" />
-      )}
+      {(() => {
+        const IconComponent = getFileIconComponent(asset.ext);
+
+        return (
+          <IconComponent
+            aria-label={asset.alternativeText || asset.name}
+            width="24px"
+            height="32px"
+          />
+        );
+      })()}
     </DocAsset>
   );
 };
