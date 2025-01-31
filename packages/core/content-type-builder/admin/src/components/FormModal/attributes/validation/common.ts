@@ -31,7 +31,7 @@ const getUsedContentTypeAttributeNames = (
   isEdition: boolean,
   attributeNameToEdit: string
 ) => {
-  const attributes = ctShema?.schema?.attributes ?? {};
+  const attributes = ctShema?.attributes ?? {};
 
   return Object.keys(attributes).filter((attr) => {
     if (isEdition) {

@@ -3,8 +3,6 @@ import { commonBaseForm } from '../attributes/commonBaseForm';
 import { attributesForm } from '../attributes/form';
 import { nameField } from '../attributes/nameField';
 import { attributeTypes } from '../attributes/types';
-import { createCategorySchema } from '../category/createCategorySchema';
-import { categoryForm } from '../category/form';
 import { componentForm } from '../component/componentForm';
 import { createComponentSchema } from '../component/createComponentSchema';
 import { contentTypeForm } from '../contentType/contentTypeForm';
@@ -15,15 +13,8 @@ import { addItemsToFormSection, FormTypeOptions } from './utils/addItemsToFormSe
 import { createComponentCollectionName } from './utils/createCollectionName';
 import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
+import type { ContentType } from '../../../types';
 import type { Internal } from '@strapi/types';
-
-type ContentType = {
-  schema: {
-    singularName: string;
-    pluralName: string;
-    collectionName: string;
-  };
-};
 
 export type SchemaParams = {
   schemaAttributes: any;
@@ -135,7 +126,7 @@ export const forms = {
       }
     ) {
       // Get the attributes object on the schema
-      const attributes: Array<Attribute> = currentSchema?.schema?.attributes ?? [];
+      const attributes: Array<Attribute> = currentSchema?.attributes ?? [];
       const usedAttributeNames = getUsedAttributeNames(attributes, options);
 
       try {
@@ -214,14 +205,14 @@ export const forms = {
         models: any;
       },
       extensions: any,
-      contentTypes: Record<string, ContentType>
+      contentTypes: Record<Internal.UID.ContentType, ContentType>
     ) {
       const singularNames = Object.values(contentTypes).map((contentType) => {
-        return contentType.schema.singularName;
+        return contentType.info.singularName;
       });
 
       const pluralNames = Object.values(contentTypes).map((contentType: any) => {
-        return contentType?.schema?.pluralName ?? '';
+        return contentType?.info?.pluralName ?? '';
       });
 
       const takenNames = isEditing
@@ -230,29 +221,28 @@ export const forms = {
 
       const takenSingularNames = isEditing
         ? singularNames.filter((singName) => {
-            const { schema } = contentTypes[ctUid];
+            const { info } = contentTypes[ctUid];
 
-            return schema.singularName !== singName;
+            return info.singularName !== singName;
           })
         : singularNames;
 
       const takenPluralNames = isEditing
         ? pluralNames.filter((pluralName) => {
-            const { schema } = contentTypes[ctUid];
+            const { info } = contentTypes[ctUid];
 
-            return schema.pluralName !== pluralName;
+            return info.pluralName !== pluralName;
           })
         : pluralNames;
 
       // return the array of collection names not all normalized
       const collectionNames = Object.values(contentTypes).map((contentType) => {
-        return contentType?.schema?.collectionName ?? '';
+        return contentType?.collectionName ?? '';
       });
 
       const takenCollectionNames = isEditing
         ? collectionNames.filter((collectionName) => {
-            const { schema } = contentTypes[ctUid];
-            const currentCollectionName = schema.collectionName;
+            const { collectionName: currentCollectionName } = contentTypes[ctUid];
 
             return collectionName !== currentCollectionName;
           })
@@ -317,7 +307,7 @@ export const forms = {
         ? alreadyTakenAttributes.filter((uid: Internal.UID.Component) => uid !== compoUid)
         : alreadyTakenAttributes;
       const collectionNames = Object.values(components).map((component: any) => {
-        return component?.schema?.collectionName;
+        return component?.collectionName;
       });
 
       const currentCollectionName = createComponentCollectionName(
@@ -363,21 +353,6 @@ export const forms = {
         }
 
         return dynamiczoneForm.base.default();
-      },
-    },
-  },
-  editCategory: {
-    schema(allCategories: Array<any>, initialData: any) {
-      const allowedCategories = allCategories
-        .filter((cat) => cat !== initialData.name)
-        .map((cat) => cat.toLowerCase());
-
-      return createCategorySchema(allowedCategories);
-    },
-    form: {
-      advanced: () => ({ sections: [] }),
-      base() {
-        return categoryForm.base;
       },
     },
   },

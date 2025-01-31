@@ -121,7 +121,6 @@
   "form.button.select-component": "컴포넌트 선택",
   "form.button.single-type.description": "About us, 홈페이지 등 단일 콘텐츠가 필요한 경우에 적합합니다.",
   "from": "from",
-  "listView.headerLayout.description": "콘텐츠 구조를 만듭니다.",
   "modalForm.attribute.form.base.name.description": "속성 이름에는 공백을 사용할 수 없습니다.",
   "modalForm.attribute.form.base.name.placeholder": "예: slug, seoUrl, 표준Url",
   "modalForm.attribute.target-field": "Attached field",
