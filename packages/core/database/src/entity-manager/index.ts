@@ -615,6 +615,15 @@ export const createEntityManager = (db: Database): EntityManager => {
             row.order = orderMap[encodedId];
           });
 
+          // delete previous relations
+          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows as any, {
+            uid,
+            attributeName,
+            joinTable,
+            db,
+            transaction: trx,
+          });
+
           await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();
 
           continue;
