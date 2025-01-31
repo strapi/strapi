@@ -108,7 +108,7 @@
   },
   "devDependencies": {
     "@strapi/ts-zen": "^0.2.0",
-    "@swc/core": "1.9.3",
+    "@swc/core": "1.10.12",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
     "@types/delegates": "1.0.0",

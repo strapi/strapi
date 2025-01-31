@@ -167,7 +167,7 @@
     "style-loader": "3.3.4",
     "typescript": "5.7.3",
     "vite": "5.2.14",
-    "webpack": "^5.90.3",
+    "webpack": "5.97.1",
     "webpack-bundle-analyzer": "^4.10.1",
     "webpack-dev-middleware": "6.1.2",
     "webpack-hot-middleware": "2.26.1",
