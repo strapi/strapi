@@ -19,11 +19,11 @@ export type EditableContentTypeData = {
 };
 
 type ModifiedData = {
-  kind: Struct.ContentTypeKind;
+  kind?: Struct.ContentTypeKind;
 };
 
 export const canEditContentType = (data: Record<string, any>, modifiedData: ModifiedData) => {
-  const kind = get(data, ['contentType', 'schema', 'kind'], '');
+  const kind = get(data, ['schema', 'kind'], '');
 
   // if kind isn't modified or content type is a single type, there is no need to check attributes.
   if (kind === 'singleType' || kind === modifiedData.kind) {

@@ -35,24 +35,29 @@ interface RelationNaturePickerProps {
   oneThatIsCreatingARelationWithAnother: string;
   relationType: string;
   target: string;
+  targetUid: string;
 }
+
+const ctRelations = ['oneWay', 'oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'manyWay'];
+const componentRelations = ['oneWay', 'manyWay'];
 
 export const RelationNaturePicker = ({
   naturePickerType,
   oneThatIsCreatingARelationWithAnother,
   relationType,
   target,
+  targetUid,
 }: RelationNaturePickerProps) => {
   const dispatch = useDispatch();
   const { formatMessage } = useIntl();
 
-  const { contentTypes, modifiedData } = useDataManager();
-  const ctRelations = ['oneWay', 'oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'manyWay'];
-  const componentRelations = ['oneWay', 'manyWay'];
+  const { contentTypes } = useDataManager();
+
   const dataType =
-    naturePickerType === 'contentType'
-      ? get(modifiedData, [naturePickerType, 'schema', 'kind'], '')
-      : naturePickerType;
+    naturePickerType === 'component'
+      ? 'component'
+      : get(contentTypes, [targetUid, 'schema', 'kind'], '');
+
   const relationsType = (
     dataType === 'collectionType' ? ctRelations : componentRelations
   ) as RelationType[];

@@ -44,8 +44,7 @@ import { TabForm } from '../TabForm';
 import { TextareaEnum } from '../TextareaEnum';
 
 import { forms } from './forms/forms';
-import { actions } from './reducer';
-import { makeSelectFormModal } from './selectors';
+import { actions, initialState, type State as FormModalState } from './reducer';
 import { canEditContentType } from './utils/canEditContentType';
 import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
@@ -55,12 +54,12 @@ import type { CustomFieldAttributeParams } from '../../contexts/DataManagerConte
 import type { AttributeType } from '../../types';
 import type { Internal } from '@strapi/types';
 
-/* eslint-disable indent */
-/* eslint-disable react/no-array-index-key */
-
 const FormComponent = styled.form`
   overflow: auto;
 `;
+
+const selectState = (state: Record<string, unknown>) =>
+  (state['content-type-builder_formModal'] || initialState) as FormModalState;
 
 export const FormModal = () => {
   const {
@@ -89,10 +88,10 @@ export const FormModal = () => {
   const getCustomField = useStrapiApp('FormModal', (state) => state.customFields.get);
   const customField = getCustomField(customFieldUid);
 
-  const formModalSelector = React.useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
   const { toggleNotification } = useNotification();
-  const reducerState = useSelector((state) => formModalSelector(state), shallowEqual);
+  const reducerState = useSelector(selectState, shallowEqual);
+
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
@@ -114,7 +113,7 @@ export const FormModal = () => {
     editCategory,
     editCustomFieldAttribute,
     submitData,
-    modifiedData: allDataSchema,
+    // modifiedData: allDataSchema,
     nestedComponents,
     setModifiedData,
     sortedContentTypesList,
@@ -130,8 +129,7 @@ export const FormModal = () => {
     modifiedData,
   } = reducerState;
 
-  const pathToSchema =
-    forTarget === 'contentType' || forTarget === 'component' ? [forTarget] : [forTarget, targetUid];
+  const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
 
   React.useEffect(() => {
     if (isOpen) {
@@ -148,15 +146,13 @@ export const FormModal = () => {
         trackUsage('willEditFieldOfContentType');
       }
 
-      const pathToAttributes = [...pathToSchema, 'schema', 'attributes'];
-
       // Case:
       // the user opens the modal chooseAttributes
       // selects dynamic zone => set the field name
       // then goes to step 1 (the modal is addComponentToDynamicZone) and finally reloads the app.
       // In this particular if the user tries to add components to the zone it will pop an error since the dz is unknown
       const foundDynamicZoneTarget =
-        findAttribute(get(allDataSchema, pathToAttributes, []), dynamicZoneTarget) || null;
+        findAttribute(get(type, 'schema.attributes', []), dynamicZoneTarget) || null;
 
       // Edit category
       if (modalType === 'editCategory' && actionType === 'edit') {
@@ -183,8 +179,8 @@ export const FormModal = () => {
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
         const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } = get(
-          allDataSchema,
-          [...pathToSchema, 'schema'],
+          type,
+          'schema',
           {
             displayName: null,
             pluginOptions: {},
@@ -209,14 +205,12 @@ export const FormModal = () => {
 
       // Edit component
       if (modalType === 'component' && actionType === 'edit') {
-        const data = get(allDataSchema, pathToSchema, {});
-
         dispatch(
           actions.setDataToEdit({
             data: {
-              displayName: data.schema.displayName,
-              category: data.category,
-              icon: data.schema.icon,
+              displayName: type.schema.displayName,
+              category: type.category,
+              icon: type.schema.icon,
             },
           })
         );
@@ -244,7 +238,7 @@ export const FormModal = () => {
       // Set the predefined data structure to create an attribute
       if (attributeType) {
         const attributeToEditNotFormatted = findAttribute(
-          get(allDataSchema, pathToAttributes, []),
+          get(type, ['schema', 'attributes'], []),
           attributeName
         ) as AttributeType;
         const attributeToEdit = {
@@ -318,7 +312,7 @@ export const FormModal = () => {
   const isEditingCategory = modalType === 'editCategory';
   const isPickingAttribute = modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.displayName || '');
-  const attributes = get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], null) as {
+  const attributes = get(type, ['schema', 'attributes'], null) as {
     name: string;
   }[];
 
@@ -334,7 +328,7 @@ export const FormModal = () => {
         Object.keys(contentTypes),
         actionType === 'edit',
         // currentUID
-        get(allDataSchema, [...pathToSchema, 'uid'], null),
+        type?.schema.uid ?? null,
         reservedNames,
         ctbFormsAPI,
         contentTypes
@@ -350,12 +344,12 @@ export const FormModal = () => {
         actionType === 'edit',
         components,
         modifiedData.displayName || '',
-        get(allDataSchema, [...pathToSchema, 'uid'], null)
+        type?.schema.uid ?? null
         // ctbFormsAPI
       );
     } else if (isCreatingCustomFieldAttribute) {
       schema = forms.customField.schema({
-        schemaAttributes: get(allDataSchema, [...pathToSchema, 'schema', 'attributes'], []),
+        schemaAttributes: get(type, ['schema', 'attributes'], []),
         attributeType: customField!.type,
         reservedNames,
         schemaData: { modifiedData, initialData },
@@ -409,10 +403,11 @@ export const FormModal = () => {
         );
       }
       schema = forms.attribute.schema(
-        get(allDataSchema, pathToSchema, {}),
+        get(type, 'schema', {}),
         type,
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
+        // @ts-expect-error - need to fix the type
         { modifiedData, initialData },
         ctbFormsAPI
       );
@@ -519,7 +514,7 @@ export const FormModal = () => {
           });
         } else {
           // We cannot switch from collection type to single when the modal is making relations other than oneWay or manyWay
-          if (canEditContentType(allDataSchema, modifiedData)) {
+          if (canEditContentType(type, modifiedData)) {
             onCloseModal();
 
             await submitData(modifiedData);
@@ -910,7 +905,7 @@ export const FormModal = () => {
     formErrors,
     isAddingAComponentToAnotherComponent,
     isCreatingComponentWhileAddingAField,
-    mainBoxHeader: get(allDataSchema, [...pathToSchema, 'schema', 'displayName'], ''),
+    mainBoxHeader: get(type, ['schema', 'displayName'], ''),
     modifiedData,
     naturePickerType: forTarget,
     isCreating,
@@ -926,7 +921,7 @@ export const FormModal = () => {
     attributes,
     extensions: ctbFormsAPI,
     forTarget,
-    contentTypeSchema: allDataSchema.contentType || {},
+    contentTypeSchema: type || {},
     customField,
   }).sections;
   const baseForm = formToDisplay.base({
@@ -937,7 +932,7 @@ export const FormModal = () => {
     attributes,
     extensions: ctbFormsAPI,
     forTarget,
-    contentTypeSchema: allDataSchema.contentType || {},
+    contentTypeSchema: type || {},
     customField,
   }).sections;
 

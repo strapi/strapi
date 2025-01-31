@@ -6,7 +6,7 @@ import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
+import { unstable_usePrompt as usePrompt, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { List } from '../../components/List';
@@ -18,17 +18,26 @@ import { getTrad } from '../../utils/getTrad';
 
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 
+import type { SchemaType } from '../../types';
+import type { Internal } from '@strapi/types';
+
 const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
 `;
 
 const ListView = () => {
-  const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
-    useDataManager();
+  const {
+    isInDevelopmentMode,
+    isInContentTypeView,
+    submitData,
+    contentTypes,
+    components,
+    initialData,
+  } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const match = useMatch('/plugins/content-type-builder/:kind/:currentUID');
+  const { contentTypeUid, componentUid } = useParams();
 
   const {
     onOpenModalAddComponentsToDZ,
@@ -38,25 +47,39 @@ const ListView = () => {
     onOpenModalEditCustomField,
   } = useFormModalNavigation();
 
-  const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
-  const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
-  const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
-  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
-  const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
+  const targetUid = (contentTypeUid || componentUid)!;
+  const type = isInContentTypeView ? contentTypes[targetUid] : components[targetUid];
 
-  const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
-  const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
-  const hasModelBeenModified = !isEqual(modifiedData, initialData);
+  const isTemporary = get(type, ['isTemporary'], false);
+  const contentTypeKind = get(type, ['schema', 'kind'], null);
+
+  const attributes = get(type, ['schema', 'attributes'], []);
+  const isFromPlugin = has(type, ['plugin']);
+  const hasModelBeenModified = false; // !isEqual(modifiedData, initialData);
 
   const forTarget = isInContentTypeView ? 'contentType' : 'component';
+
+  const isCreatingFirstContentType = contentTypeUid === 'create-content-type';
+
+  let label = get(type, ['schema', 'displayName'], '');
+  const kind = get(type, ['schema', 'kind'], '');
+
+  if (!label && isCreatingFirstContentType) {
+    label = formatMessage({
+      id: getTrad('button.model.create'),
+      defaultMessage: 'Create new collection type',
+    });
+  }
+
+  const canEdit = isInDevelopmentMode && !isFromPlugin && !isCreatingFirstContentType;
 
   const handleClickAddComponentToDZ = (dynamicZoneTarget?: string) => {
     onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
   };
 
   const handleClickEditField = async (
-    forTarget: string,
-    targetUid: string,
+    forTarget: SchemaType,
+    targetUid: Internal.UID.Schema,
     attributeName: string,
     type: string,
     customField: any
@@ -83,20 +106,8 @@ const ListView = () => {
     }
   };
 
-  let label = get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '');
-  const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
-
-  const isCreatingFirstContentType = match?.params.currentUID === 'create-content-type';
-
-  if (!label && isCreatingFirstContentType) {
-    label = formatMessage({
-      id: getTrad('button.model.create'),
-      defaultMessage: 'Create new collection type',
-    });
-  }
-
   const onEdit = () => {
-    const contentType = kind || firstMainDataPath;
+    const contentType = kind;
 
     if (contentType === 'collectionType') {
       trackUsage('willEditNameOfContentType');
@@ -106,8 +117,8 @@ const ListView = () => {
     }
 
     onOpenModalEditSchema({
-      modalType: firstMainDataPath,
-      forTarget: firstMainDataPath,
+      modalType: forTarget,
+      forTarget: forTarget,
       targetUid,
       kind: contentType,
     });
@@ -140,7 +151,13 @@ const ListView = () => {
         startIcon={<Check />}
         onClick={async () => await submitData()}
         type="submit"
-        disabled={isEqual(modifiedData, initialData)}
+        disabled={isEqual(
+          {
+            contentTypes,
+            components,
+          },
+          initialData
+        )}
       >
         {formatMessage({
           id: 'global.save',
@@ -150,7 +167,7 @@ const ListView = () => {
     </Flex>
   );
 
-  const secondaryAction = isInDevelopmentMode && !isFromPlugin && !isCreatingFirstContentType && (
+  const secondaryAction = canEdit && (
     <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
       {formatMessage({
         id: 'app.utils.edit',

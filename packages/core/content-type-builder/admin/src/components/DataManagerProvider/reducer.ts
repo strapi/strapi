@@ -37,7 +37,10 @@ const initialState: DataManagerStateType = {
   modifiedData: {
     ...DEFAULT_MODIFIED_DATA,
   },
-  reservedNames: {},
+  reservedNames: {
+    models: [],
+    attributes: [],
+  },
   isLoading: true,
 };
 
@@ -64,7 +67,7 @@ const findAttributeIndex = (schema: any, attributeToFind?: string) => {
 type InitPayload = {
   components: Record<string, Component>;
   contentTypes: Record<string, ContentType>;
-  reservedNames: Record<string, string>;
+  reservedNames: DataManagerStateType['reservedNames'];
 };
 
 type AddAttributePayload = {

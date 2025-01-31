@@ -22,19 +22,15 @@ export const ComponentList = ({
   isNestedInDZComponent = false,
   firstLoopComponentUid,
 }: ComponentListProps) => {
-  const { modifiedData } = useDataManager();
-  const {
-    schema: { attributes },
-  } = get(modifiedData, ['components', component], {
-    schema: { attributes: [] },
-  });
+  const { components } = useDataManager();
+  const type = get(components, component);
 
   return (
     <Tr $isChildOfDynamicZone={isFromDynamicZone} className="component-row">
       <td colSpan={12}>
         <List
           customRowComponent={customRowComponent}
-          items={attributes}
+          items={type.schema.attributes}
           targetUid={component}
           firstLoopComponentUid={firstLoopComponentUid || component}
           editTarget="components"

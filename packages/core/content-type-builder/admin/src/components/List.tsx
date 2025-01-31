@@ -27,22 +27,29 @@ import { ComponentList } from './ComponentList';
 import { DynamicZoneList } from './DynamicZoneList';
 import { NestedTFooter } from './NestedFooter';
 
-import type { SchemaType } from '../types';
 import type { Internal } from '@strapi/types';
 
-interface ListProps {
+type ListProps = {
   addComponentToDZ?: () => void;
   customRowComponent: ComponentType<any>;
-  editTarget: SchemaType;
   firstLoopComponentUid?: string;
   isFromDynamicZone?: boolean;
   isNestedInDZComponent?: boolean;
   isMain?: boolean;
   items: any[];
   secondLoopComponentUid?: string | null;
-  targetUid?: Internal.UID.Schema;
   isSub?: boolean;
-}
+} & (
+  | {
+      addComponentToDZ?: () => void;
+      editTarget: 'component' | 'components';
+      targetUid: Internal.UID.Component;
+    }
+  | {
+      editTarget: 'contentType';
+      targetUid: Internal.UID.ContentType;
+    }
+);
 
 export const List = ({
   addComponentToDZ,
@@ -59,7 +66,12 @@ export const List = ({
 }: ListProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { isInDevelopmentMode, modifiedData, isInContentTypeView } = useDataManager();
+  const { isInDevelopmentMode, isInContentTypeView, components, contentTypes } = useDataManager();
+
+  const type =
+    editTarget === 'component' || editTarget === 'components'
+      ? components[targetUid]
+      : contentTypes[targetUid];
 
   const { onOpenModalAddField } = useFormModalNavigation();
   const onClickAddField = () => {
@@ -198,24 +210,21 @@ export const List = ({
                     isFromDynamicZone={isFromDynamicZone}
                     secondLoopComponentUid={secondLoopComponentUid}
                   />
-
                   {type === 'component' && (
                     <ComponentList
                       {...item}
                       customRowComponent={customRowComponent}
-                      targetUid={targetUid}
                       isNestedInDZComponent={isFromDynamicZone}
-                      editTarget={editTarget}
                       firstLoopComponentUid={firstLoopComponentUid}
                     />
                   )}
 
                   {type === 'dynamiczone' && (
                     <DynamicZoneList
-                      {...item}
+                      name={item.name}
+                      components={item.components}
                       customRowComponent={customRowComponent}
-                      addComponent={addComponentToDZ}
-                      targetUid={targetUid}
+                      addComponent={addComponentToDZ!}
                     />
                   )}
                 </Fragment>
@@ -230,9 +239,9 @@ export const List = ({
           {formatMessage({
             id: getTrad(
               `form.button.add.field.to.${
-                modifiedData.contentType
-                  ? modifiedData.contentType.schema.kind
-                  : editTarget || 'collectionType'
+                editTarget === 'component' || editTarget === 'components'
+                  ? 'component'
+                  : type?.schema.kind
               }`
             ),
             defaultMessage: 'Add another field',

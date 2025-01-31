@@ -74,10 +74,9 @@ export const ComponentCard = ({
   isInDevelopmentMode = false,
   onClick,
 }: ComponentCardProps) => {
-  const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
-  const {
-    schema: { icon, displayName },
-  } = get(modifiedData, ['components', component], { schema: {} });
+  const { components, removeComponentFromDynamicZone } = useDataManager();
+  const type = get(components, component);
+  const { icon, displayName } = type?.schema || {};
 
   const onClose = (e: any) => {
     e.stopPropagation();

@@ -23,6 +23,7 @@ type SelectComponentsProps = {
     };
   }) => void;
   value: string[];
+  targetUid: string;
 };
 
 export const SelectComponents = ({
@@ -31,11 +32,13 @@ export const SelectComponents = ({
   name,
   onChange,
   value,
+  targetUid,
 }: SelectComponentsProps) => {
   const { formatMessage } = useIntl();
-  const { componentsGroupedByCategory, modifiedData } = useDataManager();
-  const dzSchema = findAttribute(modifiedData.contentType.schema.attributes, dynamicZoneTarget);
+  const { componentsGroupedByCategory, contentTypes } = useDataManager();
+  const dzSchema = findAttribute(contentTypes[targetUid].schema.attributes, dynamicZoneTarget);
   const alreadyUsedComponents = dzSchema?.components || [];
+
   const filteredComponentsGroupedByCategory = Object.keys(componentsGroupedByCategory).reduce(
     (acc, current) => {
       const filteredComponents = componentsGroupedByCategory[current].filter(({ uid }) => {

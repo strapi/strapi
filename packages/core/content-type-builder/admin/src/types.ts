@@ -1,4 +1,4 @@
-import type { Internal, Schema } from '@strapi/types';
+import type { Internal, Schema, Struct } from '@strapi/types';
 
 export type IntlLabel = {
   id: string;
@@ -37,7 +37,7 @@ export interface ContentType {
   title?: string;
   plugin?: string;
   to?: string;
-  kind?: 'singleType' | 'collectionType';
+  kind?: Struct.ContentTypeKind;
   restrictRelationsTo?: unknown;
   schema?: any;
   [key: string]: any;
@@ -56,7 +56,10 @@ export interface DataManagerStateType {
     contentType?: ContentType;
     component?: Component;
   };
-  reservedNames: Record<string, string>;
+  reservedNames: {
+    models: string[];
+    attributes: string[];
+  };
   isLoading: boolean;
   [key: string]: any;
 }

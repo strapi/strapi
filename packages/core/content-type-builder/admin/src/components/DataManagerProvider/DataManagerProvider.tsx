@@ -22,10 +22,8 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
-import { FormModal } from '../FormModal/FormModal';
 
-import { actions } from './reducer';
-import { makeSelectDataManagerProvider } from './selectors';
+import { actions, initialState } from './reducer';
 import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
 import { createDataObject } from './utils/createDataObject';
 import { createModifiedDataSchema } from './utils/createModifiedDataSchema';
@@ -37,7 +35,7 @@ import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfo
 import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import { validateSchema } from './utils/validateSchema';
 
-import type { ContentType, SchemaType, Components } from '../../types';
+import type { ContentType, SchemaType, Components, DataManagerStateType } from '../../types';
 import type { Internal } from '@strapi/types';
 
 interface DataManagerProviderProps {
@@ -51,11 +49,15 @@ interface CustomFieldAttributeParams {
   initialAttribute: Record<string, any>;
 }
 
+const selectState = (state: Record<string, unknown>) =>
+  (state['content-type-builder_dataManagerProvider'] || initialState) as DataManagerStateType;
+
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
   // refactor
   const { components, contentTypes, isLoading, initialData, modifiedData, reservedNames } =
-    useSelector(makeSelectDataManagerProvider());
+    useSelector(selectState);
+
   const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const { setCurrentStep, setStepState } = useGuidedTour('DataManagerProvider', (state) => state);
@@ -632,7 +634,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       }}
     >
       {children}
-      {isInDevelopmentMode && <FormModal />}
     </DataManagerContext.Provider>
   );
 };

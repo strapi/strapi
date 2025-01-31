@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { ComponentType, useState } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
@@ -16,10 +16,9 @@ import type { Internal } from '@strapi/types';
 
 interface DynamicZoneListProps {
   addComponent: (name?: string) => void;
-  components: Array<string>;
-  customRowComponent?: () => void;
+  components: Array<Internal.UID.Component>;
+  customRowComponent?: ComponentType<any>;
   name?: string;
-  targetUid: Internal.UID.Component;
 }
 
 const StyledAddIcon = styled(Plus)`
@@ -63,7 +62,6 @@ export const DynamicZoneList = ({
   components = [],
   addComponent,
   name,
-  targetUid,
 }: DynamicZoneListProps) => {
   const { isInDevelopmentMode } = useDataManager();
   const [activeTab, setActiveTab] = useState(0);
@@ -116,11 +114,6 @@ export const DynamicZoneList = ({
         </FixedBox>
         <ComponentContentBox>
           {components.map((component, index) => {
-            const props = {
-              customRowComponent,
-              component,
-            };
-
             return (
               <Box
                 id={`dz-${name}-panel-${index}`}
@@ -132,9 +125,9 @@ export const DynamicZoneList = ({
                 <table>
                   <tbody>
                     <ComponentList
-                      {...props}
                       isFromDynamicZone
-                      component={targetUid}
+                      component={component}
+                      customRowComponent={customRowComponent}
                       key={component}
                     />
                   </tbody>
