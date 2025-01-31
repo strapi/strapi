@@ -113,7 +113,7 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
             <Flex justifyContent="center">
               <Wrapper>
                 <IconWrapper>
-                  <PicturePlus aria-hidden />
+                  <PicturePlus width={50} height={50} aria-hidden />
                 </IconWrapper>
 
                 <Box paddingTop={3} paddingBottom={5}>
