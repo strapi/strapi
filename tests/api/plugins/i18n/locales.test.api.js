@@ -55,8 +55,6 @@ describe('CRUD locales', () => {
 
     // Delete all data that has been created
     await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
-    await strapi.db.query('api::product.product').deleteMany();
-
     await strapi.destroy();
     await builder.cleanup();
   });
