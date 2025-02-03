@@ -4,7 +4,7 @@ import { styled } from 'styled-components';
 
 import { useDataManager } from '../../../../hooks/useDataManager';
 import { isAllowedContentTypesForRelations } from '../../../../utils';
-import { ON_CHANGE_RELATION_TARGET } from '../../../FormModal/constants';
+import { actions } from '../../../FormModal/reducer';
 
 interface RelationTargetPickerProps {
   oneThatIsCreatingARelationWithAnother: string;
@@ -40,15 +40,16 @@ export const RelationTargetPicker = ({
     () => {
       const selectedContentTypeFriendlyName = plugin ? `${plugin}_${title}` : title;
 
-      dispatch({
-        type: ON_CHANGE_RELATION_TARGET,
-        target: {
-          value: uid,
-          oneThatIsCreatingARelationWithAnother,
-          selectedContentTypeFriendlyName,
-          targetContentTypeAllowedRelations: restrictRelationsTo,
-        },
-      });
+      dispatch(
+        actions.onChangeRelationTarget({
+          target: {
+            value: uid,
+            oneThatIsCreatingARelationWithAnother,
+            selectedContentTypeFriendlyName,
+            targetContentTypeAllowedRelations: restrictRelationsTo,
+          },
+        })
+      );
     };
 
   /**
