@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -11,14 +10,15 @@ import {
   FlexComponent,
   BoxComponent,
   Menu,
-  IconButton,
   Divider,
 } from '@strapi/design-system';
-import { Link, More } from '@strapi/icons';
+import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
+
+import { EditorToolbarObserver, ObservedComponent } from '../../EditorToolbarObserver';
 
 import {
   type BlocksStore,
@@ -550,105 +550,6 @@ const LinkButton = ({
   );
 };
 
-interface ObservedToolbarComponentProps {
-  index: number;
-  lastVisibleIndex: number;
-  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  rootRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-}
-
-const ObservedToolbarComponent = ({
-  index,
-  lastVisibleIndex,
-  setLastVisibleIndex,
-  rootRef,
-  children,
-}: ObservedToolbarComponentProps) => {
-  const isVisible = index <= lastVisibleIndex;
-
-  const containerRef = useElementOnScreen<HTMLDivElement>(
-    (isVisible) => {
-      /**
-       * It's the MoreMenu's job to make an item not visible when there's not room for it.
-       * But we need to react here to the element becoming visible again.
-       */
-      if (isVisible) {
-        setLastVisibleIndex((prev) => Math.max(prev, index));
-      }
-    },
-    { threshold: 1, root: rootRef.current }
-  );
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        /**
-         * Use visibility so that the element occupies the space if requires even when there's not
-         * enough room for it to be visible. The empty reserved space will be clipped by the
-         * overflow:hidden rule on the parent, so it doesn't affect the UI.
-         * This way we can keep observing its visiblity and react to browser resize events.
-         */
-        visibility: isVisible ? 'visible' : 'hidden',
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
-interface ObservedComponent {
-  toolbar: React.ReactNode;
-  menu: React.ReactNode;
-  key: string;
-}
-
-interface MoreMenuProps {
-  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  hasHiddenItems: boolean;
-  rootRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-}
-
-const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
-  const { formatMessage } = useIntl();
-  const containerRef = useElementOnScreen<HTMLButtonElement>(
-    (isVisible) => {
-      // We only react to the menu becoming invisible. When that happens, we hide the last item.
-      if (!isVisible) {
-        /**
-         * If there's no room for any item, the index can be -1.
-         * This is intentional, in that case only the more menu will be visible.
-         **/
-        setLastVisibleIndex((prev) => prev - 1);
-      }
-    },
-    { threshold: 1, root: rootRef.current }
-  );
-
-  return (
-    <Menu.Root defaultOpen={false}>
-      <Menu.Trigger
-        endIcon={null}
-        paddingLeft={0}
-        paddingRight={0}
-        ref={containerRef}
-        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
-      >
-        <IconButton
-          variant="ghost"
-          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
-          tag="span"
-        >
-          <More aria-hidden focusable={false} />
-        </IconButton>
-      </Menu.Trigger>
-      <Menu.Content>{children}</Menu.Content>
-    </Menu.Root>
-  );
-};
-
 const MenuDivider = styled(Divider)`
   /* Negative horizontal margin to compensate Menu.Content's padding */
   margin: ${({ theme }) => theme.spaces[1]} -${({ theme }) => theme.spaces[1]};
@@ -776,51 +677,14 @@ const BlocksToolbar = () => {
     },
   ];
 
-  const toolbarRef = React.useRef<HTMLElement>(null);
-  const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(
-    observedComponents.length - 1
-  );
-  const hasHiddenItems = lastVisibleIndex < observedComponents.length - 1;
-  const menuIndex = lastVisibleIndex + 1;
-
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper gap={2} padding={2} width="100%">
         <BlocksDropdown />
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex direction="row" gap={1} grow={1} overflow="hidden" ref={toolbarRef}>
-            {observedComponents
-              .map((component, index) => (
-                <ObservedToolbarComponent
-                  lastVisibleIndex={lastVisibleIndex}
-                  setLastVisibleIndex={setLastVisibleIndex}
-                  index={index}
-                  rootRef={toolbarRef}
-                  key={component.key}
-                >
-                  {component.toolbar}
-                </ObservedToolbarComponent>
-              ))
-              /**
-               * Display the "more" menu in the right position among the items.
-               * We splice here after the map above to avoid messing with the indexes,
-               * since the ObservedToolbarComponent component relies on them.
-               */
-              .toSpliced(
-                menuIndex,
-                0,
-                <MoreMenu
-                  setLastVisibleIndex={setLastVisibleIndex}
-                  hasHiddenItems={hasHiddenItems}
-                  rootRef={toolbarRef}
-                  key="more-menu"
-                >
-                  {observedComponents.slice(menuIndex).map((component) => (
-                    <React.Fragment key={component.key}>{component.menu}</React.Fragment>
-                  ))}
-                </MoreMenu>
-              )}
+          <Flex direction="row" gap={1} grow={1} overflow="hidden">
+            <EditorToolbarObserver editor="blocks" observedComponents={observedComponents} />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>
