@@ -1,4 +1,4 @@
-import { Data, Modules } from '@strapi/types';
+import type { Data, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 /**

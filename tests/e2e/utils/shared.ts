@@ -25,6 +25,39 @@ export const locateFirstAfter = async (page: Page, firstText: string, secondText
   return item;
 };
 
+interface LocatorCriteria {
+  type: string; // The HTML tag type (e.g., "div", "button", "a")
+  text: string; // The text content to locate
+}
+
+export const locateSequence = async (page: Page, sequence: LocatorCriteria[]) => {
+  if (sequence.length < 2) {
+    throw new Error('Sequence must contain at least two elements.');
+  }
+
+  let xpathExpression = '';
+
+  // Build the XPath for the sequence
+  for (let i = 0; i < sequence.length; i++) {
+    const { type, text } = sequence[i];
+
+    const tagCondition = type ? `self::${type}` : 'self::*';
+    const textCondition = `contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "${text.toLowerCase()}")`;
+
+    if (i === 0) {
+      // The first element in the sequence
+      xpathExpression += `//${type || '*'}[${textCondition}]`;
+    } else {
+      // Subsequent elements in the sequence
+      xpathExpression += `/following::*[${tagCondition} and ${textCondition}]`;
+    }
+  }
+
+  // Create the locator
+  const locator = page.locator(`xpath=${xpathExpression}`).first();
+  return locator;
+};
+
 /**
  * Navigate to a page and confirm the header, awaiting each step
  */

@@ -2,7 +2,7 @@ import { omit, assoc, merge, curry } from 'lodash/fp';
 
 import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
 
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';

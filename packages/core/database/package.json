@@ -1,6 +1,6 @@
 {
   "name": "@strapi/database",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "description": "Strapi's database layer",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -31,16 +31,18 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T tsc --noEmit && run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/utils": "5.8.0",
+    "@strapi/utils": "5.9.0",
     "ajv": "8.16.0",
     "date-fns": "2.30.0",
     "debug": "4.3.4",
@@ -51,10 +53,9 @@
     "umzug": "3.8.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.8.0",
-    "tsconfig": "5.8.0"
+    "eslint-config-custom": "5.9.0",
+    "tsconfig": "5.9.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

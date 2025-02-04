@@ -62,12 +62,12 @@ const addLabelActionToField = (field: EditFieldLayout) => {
         ? 'This value is unique for the selected locale'
         : 'This value is the same across all locales',
     },
-    icon: isFieldLocalized ? <Earth /> : <EarthStriked />,
+    icon: isFieldLocalized ? <Earth /> : null,
   };
 
   return {
     ...field,
-    labelAction: <LabelAction {...labelActionProps} />,
+    labelAction: isFieldLocalized ? <LabelAction {...labelActionProps} /> : null,
   };
 };
 
