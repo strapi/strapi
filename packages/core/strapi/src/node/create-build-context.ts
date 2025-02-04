@@ -3,7 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
-import { Core, Modules } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import type { Server } from 'node:http';
 
 import type { CLIContext } from '../cli/types';

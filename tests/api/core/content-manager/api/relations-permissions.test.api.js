@@ -16,6 +16,11 @@ let product;
 let shop;
 let user;
 
+const internals = {
+  roles: [],
+  users: [],
+};
+
 const populateShop = ['products'];
 
 const productModel = {
@@ -82,6 +87,9 @@ const createUserAndReq = async (userName, permissions) => {
     email: `${userName}.user@strapi.io`,
     roles: [role.id],
   });
+
+  internals.roles.push(role);
+  internals.users.push(user);
 
   return createAuthRequest({ strapi, userInfo: user });
 };
@@ -152,6 +160,8 @@ describe('Relation permissions', () => {
   });
 
   afterAll(async () => {
+    await utils.deleteUsersById(internals.users.map((user) => user.id));
+    await utils.deleteRolesById(internals.roles.map((role) => role.id));
     await strapi.destroy();
     await builder.cleanup();
   });

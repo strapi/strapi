@@ -129,7 +129,7 @@
   "Settings.application.customization.modal.upload.next": "下一步",
   "Settings.application.customization.size-details": "最大尺寸:{dimension}×{dimension},最大文件大小:{size}KB",
   "Settings.application.description": "管理面板的全局信息",
-  "Settings.application.edition-title": "当前计划",
+  "Settings.application.edition-title": "当前版本",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {社区版} other {企业版}}",
   "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {添加座位} other {联系销售}}",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "已达上限:添加座位以邀请更多用户",
