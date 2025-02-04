@@ -224,6 +224,9 @@ describe('useDocument', () => {
             "pluginOptions": {},
             "type": "json",
           },
+          "name": {
+            "type": "string",
+          },
           "notrepeat_req": {
             "component": "blog.test-como",
             "pluginOptions": {},
@@ -328,6 +331,40 @@ describe('useDocument', () => {
      * so therefore should not be in the dictionary.
      */
     expect(result.current.components['profiles.image']).toBeUndefined();
+  });
+
+  it('should return a getTitle function', async () => {
+    const { result } = renderHook(() =>
+      useDocument({
+        collectionType: 'collection-types',
+        model: mockData.contentManager.contentType,
+        documentId: '12345',
+      })
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getTitle).toBeInstanceOf(Function);
+    expect(result.current.getTitle('name')).toBe('Entry 1');
+  });
+
+  it('should return a getInitialFormValues function', async () => {
+    const { result } = renderHook(() =>
+      useDocument({
+        collectionType: 'collection-types',
+        model: mockData.contentManager.contentType,
+        documentId: '12345',
+      })
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.getInitialFormValues).toBeInstanceOf(Function);
+    expect(result.current.getInitialFormValues()).toMatchInlineSnapshot(`
+      {
+        "name": "Entry 1",
+      }
+    `);
   });
 });
 
