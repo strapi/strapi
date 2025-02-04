@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import { typeMap } from './content-types';
-import { clickAndWait, findAndClose, navToHeader } from './shared';
+import { clickAndWait, findAndClose, locateSequence, navToHeader } from './shared';
 
 export type FieldValueValue = string | number | boolean | null | Array<ComponentValue>;
 
@@ -38,6 +38,28 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       }
       break;
 
+    case 'component_repeatable':
+    case 'component':
+      if (Array.isArray(value)) {
+        for (const component of value) {
+          const { fields: componentFields, name: componentName } = component;
+
+          // Locate the component by its name and click the button to add it
+          const buttonLocator = await locateSequence(page, [
+            { type: 'div', text: componentName },
+            { type: 'button', text: 'add one' },
+          ]);
+          await buttonLocator.click();
+
+          // Fill component fields
+          if (componentFields && Array.isArray(componentFields)) {
+            for (const field of componentFields) {
+              await fillField(page, field);
+            }
+          }
+        }
+      }
+      break;
     case 'dz':
       if (Array.isArray(value)) {
         for (const component of value) {
@@ -160,6 +182,7 @@ export const verifyFields = async (page: Page, fields: FieldValue[]): Promise<vo
           }
         }
         break;
+      // TODO: component fields should actually check that they are in the same component
       default:
         const fieldValue = await page.getByLabel(name).inputValue();
         expect(fieldValue).toBe(String(value)); // Verify text/numeric input values

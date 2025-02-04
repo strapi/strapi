@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';

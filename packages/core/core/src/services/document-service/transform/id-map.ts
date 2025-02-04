@@ -1,4 +1,4 @@
-import { Core, Data, UID } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 import { async, contentTypes } from '@strapi/utils';
 
 const hasDraftAndPublish = (uid: UID.CollectionType) => {
