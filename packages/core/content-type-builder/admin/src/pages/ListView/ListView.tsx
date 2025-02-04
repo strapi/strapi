@@ -18,8 +18,6 @@ import { getTrad } from '../../utils/getTrad';
 
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 
-/* eslint-disable indent */
-
 const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
 `;
@@ -120,55 +118,53 @@ const ListView = () => {
     message: formatMessage({ id: getTrad('prompt.unsaved'), defaultMessage: 'Are you sure?' }),
   });
 
+  const primaryAction = isInDevelopmentMode && (
+    <Flex gap={2} marginLeft={2}>
+      {/* DON'T display the add field button when the content type has not been created */}
+      {!isCreatingFirstContentType && (
+        <Button
+          startIcon={<Plus />}
+          variant="secondary"
+          minWidth="max-content"
+          onClick={() => {
+            onOpenModalAddField({ forTarget, targetUid });
+          }}
+        >
+          {formatMessage({
+            id: getTrad('button.attributes.add.another'),
+            defaultMessage: 'Add another field',
+          })}
+        </Button>
+      )}
+      <Button
+        startIcon={<Check />}
+        onClick={async () => await submitData()}
+        type="submit"
+        disabled={isEqual(modifiedData, initialData)}
+      >
+        {formatMessage({
+          id: 'global.save',
+          defaultMessage: 'Save',
+        })}
+      </Button>
+    </Flex>
+  );
+
+  const secondaryAction = isInDevelopmentMode && !isFromPlugin && !isCreatingFirstContentType && (
+    <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
+      {formatMessage({
+        id: 'app.utils.edit',
+        defaultMessage: 'Edit',
+      })}
+    </Button>
+  );
+
   return (
     <>
       <LayoutsHeaderCustom
         id="title"
-        primaryAction={
-          isInDevelopmentMode && (
-            <Flex gap={2} marginLeft={2}>
-              {/* DON'T display the add field button when the content type has not been created */}
-              {!isCreatingFirstContentType && (
-                <Button
-                  startIcon={<Plus />}
-                  variant="secondary"
-                  minWidth="max-content"
-                  onClick={() => {
-                    onOpenModalAddField({ forTarget, targetUid });
-                  }}
-                >
-                  {formatMessage({
-                    id: getTrad('button.attributes.add.another'),
-                    defaultMessage: 'Add another field',
-                  })}
-                </Button>
-              )}
-              <Button
-                startIcon={<Check />}
-                onClick={async () => await submitData()}
-                type="submit"
-                disabled={isEqual(modifiedData, initialData)}
-              >
-                {formatMessage({
-                  id: 'global.save',
-                  defaultMessage: 'Save',
-                })}
-              </Button>
-            </Flex>
-          )
-        }
-        secondaryAction={
-          isInDevelopmentMode &&
-          !isFromPlugin &&
-          !isCreatingFirstContentType && (
-            <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
-              {formatMessage({
-                id: 'app.utils.edit',
-                defaultMessage: 'Edit',
-              })}
-            </Button>
-          )
-        }
+        primaryAction={primaryAction}
+        secondaryAction={secondaryAction}
         title={upperFirst(label)}
         subtitle={formatMessage({
           id: getTrad('listView.headerLayout.description'),
@@ -183,10 +179,9 @@ const ListView = () => {
               <LinkToCMSettingsView
                 key="link-to-cm-settings-view"
                 targetUid={targetUid}
-                isTemporary={isTemporary}
                 isInContentTypeView={isInContentTypeView}
                 contentTypeKind={contentTypeKind}
-                disabled={isCreatingFirstContentType}
+                disabled={isCreatingFirstContentType || isTemporary}
               />
             </Flex>
           </Flex>

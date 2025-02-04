@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -58,11 +58,15 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist/",
-    "strapi-server.js"
+    "dist/"
   ],
   "scripts": {
-    "build": "pack-up build && vite build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin build:types:internals",
+    "build:types:internals": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -72,7 +76,7 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json && run -T tsc -p ee/admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
@@ -82,10 +86,10 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.0.0-rc.14",
     "@strapi/icons": "2.0.0-rc.14",
-    "@strapi/permissions": "5.8.0",
-    "@strapi/types": "5.8.0",
-    "@strapi/typescript-utils": "5.8.0",
-    "@strapi/utils": "5.8.0",
+    "@strapi/permissions": "5.9.0",
+    "@strapi/types": "5.9.0",
+    "@strapi/typescript-utils": "5.9.0",
+    "@strapi/utils": "5.9.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -133,15 +137,14 @@
     "scheduler": "0.23.0",
     "semver": "7.5.4",
     "sift": "16.0.1",
-    "typescript": "5.3.2",
+    "typescript": "5.4.4",
     "use-context-selector": "1.4.1",
     "yup": "0.32.9",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "5.8.0",
-    "@strapi/data-transfer": "5.8.0",
-    "@strapi/pack-up": "5.0.2",
+    "@strapi/admin-test-utils": "5.9.0",
+    "@strapi/data-transfer": "5.9.0",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",
     "@types/invariant": "2.2.36",

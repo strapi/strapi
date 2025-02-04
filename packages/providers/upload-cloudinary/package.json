@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-upload-cloudinary",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "description": "Cloudinary provider for strapi upload",
   "keywords": [
     "upload",
@@ -36,20 +36,21 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.8.0",
+    "@strapi/utils": "5.9.0",
     "cloudinary": "^1.41.0",
     "into-stream": "^5.1.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
-    "eslint-config-custom": "5.8.0",
-    "tsconfig": "5.8.0"
+    "eslint-config-custom": "5.9.0",
+    "tsconfig": "5.9.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
