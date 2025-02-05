@@ -442,7 +442,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
     return (
       <StyledMenuItem
-        onClick={() => toggleList(format)}
+        onSelect={() => toggleList(format)}
         isActive={isListActive()}
         disabled={isListDisabled()}
       >
@@ -531,7 +531,7 @@ const LinkButton = ({
 
   if (location === 'menu') {
     return (
-      <StyledMenuItem onClick={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
+      <StyledMenuItem onSelect={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
         <Link />
         {formatMessage(label)}
       </StyledMenuItem>
@@ -724,7 +724,7 @@ const BlocksToolbar = () => {
     ...Object.entries(modifiers).map(([name, modifier]) => {
       const Icon = modifier.icon;
       const isActive = modifier.checkIsActive(editor);
-      const handleClick = () => modifier.handleToggle(editor);
+      const handleSelect = () => modifier.handleToggle(editor);
 
       return {
         toolbar: (
@@ -734,12 +734,12 @@ const BlocksToolbar = () => {
             icon={modifier.icon}
             label={modifier.label}
             isActive={modifier.checkIsActive(editor)}
-            handleClick={handleClick}
+            handleClick={handleSelect}
             disabled={isButtonDisabled}
           />
         ),
         menu: (
-          <StyledMenuItem onClick={handleClick} isActive={isActive}>
+          <StyledMenuItem onSelect={handleSelect} isActive={isActive}>
             <Icon />
             {formatMessage(modifier.label)}
           </StyledMenuItem>
