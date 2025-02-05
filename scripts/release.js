@@ -67,7 +67,6 @@ const yargs = require('yargs');
       dryRun: options.dryRun,
       verbose: options.verbose,
       gitCommit: options.gitCommit,
-      gitTag: options.gitTag,
       preid: options.preid,
     });
 
@@ -78,7 +77,7 @@ const yargs = require('yargs');
         dryRun: options.dryRun,
         verbose: options.verbose,
         gitCommit: false,
-        gitTag: false,
+        gitTag: options.gitTag,
       });
     }
   }

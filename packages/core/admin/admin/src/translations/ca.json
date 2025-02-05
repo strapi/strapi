@@ -94,7 +94,7 @@
   "Settings.application.Strapi-version": "versió de Strapi",
   "Settings.application.StrapiVersion": "versió de Strapi",
   "Settings.application.description": "Informació global del panell d'administració",
-  "Settings.application.edition-title": "pla actual",
+  "Settings.application.edition-title": "edició actual",
   "Settings.application.get-help": "Aconsegueix ajuda",
   "Settings.application.link-pricing": "Veure tots els plans",
   "Settings.application.link-upgrade": "Actualitza el panell d'administració",

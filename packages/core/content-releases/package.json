@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -41,7 +41,11 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -51,15 +55,15 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/database": "5.8.0",
-    "@strapi/design-system": "2.0.0-rc.14",
-    "@strapi/icons": "2.0.0-rc.14",
-    "@strapi/types": "5.8.0",
-    "@strapi/utils": "5.8.0",
+    "@strapi/database": "5.9.0",
+    "@strapi/design-system": "2.0.0-rc.16",
+    "@strapi/icons": "2.0.0-rc.16",
+    "@strapi/types": "5.9.0",
+    "@strapi/utils": "5.9.0",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
     "formik": "2.4.5",
@@ -71,10 +75,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.8.0",
-    "@strapi/admin-test-utils": "5.8.0",
-    "@strapi/content-manager": "5.8.0",
-    "@strapi/pack-up": "5.0.2",
+    "@strapi/admin": "5.9.0",
+    "@strapi/admin-test-utils": "5.9.0",
+    "@strapi/content-manager": "5.9.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -86,7 +89,7 @@
     "react-query": "3.39.3",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "typescript": "5.3.2"
+    "typescript": "5.4.4"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",

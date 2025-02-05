@@ -61,7 +61,7 @@
   "Roles.components.List.empty.withSearch": "Det er ingen rolle som matcher søket ({search})...",
   "Settings.PageTitle": "Innstillinger - {name}",
   "Settings.application.description": "Se prosjektdetaljer",
-  "Settings.application.edition-title": "NÅVÆRENDE PLAN",
+  "Settings.application.edition-title": "NÅVÆRENDE utgave",
   "Settings.application.link-pricing": "Se alle priser",
   "Settings.application.link-upgrade": "Oppgrader ditt projekt",
   "Settings.application.node-version": "NODE VERSION",
