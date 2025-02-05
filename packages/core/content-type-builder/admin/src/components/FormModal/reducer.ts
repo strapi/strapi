@@ -37,7 +37,7 @@ type OnChangeRelationTargetPayload = {
   target: {
     oneThatIsCreatingARelationWithAnother: string;
     selectedContentTypeFriendlyName: string;
-    targetContentTypeAllowedRelations: Schema.Attribute.RelationKind.Any | null;
+    targetContentTypeAllowedRelations: Schema.Attribute.RelationKind.Any[] | null;
     value: string;
   };
 };
@@ -142,7 +142,10 @@ const slice = createSlice({
           modifiedData.targetAttribute
         );
 
-        if (!targetContentTypeAllowedRelations.includes(currentRelationType)) {
+        if (
+          currentRelationType &&
+          !targetContentTypeAllowedRelations.includes(currentRelationType)
+        ) {
           const relationToSet = targetContentTypeAllowedRelations[0];
           didChangeRelationTypeBecauseOfRestrictedRelation = true;
           changedRelationType = relationToSet;
