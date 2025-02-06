@@ -12,7 +12,6 @@ import {
   BoxComponent,
   Menu,
   IconButton,
-  Divider,
 } from '@strapi/design-system';
 import { Link, More } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -613,6 +612,7 @@ interface MoreMenuProps {
 
 const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
   const { formatMessage } = useIntl();
+  const { editor } = useBlocksEditorContext('MoreMenu');
   const containerRef = useElementOnScreen<HTMLButtonElement>(
     (isVisible) => {
       // We only react to the menu becoming invisible. When that happens, we hide the last item.
@@ -644,20 +644,10 @@ const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: Mo
           <More aria-hidden focusable={false} />
         </IconButton>
       </Menu.Trigger>
-      <Menu.Content>{children}</Menu.Content>
+      <Menu.Content onCloseAutoFocus={(e) => e.preventDefault()}>{children}</Menu.Content>
     </Menu.Root>
   );
 };
-
-const MenuDivider = styled(Divider)`
-  /* Negative horizontal margin to compensate Menu.Content's padding */
-  margin: ${({ theme }) => theme.spaces[1]} -${({ theme }) => theme.spaces[1]};
-  width: calc(100% + ${({ theme }) => theme.spaces[2]});
-  /* Hide divider if there's nothing above in the menu */
-  &:first-child {
-    display: none;
-  }
-`;
 
 const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
   &:hover {
@@ -767,7 +757,7 @@ const BlocksToolbar = () => {
       ),
       menu: (
         <>
-          <MenuDivider />
+          <Menu.Separator />
           <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
           <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
         </>
