@@ -612,7 +612,6 @@ interface MoreMenuProps {
 
 const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
   const { formatMessage } = useIntl();
-  const { editor } = useBlocksEditorContext('MoreMenu');
   const containerRef = useElementOnScreen<HTMLButtonElement>(
     (isVisible) => {
       // We only react to the menu becoming invisible. When that happens, we hide the last item.
