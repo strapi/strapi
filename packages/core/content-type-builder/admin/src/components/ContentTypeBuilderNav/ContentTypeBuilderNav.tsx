@@ -33,7 +33,7 @@ const SubNavLinkCustom = styled(SubNavLink)`
 `;
 
 export const ContentTypeBuilderNav = () => {
-  const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
+  const { menu, search } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
 
   const pluginName = formatMessage({
@@ -45,9 +45,9 @@ export const ContentTypeBuilderNav = () => {
     <SubNav aria-label={pluginName}>
       <SubNavHeader
         searchable
-        value={searchValue}
-        onClear={() => onSearchChange('')}
-        onChange={(e) => onSearchChange(e.target.value)}
+        value={search.value}
+        onClear={() => search.clear()}
+        onChange={(e) => search.onChange(e.target.value)}
         label={pluginName}
         searchLabel={formatMessage({
           id: 'global.search',

@@ -1,11 +1,11 @@
 import get from 'lodash/get';
 
-import * as actions from '../constants';
-import { reducer, initialState } from '../reducer';
+import { reducer, initialState, actions } from '../reducer';
 
 import { data as testData } from './data';
 
 import type { Component } from '../../../types';
+import type { Internal } from '@strapi/types';
 
 describe('CTB | components | DataManagerProvider | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
@@ -85,11 +85,10 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action: any = {
-        type: actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
+      const action = actions.addCreatedComponentToDynamicZone({
         dynamicZoneTarget: 'dz',
         componentsToAdd: ['default.test'],
-      };
+      });
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -177,11 +176,10 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action: any = {
-        type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
+      const action = actions.changeDynamicZoneComponents({
         dynamicZoneTarget: 'dz',
         newComponents: ['default.dish'],
-      };
+      });
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -214,11 +212,10 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
       const componentToAddUid = 'default.closingperiod';
 
-      const action: any = {
-        type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
+      const action = actions.changeDynamicZoneComponents({
         dynamicZoneTarget: 'dz',
         newComponents: [componentToAddUid],
-      };
+      });
 
       const expected = {
         ...initialState,
@@ -250,14 +247,12 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
   describe('CREATE_COMPONENT_SCHEMA', () => {
     it('Should add the created component schema to the components object when creating a component using the left menu link', () => {
-      const action: any = {
-        type: actions.CREATE_COMPONENT_SCHEMA,
+      const action = actions.createComponentSchema({
         data: { name: 'new component', icon: 'arrow-alt-circle-down' },
         componentCategory: 'test',
-        schemaType: 'component',
         uid: 'test.new-component',
         shouldAddComponentToData: false,
-      };
+      });
 
       const state: any = {
         ...initialState,
@@ -269,12 +264,12 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         ...initialState,
         components: {
           ...testData.components,
-          [action.uid]: {
-            uid: action.uid,
+          [action.payload.uid]: {
+            uid: action.payload.uid,
             isTemporary: true,
-            category: action.componentCategory,
+            category: action.payload.componentCategory,
             schema: {
-              ...action.data,
+              ...action.payload.data,
               attributes: [],
             },
           },
@@ -286,20 +281,20 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
     });
 
     it('Should add the created component schema to the components object, create the attribute and also add the created component to modifiedData.components when using the add attribute modal', () => {
-      const action: any = {
-        type: actions.CREATE_COMPONENT_SCHEMA,
+      const action = actions.createComponentSchema({
         data: { name: 'new component', icon: 'arrow-alt-circle-down' },
         componentCategory: 'test',
-        schemaType: 'component',
+
         uid: 'test.new-component',
         shouldAddComponentToData: true,
-      };
+      });
+
       const compoToCreate = {
-        uid: action.uid,
+        uid: action.payload.uid,
         isTemporary: true,
-        category: action.componentCategory,
+        category: action.payload.componentCategory,
         schema: {
-          ...action.data,
+          ...action.payload.data,
           attributes: [],
         },
       };
@@ -318,12 +313,12 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         ...initialState,
         components: {
           ...testData.components,
-          [action.uid]: compoToCreate,
+          [action.payload.uid]: compoToCreate,
         },
         initialComponents: testData.components,
         modifiedData: {
           components: {
-            [action.uid]: compoToCreate,
+            [action.payload.uid]: compoToCreate,
           },
           contentType: { ok: true },
         },
@@ -343,7 +338,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
       const state = { ...initialState };
 
-      const action: any = { type: actions.CREATE_SCHEMA, uid, data };
+      const action = actions.createSchema({ uid, data });
 
       const expected = {
         ...initialState,
@@ -396,55 +391,9 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action: any = { type: actions.DELETE_NOT_SAVED_TYPE };
+      const action = actions.deleteNotSavedType();
 
       expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('GET_DATA_SUCCEEDED', () => {
-    it('should add api data for the content type builder (content type, components and reserved names)', () => {
-      const components = {
-        'default.test': {
-          uid: 'default.test',
-          category: 'default',
-          schema: {
-            attributes: [],
-          },
-        },
-      };
-      const contentTypes = {
-        'api::test.test': {
-          uid: 'api::test.test',
-          schema: {
-            attributes: [],
-          },
-        },
-      };
-      const reservedNames = {
-        models: ['admin', 'ctb'],
-        attributes: ['attributes', 'length'],
-      };
-
-      const state = { ...initialState };
-      const expected = {
-        ...initialState,
-        components,
-        contentTypes,
-        initialComponents: components,
-        initialContentTypes: contentTypes,
-        reservedNames,
-        isLoading: false,
-      };
-
-      expect(
-        reducer(state, {
-          type: actions.GET_DATA_SUCCEEDED,
-          components,
-          contentTypes,
-          reservedNames,
-        } as any)
-      ).toEqual(expected);
     });
   });
 
@@ -452,11 +401,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
     it('Should return the initial state constant', () => {
       const state = { ...initialState, component: { foo: {} } };
 
-      expect(
-        reducer(state, {
-          type: actions.RELOAD_PLUGIN,
-        } as any)
-      ).toEqual(initialState);
+      expect(reducer(state, actions.reloadPlugin())).toEqual(initialState);
     });
   });
 
@@ -544,11 +489,10 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         modifiedData,
       };
 
-      const action: any = {
-        type: actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE,
+      const action = actions.removeComponentFromDynamicZone({
         dzName: 'dz',
         componentToRemoveIndex: 1,
-      };
+      });
 
       const expected = {
         ...initialState,
@@ -616,11 +560,10 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action: any = {
-        type: actions.REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
+      const action = actions.removeFieldFromDisplayedComponent({
         componentUid: 'default.test',
         attributeToRemoveName: 'other',
-      };
+      });
 
       const expected = {
         ...initialState,
@@ -653,7 +596,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       const schemaToSet = {
         components: {},
         contentType: {
-          uid: 'test',
+          uid: 'test' as Internal.UID.ContentType,
         },
       };
 
@@ -661,22 +604,28 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         ...initialState,
         modifiedData: null,
         initialData: null,
-        isLoadingForDataToBeSet: true,
       };
 
       const expected = {
         ...initialState,
-        modifiedData: schemaToSet,
-        initialData: schemaToSet,
-        isLoadingForDataToBeSet: false,
+        modifiedData: {
+          contentTypes: {},
+          ...schemaToSet,
+        },
+        initialData: {
+          contentTypes: {},
+          ...schemaToSet,
+        },
       };
 
       expect(
-        reducer(state, {
-          type: actions.SET_MODIFIED_DATA,
-          schemaToSet,
-          hasJustCreatedSchema: true,
-        } as any)
+        reducer(
+          state,
+          actions.setModifiedData({
+            schemaToSet,
+            hasJustCreatedSchema: true,
+          })
+        )
       ).toEqual(expected);
     });
 
@@ -684,7 +633,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       const schemaToSet = {
         components: {},
         contentType: {
-          uid: 'test',
+          uid: 'test' as Internal.UID.ContentType,
         },
       };
 
@@ -701,17 +650,24 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         initialContentTypes: { ok: false },
         components: { ok: true },
         contentTypes: { ok: false },
-        initialData: schemaToSet,
-        modifiedData: schemaToSet,
-        isLoadingForDataToBeSet: false,
+        initialData: {
+          contentTypes: {},
+          ...schemaToSet,
+        },
+        modifiedData: {
+          contentTypes: {},
+          ...schemaToSet,
+        },
       };
 
       expect(
-        reducer(state, {
-          type: actions.SET_MODIFIED_DATA,
-          schemaToSet,
-          hasJustCreatedSchema: false,
-        } as any)
+        reducer(
+          state,
+          actions.setModifiedData({
+            schemaToSet,
+            hasJustCreatedSchema: false,
+          })
+        )
       ).toEqual(expected);
     });
   });
@@ -741,11 +697,10 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action: any = {
-        type: actions.UPDATE_SCHEMA,
+      const action = actions.updateSchema({
         data,
         schemaType: 'contentType',
-      };
+      });
       const expected = {
         ...initialState,
         modifiedData: {
@@ -812,12 +767,12 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const action: any = {
-        type: actions.UPDATE_SCHEMA,
+      const action = actions.updateSchema({
         data,
         schemaType: 'component',
         uid: 'test',
-      };
+      });
+
       const expected = {
         ...initialState,
         components: {
