@@ -38,7 +38,7 @@ export default [
     handler: 'authentication.forgotPassword',
     config: {
       auth: false,
-      middlewares: ['email::rateLimit'],
+      middlewares: ['plugin::email.rateLimit'],
     },
   },
   {
