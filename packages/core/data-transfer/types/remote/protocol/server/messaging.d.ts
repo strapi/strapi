@@ -5,6 +5,7 @@ export type Message<T = unknown> = {
   uuid?: string;
   data?: T | null;
   error?: ServerError | null;
+  diagnostic?: Diagnostic;
 };
 
 // Successful
