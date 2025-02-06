@@ -15,7 +15,6 @@ interface MoreMenuProps {
   rootRef: React.RefObject<HTMLElement>;
   children: React.ReactNode;
   triggerVariant?: IconButtonProps['variant'];
-  popoverPlacement?: Menu.ContentProps['popoverPlacement'];
 }
 
 export const MoreMenu = ({
@@ -23,7 +22,6 @@ export const MoreMenu = ({
   hasHiddenItems,
   rootRef,
   children,
-  popoverPlacement,
   triggerVariant = 'ghost',
 }: MoreMenuProps) => {
   const { formatMessage } = useIntl();
@@ -59,7 +57,12 @@ export const MoreMenu = ({
         tag={IconButton}
         icon={<More />}
       />
-      <Menu.Content maxHeight="100%" minWidth="256px" popoverPlacement={popoverPlacement}>
+      <Menu.Content
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        maxHeight="100%"
+        minWidth="256px"
+        popoverPlacement="bottom-end"
+      >
         {children}
       </Menu.Content>
     </Menu.Root>
@@ -165,7 +168,6 @@ export const EditorToolbarObserver = ({
         rootRef={toolbarRef}
         key="more-menu"
         triggerVariant={editor === 'markdown' ? 'tertiary' : 'ghost'}
-        popoverPlacement={editor === 'markdown' ? 'bottom-end' : 'bottom-start'}
       >
         {observedComponents.slice(menuIndex).map((component) => (
           <React.Fragment key={component.key}>{component.menu}</React.Fragment>

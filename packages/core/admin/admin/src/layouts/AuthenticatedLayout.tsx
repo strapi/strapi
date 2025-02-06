@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { version as strapiVersion } from '@strapi/admin/package.json';
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -8,7 +9,6 @@ import { Outlet } from 'react-router-dom';
 import lt from 'semver/functions/lt';
 import valid from 'semver/functions/valid';
 
-import packageJSON from '../../../package.json';
 import { GuidedTourModal } from '../components/GuidedTour/Modal';
 import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { LeftMenu } from '../components/LeftMenu';
@@ -25,8 +25,6 @@ import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
-
-const strapiVersion = packageJSON.version;
 
 const AdminLayout = () => {
   const setGuidedTourVisibility = useGuidedTour(

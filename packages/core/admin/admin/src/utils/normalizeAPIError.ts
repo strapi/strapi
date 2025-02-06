@@ -20,6 +20,7 @@ interface YupFormattedError {
   path: string[];
   message: string;
   name: string;
+  value: string;
 }
 
 function normalizeError(

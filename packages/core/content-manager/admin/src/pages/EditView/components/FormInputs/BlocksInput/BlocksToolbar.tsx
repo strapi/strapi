@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
+import { useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -10,15 +11,15 @@ import {
   FlexComponent,
   BoxComponent,
   Menu,
-  Divider,
+  IconButton,
 } from '@strapi/design-system';
-import { Link } from '@strapi/icons';
+import { Link, More } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
 
-import { EditorToolbarObserver, ObservedComponent } from '../../EditorToolbarObserver';
+import { EditorToolbarObserver } from '../../EditorToolbarObserver';
 
 import {
   type BlocksStore,
@@ -442,7 +443,7 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
     return (
       <StyledMenuItem
-        onClick={() => toggleList(format)}
+        onSelect={() => toggleList(format)}
         isActive={isListActive()}
         disabled={isListDisabled()}
       >
@@ -531,7 +532,7 @@ const LinkButton = ({
 
   if (location === 'menu') {
     return (
-      <StyledMenuItem onClick={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
+      <StyledMenuItem onSelect={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
         <Link />
         {formatMessage(label)}
       </StyledMenuItem>
@@ -550,15 +551,104 @@ const LinkButton = ({
   );
 };
 
-const MenuDivider = styled(Divider)`
-  /* Negative horizontal margin to compensate Menu.Content's padding */
-  margin: ${({ theme }) => theme.spaces[1]} -${({ theme }) => theme.spaces[1]};
-  width: calc(100% + ${({ theme }) => theme.spaces[2]});
-  /* Hide divider if there's nothing above in the menu */
-  &:first-child {
-    display: none;
-  }
-`;
+interface ObservedToolbarComponentProps {
+  index: number;
+  lastVisibleIndex: number;
+  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
+  rootRef: React.RefObject<HTMLElement>;
+  children: React.ReactNode;
+}
+
+const ObservedToolbarComponent = ({
+  index,
+  lastVisibleIndex,
+  setLastVisibleIndex,
+  rootRef,
+  children,
+}: ObservedToolbarComponentProps) => {
+  const isVisible = index <= lastVisibleIndex;
+
+  const containerRef = useElementOnScreen<HTMLDivElement>(
+    (isVisible) => {
+      /**
+       * It's the MoreMenu's job to make an item not visible when there's not room for it.
+       * But we need to react here to the element becoming visible again.
+       */
+      if (isVisible) {
+        setLastVisibleIndex((prev) => Math.max(prev, index));
+      }
+    },
+    { threshold: 1, root: rootRef.current }
+  );
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        /**
+         * Use visibility so that the element occupies the space if requires even when there's not
+         * enough room for it to be visible. The empty reserved space will be clipped by the
+         * overflow:hidden rule on the parent, so it doesn't affect the UI.
+         * This way we can keep observing its visiblity and react to browser resize events.
+         */
+        visibility: isVisible ? 'visible' : 'hidden',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+interface ObservedComponent {
+  toolbar: React.ReactNode;
+  menu: React.ReactNode;
+  key: string;
+}
+
+interface MoreMenuProps {
+  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
+  hasHiddenItems: boolean;
+  rootRef: React.RefObject<HTMLElement>;
+  children: React.ReactNode;
+}
+
+const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
+  const { formatMessage } = useIntl();
+  const containerRef = useElementOnScreen<HTMLButtonElement>(
+    (isVisible) => {
+      // We only react to the menu becoming invisible. When that happens, we hide the last item.
+      if (!isVisible) {
+        /**
+         * If there's no room for any item, the index can be -1.
+         * This is intentional, in that case only the more menu will be visible.
+         **/
+        setLastVisibleIndex((prev) => prev - 1);
+      }
+    },
+    { threshold: 1, root: rootRef.current }
+  );
+
+  return (
+    <Menu.Root defaultOpen={false}>
+      <Menu.Trigger
+        endIcon={null}
+        paddingLeft={0}
+        paddingRight={0}
+        ref={containerRef}
+        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
+      >
+        <IconButton
+          variant="ghost"
+          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
+          tag="span"
+        >
+          <More aria-hidden focusable={false} />
+        </IconButton>
+      </Menu.Trigger>
+      <Menu.Content onCloseAutoFocus={(e) => e.preventDefault()}>{children}</Menu.Content>
+    </Menu.Root>
+  );
+};
 
 const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
   &:hover {
@@ -625,7 +715,7 @@ const BlocksToolbar = () => {
     ...Object.entries(modifiers).map(([name, modifier]) => {
       const Icon = modifier.icon;
       const isActive = modifier.checkIsActive(editor);
-      const handleClick = () => modifier.handleToggle(editor);
+      const handleSelect = () => modifier.handleToggle(editor);
 
       return {
         toolbar: (
@@ -635,12 +725,12 @@ const BlocksToolbar = () => {
             icon={modifier.icon}
             label={modifier.label}
             isActive={modifier.checkIsActive(editor)}
-            handleClick={handleClick}
+            handleClick={handleSelect}
             disabled={isButtonDisabled}
           />
         ),
         menu: (
-          <StyledMenuItem onClick={handleClick} isActive={isActive}>
+          <StyledMenuItem onSelect={handleSelect} isActive={isActive}>
             <Icon />
             {formatMessage(modifier.label)}
           </StyledMenuItem>
@@ -668,7 +758,7 @@ const BlocksToolbar = () => {
       ),
       menu: (
         <>
-          <MenuDivider />
+          <Menu.Separator />
           <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
           <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
         </>
