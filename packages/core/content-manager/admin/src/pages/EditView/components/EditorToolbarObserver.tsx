@@ -1,73 +1,9 @@
 import * as React from 'react';
 
 import { useElementOnScreen } from '@strapi/admin/strapi-admin';
-import { IconButton, type IconButtonProps, Menu } from '@strapi/design-system';
+import { IconButton, Menu } from '@strapi/design-system';
 import { More } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-
-/* -------------------------------------------------------------------------------------------------
- * MoreMenu
- * -----------------------------------------------------------------------------------------------*/
-
-interface MoreMenuProps {
-  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
-  hasHiddenItems: boolean;
-  rootRef: React.RefObject<HTMLElement>;
-  children: React.ReactNode;
-  triggerVariant?: IconButtonProps['variant'];
-}
-
-export const MoreMenu = ({
-  setLastVisibleIndex,
-  hasHiddenItems,
-  rootRef,
-  children,
-  triggerVariant = 'ghost',
-}: MoreMenuProps) => {
-  const { formatMessage } = useIntl();
-
-  const [open, setOpen] = React.useState(false);
-  const isMenuOpenWithContent = open && hasHiddenItems;
-
-  const containerRef = useElementOnScreen<HTMLButtonElement>(
-    (isVisible) => {
-      // We only react to the menu becoming invisible. When that happens, we hide the last item.
-      if (!isVisible) {
-        /**
-         * If there's no room for any item, the index can be -1.
-         * This is intentional, in that case only the more menu will be visible.
-         **/
-        setLastVisibleIndex((prev) => prev - 1);
-        // Maintain the menu state if it has content
-        setOpen(isMenuOpenWithContent);
-      }
-    },
-    { threshold: 1, root: rootRef.current }
-  );
-
-  return (
-    <Menu.Root defaultOpen={false} open={isMenuOpenWithContent} onOpenChange={setOpen}>
-      <Menu.Trigger
-        paddingLeft={0}
-        paddingRight={0}
-        ref={containerRef}
-        variant={triggerVariant}
-        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
-        label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
-        tag={IconButton}
-        icon={<More />}
-      />
-      <Menu.Content
-        onCloseAutoFocus={(e) => e.preventDefault()}
-        maxHeight="100%"
-        minWidth="256px"
-        popoverPlacement="bottom-end"
-      >
-        {children}
-      </Menu.Content>
-    </Menu.Root>
-  );
-};
 
 /* -------------------------------------------------------------------------------------------------
  * ObservedToolbarComponent
@@ -138,12 +74,32 @@ export const EditorToolbarObserver = ({
   observedComponents: ObservedComponent[];
   editor: 'blocks' | 'markdown';
 }) => {
+  const { formatMessage } = useIntl();
   const toolbarRef = React.useRef<HTMLElement>(null);
+
   const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(
     observedComponents.length - 1
   );
   const hasHiddenItems = lastVisibleIndex < observedComponents.length - 1;
   const menuIndex = lastVisibleIndex + 1;
+
+  const [open, setOpen] = React.useState(false);
+  const isMenuOpenWithContent = open && hasHiddenItems;
+  const menuTriggerRef = useElementOnScreen<HTMLButtonElement>(
+    (isVisible) => {
+      // We only react to the menu becoming invisible. When that happens, we hide the last item.
+      if (!isVisible) {
+        /**
+         * If there's no room for any item, the index can be -1.
+         * This is intentional, in that case only the more menu will be visible.
+         **/
+        setLastVisibleIndex((prev) => prev - 1);
+        // Maintain the menu state if it has content
+        setOpen(isMenuOpenWithContent);
+      }
+    },
+    { threshold: 1, root: toolbarRef.current }
+  );
 
   return observedComponents
     .map((component, index) => {
@@ -162,16 +118,27 @@ export const EditorToolbarObserver = ({
     .toSpliced(
       menuIndex,
       0,
-      <MoreMenu
-        setLastVisibleIndex={setLastVisibleIndex}
-        hasHiddenItems={hasHiddenItems}
-        rootRef={toolbarRef}
-        key="more-menu"
-        triggerVariant={editor === 'markdown' ? 'tertiary' : 'ghost'}
-      >
-        {observedComponents.slice(menuIndex).map((component) => (
-          <React.Fragment key={component.key}>{component.menu}</React.Fragment>
-        ))}
-      </MoreMenu>
+      <Menu.Root defaultOpen={false} open={isMenuOpenWithContent} onOpenChange={setOpen}>
+        <Menu.Trigger
+          paddingLeft={0}
+          paddingRight={0}
+          ref={menuTriggerRef}
+          variant={editor === 'markdown' ? 'tertiary' : 'ghost'}
+          style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
+          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
+          tag={IconButton}
+          icon={<More />}
+        />
+        <Menu.Content
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          maxHeight="100%"
+          minWidth="256px"
+          popoverPlacement="bottom-end"
+        >
+          {observedComponents.slice(menuIndex).map((component) => (
+            <React.Fragment key={component.key}>{component.menu}</React.Fragment>
+          ))}
+        </Menu.Content>
+      </Menu.Root>
     );
 };
