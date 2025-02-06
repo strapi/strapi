@@ -7,7 +7,8 @@ const { RateLimitError } = utils.errors;
 
 export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
-    let rateLimitConfig = strapi.config.get('plugin::email').ratelimit as any;
+    const pluginConfig = strapi.config.get('plugin::email') as any;
+    let rateLimitConfig = pluginConfig.ratelimit as any;
 
     if (!rateLimitConfig) {
       rateLimitConfig = {
