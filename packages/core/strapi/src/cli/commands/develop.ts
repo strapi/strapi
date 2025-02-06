@@ -35,6 +35,7 @@ const command: StrapiCommand = ({ ctx }) => {
     .option('--watch-admin', 'Watch the admin panel for hot changes', true)
     .option('--no-watch-admin', 'Do not watch the admin panel for hot changes')
     .option('--open', 'Open the admin in your browser', true)
+    .option('--no-open', 'Do not open the admin in your browser')
     .description('Start your Strapi application in development mode')
     .action(async (options: DevelopCLIOptions) => {
       return action({ ...options, ...ctx });
