@@ -19,6 +19,8 @@ import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from
 import { ReactEditor } from 'slate-react';
 import { css, styled } from 'styled-components';
 
+import { EditorToolbarObserver } from '../../EditorToolbarObserver';
+
 import {
   type BlocksStore,
   type SelectorBlockKey,
@@ -765,51 +767,14 @@ const BlocksToolbar = () => {
     },
   ];
 
-  const toolbarRef = React.useRef<HTMLElement>(null);
-  const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(
-    observedComponents.length - 1
-  );
-  const hasHiddenItems = lastVisibleIndex < observedComponents.length - 1;
-  const menuIndex = lastVisibleIndex + 1;
-
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper gap={2} padding={2} width="100%">
         <BlocksDropdown />
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex direction="row" gap={1} grow={1} overflow="hidden" ref={toolbarRef}>
-            {observedComponents
-              .map((component, index) => (
-                <ObservedToolbarComponent
-                  lastVisibleIndex={lastVisibleIndex}
-                  setLastVisibleIndex={setLastVisibleIndex}
-                  index={index}
-                  rootRef={toolbarRef}
-                  key={component.key}
-                >
-                  {component.toolbar}
-                </ObservedToolbarComponent>
-              ))
-              /**
-               * Display the "more" menu in the right position among the items.
-               * We splice here after the map above to avoid messing with the indexes,
-               * since the ObservedToolbarComponent component relies on them.
-               */
-              .toSpliced(
-                menuIndex,
-                0,
-                <MoreMenu
-                  setLastVisibleIndex={setLastVisibleIndex}
-                  hasHiddenItems={hasHiddenItems}
-                  rootRef={toolbarRef}
-                  key="more-menu"
-                >
-                  {observedComponents.slice(menuIndex).map((component) => (
-                    <React.Fragment key={component.key}>{component.menu}</React.Fragment>
-                  ))}
-                </MoreMenu>
-              )}
+          <Flex direction="row" gap={1} grow={1} overflow="hidden">
+            <EditorToolbarObserver editor="blocks" observedComponents={observedComponents} />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>
