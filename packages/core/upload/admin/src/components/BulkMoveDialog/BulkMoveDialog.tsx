@@ -151,7 +151,7 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
 
             <Modal.Footer>
               <Modal.Close>
-                <Button variant="tertiary">
+                <Button variant="tertiary" name="cancel">
                   {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
                 </Button>
               </Modal.Close>
