@@ -774,7 +774,7 @@ const BlocksToolbar = () => {
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
           <Flex direction="row" gap={1} grow={1} overflow="hidden">
-            <EditorToolbarObserver editor="blocks" observedComponents={observedComponents} />
+            <EditorToolbarObserver observedComponents={observedComponents} />
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>

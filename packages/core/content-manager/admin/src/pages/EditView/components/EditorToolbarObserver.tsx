@@ -69,10 +69,10 @@ export interface ObservedComponent {
 
 export const EditorToolbarObserver = ({
   observedComponents,
-  editor = 'blocks',
+  menuTriggerVariant = 'ghost',
 }: {
   observedComponents: ObservedComponent[];
-  editor: 'blocks' | 'markdown';
+  menuTriggerVariant?: Menu.TriggerProps['variant'];
 }) => {
   const { formatMessage } = useIntl();
   const toolbarRef = React.useRef<HTMLElement>(null);
@@ -123,7 +123,7 @@ export const EditorToolbarObserver = ({
           paddingLeft={0}
           paddingRight={0}
           ref={menuTriggerRef}
-          variant={editor === 'markdown' ? 'tertiary' : 'ghost'}
+          variant={menuTriggerVariant}
           style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
           label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
           tag={IconButton}

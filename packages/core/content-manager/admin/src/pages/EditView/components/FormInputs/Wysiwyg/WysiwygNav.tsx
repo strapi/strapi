@@ -455,7 +455,10 @@ const WysiwygNav = ({
       </Field.Root>
       <Flex width="100%" justifyContent="space-between" overflow="hidden">
         <Flex gap={2} overflow="hidden" width="100%">
-          <EditorToolbarObserver editor="markdown" observedComponents={observedComponents} />
+          <EditorToolbarObserver
+            menuTriggerVariant="tertiary"
+            observedComponents={observedComponents}
+          />
         </Flex>
 
         {onTogglePreviewMode && (

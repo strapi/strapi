@@ -136,7 +136,6 @@ describe('Wysiwyg render and actions buttons', () => {
   it('should render link markdown when clicking the link button', async () => {
     const { user, getByText, getByRole } = render();
 
-    // await user.click(getByRole('button', { name: 'More' }));
     await user.click(getByRole('button', { name: 'Link' }));
 
     expect(getByText('[Link](link)')).toBeInTheDocument();
@@ -145,7 +144,6 @@ describe('Wysiwyg render and actions buttons', () => {
   it('should render quote markdown when clicking the quote button', async () => {
     const { user, getByText, getByRole } = render();
 
-    // await user.click(getByRole('button', { name: 'More' }));
     await user.click(getByRole('button', { name: 'Quote' }));
 
     expect(getByText('>Quote')).toBeInTheDocument();
