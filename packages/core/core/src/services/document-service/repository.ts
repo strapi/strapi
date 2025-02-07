@@ -391,6 +391,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
+    const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
+      newVersions: versionsToDraft,
+      oldVersions: oldDrafts,
+    });
+
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
 
@@ -404,6 +409,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       [...oldDrafts, ...versionsToDraft],
       draftEntries,
       relationsToSync
+    );
+
+    await bidirectionalRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      bidirectionalRelationsToSync
     );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));
