@@ -2,12 +2,14 @@ import { Box, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { AssetType } from '../../../constants';
+
 import { createAssetUrl } from '../../../utils';
+import { getFileIconComponent } from '../../../utils/icons';
+
 import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 
 import type { File as FileAsset } from '../../../../../shared/contracts/files';
-import { getFileIconComponent } from '../../../utils/icons';
 
 const DocAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);

@@ -3,13 +3,12 @@ import * as React from 'react';
 
 import MuxPlayer from '@mux/mux-player-react';
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { File } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
 import { AssetType } from '../../../constants';
-import { getFileIconComponent } from '../../../utils/icons';
 import { typeFromMime } from '../../../utils';
+import { getFileIconComponent } from '../../../utils/icons';
 
 const CardAsset = styled(Flex)`
   min-height: 26.4rem;

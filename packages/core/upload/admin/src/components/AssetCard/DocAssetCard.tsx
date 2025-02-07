@@ -1,6 +1,7 @@
 import { Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
+
 import { getFileIconComponent } from '../../utils/icons';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
