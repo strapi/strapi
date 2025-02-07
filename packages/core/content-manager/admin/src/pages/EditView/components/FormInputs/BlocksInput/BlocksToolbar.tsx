@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
+import { useElementOnScreen } from '@strapi/admin/strapi-admin';
 import {
   Flex,
   Tooltip,
@@ -9,12 +10,14 @@ import {
   Box,
   FlexComponent,
   BoxComponent,
+  Menu,
+  IconButton,
 } from '@strapi/design-system';
-import { Link } from '@strapi/icons';
+import { Link, More } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
 import {
   type BlocksStore,
@@ -32,7 +35,7 @@ const ToolbarWrapper = styled<FlexComponent>(Flex)`
   }
 `;
 
-const Separator = styled(Toolbar.Separator)`
+const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
@@ -122,7 +125,7 @@ const ToolbarButton = ({
   const enabledColor = isActive ? 'primary600' : 'neutral600';
 
   return (
-    <Tooltip description={labelMessage}>
+    <Tooltip label={labelMessage}>
       <Toolbar.ToggleItem
         value={name}
         data-state={isActive ? 'on' : 'off'}
@@ -341,10 +344,12 @@ const isListNode = (node: unknown): node is Block<'list'> => {
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
   format: Block<'list'>['format'];
+  location?: 'toolbar' | 'menu';
 }
 
-const ListButton = ({ block, format }: ListButtonProps) => {
+const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) => {
   const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
+  const { formatMessage } = useIntl();
 
   const isListActive = () => {
     if (!editor.selection) return false;
@@ -431,6 +436,21 @@ const ListButton = ({ block, format }: ListButtonProps) => {
     }
   };
 
+  if (location === 'menu') {
+    const Icon = block.icon;
+
+    return (
+      <StyledMenuItem
+        onSelect={() => toggleList(format)}
+        isActive={isListActive()}
+        disabled={isListDisabled()}
+      >
+        <Icon />
+        {formatMessage(block.label)}
+      </StyledMenuItem>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={block.icon}
@@ -443,8 +463,15 @@ const ListButton = ({ block, format }: ListButtonProps) => {
   );
 };
 
-const LinkButton = ({ disabled }: { disabled: boolean }) => {
+const LinkButton = ({
+  disabled,
+  location = 'toolbar',
+}: {
+  disabled: boolean;
+  location?: 'toolbar' | 'menu';
+}) => {
   const { editor } = useBlocksEditorContext('LinkButton');
+  const { formatMessage } = useIntl();
 
   const isLinkActive = () => {
     const { selection } = editor;
@@ -496,14 +523,25 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
     insertLink(editor, { url: '' });
   };
 
+  const label = {
+    id: 'components.Blocks.link',
+    defaultMessage: 'Link',
+  } as MessageDescriptor;
+
+  if (location === 'menu') {
+    return (
+      <StyledMenuItem onSelect={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
+        <Link />
+        {formatMessage(label)}
+      </StyledMenuItem>
+    );
+  }
+
   return (
     <ToolbarButton
       icon={Link}
       name="link"
-      label={{
-        id: 'components.Blocks.link',
-        defaultMessage: 'Link',
-      }}
+      label={label}
       isActive={isLinkActive()}
       handleClick={addLink}
       disabled={isLinkDisabled()}
@@ -511,8 +549,134 @@ const LinkButton = ({ disabled }: { disabled: boolean }) => {
   );
 };
 
+interface ObservedToolbarComponentProps {
+  index: number;
+  lastVisibleIndex: number;
+  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
+  rootRef: React.RefObject<HTMLElement>;
+  children: React.ReactNode;
+}
+
+const ObservedToolbarComponent = ({
+  index,
+  lastVisibleIndex,
+  setLastVisibleIndex,
+  rootRef,
+  children,
+}: ObservedToolbarComponentProps) => {
+  const isVisible = index <= lastVisibleIndex;
+
+  const containerRef = useElementOnScreen<HTMLDivElement>(
+    (isVisible) => {
+      /**
+       * It's the MoreMenu's job to make an item not visible when there's not room for it.
+       * But we need to react here to the element becoming visible again.
+       */
+      if (isVisible) {
+        setLastVisibleIndex((prev) => Math.max(prev, index));
+      }
+    },
+    { threshold: 1, root: rootRef.current }
+  );
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        /**
+         * Use visibility so that the element occupies the space if requires even when there's not
+         * enough room for it to be visible. The empty reserved space will be clipped by the
+         * overflow:hidden rule on the parent, so it doesn't affect the UI.
+         * This way we can keep observing its visiblity and react to browser resize events.
+         */
+        visibility: isVisible ? 'visible' : 'hidden',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+interface ObservedComponent {
+  toolbar: React.ReactNode;
+  menu: React.ReactNode;
+  key: string;
+}
+
+interface MoreMenuProps {
+  setLastVisibleIndex: React.Dispatch<React.SetStateAction<number>>;
+  hasHiddenItems: boolean;
+  rootRef: React.RefObject<HTMLElement>;
+  children: React.ReactNode;
+}
+
+const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: MoreMenuProps) => {
+  const { formatMessage } = useIntl();
+  const containerRef = useElementOnScreen<HTMLButtonElement>(
+    (isVisible) => {
+      // We only react to the menu becoming invisible. When that happens, we hide the last item.
+      if (!isVisible) {
+        /**
+         * If there's no room for any item, the index can be -1.
+         * This is intentional, in that case only the more menu will be visible.
+         **/
+        setLastVisibleIndex((prev) => prev - 1);
+      }
+    },
+    { threshold: 1, root: rootRef.current }
+  );
+
+  return (
+    <Menu.Root defaultOpen={false}>
+      <Menu.Trigger
+        endIcon={null}
+        paddingLeft={0}
+        paddingRight={0}
+        ref={containerRef}
+        style={{ visibility: hasHiddenItems ? 'visible' : 'hidden' }}
+      >
+        <IconButton
+          variant="ghost"
+          label={formatMessage({ id: 'global.more', defaultMessage: 'More' })}
+          tag="span"
+        >
+          <More aria-hidden focusable={false} />
+        </IconButton>
+      </Menu.Trigger>
+      <Menu.Content onCloseAutoFocus={(e) => e.preventDefault()}>{children}</Menu.Content>
+    </Menu.Root>
+  );
+};
+
+const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.primary100};
+  }
+
+  ${(props) =>
+    props.isActive &&
+    css`
+      font-weight: bold;
+      background-color: ${({ theme }) => theme.colors.primary100};
+      color: ${({ theme }) => theme.colors.primary600};
+      font-weight: bold;
+    `}
+
+  > span {
+    display: inline-flex;
+    gap: ${({ theme }) => theme.spaces[2]};
+    align-items: center;
+  }
+
+  svg {
+    fill: ${({ theme, isActive }) =>
+      isActive ? theme.colors.primary600 : theme.colors.neutral600};
+  }
+`;
+
 const BlocksToolbar = () => {
   const { editor, blocks, modifiers, disabled } = useBlocksEditorContext('BlocksToolbar');
+  const { formatMessage } = useIntl();
 
   /**
    * The modifier buttons are disabled when an image is selected.
@@ -538,32 +702,114 @@ const BlocksToolbar = () => {
 
   const isButtonDisabled = checkButtonDisabled();
 
+  /**
+   * Observed components are ones that may or may not be visible in the toolbar, depending on the
+   * available space. They provide two render props:
+   * - renderInToolbar: for when we try to render the component in the toolbar (may be hidden)
+   * - renderInMenu: for when the component didn't fit in the toolbar and is relegated
+   *   to the "more" menu
+   */
+  const observedComponents: ObservedComponent[] = [
+    ...Object.entries(modifiers).map(([name, modifier]) => {
+      const Icon = modifier.icon;
+      const isActive = modifier.checkIsActive(editor);
+      const handleSelect = () => modifier.handleToggle(editor);
+
+      return {
+        toolbar: (
+          <ToolbarButton
+            key={name}
+            name={name}
+            icon={modifier.icon}
+            label={modifier.label}
+            isActive={modifier.checkIsActive(editor)}
+            handleClick={handleSelect}
+            disabled={isButtonDisabled}
+          />
+        ),
+        menu: (
+          <StyledMenuItem onSelect={handleSelect} isActive={isActive}>
+            <Icon />
+            {formatMessage(modifier.label)}
+          </StyledMenuItem>
+        ),
+        key: `modifier.${name}`,
+      };
+    }),
+    {
+      toolbar: <LinkButton disabled={isButtonDisabled} location="toolbar" />,
+      menu: <LinkButton disabled={isButtonDisabled} location="menu" />,
+      key: 'block.link',
+    },
+    {
+      // List buttons can only be rendered together when in the toolbar
+      toolbar: (
+        <Flex direction="row" gap={1}>
+          <ToolbarSeparator />
+          <Toolbar.ToggleGroup type="single" asChild>
+            <Flex gap={1}>
+              <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
+              <ListButton block={blocks['list-ordered']} format="ordered" location="toolbar" />
+            </Flex>
+          </Toolbar.ToggleGroup>
+        </Flex>
+      ),
+      menu: (
+        <>
+          <Menu.Separator />
+          <ListButton block={blocks['list-unordered']} format="unordered" location="menu" />
+          <ListButton block={blocks['list-ordered']} format="ordered" location="menu" />
+        </>
+      ),
+      key: 'block.list',
+    },
+  ];
+
+  const toolbarRef = React.useRef<HTMLElement>(null);
+  const [lastVisibleIndex, setLastVisibleIndex] = React.useState<number>(
+    observedComponents.length - 1
+  );
+  const hasHiddenItems = lastVisibleIndex < observedComponents.length - 1;
+  const menuIndex = lastVisibleIndex + 1;
+
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
       <ToolbarWrapper gap={2} padding={2} width="100%">
         <BlocksDropdown />
-        <Separator />
+        <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
-          <Flex gap={1}>
-            {Object.entries(modifiers).map(([name, modifier]) => (
-              <ToolbarButton
-                key={name}
-                name={name}
-                icon={modifier.icon}
-                label={modifier.label}
-                isActive={modifier.checkIsActive(editor)}
-                handleClick={() => modifier.handleToggle(editor)}
-                disabled={isButtonDisabled}
-              />
-            ))}
-            <LinkButton disabled={isButtonDisabled} />
-          </Flex>
-        </Toolbar.ToggleGroup>
-        <Separator />
-        <Toolbar.ToggleGroup type="single" asChild>
-          <Flex gap={1}>
-            <ListButton block={blocks['list-unordered']} format="unordered" />
-            <ListButton block={blocks['list-ordered']} format="ordered" />
+          <Flex direction="row" gap={1} grow={1} overflow="hidden" ref={toolbarRef}>
+            {observedComponents
+              .map((component, index) => (
+                <ObservedToolbarComponent
+                  lastVisibleIndex={lastVisibleIndex}
+                  setLastVisibleIndex={setLastVisibleIndex}
+                  index={index}
+                  rootRef={toolbarRef}
+                  key={component.key}
+                >
+                  {component.toolbar}
+                </ObservedToolbarComponent>
+              ))
+              /**
+               * Display the "more" menu in the right position among the items.
+               * We splice here after the map above to avoid messing with the indexes,
+               * since the ObservedToolbarComponent component relies on them.
+               */
+              .toSpliced(
+                menuIndex,
+                0,
+                <MoreMenu
+                  setLastVisibleIndex={setLastVisibleIndex}
+                  hasHiddenItems={hasHiddenItems}
+                  rootRef={toolbarRef}
+                  key="more-menu"
+                >
+                  {observedComponents.slice(menuIndex).map((component) => (
+                    <React.Fragment key={component.key}>{component.menu}</React.Fragment>
+                  ))}
+                </MoreMenu>
+              )}
           </Flex>
         </Toolbar.ToggleGroup>
       </ToolbarWrapper>
