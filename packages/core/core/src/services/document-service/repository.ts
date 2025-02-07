@@ -16,6 +16,7 @@ import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
+import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
 
 const { validators } = validate;
@@ -305,6 +306,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
+    const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
+      newVersions: draftsToPublish,
+      oldVersions: oldPublishedVersions,
+    });
+
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
@@ -318,6 +324,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       [...oldPublishedVersions, ...draftsToPublish],
       publishedEntries,
       relationsToSync
+    );
+
+    await bidirectionalRelations.sync(
+      [...oldPublishedVersions, ...draftsToPublish],
+      publishedEntries,
+      bidirectionalRelationsToSync
     );
 
     publishedEntries.forEach(emitEvent('entry.publish'));
