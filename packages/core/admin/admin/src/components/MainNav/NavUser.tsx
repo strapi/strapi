@@ -27,7 +27,7 @@ const MenuTrigger = styled(Menu.Trigger)`
 `;
 
 const MenuContent = styled(Menu.Content)`
-  left: ${({ theme }) => theme.spaces[5]};
+  left: ${({ theme }) => theme.spaces[0]};
 `;
 
 const MenuItem = styled(Menu.Item)`
