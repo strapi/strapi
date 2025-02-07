@@ -8,17 +8,10 @@ const { RateLimitError } = utils.errors;
 export default (config: any, { strapi }: { strapi: Core.Strapi }) =>
   async (ctx: Context, next: Next) => {
     const pluginConfig = strapi.config.get('plugin::email') as any;
-    let rateLimitConfig = pluginConfig.ratelimit as any;
-
-    if (!rateLimitConfig) {
-      rateLimitConfig = {
-        enabled: true,
-      };
-    }
-
-    if (!has('enabled', rateLimitConfig)) {
-      rateLimitConfig.enabled = true;
-    }
+    const rateLimitConfig = {
+      enabled: true,
+      ...(pluginConfig.ratelimit || {}),
+    };
 
     if (rateLimitConfig.enabled === true) {
       // TODO: TS - Do the dynamic import
