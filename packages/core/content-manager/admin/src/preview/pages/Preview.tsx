@@ -211,11 +211,9 @@ const ProtectedPreviewPageImpl = () => {
           permission.action.includes('explorer.read')
         )}
       >
-        {({ permissions }) => (
-          <DocumentRBAC permissions={permissions}>
-            <PreviewPage />
-          </DocumentRBAC>
-        )}
+        <DocumentRBAC permissions={permissions}>
+          <PreviewPage />
+        </DocumentRBAC>
       </Page.Protect>
     </Box>
   );
