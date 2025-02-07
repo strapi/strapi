@@ -105,7 +105,7 @@ export const EditorToolbarObserver = ({
     .map((component, index) => {
       return (
         <ObservedToolbarComponent
-          key={index}
+          key={component.key}
           index={index}
           lastVisibleIndex={lastVisibleIndex}
           setLastVisibleIndex={setLastVisibleIndex}
@@ -118,7 +118,12 @@ export const EditorToolbarObserver = ({
     .toSpliced(
       menuIndex,
       0,
-      <Menu.Root defaultOpen={false} open={isMenuOpenWithContent} onOpenChange={setOpen}>
+      <Menu.Root
+        key="more-menu"
+        defaultOpen={false}
+        open={isMenuOpenWithContent}
+        onOpenChange={setOpen}
+      >
         <Menu.Trigger
           paddingLeft={0}
           paddingRight={0}
