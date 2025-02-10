@@ -107,4 +107,14 @@ test.describe('Preview', () => {
       /\/preview\/api::article\.article\/.+\/en\/published$/
     );
   });
+
+  test('Edit form should be displayed on the preview page', async ({ page }) => {
+    // Open an edit view for a content type that has preview
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    const titleBox = page.getByRole('textbox', { name: 'title' });
+    await expect(titleBox).toHaveValue(/west ham post match/i);
+  });
 });

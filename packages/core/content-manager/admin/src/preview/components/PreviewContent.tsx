@@ -3,16 +3,20 @@ import * as React from 'react';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { FormLayout } from '../../pages/EditView/components/FormLayout';
 import { usePreviewContext } from '../pages/Preview';
 
 const UnstablePreviewContent = () => {
   const previewUrl = usePreviewContext('PreviewContent', (state) => state.url);
+  const layout = usePreviewContext('PreviewContent', (state) => state.layout);
 
   const { formatMessage } = useIntl();
 
   return (
-    <Flex height="100%">
-      <Box flex={1}>TODO: Side editor</Box>
+    <Flex flex={1} overflow="auto" alignItems="stretch">
+      <Box overflow="auto" flex={1} borderWidth="0 1px 0 0" borderColor="neutral150" padding={6}>
+        <FormLayout layout={layout.layout} hasBackground />
+      </Box>
       <Box
         src={previewUrl}
         /**
