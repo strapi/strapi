@@ -160,6 +160,35 @@ const slice = createSlice({
       state.contentTypes = contentTypes;
       state.reservedNames = reservedNames;
       state.isLoading = false;
+
+      state.modifiedData = {
+        ...DEFAULT_MODIFIED_DATA,
+        component: state.modifiedData.component
+          ? components[state.modifiedData.component.uid]
+          : undefined,
+        contentType: state.modifiedData.contentType
+          ? contentTypes[state.modifiedData.contentType.uid]
+          : undefined,
+        components: state.modifiedData.components
+          ? Object.keys(state.modifiedData.components).reduce(
+              (acc, key) => {
+                acc[key] = components[key];
+                return acc;
+              },
+              {} as Record<string, Component>
+            )
+          : {},
+        contentTypes: state.modifiedData.contentTypes
+          ? Object.keys(state.modifiedData.contentTypes).reduce(
+              (acc, key) => {
+                acc[key] = contentTypes[key];
+                return acc;
+              },
+              {} as Record<string, ContentType>
+            )
+          : {},
+      };
+      state.initialData = state.modifiedData;
     },
     addAttribute: (state, action: PayloadAction<AddAttributePayload>) => {
       const { attributeToSet, forTarget, targetUid, shouldAddComponentToData } = action.payload;
