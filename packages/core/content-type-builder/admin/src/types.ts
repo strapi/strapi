@@ -30,7 +30,7 @@ export interface Component {
 }
 
 export interface ContentType {
-  uid?: Internal.UID.ContentType;
+  uid: Internal.UID.ContentType;
   isTemporary?: boolean;
   visible?: boolean;
   name?: string;
