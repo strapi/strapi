@@ -26,8 +26,6 @@ import { createYupSchema } from '../../utils/validation';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
-import { transformDocument } from './utils/data';
-import { createDefaultForm } from './utils/forms';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
