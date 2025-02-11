@@ -1,28 +1,22 @@
 import { AssetType, DocType } from '../constants';
 
+const MIME_TYPE_MAP: Record<string, string> = {
+  image: AssetType.Image,
+  video: AssetType.Video,
+  audio: AssetType.Audio,
+  pdf: DocType.Pdf,
+  csv: DocType.Csv,
+  excel: DocType.Xls,
+  zip: DocType.Zip,
+};
+
 export const typeFromMime = (mime: string) => {
-  if (mime.includes(AssetType.Image)) {
-    return AssetType.Image;
-  }
-  if (mime.includes(AssetType.Video)) {
-    return AssetType.Video;
-  }
-  if (mime.includes(AssetType.Audio)) {
-    return AssetType.Audio;
-  }
-  if (mime.includes(DocType.Pdf)) {
-    return DocType.Pdf;
-  }
-  if (mime.includes(DocType.Csv)) {
-    return DocType.Csv;
-  }
-  // Xls file mimes are returned as application/vnd.ms-excel
-  // So we need a specific condition here as the mime does not contain 'xls'
-  if (mime.includes('excel')) {
-    return DocType.Xls;
-  }
-  if (mime.includes(DocType.Zip)) {
-    return DocType.Zip;
+  const lowerCasedMime = mime.toLowerCase();
+
+  for (const [key, value] of Object.entries(MIME_TYPE_MAP)) {
+    if (lowerCasedMime.includes(key)) {
+      return value;
+    }
   }
 
   return AssetType.Document;
