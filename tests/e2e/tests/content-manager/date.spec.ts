@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { sharedSetup } from '../../utils/setup';
-import { addAttributesToContentType } from '../../utils/content-types';
 import { clickAndWait } from '../../utils/shared';
 import { createContent } from '../../utils/content-creation';
-import { resetFiles } from '../../utils/file-reset';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { login } from '../../utils/login';
 
 // Helper to get date in MM/DD/YYYY format consistently
 function toMMDDYYYY(date: Date) {
@@ -15,31 +14,12 @@ function toMMDDYYYY(date: Date) {
 
 test.describe('Date field tests', () => {
   test.beforeEach(async ({ page }) => {
-    await sharedSetup('ctb-edit-st', page, {
-      login: true,
-      skipTour: true,
-      resetFiles: true,
-      importData: 'with-admin.tar',
-      afterSetup: async ({ page }) => {
-        // Adds a date attribute to the 'Article' content type
-        await addAttributesToContentType(page, 'Article', [
-          {
-            type: 'date',
-            name: 'date',
-            date: {
-              format: 'date', // set to "date" so we only deal with the date (no time)
-            },
-          },
-        ]);
-      },
-    });
+    await resetDatabaseAndImportDataFromPath('with-admin-test.tar');
+    await page.goto('/admin');
+    await login({ page });
 
     // Navigate to Content Manager
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-  });
-
-  test.afterAll(async () => {
-    await resetFiles();
   });
 
   test('should select the current date from the UI datepicker', async ({ page }) => {

@@ -16,6 +16,9 @@
     }
   },
   "attributes": {
+    "date": {
+      "type": "date"
+    },
     "title": {
       "type": "string"
     },
