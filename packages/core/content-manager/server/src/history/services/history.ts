@@ -1,10 +1,10 @@
-import type { Core, Data, Schema, Struct } from '@strapi/types';
-import { async, errors } from '@strapi/utils';
+import type { Core, Data, Modules, Schema } from '@strapi/types';
+import { errors, traverseEntity } from '@strapi/utils';
 import { omit } from 'lodash/fp';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
-import {
+import type {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
@@ -34,8 +34,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       results: HistoryVersions.HistoryVersionDataResponse[];
       pagination: HistoryVersions.Pagination;
     }> {
-      const model = strapi.getModel(params.query.contentType);
-      const isLocalizedContentType = serviceUtils.isLocalizedContentType(model);
+      const schema = strapi.getModel(params.query.contentType);
+      const isLocalizedContentType = serviceUtils.isLocalizedContentType(schema);
       const defaultLocale = await serviceUtils.getDefaultLocale();
 
       let locale = null;
@@ -58,50 +58,31 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         }),
         serviceUtils.getLocaleDictionary(),
       ]);
-      const populateEntryRelations = async (
-        entry: HistoryVersionQueryResult
-      ): Promise<CreateHistoryVersion['data']> => {
-        const entryWithRelations = await Object.entries(entry.schema).reduce(
-          async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
-            const attributeValue = entry.data[attributeKey];
 
-            const attributeValues = Array.isArray(attributeValue)
-              ? attributeValue
-              : [attributeValue];
+      const populateEntry = async (entry: HistoryVersionQueryResult) => {
+        return traverseEntity(
+          async (options, utils) => {
+            if (!options.attribute) return;
+            if (!options.value) return;
 
-            if (attributeSchema.type === 'media') {
-              const permissionChecker = getContentManagerService('permission-checker').create({
-                userAbility: params.state.userAbility,
-                model: 'plugin::upload.file',
-              });
+            const currentValue: any[] = Array.isArray(options.value)
+              ? options.value
+              : [options.value];
 
-              const response = await serviceUtils.buildMediaResponse(attributeValues);
-              const sanitizedResults = await Promise.all(
-                response.results.map((media) => permissionChecker.sanitizeOutput(media))
-              );
-
-              return {
-                ...(await currentDataWithRelations),
-                [attributeKey]: {
-                  results: sanitizedResults,
-                  meta: response.meta,
-                },
-              };
+            if (options.attribute.type === 'component') {
+              // Ids on components throw an error when restoring
+              utils.remove('id');
             }
 
-            // TODO: handle relations that are inside components
             if (
-              attributeSchema.type === 'relation' &&
-              attributeSchema.relation !== 'morphToOne' &&
-              attributeSchema.relation !== 'morphToMany'
+              options.attribute.type === 'relation' &&
+              // TODO: handle polymorphic relations
+              options.attribute.relation !== 'morphToOne' &&
+              options.attribute.relation !== 'morphToMany'
             ) {
-              /**
-               * Don't build the relations response object for relations to admin users,
-               * because pickAllowedAdminUserFields will sanitize the data in the controller.
-               */
-              if (attributeSchema.target === 'admin::user') {
+              if (options.attribute.target === 'admin::user') {
                 const adminUsers = await Promise.all(
-                  attributeValues.map((userToPopulate) => {
+                  currentValue.map((userToPopulate) => {
                     if (userToPopulate == null) {
                       return null;
                     }
@@ -117,53 +98,58 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                   })
                 );
 
-                return {
-                  ...(await currentDataWithRelations),
-                  /**
-                   * Ideally we would return the same "{results: [], meta: {}}" shape, however,
-                   * when sanitizing the data as a whole in the controller before sending to the client,
-                   * the data for admin relation user is completely sanitized if we return an object here as opposed to an array.
-                   */
-                  [attributeKey]: adminUsers,
-                };
+                utils.set(options.key, adminUsers as any);
               }
 
               const permissionChecker = getContentManagerService('permission-checker').create({
                 userAbility: params.state.userAbility,
-                model: attributeSchema.target,
+                model: options.attribute.target,
               });
 
               const response = await serviceUtils.buildRelationReponse(
-                attributeValues,
-                attributeSchema
+                currentValue,
+                options.attribute as Schema.Attribute.RelationWithTarget
               );
               const sanitizedResults = await Promise.all(
                 response.results.map((media) => permissionChecker.sanitizeOutput(media))
               );
 
-              return {
-                ...(await currentDataWithRelations),
-                [attributeKey]: {
-                  results: sanitizedResults,
-                  meta: response.meta,
-                },
-              };
+              utils.set(options.key, {
+                results: sanitizedResults,
+                meta: response.meta,
+              });
             }
 
-            // Not a media or relation, nothing to change
-            return currentDataWithRelations;
-          },
-          Promise.resolve(entry.data)
-        );
+            if (options.attribute.type === 'media') {
+              const permissionChecker = getContentManagerService('permission-checker').create({
+                userAbility: params.state.userAbility,
+                model: 'plugin::upload.file',
+              });
 
-        return entryWithRelations;
+              const response = await serviceUtils.buildMediaResponse(currentValue);
+              const sanitizedResults = await Promise.all(
+                response.results.map((media) => permissionChecker.sanitizeOutput(media))
+              );
+
+              utils.set(options.key, {
+                results: sanitizedResults,
+                meta: response.meta,
+              });
+            }
+          },
+          {
+            schema,
+            getModel: strapi.getModel.bind(strapi),
+          },
+          entry.data
+        );
       };
 
-      const formattedResults = await Promise.all(
+      const formattedResults: any[] = await Promise.all(
         (results as HistoryVersionQueryResult[]).map(async (result) => {
           return {
             ...result,
-            data: await populateEntryRelations(result),
+            data: await populateEntry(result),
             meta: {
               unknownAttributes: serviceUtils.getSchemaAttributesDiff(
                 result.schema,
@@ -198,42 +184,63 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Clone to avoid mutating the original version data
         structuredClone(version.data)
       );
-      const sanitizedSchemaAttributes = omit(
-        FIELDS_TO_IGNORE,
-        contentTypeSchemaAttributes
-      ) as Struct.SchemaAttributes;
 
-      // Set all deleted relation values to null
-      const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
-      const dataWithoutMissingRelations = await reducer(
-        async (
-          previousRelationAttributes: Record<string, unknown>,
-          [name, attribute]: [string, Schema.Attribute.AnyAttribute]
-        ) => {
-          const versionRelationData = version.data[name];
-          if (!versionRelationData) {
-            return previousRelationAttributes;
+      // Remove the schema attributes history should ignore
+      const schema = structuredClone(version.schema);
+      schema.attributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
+
+      const dataWithoutMissingRelations = await traverseEntity(
+        async (options, utils) => {
+          if (!options.attribute) return;
+
+          if (options.attribute.type === 'component') {
+            // Ids on components throw an error when restoring
+            utils.remove('id');
+
+            if (options.attribute.repeatable && options.value === null) {
+              // Repeatable Components should always be an array
+              utils.set(options.key, [] as any);
+            }
+          }
+
+          if (options.attribute.type === 'dynamiczone') {
+            if (options.value === null) {
+              // Dynamic zones should always be an array
+              utils.set(options.key, [] as any);
+            }
           }
 
           if (
-            attribute.type === 'relation' &&
+            options.attribute.type === 'relation' &&
             // TODO: handle polymorphic relations
-            attribute.relation !== 'morphToOne' &&
-            attribute.relation !== 'morphToMany'
+            options.attribute.relation !== 'morphToOne' &&
+            options.attribute.relation !== 'morphToMany'
           ) {
-            const data = await serviceUtils.getRelationRestoreValue(versionRelationData, attribute);
-            previousRelationAttributes[name] = data;
+            if (!options.value) return;
+
+            const data = await serviceUtils.getRelationRestoreValue(
+              options.value as Modules.Documents.AnyDocument,
+              options.attribute as Schema.Attribute.RelationWithTarget
+            );
+
+            utils.set(options.key, data as Modules.Documents.AnyDocument);
           }
 
-          if (attribute.type === 'media') {
-            const data = await serviceUtils.getMediaRestoreValue(versionRelationData, attribute);
-            previousRelationAttributes[name] = data;
-          }
+          if (options.attribute.type === 'media') {
+            if (!options.value) return;
 
-          return previousRelationAttributes;
+            const data = await serviceUtils.getMediaRestoreValue(
+              options.value as Modules.Documents.AnyDocument
+            );
+
+            utils.set(options.key, data);
+          }
         },
-        // Clone to avoid mutating the original version data
-        structuredClone(dataWithoutAddedAttributes)
+        {
+          schema,
+          getModel: strapi.getModel.bind(strapi),
+        },
+        dataWithoutAddedAttributes
       );
 
       const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);

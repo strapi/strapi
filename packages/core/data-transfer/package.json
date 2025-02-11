@@ -1,6 +1,6 @@
 {
   "name": "@strapi/data-transfer",
-  "version": "5.5.0",
+  "version": "5.9.0",
   "description": "Data transfer capabilities for Strapi",
   "keywords": [
     "strapi",
@@ -32,17 +32,19 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "rimraf ./dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/logger": "workspace:*",
-    "@strapi/types": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/logger": "5.9.0",
+    "@strapi/types": "5.9.0",
+    "@strapi/utils": "5.9.0",
     "chalk": "4.1.2",
     "cli-table3": "0.6.5",
     "commander": "8.3.0",
@@ -59,8 +61,7 @@
     "ws": "8.17.1"
   },
   "devDependencies": {
-    "@strapi/database": "workspace:*",
-    "@strapi/pack-up": "5.0.2",
+    "@strapi/database": "5.9.0",
     "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
@@ -75,11 +76,10 @@
     "knex": "3.0.1",
     "koa": "2.15.2",
     "rimraf": "5.0.5",
-    "typescript": "5.3.2"
+    "typescript": "5.4.4"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }

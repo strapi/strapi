@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upload",
-  "version": "5.5.0",
+  "version": "5.9.0",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -44,7 +44,11 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -53,14 +57,14 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watch",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@mux/mux-player-react": "3.1.0",
-    "@strapi/design-system": "2.0.0-rc.14",
-    "@strapi/icons": "2.0.0-rc.14",
-    "@strapi/provider-upload-local": "workspace:*",
-    "@strapi/utils": "workspace:*",
+    "@strapi/design-system": "2.0.0-rc.16",
+    "@strapi/icons": "2.0.0-rc.16",
+    "@strapi/provider-upload-local": "5.9.0",
+    "@strapi/utils": "5.9.0",
     "byte-size": "8.1.1",
     "cropperjs": "1.6.1",
     "date-fns": "2.30.0",
@@ -82,9 +86,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "workspace:*",
+    "@strapi/admin": "5.9.0",
     "@strapi/pack-up": "5.0.2",
-    "@strapi/types": "workspace:*",
+    "@strapi/types": "5.9.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -119,6 +123,5 @@
     "description": "Media file management.",
     "required": true,
     "kind": "plugin"
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }

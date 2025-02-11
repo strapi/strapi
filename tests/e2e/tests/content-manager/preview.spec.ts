@@ -1,12 +1,10 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose, skipCtbTour } from '../../utils/shared';
+import { clickAndWait, findAndClose, skipCtbTour } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 
-const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-
-describeOnCondition(edition === 'EE')('Preview', () => {
+test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
     await resetFiles();
@@ -108,5 +106,15 @@ describeOnCondition(edition === 'EE')('Preview', () => {
       'src',
       /\/preview\/api::article\.article\/.+\/en\/published$/
     );
+  });
+
+  test('Edit form should be displayed on the preview page', async ({ page }) => {
+    // Open an edit view for a content type that has preview
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    const titleBox = page.getByRole('textbox', { name: 'title' });
+    await expect(titleBox).toHaveValue(/west ham post match/i);
   });
 });

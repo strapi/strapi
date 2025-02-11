@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { resetFiles } from '../../../utils/file-reset';
 import { sharedSetup } from '../../../utils/setup';
 import { createComponent, type AddAttribute } from '../../../utils/content-types';
@@ -71,7 +71,7 @@ test.describe('Create a new component', () => {
             name: 'testnewcomponent2',
             icon: 'alien',
             categoryCreate: 'testcategory',
-            attributes: [{ type: 'text', name: 'testcompotext' }],
+            attributes: [{ type: 'text', name: 'testnewcompotext' }],
           },
         },
       },
@@ -83,9 +83,9 @@ test.describe('Create a new component', () => {
           options: {
             repeatable: true,
             name: 'testnewcomponent3',
-            icon: 'alien',
+            icon: 'moon',
             categorySelect: 'testcategory',
-            attributes: [{ type: 'text', name: 'testcompotext' }],
+            attributes: [{ type: 'text', name: 'testexistingcompotext' }],
           },
         },
       },
@@ -98,7 +98,7 @@ test.describe('Create a new component', () => {
           options: {
             repeatable: false,
             name: 'testexistingcomponentexistingcategory',
-            icon: 'alien',
+            icon: 'globe',
             categorySelect: 'testcategory',
           },
         },
@@ -109,7 +109,7 @@ test.describe('Create a new component', () => {
 
     const options = {
       name: 'ArticlesComponent',
-      categorySelect: 'BlogPosts', // this time we select the previously created category
+      categorySelect: 'product', // use a category we know exists in the test data
       icon: 'paint',
       attributes,
     };
