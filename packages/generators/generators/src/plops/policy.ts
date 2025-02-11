@@ -23,8 +23,8 @@ export default (plop: NodePlopAPI) => {
         return [];
       }
 
-      const filePath = getFilePath(answers.destination);
       const currentDir = process.cwd();
+      const filePath = getFilePath(answers.destination);
       const language = tsUtils.isUsingTypeScriptSync(currentDir) ? 'ts' : 'js';
 
       return [

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "5.5.1",
+  "version": "5.9.0",
   "description": "Shared utilities for the Strapi packages",
   "keywords": [
     "strapi",
@@ -35,13 +35,15 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T  rollup -c -w"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
@@ -56,14 +58,13 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
     "@types/http-errors": "2.0.4",
     "@types/koa": "2.13.4",
     "@types/node": "18.19.24",
-    "eslint-config-custom": "5.5.1",
+    "eslint-config-custom": "5.9.0",
     "koa": "2.15.2",
     "koa-body": "6.0.1",
-    "tsconfig": "5.5.1"
+    "tsconfig": "5.9.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",

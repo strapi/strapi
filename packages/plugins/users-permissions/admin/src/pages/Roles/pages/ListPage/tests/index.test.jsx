@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
 
-import React from 'react';
+import * as React from 'react';
 
 import { render as renderAdmin } from '@strapi/strapi/admin/test';
 import { waitForElementToBeRemoved } from '@testing-library/react';

@@ -203,7 +203,12 @@ const ListViewPage = () => {
     return <Page.Error />;
   }
 
-  const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
+  const contentTypeTitle = schema?.info.displayName
+    ? formatMessage({ id: schema.info.displayName, defaultMessage: schema.info.displayName })
+    : formatMessage({
+        id: 'content-manager.containers.untitled',
+        defaultMessage: 'Untitled',
+      });
 
   const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
@@ -326,7 +331,7 @@ const ListViewPage = () => {
                           </Table.Cell>
                         );
                       })}
-                      {/* we stop propogation here to allow the menu to trigger it's events without triggering the row redirect */}
+                      {/* we stop propagation here to allow the menu to trigger it's events without triggering the row redirect */}
                       <ActionsCell onClick={(e) => e.stopPropagation()}>
                         <TableActions document={row} />
                       </ActionsCell>

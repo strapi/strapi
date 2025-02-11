@@ -1,4 +1,4 @@
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { async } from '@strapi/utils';
 
 import { getService } from '../../utils';

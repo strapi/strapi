@@ -1,7 +1,9 @@
 import { cloneDeep, merge } from 'lodash';
 import { Database } from '@strapi/database';
-import { transformContentTypesToModels } from '..';
-import { LoadedContentTypeModel } from '../transform-content-types-to-models';
+import {
+  LoadedContentTypeModel,
+  transformContentTypesToModels,
+} from '../transform-content-types-to-models';
 
 const db = new Database({
   settings: {

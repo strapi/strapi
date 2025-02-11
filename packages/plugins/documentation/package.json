@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "5.5.1",
+  "version": "5.9.0",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -42,7 +42,11 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi-plugin build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -51,14 +55,14 @@
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:unit": "run -T jest --verbose",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "strapi-plugin watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/admin": "5.5.1",
-    "@strapi/design-system": "2.0.0-rc.14",
-    "@strapi/icons": "2.0.0-rc.14",
-    "@strapi/utils": "5.5.1",
+    "@strapi/admin": "5.9.0",
+    "@strapi/design-system": "2.0.0-rc.16",
+    "@strapi/icons": "2.0.0-rc.16",
+    "@strapi/utils": "5.9.0",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0",
     "formik": "2.4.5",
@@ -66,7 +70,7 @@
     "immer": "9.0.21",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
-    "path-to-regexp": "6.3.0",
+    "path-to-regexp": "8.2.0",
     "react-intl": "6.6.2",
     "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",
@@ -74,11 +78,9 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@strapi/admin-test-utils": "5.5.1",
-    "@strapi/pack-up": "5.0.2",
-    "@strapi/sdk-plugin": "^5.2.0",
-    "@strapi/strapi": "5.5.1",
-    "@strapi/types": "5.5.1",
+    "@strapi/admin-test-utils": "5.9.0",
+    "@strapi/strapi": "5.9.0",
+    "@strapi/types": "5.9.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "@types/fs-extra": "11.0.4",

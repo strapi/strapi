@@ -25,6 +25,7 @@ describe('AssetCardBase', () => {
         extension: 'png',
         name: 'Card',
         variant: 'Image',
+        isSelectable: true,
       });
 
       await user.click(getByRole('checkbox'));
@@ -43,6 +44,7 @@ describe('AssetCardBase', () => {
         extension: 'png',
         name: 'Card',
         variant: 'Image',
+        isSelectable: true,
       });
 
       const editButton = getByRole('button', {
@@ -62,6 +64,7 @@ describe('AssetCardBase', () => {
         extension: 'png',
         name: 'Card',
         variant: 'Image',
+        isSelectable: true,
       });
 
       const removeButton = getByRole('button', {
@@ -81,6 +84,7 @@ describe('AssetCardBase', () => {
         extension: 'png',
         name: 'Card',
         variant: 'Image',
+        isSelectable: true,
       });
 
       const card = getAllByRole('button')[0];
@@ -100,6 +104,7 @@ describe('AssetCardBase', () => {
         name: 'Card',
         extension: 'png',
         variant: 'Image',
+        isSelectable: true,
       });
 
       await user.tab();
@@ -115,6 +120,7 @@ describe('AssetCardBase', () => {
         name: 'Card',
         extension: 'png',
         variant: 'Image',
+        isSelectable: true,
       });
 
       // checkbox
@@ -137,6 +143,7 @@ describe('AssetCardBase', () => {
         name: 'Card',
         extension: 'png',
         variant: 'Image',
+        isSelectable: true,
       });
 
       // checkbox
