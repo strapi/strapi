@@ -38,8 +38,8 @@ describe('typeFromMime', () => {
     expect(type).toBe(DocType.Zip);
   });
 
-  it('gives a type of document when the mime is neither video nor image', () => {
-    const type = typeFromMime('application/pdf');
+  it('gives a type of document as the default when the doc type is not recognised and handled', () => {
+    const type = typeFromMime('application/random-document-type');
 
     expect(type).toBe(AssetType.Document);
   });
