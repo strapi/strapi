@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_product_testrepeatablecomps",
+  "info": {
+    "displayName": "testrepeatablecomp",
+    "icon": "moon"
+  },
+  "options": {},
+  "attributes": {
+    "testrepeatablecomp2text": {
+      "type": "string",
+      "required": true,
+      "regex": "^(?!.*fail).*"
+    }
+  }
+}

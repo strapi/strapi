@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_product_testsinglecomps",
+  "info": {
+    "displayName": "testsinglecomp",
+    "icon": "moon"
+  },
+  "options": {},
+  "attributes": {
+    "testsinglecomp2text": {
+      "type": "string",
+      "required": true,
+      "regex": "^(?!.*fail).*"
+    }
+  }
+}

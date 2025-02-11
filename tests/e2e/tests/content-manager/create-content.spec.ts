@@ -1,111 +1,17 @@
 import { test, expect } from '@playwright/test';
-import { addAttributesToContentType } from '../../utils/content-types';
-import { sharedSetup } from '../../utils/setup';
 import { clickAndWait, dragElementAbove, findAndClose, isElementBefore } from '../../utils/shared';
 import { createContent, FieldValue, verifyFields } from '../../utils/content-creation';
-import { resetFiles } from '../../utils/file-reset';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { login } from '../../utils/login';
 
 test.describe('Adding content', () => {
   test.beforeEach(async ({ page }) => {
-    await sharedSetup('ctb-edit-st', page, {
-      login: true,
-      skipTour: true,
-      resetFiles: true,
-      importData: 'with-admin.tar',
-      afterSetup: async ({ page }) => {
-        // TODO: to save the time from a server restart, add these components directly inside the with-admin dataset and remove this
-        await addAttributesToContentType(page, 'Article', [
-          {
-            type: 'text',
-            name: 'testtext',
-            advanced: { required: true, regexp: '^(?!.*fail).*' },
-          },
-          {
-            type: 'component',
-            name: 'testrepeatablecomp',
-            component: {
-              options: {
-                repeatable: true,
-                name: 'testrepeatablecomp2',
-                icon: 'moon',
-                categorySelect: 'product',
-                attributes: [
-                  {
-                    type: 'text',
-                    name: 'testrepeatablecomp2text',
-                    advanced: { required: true, regexp: '^(?!.*fail).*' },
-                  },
-                ],
-              },
-            },
-          },
-          {
-            type: 'component',
-            name: 'testsinglecomp',
-            component: {
-              options: {
-                repeatable: false,
-                name: 'testsinglecomp2',
-                icon: 'moon',
-                categorySelect: 'product',
-                attributes: [
-                  {
-                    type: 'text',
-                    name: 'testsinglecomp2text',
-                    advanced: { required: true, regexp: '^(?!.*fail).*' },
-                  },
-                ],
-              },
-            },
-          },
-          {
-            type: 'dz',
-            name: 'testdz',
-            dz: {
-              components: [
-                // New repeatable component with existing category
-                {
-                  type: 'component',
-                  name: 'testnewcomponentexistingcategory',
-                  component: {
-                    options: {
-                      name: 'testnewcomponentrepeatable',
-                      icon: 'moon',
-                      categorySelect: 'product',
-                      attributes: [
-                        {
-                          type: 'text',
-                          name: 'testnewcomponentexistingcategorytext',
-                          advanced: { required: true, regexp: '^(?!.*fail).*' },
-                        },
-                      ],
-                    },
-                  },
-                },
-                // Existing component with existing category
-                {
-                  type: 'component',
-                  name: 'testexistingcomponentexistingcategory',
-                  component: {
-                    useExisting: 'variations',
-                    options: {
-                      name: 'testvariations',
-                      icon: 'globe',
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        ]);
-      },
-    });
+    await resetDatabaseAndImportDataFromPath('with-admin-test.tar');
+    await page.goto('/admin');
+    await login({ page });
 
-    await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
-  });
-
-  test.afterAll(async () => {
-    await resetFiles();
+    // Navigate to Content Manager
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
   });
 
   test('I want to be able to save and publish content', async ({ page }) => {

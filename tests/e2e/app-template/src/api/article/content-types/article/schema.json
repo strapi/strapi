@@ -44,6 +44,27 @@
         }
       },
       "component": "meta.seo"
+    },
+    "testtext": {
+      "type": "string",
+      "required": true,
+      "regex": "^(?!.*fail).*"
+    },
+    "testrepeatablecomp": {
+      "displayName": "testrepeatablecomp",
+      "type": "component",
+      "repeatable": true,
+      "component": "product.testrepeatablecomp"
+    },
+    "testsinglecomp": {
+      "displayName": "testsinglecomp",
+      "type": "component",
+      "repeatable": false,
+      "component": "product.testsinglecomp"
+    },
+    "testdz": {
+      "type": "dynamiczone",
+      "components": ["product.testnewcomponentexistingcategory", "product.variations"]
     }
   }
 }
