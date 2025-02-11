@@ -17,6 +17,11 @@ export const typeFromMime = (mime: string) => {
     if (lowerCasedMime.includes(key)) {
       return value;
     }
+
+    // XLS files are an edge case as the mime is application/vnd.ms-excel
+    if (key === 'excel' && lowerCasedMime.includes('excel')) {
+      return value;
+    }
   }
 
   return AssetType.Document;
