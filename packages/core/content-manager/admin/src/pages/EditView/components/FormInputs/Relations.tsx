@@ -37,7 +37,7 @@ import { RelationDragPreviewProps } from '../../../../components/DragPreviews/Re
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
 import { useDebounce } from '../../../../hooks/useDebounce';
-import { useDoc } from '../../../../hooks/useDocument';
+import { type UseDocument, useDoc } from '../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
@@ -55,6 +55,7 @@ import { getTranslation } from '../../../../utils/translations';
 import { DocumentStatus } from '../DocumentStatus';
 
 import { useComponent } from './ComponentContext';
+import { RelationModal, getCollectionType } from './RelationModal';
 
 import type { Schema } from '@strapi/types';
 
@@ -116,6 +117,12 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
   label: string;
   position?: RelationPosition;
   __temp_key__: string;
+  apiData?: {
+    documentId: RelationResult['documentId'];
+    id: RelationResult['id'];
+    locale?: RelationResult['locale'];
+    position: RelationPosition;
+  };
 }
 
 interface RelationsFieldProps
@@ -349,6 +356,8 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
           name={props.name}
           isLoading={isFetchingMoreRelations}
           relationType={props.attribute.relation}
+          // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+          targetModel={props.attribute.targetModel}
         />
       </Flex>
     );
@@ -563,6 +572,243 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           name={props.name}
           isLoading={isFetchingMoreRelations}
           relationType={props.attribute.relation}
+        />
+      </Flex>
+    );
+  }
+);
+
+/*
+This component is a duplicate of RelationsField component, it retrieves data with arguments and renders the Unstable components. It's used in the RelationModal component.
+*/
+
+interface RelationsModalFieldProps
+  extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
+    Pick<InputProps, 'hint'> {
+  documentModel: string;
+  document: ReturnType<UseDocument>['document'];
+  changeCurrentRelation?: (newRelation: {
+    documentId: string;
+    model: string;
+    collectionType: string;
+  }) => void;
+  isModalOpen?: boolean;
+}
+
+const RelationsModalField = React.forwardRef<HTMLDivElement, RelationsModalFieldProps>(
+  (
+    { disabled, label, documentModel, document, changeCurrentRelation, isModalOpen, ...props },
+    ref
+  ) => {
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const documentId = document?.documentId;
+    const { formatMessage } = useIntl();
+    const [{ query }] = useQueryParams();
+    const params = buildValidParams(query);
+
+    const isMorph = props.attribute.relation.toLowerCase().includes('morph');
+    const isDisabled = isMorph || disabled;
+
+    const { componentId, componentUID } = useComponent('RelationsField', ({ uid, id }) => ({
+      componentId: id,
+      componentUID: uid,
+    }));
+
+    const isSubmitting = useForm('RelationsList', (state) => state.isSubmitting);
+
+    React.useEffect(() => {
+      setCurrentPage(1);
+    }, [isSubmitting]);
+
+    /**
+     * We'll always have a documentId in a created entry, so we look for a componentId first.
+     * Same with `uid` and `documentModel`.
+     */
+    const id = componentId ? componentId.toString() : documentId;
+    const model = componentUID ?? documentModel;
+
+    /**
+     * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
+     * Where the above example would a nested field within two components, however
+     * we only require the field on the component not the complete path since we query
+     * individual components. Therefore we split the string and take the last item.
+     */
+    const [targetField] = props.name.split('.').slice(-1);
+
+    const { data, isLoading, isFetching } = useGetRelationsQuery(
+      {
+        model,
+        targetField,
+        // below we don't run the query if there is no id.
+        id: id!,
+        params: {
+          ...params,
+          pageSize: RELATIONS_TO_DISPLAY,
+          page: currentPage,
+        },
+      },
+      {
+        refetchOnMountOrArgChange: true,
+        skip: !id,
+        selectFromResult: (result) => {
+          return {
+            ...result,
+            data: {
+              ...result.data,
+              results: result.data?.results ? result.data.results : [],
+            },
+          };
+        },
+      }
+    );
+
+    const handleLoadMore = () => {
+      setCurrentPage((prev) => prev + 1);
+    };
+
+    const field = useField(props.name);
+
+    const isFetchingMoreRelations = isLoading || isFetching;
+
+    const realServerRelationsCount =
+      'pagination' in data && data.pagination ? data.pagination.total : 0;
+
+    /**
+     * Items that are already connected, but reordered would be in
+     * this list, so to get an accurate figure, we remove them.
+     */
+    const relationsConnected =
+      (field.value?.connect ?? []).filter(
+        (rel: Relation) => data.results.findIndex((relation) => relation.id === rel.id) === -1
+      ).length ?? 0;
+    const relationsDisconnected = field.value?.disconnect?.length ?? 0;
+
+    const relationsCount = realServerRelationsCount + relationsConnected - relationsDisconnected;
+
+    /**
+     * This is it, the source of truth for reordering in conjunction with partial loading & updating
+     * of relations. Relations on load are given __temp_key__ when fetched, because we don't want to
+     * create brand new keys everytime the data updates, just keep adding them onto the newly loaded ones.
+     */
+    const relations = React.useMemo(() => {
+      const ctx = {
+        field: field.value,
+        // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}`,
+        mainField: props.mainField,
+      };
+
+      /**
+       * Tidy up our data.
+       */
+      const transformations = pipe(
+        removeConnected(ctx),
+        removeDisconnected(ctx),
+        addLabelAndHref(ctx)
+      );
+
+      const transformedRels = transformations([...data.results]);
+
+      /**
+       * THIS IS CRUCIAL. If you don't sort by the __temp_key__ which comes from fractional indexing
+       * then the list will be in the wrong order.
+       */
+      return [...transformedRels, ...(field.value?.connect ?? [])].sort((a, b) => {
+        if (a.__temp_key__ < b.__temp_key__) return -1;
+        if (a.__temp_key__ > b.__temp_key__) return 1;
+        return 0;
+      });
+    }, [
+      data.results,
+      field.value,
+      // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+      props.attribute.targetModel,
+      props.mainField,
+    ]);
+
+    const handleDisconnect = useHandleDisconnect(props.name, 'RelationsField');
+
+    const handleConnect: RelationsInputProps['onChange'] = (relation) => {
+      const [lastItemInList] = relations.slice(-1);
+
+      const item = {
+        id: relation.id,
+        apiData: {
+          id: relation.id,
+          documentId: relation.documentId,
+          locale: relation.locale,
+        },
+        status: relation.status,
+        /**
+         * If there's a last item, that's the first key we use to generate out next one.
+         */
+        __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
+        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
+        [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
+        label: getRelationLabel(relation, props.mainField),
+        // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
+        href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}?${relation.locale ? `plugins[i18n][locale]=${relation.locale}` : ''}`,
+      };
+
+      if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
+        // Remove any existing relation so they can be replaced with the new one
+        field.value?.connect?.forEach(handleDisconnect);
+        relations.forEach(handleDisconnect);
+
+        field.onChange(`${props.name}.connect`, [item]);
+      } else {
+        field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
+      }
+    };
+
+    return (
+      <Flex
+        ref={ref}
+        direction="column"
+        gap={3}
+        justifyContent="space-between"
+        alignItems="stretch"
+        wrap="wrap"
+      >
+        <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
+          <RelationsInput
+            disabled={isDisabled}
+            // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
+            id={componentUID ? (componentId ? `${componentId}` : '') : documentId}
+            label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
+            model={model}
+            onChange={handleConnect}
+            {...props}
+          />
+          {'pagination' in data &&
+          data.pagination &&
+          data.pagination.pageCount > data.pagination.page ? (
+            <TextButton
+              disabled={isFetchingMoreRelations}
+              onClick={handleLoadMore}
+              loading={isFetchingMoreRelations}
+              startIcon={<ArrowClockwise />}
+              // prevent the label from line-wrapping
+              shrink={0}
+            >
+              {formatMessage({
+                id: getTranslation('relation.loadMore'),
+                defaultMessage: 'Load More',
+              })}
+            </TextButton>
+          ) : null}
+        </StyledFlex>
+        <UnstableRelationsList
+          data={relations}
+          serverData={data.results}
+          disabled={isDisabled}
+          name={props.name}
+          isLoading={isFetchingMoreRelations}
+          relationType={props.attribute.relation}
+          // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+          targetModel={props.attribute.targetModel}
+          isModalOpen={isModalOpen}
+          changeCurrentRelation={changeCurrentRelation}
         />
       </Flex>
     );
@@ -846,6 +1092,23 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
   serverData: RelationResult[];
 }
 
+interface UnstableRelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'name'> {
+  data: Relation[];
+  isLoading?: boolean;
+  relationType: Schema.Attribute.RelationKind.Any;
+  /**
+   * The existing relations connected on the server. We need these to diff against.
+   */
+  serverData: RelationResult[];
+  targetModel: string;
+  isModalOpen?: boolean;
+  changeCurrentRelation?: (newRelation: {
+    documentId: string;
+    model: string;
+    collectionType: string;
+  }) => void;
+}
+
 const UnstableRelationsList = ({
   data,
   serverData,
@@ -853,7 +1116,10 @@ const UnstableRelationsList = ({
   name,
   isLoading,
   relationType,
-}: RelationsListProps) => {
+  targetModel,
+  isModalOpen = false,
+  changeCurrentRelation,
+}: UnstableRelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
   const listRef = React.useRef<FixedSizeList>(null);
@@ -952,8 +1218,8 @@ const UnstableRelationsList = ({
                 locale: relationInFront.locale,
                 status:
                   'publishedAt' in relationInFront && relationInFront.publishedAt
-                    ? 'published'
-                    : 'draft',
+                    ? ('published' as Relation['status'])
+                    : ('draft' as Relation['status']),
               }
             : { end: true };
 
@@ -1070,6 +1336,9 @@ const UnstableRelationsList = ({
           name,
           handleDisconnect,
           relations: data,
+          targetModel,
+          isModalOpen,
+          changeCurrentRelation,
         }}
         itemKey={(index) => data[index].id}
         innerElementType="ol"
@@ -1186,8 +1455,8 @@ const RelationsList = ({
                 locale: relationInFront.locale,
                 status:
                   'publishedAt' in relationInFront && relationInFront.publishedAt
-                    ? 'published'
-                    : 'draft',
+                    ? ('published' as Relation['status'])
+                    : ('draft' as Relation['status']),
               }
             : { end: true };
 
@@ -1366,6 +1635,13 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     handleDisconnect: (relation: Relation) => void;
     name: string;
     relations: Relation[];
+    targetModel: string;
+    isModalOpen?: boolean;
+    changeCurrentRelation?: (newRelation: {
+      documentId: string;
+      model: string;
+      collectionType: string;
+    }) => void;
   };
 }
 
@@ -1387,10 +1663,14 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     handleMoveItem,
     name,
     relations,
+    targetModel,
+    isModalOpen,
+    changeCurrentRelation,
   } = data;
   const { formatMessage } = useIntl();
+  const [showModal, setShowModal] = React.useState(false);
 
-  const { id, label, status } = relations[index];
+  const { id, label, status, documentId, href, apiData } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -1413,6 +1693,17 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     );
 
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
+
+  const handleChangeModalContent = () => {
+    if (changeCurrentRelation) {
+      const newRelation = {
+        documentId: documentId ? documentId : apiData?.documentId || '',
+        model: targetModel,
+        collectionType: getCollectionType(href)!,
+      };
+      changeCurrentRelation(newRelation);
+    }
+  };
 
   React.useEffect(() => {
     dragPreviewRef(getEmptyImage());
@@ -1463,12 +1754,25 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                 <Tooltip description={label}>
                   {/*  eslint-disable-next-line no-console */}
-                  <CustomTextButton onClick={() => console.log('OPEN MODAL')}>
-                    {label}
-                  </CustomTextButton>
+                  {isModalOpen ? (
+                    <CustomTextButton onClick={handleChangeModalContent}>{label}</CustomTextButton>
+                  ) : (
+                    <CustomTextButton onClick={() => setShowModal(true)}>{label}</CustomTextButton>
+                  )}
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
+              {showModal && (
+                <RelationModal
+                  open={showModal}
+                  onToggle={() => {
+                    setShowModal((prev) => !prev);
+                  }}
+                  model={targetModel}
+                  id={documentId ? documentId : apiData?.documentId}
+                  relationUrl={href}
+                />
+              )}
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>
@@ -1661,10 +1965,12 @@ const RelationItemPlaceholder = () => (
 );
 
 const MemoizedRelationsField = React.memo(RelationsField);
+const MemoizedRelationsModalField = React.memo(RelationsModalField);
 const MemoizedUnstableRelationsField = React.memo(UnstableRelationsField);
 
 export {
   MemoizedRelationsField as RelationsInput,
+  MemoizedRelationsModalField as RelationsModalInput,
   MemoizedUnstableRelationsField as UnstableRelationsInput,
   FlexWrapper,
   DisconnectButton,
