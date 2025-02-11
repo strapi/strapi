@@ -155,7 +155,6 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                           <GuidedTourProvider>
                             <ConfigurationContextProvider
                               showReleaseNotification={false}
-                              showTutorials={false}
                               logos={{
                                 auth: { default: 'default' },
                                 menu: { default: 'default' },
