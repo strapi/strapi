@@ -3,6 +3,7 @@ import { render, screen } from '@tests/utils';
 import { RelationModal } from '../RelationModal';
 
 jest.mock('../../../../../../hooks/useDocument', () => ({
+  useDoc: jest.fn(() => ({})),
   useDocument: jest.fn(() => ({
     isLoading: false,
     components: {},

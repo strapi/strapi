@@ -6,6 +6,7 @@ import { useDoc } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
+import { InputRendererModal } from './InputRendererModal';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
   sm: '27.5rem', // 440px
@@ -15,21 +16,29 @@ export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;
 `;
 
-export const ResponsiveGridItem = styled(Grid.Item)`
-  grid-column: span 12;
-
-  @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
-    ${({ col }) => col && `grid-column: span ${col};`}
-  }
-`;
+// We need to use a different grid item for the responsive layout in the test environment
+// because @container is not supported in jsdom and it throws an error
+export const ResponsiveGridItem =
+  process.env.NODE_ENV !== 'test'
+    ? styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+        @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+          ${({ col }) => col && `grid-column: span ${col};`}
+        }
+      `
+    : styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+      `;
 
 interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   hasBackground?: boolean;
+  model?: string;
 }
 
-const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
+const FormLayout = ({ layout, hasBackground = true, model: modelContext }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { model } = useDoc();
+  const { model: modelHook } = useDoc();
+  const model = modelContext || modelHook;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -49,7 +58,11 @@ const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                <InputRenderer {...fieldWithTranslatedLabel} />
+                {modelContext ? (
+                  <InputRendererModal {...fieldWithTranslatedLabel} />
+                ) : (
+                  <InputRenderer {...fieldWithTranslatedLabel} />
+                )}
               </Grid.Item>
             </Grid.Root>
           );
@@ -58,7 +71,7 @@ const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
         return (
           <Box
             key={index}
-            {...(!hasBackground && {
+            {...(hasBackground && {
               padding: 6,
               borderColor: 'neutral150',
               background: 'neutral0',
@@ -86,7 +99,11 @@ const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
                         direction="column"
                         alignItems="stretch"
                       >
-                        <InputRenderer {...fieldWithTranslatedLabel} />
+                        {modelContext ? (
+                          <InputRendererModal {...fieldWithTranslatedLabel} />
+                        ) : (
+                          <InputRenderer {...fieldWithTranslatedLabel} />
+                        )}
                       </ResponsiveGridItem>
                     );
                   })}

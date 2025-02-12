@@ -21,7 +21,7 @@ import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { DocumentStatus } from '../../DocumentStatus';
-import { FormLayoutModal } from '../../FormLayoutModal';
+import { FormLayout } from '../../FormLayout';
 
 /* -------------------------------------------------------------------------------------------------
  * RelationModalProvider
@@ -210,9 +210,10 @@ const RelationModalBody = ({
           <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
             <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
               <Box overflow="auto" flex={1}>
-                <FormLayoutModal
+                <FormLayout
                   layout={documentLayoutResponse.edit.layout}
                   hasBackground={false}
+                  model={currentRelation.model}
                 />
               </Box>
             </Flex>
