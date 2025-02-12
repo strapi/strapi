@@ -9089,6 +9089,7 @@ __metadata:
     "@types/lodash": "npm:^4.14.191"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
+    koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     react: "npm:18.3.1"
