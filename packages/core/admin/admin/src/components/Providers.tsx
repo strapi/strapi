@@ -59,7 +59,6 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         <ConfigurationProvider
                           defaultAuthLogo={strapi.configurations.authLogo}
                           defaultMenuLogo={strapi.configurations.menuLogo}
-                          showTutorials={strapi.configurations.tutorials}
                           showReleaseNotification={strapi.configurations.notifications.releases}
                         >
                           {children}

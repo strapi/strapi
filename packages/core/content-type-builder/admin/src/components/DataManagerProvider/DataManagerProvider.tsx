@@ -306,6 +306,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     try {
       const requestURL = `/${pluginId}/${endPoint}/${currentUid}`;
       const isTemporary = get(modifiedData, [firstKeyToMainSchema, 'isTemporary'], false);
+
       // eslint-disable-next-line no-alert
       const userConfirm = window.confirm(
         formatMessage({
@@ -339,6 +340,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         // Unlock the app
         await unlockAppWithAutoreload?.();
 
+        await getDataRef.current();
         // Refetch the permissions
         await updatePermissions();
       }
@@ -562,7 +564,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
-      dispatch(actions.updateInitialState());
 
       // Update the app's permissions
       await updatePermissions();

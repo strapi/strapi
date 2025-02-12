@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { Page, useQueryParams, useRBAC, createContext } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  useQueryParams,
+  useRBAC,
+  createContext,
+  Form as FormContext,
+} from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Portal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -9,7 +15,7 @@ import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
-import { useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../utils/api';
 import { PreviewContent, UnstablePreviewContent } from '../components/PreviewContent';
 import { PreviewHeader, UnstablePreviewHeader } from '../components/PreviewHeader';
@@ -27,6 +33,7 @@ interface PreviewContextValue {
   document: NonNullable<ReturnType<UseDocument>['document']>;
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
+  layout: EditLayout;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -130,20 +137,23 @@ const PreviewPage = () => {
         title={documentTitle}
         meta={documentResponse.meta}
         schema={documentResponse.schema}
+        layout={documentLayoutResponse.edit}
       >
-        <Flex direction="column" height="100%" alignItems="stretch">
-          {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
-            <>
-              <UnstablePreviewHeader />
-              <UnstablePreviewContent />
-            </>
-          ) : (
-            <>
-              <PreviewHeader />
-              <PreviewContent />
-            </>
-          )}
-        </Flex>
+        <FormContext method="POST" initialValues={documentResponse.document} height="100%">
+          <Flex direction="column" height="100%" alignItems="stretch">
+            {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
+              <>
+                <UnstablePreviewHeader />
+                <UnstablePreviewContent />
+              </>
+            ) : (
+              <>
+                <PreviewHeader />
+                <PreviewContent />
+              </>
+            )}
+          </Flex>
+        </FormContext>
       </PreviewProvider>
     </>
   );
@@ -161,7 +171,10 @@ const ProtectedPreviewPageImpl = () => {
     permissions = [],
     isLoading,
     error,
-  } = useRBAC([{ action: 'plugin::content-manager.explorer.read', subject: model }]);
+  } = useRBAC([
+    { action: 'plugin::content-manager.explorer.read', subject: model },
+    { action: 'plugin::content-manager.explorer.update', subject: model },
+  ]);
 
   if (isLoading) {
     return <Page.Loading />;
@@ -193,12 +206,14 @@ const ProtectedPreviewPageImpl = () => {
       zIndex={2}
       background="neutral0"
     >
-      <Page.Protect permissions={permissions}>
-        {({ permissions }) => (
-          <DocumentRBAC permissions={permissions}>
-            <PreviewPage />
-          </DocumentRBAC>
+      <Page.Protect
+        permissions={permissions.filter((permission) =>
+          permission.action.includes('explorer.read')
         )}
+      >
+        <DocumentRBAC permissions={permissions}>
+          <PreviewPage />
+        </DocumentRBAC>
       </Page.Protect>
     </Box>
   );

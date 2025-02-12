@@ -23,7 +23,7 @@ export default defineConfig([
       {
         dir: import.meta.dirname + '/dist',
         entryFileNames: '[name].mjs',
-        chunkFileNames: 'chunks/[name]-[hash].js',
+        chunkFileNames: 'chunks/[name]-[hash].mjs',
         exports: 'auto',
         format: 'esm',
         sourcemap: true,
