@@ -6,7 +6,7 @@ import { login } from '../../utils/login';
 
 test.describe('Adding content', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin-test.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
     await login({ page });
 
@@ -17,10 +17,10 @@ test.describe('Adding content', () => {
   test('I want to be able to save and publish content', async ({ page }) => {
     await createContent(
       page,
-      'Article',
+      'Match',
       [
         {
-          name: 'testtext',
+          name: 'opponent',
           type: 'text',
           value: 'testname',
         },
@@ -32,7 +32,7 @@ test.describe('Adding content', () => {
   test('I want to set component order when creating content', async ({ page }) => {
     const fields = [
       {
-        name: 'testtext',
+        name: 'opponent',
         type: 'text',
         value: 'testname',
       },
@@ -60,7 +60,7 @@ test.describe('Adding content', () => {
       },
     ] satisfies FieldValue[];
 
-    await createContent(page, 'Article', fields, { save: false, publish: false, verify: false });
+    await createContent(page, 'Match', fields, { save: false, publish: false, verify: false });
 
     await page.waitForLoadState('networkidle');
 
@@ -86,14 +86,15 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (basic)',
       fields: [
-        { name: 'testtext', type: 'text', value: '' },
-        { name: 'title', type: 'text', value: 'at least one field requires text' },
+        { name: 'opponent', type: 'text', value: '' },
+        { name: 'captain', type: 'text', value: 'Roy Kent' },
       ],
       expectedError: 'This value is required',
     },
     {
       description: 'invalid regexp text field (basic)',
-      fields: [{ name: 'testtext', type: 'text', value: 'fail-regexp' }],
+      // Regex tests that richmond is not the opponent
+      fields: [{ name: 'opponent', type: 'text', value: 'richmond' }],
       expectedError: 'The value does not match the regex',
     },
 
@@ -101,7 +102,7 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (single component)',
       fields: [
-        { name: 'testtext', type: 'text', value: 'fill required text' },
+        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
           name: 'testsinglecomp',
           type: 'component',
@@ -119,7 +120,7 @@ test.describe('Adding content', () => {
     {
       description: 'invalid regexp text field (single component)',
       fields: [
-        { name: 'testtext', type: 'text', value: 'fill required text' },
+        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
           name: 'testcomponent',
           type: 'component',
@@ -127,7 +128,7 @@ test.describe('Adding content', () => {
             {
               category: 'product',
               name: 'testsinglecomp',
-              fields: [{ name: 'testsinglecomp2text', type: 'text', value: 'fail regexp' }],
+              fields: [{ name: 'testsinglecomp2text', type: 'text', value: 'fail' }],
             },
           ],
         },
@@ -139,7 +140,7 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (repeatable component)',
       fields: [
-        { name: 'testtext', type: 'text', value: 'fill required text' },
+        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
           name: 'testrepeatablecomp',
           type: 'component_repeatable',
@@ -157,7 +158,7 @@ test.describe('Adding content', () => {
     {
       description: 'invalid regexp text field (repeatable component)',
       fields: [
-        { name: 'testtext', type: 'text', value: 'fill required text' },
+        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
           name: 'testrepeatablecomp',
           type: 'component_repeatable',
@@ -165,7 +166,7 @@ test.describe('Adding content', () => {
             {
               category: 'product',
               name: 'testrepeatablecomp',
-              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: 'fail regexp' }],
+              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: 'fail' }],
             },
           ],
         },
@@ -177,7 +178,7 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (dz component)',
       fields: [
-        { name: 'testtext', type: 'text', value: 'fill required text' },
+        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
           name: 'testdz',
           type: 'dz',
@@ -201,7 +202,7 @@ test.describe('Adding content', () => {
     {
       description: 'invalid regexp text field (dz component)',
       fields: [
-        { name: 'testtext', type: 'text', value: 'fill required text' },
+        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
           name: 'testdz',
           type: 'dz',
@@ -226,7 +227,7 @@ test.describe('Adding content', () => {
 
   for (const { description, fields, expectedError } of testCases) {
     test(`when I publish ${description} I see an error`, async ({ page }) => {
-      await createContent(page, 'Article', fields, { save: false, publish: true, verify: false });
+      await createContent(page, 'Match', fields, { save: false, publish: true, verify: false });
       expect(page.getByText(expectedError)).toBeVisible();
     });
   }

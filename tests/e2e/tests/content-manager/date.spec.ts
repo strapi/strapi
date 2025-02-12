@@ -14,7 +14,7 @@ function toMMDDYYYY(date: Date) {
 
 test.describe('Date field tests', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin-test.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
     await login({ page });
 
@@ -28,7 +28,7 @@ test.describe('Date field tests', () => {
 
     await createContent(
       page,
-      'Article',
+      'Match',
       [
         {
           type: 'date_date',
@@ -56,7 +56,7 @@ test.describe('Date field tests', () => {
 
     await createContent(
       page,
-      'Article',
+      'Match',
       [
         {
           type: 'date_date',
@@ -83,7 +83,7 @@ test.describe('Date field tests', () => {
 
     await createContent(
       page,
-      'Article',
+      'Match',
       [
         {
           type: 'date_date',

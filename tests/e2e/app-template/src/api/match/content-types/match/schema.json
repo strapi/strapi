@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "matches",
+  "info": {
+    "singularName": "match",
+    "pluralName": "matches",
+    "displayName": "Match"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "date": {
+      "type": "date"
+    },
+    "captain": {
+      "type": "string"
+    },
+    "opponent": {
+      "type": "string",
+      "required": true,
+      "regex": "^(?!.*richmond).*"
+    },
+    "testrepeatablecomp": {
+      "displayName": "testrepeatablecomp",
+      "type": "component",
+      "repeatable": true,
+      "component": "product.testrepeatablecomp"
+    },
+    "testsinglecomp": {
+      "displayName": "testsinglecomp",
+      "type": "component",
+      "repeatable": false,
+      "component": "product.testsinglecomp"
+    },
+    "testdz": {
+      "type": "dynamiczone",
+      "components": ["product.testnewcomponentexistingcategory", "product.variations"]
+    }
+  }
+}
