@@ -22,6 +22,7 @@ interface AssetCardProps {
   size?: 'S' | 'M';
   allowedTypes?: AllowedTypes[];
   alt?: string;
+  className?: string;
 }
 
 export const AssetCard = ({
@@ -32,6 +33,7 @@ export const AssetCard = ({
   onRemove,
   size = 'M',
   local = false,
+  className,
 }: AssetCardProps) => {
   const handleSelect = onSelect ? () => onSelect(asset) : undefined;
 
@@ -47,6 +49,7 @@ export const AssetCard = ({
     onRemove: onRemove ? () => onRemove(asset) : undefined,
     selected: isSelected,
     size,
+    className,
   };
 
   if (asset.mime?.includes(AssetType.Video)) {
