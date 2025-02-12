@@ -8,7 +8,7 @@ const params: OpenAPIV3.ParameterObject[] = [
     deprecated: false,
     required: false,
     schema: {
-      type: 'string',
+      oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
     },
   },
   {
@@ -68,7 +68,7 @@ const params: OpenAPIV3.ParameterObject[] = [
     deprecated: false,
     required: false,
     schema: {
-      type: 'string',
+      oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
     },
   },
   {
@@ -78,7 +78,11 @@ const params: OpenAPIV3.ParameterObject[] = [
     deprecated: false,
     required: false,
     schema: {
-      type: 'string',
+      oneOf: [
+        { type: 'string' },
+        { type: 'boolean' },
+        { type: 'object', additionalProperties: true },
+      ],
     },
   },
   {
