@@ -33,29 +33,28 @@ import { NavLink } from 'react-router-dom';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { styled } from 'styled-components';
 
-import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
-import { COLLECTION_TYPES } from '../../../../constants/collections';
-import { ItemTypes } from '../../../../constants/dragAndDrop';
-import { useDebounce } from '../../../../hooks/useDebounce';
-import { type UseDocument, useDoc } from '../../../../hooks/useDocument';
-import { type EditFieldLayout } from '../../../../hooks/useDocumentLayout';
+import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
+import { COLLECTION_TYPES } from '../../../../../constants/collections';
+import { ItemTypes } from '../../../../../constants/dragAndDrop';
+import { useDebounce } from '../../../../../hooks/useDebounce';
+import { type UseDocument, useDoc } from '../../../../../hooks/useDocument';
+import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
   UseDragAndDropOptions,
   useDragAndDrop,
-} from '../../../../hooks/useDragAndDrop';
+} from '../../../../../hooks/useDragAndDrop';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
   RelationResult,
-} from '../../../../services/relations';
-import { buildValidParams } from '../../../../utils/api';
-import { getRelationLabel } from '../../../../utils/relations';
-import { getTranslation } from '../../../../utils/translations';
-import { DocumentStatus } from '../DocumentStatus';
-
-import { useComponent } from './ComponentContext';
-import { RelationModal, getCollectionType } from './RelationModal';
+} from '../../../../../services/relations';
+import { buildValidParams } from '../../../../../utils/api';
+import { getRelationLabel } from '../../../../../utils/relations';
+import { getTranslation } from '../../../../../utils/translations';
+import { DocumentStatus } from '../../DocumentStatus';
+import { useComponent } from '../ComponentContext';
+import { RelationModal, getCollectionType } from '../Relations/RelationModal';
 
 import type { Schema } from '@strapi/types';
 

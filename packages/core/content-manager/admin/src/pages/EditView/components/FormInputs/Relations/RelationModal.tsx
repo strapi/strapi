@@ -15,13 +15,13 @@ import { ArrowLeft, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../constants/collections';
-import { PERMISSIONS } from '../../../../constants/plugin';
-import { ModelRBAC } from '../../../../features/ModelRBAC';
-import { type UseDocument, useDocument } from '../../../../hooks/useDocument';
-import { useDocumentLayout } from '../../../../hooks/useDocumentLayout';
-import { DocumentStatus } from '../DocumentStatus';
-import { FormLayoutModal } from '../FormLayoutModal';
+import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
+import { PERMISSIONS } from '../../../../../constants/plugin';
+import { ModelRBAC } from '../../../../../features/ModelRBAC';
+import { type UseDocument, useDocument } from '../../../../../hooks/useDocument';
+import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
+import { DocumentStatus } from '../../DocumentStatus';
+import { FormLayoutModal } from '../../FormLayoutModal';
 
 /* -------------------------------------------------------------------------------------------------
  * RelationModalProvider

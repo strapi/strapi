@@ -2,7 +2,7 @@ import { render, screen } from '@tests/utils';
 
 import { RelationModal } from '../RelationModal';
 
-jest.mock('../../../../../hooks/useDocument', () => ({
+jest.mock('../../../../../../hooks/useDocument', () => ({
   useDocument: jest.fn(() => ({
     isLoading: false,
     components: {},
@@ -49,7 +49,7 @@ jest.mock('../../../../../hooks/useDocument', () => ({
   })),
 }));
 
-jest.mock('../../../../../hooks/useDocumentLayout', () => ({
+jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
   useDocumentLayout: jest.fn().mockReturnValue({
     edit: {
       components: {},

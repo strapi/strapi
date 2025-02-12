@@ -9,7 +9,7 @@ import { styled } from 'styled-components';
 
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
-import { useRelationModalContext } from './FormInputs/RelationModal';
+import { useRelationModalContext } from './FormInputs/Relations/RelationModal';
 import { InputRendererModal } from './InputRendererModal';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
