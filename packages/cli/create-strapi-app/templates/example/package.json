@@ -1,10 +1,23 @@
 {
   "scripts": {
-    "develop": "strapi develop",
-    "start": "strapi start",
     "build": "strapi build",
-    "strapi": "strapi",
     "deploy": "strapi deploy",
+    "develop": "strapi develop",
+    "dev": "strapi develop",
+    "console": "strapi console",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "strapi:routes": "strapi routes:list",
+    "strapi:policies": "strapi policies:list",
+    "strapi:middlewares": "strapi middlewares:list",
+    "strapi:content-types": "strapi content-types:list",
+    "strapi:controllers": "strapi controllers:list",
+    "strapi:services": "strapi services:list",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry",
+    "upgrade:major": "npx @strapi/upgrade major",
+    "upgrade:minor": "npx @strapi/upgrade minor",
+    "upgrade:patch": "npx @strapi/upgrade patch",
     "seed:example": "node ./scripts/seed.js"
   },
   "dependencies": {
