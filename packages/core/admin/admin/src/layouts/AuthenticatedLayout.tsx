@@ -13,7 +13,6 @@ import { GuidedTourModal } from '../components/GuidedTour/Modal';
 import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
-import { Onboarding } from '../components/Onboarding';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
@@ -91,7 +90,6 @@ const AdminLayout = () => {
     generalSectionLinks,
     pluginsSectionLinks,
   } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
-  const { showTutorials } = useConfiguration('Admin');
 
   /**
    * Make sure the event is only send once after accessing the admin panel
@@ -130,7 +128,6 @@ const AdminLayout = () => {
               <Box flex={1}>
                 <Outlet />
                 <GuidedTourModal />
-                {showTutorials && <Onboarding />}
               </Box>
             </Flex>
           </Box>
