@@ -23,7 +23,7 @@ import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { useRelationModalContext } from './FormInputs/Relations/RelationModal';
-import { RelationsModalInput } from './FormInputs/Relations/Relations';
+import { UnstableRelationsInput } from './FormInputs/Relations/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
@@ -160,7 +160,7 @@ const InputRendererModal = ({ visible, hint: providedHint, ...props }: InputRend
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
       return (
-        <RelationsModalInput
+        <UnstableRelationsInput
           {...props}
           hint={hint}
           disabled={fieldIsDisabled}
