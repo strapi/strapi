@@ -1,4 +1,4 @@
-import { AssetType, DocType } from '../constants';
+import { AssetType, DocType } from '../enums';
 
 const MIME_TYPE_MAP: Record<string, string> = {
   image: AssetType.Image,

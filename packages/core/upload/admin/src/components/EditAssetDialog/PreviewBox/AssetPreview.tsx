@@ -6,7 +6,7 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled, useTheme } from 'styled-components';
 
-import { AssetType } from '../../../constants';
+import { AssetType } from '../../../enums';
 import { typeFromMime } from '../../../utils';
 import { getFileIconComponent } from '../../../utils/icons';
 

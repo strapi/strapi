@@ -1,4 +1,4 @@
-import { AssetType, DocType } from '../../constants';
+import { AssetType, DocType } from '../../enums';
 import { typeFromMime } from '../typeFromMime';
 
 describe('typeFromMime', () => {
