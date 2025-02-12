@@ -1,15 +1,17 @@
-import { File, FileCsv, FilePdf, FileXls, FileZip } from '@strapi/icons';
-import { DocType } from '../constants';
-import { DefaultTheme } from 'styled-components';
 import { SVGProps } from 'react';
+
+import { File, FileCsv, FilePdf, FileXls, FileZip } from '@strapi/icons';
+import { DefaultTheme } from 'styled-components';
+
+import { DocType } from '../constants';
 
 // The IconProps interface is not exported from our design library package, so we need to redefine it here
 interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'fill' | 'stroke'> {
   /**
    * @default "currentColor"
    */
-  fill?: keyof DefaultTheme['colors'] | (string & {});
-  stroke?: keyof DefaultTheme['colors'] | (string & {});
+  fill?: keyof DefaultTheme['colors'] | string;
+  stroke?: keyof DefaultTheme['colors'] | string;
 }
 
 type IconComponent = React.FC<IconProps>;

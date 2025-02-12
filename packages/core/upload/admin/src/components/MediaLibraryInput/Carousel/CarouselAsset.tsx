@@ -2,10 +2,8 @@ import { Box, Flex } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { AssetType } from '../../../constants';
-
 import { createAssetUrl } from '../../../utils';
 import { getFileIconComponent } from '../../../utils/icons';
-
 import { AudioPreview } from '../../AssetCard/AudioPreview';
 import { VideoPreview } from '../../AssetCard/VideoPreview';
 
