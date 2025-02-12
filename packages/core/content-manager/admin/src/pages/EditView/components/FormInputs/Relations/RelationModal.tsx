@@ -17,7 +17,7 @@ import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
-import { ModelRBAC } from '../../../../../features/ModelRBAC';
+import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -196,7 +196,7 @@ const RelationModalBody = ({
         isModalOpen={isModalOpen}
         onToggleModal={onToggleModal}
       >
-        <ModelRBAC permissions={permissions} model={currentRelation.model}>
+        <DocumentRBAC permissions={permissions} model={currentRelation.model}>
           <Flex direction="column" alignItems="flex-start" gap={2}>
             <Typography tag="h2" variant="alpha">
               {documentTitle}
@@ -217,7 +217,7 @@ const RelationModalBody = ({
               </Box>
             </Flex>
           </FormContext>
-        </ModelRBAC>
+        </DocumentRBAC>
       </RelationModalProvider>
     </Modal.Body>
   );

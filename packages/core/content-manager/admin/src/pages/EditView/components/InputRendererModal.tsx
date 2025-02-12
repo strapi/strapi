@@ -14,7 +14,7 @@ import {
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
-import { useModelRBAC } from '../../../features/ModelRBAC';
+import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
@@ -58,10 +58,10 @@ const InputRendererModal = ({ visible, hint: providedHint, ...props }: InputRend
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
-  const canCreateFields = useModelRBAC('InputRendererModal', (rbac) => rbac.canCreateFields);
-  const canReadFields = useModelRBAC('InputRendererModal', (rbac) => rbac.canReadFields);
-  const canUpdateFields = useModelRBAC('InputRendererModal', (rbac) => rbac.canUpdateFields);
-  const canUserAction = useModelRBAC('InputRendererModal', (rbac) => rbac.canUserAction);
+  const canCreateFields = useDocumentRBAC('InputRendererModal', (rbac) => rbac.canCreateFields);
+  const canReadFields = useDocumentRBAC('InputRendererModal', (rbac) => rbac.canReadFields);
+  const canUpdateFields = useDocumentRBAC('InputRendererModal', (rbac) => rbac.canUpdateFields);
+  const canUserAction = useDocumentRBAC('InputRendererModal', (rbac) => rbac.canUserAction);
 
   let idToCheck = id;
   if (collectionType === SINGLE_TYPES) {
