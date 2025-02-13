@@ -4,7 +4,7 @@
  * When publishing or un publishing an entry, other entries with a relation targeting this one might lose its relation.
  * This is only the case with unidirectional relations, but not bidirectional relations.
  */
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
