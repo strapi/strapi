@@ -1,4 +1,4 @@
-import { ReactNode, memo } from 'react';
+import * as React from 'react';
 
 import {
   useStrapiApp,
@@ -10,23 +10,33 @@ import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
-import { useDocLayout } from '../../../hooks/useDocumentLayout';
+import { type UseDocument, useDoc } from '../../../hooks/useDocument';
+import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
+import { useRelationModalContext } from './FormInputs/Relations/RelationModal';
 import { RelationsInput, UnstableRelationsInput } from './FormInputs/Relations/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
+import type { CurrentRelation } from './FormInputs/Relations/RelationModal';
 import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
+  contextId?: string;
+  contextDocument?: NonNullable<ReturnType<UseDocument>['document']>;
+  contextCollectionType?: string;
+  contextModel?: string;
+  changeCurrentRelation?: (newRelation: CurrentRelation) => void;
+  isModalOpen?: boolean;
+  contextComponents?: ReturnType<typeof useDocumentLayout>['edit']['components'];
+};
 /**
  * @internal
  *
@@ -35,8 +45,54 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id, document, collectionType } = useDoc();
+const InputRendererWithContext = (props: InputRendererProps) => {
+  const id = useRelationModalContext('RelationModal', (state) => state.currentRelation.documentId);
+  const document = useRelationModalContext('RelationModal', (state) => state.document);
+  const model = useRelationModalContext('RelationModal', (state) => state.currentRelation.model);
+  const collectionType = useRelationModalContext(
+    'RelationModal',
+    (state) => state.currentRelation.collectionType
+  );
+  const changeCurrentRelation = useRelationModalContext(
+    'RelationModal',
+    (state) => state.changeCurrentRelation
+  );
+  const isModalOpen = useRelationModalContext('RelationModal', (state) => state.isModalOpen);
+  const {
+    edit: { components },
+  } = useDocumentLayout(model);
+
+  return (
+    <InputRenderer
+      contextId={id}
+      contextDocument={document}
+      contextCollectionType={collectionType}
+      contextModel={model}
+      changeCurrentRelation={changeCurrentRelation}
+      isModalOpen={isModalOpen}
+      contextComponents={components}
+      {...props}
+    />
+  );
+};
+
+const InputRenderer = ({
+  visible,
+  hint: providedHint,
+  contextId,
+  contextDocument,
+  contextCollectionType,
+  contextModel,
+  changeCurrentRelation,
+  isModalOpen,
+  contextComponents,
+  ...props
+}: InputRendererProps) => {
+  const { id: hookId, document: hookDocument, collectionType: hookCollectionType } = useDoc();
+  const id = contextId || hookId;
+  const document = contextDocument || hookDocument;
+  const collectionType = contextCollectionType || hookCollectionType;
+
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
@@ -68,8 +124,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
 
   const hint = useFieldHint(providedHint, props.attribute);
   const {
-    edit: { components },
+    edit: { components: useDocLayoutComponents },
   } = useDocLayout();
+  const components = contextComponents ?? useDocLayoutComponents;
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
@@ -143,7 +200,17 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
       if (window.strapi.future.isEnabled('unstableRelationsOnTheFly')) {
-        return <UnstableRelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+        return (
+          <UnstableRelationsInput
+            {...props}
+            hint={hint}
+            disabled={fieldIsDisabled}
+            document={contextDocument}
+            documentModel={contextModel}
+            changeCurrentRelation={changeCurrentRelation}
+            isModalOpen={isModalOpen}
+          />
+        );
       }
       return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'richtext':
@@ -184,7 +251,10 @@ const attributeHasCustomFieldProperty = (
 ): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
   'customField' in attribute && typeof attribute.customField === 'string';
 
-const useFieldHint = (hint: ReactNode = undefined, attribute: Schema.Attribute.AnyAttribute) => {
+const useFieldHint = (
+  hint: React.ReactNode = undefined,
+  attribute: Schema.Attribute.AnyAttribute
+) => {
   const { formatMessage } = useIntl();
 
   const { maximum, minimum } = getMinMax(attribute);
@@ -244,7 +314,12 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
   }
 };
 
-const MemoizedInputRenderer = memo(InputRenderer);
+const MemoizedInputRenderer = React.memo(InputRenderer);
+const MemoizedInputRendererWithContext = React.memo(InputRendererWithContext);
 
 export type { InputRendererProps };
-export { MemoizedInputRenderer as InputRenderer, useFieldHint };
+export {
+  MemoizedInputRenderer as InputRenderer,
+  MemoizedInputRendererWithContext as InputRendererWithContext,
+  useFieldHint,
+};

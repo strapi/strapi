@@ -26,7 +26,7 @@ import { FormLayout } from '../../FormLayout';
 /* -------------------------------------------------------------------------------------------------
  * RelationModalProvider
  * -----------------------------------------------------------------------------------------------*/
-interface CurrentRelation {
+export interface CurrentRelation {
   documentId: string;
   model: string;
   collectionType: string;

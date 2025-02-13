@@ -5,8 +5,7 @@ import { styled } from 'styled-components';
 import { useDoc } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
-import { InputRenderer } from './InputRenderer';
-import { InputRendererModal } from './InputRendererModal';
+import { InputRenderer, InputRendererWithContext } from './InputRenderer';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
   sm: '27.5rem', // 440px
@@ -59,7 +58,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelContext }: FormL
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
                 {modelContext ? (
-                  <InputRendererModal {...fieldWithTranslatedLabel} />
+                  <InputRendererWithContext {...fieldWithTranslatedLabel} />
                 ) : (
                   <InputRenderer {...fieldWithTranslatedLabel} />
                 )}
@@ -100,7 +99,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelContext }: FormL
                         alignItems="stretch"
                       >
                         {modelContext ? (
-                          <InputRendererModal {...fieldWithTranslatedLabel} />
+                          <InputRendererWithContext {...fieldWithTranslatedLabel} />
                         ) : (
                           <InputRenderer {...fieldWithTranslatedLabel} />
                         )}

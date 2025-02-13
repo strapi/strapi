@@ -51,6 +51,11 @@ jest.mock('../../../../../../hooks/useDocument', () => ({
 }));
 
 jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
+  useDocLayout: jest.fn(() => ({
+    edit: {
+      components: undefined,
+    },
+  })),
   useDocumentLayout: jest.fn().mockReturnValue({
     edit: {
       components: {},
