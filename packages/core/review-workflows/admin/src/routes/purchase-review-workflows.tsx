@@ -20,10 +20,6 @@ const PurchaseReviewWorkflows = () => {
             id: 'Settings.review-workflows.list.page.title',
             defaultMessage: 'Review Workflows',
           })}
-          subtitle={formatMessage({
-            id: 'Settings.review-workflows.list.page.subtitle',
-            defaultMessage: 'Manage your content review process',
-          })}
         />
         <Box marginLeft={10} marginRight={10} shadow="filterShadow" hasRadius background="neutral0">
           <Grid.Root>
@@ -71,7 +67,7 @@ const PurchaseReviewWorkflows = () => {
               </Flex>
             </Grid.Item>
             <Grid.Item col={6} s={12} background="primary100">
-              <img src={illustration} alt="" width={'100%'} height="auto" />
+              <img src={illustration} alt="" width="auto" height="auto" />
             </Grid.Item>
           </Grid.Root>
         </Box>

@@ -17,10 +17,6 @@ const PurchaseAuditLogs = () => {
       <Main>
         <Layouts.Header
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
-          subtitle={formatMessage({
-            id: 'Settings.permissions.auditLogs.listview.header.subtitle',
-            defaultMessage: 'Logs of all the activities that happened in your environment',
-          })}
         />
         <Box marginLeft={10} marginRight={10} shadow="filterShadow" hasRadius background="neutral0">
           <Grid.Root>
@@ -68,7 +64,7 @@ const PurchaseAuditLogs = () => {
               </Flex>
             </Grid.Item>
             <Grid.Item col={6} s={12} background="primary100">
-              <img src={illustration} alt="" width={'100%'} height="auto" />
+              <img src={illustration} alt="" width="auto" height="auto" />
             </Grid.Item>
           </Grid.Root>
         </Box>
