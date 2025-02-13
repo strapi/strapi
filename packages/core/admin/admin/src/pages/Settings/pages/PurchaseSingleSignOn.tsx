@@ -1,8 +1,8 @@
-import { Layouts } from '../../../components/Layouts/Layout';
 import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
 import { ExternalLink, Check, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { Layouts } from '../../../components/Layouts/Layout';
 import illustration from '../assets/purchase-page-sso-illustration.svg';
 
 const PurchaseSingleSignOn = () => {
