@@ -197,7 +197,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = componentUID ?? documentModel;
+    const model = documentModel ?? componentUID;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
