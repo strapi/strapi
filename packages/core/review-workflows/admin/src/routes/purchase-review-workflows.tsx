@@ -1,8 +1,9 @@
 import { Layouts } from '@strapi/admin/strapi-admin';
-import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
-import { ExternalLink } from '@strapi/icons';
-import { EmptyPermissions } from '@strapi/icons/symbols';
+import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
+import { ExternalLink, Check, Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
+import illustration from '../assets/purchase-page-illustration.svg';
 
 const PurchaseReviewWorkflows = () => {
   const { formatMessage } = useIntl();
@@ -20,29 +21,55 @@ const PurchaseReviewWorkflows = () => {
             defaultMessage: 'Manage your content review process',
           })}
         />
-        <Box paddingLeft={10} paddingRight={10}>
-          <EmptyStateLayout
-            icon={<EmptyPermissions width="16rem" />}
-            content={formatMessage({
-              id: 'Settings.review-workflows.not-available',
-              defaultMessage:
-                'Review Workflows is only available as part of a paid plan. Upgrade to create and manage workflows.',
-            })}
-            action={
-              <LinkButton
-                variant="default"
-                endIcon={<ExternalLink />}
-                href="https://strapi.io/features/review-workflow?utm_campaign=In-Product-CTA&utm_source=Review%20Workflows"
-                isExternal
-                target="_blank"
-              >
-                {formatMessage({
-                  id: 'global.learn-more',
-                  defaultMessage: 'Learn more',
-                })}
-              </LinkButton>
-            }
-          />
+        <Box marginLeft={10} marginRight={10} shadow="filterShadow" hasRadius background="neutral0">
+          <Grid.Root>
+            <Grid.Item col={6} s={12}>
+              <Flex direction="column" alignItems="flex-start" padding={7} gap={2}>
+                <Flex>
+                  <Lightning fill="primary600" width={`24px`} height={`24px`} />
+                </Flex>
+                <Flex paddingTop={2} paddingBottom={2}>
+                  <Typography variant="beta" fontWeight="bold">
+                    Manage your content review process
+                  </Typography>
+                </Flex>
+
+                <Flex gap={1}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">Customizable review stages</Typography>
+                </Flex>
+
+                <Flex gap={1}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">Manage user permissions</Typography>
+                </Flex>
+
+                <Flex gap={1}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">Support for webhooks</Typography>
+                </Flex>
+
+                <Flex gap={3} marginTop={4}>
+                  <LinkButton
+                    variant="default"
+                    href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Review%20Workflows"
+                  >
+                    Upgrade
+                  </LinkButton>
+                  <LinkButton
+                    variant="tertiary"
+                    endIcon={<ExternalLink />}
+                    href="https://strapi.io/features/review-workflow?utm_campaign=In-Product-CTA&utm_source=Review%20Workflows"
+                  >
+                    Learn more
+                  </LinkButton>
+                </Flex>
+              </Flex>
+            </Grid.Item>
+            <Grid.Item col={6} s={12} background="primary100">
+              <img src={illustration} alt="" width={'100%'} height="auto" />
+            </Grid.Item>
+          </Grid.Root>
         </Box>
       </Main>
     </Layouts.Root>
