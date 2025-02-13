@@ -139,7 +139,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
 
     // all other cases can be handled as text fills
     default:
-      await page.getByLabel(name).fill(String(value));
+      await page.getByLabel(name).last().fill(String(value));
       break;
   }
 };
@@ -184,7 +184,7 @@ export const verifyFields = async (page: Page, fields: FieldValue[]): Promise<vo
         break;
       // TODO: component fields should actually check that they are in the same component
       default:
-        const fieldValue = await page.getByLabel(name).inputValue();
+        const fieldValue = await page.getByLabel(name, { exact: true }).inputValue();
         expect(fieldValue).toBe(String(value)); // Verify text/numeric input values
         break;
     }

@@ -20,7 +20,7 @@ test.describe('Adding content', () => {
       'Match',
       [
         {
-          name: 'opponent',
+          name: 'opponent*',
           type: 'text',
           value: 'testname',
         },
@@ -32,29 +32,29 @@ test.describe('Adding content', () => {
   test('I want to set component order when creating content', async ({ page }) => {
     const fields = [
       {
-        name: 'opponent',
+        name: 'opponent*',
         type: 'text',
         value: 'testname',
       },
       {
-        name: 'testdz',
+        name: 'sections',
         type: 'dz',
         value: [
           {
-            category: 'product',
-            name: 'testnewcomponentexistingcategory',
+            category: 'match',
+            name: 'player',
             fields: [
               {
                 type: 'text',
-                name: 'testnewcomponentexistingcategorytext',
-                value: 'First component text value',
+                name: 'full_name*',
+                value: 'Roy Kent',
               },
             ],
           },
           {
             category: 'product',
             name: 'variations',
-            fields: [{ type: 'text', name: 'name', value: 'Second component text value' }],
+            fields: [{ type: 'text', name: 'name', value: 'Roy Kent Shirt Jersey' }],
           },
         ],
       },
@@ -65,7 +65,7 @@ test.describe('Adding content', () => {
     await page.waitForLoadState('networkidle');
 
     const source = page.locator('li:has-text("variations")');
-    const target = page.locator('li:has-text("testnewcomponentexistingcategory")');
+    const target = page.locator('li:has-text("player")');
     await dragElementAbove(page, {
       source,
       target,
@@ -86,15 +86,15 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (basic)',
       fields: [
-        { name: 'opponent', type: 'text', value: '' },
-        { name: 'captain', type: 'text', value: 'Roy Kent' },
+        { name: 'opponent*', type: 'text', value: '' },
+        { name: 'kit_man', type: 'text', value: 'Roy Kent' },
       ],
       expectedError: 'This value is required',
     },
     {
       description: 'invalid regexp text field (basic)',
-      // Regex tests that richmond is not the opponent
-      fields: [{ name: 'opponent', type: 'text', value: 'richmond' }],
+      // Regex tests that richmond is not the opponent*
+      fields: [{ name: 'opponent*', type: 'text', value: 'richmond' }],
       expectedError: 'The value does not match the regex',
     },
 
@@ -102,36 +102,37 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (single component)',
       fields: [
-        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
-          name: 'testsinglecomp',
+          name: 'most_valuable_player',
           type: 'component',
           value: [
             {
-              category: 'product',
-              name: 'testsinglecomp',
-              fields: [{ name: 'testsinglecomp2text', type: 'text', value: '' }],
+              category: 'match',
+              name: 'player',
+              fields: [{ name: 'name', type: 'text', value: '' }],
             },
           ],
         },
+        { name: 'opponent*', type: 'text', value: 'West Ham' },
       ],
       expectedError: 'This value is required',
     },
     {
       description: 'invalid regexp text field (single component)',
       fields: [
-        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
-          name: 'testcomponent',
+          name: 'most_valuable_player',
           type: 'component',
           value: [
             {
-              category: 'product',
-              name: 'testsinglecomp',
-              fields: [{ name: 'testsinglecomp2text', type: 'text', value: 'fail' }],
+              category: 'match',
+              name: 'player',
+              // Regex tests that nate is not the name
+              fields: [{ name: 'full_name*', type: 'text', value: 'nate' }],
             },
           ],
         },
+        { name: 'opponent*', type: 'text', value: 'West Ham' },
       ],
       expectedError: 'The value does not match the regex',
     },
@@ -140,36 +141,37 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (repeatable component)',
       fields: [
-        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
-          name: 'testrepeatablecomp',
+          name: 'lineup',
           type: 'component_repeatable',
           value: [
             {
-              category: 'product',
-              name: 'testrepeatablecomp',
-              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: '' }],
+              category: 'match',
+              name: 'player',
+              fields: [{ name: 'full_name*', type: 'text', value: '' }],
             },
           ],
         },
+        { name: 'opponent*', type: 'text', value: 'West Ham' },
       ],
       expectedError: 'This value is required',
     },
     {
       description: 'invalid regexp text field (repeatable component)',
       fields: [
-        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
-          name: 'testrepeatablecomp',
+          name: 'lineup',
           type: 'component_repeatable',
           value: [
             {
-              category: 'product',
-              name: 'testrepeatablecomp',
-              fields: [{ name: 'testrepeatablecomp2text', type: 'text', value: 'fail' }],
+              category: 'match',
+              name: 'player',
+              // Regex tests that nate is not the name
+              fields: [{ name: 'full_name*', type: 'text', value: 'nate' }],
             },
           ],
         },
+        { name: 'opponent*', type: 'text', value: 'West Ham' },
       ],
       expectedError: 'The value does not match the regex',
     },
@@ -178,48 +180,48 @@ test.describe('Adding content', () => {
     {
       description: 'empty required text field (dz component)',
       fields: [
-        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
-          name: 'testdz',
+          name: 'sections',
           type: 'dz',
           value: [
             {
-              category: 'product',
-              name: 'newcomponentexistingcategory',
+              category: 'match',
+              name: 'player',
               fields: [
                 {
                   type: 'text',
-                  name: 'testnewcomponentexistingcategorytext',
+                  name: 'full_name*',
                   value: '',
                 },
               ],
             },
           ],
         },
+        { name: 'opponent*', type: 'text', value: 'West Ham' },
       ],
       expectedError: 'This value is required',
     },
     {
       description: 'invalid regexp text field (dz component)',
       fields: [
-        { name: 'opponent', type: 'text', value: 'West Ham' },
         {
-          name: 'testdz',
+          name: 'sections',
           type: 'dz',
           value: [
             {
-              category: 'product',
-              name: 'newcomponentexistingcategory',
+              category: 'match',
+              name: 'player',
               fields: [
                 {
                   type: 'text',
-                  name: 'testnewcomponentexistingcategorytext',
-                  value: 'fail regexp',
+                  name: 'full_name*',
+                  value: 'nate',
                 },
               ],
             },
           ],
         },
+        { name: 'opponent*', type: 'text', value: 'West Ham' },
       ],
       expectedError: 'The value does not match the regex',
     },

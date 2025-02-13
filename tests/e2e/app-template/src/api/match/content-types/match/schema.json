@@ -13,7 +13,7 @@
     "date": {
       "type": "date"
     },
-    "captain": {
+    "kit_man": {
       "type": "string"
     },
     "opponent": {
@@ -21,21 +21,19 @@
       "required": true,
       "regex": "^(?!.*richmond).*"
     },
-    "testrepeatablecomp": {
-      "displayName": "testrepeatablecomp",
+    "lineup": {
       "type": "component",
       "repeatable": true,
-      "component": "product.testrepeatablecomp"
+      "component": "match.player"
     },
-    "testsinglecomp": {
-      "displayName": "testsinglecomp",
+    "most_valuable_player": {
       "type": "component",
       "repeatable": false,
-      "component": "product.testsinglecomp"
+      "component": "match.player"
     },
-    "testdz": {
+    "sections": {
       "type": "dynamiczone",
-      "components": ["product.testnewcomponentexistingcategory", "product.variations"]
+      "components": ["match.player", "product.variations"]
     }
   }
 }
