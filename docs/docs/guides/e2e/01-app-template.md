@@ -20,6 +20,7 @@ The app template should be realistic and structured in a way an actual user migh
 :::
 
 To update the app template:
+
 - Run `yarn test:e2e clean` to remove existing test apps
 - Run `yarn test:e2e -c=1 -- --ui` to generate a test app (don't run any tests)
 - Follow the instructions to [import the existing data set](./02-data-transfer.md#importing-an-existing-data-packet)
@@ -28,6 +29,7 @@ To update the app template:
 - Copy the generated files in the test app to the app template
 
 Once the app template is updated:
+
 - Run `yarn test:e2e clean` to remove existing test apps
 - Run `yarn test:e2e -c=1 -- --ui` to generate a new test app using the updated template (don't run any tests)
 - Follow the instructions to [import the existing data set](./02-data-transfer.md#importing-an-existing-data-packet)
