@@ -1,12 +1,6 @@
-import { TemplateFile } from '@strapi/pack-up';
 import { outdent } from 'outdent';
 
-interface TsConfigFiles {
-  tsconfigFile: TemplateFile;
-  tsconfigBuildFile: TemplateFile;
-}
-
-const ADMIN: TsConfigFiles = {
+const ADMIN = {
   tsconfigFile: {
     name: 'admin/tsconfig.json',
     contents: outdent`
@@ -52,7 +46,7 @@ const ADMIN: TsConfigFiles = {
   },
 };
 
-const SERVER: TsConfigFiles = {
+const SERVER = {
   tsconfigFile: {
     name: 'server/tsconfig.json',
     contents: outdent`
