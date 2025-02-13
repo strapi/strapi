@@ -3,11 +3,15 @@ import { ExternalLink, Check, Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
-import illustration from '../assets/purchase-page-audit-logs-illustration.svg';
+import { useTypedSelector } from '../../../core/store/hooks';
+import darkIllustration from '../assets/purchase-page-audit-logs-illustration-dark.svg';
+import lightIllustration from '../assets/purchase-page-audit-logs-illustration-light.svg';
 
 const PurchaseAuditLogs = () => {
   const { formatMessage } = useIntl();
+  const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
 
+  const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
     <Layouts.Root>
       <Main>
@@ -25,28 +29,28 @@ const PurchaseAuditLogs = () => {
                 <Flex>
                   <Lightning fill="primary600" width={`24px`} height={`24px`} />
                 </Flex>
-                <Flex paddingTop={2} paddingBottom={2}>
+                <Flex paddingTop={2} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
                     Track and review changes with your team
                   </Typography>
                 </Flex>
 
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
                   <Typography textColor="neutral700">Easily track changes</Typography>
                 </Flex>
 
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
                   <Typography textColor="neutral700">Review changes with ease</Typography>
                 </Flex>
 
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
                   <Typography textColor="neutral700">Maintain security and compliance</Typography>
                 </Flex>
 
-                <Flex gap={3} marginTop={4}>
+                <Flex gap={2} marginTop={7}>
                   <LinkButton
                     variant="default"
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Audit-Logs"

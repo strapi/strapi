@@ -3,10 +3,15 @@ import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-sy
 import { ExternalLink, Check, PaperPlane } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import illustration from '../assets/purchase-page-illustration.svg';
+import darkIllustration from '../assets/purchase-page-illustration-dark.svg';
+import lightIllustration from '../assets/purchase-page-illustration-light.svg';
+import { useTypedSelector } from '../modules/hooks';
 
 const PurchaseContentReleases = () => {
   const { formatMessage } = useIntl();
+  const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
+
+  const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
 
   return (
     <Layouts.Root>
@@ -29,32 +34,32 @@ const PurchaseContentReleases = () => {
                 <Flex>
                   <PaperPlane fill="primary600" width={`24px`} height={`24px`} />
                 </Flex>
-                <Flex paddingTop={2} paddingBottom={2}>
+                <Flex paddingTop={2} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
                     Group content and publish updates together
                   </Typography>
                 </Flex>
 
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
                   <Typography textColor="neutral700">Add many entries to releases</Typography>
                 </Flex>
 
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
                   <Typography textColor="neutral700">
                     Quickly identify entries containing errors
                   </Typography>
                 </Flex>
 
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
                   <Typography textColor="neutral700">
                     Schedule their publication, or publish them manually
                   </Typography>
                 </Flex>
 
-                <Flex gap={3} marginTop={4}>
+                <Flex gap={2} marginTop={7}>
                   <LinkButton
                     variant="default"
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Releases"
