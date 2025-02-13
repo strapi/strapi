@@ -60,13 +60,7 @@ const MenuItemDanger = styled(MenuItem)`
   `}
   }
 `;
-const sampleRoles = [
-  { id: 1, name: 'Super Admin' },
-  { id: 2, name: 'Content Editor' },
-  { id: 3, name: 'API User' },
-  { id: 4, name: 'Developer' },
-  { id: 5, name: 'Moderator' },
-];
+
 export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
