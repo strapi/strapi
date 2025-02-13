@@ -1,4 +1,4 @@
-import { Layouts } from '@strapi/admin/strapi-admin';
+import { Layouts } from '../../../components/Layouts/Layout';
 import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
 import { ExternalLink, Check, Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
