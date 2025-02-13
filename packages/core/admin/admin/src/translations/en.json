@@ -719,7 +719,7 @@
   "global.plugins.upload.description": "Media file management.",
   "global.plugins.users-permissions": "Roles & Permissions",
   "global.plugins.users-permissions.description": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
-  "global.profile": "Profile Settings",
+  "global.profile": "Profile settings",
   "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost",
   "global.reset-password": "Reset password",
   "global.roles": "Roles",
