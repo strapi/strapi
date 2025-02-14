@@ -37,8 +37,8 @@ const MenuContent = styled(Menu.Content)`
   left: ${({ theme }) => theme.spaces[3]};
   max-height: none;
   max-width: 300px;
+  margin: ${({ theme }) => theme.spaces[4]}; // Add 16px margin all around
 `;
-
 const MenuItem = styled(Menu.Item)`
   & > span {
     width: 100%;
@@ -49,15 +49,18 @@ const MenuItem = styled(Menu.Item)`
   }
 `;
 const UserInfoSection = styled(Box)`
-  padding: ${({ theme }) => theme.spaces[4]};
+  padding: ${({ theme }) => theme.spaces[4]}; // 16px padding
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+const StyledBadge = styled(Badge)`
+  padding-top: ${({ theme }) => theme.spaces[2]}; // 8px top padding
+  padding-bottom: ${({ theme }) => theme.spaces[2]}; // 8px bottom padding
+  margin-top: ${({ theme }) => theme.spaces[1]}; // 4px top margin
 `;
 
 const MenuItemDanger = styled(MenuItem)`
   &:hover {
-    ${({ theme }) => `
-    background: ${theme.colors.danger100};
-  `}
+    background: ${({ theme }) => theme.colors.danger100};
   }
 `;
 
@@ -93,15 +96,14 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
             <Typography variant="omega">
               {user?.firstname} {user?.lastname}
             </Typography>
-
-            <Box>
+            <Box paddingTop={1}>
               <Typography variant="pi" textColor="neutral600">
                 {user?.email}
               </Typography>
             </Box>
             <Box paddingTop={3}>
               <Flex gap={2} wrap="wrap">
-                {user?.roles?.map((role) => <Badge key={role.id}>{role.name}</Badge>)}
+                {user?.roles?.map((role) => <StyledBadge key={role.id}>{role.name}</StyledBadge>)}
               </Flex>
             </Box>
           </UserInfoSection>
@@ -111,7 +113,6 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
               defaultMessage: 'Profile settings',
             })}
           </MenuItem>
-
           <MenuItemDanger onSelect={handleLogout} color="danger600">
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
