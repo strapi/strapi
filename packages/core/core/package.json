@@ -82,7 +82,7 @@
     "http-errors": "2.0.0",
     "inquirer": "8.2.5",
     "is-docker": "2.2.1",
-    "koa": "2.15.2",
+    "koa": "2.15.4",
     "koa-body": "6.0.1",
     "koa-compose": "4.1.0",
     "koa-compress": "5.1.1",
@@ -103,7 +103,7 @@
     "semver": "7.5.4",
     "statuses": "2.0.1",
     "typescript": "5.4.4",
-    "undici": "6.21.1",
+    "undici": "7.2.3",
     "yup": "0.32.9"
   },
   "devDependencies": {
