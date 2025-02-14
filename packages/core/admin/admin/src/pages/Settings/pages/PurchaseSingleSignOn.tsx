@@ -67,7 +67,12 @@ const PurchaseSingleSignOn = () => {
               </Flex>
             </Grid.Item>
             <Grid.Item col={6} s={12} background="primary100">
-              <img src={illustration} alt="" width="auto" height="auto" />
+              <img
+                src={illustration}
+                alt="purchase-page-sso-illustration"
+                width="auto"
+                height="auto"
+              />
             </Grid.Item>
           </Grid.Root>
         </Box>
