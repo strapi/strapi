@@ -3,17 +3,10 @@
   "compilerOptions": {
     "rootDir": "../",
     "baseUrl": ".",
-    "outDir": "./dist"
+    "outDir": "../dist",
+    "noEmit": false
   },
-  "include": [
-    "./src",
-    "./custom.d.ts",
-    "../shared",
-    "./module.d.ts",
-    "../ee/admin",
-    "../package.json",
-    "./tests"
-  ],
+  "include": ["./src", "./custom.d.ts", "../shared", "../ee/admin", "../package.json", "./tests"],
   "exclude": [
     "**/__mocks__",
     "./src/**/tests",

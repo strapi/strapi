@@ -29,8 +29,7 @@ import {
   Dialog,
   type StatusVariant,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Download, Cross, Plus } from '@strapi/icons';
-import { Modules } from '@strapi/types';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -46,6 +45,7 @@ import { BulkLocaleActionModal } from './BulkLocaleActionModal';
 
 import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
+import type { Modules } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * LocalePickerAction
@@ -161,7 +161,7 @@ const LocalePickerAction = ({
 
   const allCurrentLocales = [
     { status: getDocumentStatus(document, meta), locale: currentLocale?.code },
-    ...(meta?.availableLocales ?? []),
+    ...(document?.localizations ?? []),
   ];
 
   if (!hasI18n || !Array.isArray(locales) || locales.length === 0) {
@@ -292,7 +292,7 @@ const FillFromAnotherLocaleAction = ({
 
   return {
     type: 'icon',
-    icon: <Download />,
+    icon: <Earth />,
     disabled: availableLocales.length === 0,
     label: formatMessage({
       id: getTranslation('CMEditViewCopyLocale.copy-text'),
@@ -472,14 +472,13 @@ interface ExtendedDocumentActionProps extends DocumentActionProps {
  * -----------------------------------------------------------------------------------------------*/
 
 const BulkLocaleAction: DocumentActionComponent = ({
-  document: baseDocument,
+  document,
   documentId,
   model,
   collectionType,
   action,
 }: ExtendedDocumentActionProps) => {
-  const baseLocale = baseDocument?.locale ?? null;
-
+  const locale = document?.locale ?? null;
   const [{ query }] = useQueryParams<{ status: 'draft' | 'published' }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -497,22 +496,18 @@ const BulkLocaleAction: DocumentActionComponent = ({
   const { publishMany: publishManyAction, unpublishMany: unpublishManyAction } =
     useDocumentActions();
 
-  const {
-    document,
-    meta: documentMeta,
-    schema,
-    validate,
-  } = useDocument(
+  const { schema, validate } = useDocument(
     {
       model,
       collectionType,
       documentId,
       params: {
-        locale: baseLocale,
+        locale,
       },
     },
     {
-      skip: !hasI18n || !baseLocale,
+      // No need to fetch the document, the data is already available in the `document` prop
+      skip: true,
     }
   );
 
@@ -545,27 +540,27 @@ const BulkLocaleAction: DocumentActionComponent = ({
   // Extract the rows for the bulk locale publish modal and any validation
   // errors per locale
   const [rows, validationErrors] = React.useMemo(() => {
-    if (!document || !documentMeta?.availableLocales) {
-      // If we don't have a document or available locales, we return empty rows
-      // and no validation errors
+    if (!document) {
       return [[], {}];
     }
 
+    const localizations = document.localizations ?? [];
+
     // Build the rows for the bulk locale publish modal by combining the current
     // document with all the available locales from the document meta
-    const rowsFromMeta: LocaleStatus[] = documentMeta?.availableLocales.map((doc) => {
+    const locales: LocaleStatus[] = localizations.map((doc: any) => {
       const { locale, status } = doc;
-
       return { locale, status };
     });
 
-    rowsFromMeta.unshift({
+    // Add the current document locale
+    locales.unshift({
       locale: document.locale,
       status: document.status,
     });
 
     // Build the validation errors for each locale.
-    const allDocuments = [document, ...(documentMeta?.availableLocales ?? [])];
+    const allDocuments = [document, ...localizations];
     const errors = allDocuments.reduce<FormErrors>((errs, document) => {
       if (!document) {
         return errs;
@@ -579,8 +574,8 @@ const BulkLocaleAction: DocumentActionComponent = ({
       return errs;
     }, {});
 
-    return [rowsFromMeta, errors];
-  }, [document, documentMeta?.availableLocales, validate]);
+    return [locales, errors];
+  }, [document, validate]);
 
   const isBulkPublish = action === 'bulk-publish';
   const localesForAction = selectedRows.reduce((acc: string[], selectedRow: LocaleStatus) => {

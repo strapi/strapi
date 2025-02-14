@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendmail",
-  "version": "5.4.2",
+  "version": "5.10.2",
   "description": "Sendmail provider for strapi email",
   "keywords": [
     "email",
@@ -35,24 +35,24 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.4.2",
+    "@strapi/utils": "5.10.2",
     "sendmail": "^1.6.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.2",
     "@types/sendmail": "1.4.4",
-    "eslint-config-custom": "5.4.2",
-    "tsconfig": "5.4.2"
+    "eslint-config-custom": "5.10.2",
+    "tsconfig": "5.10.2"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
-  },
-  "gitHead": "7d785703f52464577d077c4618cbe68b44f8a9cd"
+  }
 }
