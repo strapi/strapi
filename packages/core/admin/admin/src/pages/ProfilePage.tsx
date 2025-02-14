@@ -444,7 +444,7 @@ const UserInfoSection = () => {
             {
               label: formatMessage({
                 id: 'Auth.form.firstname.label',
-                defaultMessage: 'First name',
+                defaultMessage: 'First names',
               }),
               name: 'firstname',
               required: true,
