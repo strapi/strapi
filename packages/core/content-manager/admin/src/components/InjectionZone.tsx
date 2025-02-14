@@ -10,6 +10,9 @@ const INJECTION_ZONES = {
     publishModalAdditionalInfos: [],
     unpublishModalAdditionalInfos: [],
   },
+  preview: {
+    actions: [],
+  },
 } satisfies InjectionZones;
 
 interface InjectionZones {
@@ -23,6 +26,9 @@ interface InjectionZones {
     publishModalAdditionalInfos: InjectionZoneComponent[];
     unpublishModalAdditionalInfos: InjectionZoneComponent[];
   };
+  preview: {
+    actions: InjectionZoneComponent[];
+  };
 }
 
 type InjectionZoneArea =
@@ -32,7 +38,8 @@ type InjectionZoneArea =
   | 'listView.unpublishModalAdditionalInfos'
   | 'listView.deleteModalAdditionalInfos'
   | 'listView.publishModalAdditionalInfos'
-  | 'listView.deleteModalAdditionalInfos';
+  | 'listView.deleteModalAdditionalInfos'
+  | 'preview.actions';
 
 type InjectionZoneModule = InjectionZoneArea extends `${infer Word}.${string}` ? Word : never;
 type InjectionZoneContainer = InjectionZoneArea extends `${string}.${infer Word}.${string}`
@@ -47,8 +54,8 @@ type InjectionZoneBlock = InjectionZoneArea extends `${string}.${string}.${infer
  * e.g. content-manager edit view, we just send the slug but we might not in the listView,
  * therefore, people should type it themselves on the components they render.
  */
-const InjectionZone = ({ area, ...props }: { area: InjectionZoneArea; [key: string]: unknown }) => {
-  const components = useInjectionZone(area);
+const InjectionZone = (props: { area: InjectionZoneArea; [key: string]: unknown }) => {
+  const components = useInjectionZone(props.area);
 
   return (
     <>

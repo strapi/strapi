@@ -10,6 +10,7 @@ import {
   Flex,
   Loader,
   Typography,
+  VisuallyHidden,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -27,7 +28,10 @@ import { STAGE_ATTRIBUTE_NAME } from './constants';
 
 import type { Data } from '@strapi/types';
 
-export const StageSelect = () => {
+type InjectionZoneArea = 'preview.actions';
+
+export const StageSelect = ({ area }: { area?: InjectionZoneArea }) => {
+  const isCompact = area === 'preview.actions';
   const {
     collectionType = '',
     slug: model = '',
@@ -160,13 +164,26 @@ export const StageSelect = () => {
         name={STAGE_ATTRIBUTE_NAME}
         id={STAGE_ATTRIBUTE_NAME}
       >
-        <Field.Label>
-          {formatMessage({
-            id: 'content-manager.reviewWorkflows.stage.label',
-            defaultMessage: 'Review stage',
-          })}
-        </Field.Label>
+        {isCompact ? (
+          <VisuallyHidden>
+            <Field.Label>
+              {formatMessage({
+                id: 'content-manager.reviewWorkflows.stage.label',
+                defaultMessage: 'Review stage',
+              })}
+            </Field.Label>
+          </VisuallyHidden>
+        ) : (
+          <Field.Label>
+            {formatMessage({
+              id: 'content-manager.reviewWorkflows.stage.label',
+              defaultMessage: 'Review stage',
+            })}
+          </Field.Label>
+        )}
+
         <SingleSelect
+          size={isCompact ? 'S' : undefined}
           disabled={stages.length === 0}
           value={activeWorkflowStage?.id}
           onChange={handleChange}
@@ -192,7 +209,7 @@ export const StageSelect = () => {
           customizeContent={() => {
             return (
               <Flex tag="span" justifyContent="space-between" alignItems="center" width="100%">
-                <Typography textColor="neutral800" ellipsis>
+                <Typography textColor="neutral800" ellipsis style={{ lineHeight: 'inherit' }}>
                   {activeWorkflowStage?.name ?? ''}
                 </Typography>
                 {isLoading ? (

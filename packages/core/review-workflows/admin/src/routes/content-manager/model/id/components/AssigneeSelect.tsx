@@ -8,7 +8,7 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
-import { Combobox, ComboboxOption, Field } from '@strapi/design-system';
+import { Combobox, ComboboxOption, Field, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
@@ -19,7 +19,10 @@ import { getDisplayName } from '../../../../../utils/users';
 
 import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';
 
-const AssigneeSelect = () => {
+type InjectionZoneArea = 'preview.actions';
+
+const AssigneeSelect = ({ area }: { area?: InjectionZoneArea }) => {
+  const isCompact = area === 'preview.actions';
   const {
     collectionType = '',
     id,
@@ -101,12 +104,23 @@ const AssigneeSelect = () => {
         undefined
       }
     >
-      <Field.Label>
-        {formatMessage({
-          id: 'content-manager.reviewWorkflows.assignee.label',
-          defaultMessage: 'Assignee',
-        })}
-      </Field.Label>
+      {isCompact ? (
+        <VisuallyHidden>
+          <Field.Label>
+            {formatMessage({
+              id: 'content-manager.reviewWorkflows.assignee.label',
+              defaultMessage: 'Assignee',
+            })}
+          </Field.Label>
+        </VisuallyHidden>
+      ) : (
+        <Field.Label>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.assignee.label',
+            defaultMessage: 'Assignee',
+          })}
+        </Field.Label>
+      )}
       <Combobox
         clearLabel={formatMessage({
           id: 'content-manager.reviewWorkflows.assignee.clear',
@@ -123,6 +137,7 @@ const AssigneeSelect = () => {
           defaultMessage: 'Select…',
         })}
         loading={isLoading || isLoadingPermissions || isMutating}
+        size={isCompact ? 'S' : undefined}
       >
         {users.map((user) => {
           return (
