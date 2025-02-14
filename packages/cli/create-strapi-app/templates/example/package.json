@@ -9,9 +9,6 @@
     "strapi": "strapi",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry",
-    "upgrade:major": "npx @strapi/upgrade major",
-    "upgrade:minor": "npx @strapi/upgrade minor",
-    "upgrade:patch": "npx @strapi/upgrade patch",
     "seed:example": "node ./scripts/seed.js"
   },
   "dependencies": {
