@@ -17,6 +17,7 @@ import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import entityValidator from '../entity-validator';
+import { standarizeRelations } from './transform/relations/transform/data-ids';
 
 const { validators } = validate;
 
@@ -193,7 +194,24 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         // assign new documentId
         assoc('documentId', createDocumentId()),
         // Merge new data into it
-        (data) => merge(data, queryParams.data),
+        async (data) =>
+          /**
+           * Merge receives [{ connect: [{ id: 1 }] }] and { connect: [{ documentId }] }]
+           * but it does not merge arrays, so only keeps one of them.
+           * We want to not do connect for everything, but use both connect (for the new one) and
+           * set (for the old one) at the same time. This requires a change at the database level.
+           * Can this be done?
+           */
+          merge(
+            await standarizeRelations(data, uid),
+            await standarizeRelations(queryParams.data, uid)
+          ),
+        async (data) => {
+          console.log('data', await standarizeRelations(data, uid));
+          console.log('queryParams.data', await standarizeRelations(queryParams.data, uid));
+          console.log('merged data', JSON.stringify(data, null, 2));
+          return data;
+        },
         (data) => entries.create({ ...queryParams, data, status: 'draft' })
       )
     );
