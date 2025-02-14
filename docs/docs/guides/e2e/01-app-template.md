@@ -15,13 +15,25 @@ Here you can read about what content schemas the test instance has & the API cus
 
 ## Update the app template
 
+:::info
+The app template should be realistic and structured in a way an actual user might create an app using Strapi
+:::
+
 To update the app template:
 
-- run the tests to create a Strapi app based on the existing template at `test-apps/e2e/test-app-<number>`.
-- Move into this folder and run `yarn develop`.
-- Login using the credentials found in `e2e/constants.js`.
-- Make any changes you need (i.e. create a content-type).
-- Replace the existing template in `e2e/app-template` with the current folder content (only keep the files you need).
+- Run `yarn test:e2e clean` to remove existing test apps
+- Run `yarn test:e2e -c=1 -- --ui` to generate a test app (don't run any tests)
+- Follow the instructions to [import the existing data set](./02-data-transfer.md#importing-an-existing-data-packet)
+- With the test app server running on 1337 you can now login to the app
+- Make changes in the content-type builder
+- Copy the generated files in the test app to the app template
+
+Once the app template is updated:
+
+- Run `yarn test:e2e clean` to remove existing test apps
+- Run `yarn test:e2e -c=1 -- --ui` to generate a new test app using the updated template (don't run any tests)
+- Follow the instructions to [import the existing data set](./02-data-transfer.md#importing-an-existing-data-packet)
+- Follow the instructions to [export the updated data set](./02-data-transfer.md#exporting-an-updated-data-packet)
 
 ## Content Schemas
 
@@ -184,6 +196,42 @@ This collection type is internationalized.
         }
       },
       "component": "product.variations"
+    }
+  }
+  // ...
+}
+```
+
+### Match
+
+```json
+{
+  // ...
+  "attributes": {
+    "date": {
+      "type": "date"
+    },
+    "kit_man": {
+      "type": "string"
+    },
+    "opponent": {
+      "type": "string",
+      "required": true,
+      "regex": "^(?!.*richmond).*"
+    },
+    "lineup": {
+      "type": "component",
+      "repeatable": true,
+      "component": "match.player"
+    },
+    "most_valuable_player": {
+      "type": "component",
+      "repeatable": false,
+      "component": "match.player"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": ["match.player", "product.variations"]
     }
   }
   // ...
