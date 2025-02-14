@@ -183,8 +183,16 @@ export const EditFolderContent = ({
         onSubmit={handleSubmit}
         initialValues={initialFormData}
       >
-        {({ values, errors, handleChange, setFieldValue }) => (
-          <Form noValidate>
+        {({ values, errors, handleChange, setFieldValue, handleSubmit  }) => (
+          <Form 
+          noValidate 
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault(); // Evita el comportamiento predeterminado de la tecla ENTER
+              handleSubmit(); // Ejecuta el submit manualmente
+            }
+          }}
+        >
             <EditFolderModalHeader isEditing={isEditing} />
             <Modal.Body>
               <Grid.Root gap={4}>
@@ -303,7 +311,7 @@ export const EditFolderContent = ({
                   name="submit"
                   loading={isEditFolderLoading}
                   disabled={formDisabled}
-                  type="submit"
+                  type="submit"             //here button
                 >
                   {formatMessage(
                     isEditing
