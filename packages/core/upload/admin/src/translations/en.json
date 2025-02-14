@@ -17,7 +17,7 @@
   "control-card.stop-crop": "Stop cropping",
   "filter.add": "Add filter",
   "form.button.replace-media": "Replace media",
-  "form.input.decription.file-alt": "This text will be displayed if the asset can’t be shown.",
+  "form.input.description.file-alt": "This text will be displayed if the asset can’t be shown.",
   "form.input.label.file-alt": "Alternative text",
   "form.input.label.file-caption": "Caption",
   "form.input.label.file-name": "File name",

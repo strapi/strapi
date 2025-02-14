@@ -1,6 +1,8 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
+import { immerable } from 'immer';
+
 export interface PluginConfig
   extends Partial<Pick<Plugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>> {
   name: string;
@@ -8,6 +10,8 @@ export interface PluginConfig
 }
 
 export class Plugin {
+  [immerable] = true;
+
   apis: Record<string, unknown>;
   initializer: React.ComponentType<{ setPlugin(pluginId: string): void }> | null;
   injectionZones: Record<

@@ -1,5 +1,5 @@
 import { scheduleJob, Job } from 'node-schedule';
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 import { Release } from '../../../shared/contracts/releases';

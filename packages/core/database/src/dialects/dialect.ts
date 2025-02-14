@@ -1,8 +1,11 @@
 import type { Database } from '..';
-import type { Schema } from '../schema';
+import type { ForeignKey, Index, Schema } from '../schema';
 
 export interface SchemaInspector {
   getSchema(): Promise<Schema>;
+  getIndexes(tableName: string): Promise<Index[]>;
+  getForeignKeys(tableName: string): Promise<ForeignKey[]>;
+  getTables(): Promise<string[]>;
 }
 
 export default class Dialect {
@@ -23,6 +26,10 @@ export default class Dialect {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async initialize(_nativeConnection?: unknown) {
     // noop
+  }
+
+  getTables() {
+    throw new Error('getTables not implemented for this dialect');
   }
 
   getSqlType(type: unknown) {

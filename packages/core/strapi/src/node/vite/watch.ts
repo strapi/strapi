@@ -55,17 +55,28 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
 
   const vite = await createServer(finalConfig);
 
-  ctx.strapi.server.app.use((ctx, next) => {
+  const viteMiddlewares: Core.MiddlewareHandler = (koaCtx, next) => {
     return new Promise((resolve, reject) => {
-      vite.middlewares(ctx.req, ctx.res, (err: unknown) => {
+      const prefix = ctx.basePath.replace(ctx.adminPath, '').replace(/\/+$/, '');
+
+      const originalPath = koaCtx.path;
+      if (!koaCtx.path.startsWith(prefix)) {
+        koaCtx.path = `${prefix}${koaCtx.path}`;
+      }
+
+      vite.middlewares(koaCtx.req, koaCtx.res, (err: unknown) => {
         if (err) {
           reject(err);
         } else {
+          if (!koaCtx.res.headersSent) {
+            koaCtx.path = originalPath;
+          }
+
           resolve(next());
         }
       });
     });
-  });
+  };
 
   const serveAdmin: Core.MiddlewareHandler = async (koaCtx, next) => {
     await next();
@@ -87,14 +98,10 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
     koaCtx.body = template;
   };
 
-  ctx.strapi.server.routes([
-    {
-      method: 'GET',
-      path: `${ctx.basePath}:path*`,
-      handler: serveAdmin,
-      config: { auth: false },
-    },
-  ]);
+  const adminRoute = `${ctx.adminPath}/:path*`;
+
+  ctx.strapi.server.router.get(adminRoute, serveAdmin);
+  ctx.strapi.server.router.use(adminRoute, viteMiddlewares);
 
   return {
     async close() {

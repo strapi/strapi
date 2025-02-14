@@ -1,19 +1,16 @@
 import * as React from 'react';
 
-import { useClipboard, useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
 import {
-  Box,
-  type BoxProps,
-  Flex,
-  IconButton,
-  Tabs,
-  Typography,
-  Grid,
-} from '@strapi/design-system';
+  useClipboard,
+  useHistory,
+  useNotification,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
+import { IconButton, Tabs, Typography, Grid, Flex } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
-import { type MessageDescriptor, useIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+import { Link, type To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
@@ -30,14 +27,41 @@ const ClosePreviewButton = () => {
   }>();
   const { formatMessage } = useIntl();
 
+  const canGoBack = useHistory('BackButton', (state) => state.canGoBack);
+  const goBack = useHistory('BackButton', (state) => state.goBack);
+  const history = useHistory('BackButton', (state) => state.history);
+  const locationIndex = useHistory('BackButton', (state) => state.currentLocationIndex);
+
+  /**
+   * Get the link destination from the history.
+   * Rely on a fallback (the parent edit view page) if there's no page to go back .
+   */
+  const historyTo = canGoBack ? history.at(locationIndex - 2) : undefined;
+  const fallback = {
+    pathname: '..',
+    search: stringify(query, { encode: false }),
+  } satisfies To;
+  const toWithFallback = historyTo ?? fallback;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (canGoBack) {
+      // Prevent normal link behavior, go back in the history stack instead
+      e.preventDefault();
+      goBack();
+      return;
+    }
+
+    // Otherwise rely on native link behavior to go back to the edit view. We don't use navigate()
+    // here in order to get the relative="path" functionality from the Link component.
+  };
+
   return (
     <IconButton
+      variant="ghost"
       tag={Link}
       relative="path"
-      to={{
-        pathname: '..',
-        search: stringify({ plugins: query.plugins }, { encode: false }),
-      }}
+      to={toWithFallback}
+      onClick={handleClick}
       label={formatMessage({
         id: 'content-manager.preview.header.close',
         defaultMessage: 'Close preview',
@@ -122,11 +146,65 @@ const PreviewTabs = () => {
  * PreviewHeader
  * -----------------------------------------------------------------------------------------------*/
 
+const UnstablePreviewHeader = () => {
+  // Get the document title
+  const title = usePreviewContext('PreviewHeader', (state) => state.title);
+
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { copy } = useClipboard();
+
+  const handleCopyLink = () => {
+    copy(window.location.href);
+    toggleNotification({
+      message: formatMessage({
+        id: 'content-manager.preview.copy.success',
+        defaultMessage: 'Copied preview link',
+      }),
+      type: 'success',
+    });
+  };
+
+  return (
+    <Flex gap={4} background="neutral0" borderColor="neutral150" tag="header">
+      {/* Title and status */}
+      <TitleContainer height="100%" paddingLeft={2} paddingRight={4}>
+        <ClosePreviewButton />
+        <PreviewTitle
+          tag="h1"
+          title={title}
+          maxWidth="200px"
+          fontSize={2}
+          paddingLeft={2}
+          paddingRight={3}
+          fontWeight={600}
+        >
+          {title}
+        </PreviewTitle>
+        <Status />
+      </TitleContainer>
+
+      {/* Tabs and actions */}
+      <Flex flex={1} paddingRight={2} justifyContent="space-between">
+        <PreviewTabs />
+        <IconButton
+          type="button"
+          label={formatMessage({
+            id: 'preview.copy.label',
+            defaultMessage: 'Copy preview link',
+          })}
+          onClick={handleCopyLink}
+        >
+          <LinkIcon />
+        </IconButton>
+      </Flex>
+    </Flex>
+  );
+};
+
 const PreviewHeader = () => {
-  // Get main field
-  const mainField = usePreviewContext('PreviewHeader', (state) => state.mainField);
-  const document = usePreviewContext('PreviewHeader', (state) => state.document);
-  const title = document[mainField];
+  // Get the document title
+  const title = usePreviewContext('PreviewHeader', (state) => state.title);
 
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -156,7 +234,7 @@ const PreviewHeader = () => {
       {/* Title and status */}
       <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
         <ClosePreviewButton />
-        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px">
+        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={title}>
           {title}
         </PreviewTitle>
         <Status />
@@ -192,4 +270,8 @@ const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
 `;
 
-export { PreviewHeader };
+const TitleContainer = styled(Flex)`
+  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+export { PreviewHeader, UnstablePreviewHeader };
