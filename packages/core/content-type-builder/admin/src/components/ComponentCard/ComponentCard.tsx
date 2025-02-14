@@ -3,9 +3,12 @@ import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { styled } from 'styled-components';
 
-import { useDataManager } from '../../hooks/useDataManager';
+import { useDataManager } from '../DataManager/useDataManager';
 
 import { ComponentIcon } from './ComponentIcon';
+
+import type { SchemaType } from '../../types';
+import type { Internal } from '@strapi/types';
 
 interface ComponentCardProps {
   component: string;
@@ -14,6 +17,8 @@ interface ComponentCardProps {
   isActive?: boolean;
   isInDevelopmentMode?: boolean;
   onClick?: () => void;
+  forTarget: SchemaType;
+  targetUid: Internal.UID.Schema;
 }
 
 const CloseButton = styled(Box)`
@@ -73,15 +78,21 @@ export const ComponentCard = ({
   isActive = false,
   isInDevelopmentMode = false,
   onClick,
+  forTarget,
+  targetUid,
 }: ComponentCardProps) => {
-  const { modifiedData, removeComponentFromDynamicZone } = useDataManager();
-  const {
-    schema: { icon, displayName },
-  } = get(modifiedData, ['components', component], { schema: {} });
+  const { components, removeComponentFromDynamicZone } = useDataManager();
+  const type = get(components, component);
+  const { icon, displayName } = type?.schema || {};
 
   const onClose = (e: any) => {
     e.stopPropagation();
-    removeComponentFromDynamicZone(dzName, index);
+    removeComponentFromDynamicZone({
+      forTarget,
+      targetUid,
+      dzName,
+      componentToRemoveIndex: index,
+    });
   };
 
   return (

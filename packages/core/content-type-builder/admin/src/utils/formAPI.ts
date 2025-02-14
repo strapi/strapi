@@ -1,7 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import * as yup from 'yup';
-// TODO V5 Convert any into real types
+
 export const formsAPI: any = {
   components: {
     inputs: {} as Record<string, any>,

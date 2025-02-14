@@ -1,31 +1,29 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { current } from 'immer';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
-import { retrieveComponentsFromSchema } from './utils/retrieveComponentsFromSchema';
+import { formatSchema } from './utils/formatSchemas';
 
-import type { DataManagerStateType, ContentType, AttributeType, Component } from '../../types';
-import type { Internal, Schema } from '@strapi/types';
-
-type Target = 'component' | 'components' | 'contentType' | 'contentTypes';
+import type {
+  DataManagerStateType,
+  ContentType,
+  AttributeType,
+  Component,
+  SchemaType,
+} from '../../types';
+import type { Internal, Schema, Struct } from '@strapi/types';
 
 // TODO: Define all possible actions based on type
 export type Action<T = any> = {
   type: T;
   uid?: string;
-  mainDataKey: Target;
+  mainDataKey: SchemaType;
   schemaType: 'component' | 'contentType';
   attributeToRemoveName?: string;
   [key: string]: any;
-};
-
-const DEFAULT_MODIFIED_DATA = {
-  components: {},
-  contentTypes: {},
 };
 
 const initialState: DataManagerStateType = {
@@ -33,11 +31,10 @@ const initialState: DataManagerStateType = {
   contentTypes: {},
   initialComponents: {},
   initialContentTypes: {},
-  initialData: {},
-  modifiedData: {
-    ...DEFAULT_MODIFIED_DATA,
+  reservedNames: {
+    models: [],
+    attributes: [],
   },
-  reservedNames: {},
   isLoading: true,
 };
 
@@ -64,37 +61,39 @@ const findAttributeIndex = (schema: any, attributeToFind?: string) => {
 type InitPayload = {
   components: Record<string, Component>;
   contentTypes: Record<string, ContentType>;
-  reservedNames: Record<string, string>;
+  reservedNames: DataManagerStateType['reservedNames'];
 };
 
 type AddAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: Target;
+  forTarget: SchemaType;
   targetUid: string;
-  shouldAddComponentToData: boolean;
 };
 
 type AddCreateComponentToDynamicZonePayload = {
+  forTarget: SchemaType;
+  targetUid: string;
   dynamicZoneTarget: string;
   componentsToAdd: Internal.UID.Component[];
 };
 
 type AddCustomFieldAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: Target;
+  forTarget: SchemaType;
   targetUid: string;
 };
 
 type ChangeDynamicZoneComponentsPayload = {
   dynamicZoneTarget: string;
   newComponents: Internal.UID.Component[];
+  forTarget: SchemaType;
+  targetUid: string;
 };
 
 type CreateComponentSchemaPayload = {
   uid: string;
   data: any;
   componentCategory: string;
-  shouldAddComponentToData: boolean;
 };
 
 type CreateSchemaPayload = {
@@ -104,48 +103,40 @@ type CreateSchemaPayload = {
 
 type EditAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: Target;
+  forTarget: SchemaType;
   targetUid: string;
   initialAttribute: Record<string, any>;
 };
 
 type EditCustomFieldAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: Target;
+  forTarget: SchemaType;
   targetUid: string;
   initialAttribute: Record<string, any>;
 };
 
 type RemoveComponentFromDynamicZonePayload = {
+  forTarget: SchemaType;
+  targetUid: string;
   dzName: string;
   componentToRemoveIndex: number;
 };
 
 type RemoveFieldPayload = {
-  mainDataKey: Target;
+  forTarget: SchemaType;
+  targetUid: string;
   attributeToRemoveName: string;
 };
 
-type RemoveFieldFromDisplayedComponentPayload = {
-  attributeToRemoveName: string;
-  componentUid: string;
+type UpdateComponentSchemaPayload = {
+  data: Record<string, any>;
+  uid: string;
 };
 
-type SetModifiedDataPayload = {
-  schemaToSet: Partial<DataManagerStateType['modifiedData']>;
-  hasJustCreatedSchema: boolean;
+type UpdateSchemaPayload = {
+  data: Record<string, any>;
+  uid: string;
 };
-
-type UpdateSchemaPayload =
-  | {
-      data: Record<string, any>;
-      schemaType: 'component';
-      uid: string;
-    }
-  | {
-      data: Record<string, any>;
-      schemaType: 'contentType';
-    };
 
 const slice = createSlice({
   name: 'data-manager',
@@ -160,104 +151,23 @@ const slice = createSlice({
       state.contentTypes = contentTypes;
       state.reservedNames = reservedNames;
       state.isLoading = false;
-
-      state.modifiedData = {
-        ...DEFAULT_MODIFIED_DATA,
-        component: state.modifiedData.component
-          ? components[state.modifiedData.component.uid]
-          : undefined,
-        contentType: state.modifiedData.contentType
-          ? contentTypes[state.modifiedData.contentType.uid]
-          : undefined,
-        components: state.modifiedData.components
-          ? Object.keys(state.modifiedData.components).reduce(
-              (acc, key) => {
-                acc[key] = components[key];
-                return acc;
-              },
-              {} as Record<string, Component>
-            )
-          : {},
-        contentTypes: state.modifiedData.contentTypes
-          ? Object.keys(state.modifiedData.contentTypes).reduce(
-              (acc, key) => {
-                acc[key] = contentTypes[key];
-                return acc;
-              },
-              {} as Record<string, ContentType>
-            )
-          : {},
-      };
-      state.initialData = state.modifiedData;
     },
     addAttribute: (state, action: PayloadAction<AddAttributePayload>) => {
-      const { attributeToSet, forTarget, targetUid, shouldAddComponentToData } = action.payload;
+      const { attributeToSet, forTarget, targetUid } = action.payload;
       const { name, ...rest } = attributeToSet;
 
       delete rest.createComponent;
 
-      const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-        ? [forTarget]
-        : [forTarget, targetUid];
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
 
-      const currentAttributes = get(
-        state,
-        ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
-        []
-      ).slice();
+      const currentAttributes = get(type, ['schema', 'attributes'], []).slice();
 
       // Add the createdAttribute
       const updatedAttributes = [...currentAttributes, { ...rest, name }];
 
-      set(state, ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], updatedAttributes);
-
-      if (shouldAddComponentToData) {
-        const componentToAddUID = rest.component;
-        const componentToAdd = state.components[componentToAddUID];
-        const isTemporaryComponent = componentToAdd?.isTemporary;
-        const hasComponentAlreadyBeenAdded =
-          state.modifiedData.components?.[componentToAddUID] !== undefined;
-
-        if (isTemporaryComponent || hasComponentAlreadyBeenAdded) {
-          return;
-        }
-
-        // Initialize modifiedData.components if it is undefined
-        if (!state.modifiedData.components) {
-          state.modifiedData.components = {};
-        }
-
-        // Add the added component to the modifiedData.components
-        state.modifiedData.components[componentToAddUID] = componentToAdd;
-
-        const nestedComponents = retrieveComponentsFromSchema(
-          componentToAdd.schema.attributes as AttributeType[],
-          state.components
-        );
-
-        // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
-        const nestedComponentsToAddInModifiedData = nestedComponents.filter(
-          (compoUID: Internal.UID.Component) => {
-            return get(state, ['modifiedData', 'components', compoUID]) === undefined;
-          }
-        );
-
-        nestedComponentsToAddInModifiedData.forEach((compoUID: Internal.UID.Component) => {
-          const compoSchema = get(state, ['components', compoUID], {}) as Component;
-          const isTemporary = compoSchema.isTemporary || false;
-
-          // If the nested component has not been saved we don't need to add them as they are already in the state
-          if (!isTemporary) {
-            if (!state.modifiedData.components) {
-              state.modifiedData.components = {};
-            }
-
-            state.modifiedData.components[compoUID] = compoSchema;
-          }
-        });
-
-        return;
-      }
+      type.status = 'CHANGED';
+      set(type, ['schema', 'attributes'], updatedAttributes);
 
       const isCreatingRelationAttribute = rest.type === 'relation';
 
@@ -266,7 +176,7 @@ const slice = createSlice({
         const targetAttribute = rest.targetAttribute || null;
         const relation = rest.relation;
         const relationType = getRelationType(relation, targetAttribute);
-        const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
+        const currentUid = type.uid;
 
         // When the user in creating a relation with the same content type we need to create another attribute
         // that is the opposite of the created one
@@ -291,11 +201,7 @@ const slice = createSlice({
 
           const attributesToSet = [...updatedAttributes, oppositeAttribute];
 
-          set(
-            state,
-            ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
-            attributesToSet
-          );
+          set(type, ['schema', 'attributes'], attributesToSet);
         }
       }
     },
@@ -303,116 +209,85 @@ const slice = createSlice({
       state,
       action: PayloadAction<AddCreateComponentToDynamicZonePayload>
     ) => {
-      const { dynamicZoneTarget, componentsToAdd } = action.payload;
+      const { dynamicZoneTarget, componentsToAdd, forTarget, targetUid } = action.payload;
 
-      const dzAttributeIndex = findAttributeIndex(
-        state.modifiedData.contentType,
-        dynamicZoneTarget
-      );
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
+
+      const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
 
       componentsToAdd.forEach((componentUid: Internal.UID.Component) => {
-        if (!state.modifiedData.contentType) {
-          return;
+        if (!type.schema.attributes[dzAttributeIndex].components) {
+          type.schema.attributes[dzAttributeIndex].components = [];
         }
-
-        if (!state.modifiedData.contentType.schema.attributes[dzAttributeIndex].components) {
-          state.modifiedData.contentType.schema.attributes[dzAttributeIndex].components = [];
-        }
-        state.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.push(
-          componentUid
-        );
+        type.schema.attributes[dzAttributeIndex].components.push(componentUid);
       });
+
+      type.status = 'CHANGED';
     },
     addCustomFieldAttribute: (state, action: PayloadAction<AddCustomFieldAttributePayload>) => {
       const { attributeToSet, forTarget, targetUid } = action.payload;
       const { name, ...rest } = attributeToSet;
 
-      const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-        ? [forTarget]
-        : [forTarget, targetUid];
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
 
-      const currentAttributes = get(
-        state,
-        ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
-        []
-      ).slice();
+      const currentAttributes = get(type, ['schema', 'attributes'], []).slice();
 
       // Add the createdAttribute
       const updatedAttributes = [...currentAttributes, { ...rest, name }];
 
-      set(state, ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], updatedAttributes);
+      type.status = 'CHANGED';
+      set(type, ['schema', 'attributes'], updatedAttributes);
     },
     changeDynamicZoneComponents: (
       state,
       action: PayloadAction<ChangeDynamicZoneComponentsPayload>
     ) => {
-      const { dynamicZoneTarget, newComponents } = action.payload;
+      const { dynamicZoneTarget, newComponents, forTarget, targetUid } = action.payload;
 
-      const dzAttributeIndex = findAttributeIndex(
-        state.modifiedData.contentType,
-        dynamicZoneTarget
-      );
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
 
-      const currentDZComponents =
-        (state.modifiedData.contentType?.schema.attributes[dzAttributeIndex]).components;
+      const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
+
+      const currentDZComponents = (type?.schema.attributes[dzAttributeIndex]).components;
 
       const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
-      (state.modifiedData.contentType?.schema.attributes[dzAttributeIndex]).components =
-        updatedComponents;
-
-      // Retrieve all the components that needs to be added to the modifiedData.components
-      const nestedComponents = retrieveComponentsFromSchema(
-        current(state.modifiedData.contentType?.schema.attributes),
-        state.components
-      );
-
-      // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
-      const nestedComponentsToAddInModifiedData = nestedComponents.filter((compoUID) => {
-        return get(state, ['modifiedData', 'components', compoUID]) === undefined;
-      });
-
-      nestedComponentsToAddInModifiedData.forEach((compoUID: Internal.UID.Component) => {
-        const compoSchema = get(state, ['components', compoUID], {}) as Component;
-        const isTemporary = compoSchema.isTemporary || false;
-
-        // If the nested component has not been saved we don't need to add them as they are already in the state
-        if (!isTemporary) {
-          if (!state.modifiedData.components) {
-            state.modifiedData.components = {};
-          }
-          state.modifiedData.components[compoUID] = compoSchema;
-        }
-      });
+      type.status = 'CHANGED';
+      type.schema.attributes[dzAttributeIndex].components = updatedComponents;
     },
     createComponentSchema: (state, action: PayloadAction<CreateComponentSchemaPayload>) => {
-      const { uid, data, componentCategory, shouldAddComponentToData } = action.payload;
+      const { uid, data, componentCategory } = action.payload;
 
       const newSchema: Component = {
         uid: uid as Internal.UID.Component,
+        status: 'NEW',
         isTemporary: true,
         category: componentCategory,
         schema: {
           ...data,
+          visible: true,
           attributes: [],
+          modelType: 'component',
         },
       };
 
       state.components[uid as string] = newSchema;
-
-      if (shouldAddComponentToData) {
-        state.modifiedData.components[uid as string] = newSchema;
-      }
     },
     createSchema: (state, action: PayloadAction<CreateSchemaPayload>) => {
       const { uid, data } = action.payload;
 
       const newSchema: ContentType = {
         uid: uid as Internal.UID.ContentType,
+        status: 'NEW',
         isTemporary: true,
         schema: {
           ...data,
+          visible: true,
           attributes: [],
+          modelType: 'contentType',
         },
       };
 
@@ -423,33 +298,20 @@ const slice = createSlice({
       const { name, ...rest } = attributeToSet;
 
       const initialAttributeName = initialAttribute.name;
-      const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-        ? [forTarget]
-        : [forTarget, targetUid];
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
 
-      const initialAttributeIndex = findAttributeIndex(
-        get(state, ['modifiedData', ...pathToDataToEdit]),
-        initialAttributeName
-      );
+      const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
 
       const isEditingRelation = rest.type === 'relation';
 
       if (!isEditingRelation) {
-        set(
-          state,
-          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
-          attributeToSet
-        );
-
+        type.status = 'CHANGED';
+        set(type, ['schema', 'attributes', initialAttributeIndex], attributeToSet);
         return;
       }
 
-      const updatedAttributes: AttributeType[] = get(state, [
-        'modifiedData',
-        ...pathToDataToEdit,
-        'schema',
-        'attributes',
-      ]).slice();
+      const updatedAttributes: AttributeType[] = get(type, ['schema', 'attributes']).slice();
 
       // First create the current relation attribute updated
       const toSet = {
@@ -482,7 +344,7 @@ const slice = createSlice({
       let oppositeAttributeToCreate: AttributeType | null = null;
       let initialOppositeAttribute = null;
 
-      const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
+      const currentUid = type.uid;
       const didChangeTargetRelation = initialAttribute.target !== rest.target;
       const didCreateInternalRelation = rest.target === currentUid;
       const relationType = getRelationType(rest.relation, rest.targetAttribute);
@@ -621,29 +483,20 @@ const slice = createSlice({
         }
       }
 
-      set(state, ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], updatedAttributes);
+      type.status = 'CHANGED';
+      set(type, ['schema', 'attributes'], updatedAttributes);
     },
     editCustomFieldAttribute: (state, action: PayloadAction<EditCustomFieldAttributePayload>) => {
       const { forTarget, targetUid, initialAttribute, attributeToSet } = action.payload;
 
       const initialAttributeName = initialAttribute.name;
-      const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-        ? [forTarget]
-        : [forTarget, targetUid];
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
 
-      const initialAttributeIndex = findAttributeIndex(
-        get(state, ['modifiedData', ...pathToDataToEdit]),
-        initialAttributeName
-      );
+      const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
 
-      set(
-        state,
-        ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', initialAttributeIndex],
-        attributeToSet
-      );
-    },
-    updateInitialState: (state) => {
-      state.initialData = state.modifiedData;
+      type.status = 'CHANGED';
+      set(type, ['schema', 'attributes', initialAttributeIndex], attributeToSet);
     },
     deleteNotSavedType: (state) => {
       // Doing so will also reset the modified and the initial data
@@ -657,31 +510,33 @@ const slice = createSlice({
       state,
       action: PayloadAction<RemoveComponentFromDynamicZonePayload>
     ) => {
-      const { dzName, componentToRemoveIndex } = action.payload;
+      const { dzName, componentToRemoveIndex, forTarget, targetUid } = action.payload;
 
-      const dzAttributeIndex = findAttributeIndex(state.modifiedData.contentType, dzName);
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
 
-      if (state.modifiedData.contentType) {
-        state.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.splice(
-          componentToRemoveIndex,
-          1
-        );
+      if (!type) {
+        return;
       }
+
+      const dzAttributeIndex = findAttributeIndex(type, dzName);
+
+      type.status = 'CHANGED';
+      type.schema.attributes[dzAttributeIndex].components.splice(componentToRemoveIndex, 1);
     },
     removeField: (state, action: PayloadAction<RemoveFieldPayload>) => {
-      const { mainDataKey, attributeToRemoveName } = action.payload;
-      const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
-      const attributeToRemoveIndex = findAttributeIndex(
-        state.modifiedData[mainDataKey],
-        attributeToRemoveName
-      );
+      const { forTarget, targetUid, attributeToRemoveName } = action.payload;
 
-      const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveIndex];
-      const attributeToRemoveData = get(state, pathToAttributeToRemove);
+      const type =
+        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
+
+      const attributeToRemoveIndex = findAttributeIndex(type, attributeToRemoveName);
+
+      const attributeToRemoveData = get(type, ['schema', 'attributes', attributeToRemoveIndex]);
       const isRemovingRelationAttribute = attributeToRemoveData.type === 'relation';
       // Only content types can have relations with themselves since
       // components can only have oneWay or manyWay relations
-      const canTheAttributeToRemoveHaveARelationWithItself = mainDataKey === 'contentType';
+      const canTheAttributeToRemoveHaveARelationWithItself = forTarget === 'contentType';
 
       if (isRemovingRelationAttribute && canTheAttributeToRemoveHaveARelationWithItself) {
         const { target, relation, targetAttribute } = attributeToRemoveData;
@@ -692,8 +547,7 @@ const slice = createSlice({
           target === uid && !ONE_SIDE_RELATIONS.includes(relationType!);
 
         if (shouldRemoveOppositeAttribute) {
-          const attributes: AttributeType[] =
-            state.modifiedData[mainDataKey]?.schema.attributes.slice();
+          const attributes: AttributeType[] = type.schema.attributes.slice();
           const nextAttributes = attributes.filter((attribute) => {
             if (attribute.name === attributeToRemoveName) {
               return false;
@@ -706,7 +560,7 @@ const slice = createSlice({
             return true;
           });
 
-          const schema = state.modifiedData[mainDataKey];
+          const schema = type;
           if (schema) {
             schema.schema.attributes = nextAttributes;
           }
@@ -717,83 +571,147 @@ const slice = createSlice({
 
       // Find all uid fields that have the targetField set to the field we are removing
 
-      const uidFieldsToUpdate: string[] = state.modifiedData[
-        mainDataKey
-      ]!.schema.attributes.slice().reduce((acc: string[], current: AttributeType) => {
-        if (current.type !== 'uid') {
+      const uidFieldsToUpdate: string[] = type.schema.attributes
+        .slice()
+        .reduce((acc: string[], current: AttributeType) => {
+          if (current.type !== 'uid') {
+            return acc;
+          }
+
+          if (current.targetField !== attributeToRemoveName) {
+            return acc;
+          }
+
+          acc.push(current.name as string);
+
           return acc;
-        }
-
-        if (current.targetField !== attributeToRemoveName) {
-          return acc;
-        }
-
-        acc.push(current.name as string);
-
-        return acc;
-      }, []);
+        }, []);
 
       uidFieldsToUpdate.forEach((fieldName) => {
-        const fieldIndex = findAttributeIndex(state.modifiedData[mainDataKey], fieldName);
+        const fieldIndex = findAttributeIndex(type, fieldName);
 
-        delete state.modifiedData[mainDataKey]?.schema.attributes[fieldIndex].targetField;
+        delete type.schema.attributes[fieldIndex].targetField;
       });
 
-      state.modifiedData[mainDataKey]?.schema.attributes.splice(attributeToRemoveIndex, 1);
+      type.status = 'CHANGED';
+      type.schema.attributes.splice(attributeToRemoveIndex, 1);
     },
-    removeFieldFromDisplayedComponent: (
-      state,
-      action: PayloadAction<RemoveFieldFromDisplayedComponentPayload>
-    ) => {
-      const { attributeToRemoveName, componentUid } = action.payload;
+    // only edits a component in practice
+    updateComponentSchema: (state, action: PayloadAction<UpdateComponentSchemaPayload>) => {
+      const { data, uid } = action.payload;
 
-      const attributeToRemoveIndex = findAttributeIndex(
-        state.modifiedData.components?.[componentUid],
-        attributeToRemoveName
-      );
-
-      state.modifiedData.components?.[componentUid]?.schema?.attributes?.splice(
-        attributeToRemoveIndex,
-        1
-      );
-    },
-    setModifiedData: (state, action: PayloadAction<SetModifiedDataPayload>) => {
-      const { schemaToSet, hasJustCreatedSchema } = action.payload;
-
-      const schema = {
-        ...DEFAULT_MODIFIED_DATA,
-        ...schemaToSet,
-      };
-
-      state.initialData = schema;
-      state.modifiedData = schema;
-
-      // Reset the state with the initial data
-      // All created components and content types will be lost
-      if (!hasJustCreatedSchema) {
-        state.components = state.initialComponents;
-        state.contentTypes = state.initialContentTypes;
-      }
-    },
-    updateSchema: (state, action: PayloadAction<UpdateSchemaPayload>) => {
-      const { data, schemaType } = action.payload;
-
-      const schema = state.modifiedData[schemaType];
-      if (!schema) {
+      const type = state.components[uid];
+      if (!type) {
         return;
       }
 
-      schema.schema.displayName = data.displayName;
+      type.status = 'CHANGED';
 
-      if (schemaType === 'component') {
-        const { uid } = action.payload;
+      type.schema.displayName = data.displayName;
+      type.schema.icon = data.icon;
+    },
+    updateSchema: (state, action: PayloadAction<UpdateSchemaPayload>) => {
+      const { data, uid } = action.payload;
 
-        schema.category = data.category;
-        schema.schema.icon = data.icon;
-        const addedComponent = current(schema);
-        state.components[uid] = addedComponent as Component;
-      } else {
-        schema.schema.kind = data.kind;
+      const type = state.contentTypes[uid];
+      if (!type) {
+        return;
+      }
+
+      type.status = 'CHANGED';
+      type.schema = {
+        ...type.schema,
+        ...data,
+      };
+    },
+    deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
+      const uid = action.payload;
+
+      // remove the compo from the components
+      // delete state.components[uid];
+      state.components[uid].status = 'REMOVED';
+
+      // remove the compo from the content types
+      Object.keys(state.contentTypes).forEach((contentTypeUid) => {
+        const contentType = state.contentTypes[contentTypeUid];
+
+        // remove from dynamic zones
+        contentType.schema.attributes.forEach((attribute) => {
+          if (attribute.type === 'dynamiczone') {
+            const newComponents = attribute.components.filter(
+              (component: unknown) => component !== uid
+            );
+            attribute.components = newComponents;
+          }
+        });
+
+        const newAttributes = contentType.schema.attributes.filter(
+          (attribute) => attribute.type !== 'component' || attribute.component !== uid
+        );
+
+        contentType.schema.attributes = newAttributes;
+      });
+
+      // remove the compo from other components
+      Object.keys(state.components).forEach((componentUid) => {
+        const component = state.components[componentUid];
+
+        const newAttributes = component.schema.attributes.filter(
+          (attribute) => attribute.type !== 'component' || attribute.component !== uid
+        );
+
+        component.schema.attributes = newAttributes;
+      });
+    },
+    deleteContentType: (state, action: PayloadAction<Internal.UID.ContentType>) => {
+      const uid = action.payload;
+
+      // remove the content type from the content types
+      state.contentTypes[uid].status = 'REMOVED';
+
+      // remove the content type from the components
+      Object.keys(state.components).forEach((componentUid) => {
+        const component = state.components[componentUid];
+
+        const newAttributes = component.schema.attributes.filter(
+          (attribute) => attribute.type !== 'relation' || attribute.target !== uid
+        );
+
+        component.schema.attributes = newAttributes;
+      });
+
+      // remove the content type from the content types
+      Object.keys(state.contentTypes).forEach((contentTypeUid) => {
+        const contentType = state.contentTypes[contentTypeUid];
+
+        const newAttributes = contentType.schema.attributes.filter(
+          (attribute) => attribute.type !== 'relation' || attribute.target !== uid
+        );
+
+        contentType.schema.attributes = newAttributes;
+      });
+    },
+
+    applyChange(
+      state,
+      reducerAction: PayloadAction<{
+        action: 'add' | 'update' | 'delete';
+        schema: Struct.Schema;
+      }>
+    ) {
+      const { action, schema } = reducerAction.payload;
+
+      switch (action) {
+        case 'add': {
+          // generate a uid ?
+          const uid = schema.uid;
+
+          if (schema.modelType === 'component') {
+            state.components[uid] = formatSchema(schema);
+          } else {
+            state.contentTypes[uid] = formatSchema(schema);
+          }
+        }
       }
     },
   },
