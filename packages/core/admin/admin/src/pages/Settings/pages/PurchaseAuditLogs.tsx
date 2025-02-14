@@ -67,8 +67,9 @@ const PurchaseAuditLogs = () => {
               <img
                 src={illustration}
                 alt="purchase-page-audit-logs-illustration"
-                width="auto"
-                height="auto"
+                width="100%"
+                height="100%"
+                style={{ objectFit: 'cover', objectPosition: 'top left' }}
               />
             </Grid.Item>
           </Grid.Root>

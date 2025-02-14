@@ -74,8 +74,9 @@ const PurchaseContentReleases = () => {
               <img
                 src={illustration}
                 alt="purchase-page-content-releases-illustration"
-                width="auto"
-                height="auto"
+                width="100%"
+                height="100%"
+                style={{ objectFit: 'cover', objectPosition: 'top left' }}
               />
             </Grid.Item>
           </Grid.Root>

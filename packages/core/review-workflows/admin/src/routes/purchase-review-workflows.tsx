@@ -70,8 +70,9 @@ const PurchaseReviewWorkflows = () => {
               <img
                 src={illustration}
                 alt="purchase-page-review-workflows-illustration"
-                width="auto"
-                height="auto"
+                width="100%"
+                height="100%"
+                style={{ objectFit: 'cover', objectPosition: 'top left' }}
               />
             </Grid.Item>
           </Grid.Root>
