@@ -108,13 +108,43 @@ test.describe('Preview', () => {
     );
   });
 
-  test('Edit form should be displayed on the preview page', async ({ page }) => {
+  test.only('I can edit the form to save the document as draft, modified, or published', async ({
+    page,
+  }) => {
     // Open an edit view for a content type that has preview
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
 
+    // Open the preview page
+    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+
     const titleBox = page.getByRole('textbox', { name: 'title' });
+    const saveButton = page.getByRole('button', { name: /save/i });
+    const publishButton = page.getByRole('button', { name: /publish/i });
+
+    // Confirm initial state
     await expect(titleBox).toHaveValue(/west ham post match/i);
+    await expect(page.getByRole('status', { name: 'draft' })).toBeVisible();
+
+    // Update and save
+    await titleBox.fill('West Ham pre match pep talk');
+    await expect(saveButton).toBeEnabled();
+    await clickAndWait(page, saveButton);
+    await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
+    await expect(page.getByRole('status', { name: 'draft' })).toBeVisible();
+
+    // Publish
+    await expect(publishButton).toBeEnabled();
+    await publishButton.click();
+    await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
+    await expect(page.getByRole('status', { name: 'published' })).toBeVisible();
+
+    // Modify
+    titleBox.fill('West Ham pre match jokes');
+    await expect(saveButton).toBeEnabled();
+    await saveButton.click();
+    await expect(titleBox).toHaveValue(/west ham pre match jokes/i);
+    await expect(page.getByRole('status', { name: 'modified' })).toBeVisible();
   });
 });

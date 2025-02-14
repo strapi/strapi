@@ -40,7 +40,7 @@ import type { DocumentActionComponent } from '../../../content-manager';
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
-type DocumentActionPosition = 'panel' | 'header' | 'table-row';
+type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview';
 
 interface DocumentActionDescription {
   label: string;
@@ -60,6 +60,7 @@ interface DocumentActionDescription {
    * @default 'secondary'
    */
   variant?: ButtonProps['variant'];
+  loading?: ButtonProps['loading'];
 }
 
 interface DialogOptions {
@@ -193,6 +194,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
         variant={action.variant || 'default'}
         paddingTop="7px"
         paddingBottom="7px"
+        loading={action.loading}
       >
         {action.label}
       </Button>
@@ -522,7 +524,7 @@ const PublishAction: DocumentActionComponent = ({
   const { id } = useParams();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
-  const { publish } = useDocumentActions();
+  const { publish, isLoading } = useDocumentActions();
   const [
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
@@ -684,6 +686,8 @@ const PublishAction: DocumentActionComponent = ({
   const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
 
   return {
+    loading: isLoading,
+    position: ['panel', 'preview'],
     /**
      * Disabled when:
      *  - currently if you're cloning a document we don't support publish & clone at the same time.
@@ -756,7 +760,7 @@ const UpdateAction: DocumentActionComponent = ({
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { create, update, clone } = useDocumentActions();
+  const { create, update, clone, isLoading } = useDocumentActions();
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
@@ -902,6 +906,7 @@ const UpdateAction: DocumentActionComponent = ({
   }, [handleUpdate]);
 
   return {
+    loading: isLoading,
     /**
      * Disabled when:
      * - the form is submitting
@@ -914,6 +919,7 @@ const UpdateAction: DocumentActionComponent = ({
       defaultMessage: 'Save',
     }),
     onClick: handleUpdate,
+    position: ['panel', 'preview'],
   };
 };
 

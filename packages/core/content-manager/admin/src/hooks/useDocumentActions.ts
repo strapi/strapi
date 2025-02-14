@@ -64,6 +64,7 @@ type UseDocumentActions = () => {
    * This will return a list of the fields as an error if it's unable to clone.
    * You most likely want to use the `clone` action instead.
    */
+  isLoading: boolean;
   autoClone: (args: {
     model: string;
     sourceId: string;
@@ -332,7 +333,7 @@ const useDocumentActions: UseDocumentActions = () => {
     [discardDocument, formatAPIError, formatMessage, toggleNotification]
   );
 
-  const [publishDocument] = usePublishDocumentMutation();
+  const [publishDocument, { isLoading: isPublishing }] = usePublishDocumentMutation();
   const publish: IUseDocumentActs['publish'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, data) => {
       try {
@@ -416,7 +417,7 @@ const useDocumentActions: UseDocumentActions = () => {
     ]
   );
 
-  const [updateDocument] = useUpdateDocumentMutation();
+  const [updateDocument, { isLoading: isUpdating }] = useUpdateDocumentMutation();
   const update: IUseDocumentActs['update'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, data, trackerProperty) => {
       try {
@@ -694,6 +695,7 @@ const useDocumentActions: UseDocumentActions = () => {
   );
 
   return {
+    isLoading: isPublishing || isUpdating,
     autoClone,
     clone,
     create,
