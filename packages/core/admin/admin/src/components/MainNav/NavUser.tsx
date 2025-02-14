@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Menu, ButtonProps, VisuallyHidden, Avatar } from '@strapi/design-system';
-import { SignOut } from '@strapi/icons';
+import { Flex, Menu, ButtonProps, VisuallyHidden, Avatar, Typography, Badge } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -18,27 +17,36 @@ const MenuTrigger = styled(Menu.Trigger)`
   width: ${({ theme }) => theme.spaces[7]};
   border: none;
   border-radius: 50%;
-  // Removes inherited 16px padding
   padding: 0;
-  // Prevent empty pixel from appearing below the main nav
   overflow: hidden;
 `;
 
 const MenuContent = styled(Menu.Content)`
   left: ${({ theme }) => theme.spaces[3]};
+  width: auto;
+  max-width: 300px;
+  height: auto;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: ${({ theme }) => theme.spaces[2]};
+  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+  background: ${({ theme }) => theme.colors.neutral0};
+  color: ${({ theme }) => theme.colors.neutral800};
 `;
 
 const MenuItem = styled(Menu.Item)`
   & > span {
     width: 100%;
     display: flex;
-    align-items: center;
-    gap: ${({ theme }) => theme.spaces[3]};
+    align-items: flex-start;
+    gap: 3px;
     justify-content: space-between;
   }
+  color: ${({ theme }) => theme.colors.neutral800};
 `;
 
 const MenuItemDanger = styled(MenuItem)`
+  color: ${({ theme }) => theme.colors.danger600};
   &:hover {
     ${({ theme }) => `
     background: ${theme.colors.danger100};
@@ -49,7 +57,9 @@ const MenuItemDanger = styled(MenuItem)`
 export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  const user = useAuth('User', (state) => state.user);
   const logout = useAuth('Logout', (state) => state.logout);
+
   const handleProfile = () => {
     navigate('/me');
   };
@@ -73,19 +83,39 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
           <VisuallyHidden tag="span">{children}</VisuallyHidden>
         </MenuTrigger>
         <MenuContent popoverPlacement="top-center" zIndex={3}>
+          {user && (
+            <Flex direction="column" padding={0} gap={0} alignItems="flex-start">
+              <Flex direction="column" padding={4} gap={0} alignItems="flex-start">
+                <Typography variant="beta" fontWeight="bold" style={{ marginBottom: '2px' }}>
+                  {user.firstname ? `${user.firstname} ${user.lastname}` : user.username}
+                </Typography>
+                <Typography variant="pi" textColor="neutral600">
+                  {user.email}
+                </Typography>
+                
+                <Flex wrap="wrap" gap={1} style={{ paddingBlockStart: '12px'}}>
+                  {user.roles.map((role) => (
+                    <Badge key={role.id}>
+                      {role.name}
+                    </Badge>
+                  ))}
+                </Flex>
+              </Flex>
+            </Flex>
+          )}
+          <hr style={{ width: '100%', borderColor: '#4a4a6ac7', color: '#32324d'}} />
           <MenuItem onSelect={handleProfile}>
             {formatMessage({
-              id: 'global.profile',
-              defaultMessage: 'Profile',
+              id: 'global.profileSettings',
+              defaultMessage: 'Profile settings',
             })}
           </MenuItem>
 
-          <MenuItemDanger onSelect={handleLogout} color="danger600">
+          <MenuItemDanger onSelect={handleLogout}>
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
-              defaultMessage: 'Logout',
+              defaultMessage: 'Log out',
             })}
-            <SignOut />
           </MenuItemDanger>
         </MenuContent>
       </Menu.Root>
