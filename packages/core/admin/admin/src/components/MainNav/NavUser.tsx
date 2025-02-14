@@ -1,6 +1,15 @@
 import * as React from 'react';
 
-import { Flex, Menu, ButtonProps, VisuallyHidden, Avatar } from '@strapi/design-system';
+import {
+  Flex,
+  Menu,
+  ButtonProps,
+  VisuallyHidden,
+  Avatar,
+  Typography,
+  Badge,
+  Box,
+} from '@strapi/design-system';
 import { SignOut } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -26,8 +35,10 @@ const MenuTrigger = styled(Menu.Trigger)`
 
 const MenuContent = styled(Menu.Content)`
   left: ${({ theme }) => theme.spaces[3]};
+  max-height: none;
+  max-width: 300px;
+  margin: ${({ theme }) => theme.spaces[4]}; // Add 16px margin all around
 `;
-
 const MenuItem = styled(Menu.Item)`
   & > span {
     width: 100%;
@@ -37,12 +48,19 @@ const MenuItem = styled(Menu.Item)`
     justify-content: space-between;
   }
 `;
+const UserInfoSection = styled(Box)`
+  padding: ${({ theme }) => theme.spaces[4]}; // 16px padding
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+const StyledBadge = styled(Badge)`
+  padding-top: ${({ theme }) => theme.spaces[2]}; // 8px top padding
+  padding-bottom: ${({ theme }) => theme.spaces[2]}; // 8px bottom padding
+  margin-top: ${({ theme }) => theme.spaces[1]}; // 4px top margin
+`;
 
 const MenuItemDanger = styled(MenuItem)`
   &:hover {
-    ${({ theme }) => `
-    background: ${theme.colors.danger100};
-  `}
+    background: ${({ theme }) => theme.colors.danger100};
   }
 `;
 
@@ -50,6 +68,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const logout = useAuth('Logout', (state) => state.logout);
+  const user = useAuth('User info', (state) => state.user);
   const handleProfile = () => {
     navigate('/me');
   };
@@ -73,19 +92,32 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
           <VisuallyHidden tag="span">{children}</VisuallyHidden>
         </MenuTrigger>
         <MenuContent popoverPlacement="top-center" zIndex={3}>
+          <UserInfoSection>
+            <Typography variant="omega">
+              {user?.firstname} {user?.lastname}
+            </Typography>
+            <Box paddingTop={1}>
+              <Typography variant="pi" textColor="neutral600">
+                {user?.email}
+              </Typography>
+            </Box>
+            <Box paddingTop={3}>
+              <Flex gap={2} wrap="wrap">
+                {user?.roles?.map((role) => <StyledBadge key={role.id}>{role.name}</StyledBadge>)}
+              </Flex>
+            </Box>
+          </UserInfoSection>
           <MenuItem onSelect={handleProfile}>
             {formatMessage({
               id: 'global.profile',
-              defaultMessage: 'Profile',
+              defaultMessage: 'Profile settings',
             })}
           </MenuItem>
-
           <MenuItemDanger onSelect={handleLogout} color="danger600">
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
-              defaultMessage: 'Logout',
+              defaultMessage: 'Log out',
             })}
-            <SignOut />
           </MenuItemDanger>
         </MenuContent>
       </Menu.Root>
