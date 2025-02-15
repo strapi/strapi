@@ -1,31 +1,52 @@
 import * as React from 'react';
-
-import { Flex, Menu, ButtonProps, VisuallyHidden, Avatar } from '@strapi/design-system';
-import { SignOut } from '@strapi/icons';
+import {
+  Flex,
+  Menu,
+  ButtonProps,
+  VisuallyHidden,
+  Avatar,
+  Typography,
+  Badge,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useAuth } from '../../features/Auth';
 
-export interface NavUserProps extends ButtonProps {
-  initials: string;
-  children?: React.ReactNode;
-}
-
 const MenuTrigger = styled(Menu.Trigger)`
   height: ${({ theme }) => theme.spaces[7]};
   width: ${({ theme }) => theme.spaces[7]};
   border: none;
   border-radius: 50%;
-  // Removes inherited 16px padding
   padding: 0;
-  // Prevent empty pixel from appearing below the main nav
   overflow: hidden;
 `;
 
 const MenuContent = styled(Menu.Content)`
-  left: ${({ theme }) => theme.spaces[3]};
+  padding: 0;
+  max-height: 300px;
+  // min-width: 240px;
+  width: max-content;
+  max-width: 240px;
+`;
+
+const UserInfo = styled(Flex)`
+  && {
+    padding: ${({ theme }) => theme.spaces[4]};
+  }
+  align-items: flex-start;
+`;
+
+const BadgeWrapper = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: ${({ theme }) => theme.spaces[2]};
+
+  width: 100%;
+`;
+const StyledTypography = styled(Typography)`
+  margin-bottom: ${({ theme }) => theme.spaces[3]};
 `;
 
 const MenuItem = styled(Menu.Item)`
@@ -34,29 +55,44 @@ const MenuItem = styled(Menu.Item)`
     display: flex;
     align-items: center;
     gap: ${({ theme }) => theme.spaces[3]};
-    justify-content: space-between;
   }
 `;
 
 const MenuItemDanger = styled(MenuItem)`
   &:hover {
-    ${({ theme }) => `
-    background: ${theme.colors.danger100};
-  `}
+    background: ${({ theme }) => theme.colors.danger100};
   }
 `;
 
-export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
+const StyledMenuSeparator = styled(Menu.Separator)`
+  margin: 0;
+  height: 1px;
+  background: ${({ theme }) => theme.colors.neutral150};
+`;
+
+export interface NavUserProps extends ButtonProps {
+  initials: string;
+}
+
+export const NavUser = ({ initials, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  const user = useAuth('User', (state) => state.user);
   const logout = useAuth('Logout', (state) => state.logout);
+
   const handleProfile = () => {
     navigate('/me');
   };
+
   const handleLogout = () => {
     logout();
     navigate('/auth/login');
   };
+
+  const displayName =
+    user?.firstname && user?.lastname
+      ? `${user.firstname} ${user.lastname}`
+      : user?.username || 'Unknown User';
 
   return (
     <Flex
@@ -70,25 +106,41 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Avatar.Item delayMs={0} fallback={initials} />
-          <VisuallyHidden tag="span">{children}</VisuallyHidden>
+          <VisuallyHidden tag="span">{displayName}</VisuallyHidden>
         </MenuTrigger>
-        <MenuContent popoverPlacement="top-center" zIndex={3}>
+
+        <MenuContent popoverPlacement="top-start" zIndex={3}>
+          <UserInfo direction="column" gap={0} alignItems="flex-start">
+            <Typography variant="omega" fontWeight="bold" textTransform="none">
+              {displayName}
+            </Typography>
+            <StyledTypography variant="pi" textColor="neutral600">
+              {user?.email}
+            </StyledTypography>
+            <BadgeWrapper>
+              {user?.roles?.map((role) => <Badge key={role.id}>{role.name}</Badge>)}
+            </BadgeWrapper>
+          </UserInfo>
+
+          <StyledMenuSeparator />
+
           <MenuItem onSelect={handleProfile}>
             {formatMessage({
               id: 'global.profile',
-              defaultMessage: 'Profile',
+              defaultMessage: 'Profile settings',
             })}
           </MenuItem>
 
           <MenuItemDanger onSelect={handleLogout} color="danger600">
             {formatMessage({
               id: 'app.components.LeftMenu.logout',
-              defaultMessage: 'Logout',
+              defaultMessage: 'Log out',
             })}
-            <SignOut />
           </MenuItemDanger>
         </MenuContent>
       </Menu.Root>
     </Flex>
   );
 };
+
+export default NavUser;
