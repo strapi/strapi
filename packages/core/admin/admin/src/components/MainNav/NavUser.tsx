@@ -24,7 +24,6 @@ const MenuTrigger = styled(Menu.Trigger)`
 `;
 
 const MenuContent = styled(Menu.Content)`
-  padding: 0;
   max-height: fit-content;
   width: 200px;
 `;
