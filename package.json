@@ -31,7 +31,7 @@
     "scripts/*"
   ],
   "scripts": {
-    "build": "nx run-many --targets build:code,build:types --nx-ignore-cycles",
+    "build": "run-s build:code build:types",
     "build:code": "nx run-many --target=build:code --nx-ignore-cycles",
     "build:types": "nx run-many --target=build:types --nx-ignore-cycles",
     "watch": "nx watch --all -- 'nx run-many --targets build:code,build:types --projects $NX_PROJECT_NAME'",
