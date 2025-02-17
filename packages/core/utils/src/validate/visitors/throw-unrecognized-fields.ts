@@ -52,14 +52,14 @@ const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema, parent
     return;
   }
 
-  // allow id fields where it is needed for setting a relational id rather than trying to create with a given id
-  const canUseID =
-    parent?.attribute &&
-    (isRelationalAttribute(parent.attribute) ||
-      isMediaAttribute(parent.attribute) ||
-      isComponentAttribute(parent.attribute));
+  // allow relatiom reordering
+  const canUseID = isRelationalAttribute(parent?.attribute) || isMediaAttribute(parent?.attribute);
+  if (canUseID && RELATION_REORDERING_FIELDS.includes(key)) {
+    return;
+  }
 
-  if (canUseID && ID_FIELDS.includes(key)) {
+  // allow updating relations
+  if (parent?.attribute && isComponentAttribute(parent.attribute) && ID_FIELDS.includes(key)) {
     return;
   }
 
