@@ -29,7 +29,7 @@ import {
   Dialog,
   type StatusVariant,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Download, Cross, Plus } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -292,7 +292,7 @@ const FillFromAnotherLocaleAction = ({
 
   return {
     type: 'icon',
-    icon: <Download />,
+    icon: <Earth />,
     disabled: availableLocales.length === 0,
     label: formatMessage({
       id: getTranslation('CMEditViewCopyLocale.copy-text'),
