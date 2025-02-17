@@ -51,16 +51,12 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
       function (value) {
         if (!value) return true; // Allow empty values
 
-        try {
-          if (typeof value !== 'string') {
-            return false;
-          }
-
-          const byteSize = getByteSize(value);
-          return byteSize <= 72;
-        } catch (error) {
+        if (typeof value !== 'string') {
           return false;
         }
+
+        const byteSize = getByteSize(value);
+        return byteSize <= 72;
       }
     )
     .matches(/[a-z]/, {
