@@ -413,6 +413,7 @@ describe('Admin Auth End to End', () => {
     });
 
     test('Fails on password of 73 bytes', async () => {
+      const password = `aA1${'b'.repeat(70)}`;
       const res = await rq({
         url: '/admin/register',
         method: 'POST',
@@ -421,7 +422,7 @@ describe('Admin Auth End to End', () => {
           userInfo: {
             firstname: 'test',
             lastname: 'Strapi',
-            password: `aA1${'b'.repeat(70)}`,
+            password,
           },
         },
       });
@@ -436,6 +437,7 @@ describe('Admin Auth End to End', () => {
               {
                 message: 'userInfo.password must be less than 73 bytes',
                 name: 'ValidationError',
+                value: password,
                 path: ['userInfo', 'password'],
               },
             ],
