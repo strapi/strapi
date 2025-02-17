@@ -52,13 +52,13 @@ const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema, parent
     return;
   }
 
-  // allow relatiom reordering
+  // allow relation reordering
   const canUseID = isRelationalAttribute(parent?.attribute) || isMediaAttribute(parent?.attribute);
   if (canUseID && RELATION_REORDERING_FIELDS.includes(key)) {
     return;
   }
 
-  // allow updating relations
+  // allow updating component relations
   if (parent?.attribute && isComponentAttribute(parent.attribute) && ID_FIELDS.includes(key)) {
     return;
   }
