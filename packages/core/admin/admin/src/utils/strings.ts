@@ -1,7 +1,7 @@
 const capitalise = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1);
 
 function getByteSize(value: string) {
-  return new globalThis.TextEncoder().encode(value).length;
+  return new TextEncoder().encode(value).length;
 }
 
 export { capitalise, getByteSize };
