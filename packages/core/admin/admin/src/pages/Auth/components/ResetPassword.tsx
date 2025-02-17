@@ -38,11 +38,7 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
         defaultMessage: 'Password must be less than 73 bytes',
       },
       function (value) {
-        if (!value) return true; // Allow empty values
-
-        if (typeof value !== 'string') {
-          return false;
-        }
+        if (!value || typeof value !== 'string') return true; // validated elsewhere
 
         const byteSize = getByteSize(value);
         return byteSize <= 72;
