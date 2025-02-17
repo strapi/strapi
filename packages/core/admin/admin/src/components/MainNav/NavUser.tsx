@@ -25,15 +25,13 @@ const MenuTrigger = styled(Menu.Trigger)`
 
 const MenuContent = styled(Menu.Content)`
   padding: 0;
-  max-height: 300px;
-  // min-width: 240px;
-  width: max-content;
-  max-width: 240px;
+  max-height: fit-content;
+  width: 200px;
 `;
 
 const UserInfo = styled(Flex)`
   && {
-    padding: ${({ theme }) => theme.spaces[4]};
+    padding: ${({ theme }) => theme.spaces[3]};
   }
   align-items: flex-start;
 `;
@@ -41,7 +39,7 @@ const UserInfo = styled(Flex)`
 const BadgeWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: ${({ theme }) => theme.spaces[2]};
+  gap: ${({ theme }) => theme.spaces[1]};
 
   width: 100%;
 `;
@@ -62,12 +60,6 @@ const MenuItemDanger = styled(MenuItem)`
   &:hover {
     background: ${({ theme }) => theme.colors.danger100};
   }
-`;
-
-const StyledMenuSeparator = styled(Menu.Separator)`
-  margin: 0;
-  height: 1px;
-  background: ${({ theme }) => theme.colors.neutral150};
 `;
 
 export interface NavUserProps extends ButtonProps {
@@ -122,7 +114,7 @@ export const NavUser = ({ initials, ...props }: NavUserProps) => {
             </BadgeWrapper>
           </UserInfo>
 
-          <StyledMenuSeparator />
+          <Menu.Separator />
 
           <MenuItem onSelect={handleProfile}>
             {formatMessage({
