@@ -48,7 +48,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       .filter(Boolean) as RecentDocument['contentTypeUid'][];
   };
 
-  type DocumentMeta = {
+  type ContentTypeMeta = {
     fields: string[];
     mainField: string;
     contentType: Schema.ContentType;
@@ -56,10 +56,10 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     uid: RecentDocument['contentTypeUid'];
   };
 
-  const getDocumentsMetaData = (
+  const getContentTypesMeta = (
     allowedContentTypeUids: RecentDocument['contentTypeUid'][],
     configurations: ContentTypeConfiguration[]
-  ): DocumentMeta[] => {
+  ): ContentTypeMeta[] => {
     return allowedContentTypeUids.map((uid) => {
       const configuration = configurations.find((config) => config.uid === uid);
       const contentType = strapi.contentType(uid);
@@ -92,7 +92,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  const formatDocuments = (documents: Modules.Documents.AnyDocument[], meta: DocumentMeta) => {
+  const formatDocuments = (documents: Modules.Documents.AnyDocument[], meta: ContentTypeMeta) => {
     return documents.map((document) => {
       return {
         documentId: document.documentId,
@@ -139,6 +139,8 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     );
   };
 
+  const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
+
   return {
     async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
       const permittedContentTypes = await getPermittedContentTypes();
@@ -148,16 +150,22 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Fetch the configuration for each content type in a single query
       const configurations = await getConfiguration(allowedContentTypeUids);
       // Get the necessary metadata for the documents
-      const documentsMeta = getDocumentsMetaData(allowedContentTypeUids, configurations);
+      const contentTypesMeta = getContentTypesMeta(allowedContentTypeUids, configurations);
       // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
-        documentsMeta.map(async (meta) => {
-          const docs = await strapi.documents(meta.uid).findMany({
+        contentTypesMeta.map(async (meta) => {
+          const permissionChecker = permissionCheckerService.create({
+            userAbility: strapi.requestContext.get()?.state.userAbility,
+            model: meta.uid,
+          });
+          const permissionQuery = await permissionChecker.sanitizedQuery.read({
             limit: MAX_DOCUMENTS,
             sort: 'publishedAt:desc',
             fields: meta.fields,
             status: 'published',
           });
+
+          const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
 
           return formatDocuments(docs, meta);
         })
@@ -179,15 +187,21 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Fetch the configuration for each content type in a single query
       const configurations = await getConfiguration(allowedContentTypeUids);
       // Get the necessary metadata for the documents
-      const documentsMeta = getDocumentsMetaData(allowedContentTypeUids, configurations);
+      const contentTypesMeta = getContentTypesMeta(allowedContentTypeUids, configurations);
       // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
-        documentsMeta.map(async (meta) => {
-          const docs = await strapi.documents(meta.uid).findMany({
+        contentTypesMeta.map(async (meta) => {
+          const permissionChecker = permissionCheckerService.create({
+            userAbility: strapi.requestContext.get()?.state.userAbility,
+            model: meta.uid,
+          });
+          const permissionQuery = await permissionChecker.sanitizedQuery.read({
             limit: MAX_DOCUMENTS,
             sort: 'updatedAt:desc',
             fields: meta.fields,
           });
+
+          const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
 
           return formatDocuments(docs, meta);
         })
