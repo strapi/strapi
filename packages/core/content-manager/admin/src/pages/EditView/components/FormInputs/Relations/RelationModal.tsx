@@ -20,6 +20,7 @@ import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
+import { useRelationContext } from '../../../EditViewPage';
 import { DocumentStatus } from '../../DocumentStatus';
 import { FormLayout } from '../../FormLayout';
 
@@ -115,19 +116,9 @@ interface RelationModalBodyProps {
   onToggleModal: () => void;
 }
 
-const RelationModalBody = ({
-  model,
-  id,
-  collectionType,
-  isModalOpen,
-  onToggleModal,
-}: RelationModalBodyProps) => {
+const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
-  const [currentRelation, setCurrentRelation] = React.useState({
-    documentId: id!,
-    model,
-    collectionType,
-  });
+  const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
 
   const documentResponse = useDocument({
     documentId: currentRelation.documentId,
@@ -189,37 +180,29 @@ const RelationModalBody = ({
 
   return (
     <Modal.Body>
-      <RelationModalProvider
-        currentRelation={currentRelation}
-        changeCurrentRelation={setCurrentRelation}
-        document={documentResponse.document}
-        isModalOpen={isModalOpen}
-        onToggleModal={onToggleModal}
-      >
-        <DocumentRBAC permissions={permissions} model={currentRelation.model}>
-          <Flex direction="column" alignItems="flex-start" gap={2}>
-            <Typography tag="h2" variant="alpha">
-              {documentTitle}
-            </Typography>
-            {hasDraftAndPublished ? (
-              <Box marginTop={1}>
-                <DocumentStatus status={documentResponse.document?.status} />
-              </Box>
-            ) : null}
+      <DocumentRBAC permissions={permissions} model={currentRelation.model}>
+        <Flex direction="column" alignItems="flex-start" gap={2}>
+          <Typography tag="h2" variant="alpha">
+            {documentTitle}
+          </Typography>
+          {hasDraftAndPublished ? (
+            <Box marginTop={1}>
+              <DocumentStatus status={documentResponse.document?.status} />
+            </Box>
+          ) : null}
+        </Flex>
+        <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
+          <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
+            <Box overflow="auto" flex={1}>
+              <FormLayout
+                layout={documentLayoutResponse.edit.layout}
+                hasBackground={false}
+                model={currentRelation.model}
+              />
+            </Box>
           </Flex>
-          <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
-            <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
-              <Box overflow="auto" flex={1}>
-                <FormLayout
-                  layout={documentLayoutResponse.edit.layout}
-                  hasBackground={false}
-                  model={currentRelation.model}
-                />
-              </Box>
-            </Flex>
-          </FormContext>
-        </DocumentRBAC>
-      </RelationModalProvider>
+        </FormContext>
+      </DocumentRBAC>
     </Modal.Body>
   );
 };
