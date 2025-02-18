@@ -34,10 +34,13 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   model?: string;
 }
 
-const FormLayout = ({ layout, hasBackground = true, model: modelContext }: FormLayoutProps) => {
+/**
+ * Component that renders the form layout, in case the model is passed as a prompt we give priority to it instead of using the one from useDoc, which is the default behavior. This is useful for Relation modal where the model is not the one in the url but the one from the relation.
+ */
+const FormLayout = ({ layout, hasBackground = true, model: modelProp }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { model: modelHook } = useDoc();
-  const model = modelContext || modelHook;
+  const { model: modelUseDoc } = useDoc();
+  const model = modelProp || modelUseDoc;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -57,7 +60,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelContext }: FormL
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                {modelContext ? (
+                {modelProp ? (
                   <InputRendererWithContext {...fieldWithTranslatedLabel} />
                 ) : (
                   <InputRenderer {...fieldWithTranslatedLabel} />
@@ -98,7 +101,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelContext }: FormL
                         direction="column"
                         alignItems="stretch"
                       >
-                        {modelContext ? (
+                        {modelProp ? (
                           <InputRendererWithContext {...fieldWithTranslatedLabel} />
                         ) : (
                           <InputRenderer {...fieldWithTranslatedLabel} />
