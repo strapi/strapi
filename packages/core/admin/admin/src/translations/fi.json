@@ -213,7 +213,7 @@
   "Settings.profile.form.section.experience.here": "dokumentaatio",
   "Settings.profile.form.section.experience.interfaceLanguage": "Liitännän kieli",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "Tämä näyttää vain oman käyttöliittymäsi valitulla kielellä",
-  "Settings.profile.form.section.experience.interfaceLanguageHelp": "Valinta muuttaa käyttöliittymän kielen vain sinulle. Katso tästä {tästä}, jotta muut kielet ovat tiimisi käytettävissä.",
+  "Settings.profile.form.section.experience.interfaceLanguageHelp": "Tämä valinta muuttaa käyttöliittymän kielen vain sinulle. Katso tästä {tästä}, jotta muut kielet ovat tiimisi käytettävissä.",
   "Settings.profile.form.section.experience.mode.hint": "Näyttää käyttöliittymäsi valitun katselutilan mukaan.",
   "Settings.profile.form.section.experience.mode.label": "Käyttöliittymä-tila",
   "Settings.profile.form.section.experience.mode.option-label": "{name}-tila",

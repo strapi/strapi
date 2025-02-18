@@ -68,7 +68,7 @@
   "components.Select.locales.not-available": "Sisältöä ei ole saatavilla",
   "plugin.description.long": "Tämä lisäosa mahdollistaa sisällön luomisen, lukemisen ja päivittämisen eri kielillä sekä hallintapaneelista että API:sta.",
   "plugin.description.short": "Tämä lisäosa mahdollistaa sisällön luomisen, lukemisen ja päivittämisen eri kielillä sekä hallintapaneelista että API:sta.",
-  "plugin.name": "Internationalization",
+  "plugin.name": "Kansainvälistyminen",
   "plugin.schema.i18n.localized.description-content-type": "Mahdollistaa merkinnän kääntämisen eri kielille",
   "plugin.schema.i18n.localized.description-field": "Kentällä voi olla eri arvot jokaisella kielellä",
   "plugin.schema.i18n.localized.label-content-type": "Kansainvälistyminen",

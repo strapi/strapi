@@ -59,7 +59,7 @@
   "Roles.empty.search": "Hakua vastaavia rooleja ei löydy.",
   "Settings.roles.deleted": "Rooli poistettu",
   "Settings.roles.edited": "Roolia muokattu",
-  "Settings.section-label": "Käyttäjät ja käyttöoikeudet lisäosa",
+  "Settings.section-label": "Käyttäjät ja käyttöoikeudet",
   "components.Input.error.validation.email": "Tämä ei ole kelvollinen sähköpostiosoite",
   "components.Input.error.validation.json": "Tämä ei vastaa JSON-muotoa",
   "components.Input.error.validation.max": "Arvo on liian korkea.",
