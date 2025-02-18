@@ -1,11 +1,19 @@
 import * as React from 'react';
 
 import { Box, Flex, IconButton } from '@strapi/design-system';
-import { ArrowLeft, ArrowRight } from '@strapi/icons';
+import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
 import { usePreviewContext } from '../pages/Preview';
+
+// TODO use ArrowLineLeft once it's available in the DS
+const AnimatedArrow = styled(ArrowLeft)<{ isSideEditorOpen: boolean }>`
+  will-change: transform;
+  rotate: ${(props) => (props.isSideEditorOpen ? '180deg' : '0deg')};
+  transition: rotate 0.2s ease-in-out;
+`;
 
 const UnstablePreviewContent = () => {
   const previewUrl = usePreviewContext('PreviewContent', (state) => state.url);
@@ -17,11 +25,20 @@ const UnstablePreviewContent = () => {
 
   return (
     <Flex flex={1} overflow="auto" alignItems="stretch">
-      {isSideEditorOpen && (
-        <Box overflow="auto" flex={1} borderWidth="0 1px 0 0" borderColor="neutral150" padding={6}>
-          <FormLayout layout={layout.layout} hasBackground />
-        </Box>
-      )}
+      <Box
+        overflow="auto"
+        width={isSideEditorOpen ? '50%' : 0}
+        borderWidth="0 1px 0 0"
+        borderColor="neutral150"
+        paddingTop={6}
+        paddingBottom={6}
+        // Remove horizontal padding when the editor is closed or it won't fully disappear
+        paddingLeft={isSideEditorOpen ? 6 : 0}
+        paddingRight={isSideEditorOpen ? 6 : 0}
+        transition="all 0.2s ease-in-out"
+      >
+        <FormLayout layout={layout.layout} hasBackground />
+      </Box>
       <Box position="relative" flex={1} height="100%" overflow="hidden">
         <Box
           src={previewUrl}
@@ -60,8 +77,7 @@ const UnstablePreviewContent = () => {
           top={2}
           left={2}
         >
-          {/* TODO use ArrowLineLeft once it's available in the DS */}
-          {isSideEditorOpen ? <ArrowLeft /> : <ArrowRight />}
+          <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
         </IconButton>
       </Box>
     </Flex>
