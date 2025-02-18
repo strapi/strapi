@@ -72,7 +72,7 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
     throw new Error('Cannot find the slug param in the URL or the model prop is not provided.');
   }
 
-  const documentIdentifier = model ?? slug;
+  const contentTypeUid = model ?? slug;
 
   const [{ rawQuery }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
 
@@ -80,13 +80,13 @@ const DocumentRBAC = ({ children, permissions, model }: DocumentRBACProps) => {
 
   const contentTypePermissions = React.useMemo(() => {
     const contentTypePermissions = userPermissions.filter(
-      (permission) => permission.subject === documentIdentifier
+      (permission) => permission.subject === contentTypeUid
     );
     return contentTypePermissions.reduce<Record<string, Permission[]>>((acc, permission) => {
       const [action] = permission.action.split('.').slice(-1);
       return { ...acc, [action]: [permission] };
     }, {});
-  }, [documentIdentifier, userPermissions]);
+  }, [contentTypeUid, userPermissions]);
 
   const { isLoading, allowedActions } = useRBAC(
     contentTypePermissions,
