@@ -8971,7 +8971,7 @@ __metadata:
     supertest: "npm:6.3.3"
     tsconfig: "npm:5.10.2"
     typescript: "npm:5.4.4"
-    undici: "npm:6.19.2"
+    undici: "npm:6.21.1"
     yup: "npm:0.32.9"
   languageName: unknown
   linkType: soft
@@ -9089,6 +9089,7 @@ __metadata:
     "@types/lodash": "npm:^4.14.191"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
+    koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     react: "npm:18.3.1"
@@ -9753,7 +9754,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:1.1.0"
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.4"
-    undici: "npm:6.19.2"
+    undici: "npm:6.21.1"
   languageName: unknown
   linkType: soft
 
@@ -31131,10 +31132,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.19.2":
-  version: 6.19.2
-  resolution: "undici@npm:6.19.2"
-  checksum: 10c0/3b7b9238c0c84fd90742422fb12844a29e33e922d2c5f722f626090ca1f1ec93596ccec9be1814bb0e923e28682d2080a17d17a4afe373897b9770ef25a64d97
+"undici@npm:6.21.1":
+  version: 6.21.1
+  resolution: "undici@npm:6.21.1"
+  checksum: 10c0/d604080e4f8db89b35a63b483b5f96a5f8b19ec9f716e934639345449405809d2997e1dd7212d67048f210e54534143384d712bd9075e4394f0788895ef9ca8e
   languageName: node
   linkType: hard
 

@@ -35,8 +35,9 @@
     "dist/"
   ],
   "scripts": {
-    "build": "run -T npm-run-all clean --parallel build:code build:types copy-files",
-    "build:code": "run -T rollup -c",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T run-p build:code:rollup copy-files",
+    "build:code:rollup": "run -T rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
