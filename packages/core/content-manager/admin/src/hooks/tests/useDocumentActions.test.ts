@@ -22,6 +22,7 @@ describe('useDocumentActions', () => {
       update: expect.any(Function),
       unpublish: expect.any(Function),
       unpublishMany: expect.any(Function),
+      isLoading: expect.any(Boolean),
     });
   });
 
