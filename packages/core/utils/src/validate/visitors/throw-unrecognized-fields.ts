@@ -12,7 +12,7 @@ import type { Visitor } from '../../traverse-entity';
 import { throwInvalidKey } from '../utils';
 
 // TODO these should all be centralized somewhere instead of maintaining a list
-const ID_FIELDS = [constants.ID_ATTRIBUTE, constants.DOC_ID_ATTRIBUTE];
+const ID_FIELDS = [constants.DOC_ID_ATTRIBUTE];
 const ALLOWED_ROOT_LEVEL_FIELDS = [constants.DOC_ID_ATTRIBUTE];
 const MORPH_TO_ALLOWED_FIELDS = ['__type'];
 const DYNAMIC_ZONE_ALLOWED_FIELDS = ['__component'];
@@ -52,9 +52,9 @@ const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema, parent
     return;
   }
 
-  // allow relation reordering
+  // allow id fields where it is needed for setting a relational id rather than trying to create with a given id
   const canUseID = isRelationalAttribute(parent?.attribute) || isMediaAttribute(parent?.attribute);
-  if (canUseID && RELATION_REORDERING_FIELDS.includes(key)) {
+  if (canUseID && !ID_FIELDS.includes(key)) {
     return;
   }
 
