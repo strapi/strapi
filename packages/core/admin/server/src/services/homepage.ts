@@ -140,6 +140,11 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
+  const getPermissionChecker = (uid: string) =>
+    permissionCheckerService.create({
+      userAbility: strapi.requestContext.get()?.state.userAbility,
+      model: uid,
+    });
 
   return {
     async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
@@ -154,11 +159,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
         contentTypesMeta.map(async (meta) => {
-          const permissionChecker = permissionCheckerService.create({
-            userAbility: strapi.requestContext.get()?.state.userAbility,
-            model: meta.uid,
-          });
-          const permissionQuery = await permissionChecker.sanitizedQuery.read({
+          const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
             limit: MAX_DOCUMENTS,
             sort: 'publishedAt:desc',
             fields: meta.fields,
@@ -191,11 +192,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       // Now actually fetch and format the documents
       const recentDocuments = await Promise.all(
         contentTypesMeta.map(async (meta) => {
-          const permissionChecker = permissionCheckerService.create({
-            userAbility: strapi.requestContext.get()?.state.userAbility,
-            model: meta.uid,
-          });
-          const permissionQuery = await permissionChecker.sanitizedQuery.read({
+          const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
             limit: MAX_DOCUMENTS,
             sort: 'updatedAt:desc',
             fields: meta.fields,
