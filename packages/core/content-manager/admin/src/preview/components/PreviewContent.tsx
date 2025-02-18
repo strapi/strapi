@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Box, Flex } from '@strapi/design-system';
+import { Box, Flex, IconButton } from '@strapi/design-system';
+import { ArrowLeft, ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
@@ -12,30 +13,57 @@ const UnstablePreviewContent = () => {
 
   const { formatMessage } = useIntl();
 
+  const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
+
   return (
     <Flex flex={1} overflow="auto" alignItems="stretch">
-      <Box overflow="auto" flex={1} borderWidth="0 1px 0 0" borderColor="neutral150" padding={6}>
-        <FormLayout layout={layout.layout} hasBackground />
+      {isSideEditorOpen && (
+        <Box overflow="auto" flex={1} borderWidth="0 1px 0 0" borderColor="neutral150" padding={6}>
+          <FormLayout layout={layout.layout} hasBackground />
+        </Box>
+      )}
+      <Box position="relative" flex={1} height="100%" overflow="hidden">
+        <Box
+          src={previewUrl}
+          /**
+           * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+           * history stack. This is an issue for us as it means clicking the back button will not let us
+           * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+           * different iframe when the preview URL changes. So we set a key prop to force React
+           * to mount a different node when the src changes.
+           */
+          key={previewUrl}
+          title={formatMessage({
+            id: 'content-manager.preview.panel.title',
+            defaultMessage: 'Preview',
+          })}
+          width="100%"
+          height="100%"
+          borderWidth={0}
+          tag="iframe"
+        />
+        <IconButton
+          variant="tertiary"
+          label={formatMessage(
+            isSideEditorOpen
+              ? {
+                  id: 'content-manager.preview.content.close-editor',
+                  defaultMessage: 'Close editor',
+                }
+              : {
+                  id: 'content-manager.preview.content.open-editor',
+                  defaultMessage: 'Open editor',
+                }
+          )}
+          onClick={() => setIsSideEditorOpen((prev) => !prev)}
+          position="absolute"
+          top={2}
+          left={2}
+        >
+          {/* TODO use ArrowLineLeft once it's available in the DS */}
+          {isSideEditorOpen ? <ArrowLeft /> : <ArrowRight />}
+        </IconButton>
       </Box>
-      <Box
-        src={previewUrl}
-        /**
-         * For some reason, changing an iframe's src tag causes the browser to add a new item in the
-         * history stack. This is an issue for us as it means clicking the back button will not let us
-         * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
-         * different iframe when the preview URL changes. So we set a key prop to force React
-         * to mount a different node when the src changes.
-         */
-        key={previewUrl}
-        title={formatMessage({
-          id: 'content-manager.preview.panel.title',
-          defaultMessage: 'Preview',
-        })}
-        flex={1}
-        height="100%"
-        borderWidth={0}
-        tag="iframe"
-      />
     </Flex>
   );
 };
