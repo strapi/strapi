@@ -19,6 +19,7 @@ import {
 import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
@@ -33,14 +34,13 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .test(
       'required-byte-size',
       {
-        message: {
-          id: 'components.Input.error.contain.maxBytes',
-          defaultMessage: 'Password must be less than 73 bytes',
-        },
+        id: 'components.Input.error.contain.maxBytes',
+        defaultMessage: 'Password must be less than 73 bytes',
       },
       function (value) {
-        if (!value) return true;
-        const byteSize = new TextEncoder().encode(value).length;
+        if (!value || typeof value !== 'string') return true; // validated elsewhere
+
+        const byteSize = getByteSize(value);
         return byteSize <= 72;
       }
     )
