@@ -238,6 +238,7 @@ const UnstablePreviewHeader = () => {
 
               if (!primaryAction && !secondaryAction) return null;
 
+              // Both actions are available when draft and publish enabled
               if (primaryAction && secondaryAction) {
                 return (
                   <>
@@ -254,7 +255,8 @@ const UnstablePreviewHeader = () => {
                   </>
                 );
               }
-              // Save
+
+              // Otherwise we just have the save action
               return (
                 <DocumentActionButton
                   {...primaryAction}
