@@ -11,9 +11,7 @@ import {
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
-
 import { useAuth } from '../../features/Auth';
-
 import { getDisplayName } from '../../utils/users';
 
 const MenuTrigger = styled(Menu.Trigger)`
