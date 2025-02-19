@@ -38,10 +38,12 @@ const AuthResponse = () => {
         dispatch(
           login({
             token: jwtToken,
+            persist: getCookieValue('rememberMe') === 'true',
           })
         );
 
         deleteCookie('jwtToken');
+        deleteCookie('rememberMe');
 
         navigate('/auth/login');
       } else {
