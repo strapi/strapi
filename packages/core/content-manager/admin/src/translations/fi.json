@@ -89,6 +89,7 @@
   "containers.Edit.delete": "Poista",
   "containers.edit.title.new": "Luo merkintä",
   "containers.edit.header.more-actions": "Lisää toimintoja",
+  "content-manager.containers.edit.panels.review-workflows.title": "Tarkistuksen työnkulku",
   "containers.edit.information.last-published.label": "Julkaistu",
   "containers.edit.information.last-published.value": "{time}{isAnonymous, select, true {} other { luoja: {author}}}",
   "containers.edit.information.last-draft.label": "Päivitetty",
