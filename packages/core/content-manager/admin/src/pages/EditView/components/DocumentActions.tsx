@@ -390,6 +390,7 @@ const convertActionVariantToIconColor = (
 interface DocumentActionConfirmDialogProps extends DialogOptions, Pick<Action, 'variant'> {
   onClose: () => void;
   isOpen: Dialog.Props['open'];
+  loading?: ButtonProps['loading'];
 }
 
 const DocumentActionConfirmDialog = ({
@@ -400,6 +401,7 @@ const DocumentActionConfirmDialog = ({
   content,
   isOpen,
   variant = 'secondary',
+  loading,
 }: DocumentActionConfirmDialogProps) => {
   const { formatMessage } = useIntl();
 
@@ -433,7 +435,7 @@ const DocumentActionConfirmDialog = ({
               })}
             </Button>
           </Dialog.Cancel>
-          <Button onClick={handleConfirm} variant={variant} fullWidth>
+          <Button onClick={handleConfirm} variant={variant} fullWidth loading={loading}>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',
@@ -1087,7 +1089,7 @@ const DiscardAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const { schema } = useDoc();
   const canUpdate = useDocumentRBAC('DiscardAction', ({ canUpdate }) => canUpdate);
-  const { discard } = useDocumentActions();
+  const { discard, isLoading } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
@@ -1121,6 +1123,7 @@ const DiscardAction: DocumentActionComponent = ({
           </Typography>
         </Flex>
       ),
+      loading: isLoading,
       onConfirm: async () => {
         await discard({
           collectionType,
