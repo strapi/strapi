@@ -94,13 +94,13 @@ export const NavUser = ({ initials, ...props }: NavUserProps) => {
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Avatar.Item delayMs={0} fallback={initials} />
-          <VisuallyHidden tag="span"> {getDisplayName(user) || 'Unknown User'}</VisuallyHidden>
+          <VisuallyHidden tag="span"> {getDisplayName(user)}</VisuallyHidden>
         </MenuTrigger>
 
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">
             <Typography variant="omega" fontWeight="bold" textTransform="none">
-              {getDisplayName(user) || 'Unknown User'}
+              {getDisplayName(user)}
             </Typography>
             <StyledTypography variant="pi" textColor="neutral600">
               {user?.email}
