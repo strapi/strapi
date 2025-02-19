@@ -14,6 +14,8 @@ import { styled } from 'styled-components';
 
 import { useAuth } from '../../features/Auth';
 
+import { getDisplayName } from '../../utils/users';
+
 const MenuTrigger = styled(Menu.Trigger)`
   height: ${({ theme }) => theme.spaces[7]};
   width: ${({ theme }) => theme.spaces[7]};
@@ -35,7 +37,7 @@ const UserInfo = styled(Flex)`
   align-items: flex-start;
 `;
 
-const BadgeWrapper = styled.div`
+const BadgeWrapper = styled(Flex)`
   display: flex;
   flex-wrap: wrap;
   gap: ${({ theme }) => theme.spaces[1]};
@@ -80,11 +82,6 @@ export const NavUser = ({ initials, ...props }: NavUserProps) => {
     navigate('/auth/login');
   };
 
-  const displayName =
-    user?.firstname && user?.lastname
-      ? `${user.firstname} ${user.lastname}`
-      : user?.username || 'Unknown User';
-
   return (
     <Flex
       justifyContent="center"
@@ -97,13 +94,13 @@ export const NavUser = ({ initials, ...props }: NavUserProps) => {
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Avatar.Item delayMs={0} fallback={initials} />
-          <VisuallyHidden tag="span">{displayName}</VisuallyHidden>
+          <VisuallyHidden tag="span"> {getDisplayName(user) || 'Unknown User'}</VisuallyHidden>
         </MenuTrigger>
 
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">
             <Typography variant="omega" fontWeight="bold" textTransform="none">
-              {displayName}
+              {getDisplayName(user) || 'Unknown User'}
             </Typography>
             <StyledTypography variant="pi" textColor="neutral600">
               {user?.email}
