@@ -17,7 +17,7 @@ export default defineConfig({
     {
       dir: path.join(import.meta.dirname, 'dist/admin'),
       entryFileNames: '[name].mjs',
-      chunkFileNames: 'chunks/[name]-[hash].js',
+      chunkFileNames: 'chunks/[name]-[hash].mjs',
       exports: 'auto',
       format: 'esm',
       sourcemap: true,

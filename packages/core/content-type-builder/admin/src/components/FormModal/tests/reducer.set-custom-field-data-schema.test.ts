@@ -1,5 +1,4 @@
-import * as actions from '../constants';
-import { initialState, reducer } from '../reducer';
+import { initialState, reducer, actions } from '../reducer';
 
 const mockCustomField = {
   type: 'string',
@@ -21,26 +20,24 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
       },
     };
 
-    const action = {
-      type: actions.SET_CUSTOM_FIELD_DATA_SCHEMA,
+    const action = actions.setCustomFieldDataSchema({
       isEditing: true,
       modifiedDataToSetForEditing: {
         type: 'string',
         customField: 'plugin::color-picker.color',
         name: 'test',
       },
-    };
+    });
 
     expect(reducer(initialState, action)).toEqual(expected);
   });
 
   it('adds a custom field', () => {
-    const action = {
-      type: actions.SET_CUSTOM_FIELD_DATA_SCHEMA,
+    const action = actions.setCustomFieldDataSchema({
       customField: mockCustomField,
       isEditing: false,
       modifiedDataToSetForEditing: { name: null },
-    };
+    });
 
     const expected = {
       ...initialState,
@@ -84,12 +81,11 @@ describe('CTB | components | FormModal | reducer | actions | SET_CUSTOM_FIELD_DA
       },
     };
 
-    const action = {
-      type: actions.SET_CUSTOM_FIELD_DATA_SCHEMA,
+    const action = actions.setCustomFieldDataSchema({
       customField: mockCustomFieldWithOptionsPath,
       isEditing: false,
       modifiedDataToSetForEditing: { name: null },
-    };
+    });
 
     const expected = {
       ...initialState,
