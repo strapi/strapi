@@ -1,4 +1,4 @@
-import { render } from '@tests/utils';
+import { render, fireEvent, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
 import { SearchInput } from '../SearchInput';
@@ -82,5 +82,24 @@ describe('SearchInput', () => {
     expect(getByRole('textbox', { name: 'Search label' })).toHaveValue('');
 
     expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
+  });
+
+  it('should close the search field when the input loses focus', async () => {
+    const { user, getByRole, queryByRole } = render(<SearchInput label="Search label" />);
+
+    // Open the search input by clicking the search icon button
+    await user.click(getByRole('button', { name: 'Search' }));
+
+    // The textbox should now be visible
+    const textbox = getByRole('textbox', { name: 'Search label' });
+    expect(textbox).toBeInTheDocument();
+
+    // Simulate the blur event with no related target (i.e. clicked outside)
+    fireEvent.blur(textbox, { relatedTarget: null });
+
+    // Wait for the state update and verify the textbox is no longer in the document
+    await waitFor(() => {
+      expect(queryByRole('textbox', { name: 'Search label' })).not.toBeInTheDocument();
+    });
   });
 });
