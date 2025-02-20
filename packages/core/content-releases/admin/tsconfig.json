@@ -7,6 +7,6 @@
       "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["./src", "../shared", "tests", "custom.d.ts"],
+  "include": ["./src", "../shared", "tests", "custom.d.ts", "./module.d.ts"],
   "exclude": ["node_modules"]
 }
