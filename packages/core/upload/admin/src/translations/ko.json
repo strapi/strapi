@@ -15,7 +15,7 @@
   "control-card.stop-crop": "그만 자르기",
   "filter.add": "필터 추가",
   "form.button.replace-media": "미디어 교체",
-  "form.input.decription.file-alt": "에셋을 표시할 수 없는 경우 이 텍스트가 표시됩니다.",
+  "form.input.description.file-alt": "에셋을 표시할 수 없는 경우 이 텍스트가 표시됩니다.",
   "form.input.label.file-alt": "대체 텍스트",
   "form.input.label.file-caption": "캡션",
   "form.input.label.file-name": "파일명",

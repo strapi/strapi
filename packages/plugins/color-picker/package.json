@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "5.9.0",
+  "version": "5.10.3",
   "description": "Strapi maintained Custom Fields",
   "repository": {
     "type": "git",
@@ -57,14 +57,14 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.14",
-    "@strapi/icons": "2.0.0-rc.14",
+    "@strapi/design-system": "2.0.0-rc.16",
+    "@strapi/icons": "2.0.0-rc.16",
     "react-colorful": "5.6.1",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.2.0",
-    "@strapi/strapi": "5.9.0",
+    "@strapi/strapi": "5.10.3",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "react": "18.3.1",
