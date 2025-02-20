@@ -52,6 +52,7 @@ import {
 import { buildValidParams } from '../../../../../utils/api';
 import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
+import { useRelationContext } from '../../../EditViewPage';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
 import { RelationModal, getCollectionType } from '../Relations/RelationModal';
@@ -158,17 +159,10 @@ export interface RelationsFormValue {
  */
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   (
-    {
-      disabled,
-      label,
-      documentModel: modelInput,
-      document: documentInput,
-      changeCurrentRelation,
-      isModalOpen,
-      ...props
-    },
+    { disabled, label, documentModel: modelInput, document: documentInput, isModalOpen, ...props },
     ref
   ) => {
+    const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
     const [currentPage, setCurrentPage] = React.useState(1);
     const { document: hookDocument, model: hookModel } = useDoc();
     const document = documentInput && isModalOpen ? documentInput : hookDocument;
@@ -177,6 +171,10 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
     const params = buildValidParams(query);
+    const changeCurrentRelation = useRelationContext(
+      'RelationContext',
+      (state) => state.changeCurrentRelation
+    );
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
@@ -209,10 +207,10 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
-        model,
+        model: currentRelation.model ?? documentModel,
         targetField,
         // below we don't run the query if there is no id.
-        id: id!,
+        id: currentRelation.documentId ?? id!,
         params: {
           ...params,
           pageSize: RELATIONS_TO_DISPLAY,
@@ -1453,6 +1451,7 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     isModalOpen,
     changeCurrentRelation,
   } = data;
+  const model = useRelationContext('RelationContext', (state) => state.model);
   const { formatMessage } = useIntl();
   const [showModal, setShowModal] = React.useState(false);
 
@@ -1543,7 +1542,14 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                   {isModalOpen ? (
                     <CustomTextButton onClick={handleChangeModalContent}>{label}</CustomTextButton>
                   ) : (
-                    <CustomTextButton onClick={() => setShowModal(true)}>{label}</CustomTextButton>
+                    <CustomTextButton
+                      onClick={() => {
+                        setShowModal(true);
+                        handleChangeModalContent();
+                      }}
+                    >
+                      {label}
+                    </CustomTextButton>
                   )}
                 </Tooltip>
               </Box>

@@ -5,7 +5,7 @@ import { styled } from 'styled-components';
 import { useDoc } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
-import { InputRenderer, InputRendererWithContext } from './InputRenderer';
+import { InputRenderer } from './InputRenderer';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
   sm: '27.5rem', // 440px
@@ -60,11 +60,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelProp }: FormLayo
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                {modelProp ? (
-                  <InputRendererWithContext {...fieldWithTranslatedLabel} />
-                ) : (
-                  <InputRenderer {...fieldWithTranslatedLabel} />
-                )}
+                <InputRenderer {...fieldWithTranslatedLabel} />
               </Grid.Item>
             </Grid.Root>
           );
@@ -101,11 +97,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelProp }: FormLayo
                         direction="column"
                         alignItems="stretch"
                       >
-                        {modelProp ? (
-                          <InputRendererWithContext {...fieldWithTranslatedLabel} />
-                        ) : (
-                          <InputRenderer {...fieldWithTranslatedLabel} />
-                        )}
+                        <InputRenderer {...fieldWithTranslatedLabel} />
                       </ResponsiveGridItem>
                     );
                   })}
