@@ -51,7 +51,7 @@
     "@strapi/permissions": "5.10.3",
     "@strapi/utils": "5.10.3",
     "commander": "8.3.0",
-    "koa": "2.15.2",
+    "koa": "2.15.4",
     "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
     "typedoc": "0.25.10",
@@ -68,7 +68,7 @@
     "lodash": "4.17.21",
     "tsconfig": "5.10.3",
     "typescript": "5.4.4",
-    "undici": "6.21.1"
+    "undici": "7.2.3"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
