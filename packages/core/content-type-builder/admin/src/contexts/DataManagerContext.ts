@@ -22,7 +22,10 @@ export interface DataManagerContextValue {
   ) => void;
   addCustomFieldAttribute: (params: CustomFieldAttributeParams) => void;
   editCustomFieldAttribute: (params: CustomFieldAttributeParams) => void;
-  addCreatedComponentToDynamicZone: (dynamicZoneTarget: string, componentsToAdd: string[]) => void;
+  addCreatedComponentToDynamicZone: (
+    dynamicZoneTarget: string,
+    componentsToAdd: Internal.UID.Component[]
+  ) => void;
   createSchema: (
     data: Record<string, any>,
     schemaType: SchemaType,
@@ -30,9 +33,12 @@ export interface DataManagerContextValue {
     componentCategory?: string,
     shouldAddComponentToData?: boolean
   ) => void;
-  changeDynamicZoneComponents: (dynamicZoneTarget: string, newComponents: string[]) => void;
+  changeDynamicZoneComponents: (
+    dynamicZoneTarget: string,
+    newComponents: Internal.UID.Component[]
+  ) => void;
   removeAttribute: (
-    mainDataKey: string,
+    mainDataKey: 'contentType' | 'component' | 'contentTypes' | 'components',
     attributeToRemoveName: string,
     componentUid?: string
   ) => void;
@@ -45,7 +51,7 @@ export interface DataManagerContextValue {
   submitData: (additionalContentTypeData?: Record<string, any>) => Promise<void>;
   updateSchema: (
     data: Record<string, any>,
-    schemaType: SchemaType,
+    schemaType: 'contentType' | 'component',
     componentUID: Internal.UID.Component
   ) => void;
   components: Record<Internal.UID.Component, Component>;
