@@ -37,9 +37,8 @@ export interface CurrentRelation {
 interface RelationModalContextValue {
   currentRelation: CurrentRelation;
   changeCurrentRelation: (newRelation: CurrentRelation) => void;
-  document: NonNullable<ReturnType<UseDocument>['document']>;
   isModalOpen: boolean;
-  onToggleModal: () => void;
+  setIsModalOpen: (newValue: boolean) => void;
 }
 
 const [RelationProvider, useRelationContext] =
@@ -158,9 +157,8 @@ const EditViewPage = () => {
       <RelationProvider
         currentRelation={currentRelation}
         changeCurrentRelation={setCurrentRelation}
-        document={document!}
         isModalOpen={isModalOpen}
-        onToggleModal={() => setIsModalOpen((prev) => !prev)}
+        setIsModalOpen={setIsModalOpen}
       >
         <Form
           disabled={hasDraftAndPublished && status === 'published'}

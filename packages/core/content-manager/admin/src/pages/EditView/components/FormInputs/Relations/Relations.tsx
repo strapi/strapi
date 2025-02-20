@@ -135,7 +135,6 @@ interface RelationsFieldProps
     model: string;
     collectionType: string;
   }) => void;
-  isModalOpen?: boolean;
 }
 
 export interface RelationsFormValue {
@@ -158,15 +157,12 @@ export interface RelationsFormValue {
  * they wish to do so.
  */
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
-  (
-    { disabled, label, documentModel: modelInput, document: documentInput, isModalOpen, ...props },
-    ref
-  ) => {
+  ({ disabled, label, documentModel: modelInput, document: documentInput, ...props }, ref) => {
     const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
     const [currentPage, setCurrentPage] = React.useState(1);
     const { document: hookDocument, model: hookModel } = useDoc();
-    const document = documentInput && isModalOpen ? documentInput : hookDocument;
-    const documentModel = modelInput && isModalOpen ? modelInput : hookModel;
+    const document = documentInput ? documentInput : hookDocument;
+    const documentModel = modelInput ? modelInput : hookModel;
     const documentId = document?.documentId;
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
@@ -195,7 +191,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = isModalOpen ? (documentModel ?? componentUID) : (componentUID ?? documentModel);
+    const model = documentModel ?? componentUID ?? componentUID ?? documentModel;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -377,7 +373,6 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
           relationType={props.attribute.relation}
           // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
           targetModel={props.attribute.targetModel}
-          isModalOpen={isModalOpen}
           changeCurrentRelation={changeCurrentRelation}
         />
       </Flex>
@@ -885,7 +880,6 @@ interface UnstableRelationsListProps extends Pick<RelationsFieldProps, 'disabled
    */
   serverData: RelationResult[];
   targetModel: string;
-  isModalOpen?: boolean;
   changeCurrentRelation?: (newRelation: {
     documentId: string;
     model: string;
@@ -901,7 +895,6 @@ const UnstableRelationsList = ({
   isLoading,
   relationType,
   targetModel,
-  isModalOpen = false,
   changeCurrentRelation,
 }: UnstableRelationsListProps) => {
   const ariaDescriptionId = React.useId();
@@ -1121,7 +1114,6 @@ const UnstableRelationsList = ({
           handleDisconnect,
           relations: data,
           targetModel,
-          isModalOpen,
           changeCurrentRelation,
         }}
         itemKey={(index) => data[index].id}
@@ -1420,7 +1412,6 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     name: string;
     relations: Relation[];
     targetModel: string;
-    isModalOpen?: boolean;
     changeCurrentRelation?: (newRelation: {
       documentId: string;
       model: string;
@@ -1448,12 +1439,11 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     name,
     relations,
     targetModel,
-    isModalOpen,
     changeCurrentRelation,
   } = data;
-  const model = useRelationContext('RelationContext', (state) => state.model);
   const { formatMessage } = useIntl();
-  const [showModal, setShowModal] = React.useState(false);
+  const isModalOpen = useRelationContext('RelationContext', (state) => state.isModalOpen);
+  const setIsModalOpen = useRelationContext('RelationContext', (state) => state.setIsModalOpen);
 
   const { id, label, status, documentId, href, apiData } = relations[index];
 
@@ -1544,7 +1534,7 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                   ) : (
                     <CustomTextButton
                       onClick={() => {
-                        setShowModal(true);
+                        !isModalOpen && setIsModalOpen(true);
                         handleChangeModalContent();
                       }}
                     >
@@ -1554,11 +1544,11 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
-              {showModal && (
+              {isModalOpen && (
                 <RelationModal
-                  open={showModal}
+                  open={isModalOpen}
                   onToggle={() => {
-                    setShowModal((prev) => !prev);
+                    setIsModalOpen(!isModalOpen);
                   }}
                   model={targetModel}
                   id={documentId ? documentId : apiData?.documentId}

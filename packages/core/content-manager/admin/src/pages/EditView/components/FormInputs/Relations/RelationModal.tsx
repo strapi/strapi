@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form as FormContext, createContext, useRBAC } from '@strapi/admin/strapi-admin';
+import { Form as FormContext, useRBAC } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -18,31 +18,11 @@ import { styled } from 'styled-components';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
-import { type UseDocument, useDocument } from '../../../../../hooks/useDocument';
+import { useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useRelationContext } from '../../../EditViewPage';
 import { DocumentStatus } from '../../DocumentStatus';
-import { FormLayout } from '../../FormLayout';
-
-/* -------------------------------------------------------------------------------------------------
- * RelationModalProvider
- * -----------------------------------------------------------------------------------------------*/
-export interface CurrentRelation {
-  documentId: string;
-  model: string;
-  collectionType: string;
-}
-
-interface RelationModalContextValue {
-  currentRelation: CurrentRelation;
-  changeCurrentRelation: (newRelation: CurrentRelation) => void;
-  document: NonNullable<ReturnType<UseDocument>['document']>;
-  isModalOpen: boolean;
-  onToggleModal: () => void;
-}
-
-const [RelationModalProvider, useRelationModalContext] =
-  createContext<RelationModalContextValue>('RelationModal');
+import { FormLayout, FormLayoutTest } from '../../FormLayout';
 
 interface RelationModalProps {
   open: boolean;
@@ -116,7 +96,13 @@ interface RelationModalBodyProps {
   onToggleModal: () => void;
 }
 
-const RelationModalBody = ({ id }: RelationModalBodyProps) => {
+const RelationModalBody = ({
+  model,
+  id,
+  collectionType,
+  isModalOpen,
+  onToggleModal,
+}: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
   const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
 
@@ -194,7 +180,7 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
         <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
           <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
             <Box overflow="auto" flex={1}>
-              <FormLayout
+              <FormLayoutTest
                 layout={documentLayoutResponse.edit.layout}
                 hasBackground={false}
                 model={currentRelation.model}
@@ -207,4 +193,4 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   );
 };
 
-export { RelationModal, useRelationModalContext };
+export { RelationModal };

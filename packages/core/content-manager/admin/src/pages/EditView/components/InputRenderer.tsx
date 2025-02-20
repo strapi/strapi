@@ -34,7 +34,6 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
   contextCollectionType?: string;
   contextModel?: string;
   changeCurrentRelation?: (newRelation: CurrentRelation) => void;
-  isModalOpen?: boolean;
   contextComponents?: ReturnType<typeof useDocumentLayout>['edit']['components'];
 };
 
@@ -58,7 +57,6 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     'RelationContext',
     (state) => state.changeCurrentRelation
   );
-  const isModalOpen = useRelationContext('RelationContext', (state) => state.isModalOpen);
   const id = contextId || hookId;
   const document = contextDocument.document || hookDocument;
   const collectionType = contextCollectionType || hookCollectionType;
@@ -182,7 +180,6 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
             document={contextDocument!.document}
             documentModel={contextModel}
             changeCurrentRelation={changeCurrentRelation}
-            isModalOpen={isModalOpen}
           />
         );
       }
@@ -205,6 +202,172 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
           disabled={fieldIsDisabled}
         />
       );
+    default:
+      // These props are not needed for the generic form input renderer.
+      const { unique: _unique, mainField: _mainField, ...restProps } = props;
+      return (
+        <FormInputRenderer
+          {...restProps}
+          hint={hint}
+          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+          type={props.customField ? 'custom-field' : props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
+  }
+};
+
+const InputRendererTest = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
+  const { id: hookId, document: hookDocument, collectionType: hookCollectionType } = useDoc();
+  const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
+  const contextId = useRelationContext(
+    'RelationContext',
+    (state) => state.currentRelation.documentId
+  );
+  const contextDocument = useDocument({ ...currentRelation });
+  const contextModel = useRelationContext(
+    'RelationContext',
+    (state) => state.currentRelation.model
+  );
+  const contextCollectionType = useRelationContext(
+    'RelationContext',
+    (state) => state.currentRelation.collectionType
+  );
+  const changeCurrentRelation = useRelationContext(
+    'RelationContext',
+    (state) => state.changeCurrentRelation
+  );
+  const id = contextId || hookId;
+  const document = contextDocument.document || hookDocument;
+  const collectionType = contextCollectionType || hookCollectionType;
+  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
+  const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
+  const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
+  const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
+  const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
+  const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
+  let idToCheck = id;
+  if (collectionType === SINGLE_TYPES) {
+    idToCheck = document?.documentId;
+  }
+
+  const editableFields = idToCheck ? canUpdateFields : canCreateFields;
+  const readableFields = idToCheck ? canReadFields : canCreateFields;
+  /**
+   * Component fields are always readable and editable,
+   * however the fields within them may not be.
+   */
+  const canUserReadField = canUserAction(props.name, readableFields, props.type);
+  const canUserEditField = canUserAction(props.name, editableFields, props.type);
+  const fields = useStrapiApp('InputRenderer', (app) => app.fields);
+  const { lazyComponentStore } = useLazyComponents(
+    attributeHasCustomFieldProperty(props.attribute) ? [props.attribute.customField] : undefined
+  );
+  const hint = useFieldHint(providedHint, props.attribute);
+  const {
+    edit: { components: useDocLayoutComponents },
+  } = useDocLayout();
+  const {
+    edit: { components: contextComponents },
+  } = useDocumentLayout(contextModel);
+  const components =
+    Object.keys(useDocLayoutComponents).length !== 0 ? useDocLayoutComponents : contextComponents;
+  // We pass field in case of Custom Fields to keep backward compatibility
+  const field = useField(props.name);
+  if (!visible) {
+    return null;
+  }
+  /**
+   * If the user can't read the field then we don't want to ever render it.
+   */
+  if (!canUserReadField && !isInDynamicZone) {
+    return <NotAllowedInput hint={hint} {...props} />;
+  }
+  const fieldIsDisabled =
+    (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
+  /**
+   * Because a custom field has a unique prop but the type could be confused with either
+   * the useField hook or the type of the field we need to handle it separately and first.
+   */
+
+  if (attributeHasCustomFieldProperty(props.attribute)) {
+    const CustomInput = lazyComponentStore[props.attribute.customField];
+    if (CustomInput) {
+      // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+      return <CustomInput {...props} {...field} hint={hint} disabled={fieldIsDisabled} />;
+    }
+    return (
+      <FormInputRenderer
+        {...props}
+        hint={hint}
+        // @ts-expect-error – this workaround lets us display that the custom field is missing.
+        type={props.attribute.customField}
+        disabled={fieldIsDisabled}
+      />
+    );
+  }
+  /**
+   * This is where we handle ONLY the fields from the `useLibrary` hook.
+   */
+  const addedInputTypes = Object.keys(fields);
+  if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
+    const CustomInput = fields[props.type];
+    // @ts-expect-error – TODO: fix this type error in the useLibrary hook.
+    return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+  }
+  /**
+   * These include the content-manager specific fields, failing that we fall back
+   * to the more generic form input renderer.
+   */
+
+  switch (props.type) {
+    case 'blocks':
+      return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+    //   case 'component':
+    //     return (
+    //       <ComponentInput
+    //         {...props}
+    //         hint={hint}
+    //         layout={components[props.attribute.component].layout}
+    //         disabled={fieldIsDisabled}
+    //       >
+    //         {(inputProps) => <InputRenderer {...inputProps} />}
+    //       </ComponentInput>
+    //     );
+    //   case 'dynamiczone':
+    //     return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
+    //   case 'relation':
+    //     if (window.strapi.future.isEnabled('unstableRelationsOnTheFly')) {
+    //       return (
+    //         <UnstableRelationsInput
+    //           {...props}
+    //           hint={hint}
+    //           disabled={fieldIsDisabled}
+    //           document={contextDocument!.document}
+    //           documentModel={contextModel}
+    //           changeCurrentRelation={changeCurrentRelation}
+    //         />
+    //       );
+    //     }
+    //     return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+    //   case 'richtext':
+    //     return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+    //   case 'uid':
+    //     return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+    //   /**
+    //    * Enumerations are a special case because they require options.
+    //    */
+    //   case 'enumeration':
+    //     return (
+    //       <FormInputRenderer
+    //         {...props}
+    //         hint={hint}
+    //         options={props.attribute.enum.map((value) => ({ value }))}
+    //         // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+    //         type={props.customField ? 'custom-field' : props.type}
+    //         disabled={fieldIsDisabled}
+    //       />
+    //     );
     default:
       // These props are not needed for the generic form input renderer.
       const { unique: _unique, mainField: _mainField, ...restProps } = props;
@@ -289,6 +452,11 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
 };
 
 const MemoizedInputRenderer = React.memo(InputRenderer);
+const MemoizedInputRendererTest = React.memo(InputRendererTest);
 
 export type { InputRendererProps };
-export { MemoizedInputRenderer as InputRenderer, useFieldHint };
+export {
+  MemoizedInputRenderer as InputRenderer,
+  MemoizedInputRendererTest as InputRendererTest,
+  useFieldHint,
+};
