@@ -100,8 +100,8 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     edit: { components: contextComponents },
   } = useDocumentLayout(contextModel);
 
-  const components = contextComponents ?? useDocLayoutComponents;
-
+  const components =
+    Object.keys(useDocLayoutComponents).length !== 0 ? useDocLayoutComponents : contextComponents;
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
 
