@@ -11,7 +11,7 @@ import { usePreviewContext } from '../pages/Preview';
 // TODO use ArrowLineLeft once it's available in the DS
 const AnimatedArrow = styled(ArrowLeft)<{ isSideEditorOpen: boolean }>`
   will-change: transform;
-  rotate: ${(props) => (props.isSideEditorOpen ? '180deg' : '0deg')};
+  rotate: ${(props) => (props.isSideEditorOpen ? '0deg' : '180deg')};
   transition: rotate 0.2s ease-in-out;
 `;
 
