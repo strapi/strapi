@@ -34,7 +34,7 @@ export const upgrade = async (options: UpgradeOptions) => {
     `Application: VERSION=${f.version(project.packageJSON.version as Version.LiteralVersion)}; STRAPI_VERSION=${f.version(project.strapiVersion)}`
   );
 
-  const npmPackage = npmPackageFactory(upgraderConstants.STRAPI_PACKAGE_NAME);
+  const npmPackage = npmPackageFactory(upgraderConstants.STRAPI_PACKAGE_NAME, project.cwd, logger);
 
   // Load all available versions from the NPM registry
   await npmPackage.refresh();
