@@ -12,6 +12,7 @@ export const ALLOWED_CONTENT_TYPES = [
   'api::homepage.homepage',
   'api::product.product',
   'api::shop.shop',
+  'api::match.match',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
   'plugin::content-manager.history-version',
