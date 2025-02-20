@@ -228,7 +228,7 @@ const UnstablePreviewHeader = () => {
             props={props}
             descriptions={(
               plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-            ).getDocumentActions()}
+            ).getDocumentActions('preview')}
           >
             {(actions) => {
               const filteredActions = actions.filter((action) =>

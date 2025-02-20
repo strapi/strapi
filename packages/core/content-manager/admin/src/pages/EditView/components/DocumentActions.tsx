@@ -748,7 +748,7 @@ const PublishAction: DocumentActionComponent = ({
 };
 
 PublishAction.type = 'publish';
-PublishAction.position = 'panel';
+PublishAction.position = ['panel', 'preview'];
 
 const UpdateAction: DocumentActionComponent = ({
   activeTab,
@@ -926,7 +926,7 @@ const UpdateAction: DocumentActionComponent = ({
 };
 
 UpdateAction.type = 'update';
-UpdateAction.position = 'panel';
+UpdateAction.position = ['panel', 'preview'];
 
 const UNPUBLISH_DRAFT_OPTIONS = {
   KEEP: 'keep',
