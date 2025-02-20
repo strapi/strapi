@@ -1441,6 +1441,7 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     targetModel,
     changeCurrentRelation,
   } = data;
+  const [showModal, setShowModal] = React.useState(false);
   const { formatMessage } = useIntl();
   const isModalOpen = useRelationContext('RelationContext', (state) => state.isModalOpen);
   const setIsModalOpen = useRelationContext('RelationContext', (state) => state.setIsModalOpen);
@@ -1534,7 +1535,8 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                   ) : (
                     <CustomTextButton
                       onClick={() => {
-                        !isModalOpen && setIsModalOpen(true);
+                        setShowModal(true);
+                        setIsModalOpen(true);
                         handleChangeModalContent();
                       }}
                     >
@@ -1544,10 +1546,11 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
-              {isModalOpen && (
+              {showModal && (
                 <RelationModal
-                  open={isModalOpen}
+                  open={showModal}
                   onToggle={() => {
+                    setShowModal((prev) => !prev);
                     setIsModalOpen(!isModalOpen);
                   }}
                   model={targetModel}

@@ -22,7 +22,7 @@ import { useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useRelationContext } from '../../../EditViewPage';
 import { DocumentStatus } from '../../DocumentStatus';
-import { FormLayout, FormLayoutTest } from '../../FormLayout';
+import { FormLayout } from '../../FormLayout';
 
 interface RelationModalProps {
   open: boolean;
@@ -96,13 +96,7 @@ interface RelationModalBodyProps {
   onToggleModal: () => void;
 }
 
-const RelationModalBody = ({
-  model,
-  id,
-  collectionType,
-  isModalOpen,
-  onToggleModal,
-}: RelationModalBodyProps) => {
+const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
   const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
 
@@ -180,7 +174,7 @@ const RelationModalBody = ({
         <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
           <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
             <Box overflow="auto" flex={1}>
-              <FormLayoutTest
+              <FormLayout
                 layout={documentLayoutResponse.edit.layout}
                 hasBackground={false}
                 model={currentRelation.model}
