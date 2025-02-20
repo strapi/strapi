@@ -33,28 +33,28 @@ import { NavLink } from 'react-router-dom';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { styled } from 'styled-components';
 
-import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
-import { COLLECTION_TYPES } from '../../../../constants/collections';
-import { ItemTypes } from '../../../../constants/dragAndDrop';
-import { useDebounce } from '../../../../hooks/useDebounce';
-import { useDoc } from '../../../../hooks/useDocument';
-import { type EditFieldLayout } from '../../../../hooks/useDocumentLayout';
+import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
+import { COLLECTION_TYPES } from '../../../../../constants/collections';
+import { ItemTypes } from '../../../../../constants/dragAndDrop';
+import { useDebounce } from '../../../../../hooks/useDebounce';
+import { type UseDocument, useDoc } from '../../../../../hooks/useDocument';
+import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
   UseDragAndDropOptions,
   useDragAndDrop,
-} from '../../../../hooks/useDragAndDrop';
+} from '../../../../../hooks/useDragAndDrop';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
   RelationResult,
-} from '../../../../services/relations';
-import { buildValidParams } from '../../../../utils/api';
-import { getRelationLabel } from '../../../../utils/relations';
-import { getTranslation } from '../../../../utils/translations';
-import { DocumentStatus } from '../DocumentStatus';
-
-import { useComponent } from './ComponentContext';
+} from '../../../../../services/relations';
+import { buildValidParams } from '../../../../../utils/api';
+import { getRelationLabel } from '../../../../../utils/relations';
+import { getTranslation } from '../../../../../utils/translations';
+import { DocumentStatus } from '../../DocumentStatus';
+import { useComponent } from '../ComponentContext';
+import { RelationModal, getCollectionType } from '../Relations/RelationModal';
 
 import type { Schema } from '@strapi/types';
 
@@ -116,11 +116,26 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
   label: string;
   position?: RelationPosition;
   __temp_key__: string;
+  apiData?: {
+    documentId: RelationResult['documentId'];
+    id: RelationResult['id'];
+    locale?: RelationResult['locale'];
+    position: RelationPosition;
+  };
 }
 
 interface RelationsFieldProps
   extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
-    Pick<InputProps, 'hint'> {}
+    Pick<InputProps, 'hint'> {
+  documentModel?: string;
+  document?: ReturnType<UseDocument>['document'];
+  changeCurrentRelation?: (newRelation: {
+    documentId: string;
+    model: string;
+    collectionType: string;
+  }) => void;
+  isModalOpen?: boolean;
+}
 
 export interface RelationsFormValue {
   connect?: Relation[];
@@ -142,9 +157,22 @@ export interface RelationsFormValue {
  * they wish to do so.
  */
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
-  ({ disabled, label, ...props }, ref) => {
+  (
+    {
+      disabled,
+      label,
+      documentModel: modelInput,
+      document: documentInput,
+      changeCurrentRelation,
+      isModalOpen,
+      ...props
+    },
+    ref
+  ) => {
     const [currentPage, setCurrentPage] = React.useState(1);
-    const { document, model: documentModel } = useDoc();
+    const { document: hookDocument, model: hookModel } = useDoc();
+    const document = documentInput && isModalOpen ? documentInput : hookDocument;
+    const documentModel = modelInput && isModalOpen ? modelInput : hookModel;
     const documentId = document?.documentId;
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
@@ -169,7 +197,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = componentUID ?? documentModel;
+    const model = isModalOpen ? (documentModel ?? componentUID) : (componentUID ?? documentModel);
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -349,6 +377,10 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
           name={props.name}
           isLoading={isFetchingMoreRelations}
           relationType={props.attribute.relation}
+          // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+          targetModel={props.attribute.targetModel}
+          isModalOpen={isModalOpen}
+          changeCurrentRelation={changeCurrentRelation}
         />
       </Flex>
     );
@@ -846,6 +878,23 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
   serverData: RelationResult[];
 }
 
+interface UnstableRelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'name'> {
+  data: Relation[];
+  isLoading?: boolean;
+  relationType: Schema.Attribute.RelationKind.Any;
+  /**
+   * The existing relations connected on the server. We need these to diff against.
+   */
+  serverData: RelationResult[];
+  targetModel: string;
+  isModalOpen?: boolean;
+  changeCurrentRelation?: (newRelation: {
+    documentId: string;
+    model: string;
+    collectionType: string;
+  }) => void;
+}
+
 const UnstableRelationsList = ({
   data,
   serverData,
@@ -853,7 +902,10 @@ const UnstableRelationsList = ({
   name,
   isLoading,
   relationType,
-}: RelationsListProps) => {
+  targetModel,
+  isModalOpen = false,
+  changeCurrentRelation,
+}: UnstableRelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
   const listRef = React.useRef<FixedSizeList>(null);
@@ -952,8 +1004,8 @@ const UnstableRelationsList = ({
                 locale: relationInFront.locale,
                 status:
                   'publishedAt' in relationInFront && relationInFront.publishedAt
-                    ? 'published'
-                    : 'draft',
+                    ? ('published' as Relation['status'])
+                    : ('draft' as Relation['status']),
               }
             : { end: true };
 
@@ -1070,6 +1122,9 @@ const UnstableRelationsList = ({
           name,
           handleDisconnect,
           relations: data,
+          targetModel,
+          isModalOpen,
+          changeCurrentRelation,
         }}
         itemKey={(index) => data[index].id}
         innerElementType="ol"
@@ -1186,8 +1241,8 @@ const RelationsList = ({
                 locale: relationInFront.locale,
                 status:
                   'publishedAt' in relationInFront && relationInFront.publishedAt
-                    ? 'published'
-                    : 'draft',
+                    ? ('published' as Relation['status'])
+                    : ('draft' as Relation['status']),
               }
             : { end: true };
 
@@ -1366,6 +1421,13 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     handleDisconnect: (relation: Relation) => void;
     name: string;
     relations: Relation[];
+    targetModel: string;
+    isModalOpen?: boolean;
+    changeCurrentRelation?: (newRelation: {
+      documentId: string;
+      model: string;
+      collectionType: string;
+    }) => void;
   };
 }
 
@@ -1387,10 +1449,14 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     handleMoveItem,
     name,
     relations,
+    targetModel,
+    isModalOpen,
+    changeCurrentRelation,
   } = data;
   const { formatMessage } = useIntl();
+  const [showModal, setShowModal] = React.useState(false);
 
-  const { id, label, status } = relations[index];
+  const { id, label, status, documentId, href, apiData } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -1413,6 +1479,17 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     );
 
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
+
+  const handleChangeModalContent = () => {
+    if (changeCurrentRelation) {
+      const newRelation = {
+        documentId: documentId ? documentId : apiData?.documentId || '',
+        model: targetModel,
+        collectionType: getCollectionType(href)!,
+      };
+      changeCurrentRelation(newRelation);
+    }
+  };
 
   React.useEffect(() => {
     dragPreviewRef(getEmptyImage());
@@ -1463,12 +1540,25 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                 <Tooltip description={label}>
                   {/*  eslint-disable-next-line no-console */}
-                  <CustomTextButton onClick={() => console.log('OPEN MODAL')}>
-                    {label}
-                  </CustomTextButton>
+                  {isModalOpen ? (
+                    <CustomTextButton onClick={handleChangeModalContent}>{label}</CustomTextButton>
+                  ) : (
+                    <CustomTextButton onClick={() => setShowModal(true)}>{label}</CustomTextButton>
+                  )}
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
+              {showModal && (
+                <RelationModal
+                  open={showModal}
+                  onToggle={() => {
+                    setShowModal((prev) => !prev);
+                  }}
+                  model={targetModel}
+                  id={documentId ? documentId : apiData?.documentId}
+                  relationUrl={href}
+                />
+              )}
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>
