@@ -301,6 +301,58 @@ jobs:
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
 
+  e2e_future:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
+    timeout-minutes: 60
+    needs: [conditions, build]
+    name: '[FUTURE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
+    runs-on: ubuntu-latest
+    env:
+      STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+    strategy:
+      fail-fast: false # remove once tests aren't flaky
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
+        shard: [1/4, 2/4, 3/4, 4/4]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run [FUTURE] E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: true
+          runFutureFeatures: true
+          jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: future-${{ matrix.project }}--playwright-trace-${{ github.run_id }}-${{ github.job }}
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+      # Add the Trunk Analytics Uploader step
+      - name: Upload results to trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@main
+        with:
+          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+        continue-on-error: true
   cli:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.cli == 'true'
     timeout-minutes: 60

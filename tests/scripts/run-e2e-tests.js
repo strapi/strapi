@@ -193,7 +193,8 @@ yargs
 
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < chunkedDomains.length; i++) {
-          const domains = chunkedDomains[i];
+          const domains =
+            process.env.RUN_FUTURE_FEATURES === 'true' ? ['future'] : chunkedDomains[i];
 
           await Promise.all(
             domains.map(async (domain, j) => {
@@ -257,6 +258,7 @@ module.exports = config
                     HOST: '127.0.0.1',
                     TEST_APP_PATH: testAppPath,
                     STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
+                    STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR: process.env.RUN_FUTURE_FEATURES,
                   },
                 }
               );
