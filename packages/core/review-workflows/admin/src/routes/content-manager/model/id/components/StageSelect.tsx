@@ -149,6 +149,11 @@ export const StageSelect = ({ area }: { area?: InjectionZoneArea }) => {
 
   const isLoading = isLoadingStages || isLoadingDocument;
 
+  const reviewStageLabel = formatMessage({
+    id: 'content-manager.reviewWorkflows.stage.label',
+    defaultMessage: 'Review stage',
+  });
+
   return (
     <>
       <Field.Root
@@ -166,20 +171,10 @@ export const StageSelect = ({ area }: { area?: InjectionZoneArea }) => {
       >
         {isCompact ? (
           <VisuallyHidden>
-            <Field.Label>
-              {formatMessage({
-                id: 'content-manager.reviewWorkflows.stage.label',
-                defaultMessage: 'Review stage',
-              })}
-            </Field.Label>
+            <Field.Label>{reviewStageLabel}</Field.Label>
           </VisuallyHidden>
         ) : (
-          <Field.Label>
-            {formatMessage({
-              id: 'content-manager.reviewWorkflows.stage.label',
-              defaultMessage: 'Review stage',
-            })}
-          </Field.Label>
+          <Field.Label>{reviewStageLabel}</Field.Label>
         )}
 
         <SingleSelect
@@ -209,7 +204,7 @@ export const StageSelect = ({ area }: { area?: InjectionZoneArea }) => {
           customizeContent={() => {
             return (
               <Flex tag="span" justifyContent="space-between" alignItems="center" width="100%">
-                <Typography textColor="neutral800" ellipsis style={{ lineHeight: 'inherit' }}>
+                <Typography textColor="neutral800" ellipsis lineHeight="inherit">
                   {activeWorkflowStage?.name ?? ''}
                 </Typography>
                 {isLoading ? (

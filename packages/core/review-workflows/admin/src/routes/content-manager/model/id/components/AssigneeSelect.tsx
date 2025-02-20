@@ -89,6 +89,11 @@ const AssigneeSelect = ({ area }: { area?: InjectionZoneArea }) => {
     }
   };
 
+  const assigneeLabel = formatMessage({
+    id: 'content-manager.reviewWorkflows.assignee.label',
+    defaultMessage: 'Assignee',
+  });
+
   return (
     <Field.Root
       name={ASSIGNEE_ATTRIBUTE_NAME}
@@ -106,20 +111,10 @@ const AssigneeSelect = ({ area }: { area?: InjectionZoneArea }) => {
     >
       {isCompact ? (
         <VisuallyHidden>
-          <Field.Label>
-            {formatMessage({
-              id: 'content-manager.reviewWorkflows.assignee.label',
-              defaultMessage: 'Assignee',
-            })}
-          </Field.Label>
+          <Field.Label>{assigneeLabel}</Field.Label>
         </VisuallyHidden>
       ) : (
-        <Field.Label>
-          {formatMessage({
-            id: 'content-manager.reviewWorkflows.assignee.label',
-            defaultMessage: 'Assignee',
-          })}
-        </Field.Label>
+        <Field.Label>{assigneeLabel}</Field.Label>
       )}
       <Combobox
         clearLabel={formatMessage({
