@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
 
+import { useElementOnScreen } from '../../hooks/useElementOnScreen';
+
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
  * -----------------------------------------------------------------------------------------------*/
@@ -102,8 +104,9 @@ interface HeaderLayoutProps extends BaseHeaderLayoutProps {}
 const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
+  const [isVisible, setIsVisible] = React.useState(true);
 
-  const [containerRef, isVisible] = useElementOnScreen<HTMLDivElement>({
+  const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
     rootMargin: '0px',
     threshold: 0,
@@ -133,38 +136,6 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
 };
 
 HeaderLayout.displayName = 'HeaderLayout';
-
-/**
- * useElementOnScreen: hook that returns a ref to an element and a boolean indicating if the element is in the viewport.
- */
-const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
-  options?: IntersectionObserverInit
-): [containerRef: React.RefObject<TElement>, isVisible: boolean] => {
-  const containerRef = React.useRef<TElement>(null);
-
-  const [isVisible, setIsVisible] = React.useState<boolean>(true);
-
-  const callback: IntersectionObserverCallback = ([entry]) => {
-    setIsVisible(entry.isIntersecting);
-  };
-
-  React.useEffect(() => {
-    const containerEl = containerRef.current;
-    const observer = new IntersectionObserver(callback, options);
-
-    if (containerEl) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => {
-      if (containerEl) {
-        observer.disconnect();
-      }
-    };
-  }, [containerRef, options]);
-
-  return [containerRef, isVisible];
-};
 
 /**
  * useResizeObserver: hook that observes the size of an element and calls a callback when it changes.
