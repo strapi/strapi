@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { type UseDocument, useDoc, useDocument } from '../../../hooks/useDocument';
+import { useDoc, useDocument } from '../../../hooks/useDocument';
 import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { useRelationContext } from '../EditViewPage';
@@ -23,33 +23,25 @@ import { RelationsInput, UnstableRelationsInput } from './FormInputs/Relations/R
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
-import type { CurrentRelation } from './FormInputs/Relations/RelationModal';
 import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
-  contextId?: string;
-  contextDocument?: NonNullable<ReturnType<UseDocument>['document']>;
-  contextCollectionType?: string;
-  contextModel?: string;
-  changeCurrentRelation?: (newRelation: CurrentRelation) => void;
-  contextComponents?: ReturnType<typeof useDocumentLayout>['edit']['components'];
-};
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id: hookId, document: hookDocument, collectionType: hookCollectionType } = useDoc();
+  const { id: rootId, document: rootDocument, collectionType: rootCollectionType } = useDoc();
   const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
-  const contextId = useRelationContext(
+  const relationId = useRelationContext(
     'RelationContext',
     (state) => state.currentRelation.documentId
   );
-  const contextDocument = useDocument({ ...currentRelation });
-  const contextModel = useRelationContext(
+  const relationDocument = useDocument({ ...currentRelation });
+  const relationModel = useRelationContext(
     'RelationContext',
     (state) => state.currentRelation.model
   );
-  const contextCollectionType = useRelationContext(
+  const relationCollectionType = useRelationContext(
     'RelationContext',
     (state) => state.currentRelation.collectionType
   );
@@ -57,9 +49,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     'RelationContext',
     (state) => state.changeCurrentRelation
   );
-  const id = contextId || hookId;
-  const document = contextDocument.document || hookDocument;
-  const collectionType = contextCollectionType || hookCollectionType;
+  const id = relationId || rootId;
+  const document = relationDocument.document || rootDocument;
+  const collectionType = relationCollectionType || rootCollectionType;
 
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
@@ -96,7 +88,7 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   } = useDocLayout();
   const {
     edit: { components: contextComponents },
-  } = useDocumentLayout(contextModel);
+  } = useDocumentLayout(relationModel);
 
   const components =
     Object.keys(useDocLayoutComponents).length !== 0 ? useDocLayoutComponents : contextComponents;
@@ -177,8 +169,8 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
             {...props}
             hint={hint}
             disabled={fieldIsDisabled}
-            document={contextDocument!.document}
-            documentModel={contextModel}
+            document={relationDocument!.document}
+            documentModel={relationModel}
             changeCurrentRelation={changeCurrentRelation}
           />
         );
