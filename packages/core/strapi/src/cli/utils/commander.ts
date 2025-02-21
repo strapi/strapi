@@ -68,38 +68,40 @@ const parseURL = (value: string) => {
 };
 
 /**
- * hook: if encrypt==true and key not provided, prompt for it
+ * hook: prompt for an encryption key if it's not provided
  */
-const promptEncryptionKey = async (thisCommand: Command) => {
-  const opts = thisCommand.opts();
+const promptEncryptionKey = (keyName: string, encryptName: string) => {
+  return async (thisCommand: Command) => {
+    const opts = thisCommand.opts();
 
-  if (!opts.encrypt && opts.key) {
-    return exitWith(1, 'Key may not be present unless encryption is used');
-  }
+    if (!opts[encryptName] && opts[keyName]) {
+      return exitWith(1, `Key may not be present unless encryption is used`);
+    }
 
-  // if encrypt==true but we have no key, prompt for it
-  if (opts.encrypt && !(opts.key && opts.key.length > 0)) {
-    try {
-      const answers = await inquirer.prompt([
-        {
-          type: 'password',
-          message: 'Please enter an encryption key',
-          name: 'key',
-          validate(key) {
-            if (key.length > 0) return true;
+    // if encrypt==true but we have no key, prompt for it
+    if (opts[encryptName] && !(opts[keyName] && opts[keyName].length > 0)) {
+      try {
+        const answers = await inquirer.prompt([
+          {
+            type: 'password',
+            message: 'Please enter an encryption key',
+            name: keyName,
+            validate(key) {
+              if (key.length > 0) return true;
 
-            return 'Key must be present when using the encrypt option';
+              return 'Key must be present when using the encrypt option';
+            },
           },
-        },
-      ]);
-      opts.key = answers.key;
-    } catch (e) {
-      return exitWith(1, 'Failed to get encryption key');
+        ]);
+        opts[keyName] = answers[keyName];
+      } catch (e) {
+        return exitWith(1, 'Failed to get encryption key');
+      }
+      if (!opts[keyName]) {
+        return exitWith(1, 'Failed to get encryption key');
+      }
     }
-    if (!opts.key) {
-      return exitWith(1, 'Failed to get encryption key');
-    }
-  }
+  };
 };
 
 /**

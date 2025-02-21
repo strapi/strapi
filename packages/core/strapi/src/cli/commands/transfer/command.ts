@@ -1,6 +1,12 @@
 import inquirer from 'inquirer';
 import { createCommand, Option } from 'commander';
-import { getCommanderConfirmMessage, forceOption, parseURL } from '../../utils/commander';
+import path from 'path';
+import {
+  getCommanderConfirmMessage,
+  forceOption,
+  parseURL,
+  promptEncryptionKey,
+} from '../../utils/commander';
 import { exitWith, assertUrlHasProtocol, ifOptions } from '../../utils/helpers';
 import {
   excludeOption,
@@ -37,6 +43,8 @@ const command = () => {
         new Option('--to-token <token>', `Transfer token for the remote Strapi destination`)
       )
       .addOption(new Option('--verbose', 'Enable verbose logs'))
+
+      // Shared options
       .addOption(forceOption)
       .addOption(excludeOption)
       .addOption(onlyOption)
@@ -109,6 +117,112 @@ const command = () => {
           }
         )
       )
+
+      // When experimental is enabled, we allow remote to file or other remote
+      .addOption(
+        new Option('--experimental', 'Enable experimental features').default(false).hideHelp()
+      )
+
+      // File export options
+      .addOption(new Option('--to-file <path>', 'Transfer the data to a file').hideHelp())
+      .addOption(
+        new Option('--to-compress', 'Enable compression for the output file')
+          .default(false)
+          .hideHelp()
+      )
+      .addOption(new Option('--to-key <key>', 'Encryption key for the output file').hideHelp())
+      .addOption(
+        new Option('--to-encrypt', 'Enables encryption for the output file')
+          .default(true)
+          .hideHelp()
+      )
+      .addOption(
+        new Option('--no-to-encrypt', 'Disables encryption for the output file').hideHelp()
+      )
+
+      // Ensure we have a key unless --no-to-encrypt is used
+      .hook(
+        'preAction',
+        ifOptions(
+          (opts) => opts.experimental && opts.toFile && opts.toEncrypt,
+          promptEncryptionKey('toKey', 'toEncrypt')
+        )
+      )
+
+      // File import Options
+      .addOption(new Option('--from-file <path>', 'Transfer the data from a file').hideHelp())
+      .addOption(new Option('--from-key <key>', 'Decryption key for the input file').hideHelp())
+      .addOption(
+        new Option('--from-decrypt', 'Enables decryption for the input file')
+          .default(true)
+          .hideHelp()
+      )
+      .addOption(
+        new Option('--no-from-decrypt', 'Disables decryption for the input file').hideHelp()
+      )
+      .addOption(
+        new Option('--from-decompress', 'Enables decompression for the input file')
+          .default(true)
+          .hideHelp()
+      )
+      .addOption(
+        new Option('--no-from-decompress', 'Disables decompression for the input file').hideHelp()
+      )
+      // set decrypt and decompress options based on filename
+      .hook(
+        'preAction',
+        ifOptions(
+          (opts) => opts.experimental && opts.fromFile,
+          async (thisCommand) => {
+            const opts = thisCommand.opts();
+
+            const { extname, parse } = path;
+
+            let file = opts.fromFile;
+
+            if (extname(file) === '.enc') {
+              file = parse(file).name; // trim the .enc extension
+              thisCommand.opts().fromDecrypt = true;
+            } else {
+              thisCommand.opts().fromDecrypt = false;
+            }
+
+            if (extname(file) === '.gz') {
+              file = parse(file).name; // trim the .gz extension
+              thisCommand.opts().fromDecompress = true;
+            } else {
+              thisCommand.opts().fromDecompress = false;
+            }
+
+            if (extname(file) !== '.tar') {
+              exitWith(
+                1,
+                `The file '${opts.fromFile}' does not appear to be a valid Strapi data file. It must have an extension ending in .tar[.gz][.enc]`
+              );
+            }
+          }
+        )
+      )
+
+      // Validate the options
+      .hook('preAction', (thisCommand) => {
+        const opts = thisCommand.opts();
+
+        if (opts.experimental) {
+          console.warn('Experimental mode enabled');
+          return;
+        }
+
+        // File export options
+        if (opts.toFile || opts.fromFile) {
+          exitWith(
+            1,
+            'Experimental providers are not available unless --experimental mode is enabled'
+          );
+        }
+      })
+
+      // add the action
       .action(action)
   );
 };

@@ -1,5 +1,9 @@
-import { isObject } from 'lodash/fp';
-import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
+import { isObject, isString } from 'lodash/fp';
+import {
+  engine as engineDataTransfer,
+  strapi as strapiDataTransfer,
+  file as fileDataTransfer,
+} from '@strapi/data-transfer';
 
 import {
   buildTransferTable,
@@ -14,6 +18,7 @@ import {
   getDiffHandler,
   getAssetsBackupHandler,
   parseRestoreFromOptions,
+  getDefaultExportName,
 } from '../../utils/data-transfer';
 import { exitWith } from '../../utils/helpers';
 
@@ -27,16 +32,29 @@ const {
   },
 } = strapiDataTransfer;
 
+const {
+  providers: { createLocalFileDestinationProvider, createLocalFileSourceProvider },
+} = fileDataTransfer;
+
 interface CmdOptions {
   from?: URL;
   fromToken: string;
   to: URL;
   toToken: string;
+  toFile?: string;
+  toKey?: string;
+  toEncrypt?: boolean;
+  toCompress?: boolean;
+  fromFile?: string;
+  fromKey?: string;
+  fromEncrypt?: boolean;
+  fromCompress?: boolean;
   verbose?: boolean;
   only?: (keyof engineDataTransfer.TransferGroupFilter)[];
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   throttle?: number;
   force?: boolean;
+  experimental?: boolean;
 }
 /**
  * Transfer command.
@@ -49,19 +67,25 @@ export default async (opts: CmdOptions) => {
     exitWith(1, 'Could not parse command arguments');
   }
 
-  if (!(opts.from || opts.to) || (opts.from && opts.to)) {
-    exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
+  if (!opts.experimental) {
+    if (!(opts.from || opts.to) || (opts.from && opts.to)) {
+      exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
+    }
   }
 
   const strapi = await createStrapiInstance();
   let source;
   let destination;
 
-  // if no URL provided, use local Strapi
+  // create the source provider based on the options
   if (!opts.from) {
-    source = createLocalStrapiSourceProvider({
-      getStrapi: () => strapi,
-    });
+    if (opts.fromFile) {
+      source = createFileSourceProvider(opts);
+    } else {
+      source = createLocalStrapiSourceProvider({
+        getStrapi: () => strapi,
+      });
+    }
   }
   // if URL provided, set up a remote source provider
   else {
@@ -79,13 +103,17 @@ export default async (opts: CmdOptions) => {
     });
   }
 
-  // if no URL provided, use local Strapi
+  // create the destination provider based on the options
   if (!opts.to) {
-    destination = createLocalStrapiDestinationProvider({
-      getStrapi: () => strapi,
-      strategy: 'restore',
-      restore: parseRestoreFromOptions(opts),
-    });
+    if (opts.toFile) {
+      destination = createFileDestinationProvider(opts);
+    } else {
+      destination = createLocalStrapiDestinationProvider({
+        getStrapi: () => strapi,
+        strategy: 'restore',
+        restore: parseRestoreFromOptions(opts),
+      });
+    }
   }
   // if URL provided, set up a remote destination provider
   else {
@@ -192,4 +220,43 @@ export default async (opts: CmdOptions) => {
     await strapi.telemetry.send('didDEITSProcessFail', getTransferTelemetryPayload(engine));
     exitWith(1, exitMessageText('transfer', true));
   }
+};
+
+const createFileDestinationProvider = (opts: CmdOptions) => {
+  const { toFile, toEncrypt, toCompress, toKey } = opts;
+  const filepath = isString(toFile) && toFile.length > 0 ? toFile : getDefaultExportName();
+
+  return createLocalFileDestinationProvider({
+    file: {
+      path: filepath ?? getDefaultExportName(),
+    },
+    encryption: {
+      enabled: toEncrypt ?? false,
+      key: toKey,
+    },
+    compression: {
+      enabled: toCompress ?? false,
+    },
+  });
+};
+
+const createFileSourceProvider = (opts: CmdOptions) => {
+  const { fromFile, fromEncrypt, fromCompress, fromKey } = opts;
+
+  if (!fromFile) {
+    throw new Error('Missing file to import');
+  }
+
+  return createLocalFileSourceProvider({
+    file: {
+      path: fromFile,
+    },
+    encryption: {
+      enabled: fromEncrypt ?? false,
+      key: fromKey,
+    },
+    compression: {
+      enabled: fromCompress ?? false,
+    },
+  });
 };

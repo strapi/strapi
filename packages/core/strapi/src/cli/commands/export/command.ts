@@ -38,7 +38,7 @@ const command = () => {
     .addOption(onlyOption)
     .addOption(throttleOption)
     .hook('preAction', validateExcludeOnly)
-    .hook('preAction', promptEncryptionKey)
+    .hook('preAction', promptEncryptionKey('key', 'encrypt'))
     .action(action);
 };
 
