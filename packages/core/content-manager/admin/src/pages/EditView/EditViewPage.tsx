@@ -34,7 +34,7 @@ export interface CurrentRelation {
   collectionType: string;
 }
 
-interface RelationModalContextValue {
+interface RelationContextValue {
   currentRelation: CurrentRelation;
   changeCurrentRelation: (newRelation: CurrentRelation) => void;
   isModalOpen: boolean;
@@ -42,7 +42,7 @@ interface RelationModalContextValue {
 }
 
 const [RelationProvider, useRelationContext] =
-  createContext<RelationModalContextValue>('RelationContext');
+  createContext<RelationContextValue>('RelationContext');
 export { useRelationContext };
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
