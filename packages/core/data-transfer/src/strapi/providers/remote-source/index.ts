@@ -29,7 +29,7 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
   };
 }
 
-type QueueableChunk = Protocol.Client.TransferAssetFlow &
+type QueueableAction = Protocol.Client.TransferAssetFlow &
   ({ action: 'stream' } | { action: 'end' });
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
@@ -134,8 +134,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       // TODO: could we include filename in this for improved logging?
       [assetID: string]: IAsset & {
         stream: PassThrough;
-        queue: Array<QueueableChunk>;
-        status: 'init' | 'busy' | 'closed' | 'errored';
+        queue: Array<QueueableAction>;
+        status: 'ok' | 'closed' | 'errored';
       };
     } = {};
 
@@ -162,7 +162,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
             assets[assetID] = {
               ...item.data,
               stream: new PassThrough(),
-              status: 'init',
+              status: 'ok',
               queue: [],
             };
 
@@ -184,21 +184,13 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           }
         }
 
-        // TODO: every process that gets a payload will be running this same loop, but it works anyway because of shifting data off the queue; but fix it anyway
-        // eslint-disable-next-line guard-for-in
+        // NOTE: each new payload will start a new processQueue call, but it works because we shift data off the queue so it doesn't
+        // matter which thread is processing the queue or if multiple ones are running at once
         for (const assetID in assets) {
-          const asset = assets[assetID];
-          if (asset.queue?.length > 0) {
-            // asset.status = 'busy';
-
-            while (asset.queue.length > 0) {
-              const chunk = asset.queue.shift();
-
-              if (!chunk) {
-                throw new Error(`Invalid chunk found for ${assetID}`);
-              }
-
-              await processChunk(assetID, chunk);
+          if (Object.prototype.hasOwnProperty.call(assets, assetID)) {
+            const asset = assets[assetID];
+            if (asset.queue?.length > 0) {
+              await processQueue(assetID);
             }
           }
         }
@@ -210,12 +202,13 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     /**
      * Writes a chunk of data for the specified asset with the given id.
      */
-    const processChunk = async (id: string, data: QueueableChunk) => {
+    const processQueue = async (id: string) => {
       if (!assets[id]) {
         throw new Error(`Failed to write asset chunk for "${id}". Asset not found.`);
       }
 
-      const { status: currentStatus } = assets[id];
+      const asset = assets[id];
+      const { status: currentStatus } = asset;
 
       if (['closed', 'errored'].includes(currentStatus)) {
         throw new Error(
@@ -223,35 +216,27 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         );
       }
 
-      const nextItemInQueue = () => assets[id].queue.shift();
+      while (asset.queue.length > 0) {
+        const data = asset.queue.shift();
 
-      try {
-        // if this is an end chunk, close the asset stream
-        if (data?.action === 'end') {
-          this.#reportInfo(`Ending asset stream for ${id}`);
-          return await closeAssetStream(id);
+        if (!data) {
+          throw new Error(`Invalid chunk found for ${id}`);
         }
 
-        // Save the current chunk
-        await writeChunkToStream(id, data);
-
-        // Empty the queue if needed
-        let item = nextItemInQueue();
-
-        while (item) {
-          // in theory, this should be the end of the queue and nothing should come after it
-          // but we will not exit the loop, so that we catch any errors if that does happen
-          if (item?.action === 'end') {
+        try {
+          // if this is an end chunk, close the asset stream
+          if (data.action === 'end') {
+            this.#reportInfo(`Ending asset stream for ${id}`);
             await closeAssetStream(id);
-          } else {
-            await writeChunkToStream(id, item.data);
+            break; // Exit the loop after closing the stream
           }
 
-          item = nextItemInQueue();
-        }
-      } catch {
-        if (!assets[id]) {
-          throw new Error(`No id matching ${id} for writeAssetChunk`);
+          // Save the current chunk
+          await writeChunkToStream(id, data);
+        } catch {
+          if (!assets[id]) {
+            throw new Error(`No id matching ${id} for writeAssetChunk`);
+          }
         }
       }
     };
