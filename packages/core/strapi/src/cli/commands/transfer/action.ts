@@ -54,7 +54,6 @@ interface CmdOptions {
   exclude?: (keyof engineDataTransfer.TransferGroupFilter)[];
   throttle?: number;
   force?: boolean;
-  experimental?: boolean;
 }
 /**
  * Transfer command.
@@ -65,12 +64,6 @@ export default async (opts: CmdOptions) => {
   // Validate inputs from Commander
   if (!isObject(opts)) {
     exitWith(1, 'Could not parse command arguments');
-  }
-
-  if (!opts.experimental) {
-    if (!(opts.from || opts.to) || (opts.from && opts.to)) {
-      exitWith(1, 'Exactly one source (from) or destination (to) option must be provided');
-    }
   }
 
   const strapi = await createStrapiInstance();

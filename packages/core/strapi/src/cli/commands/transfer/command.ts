@@ -50,17 +50,6 @@ const command = () => {
       .addOption(onlyOption)
       .addOption(throttleOption)
       .hook('preAction', validateExcludeOnly)
-      .hook(
-        'preAction',
-        ifOptions(
-          (opts) => !(opts.from || opts.to) || (opts.from && opts.to),
-          async () =>
-            exitWith(
-              1,
-              'Exactly one remote source (from) or destination (to) option must be provided'
-            )
-        )
-      )
       // If --from is used, validate the URL and token
       .hook(
         'preAction',
@@ -208,8 +197,24 @@ const command = () => {
       .hook('preAction', (thisCommand) => {
         const opts = thisCommand.opts();
 
+        if (!(opts.from || opts.to) || (opts.from && opts.to)) {
+          exitWith(
+            1,
+            'Exactly one remote source (from) or destination (to) option must be provided'
+          );
+        }
+
         if (opts.experimental) {
           console.warn('Experimental mode enabled');
+
+          if (opts.from && opts.fromFile) {
+            exitWith(1, 'Cannot provide both a remote source and a local file source');
+          }
+
+          if (opts.to && opts.toFile) {
+            exitWith(1, 'Cannot provide both a remote destination and a local file destination');
+          }
+
           return;
         }
 
