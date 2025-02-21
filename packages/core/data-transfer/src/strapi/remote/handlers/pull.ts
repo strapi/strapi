@@ -175,6 +175,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         error: null,
         id,
       });
+      batch = [];
     };
 
     if (!stream) {
@@ -187,7 +188,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
           batch.push(chunk);
           if (batchLength() >= batchSize) {
             await sendBatch();
-            batch = [];
           }
         } else {
           await this.confirm({
@@ -202,7 +202,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
       if (batch.length > 0 && stage !== 'assets') {
         await sendBatch();
-        batch = [];
       }
       await this.confirm({ type: 'transfer', data: null, ended: true, error: null, id });
     } catch (e) {
