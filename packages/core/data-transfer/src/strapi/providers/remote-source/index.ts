@@ -301,11 +301,12 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
         stream
           .on('close', () => {
-            delete assets[id];
-
             resolve();
           })
-          .on('error', reject)
+          .on('error', (e) => {
+            assets[id].status = 'errored';
+            reject(new Error(`Failed to close asset "${id}". Asset stream error: ${e.toString()}`));
+          })
           .end();
       });
     };
