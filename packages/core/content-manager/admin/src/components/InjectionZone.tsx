@@ -54,8 +54,8 @@ type InjectionZoneBlock = InjectionZoneArea extends `${string}.${string}.${infer
  * e.g. content-manager edit view, we just send the slug but we might not in the listView,
  * therefore, people should type it themselves on the components they render.
  */
-const InjectionZone = (props: { area: InjectionZoneArea; [key: string]: unknown }) => {
-  const components = useInjectionZone(props.area);
+const InjectionZone = ({ area, ...props }: { area: InjectionZoneArea; [key: string]: unknown }) => {
+  const components = useInjectionZone(area);
 
   return (
     <>

@@ -1,5 +1,5 @@
 import { PLUGIN_ID, FEATURE_ID } from './constants';
-import { AssigneeSelect } from './routes/content-manager/model/id/components/AssigneeSelect';
+import { Header } from './routes/content-manager/model/id/components/Header';
 import { Panel } from './routes/content-manager/model/id/components/Panel';
 import { StageSelect } from './routes/content-manager/model/id/components/StageSelect';
 import { addColumnToTableHook } from './utils/cm-hooks';
@@ -56,12 +56,7 @@ const admin: Plugin.Config.AdminInput = {
     if (window.strapi.features.isEnabled(FEATURE_ID)) {
       app.getPlugin('content-manager').injectComponent('preview', 'actions', {
         name: 'review-workflows-assignee',
-        Component: AssigneeSelect,
-      });
-
-      app.getPlugin('content-manager').injectComponent('preview', 'actions', {
-        name: 'review-workflows-stage',
-        Component: StageSelect,
+        Component: Header,
       });
     }
   },

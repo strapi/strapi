@@ -19,10 +19,7 @@ import { getDisplayName } from '../../../../../utils/users';
 
 import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';
 
-type InjectionZoneArea = 'preview.actions';
-
-const AssigneeSelect = ({ area }: { area?: InjectionZoneArea }) => {
-  const isCompact = area === 'preview.actions';
+const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
   const {
     collectionType = '',
     id,
@@ -38,7 +35,11 @@ const AssigneeSelect = ({ area }: { area?: InjectionZoneArea }) => {
   } = useRBAC(permissions.settings?.users);
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const { data, isLoading, isError } = useAdminUsers(undefined, {
+  const {
+    data,
+    isLoading: isLoadingUsers,
+    isError,
+  } = useAdminUsers(undefined, {
     skip: isLoadingPermissions || !canRead,
   });
   const { document } = unstable_useDocument(
@@ -87,12 +88,63 @@ const AssigneeSelect = ({ area }: { area?: InjectionZoneArea }) => {
         }),
       });
     }
+
+    if (isCompact && 'error' in res) {
+      toggleNotification({
+        type: 'danger',
+        message: formatAPIError(res.error),
+      });
+    }
   };
+
+  const isDisabled =
+    (!isLoadingPermissions && !isLoadingUsers && users.length === 0) || !document.documentId;
+  const isLoading = isLoadingUsers || isLoadingPermissions || isMutating;
 
   const assigneeLabel = formatMessage({
     id: 'content-manager.reviewWorkflows.assignee.label',
     defaultMessage: 'Assignee',
   });
+  const assigneeClearLabel = formatMessage({
+    id: 'content-manager.reviewWorkflows.assignee.clear',
+    defaultMessage: 'Clear assignee',
+  });
+  const assigneePlaceholder = formatMessage({
+    id: 'content-manager.reviewWorkflows.assignee.placeholder',
+    defaultMessage: 'Select…',
+  });
+
+  if (isCompact) {
+    return (
+      <Field.Root name={ASSIGNEE_ATTRIBUTE_NAME} id={ASSIGNEE_ATTRIBUTE_NAME}>
+        <VisuallyHidden>
+          <Field.Label>{assigneeLabel}</Field.Label>
+        </VisuallyHidden>
+        <Combobox
+          clearLabel={assigneeClearLabel}
+          disabled={isDisabled}
+          value={currentAssignee ? currentAssignee.id.toString() : null}
+          onChange={handleChange}
+          onClear={() => handleChange(null)}
+          placeholder={assigneePlaceholder}
+          loading={isLoading || isLoadingPermissions || isMutating}
+          size="S"
+        >
+          {users.map((user) => {
+            return (
+              <ComboboxOption
+                key={user.id}
+                value={user.id.toString()}
+                textValue={getDisplayName(user)}
+              >
+                {getDisplayName(user)}
+              </ComboboxOption>
+            );
+          })}
+        </Combobox>
+      </Field.Root>
+    );
+  }
 
   return (
     <Field.Root
@@ -109,30 +161,17 @@ const AssigneeSelect = ({ area }: { area?: InjectionZoneArea }) => {
         undefined
       }
     >
-      {isCompact ? (
-        <VisuallyHidden>
-          <Field.Label>{assigneeLabel}</Field.Label>
-        </VisuallyHidden>
-      ) : (
-        <Field.Label>{assigneeLabel}</Field.Label>
-      )}
+      <Field.Label>{assigneeLabel}</Field.Label>
       <Combobox
-        clearLabel={formatMessage({
-          id: 'content-manager.reviewWorkflows.assignee.clear',
-          defaultMessage: 'Clear assignee',
-        })}
+        clearLabel={assigneeClearLabel}
         disabled={
           (!isLoadingPermissions && !isLoading && users.length === 0) || !document.documentId
         }
         value={currentAssignee ? currentAssignee.id.toString() : null}
         onChange={handleChange}
         onClear={() => handleChange(null)}
-        placeholder={formatMessage({
-          id: 'content-manager.reviewWorkflows.assignee.placeholder',
-          defaultMessage: 'Select…',
-        })}
+        placeholder={assigneePlaceholder}
         loading={isLoading || isLoadingPermissions || isMutating}
-        size={isCompact ? 'S' : undefined}
       >
         {users.map((user) => {
           return (
