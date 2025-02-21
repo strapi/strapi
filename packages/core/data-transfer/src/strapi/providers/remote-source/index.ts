@@ -18,7 +18,7 @@ import { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
 import { ILocalStrapiSourceProviderOptions } from '../local-source';
-import { createDispatcher, connectToWebsocket, trimTrailingSlash, wait, waitUntil } from '../utils';
+import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {
   url: URL; // the url of the remote Strapi admin
@@ -28,6 +28,9 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
     retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
   };
 }
+
+type AssetChunk = Protocol.Client.TransferAssetFlow & ({ action: 'stream' } | { action: 'end' });
+// type AssetClose = { action: 'end' };
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
   name = 'source::remote-strapi';
@@ -128,10 +131,11 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
     // Init the asset map
     const assets: {
-      [filename: string]: IAsset & {
+      // TODO: could we include filename in this for improved logging?
+      [assetID: string]: IAsset & {
         stream: PassThrough;
-        queue: Array<Protocol.Client.TransferAssetFlow & { action: 'stream' }>;
-        status: 'idle' | 'busy' | 'closed' | 'errored';
+        queue: Array<AssetChunk>;
+        status: 'init' | 'busy' | 'closed' | 'errored';
       };
     } = {};
 
@@ -150,14 +154,15 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           if (action === 'start') {
             // Ignore the item if a transfer has already been started for the same asset ID
             if (assets[assetID]) {
-              continue;
+              throw new Error(`Asset ${assetID} already started`);
             }
 
+            this.#reportInfo(`Asset ${assetID} starting`);
             // Register the asset
             assets[assetID] = {
               ...item.data,
               stream: new PassThrough(),
-              status: 'idle',
+              status: 'init',
               queue: [],
             };
 
@@ -167,57 +172,33 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           }
 
           // Writes the asset's data chunks to their corresponding stream
-          else if (action === 'stream') {
+          // "end" is considered a chunk, but it's not a data chunk, it's a control message
+          // That is done so that we don't complicate the already complicated async processing of the queue
+          else if (action === 'stream' || action === 'end') {
             // If the asset hasn't been registered, or if it's been closed already, then ignore the message
             if (!assets[assetID]) {
-              continue;
+              throw new Error(`No id matching ${assetID} for stream action`);
             }
 
-            switch (assets[assetID].status) {
-              // The asset is ready to accept a new chunk, write it now
-              case 'idle':
-                await writeAssetChunk(assetID, item.data);
-                break;
-              // The resource is busy, queue the current chunk so that it gets transferred as soon as possible
-              case 'busy':
-                assets[assetID].queue.push(item);
-                break;
-              // Ignore asset chunks for assets with a closed/errored status
-              case 'closed':
-              case 'errored':
-              default:
-                break;
-            }
+            assets[assetID].queue.push(item);
           }
+        }
 
-          // All the asset chunks have been transferred
-          else if (action === 'end') {
-            // If the asset has already been closed, or if it was never registered, ignore the command
-            if (!assets[assetID]) {
-              continue;
-            }
+        // TODO: every process that gets a payload will be running this same loop, but it works anyway because of shifting data off the queue; but fix it anyway
+        // eslint-disable-next-line guard-for-in
+        for (const assetID in assets) {
+          const asset = assets[assetID];
+          if (asset.queue?.length > 0) {
+            // asset.status = 'busy';
 
-            switch (assets[assetID].status) {
-              // There's no ongoing activity, the asset is ready to be closed
-              case 'idle':
-              case 'errored':
-                await closeAssetStream(assetID);
-                break;
-              // The resource is busy, wait for a different state and close the stream.
-              case 'busy':
-                await Promise.race([
-                  // Either: wait for the asset to be ready to be closed
-                  waitUntil(() => assets[assetID].status !== 'busy', 100),
-                  // Or: if the last chunks are still not processed after ten seconds
-                  wait(10000),
-                ]);
+            while (asset.queue.length > 0) {
+              const chunk = asset.queue.shift();
 
-                await closeAssetStream(assetID);
-                break;
-              // Ignore commands for assets being currently closed
-              case 'closed':
-              default:
-                break;
+              if (!chunk) {
+                throw new Error(`Invalid chunk found for ${assetID}`);
+              }
+
+              await processChunk(assetID, chunk);
             }
           }
         }
@@ -229,14 +210,14 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     /**
      * Writes a chunk of data for the specified asset with the given id.
      */
-    const writeAssetChunk = async (id: string, data: unknown) => {
+    const processChunk = async (id: string, data: AssetChunk) => {
       if (!assets[id]) {
         throw new Error(`Failed to write asset chunk for "${id}". Asset not found.`);
       }
 
       const { status: currentStatus } = assets[id];
 
-      if (currentStatus !== 'idle') {
+      if (['closed', 'errored'].includes(currentStatus)) {
         throw new Error(
           `Failed to write asset chunk for "${id}". The asset is currently "${currentStatus}"`
         );
@@ -245,24 +226,33 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       const nextItemInQueue = () => assets[id].queue.shift();
 
       try {
-        // Lock the asset
-        assets[id].status = 'busy';
+        // if this is an end chunk, close the asset stream
+        if (data?.action === 'end') {
+          this.#reportInfo(`Ending asset stream for ${id}`);
+          return await closeAssetStream(id);
+        }
 
         // Save the current chunk
-        await unsafe_writeAssetChunk(id, data);
+        await writeChunkToStream(id, data);
 
         // Empty the queue if needed
         let item = nextItemInQueue();
 
         while (item) {
-          await unsafe_writeAssetChunk(id, item.data);
+          // in theory, this should be the end of the queue and nothing should come after it
+          // but we will not exit the loop, so that we catch any errors if that does happen
+          if (item?.action === 'end') {
+            await closeAssetStream(id);
+          } else {
+            await writeChunkToStream(id, item.data);
+          }
+
           item = nextItemInQueue();
         }
-
-        // Unlock the asset
-        assets[id].status = 'idle';
       } catch {
-        assets[id].status = 'errored';
+        if (!assets[id]) {
+          throw new Error(`No id matching ${id} for writeAssetChunk`);
+        }
       }
     };
 
@@ -271,7 +261,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
      *
      * Only check if the targeted asset exists, no other validation is done.
      */
-    const unsafe_writeAssetChunk = async (id: string, data: unknown) => {
+    const writeChunkToStream = async (id: string, data: unknown) => {
       const asset = assets[id];
 
       if (!asset) {
