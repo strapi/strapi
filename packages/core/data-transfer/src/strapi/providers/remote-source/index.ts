@@ -29,7 +29,7 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
   };
 }
 
-type QueueableChunk = Protocol.Client.TransferAssetFlow &
+type QueueableAction = Protocol.Client.TransferAssetFlow &
   ({ action: 'stream' } | { action: 'end' });
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
@@ -134,7 +134,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       // TODO: could we include filename in this for improved logging?
       [assetID: string]: IAsset & {
         stream: PassThrough;
-        queue: Array<QueueableChunk>;
+        queue: Array<QueueableAction>;
         status: 'ok' | 'closed' | 'errored';
       };
     } = {};
