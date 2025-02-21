@@ -4,6 +4,7 @@ import { styled } from 'styled-components';
 
 import { useDoc } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
+import { useRelationContext } from '../EditViewPage';
 
 import { InputRenderer } from './InputRenderer';
 
@@ -37,10 +38,14 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
 /**
  * Component that renders the form layout, in case the model is passed as a prompt we give priority to it instead of using the one from useDoc, which is the default behavior. This is useful for Relation modal where the model is not the one in the url but the one from the relation.
  */
-const FormLayout = ({ layout, hasBackground = true, model: modelProp }: FormLayoutProps) => {
+const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
+  const modelRelation = useRelationContext(
+    'RelationContext',
+    (state) => state.currentRelation.model
+  );
   const { formatMessage } = useIntl();
-  const { model: modelUseDoc } = useDoc();
-  const model = modelProp || modelUseDoc;
+  const { model: rootModel } = useDoc();
+  const model = modelRelation || rootModel;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>

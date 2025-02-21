@@ -174,11 +174,7 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
         <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
           <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
             <Box overflow="auto" flex={1}>
-              <FormLayout
-                layout={documentLayoutResponse.edit.layout}
-                hasBackground={false}
-                model={currentRelation.model}
-              />
+              <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground={false} />
             </Box>
           </Flex>
         </FormContext>
