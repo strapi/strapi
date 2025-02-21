@@ -228,7 +228,6 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
         },
       }
     );
-    console.log('data', data);
 
     const handleLoadMore = () => {
       setCurrentPage((prev) => prev + 1);
@@ -420,9 +419,6 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      */
     const [targetField] = props.name.split('.').slice(-1);
 
-    console.log('id', id!);
-    console.log('model', model);
-    console.log('targetField', targetField);
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
         model,
