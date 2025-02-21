@@ -99,14 +99,11 @@ interface RelationModalBodyProps {
 const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
   const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
-
-  const documentResponse = useDocument({
-    documentId: currentRelation.documentId,
-    model: currentRelation.model,
-    collectionType: currentRelation.collectionType,
-  });
-
-  const documentLayoutResponse = useDocumentLayout(currentRelation.model);
+  const documentResponse = useRelationContext('RelationContext', (state) => state.document);
+  const documentLayoutResponse = useRelationContext(
+    'RelationContext',
+    (state) => state.documentLayout
+  );
 
   const initialValues = documentResponse.getInitialFormValues();
 

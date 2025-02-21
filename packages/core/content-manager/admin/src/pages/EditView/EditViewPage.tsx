@@ -17,7 +17,7 @@ import { styled } from 'styled-components';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { type UseDocument, useDoc } from '../../hooks/useDocument';
+import { type UseDocument, useDoc, useDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
@@ -36,13 +36,39 @@ export interface CurrentRelation {
 
 interface RelationContextValue {
   currentRelation: CurrentRelation;
+  document: ReturnType<UseDocument>;
+  documentLayout: ReturnType<typeof useDocumentLayout>;
   changeCurrentRelation: (newRelation: CurrentRelation) => void;
-  isModalOpen: boolean;
-  setIsModalOpen: (newValue: boolean) => void;
 }
 
-const [RelationProvider, useRelationContext] =
+// TODO: RelationProvider is maybe not the best name? DocumentRelationProvider, EditViewProvider?
+const [RelationProviderImpl, useRelationContext] =
   createContext<RelationContextValue>('RelationContext');
+
+const RelationProvider = ({
+  children,
+  initialRelation,
+}: {
+  children: React.ReactNode | React.ReactNode[];
+  initialRelation: CurrentRelation;
+}) => {
+  // TODO: currentRelation is maybe not the best name? documentMeta? documentParams? documentInfo? documentIdentifiers?
+  const [currentRelation, setCurrentRelation] = React.useState<CurrentRelation>(initialRelation);
+  const document = useDocument(currentRelation);
+  const documentLayout = useDocumentLayout(currentRelation.model);
+
+  return (
+    <RelationProviderImpl
+      currentRelation={currentRelation}
+      changeCurrentRelation={setCurrentRelation}
+      document={document}
+      documentLayout={documentLayout}
+    >
+      {children}
+    </RelationProviderImpl>
+  );
+};
+
 export { useRelationContext };
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -74,13 +100,6 @@ const EditViewPage = () => {
     getTitle,
     getInitialFormValues,
   } = useDoc();
-
-  const [currentRelation, setCurrentRelation] = React.useState({
-    documentId: id!,
-    model,
-    collectionType,
-  });
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
@@ -155,10 +174,11 @@ const EditViewPage = () => {
     <Main paddingLeft={10} paddingRight={10}>
       <Page.Title>{getTitle(mainField)}</Page.Title>
       <RelationProvider
-        currentRelation={currentRelation}
-        changeCurrentRelation={setCurrentRelation}
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
+        initialRelation={{
+          documentId: id!,
+          model,
+          collectionType,
+        }}
       >
         <Form
           disabled={hasDraftAndPublished && status === 'published'}

@@ -157,21 +157,20 @@ export interface RelationsFormValue {
  * they wish to do so.
  */
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
-  ({ disabled, label, documentModel: modelInput, document: documentInput, ...props }, ref) => {
+  ({ disabled, label, ...props }, ref) => {
     const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
-    const isModalOpen = useRelationContext('RelationContext', (state) => state.isModalOpen);
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const { document: hookDocument, model: hookModel } = useDoc();
-    const document = documentInput ? documentInput : hookDocument;
-    const documentModel = modelInput ? modelInput : hookModel;
-    const documentId = document?.documentId;
-    const { formatMessage } = useIntl();
-    const [{ query }] = useQueryParams();
-    const params = buildValidParams(query);
+    const documentResponse = useRelationContext('RelationContext', (state) => state.document);
     const changeCurrentRelation = useRelationContext(
       'RelationContext',
       (state) => state.changeCurrentRelation
     );
+
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const documentId = documentResponse.document?.documentId;
+
+    const { formatMessage } = useIntl();
+    const [{ query }] = useQueryParams();
+    const params = buildValidParams(query);
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
@@ -192,7 +191,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = isModalOpen ? (documentModel ?? componentUID) : (componentUID ?? documentModel);
+    const model = componentUID ?? currentRelation.model;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -204,10 +203,10 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
-        model: isModalOpen ? currentRelation.model : documentModel,
+        model: currentRelation.model,
         targetField,
         // below we don't run the query if there is no id.
-        id: isModalOpen ? currentRelation.documentId : id!,
+        id: currentRelation.documentId,
         params: {
           ...params,
           pageSize: RELATIONS_TO_DISPLAY,
@@ -1442,10 +1441,9 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     targetModel,
     changeCurrentRelation,
   } = data;
-  const [showModal, setShowModal] = React.useState(false);
+
   const { formatMessage } = useIntl();
-  const isModalOpen = useRelationContext('RelationContext', (state) => state.isModalOpen);
-  const setIsModalOpen = useRelationContext('RelationContext', (state) => state.setIsModalOpen);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const { id, label, status, documentId, href, apiData } = relations[index];
 
@@ -1536,7 +1534,6 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                   ) : (
                     <CustomTextButton
                       onClick={() => {
-                        setShowModal(true);
                         setIsModalOpen(true);
                         handleChangeModalContent();
                       }}
@@ -1547,11 +1544,10 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
-              {showModal && (
+              {isModalOpen && (
                 <RelationModal
-                  open={showModal}
+                  open={isModalOpen}
                   onToggle={() => {
-                    setShowModal((prev) => !prev);
                     setIsModalOpen(!isModalOpen);
                   }}
                   model={targetModel}

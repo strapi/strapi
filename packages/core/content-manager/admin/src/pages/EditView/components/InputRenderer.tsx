@@ -30,39 +30,23 @@ import type { DistributiveOmit } from 'react-redux';
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id: rootId, document: rootDocument, collectionType: rootCollectionType } = useDoc();
+  const { id: rootId } = useDoc();
   const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
-  const relationId = useRelationContext(
-    'RelationContext',
-    (state) => state.currentRelation.documentId
-  );
-  const relationDocument = useDocument({ ...currentRelation });
-  const relationModel = useRelationContext(
-    'RelationContext',
-    (state) => state.currentRelation.model
-  );
-  const relationCollectionType = useRelationContext(
-    'RelationContext',
-    (state) => state.currentRelation.collectionType
-  );
-  const changeCurrentRelation = useRelationContext(
-    'RelationContext',
-    (state) => state.changeCurrentRelation
-  );
-  const id = relationId || rootId;
-  const document = relationDocument.document || rootDocument;
-  const collectionType = relationCollectionType || rootCollectionType;
+  const documentResponse = useRelationContext('RelationContext', (state) => state.document);
+  const documentLayout = useRelationContext('RelationContext', (state) => state.documentLayout);
 
-  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
+  const document = documentResponse?.document;
+  const collectionType = currentRelation.collectionType;
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
+  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
-  let idToCheck = id;
+  let idToCheck = rootId;
   if (collectionType === SINGLE_TYPES) {
     idToCheck = document?.documentId;
   }
@@ -83,15 +67,16 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+
   const {
-    edit: { components: useDocLayoutComponents },
+    edit: { components: rootDocumentComponents },
   } = useDocLayout();
-  const {
-    edit: { components: contextComponents },
-  } = useDocumentLayout(relationModel);
 
   const components =
-    Object.keys(useDocLayoutComponents).length !== 0 ? useDocLayoutComponents : contextComponents;
+    Object.keys(rootDocumentComponents).length !== 0
+      ? rootDocumentComponents
+      : documentLayout.edit.components;
+
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
 
@@ -164,16 +149,7 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
       if (window.strapi.future.isEnabled('unstableRelationsOnTheFly')) {
-        return (
-          <UnstableRelationsInput
-            {...props}
-            hint={hint}
-            disabled={fieldIsDisabled}
-            document={relationDocument!.document}
-            documentModel={relationModel}
-            changeCurrentRelation={changeCurrentRelation}
-          />
-        );
+        return <UnstableRelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
       }
       return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'richtext':

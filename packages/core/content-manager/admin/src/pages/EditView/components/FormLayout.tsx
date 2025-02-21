@@ -2,7 +2,7 @@ import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDoc } from '../../../hooks/useDocument';
+import { useDoc, useDocument } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 import { useRelationContext } from '../EditViewPage';
 
@@ -39,13 +39,9 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
  * Component that renders the form layout, in case the model is passed as a prompt we give priority to it instead of using the one from useDoc, which is the default behavior. This is useful for Relation modal where the model is not the one in the url but the one from the relation.
  */
 const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
-  const modelRelation = useRelationContext(
-    'RelationContext',
-    (state) => state.currentRelation.model
-  );
   const { formatMessage } = useIntl();
-  const { model: rootModel } = useDoc();
-  const model = modelRelation || rootModel;
+  const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
+  const model = currentRelation.model;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
