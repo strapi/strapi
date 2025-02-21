@@ -1,0 +1,11 @@
+{
+  "settings.page.title": "Review Workflows",
+  "settings.page.subtitle": "{count, plural, one {# vaihe} other {# vaiheet}}",
+  "settings.page.isLoading": "Työnkulku latautuu",
+  "settings.page.delete.confirm.body": "Kaikki poistetuille vaiheille määritetyt merkinnät siirretään edelliseen vaiheeseen. Haluatko varmasti tallentaa?",
+  "settings.stage.name.label": "Vaiheen nimi",
+  "settings.not-available": "Työnkulkujen tarkistus on saatavilla vain osana Enterprise Edition -versiota. Päivitä työnkulkujen luomista ja hallintaa varten.",
+  "settings.review-workflows.workflow.stageRequiredToPublish.label": "Julkaisemisen pakollinen vaihe",
+  "settings.review-workflows.workflow.stageRequiredToPublish.any": "Kaikki vaiheet",
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Estää merkintöjen julkaisemisen, jos ne eivät ole vaaditussa vaiheessa."
+ }

@@ -1,0 +1,23 @@
+{
+  "link": "Linkki",
+  "Settings.email.plugin.button.test-email": "Lähetä testisähköposti",
+  "Settings.email.plugin.label.defaultFrom": "Oletuslähettäjäsähköposti",
+  "Settings.email.plugin.label.defaultReplyTo": "Oletusvastaussähköposti",
+  "Settings.email.plugin.label.provider": "Sähköpostin palvelutarjoaja",
+  "Settings.email.plugin.label.testAddress": "Vastaanottajan sähköpostiosoite",
+  "Settings.email.plugin.notification.config.error": "Sähköpostin asetuksien lataaminen epäonnistui",
+  "Settings.email.plugin.notification.data.loaded": "Sähköpostiasetustiedot on ladattu",
+  "Settings.email.plugin.notification.test.error": "Testiviestin lähettäminen osoitteeseen {to} epäonnistui",
+  "Settings.email.plugin.notification.test.success": "Sähköpostitesti onnistui, katso {to}-postilaatikko",
+  "Settings.email.plugin.placeholder.defaultFrom": "esim. Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.email.plugin.placeholder.defaultReplyTo": "esim: Strapi <example@strapi.io>",
+  "Settings.email.plugin.placeholder.testAddress": "esim: developer@example.com",
+  "Settings.email.plugin.subTitle": "Testaa sähköpostilaajennuksen asetuksia",
+  "Settings.email.plugin.text.configuration": "Laajennus on määritetty tiedoston {file} kautta, katso dokumentaatio tästä {linkistä.",
+  "Settings.email.plugin.title": "Asetukset",
+  "Settings.email.plugin.title.config": "Asetukset",
+  "Settings.email.plugin.title.test": "Testaa sähköpostin toimitusta",
+  "SettingsNav.link.settings": "Asetukset",
+  "SettingsNav.section-label": "Sähköposti",
+  "components.Input.error.validation.email": "Tämä ei ole kelvollinen sähköpostiosoite"
+ }
