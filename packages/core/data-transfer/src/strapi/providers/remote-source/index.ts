@@ -29,8 +29,8 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
   };
 }
 
-type AssetChunk = Protocol.Client.TransferAssetFlow & ({ action: 'stream' } | { action: 'end' });
-// type AssetClose = { action: 'end' };
+type QueueableChunk = Protocol.Client.TransferAssetFlow &
+  ({ action: 'stream' } | { action: 'end' });
 
 class RemoteStrapiSourceProvider implements ISourceProvider {
   name = 'source::remote-strapi';
@@ -134,7 +134,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       // TODO: could we include filename in this for improved logging?
       [assetID: string]: IAsset & {
         stream: PassThrough;
-        queue: Array<AssetChunk>;
+        queue: Array<QueueableChunk>;
         status: 'init' | 'busy' | 'closed' | 'errored';
       };
     } = {};
@@ -210,7 +210,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
     /**
      * Writes a chunk of data for the specified asset with the given id.
      */
-    const processChunk = async (id: string, data: AssetChunk) => {
+    const processChunk = async (id: string, data: QueueableChunk) => {
       if (!assets[id]) {
         throw new Error(`Failed to write asset chunk for "${id}". Asset not found.`);
       }
