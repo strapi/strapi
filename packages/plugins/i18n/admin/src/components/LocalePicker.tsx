@@ -77,11 +77,13 @@ const LocalePicker = () => {
       // @ts-expect-error – This can be removed in V2 of the DS.
       onChange={handleChange}
     >
-      {displayedLocales.map((locale) => (
-        <SingleSelectOption key={locale.id} value={locale.code}>
-          {locale.name}
-        </SingleSelectOption>
-      ))}
+      {displayedLocales
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((locale) => (
+          <SingleSelectOption key={locale.id} value={locale.code}>
+            {locale.name}
+          </SingleSelectOption>
+        ))}
     </SingleSelect>
   );
 };
