@@ -159,6 +159,7 @@ export interface RelationsFormValue {
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, documentModel: modelInput, document: documentInput, ...props }, ref) => {
     const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
+    const isModalOpen = useRelationContext('RelationContext', (state) => state.isModalOpen);
     const [currentPage, setCurrentPage] = React.useState(1);
     const { document: hookDocument, model: hookModel } = useDoc();
     const document = documentInput ? documentInput : hookDocument;
@@ -191,7 +192,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = documentModel ?? componentUID;
+    const model = isModalOpen ? (documentModel ?? componentUID) : (componentUID ?? documentModel);
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -203,10 +204,10 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
-        model: currentRelation.model ?? documentModel,
+        model: isModalOpen ? currentRelation.model : documentModel,
         targetField,
         // below we don't run the query if there is no id.
-        id: currentRelation.documentId ?? id!,
+        id: isModalOpen ? currentRelation.documentId : id!,
         params: {
           ...params,
           pageSize: RELATIONS_TO_DISPLAY,
@@ -227,6 +228,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
         },
       }
     );
+    console.log('data', data);
 
     const handleLoadMore = () => {
       setCurrentPage((prev) => prev + 1);
@@ -418,6 +420,9 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      */
     const [targetField] = props.name.split('.').slice(-1);
 
+    console.log('id', id!);
+    console.log('model', model);
+    console.log('targetField', targetField);
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
         model,
