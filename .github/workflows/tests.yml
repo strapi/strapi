@@ -282,7 +282,6 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
-          enableFutureFeatures: true
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@v4
