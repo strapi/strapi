@@ -71,13 +71,21 @@ const PurchaseContentReleases = () => {
               </Flex>
             </Grid.Item>
             <Grid.Item col={6} s={12} background="primary100">
-              <img
-                src={illustration}
-                alt="purchase-page-content-releases-illustration"
-                width="100%"
-                height="100%"
-                style={{ objectFit: 'cover', objectPosition: 'top left' }}
-              />
+              <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
+                <img
+                  src={illustration}
+                  alt="purchase-page-content-releases-illustration"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'top left',
+                  }}
+                />
+              </div>
             </Grid.Item>
           </Grid.Root>
         </Box>
