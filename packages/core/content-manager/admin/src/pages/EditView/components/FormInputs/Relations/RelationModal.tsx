@@ -17,8 +17,8 @@ import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
-import { useDocumentContext } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { DocumentStatus } from '../../DocumentStatus';
 import { FormLayout } from '../../FormLayout';
@@ -97,9 +97,9 @@ interface RelationModalBodyProps {
 
 const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
-  const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
-  const documentResponse = useDocumentContext('DocumentContext', (state) => state.document);
-  const documentLayoutResponse = useDocumentLayout(currentDocument.model);
+  const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
+  const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
+  const documentLayoutResponse = useDocumentLayout(documentMeta.model);
 
   const initialValues = documentResponse.getInitialFormValues();
 
@@ -110,7 +110,7 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   } = useRBAC(
     PERMISSIONS.map((action) => ({
       action,
-      subject: currentDocument.model,
+      subject: documentMeta.model,
     }))
   );
 
@@ -127,7 +127,7 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
 
   if (
     error ||
-    !currentDocument.model ||
+    !documentMeta.model ||
     documentLayoutResponse.error ||
     !documentResponse.document ||
     !documentResponse.meta ||
@@ -153,7 +153,7 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
 
   return (
     <Modal.Body>
-      <DocumentRBAC permissions={permissions} model={currentDocument.model}>
+      <DocumentRBAC permissions={permissions} model={documentMeta.model}>
         <Flex direction="column" alignItems="flex-start" gap={2}>
           <Typography tag="h2" variant="alpha">
             {documentTitle}

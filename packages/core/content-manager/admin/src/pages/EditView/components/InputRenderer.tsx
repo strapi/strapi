@@ -9,8 +9,9 @@ import {
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc, useDocumentContext } from '../../../hooks/useDocument';
+import { useDoc } from '../../../hooks/useDocument';
 import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
@@ -30,12 +31,12 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
   const { id: rootId } = useDoc();
-  const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
-  const documentResponse = useDocumentContext('DocumentContext', (state) => state.document);
-  const documentLayout = useDocumentLayout(currentDocument.model);
+  const documentMeta = useDocumentContext('InputRenderer', (state) => state.meta);
+  const documentResponse = useDocumentContext('InputRenderer', (state) => state.document);
+  const documentLayout = useDocumentLayout(documentMeta.model);
 
   const document = documentResponse?.document;
-  const collectionType = currentDocument.collectionType;
+  const collectionType = documentMeta.collectionType;
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 

@@ -7,7 +7,6 @@ import {
   useRBAC,
   useNotification,
   useQueryParams,
-  createContext,
 } from '@strapi/admin/strapi-admin';
 import { Grid, Main, Tabs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -16,14 +15,9 @@ import { styled } from 'styled-components';
 
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
+import { DocumentContextProvider } from '../../features/DocumentContext';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import {
-  type UseDocument,
-  type CurrentDocument,
-  useDoc,
-  useDocument,
-  DocumentProviderImpl,
-} from '../../hooks/useDocument';
+import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
@@ -33,27 +27,6 @@ import { createYupSchema } from '../../utils/validation';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
-
-const DocumentContextProvider = ({
-  children,
-  initialDocument,
-}: {
-  children: React.ReactNode | React.ReactNode[];
-  initialDocument: CurrentDocument;
-}) => {
-  const [currentDocument, setCurrentDocument] = React.useState<CurrentDocument>(initialDocument);
-  const document = useDocument(currentDocument);
-
-  return (
-    <DocumentProviderImpl
-      currentDocument={currentDocument}
-      setCurrentDocument={setCurrentDocument}
-      document={document}
-    >
-      {children}
-    </DocumentProviderImpl>
-  );
-};
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage

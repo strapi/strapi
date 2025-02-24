@@ -36,8 +36,9 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
-import { type UseDocument, useDoc, useDocumentContext } from '../../../../../hooks/useDocument';
+import { type UseDocument, useDoc } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
@@ -157,12 +158,9 @@ export interface RelationsFormValue {
  */
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
-    const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
-    const documentResponse = useDocumentContext('DocumentContext', (state) => state.document);
-    const setCurrentDocument = useDocumentContext(
-      'DocumentContext',
-      (state) => state.setCurrentDocument
-    );
+    const documentMeta = useDocumentContext('RelationsField', (state) => state.meta);
+    const documentResponse = useDocumentContext('RelationsField', (state) => state.document);
+    const changeDocument = useDocumentContext('RelationsField', (state) => state.changeDocument);
 
     const [currentPage, setCurrentPage] = React.useState(1);
     const documentId = documentResponse.document?.documentId;
@@ -190,7 +188,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = componentUID ?? currentDocument.model;
+    const model = componentUID ?? documentMeta.model;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -372,7 +370,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
           relationType={props.attribute.relation}
           // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
           targetModel={props.attribute.targetModel}
-          setCurrentDocument={setCurrentDocument}
+          setCurrentDocument={changeDocument}
         />
       </Flex>
     );

@@ -2,7 +2,7 @@ import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDocumentContext } from '../../../hooks/useDocument';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
@@ -39,8 +39,8 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
  */
 const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
-  const model = currentDocument.model;
+  const documentMeta = useDocumentContext('FormLayout', (state) => state.meta);
+  const model = documentMeta.model;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>

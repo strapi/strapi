@@ -330,31 +330,5 @@ const useContentManagerContext = () => {
   };
 };
 
-interface CurrentDocument {
-  documentId: string;
-  model: string;
-  collectionType: string;
-}
-
-interface DocumentContextValue {
-  currentDocument: CurrentDocument;
-  document: ReturnType<UseDocument>;
-  setCurrentDocument: (newRelation: CurrentDocument) => void;
-}
-
-/**
- * @internal This hook and provider are not meant to be used outside of the Content Manager plugin.
- * It defines the document currently shown with its basic infos and it is used inside the EditView page and in the Relation modals.
- */
-const [DocumentProviderImpl, useDocumentContext] =
-  createContext<DocumentContextValue>('DocumentContext');
-
-export { useDocument, useDoc, useContentManagerContext, useDocumentContext, DocumentProviderImpl };
-export type {
-  UseDocument,
-  UseDocumentArgs,
-  Document,
-  Schema,
-  ComponentsDictionary,
-  CurrentDocument,
-};
+export { useDocument, useDoc, useContentManagerContext };
+export type { UseDocument, UseDocumentArgs, Document, Schema, ComponentsDictionary };

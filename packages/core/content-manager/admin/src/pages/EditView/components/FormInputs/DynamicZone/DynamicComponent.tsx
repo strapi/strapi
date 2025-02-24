@@ -19,7 +19,7 @@ import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
@@ -58,10 +58,10 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
-  const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
+  const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
   const {
     edit: { components },
-  } = useDocumentLayout(currentDocument.model);
+  } = useDocumentLayout(documentMeta.model);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
