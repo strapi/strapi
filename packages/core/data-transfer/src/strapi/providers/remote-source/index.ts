@@ -152,7 +152,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
           // Creates the stream to send the incoming asset through
           if (action === 'start') {
-            // Ignore the item if a transfer has already been started for the same asset ID
+            // if a transfer has already been started for the same asset ID, something is wrong
             if (assets[assetID]) {
               throw new Error(`Asset ${assetID} already started`);
             }
@@ -175,17 +175,21 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
           // "end" is considered a chunk, but it's not a data chunk, it's a control message
           // That is done so that we don't complicate the already complicated async processing of the queue
           else if (action === 'stream' || action === 'end') {
-            // If the asset hasn't been registered, or if it's been closed already, then ignore the message
+            // If the asset hasn't been registered, or if it's been closed already, something is wrong
             if (!assets[assetID]) {
               throw new Error(`No id matching ${assetID} for stream action`);
+            }
+
+            if (assets[assetID].status === 'closed') {
+              throw new Error(`Asset ${assetID} is closed`);
             }
 
             assets[assetID].queue.push(item);
           }
         }
 
-        // NOTE: each new payload will start a new processQueue call, but it works because we shift data off the queue so it doesn't
-        // matter which thread is processing the queue or if multiple ones are running at once
+        // each new payload will start new processQueue calls, which may cause some extra calls
+        // it's essentially saying "start processing this asset again, I added more data to the queue"
         for (const assetID in assets) {
           if (Object.prototype.hasOwnProperty.call(assets, assetID)) {
             const asset = assets[assetID];
