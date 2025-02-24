@@ -646,6 +646,18 @@ describe('Transfer engine', () => {
         destination: { foo: 'baz' },
       });
     });
+
+    test('surfaces error from createAssetsReadStream in CLI', async () => {
+      const errorMessage = 'Test error';
+      const source = createSource();
+      source.createAssetsReadStream = jest.fn().mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
+
+      const engine = createTransferEngine(source, completeDestination, defaultOptions);
+
+      await expect(engine.transfer()).rejects.toThrowError(errorMessage);
+    });
   });
 
   describe('progressStream', () => {
