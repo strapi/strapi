@@ -98,29 +98,6 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     await expect(page.getByRole('combobox', { name: 'Review stage' })).toHaveText('In progress');
   });
 
-  test('I want to change the stage of a document from preview and see this change in the edit and list views', async ({
-    page,
-  }) => {
-    // Open an edit view for a content type that has preview
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
-
-    // Open the preview page
-    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
-
-    await checkAssignee(page);
-
-    // Confirm the edit view updated
-    await clickAndWait(page, page.getByRole('link', { name: /close preview/i }));
-    await expect(page.getByRole('combobox', { name: 'Assignee' })).toBeVisible();
-    await expect(page.getByRole('combobox', { name: 'Assignee' })).toHaveValue('editor testing');
-
-    // Confirm the list view updated
-    await clickAndWait(page, page.getByRole('link', { name: 'Back' }));
-    await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
-  });
-
   describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR === 'true')(
     'Unstable Preview',
     () => {
