@@ -342,6 +342,10 @@ interface DocumentContextValue {
   setCurrentDocument: (newRelation: CurrentDocument) => void;
 }
 
+/**
+ * @internal This hook and provider are not meant to be used outside of the Content Manager plugin.
+ * It defines the document currently shown with its basic infos and it is used inside the EditView page and in the Relation modals.
+ */
 const [DocumentProviderImpl, useDocumentContext] =
   createContext<DocumentContextValue>('DocumentContext');
 
