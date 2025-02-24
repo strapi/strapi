@@ -26,6 +26,7 @@ import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
@@ -40,7 +41,7 @@ import type { DocumentActionComponent } from '../../../content-manager';
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
-type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview';
+type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview' | 'relation-modal';
 
 interface DocumentActionDescription {
   label: string;
@@ -517,7 +518,7 @@ const PublishAction: DocumentActionComponent = ({
   meta,
   document,
 }) => {
-  const { schema } = useDoc();
+  const schema = useDocumentContext('PublishAction', (state) => state.document.schema);
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -689,7 +690,7 @@ const PublishAction: DocumentActionComponent = ({
 
   return {
     loading: isLoading,
-    position: ['panel', 'preview'],
+    position: ['panel', 'preview', 'relation-modal'],
     /**
      * Disabled when:
      *  - currently if you're cloning a document we don't support publish & clone at the same time.
@@ -748,7 +749,7 @@ const PublishAction: DocumentActionComponent = ({
 };
 
 PublishAction.type = 'publish';
-PublishAction.position = ['panel', 'preview'];
+PublishAction.position = ['panel', 'preview', 'relation-modal'];
 
 const UpdateAction: DocumentActionComponent = ({
   activeTab,
@@ -921,12 +922,12 @@ const UpdateAction: DocumentActionComponent = ({
       defaultMessage: 'Save',
     }),
     onClick: handleUpdate,
-    position: ['panel', 'preview'],
+    position: ['panel', 'preview', 'relation-modal'],
   };
 };
 
 UpdateAction.type = 'update';
-UpdateAction.position = ['panel', 'preview'];
+UpdateAction.position = ['panel', 'preview', 'relation-modal'];
 
 const UNPUBLISH_DRAFT_OPTIONS = {
   KEEP: 'keep',

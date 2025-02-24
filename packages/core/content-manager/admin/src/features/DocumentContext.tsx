@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createContext } from '@strapi/admin/strapi-admin';
 
 import { useDocument, type UseDocument } from '../hooks/useDocument';
+import { buildValidParams } from '../utils/api';
 
 interface DocumentMeta {
   /**
@@ -20,6 +21,11 @@ interface DocumentMeta {
    * i.e. collection-types or single-types
    */
   collectionType: string;
+  /**
+   * The parsed query params
+   * i.e. ?i18n=en parsed to { i18n: 'en' }
+   */
+  params?: Record<string, string>;
 }
 
 interface DocumentContextValue {
@@ -54,7 +60,11 @@ const DocumentContextProvider = ({
    * one of the root level document's relations.
    */
   const [currentDocumentMeta, changeDocument] = React.useState<DocumentMeta>(initialDocument);
-  const document = useDocument(currentDocumentMeta);
+  const params = React.useMemo(
+    () => buildValidParams(currentDocumentMeta.params ?? {}),
+    [currentDocumentMeta.params]
+  );
+  const document = useDocument({ ...currentDocumentMeta, params });
 
   return (
     <DocumentProvider

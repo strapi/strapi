@@ -152,7 +152,6 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
     const documentMeta = useDocumentContext('RelationsField', (state) => state.meta);
     const documentResponse = useDocumentContext('RelationsField', (state) => state.document);
-    const changeDocument = useDocumentContext('RelationsField', (state) => state.changeDocument);
 
     const [currentPage, setCurrentPage] = React.useState(1);
     const documentId = documentResponse.document?.documentId;
@@ -362,7 +361,6 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           relationType={props.attribute.relation}
           // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
           targetModel={props.attribute.targetModel}
-          setCurrentDocument={changeDocument}
         />
       </Flex>
     );
@@ -645,11 +643,6 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
    */
   serverData: RelationResult[];
   targetModel: string;
-  setCurrentDocument?: (newDocument: {
-    documentId: string;
-    model: string;
-    collectionType: string;
-  }) => void;
 }
 
 const RelationsList = ({
@@ -660,7 +653,6 @@ const RelationsList = ({
   isLoading,
   relationType,
   targetModel,
-  setCurrentDocument,
 }: RelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
@@ -879,7 +871,6 @@ const RelationsList = ({
           handleDisconnect,
           relations: data,
           targetModel,
-          setCurrentDocument,
         }}
         itemKey={(index) => data[index].id}
         innerElementType="ol"
@@ -943,11 +934,6 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     name: string;
     relations: Relation[];
     targetModel: string;
-    setCurrentDocument?: (newRelation: {
-      documentId: string;
-      model: string;
-      collectionType: string;
-    }) => void;
   };
 }
 
@@ -970,8 +956,8 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     name,
     relations,
     targetModel,
-    setCurrentDocument,
   } = data;
+  const changeDocument = useDocumentContext('RelationsList', (state) => state.changeDocument);
 
   const { formatMessage } = useIntl();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -1001,13 +987,14 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
 
   const handleChangeModalContent = () => {
-    if (setCurrentDocument) {
+    if (changeDocument) {
       const newRelation = {
-        documentId: documentId ? documentId : apiData?.documentId || '',
+        documentId: documentId ?? apiData?.documentId,
         model: targetModel,
         collectionType: getCollectionType(href)!,
       };
-      setCurrentDocument(newRelation);
+
+      changeDocument(newRelation);
     }
   };
 
@@ -1064,8 +1051,8 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                   ) : (
                     <CustomTextButton
                       onClick={() => {
-                        setIsModalOpen(true);
                         handleChangeModalContent();
+                        setIsModalOpen(true);
                       }}
                     >
                       {label}
@@ -1080,9 +1067,6 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                   onToggle={() => {
                     setIsModalOpen(!isModalOpen);
                   }}
-                  model={targetModel}
-                  id={documentId ? documentId : apiData?.documentId}
-                  relationUrl={href}
                 />
               )}
             </Flex>

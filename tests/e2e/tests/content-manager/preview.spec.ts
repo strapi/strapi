@@ -142,7 +142,7 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR ===
 
       // Confirm initial state
       await expect(titleBox).toHaveValue(/west ham post match/i);
-      await expect(page.getByRole('status', { name: /draft/i })).toBeVisible();
+      await expect(page.getByRole('status', { name: /draft/i }).first()).toBeVisible();
       await expect(draftTab).toHaveAttribute('aria-selected', 'true');
       await expect(draftTab).toBeEnabled();
       await expect(publishedTab).toHaveAttribute('aria-selected', 'false');
@@ -153,13 +153,13 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR ===
       await expect(saveButton).toBeEnabled();
       await clickAndWait(page, saveButton);
       await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
-      await expect(page.getByRole('status', { name: /draft/i })).toBeVisible();
+      await expect(page.getByRole('status', { name: /draft/i }).first()).toBeVisible();
 
       // Publish
       await expect(publishButton).toBeEnabled();
       await clickAndWait(page, publishButton);
       await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
-      await expect(page.getByRole('status', { name: /published/i })).toBeVisible();
+      await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
       await expect(publishedTab).toBeEnabled();
       await clickAndWait(page, publishedTab);
       await expect(titleBox).toBeDisabled();
@@ -170,7 +170,7 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR ===
       await expect(saveButton).toBeEnabled();
       await clickAndWait(page, saveButton);
       await expect(titleBox).toHaveValue(/west ham pre match jokes/i);
-      await expect(page.getByRole('status', { name: /modified/i })).toBeVisible();
+      await expect(page.getByRole('status', { name: /modified/i }).first()).toBeVisible();
     });
   }
 );
