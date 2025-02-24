@@ -67,7 +67,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     reservedNames,
     initialComponents,
     initialContentTypes,
-  } = state;
+  } = state.current;
 
   const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
@@ -347,8 +347,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       return;
     }
 
-    lockAppWithAutoreload?.();
-
     const mutatedCTs = Object.entries(contentTypes).reduce((acc, [uid, contentType]) => {
       acc[uid] = PluginForms.mutateContentTypeSchema(
         contentType,
@@ -359,7 +357,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     }, {} as ContentTypes);
 
     const requestData = stateToRequestData({
-      ...state,
+      ...state.current,
       contentTypes: mutatedCTs,
     });
 
@@ -376,6 +374,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     //   });
     //   return;
     // }
+
+    lockAppWithAutoreload?.();
 
     try {
       const res = await fetchClient.post(`/content-type-builder/update-schema`, {
@@ -566,6 +566,19 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     dispatch(actions.applyChange(args));
   };
 
+  const undo = () => {
+    dispatch(actions.undo());
+  };
+
+  const redo = () => {
+    dispatch(actions.redo());
+  };
+
+  const discardAllChanges = () => {
+    dispatch(actions.discardAll());
+    getDataRef.current();
+  };
+
   return (
     <DataManagerContext.Provider
       value={{
@@ -597,6 +610,9 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         saveSchema,
         isModified,
         applyChange,
+        undo,
+        redo,
+        discardAllChanges,
       }}
     >
       {children}

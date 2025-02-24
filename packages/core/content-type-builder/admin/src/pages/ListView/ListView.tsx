@@ -1,3 +1,5 @@
+import { useEffect, useCallback } from 'react';
+
 import { BackButton, useTracking, Layouts } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex } from '@strapi/design-system';
 import { Pencil, Plus } from '@strapi/icons';
@@ -25,7 +27,8 @@ const LayoutsHeaderCustom = styled(Layouts.Header)`
 `;
 
 const ListView = () => {
-  const { isInDevelopmentMode, contentTypes, components } = useDataManager();
+  const { isInDevelopmentMode, contentTypes, components, saveSchema, isModified, undo, redo } =
+    useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
@@ -33,6 +36,34 @@ const ListView = () => {
     contentTypeUid: Internal.UID.ContentType;
     componentUid: Internal.UID.Component;
   }>();
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 's') {
+          if (isModified) {
+            e.preventDefault();
+            saveSchema();
+          }
+        } else if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault(); // Prevent browser default undo (e.g., in input fields)
+          undo();
+        } else if (e.key === 'y' || (e.shiftKey && e.key === 'z')) {
+          e.preventDefault(); // Prevent browser default redo (e.g., in input fields)
+          redo();
+        }
+      }
+    },
+    [isModified, redo, saveSchema, undo]
+  );
+
+  useEffect(() => {
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [onKeyDown]);
 
   const {
     onOpenModalAddComponentsToDZ,

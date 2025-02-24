@@ -1,4 +1,13 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  CaseReducer,
+  createSlice,
+  CreateSliceOptions,
+  Draft,
+  original,
+  PayloadAction,
+  Slice,
+  SliceCaseReducers,
+} from '@reduxjs/toolkit';
 import get from 'lodash/get';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
@@ -18,6 +27,7 @@ import type {
   Status,
 } from '../../types';
 import type { Internal, Schema, Struct } from '@strapi/types';
+import { nothing } from 'immer';
 
 // TODO: Define all possible actions based on type
 export type Action<T = any> = {
@@ -190,7 +200,106 @@ const updateType = (type: ContentType | Component, data: Record<string, any>) =>
   setStatus(type, 'CHANGED');
 };
 
-const slice = createSlice({
+type UndoRedoState<T> = {
+  past: T[];
+  future: T[];
+  current: T;
+};
+
+type WrappedUndoRedoReducer<TState, TReducers extends SliceCaseReducers<TState>> = {
+  [K in keyof TReducers]: TReducers[K] extends CaseReducer<TState, infer A>
+    ? CaseReducer<UndoRedoState<TState>, A>
+    : never;
+};
+
+type UndoRedoReducer<TState, TReducers extends SliceCaseReducers<TState>> = WrappedUndoRedoReducer<
+  TState,
+  TReducers
+> & {
+  undo: CaseReducer<UndoRedoState<TState>>;
+  redo: CaseReducer<UndoRedoState<TState>>;
+  discardAll: CaseReducer<UndoRedoState<TState>>;
+};
+
+const isCallable = (obj: any): obj is (...args: any[]) => any => {
+  return typeof obj === 'function';
+};
+
+const createUndoRedoSlice = <State, CaseReducers extends SliceCaseReducers<State>>(
+  opts: CreateSliceOptions<State, CaseReducers, string>
+) => {
+  const initialState: UndoRedoState<State> = {
+    past: [],
+    future: [],
+    current: isCallable(opts.initialState) ? opts.initialState() : opts.initialState,
+  };
+
+  const wrappedReducers = Object.keys(opts.reducers).reduce(
+    (acc, actionName: string) => {
+      const reducer = opts.reducers[actionName];
+
+      if (!isCallable(reducer)) {
+        throw new Error('Reducer must be a function. prepapre not support in UndoRedo wrapper');
+      }
+
+      acc[actionName] = (state, action) => {
+        const newCurrent = reducer(state.current as Draft<State>, action);
+
+        state.past.push(original(state.current)!);
+        if (state.past.length > 10) {
+          state.past.shift();
+        }
+        state.future = [];
+
+        if (newCurrent !== undefined) {
+          state.current = newCurrent as Draft<State>;
+        }
+      };
+
+      return acc;
+    },
+    {} as Record<string, CaseReducer<UndoRedoState<State>, PayloadAction<any>>>
+  ) as WrappedUndoRedoReducer<State, CaseReducers>;
+
+  return createSlice<UndoRedoState<State>, UndoRedoReducer<State, CaseReducers>>({
+    name: opts.name,
+    initialState,
+    // @ts-expect-error - TS doesn't like the fact that we're adding extra reducers
+    reducers: {
+      ...wrappedReducers,
+      undo: (state) => {
+        if (state.past.length === 0) {
+          return;
+        }
+
+        const previous = state.past.pop();
+
+        if (previous !== undefined) {
+          state.future = [state.current, ...state.future];
+          state.current = previous;
+        }
+      },
+
+      redo: (state) => {
+        if (state.future.length === 0) {
+          return;
+        }
+
+        const next = state.future.shift();
+        if (next != undefined) {
+          state.past = [...state.past, state.current];
+          state.current = next;
+        }
+      },
+
+      discardAll: () => {
+        return initialState;
+      },
+    },
+  });
+};
+
+const slice = createUndoRedoSlice({
   name: 'data-manager',
   initialState,
   reducers: {

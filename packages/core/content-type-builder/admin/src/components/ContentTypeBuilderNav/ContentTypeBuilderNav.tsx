@@ -9,8 +9,10 @@ import {
   Typography,
   Divider,
   IconButton,
+  Menu,
+  VisuallyHidden,
 } from '@strapi/design-system';
-import { ChevronDown, Plus, Search } from '@strapi/icons';
+import { ArrowClockwise, ChevronDown, Cross, More, Plus, Search } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -21,6 +23,10 @@ import { useDataManager } from '../DataManager/useDataManager';
 import { Status } from '../Status';
 
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
+
+const ArrowCounterClockwise = styled(ArrowClockwise)`
+  transform: scaleX(-1);
+`;
 
 const SubNavCustom = styled(SubNav)`
   background-color: ${({ theme }) => theme.colors.neutral0};
@@ -211,7 +217,7 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
 
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
-  const { saveSchema, isModified } = useDataManager();
+  const { saveSchema, isModified, undo, redo, discardAllChanges } = useDataManager();
   const { formatMessage } = useIntl();
 
   const pluginName = formatMessage({
@@ -225,25 +231,84 @@ export const ContentTypeBuilderNav = () => {
         <Typography variant="beta">{pluginName}</Typography>
       </NavHeader>
       <Divider background="neutral200" />
-      <Flex padding={5} gap={3} direction={'column'}>
-        <Button
-          onClick={(e) => {
-            e.preventDefault();
-            saveSchema();
-          }}
-          type="submit"
-          disabled={!isModified}
-          fullWidth
-          size="S"
-        >
-          {formatMessage({
-            id: 'global.save',
-            defaultMessage: 'Save',
-          })}
-        </Button>
+      <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
+        <Flex gap={1}>
+          <Button
+            flex={1}
+            onClick={(e) => {
+              e.preventDefault();
+              saveSchema();
+            }}
+            type="submit"
+            disabled={!isModified}
+            fullWidth
+            size="S"
+          >
+            {formatMessage({
+              id: 'global.save',
+              defaultMessage: 'Save',
+            })}
+          </Button>
+          <Menu.Root>
+            <Menu.Trigger
+              size="S"
+              endIcon={null}
+              paddingTop="4px"
+              paddingLeft="7px"
+              paddingRight="7px"
+              variant="tertiary"
+            >
+              <More fill="neutral500" aria-hidden focusable={false} />
+              <VisuallyHidden tag="span">
+                {formatMessage({
+                  id: 'global.more.actions',
+                  defaultMessage: 'More actions',
+                })}
+              </VisuallyHidden>
+            </Menu.Trigger>
+            <Menu.Content zIndex={1}>
+              <Menu.Item
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  undo();
+                }}
+              >
+                <Flex gap={1}>
+                  <ArrowCounterClockwise fill="neutral500" />
+                  <Typography>Undo last change</Typography>
+                </Flex>
+              </Menu.Item>
+              <Menu.Item
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  redo();
+                }}
+              >
+                <Typography>
+                  <Flex gap={1}>
+                    <ArrowClockwise fill="neutral500" />
+                    <Typography>Redo last change</Typography>
+                  </Flex>
+                </Typography>
+              </Menu.Item>
+              <Menu.Separator />
+              <Menu.Item
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  discardAllChanges();
+                }}
+              >
+                <Flex gap={1}>
+                  <Cross fill="danger500" />
+                  <Typography textColor={'danger500'}>Discard all changes</Typography>
+                </Flex>
+              </Menu.Item>
+            </Menu.Content>
+          </Menu.Root>
+        </Flex>
 
         <TextInput
-          startAction={<Search />}
+          startAction={<Search fill="neutral500" />}
           value={search.value}
           onChange={(e) => search.onChange(e.target.value)}
           aria-label="Search"
