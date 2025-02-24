@@ -58,10 +58,10 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
-  const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
-  const {
-    edit: { components },
-  } = useDocumentLayout(currentRelation.model);
+  const components = useRelationContext(
+    'RelationContext',
+    (state) => state.documentLayout.edit.components
+  );
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
