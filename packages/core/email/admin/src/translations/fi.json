@@ -13,7 +13,7 @@
   "Settings.email.plugin.placeholder.defaultReplyTo": "esim: Strapi <example@strapi.io>",
   "Settings.email.plugin.placeholder.testAddress": "esim: developer@example.com",
   "Settings.email.plugin.subTitle": "Testaa sähköpostilaajennuksen asetuksia",
-  "Settings.email.plugin.text.configuration": "Laajennus on määritetty tiedoston {file} kautta, katso dokumentaatio tästä {linkistä.",
+  "Settings.email.plugin.text.configuration": "Laajennus on määritetty tiedoston {file} kautta, katso dokumentaatio tästä {linkistä}.",
   "Settings.email.plugin.title": "Asetukset",
   "Settings.email.plugin.title.config": "Asetukset",
   "Settings.email.plugin.title.test": "Testaa sähköpostin toimitusta",

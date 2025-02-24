@@ -1,5 +1,5 @@
 {
-  "settings.page.title": "Review Workflows",
+  "settings.page.title": "Työnkulkujen tarkistus",
   "settings.page.subtitle": "{count, plural, one {# vaihe} other {# vaiheet}}",
   "settings.page.isLoading": "Työnkulku latautuu",
   "settings.page.delete.confirm.body": "Kaikki poistetuille vaiheille määritetyt merkinnät siirretään edelliseen vaiheeseen. Haluatko varmasti tallentaa?",
