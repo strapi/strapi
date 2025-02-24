@@ -1,6 +1,6 @@
 import { render, screen } from '@tests/utils';
 
-import { DocumentContextProvider } from '../../../../EditViewPage';
+import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { RelationModal } from '../RelationModal';
 
 const relationContext = {
