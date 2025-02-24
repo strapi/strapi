@@ -13,6 +13,7 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
+import { DocumentContextProvider } from '../../features/DocumentContext';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
@@ -150,52 +151,60 @@ const PreviewPage = () => {
           }
         )}
       </Page.Title>
-      <PreviewProvider
-        url={previewUrlResponse.data.data.url}
-        document={documentResponse.document}
-        title={documentTitle}
-        meta={documentResponse.meta}
-        schema={documentResponse.schema}
-        layout={documentLayoutResponse.edit}
+      <DocumentContextProvider
+        initialDocument={{
+          documentId,
+          model,
+          collectionType,
+        }}
       >
-        <FormContext
-          method="PUT"
-          disabled={
-            query.status === 'published' &&
-            documentResponse &&
-            documentResponse.document.status === 'published'
-          }
-          initialValues={documentResponse.getInitialFormValues()}
-          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
-          height="100%"
-          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-            const yupSchema = createYupSchema(
-              documentResponse.schema?.attributes,
-              documentResponse.components,
-              {
-                status: documentResponse.document?.status,
-                ...options,
-              }
-            );
-
-            return yupSchema.validate(values, { abortEarly: false });
-          }}
+        <PreviewProvider
+          url={previewUrlResponse.data.data.url}
+          document={documentResponse.document}
+          title={documentTitle}
+          meta={documentResponse.meta}
+          schema={documentResponse.schema}
+          layout={documentLayoutResponse.edit}
         >
-          <Flex direction="column" height="100%" alignItems="stretch">
-            {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
-              <>
-                <UnstablePreviewHeader />
-                <UnstablePreviewContent />
-              </>
-            ) : (
-              <>
-                <PreviewHeader />
-                <PreviewContent />
-              </>
-            )}
-          </Flex>
-        </FormContext>
-      </PreviewProvider>
+          <FormContext
+            method="PUT"
+            disabled={
+              query.status === 'published' &&
+              documentResponse &&
+              documentResponse.document.status === 'published'
+            }
+            initialValues={documentResponse.getInitialFormValues()}
+            initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+            height="100%"
+            validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+              const yupSchema = createYupSchema(
+                documentResponse.schema?.attributes,
+                documentResponse.components,
+                {
+                  status: documentResponse.document?.status,
+                  ...options,
+                }
+              );
+
+              return yupSchema.validate(values, { abortEarly: false });
+            }}
+          >
+            <Flex direction="column" height="100%" alignItems="stretch">
+              {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
+                <>
+                  <UnstablePreviewHeader />
+                  <UnstablePreviewContent />
+                </>
+              ) : (
+                <>
+                  <PreviewHeader />
+                  <PreviewContent />
+                </>
+              )}
+            </Flex>
+          </FormContext>
+        </PreviewProvider>
+      </DocumentContextProvider>
     </>
   );
 };
