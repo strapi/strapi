@@ -203,10 +203,10 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
-        model: currentRelation.model,
+        model,
         targetField,
         // below we don't run the query if there is no id.
-        id: currentRelation.documentId,
+        id,
         params: {
           ...params,
           pageSize: RELATIONS_TO_DISPLAY,
