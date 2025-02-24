@@ -18,7 +18,6 @@ import { styled } from 'styled-components';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
-import { useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useRelationContext } from '../../../EditViewPage';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -100,10 +99,7 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
   const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
   const documentResponse = useRelationContext('RelationContext', (state) => state.document);
-  const documentLayoutResponse = useRelationContext(
-    'RelationContext',
-    (state) => state.documentLayout
-  );
+  const documentLayoutResponse = useDocumentLayout(currentRelation.model);
 
   const initialValues = documentResponse.getInitialFormValues();
 

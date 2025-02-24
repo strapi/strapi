@@ -37,7 +37,6 @@ export interface CurrentRelation {
 interface RelationContextValue {
   currentRelation: CurrentRelation;
   document: ReturnType<UseDocument>;
-  documentLayout: ReturnType<typeof useDocumentLayout>;
   changeCurrentRelation: (newRelation: CurrentRelation) => void;
 }
 
@@ -55,14 +54,12 @@ const RelationProvider = ({
   // TODO: currentRelation is maybe not the best name? documentMeta? documentParams? documentInfo? documentIdentifiers?
   const [currentRelation, setCurrentRelation] = React.useState<CurrentRelation>(initialRelation);
   const document = useDocument(currentRelation);
-  const documentLayout = useDocumentLayout(currentRelation.model);
 
   return (
     <RelationProviderImpl
       currentRelation={currentRelation}
       changeCurrentRelation={setCurrentRelation}
       document={document}
-      documentLayout={documentLayout}
     >
       {children}
     </RelationProviderImpl>

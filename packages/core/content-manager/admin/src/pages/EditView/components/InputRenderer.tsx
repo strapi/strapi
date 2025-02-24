@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc, useDocument } from '../../../hooks/useDocument';
+import { useDoc } from '../../../hooks/useDocument';
 import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 import { useRelationContext } from '../EditViewPage';
@@ -33,7 +33,7 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   const { id: rootId } = useDoc();
   const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
   const documentResponse = useRelationContext('RelationContext', (state) => state.document);
-  const documentLayout = useRelationContext('RelationContext', (state) => state.documentLayout);
+  const documentLayout = useDocumentLayout(currentRelation.model);
 
   const document = documentResponse?.document;
   const collectionType = currentRelation.collectionType;
