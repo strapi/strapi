@@ -98,9 +98,9 @@ const PreviewPage = () => {
   const documentLayoutResponse = useDocumentLayout(model);
 
   if (
-    documentResponse.isLoading ||
     previewUrlResponse.isLoading ||
-    documentLayoutResponse.isLoading
+    documentLayoutResponse.isLoading ||
+    !documentResponse.document.documentId
   ) {
     return <Page.Loading />;
   }
