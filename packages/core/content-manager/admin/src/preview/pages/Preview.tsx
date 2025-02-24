@@ -153,7 +153,7 @@ const PreviewPage = () => {
       </Page.Title>
       <DocumentContextProvider
         initialDocument={{
-          documentId,
+          documentId: documentId || '',
           model,
           collectionType,
         }}
