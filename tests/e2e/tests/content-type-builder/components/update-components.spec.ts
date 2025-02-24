@@ -137,9 +137,6 @@ test.describe('Update a new component', () => {
     // delete it
     await deleteComponent(page, 'SomeComponent');
 
-    // TODO: fix issue that components aren't removed from side navigation or content types until refresh
-    await page.reload({ waitUntil: 'networkidle' });
-
     // confirm that it no longer exists in the content type this component was in
     await navToHeader(page, ['Content-Type Builder', collectionType.name], collectionType.name);
     await expect(page.getByText(componentAttributeName, { exact: true })).not.toBeVisible();
