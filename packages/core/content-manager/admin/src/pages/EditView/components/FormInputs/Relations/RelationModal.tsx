@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form as FormContext, createContext, useRBAC } from '@strapi/admin/strapi-admin';
+import { Form as FormContext, useRBAC } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -17,31 +17,11 @@ import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
-import { type UseDocument, useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { DocumentStatus } from '../../DocumentStatus';
 import { FormLayout } from '../../FormLayout';
-
-/* -------------------------------------------------------------------------------------------------
- * RelationModalProvider
- * -----------------------------------------------------------------------------------------------*/
-export interface CurrentRelation {
-  documentId: string;
-  model: string;
-  collectionType: string;
-}
-
-interface RelationModalContextValue {
-  currentRelation: CurrentRelation;
-  changeCurrentRelation: (newRelation: CurrentRelation) => void;
-  document: NonNullable<ReturnType<UseDocument>['document']>;
-  isModalOpen: boolean;
-  onToggleModal: () => void;
-}
-
-const [RelationModalProvider, useRelationModalContext] =
-  createContext<RelationModalContextValue>('RelationModal');
 
 interface RelationModalProps {
   open: boolean;
@@ -115,27 +95,11 @@ interface RelationModalBodyProps {
   onToggleModal: () => void;
 }
 
-const RelationModalBody = ({
-  model,
-  id,
-  collectionType,
-  isModalOpen,
-  onToggleModal,
-}: RelationModalBodyProps) => {
+const RelationModalBody = ({ id }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
-  const [currentRelation, setCurrentRelation] = React.useState({
-    documentId: id!,
-    model,
-    collectionType,
-  });
-
-  const documentResponse = useDocument({
-    documentId: currentRelation.documentId,
-    model: currentRelation.model,
-    collectionType: currentRelation.collectionType,
-  });
-
-  const documentLayoutResponse = useDocumentLayout(currentRelation.model);
+  const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
+  const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
+  const documentLayoutResponse = useDocumentLayout(documentMeta.model);
 
   const initialValues = documentResponse.getInitialFormValues();
 
@@ -146,7 +110,7 @@ const RelationModalBody = ({
   } = useRBAC(
     PERMISSIONS.map((action) => ({
       action,
-      subject: currentRelation.model,
+      subject: documentMeta.model,
     }))
   );
 
@@ -163,7 +127,7 @@ const RelationModalBody = ({
 
   if (
     error ||
-    !currentRelation.model ||
+    !documentMeta.model ||
     documentLayoutResponse.error ||
     !documentResponse.document ||
     !documentResponse.meta ||
@@ -189,39 +153,27 @@ const RelationModalBody = ({
 
   return (
     <Modal.Body>
-      <RelationModalProvider
-        currentRelation={currentRelation}
-        changeCurrentRelation={setCurrentRelation}
-        document={documentResponse.document}
-        isModalOpen={isModalOpen}
-        onToggleModal={onToggleModal}
-      >
-        <DocumentRBAC permissions={permissions} model={currentRelation.model}>
-          <Flex direction="column" alignItems="flex-start" gap={2}>
-            <Typography tag="h2" variant="alpha">
-              {documentTitle}
-            </Typography>
-            {hasDraftAndPublished ? (
-              <Box marginTop={1}>
-                <DocumentStatus status={documentResponse.document?.status} />
-              </Box>
-            ) : null}
+      <DocumentRBAC permissions={permissions} model={documentMeta.model}>
+        <Flex direction="column" alignItems="flex-start" gap={2}>
+          <Typography tag="h2" variant="alpha">
+            {documentTitle}
+          </Typography>
+          {hasDraftAndPublished ? (
+            <Box marginTop={1}>
+              <DocumentStatus status={documentResponse.document?.status} />
+            </Box>
+          ) : null}
+        </Flex>
+        <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
+          <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
+            <Box overflow="auto" flex={1}>
+              <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground={false} />
+            </Box>
           </Flex>
-          <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
-            <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
-              <Box overflow="auto" flex={1}>
-                <FormLayout
-                  layout={documentLayoutResponse.edit.layout}
-                  hasBackground={false}
-                  model={currentRelation.model}
-                />
-              </Box>
-            </Flex>
-          </FormContext>
-        </DocumentRBAC>
-      </RelationModalProvider>
+        </FormContext>
+      </DocumentRBAC>
     </Modal.Body>
   );
 };
 
-export { RelationModal, useRelationModalContext };
+export { RelationModal };

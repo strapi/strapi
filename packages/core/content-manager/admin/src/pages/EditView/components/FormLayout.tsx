@@ -2,10 +2,10 @@ import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDoc } from '../../../hooks/useDocument';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
-import { InputRenderer, InputRendererWithContext } from './InputRenderer';
+import { InputRenderer } from './InputRenderer';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
   sm: '27.5rem', // 440px
@@ -37,10 +37,10 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
 /**
  * Component that renders the form layout, in case the model is passed as a prompt we give priority to it instead of using the one from useDoc, which is the default behavior. This is useful for Relation modal where the model is not the one in the url but the one from the relation.
  */
-const FormLayout = ({ layout, hasBackground = true, model: modelProp }: FormLayoutProps) => {
+const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { model: modelUseDoc } = useDoc();
-  const model = modelProp || modelUseDoc;
+  const documentMeta = useDocumentContext('FormLayout', (state) => state.meta);
+  const model = documentMeta.model;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -60,11 +60,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelProp }: FormLayo
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                {modelProp ? (
-                  <InputRendererWithContext {...fieldWithTranslatedLabel} />
-                ) : (
-                  <InputRenderer {...fieldWithTranslatedLabel} />
-                )}
+                <InputRenderer {...fieldWithTranslatedLabel} />
               </Grid.Item>
             </Grid.Root>
           );
@@ -101,11 +97,7 @@ const FormLayout = ({ layout, hasBackground = true, model: modelProp }: FormLayo
                         direction="column"
                         alignItems="stretch"
                       >
-                        {modelProp ? (
-                          <InputRendererWithContext {...fieldWithTranslatedLabel} />
-                        ) : (
-                          <InputRenderer {...fieldWithTranslatedLabel} />
-                        )}
+                        <InputRenderer {...fieldWithTranslatedLabel} />
                       </ResponsiveGridItem>
                     );
                   })}

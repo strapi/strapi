@@ -9,8 +9,9 @@ import {
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { type UseDocument, useDoc } from '../../../hooks/useDocument';
+import { useDoc } from '../../../hooks/useDocument';
 import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
@@ -18,91 +19,34 @@ import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
-import { useRelationModalContext } from './FormInputs/Relations/RelationModal';
 import { RelationsInput, UnstableRelationsInput } from './FormInputs/Relations/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
-import type { CurrentRelation } from './FormInputs/Relations/RelationModal';
 import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
-  contextId?: string;
-  contextDocument?: NonNullable<ReturnType<UseDocument>['document']>;
-  contextCollectionType?: string;
-  contextModel?: string;
-  changeCurrentRelation?: (newRelation: CurrentRelation) => void;
-  isModalOpen?: boolean;
-  contextComponents?: ReturnType<typeof useDocumentLayout>['edit']['components'];
-};
-/**
- * @internal
- *
- * @description An abstraction around the regular form input renderer designed
- * specifically to be used in the EditView of the content-manager this understands
- * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
- * components such as Blocks / Relations.
- */
-const InputRendererWithContext = (props: InputRendererProps) => {
-  const id = useRelationModalContext('RelationModal', (state) => state.currentRelation.documentId);
-  const document = useRelationModalContext('RelationModal', (state) => state.document);
-  const model = useRelationModalContext('RelationModal', (state) => state.currentRelation.model);
-  const collectionType = useRelationModalContext(
-    'RelationModal',
-    (state) => state.currentRelation.collectionType
-  );
-  const changeCurrentRelation = useRelationModalContext(
-    'RelationModal',
-    (state) => state.changeCurrentRelation
-  );
-  const isModalOpen = useRelationModalContext('RelationModal', (state) => state.isModalOpen);
-  const {
-    edit: { components },
-  } = useDocumentLayout(model);
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
-  return (
-    <InputRenderer
-      contextId={id}
-      contextDocument={document}
-      contextCollectionType={collectionType}
-      contextModel={model}
-      changeCurrentRelation={changeCurrentRelation}
-      isModalOpen={isModalOpen}
-      contextComponents={components}
-      {...props}
-    />
-  );
-};
+const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
+  const { id: rootId } = useDoc();
+  const documentMeta = useDocumentContext('InputRenderer', (state) => state.meta);
+  const documentResponse = useDocumentContext('InputRenderer', (state) => state.document);
+  const documentLayout = useDocumentLayout(documentMeta.model);
 
-const InputRenderer = ({
-  visible,
-  hint: providedHint,
-  contextId,
-  contextDocument,
-  contextCollectionType,
-  contextModel,
-  changeCurrentRelation,
-  isModalOpen,
-  contextComponents,
-  ...props
-}: InputRendererProps) => {
-  const { id: hookId, document: hookDocument, collectionType: hookCollectionType } = useDoc();
-  const id = contextId || hookId;
-  const document = contextDocument || hookDocument;
-  const collectionType = contextCollectionType || hookCollectionType;
-
-  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
+  const document = documentResponse?.document;
+  const collectionType = documentMeta.collectionType;
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
+  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
-  let idToCheck = id;
+  let idToCheck = rootId;
   if (collectionType === SINGLE_TYPES) {
     idToCheck = document?.documentId;
   }
@@ -123,10 +67,15 @@ const InputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+
   const {
-    edit: { components: useDocLayoutComponents },
+    edit: { components: rootDocumentComponents },
   } = useDocLayout();
-  const components = contextComponents ?? useDocLayoutComponents;
+
+  const components =
+    Object.keys(rootDocumentComponents).length !== 0
+      ? rootDocumentComponents
+      : documentLayout.edit.components;
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
@@ -200,17 +149,7 @@ const InputRenderer = ({
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
       if (window.strapi.future.isEnabled('unstableRelationsOnTheFly')) {
-        return (
-          <UnstableRelationsInput
-            {...props}
-            hint={hint}
-            disabled={fieldIsDisabled}
-            document={contextDocument}
-            documentModel={contextModel}
-            changeCurrentRelation={changeCurrentRelation}
-            isModalOpen={isModalOpen}
-          />
-        );
+        return <UnstableRelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
       }
       return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'richtext':
@@ -315,11 +254,6 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
 };
 
 const MemoizedInputRenderer = React.memo(InputRenderer);
-const MemoizedInputRendererWithContext = React.memo(InputRendererWithContext);
 
 export type { InputRendererProps };
-export {
-  MemoizedInputRenderer as InputRenderer,
-  MemoizedInputRendererWithContext as InputRendererWithContext,
-  useFieldHint,
-};
+export { MemoizedInputRenderer as InputRenderer, useFieldHint };

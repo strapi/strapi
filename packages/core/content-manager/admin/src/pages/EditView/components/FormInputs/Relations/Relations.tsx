@@ -36,6 +36,7 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { type UseDocument, useDoc } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
@@ -129,12 +130,11 @@ interface RelationsFieldProps
     Pick<InputProps, 'hint'> {
   documentModel?: string;
   document?: ReturnType<UseDocument>['document'];
-  changeCurrentRelation?: (newRelation: {
+  setCurrentDocument?: (newDocument: {
     documentId: string;
     model: string;
     collectionType: string;
   }) => void;
-  isModalOpen?: boolean;
 }
 
 export interface RelationsFormValue {
@@ -157,23 +157,14 @@ export interface RelationsFormValue {
  * they wish to do so.
  */
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
-  (
-    {
-      disabled,
-      label,
-      documentModel: modelInput,
-      document: documentInput,
-      changeCurrentRelation,
-      isModalOpen,
-      ...props
-    },
-    ref
-  ) => {
+  ({ disabled, label, ...props }, ref) => {
+    const documentMeta = useDocumentContext('RelationsField', (state) => state.meta);
+    const documentResponse = useDocumentContext('RelationsField', (state) => state.document);
+    const changeDocument = useDocumentContext('RelationsField', (state) => state.changeDocument);
+
     const [currentPage, setCurrentPage] = React.useState(1);
-    const { document: hookDocument, model: hookModel } = useDoc();
-    const document = documentInput && isModalOpen ? documentInput : hookDocument;
-    const documentModel = modelInput && isModalOpen ? modelInput : hookModel;
-    const documentId = document?.documentId;
+    const documentId = documentResponse.document?.documentId;
+
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
     const params = buildValidParams(query);
@@ -197,7 +188,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = isModalOpen ? (documentModel ?? componentUID) : (componentUID ?? documentModel);
+    const model = componentUID ?? documentMeta.model;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -212,7 +203,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
         model,
         targetField,
         // below we don't run the query if there is no id.
-        id: id!,
+        id,
         params: {
           ...params,
           pageSize: RELATIONS_TO_DISPLAY,
@@ -379,8 +370,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
           relationType={props.attribute.relation}
           // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
           targetModel={props.attribute.targetModel}
-          isModalOpen={isModalOpen}
-          changeCurrentRelation={changeCurrentRelation}
+          setCurrentDocument={changeDocument}
         />
       </Flex>
     );
@@ -887,8 +877,7 @@ interface UnstableRelationsListProps extends Pick<RelationsFieldProps, 'disabled
    */
   serverData: RelationResult[];
   targetModel: string;
-  isModalOpen?: boolean;
-  changeCurrentRelation?: (newRelation: {
+  setCurrentDocument?: (newDocument: {
     documentId: string;
     model: string;
     collectionType: string;
@@ -903,8 +892,7 @@ const UnstableRelationsList = ({
   isLoading,
   relationType,
   targetModel,
-  isModalOpen = false,
-  changeCurrentRelation,
+  setCurrentDocument,
 }: UnstableRelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
@@ -1123,8 +1111,7 @@ const UnstableRelationsList = ({
           handleDisconnect,
           relations: data,
           targetModel,
-          isModalOpen,
-          changeCurrentRelation,
+          setCurrentDocument,
         }}
         itemKey={(index) => data[index].id}
         innerElementType="ol"
@@ -1422,8 +1409,7 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     name: string;
     relations: Relation[];
     targetModel: string;
-    isModalOpen?: boolean;
-    changeCurrentRelation?: (newRelation: {
+    setCurrentDocument?: (newRelation: {
       documentId: string;
       model: string;
       collectionType: string;
@@ -1450,11 +1436,11 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     name,
     relations,
     targetModel,
-    isModalOpen,
-    changeCurrentRelation,
+    setCurrentDocument,
   } = data;
+
   const { formatMessage } = useIntl();
-  const [showModal, setShowModal] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const { id, label, status, documentId, href, apiData } = relations[index];
 
@@ -1481,13 +1467,13 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
 
   const handleChangeModalContent = () => {
-    if (changeCurrentRelation) {
+    if (setCurrentDocument) {
       const newRelation = {
         documentId: documentId ? documentId : apiData?.documentId || '',
         model: targetModel,
         collectionType: getCollectionType(href)!,
       };
-      changeCurrentRelation(newRelation);
+      setCurrentDocument(newRelation);
     }
   };
 
@@ -1543,16 +1529,23 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                   {isModalOpen ? (
                     <CustomTextButton onClick={handleChangeModalContent}>{label}</CustomTextButton>
                   ) : (
-                    <CustomTextButton onClick={() => setShowModal(true)}>{label}</CustomTextButton>
+                    <CustomTextButton
+                      onClick={() => {
+                        setIsModalOpen(true);
+                        handleChangeModalContent();
+                      }}
+                    >
+                      {label}
+                    </CustomTextButton>
                   )}
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
-              {showModal && (
+              {isModalOpen && (
                 <RelationModal
-                  open={showModal}
+                  open={isModalOpen}
                   onToggle={() => {
-                    setShowModal((prev) => !prev);
+                    setIsModalOpen(!isModalOpen);
                   }}
                   model={targetModel}
                   id={documentId ? documentId : apiData?.documentId}
