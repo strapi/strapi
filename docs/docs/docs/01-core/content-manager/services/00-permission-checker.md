@@ -127,12 +127,12 @@ permissionChecker.validateInput('update', inputData, existingEntity);
 
 ### Query Enforcement
 
-#### `sanitizedQuery(query, action)`
+#### `sanitizedQuery.<action>(query)`
 
 Modifies queries to enforce permissions automatically.
 
 ```ts
-const securedQuery = permissionChecker.sanitizedQuery({ sort: 'createdAt:desc' });
+const securedQuery = permissionChecker.sanitizedQuery.read({ sort: 'createdAt:desc' });
 ```
 
 ## Exported Service
