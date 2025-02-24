@@ -19,11 +19,11 @@ import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
+import { useDocumentContext } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
-import { useRelationContext } from '../../../EditViewPage';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
@@ -58,10 +58,10 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
-  const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
+  const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
   const {
     edit: { components },
-  } = useDocumentLayout(currentRelation.model);
+  } = useDocumentLayout(currentDocument.model);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };

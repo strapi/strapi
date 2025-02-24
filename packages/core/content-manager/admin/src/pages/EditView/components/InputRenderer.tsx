@@ -10,10 +10,9 @@ import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
+import { useDoc, useDocumentContext } from '../../../hooks/useDocument';
 import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
-import { useRelationContext } from '../EditViewPage';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
@@ -31,12 +30,12 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
   const { id: rootId } = useDoc();
-  const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
-  const documentResponse = useRelationContext('RelationContext', (state) => state.document);
-  const documentLayout = useDocumentLayout(currentRelation.model);
+  const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
+  const documentResponse = useDocumentContext('DocumentContext', (state) => state.document);
+  const documentLayout = useDocumentLayout(currentDocument.model);
 
   const document = documentResponse?.document;
-  const collectionType = currentRelation.collectionType;
+  const collectionType = currentDocument.collectionType;
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 

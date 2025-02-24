@@ -1,17 +1,15 @@
 import { render, screen } from '@tests/utils';
 
-import { RelationProvider } from '../../../../EditViewPage';
+import { DocumentContextProvider } from '../../../../EditViewPage';
 import { RelationModal } from '../RelationModal';
 
 const relationContext = {
-  currentRelation: {
+  initialDocument: {
     documentId: 'abcdefg',
     model: 'api::test.test',
     collectionType: 'collection-types',
   },
-  changeCurrentRelation: jest.fn(),
-  isModalOpen: true,
-  setIsModalOpen: jest.fn(),
+  setCurrentDocument: jest.fn(),
 };
 
 jest.mock('../../../../../../hooks/useDocument', () => ({
@@ -176,7 +174,7 @@ describe('<RelationModal />', () => {
   });
   it("doesn't render the modal if we pass an open prop to false", () => {
     render(
-      <RelationProvider {...relationContext}>
+      <DocumentContextProvider {...relationContext}>
         <RelationModal
           open={false}
           onToggle={() => {}}
@@ -184,7 +182,7 @@ describe('<RelationModal />', () => {
           id="abcdefg"
           relationUrl="../collection-types/api::test.test/abcdefg?"
         />
-      </RelationProvider>
+      </DocumentContextProvider>
     );
 
     expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
@@ -192,7 +190,7 @@ describe('<RelationModal />', () => {
 
   it('renders the modal if we pass an open prop to true', () => {
     render(
-      <RelationProvider {...relationContext}>
+      <DocumentContextProvider {...relationContext}>
         <RelationModal
           open={true}
           onToggle={() => {}}
@@ -200,14 +198,14 @@ describe('<RelationModal />', () => {
           id="abcdefg"
           relationUrl="../collection-types/api::test.test/abcdefg"
         />
-      </RelationProvider>
+      </DocumentContextProvider>
     );
 
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
   it('shows the modal with the Edit a relation title, the relation title, the X button and the Cancel button when the modal is to Edit a relation', () => {
     render(
-      <RelationProvider {...relationContext}>
+      <DocumentContextProvider {...relationContext}>
         <RelationModal
           open={true}
           onToggle={() => {}}
@@ -215,7 +213,7 @@ describe('<RelationModal />', () => {
           id="abcdefg"
           relationUrl="../collection-types/api::test.test/abcdefg?"
         />
-      </RelationProvider>
+      </DocumentContextProvider>
     );
 
     expect(screen.getByText('Edit a relation')).toBeInTheDocument();

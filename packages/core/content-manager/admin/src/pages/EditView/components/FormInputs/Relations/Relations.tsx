@@ -37,7 +37,7 @@ import { RelationDragPreviewProps } from '../../../../../components/DragPreviews
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDebounce } from '../../../../../hooks/useDebounce';
-import { type UseDocument, useDoc } from '../../../../../hooks/useDocument';
+import { type UseDocument, useDoc, useDocumentContext } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
@@ -52,7 +52,6 @@ import {
 import { buildValidParams } from '../../../../../utils/api';
 import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
-import { useRelationContext } from '../../../EditViewPage';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
 import { RelationModal, getCollectionType } from '../Relations/RelationModal';
@@ -130,7 +129,7 @@ interface RelationsFieldProps
     Pick<InputProps, 'hint'> {
   documentModel?: string;
   document?: ReturnType<UseDocument>['document'];
-  changeCurrentRelation?: (newRelation: {
+  setCurrentDocument?: (newDocument: {
     documentId: string;
     model: string;
     collectionType: string;
@@ -158,11 +157,11 @@ export interface RelationsFormValue {
  */
 const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
-    const currentRelation = useRelationContext('RelationContext', (state) => state.currentRelation);
-    const documentResponse = useRelationContext('RelationContext', (state) => state.document);
-    const changeCurrentRelation = useRelationContext(
-      'RelationContext',
-      (state) => state.changeCurrentRelation
+    const currentDocument = useDocumentContext('DocumentContext', (state) => state.currentDocument);
+    const documentResponse = useDocumentContext('DocumentContext', (state) => state.document);
+    const setCurrentDocument = useDocumentContext(
+      'DocumentContext',
+      (state) => state.setCurrentDocument
     );
 
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -191,7 +190,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
      * Same with `uid` and `documentModel`.
      */
     const id = componentId ? componentId.toString() : documentId;
-    const model = componentUID ?? currentRelation.model;
+    const model = componentUID ?? currentDocument.model;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -373,7 +372,7 @@ const UnstableRelationsField = React.forwardRef<HTMLDivElement, RelationsFieldPr
           relationType={props.attribute.relation}
           // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
           targetModel={props.attribute.targetModel}
-          changeCurrentRelation={changeCurrentRelation}
+          setCurrentDocument={setCurrentDocument}
         />
       </Flex>
     );
@@ -880,7 +879,7 @@ interface UnstableRelationsListProps extends Pick<RelationsFieldProps, 'disabled
    */
   serverData: RelationResult[];
   targetModel: string;
-  changeCurrentRelation?: (newRelation: {
+  setCurrentDocument?: (newDocument: {
     documentId: string;
     model: string;
     collectionType: string;
@@ -895,7 +894,7 @@ const UnstableRelationsList = ({
   isLoading,
   relationType,
   targetModel,
-  changeCurrentRelation,
+  setCurrentDocument,
 }: UnstableRelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
@@ -1114,7 +1113,7 @@ const UnstableRelationsList = ({
           handleDisconnect,
           relations: data,
           targetModel,
-          changeCurrentRelation,
+          setCurrentDocument,
         }}
         itemKey={(index) => data[index].id}
         innerElementType="ol"
@@ -1412,7 +1411,7 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     name: string;
     relations: Relation[];
     targetModel: string;
-    changeCurrentRelation?: (newRelation: {
+    setCurrentDocument?: (newRelation: {
       documentId: string;
       model: string;
       collectionType: string;
@@ -1439,7 +1438,7 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     name,
     relations,
     targetModel,
-    changeCurrentRelation,
+    setCurrentDocument,
   } = data;
 
   const { formatMessage } = useIntl();
@@ -1470,13 +1469,13 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
 
   const handleChangeModalContent = () => {
-    if (changeCurrentRelation) {
+    if (setCurrentDocument) {
       const newRelation = {
         documentId: documentId ? documentId : apiData?.documentId || '',
         model: targetModel,
         collectionType: getCollectionType(href)!,
       };
-      changeCurrentRelation(newRelation);
+      setCurrentDocument(newRelation);
     }
   };
 

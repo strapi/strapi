@@ -13,6 +13,7 @@ import {
   FormErrors,
   getYupValidationErrors,
   useForm,
+  createContext,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -329,5 +330,27 @@ const useContentManagerContext = () => {
   };
 };
 
-export { useDocument, useDoc, useContentManagerContext };
-export type { UseDocument, UseDocumentArgs, Document, Schema, ComponentsDictionary };
+interface CurrentDocument {
+  documentId: string;
+  model: string;
+  collectionType: string;
+}
+
+interface DocumentContextValue {
+  currentDocument: CurrentDocument;
+  document: ReturnType<UseDocument>;
+  setCurrentDocument: (newRelation: CurrentDocument) => void;
+}
+
+const [DocumentProviderImpl, useDocumentContext] =
+  createContext<DocumentContextValue>('DocumentContext');
+
+export { useDocument, useDoc, useContentManagerContext, useDocumentContext, DocumentProviderImpl };
+export type {
+  UseDocument,
+  UseDocumentArgs,
+  Document,
+  Schema,
+  ComponentsDictionary,
+  CurrentDocument,
+};

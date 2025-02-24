@@ -18,12 +18,11 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocument } from '../../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../../hooks/useDocument';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
-import { useRelationContext } from '../../../EditViewPage';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
@@ -52,7 +51,7 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const components = useRelationContext('Relation', (state) => state.document.components);
+  const components = useDocumentContext('Relation', (state) => state.document.components);
 
   const {
     value = [],

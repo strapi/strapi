@@ -17,7 +17,13 @@ import { styled } from 'styled-components';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { type UseDocument, useDoc, useDocument } from '../../hooks/useDocument';
+import {
+  type UseDocument,
+  type CurrentDocument,
+  useDoc,
+  useDocument,
+  DocumentProviderImpl,
+} from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
@@ -28,45 +34,27 @@ import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
 
-export interface CurrentRelation {
-  documentId: string;
-  model: string;
-  collectionType: string;
-}
-
-interface RelationContextValue {
-  currentRelation: CurrentRelation;
-  document: ReturnType<UseDocument>;
-  changeCurrentRelation: (newRelation: CurrentRelation) => void;
-}
-
-// TODO: RelationProvider is maybe not the best name? DocumentRelationProvider, EditViewProvider?
-const [RelationProviderImpl, useRelationContext] =
-  createContext<RelationContextValue>('RelationContext');
-
-const RelationProvider = ({
+const DocumentContextProvider = ({
   children,
-  initialRelation,
+  initialDocument,
 }: {
   children: React.ReactNode | React.ReactNode[];
-  initialRelation: CurrentRelation;
+  initialDocument: CurrentDocument;
 }) => {
-  // TODO: currentRelation is maybe not the best name? documentMeta? documentParams? documentInfo? documentIdentifiers?
-  const [currentRelation, setCurrentRelation] = React.useState<CurrentRelation>(initialRelation);
-  const document = useDocument(currentRelation);
+  const [currentDocument, setCurrentDocument] = React.useState<CurrentDocument>(initialDocument);
+  const document = useDocument(currentDocument);
 
   return (
-    <RelationProviderImpl
-      currentRelation={currentRelation}
-      changeCurrentRelation={setCurrentRelation}
+    <DocumentProviderImpl
+      currentDocument={currentDocument}
+      setCurrentDocument={setCurrentDocument}
       document={document}
     >
       {children}
-    </RelationProviderImpl>
+    </DocumentProviderImpl>
   );
 };
 
-export { useRelationContext };
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
  * -----------------------------------------------------------------------------------------------*/
@@ -170,8 +158,8 @@ const EditViewPage = () => {
   return (
     <Main paddingLeft={10} paddingRight={10}>
       <Page.Title>{getTitle(mainField)}</Page.Title>
-      <RelationProvider
-        initialRelation={{
+      <DocumentContextProvider
+        initialDocument={{
           documentId: id!,
           model,
           collectionType,
@@ -246,7 +234,7 @@ const EditViewPage = () => {
             </>
           )}
         </Form>
-      </RelationProvider>
+      </DocumentContextProvider>
     </Main>
   );
 };
@@ -323,4 +311,4 @@ const ProtectedEditViewPage = () => {
   );
 };
 
-export { EditViewPage, ProtectedEditViewPage, getDocumentStatus, RelationProvider };
+export { EditViewPage, ProtectedEditViewPage, getDocumentStatus, DocumentContextProvider };

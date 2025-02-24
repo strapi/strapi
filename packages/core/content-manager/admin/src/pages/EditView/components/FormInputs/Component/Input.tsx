@@ -5,10 +5,9 @@ import { Field, Flex, IconButton } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { useDocument } from '../../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../../hooks/useDocument';
 import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
-import { useRelationContext } from '../../../EditViewPage';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
 import { type InputRendererProps } from '../../InputRenderer';
@@ -43,7 +42,7 @@ const ComponentInput = ({
 
   const showResetComponent = !attribute.repeatable && field.value && !disabled;
 
-  const components = useRelationContext('RelationContext', (state) => state.document.components);
+  const components = useDocumentContext('DocumentContext', (state) => state.document.components);
 
   const handleInitialisationClick = () => {
     const schema = components[attribute.component];
