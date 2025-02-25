@@ -204,7 +204,10 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
       });
 
     /**
-     * Writes a chunk of data for the specified asset with the given id.
+     * Start processing the queue for a given assetID
+     *
+     * Even though this is a loop that attempts to process the entire queue, it is safe to call this more than once
+     * for the same asset id because the queue is shared globally, the items are shifted off and immediately written
      */
     const processQueue = async (id: string) => {
       if (!assets[id]) {
