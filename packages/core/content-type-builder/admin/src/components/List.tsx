@@ -65,56 +65,29 @@ export const List = ({
 
   if (type?.attributes.length === 0 && isMain) {
     return (
-      <Table colCount={2} rowCount={2}>
-        <Thead>
-          <Tr>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
-              </Typography>
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td colSpan={2}>
-              <EmptyStateLayout
-                action={
-                  <Button
-                    onClick={onClickAddField}
-                    size="L"
-                    startIcon={<Plus />}
-                    variant="secondary"
-                  >
-                    {formatMessage({
-                      id: getTrad('table.button.no-fields'),
-                      defaultMessage: 'Add new field',
-                    })}
-                  </Button>
-                }
-                content={formatMessage(
-                  isInContentTypeView
-                    ? {
-                        id: getTrad('table.content.no-fields.collection-type'),
-                        defaultMessage: 'Add your first field to this Collection-Type',
-                      }
-                    : {
-                        id: getTrad('table.content.no-fields.component'),
-                        defaultMessage: 'Add your first field to this component',
-                      }
-                )}
-                hasRadius
-                icon={<EmptyDocuments width="16rem" />}
-              />
-            </Td>
-          </Tr>
-        </Tbody>
-      </Table>
+      <EmptyStateLayout
+        action={
+          <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
+            {formatMessage({
+              id: getTrad('table.button.no-fields'),
+              defaultMessage: 'Add new field',
+            })}
+          </Button>
+        }
+        content={formatMessage(
+          isInContentTypeView
+            ? {
+                id: getTrad('table.content.no-fields.collection-type'),
+                defaultMessage: 'Add your first field to this Collection-Type',
+              }
+            : {
+                id: getTrad('table.content.no-fields.component'),
+                defaultMessage: 'Add your first field to this component',
+              }
+        )}
+        hasRadius
+        icon={<EmptyDocuments width="16rem" />}
+      />
     );
   }
 
@@ -187,9 +160,7 @@ export const List = ({
         <TFooter cursor="pointer" icon={<Plus />} onClick={onClickAddField}>
           {formatMessage({
             id: getTrad(
-              `form.button.add.field.to.${
-                type.modelType === 'component' ? 'component' : type.kind
-              }`
+              `form.button.add.field.to.${type.modelType === 'component' ? 'component' : type.kind}`
             ),
             defaultMessage: 'Add another field',
           })}

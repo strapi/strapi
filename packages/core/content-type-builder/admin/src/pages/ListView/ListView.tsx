@@ -3,8 +3,6 @@ import { useEffect, useCallback } from 'react';
 import { BackButton, useTracking, Layouts } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex } from '@strapi/design-system';
 import { Pencil, Plus } from '@strapi/icons';
-import get from 'lodash/get';
-import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
@@ -191,10 +189,6 @@ const ListView = () => {
         id="title"
         primaryAction={primaryAction}
         title={upperFirst(label)}
-        subtitle={formatMessage({
-          id: getTrad('listView.headerLayout.description'),
-          defaultMessage: 'Build the data architecture of your content',
-        })}
         navigationAction={<BackButton />}
       />
       <Layouts.Content>

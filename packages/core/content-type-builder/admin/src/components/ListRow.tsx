@@ -145,6 +145,9 @@ export const ListRow = memo(
                     defaultMessage: 'from',
                   })}: ${isPluginContentType})`}
               </span>
+              <Typography textColor="neutral600" fontWeight="normal">
+                &nbsp;({relation})
+              </Typography>
             </Typography>
           ) : (
             <DisplayedType type={type} customField={customField} repeatable={repeatable} />
@@ -152,9 +155,12 @@ export const ListRow = memo(
         </td>
         <td>
           {isInDevelopmentMode ? (
-            <Flex justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
+            <Flex justifyContent="flex-end" gap={1} onClick={(e) => e.stopPropagation()}>
+              <Box paddingRight={2}>
+                <Status status={status} />
+              </Box>
               {configurable ? (
-                <Flex gap={1}>
+                <>
                   {!isMorph && (
                     <IconButton
                       onClick={handleClick}
@@ -185,8 +191,7 @@ export const ListRow = memo(
                   >
                     <Trash />
                   </IconButton>
-                  <Status status={status} />
-                </Flex>
+                </>
               ) : (
                 <Lock />
               )}

@@ -232,7 +232,7 @@ export const ContentTypeBuilderNav = () => {
       </NavHeader>
       <Divider background="neutral200" />
       <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
-        <Flex gap={1}>
+        <Flex gap={2}>
           <Button
             flex={1}
             onClick={(e) => {
@@ -273,7 +273,7 @@ export const ContentTypeBuilderNav = () => {
                   undo();
                 }}
               >
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <ArrowCounterClockwise fill="neutral500" />
                   <Typography>Undo last change</Typography>
                 </Flex>
@@ -285,7 +285,7 @@ export const ContentTypeBuilderNav = () => {
                 }}
               >
                 <Typography>
-                  <Flex gap={1}>
+                  <Flex gap={2}>
                     <ArrowClockwise fill="neutral500" />
                     <Typography>Redo last change</Typography>
                   </Flex>
@@ -294,11 +294,12 @@ export const ContentTypeBuilderNav = () => {
               <Menu.Separator />
               <Menu.Item
                 onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  // TODO: add confirmation step <Blocker>
                   e.preventDefault();
                   discardAllChanges();
                 }}
               >
-                <Flex gap={1}>
+                <Flex gap={2}>
                   <Cross fill="danger500" />
                   <Typography textColor={'danger500'}>Discard all changes</Typography>
                 </Flex>
