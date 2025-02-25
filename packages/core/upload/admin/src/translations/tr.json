@@ -17,7 +17,7 @@
   "control-card.stop-crop": "Kırpmayı durdur",
   "filter.add": "Filtre ekle",
   "form.button.replace-media": "Ortamı değiştir",
-  "form.input.decription.file-alt": "Dosya gösterilemediğinde bu yazı görünecek.",
+  "form.input.description.file-alt": "Dosya gösterilemediğinde bu yazı görünecek.",
   "form.input.label.file-alt": "Alternatif metin",
   "form.input.label.file-caption": "Başlık",
   "form.input.label.file-name": "Dosya adı",
