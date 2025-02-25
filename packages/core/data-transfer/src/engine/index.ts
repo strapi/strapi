@@ -122,6 +122,8 @@ class TransferEngine<
 
   #currentStreamController?: AbortController;
 
+  #aborted: boolean = false;
+
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
   }
@@ -592,12 +594,11 @@ class TransferEngine<
     }
   }
 
-  #aborted: boolean = false;
-
   // Cause an ongoing transfer to abort gracefully
   async abortTransfer(): Promise<void> {
     this.#aborted = true;
     this.#currentStreamController?.abort();
+    throw new TransferEngineError('fatal', 'Transfer aborted.');
   }
 
   async init(): Promise<void> {
