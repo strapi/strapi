@@ -5,7 +5,6 @@ import {
   Draft,
   original,
   PayloadAction,
-  Slice,
   SliceCaseReducers,
 } from '@reduxjs/toolkit';
 import get from 'lodash/get';
@@ -21,19 +20,18 @@ import { formatSchema } from './utils/formatSchemas';
 import type {
   DataManagerStateType,
   ContentType,
-  AttributeType,
   Component,
-  SchemaType,
   Status,
+  AnyAttribute,
+  Relation,
 } from '../../types';
 import type { Internal, Schema, Struct } from '@strapi/types';
-import { nothing } from 'immer';
 
 // TODO: Define all possible actions based on type
 export type Action<T = any> = {
   type: T;
   uid?: string;
-  mainDataKey: SchemaType;
+  mainDataKey: Struct.ModelType;
   schemaType: 'component' | 'contentType';
   attributeToRemoveName?: string;
   [key: string]: any;
@@ -53,7 +51,7 @@ const initialState: DataManagerStateType = {
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.WithTarget) => {
+const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.Any) => {
   if (originalRelation === 'manyToOne') {
     return 'oneToMany';
   }
@@ -66,7 +64,7 @@ const getOppositeRelation = (originalRelation?: Schema.Attribute.RelationKind.Wi
 };
 
 const findAttributeIndex = (type: any, attributeToFind?: string) => {
-  return type.schema.attributes.findIndex(({ name }: { name: string }) => name === attributeToFind);
+  return type.attributes.findIndex(({ name }: { name: string }) => name === attributeToFind);
 };
 
 type InitPayload = {
@@ -77,12 +75,12 @@ type InitPayload = {
 
 type AddAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
 };
 
 type AddCreateComponentToDynamicZonePayload = {
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
   dynamicZoneTarget: string;
   componentsToAdd: Internal.UID.Component[];
@@ -90,62 +88,80 @@ type AddCreateComponentToDynamicZonePayload = {
 
 type AddCustomFieldAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
 };
 
 type ChangeDynamicZoneComponentsPayload = {
   dynamicZoneTarget: string;
   newComponents: Internal.UID.Component[];
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
 };
 
 type CreateComponentSchemaPayload = {
   uid: string;
-  data: any;
+  data: {
+    icon: string;
+    displayName: string;
+  };
   componentCategory: string;
 };
 
 type CreateSchemaPayload = {
   uid: string;
-  data: any;
+  data: {
+    displayName: string;
+    singularName: string;
+    pluralName: string;
+    kind: Struct.ContentTypeKind;
+    draftAndPublish: boolean;
+    pluginOptions: Record<string, any>;
+  };
 };
 
 type EditAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
   initialAttribute: Record<string, any>;
 };
 
 type EditCustomFieldAttributePayload = {
   attributeToSet: Record<string, any>;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
   initialAttribute: Record<string, any>;
 };
 
 type RemoveComponentFromDynamicZonePayload = {
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
   dzName: string;
   componentToRemoveIndex: number;
 };
 
 type RemoveFieldPayload = {
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: string;
   attributeToRemoveName: string;
 };
 
 type UpdateComponentSchemaPayload = {
-  data: Record<string, any>;
+  data: {
+    icon: string;
+    displayName: string;
+  };
   uid: string;
 };
 
 type UpdateSchemaPayload = {
-  data: Record<string, any>;
+  data: {
+    displayName: string;
+    kind: Struct.ContentTypeKind;
+    draftAndPublish: boolean;
+    pluginOptions: Record<string, any>;
+  };
   uid: string;
 };
 
@@ -155,41 +171,37 @@ const getType = (
     forTarget,
     targetUid,
   }: {
-    forTarget: SchemaType;
+    forTarget: Struct.ModelType;
     targetUid: string;
   }
 ): ContentType | Component => {
   return forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
 };
 
-const createAttribute = (properties: Record<string, any>): Record<string, any> => {
+const createAttribute = (properties: Record<string, any>): AnyAttribute => {
   return {
     ...properties,
     status: 'NEW',
-  };
+  } as AnyAttribute;
 };
 
-const setAttributeAt = (
-  type: ContentType | Component,
-  index: number,
-  attribute: Record<string, any>
-) => {
-  type.schema.attributes[index] = attribute;
+const setAttributeAt = (type: ContentType | Component, index: number, attribute: AnyAttribute) => {
+  type.attributes[index] = attribute;
   setStatus(type, 'CHANGED');
 };
 
-const pushAttribute = (type: ContentType | Component, attribute: Record<string, any>) => {
-  type.schema.attributes.push(attribute);
+const pushAttribute = (type: ContentType | Component, attribute: AnyAttribute) => {
+  type.attributes.push(attribute);
   setStatus(type, 'CHANGED');
 };
 
 const removeAttributeAt = (type: ContentType | Component, index: number) => {
-  const attr = type.schema.attributes[index];
+  const attr = type.attributes[index];
 
   setStatus(type, 'CHANGED');
 
   if (attr.status === 'NEW') {
-    type.schema.attributes.splice(index, 1);
+    type.attributes.splice(index, 1);
   } else {
     setAttributeStatus(attr, 'REMOVED');
   }
@@ -321,12 +333,14 @@ const slice = createUndoRedoSlice({
         status: 'NEW',
         isTemporary: true,
         category: componentCategory,
-        schema: {
-          ...data,
-          visible: true,
-          attributes: [],
-          modelType: 'component',
+        modelName: data.displayName,
+        globalId: data.displayName,
+        info: {
+          icon: data.icon,
+          displayName: data.displayName,
         },
+        attributes: [],
+        modelType: 'component',
       };
 
       state.components[uid as string] = newSchema;
@@ -334,16 +348,27 @@ const slice = createUndoRedoSlice({
     createSchema: (state, action: PayloadAction<CreateSchemaPayload>) => {
       const { uid, data } = action.payload;
 
+      const { displayName, singularName, pluralName, kind, draftAndPublish, pluginOptions } = data;
+
       const newSchema: ContentType = {
         uid: uid as Internal.UID.ContentType,
         status: 'NEW',
         isTemporary: true,
-        schema: {
-          ...data,
-          visible: true,
-          attributes: [],
-          modelType: 'contentType',
+        visible: true,
+        modelType: 'contentType',
+        attributes: [],
+        kind,
+        modelName: displayName,
+        globalId: displayName,
+        options: {
+          draftAndPublish,
         },
+        info: {
+          displayName,
+          singularName,
+          pluralName,
+        },
+        pluginOptions,
       };
 
       state.contentTypes[uid] = newSchema;
@@ -355,7 +380,7 @@ const slice = createUndoRedoSlice({
 
       const attribute = createAttribute(omit(attributeToSet, 'createComponent'));
 
-      type.schema.attributes.push(attribute);
+      type.attributes.push(attribute);
 
       setStatus(type, 'CHANGED');
 
@@ -387,7 +412,7 @@ const slice = createUndoRedoSlice({
 
       const type = getType(state, { forTarget, targetUid });
 
-      pushAttribute(type, attributeToSet);
+      pushAttribute(type, attributeToSet as AnyAttribute);
     },
     addCreatedComponentToDynamicZone: (
       state,
@@ -398,12 +423,10 @@ const slice = createUndoRedoSlice({
       const type = getType(state, { forTarget, targetUid });
 
       const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
+      const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
 
       componentsToAdd.forEach((componentUid: Internal.UID.Component) => {
-        if (!type.schema.attributes[dzAttributeIndex].components) {
-          type.schema.attributes[dzAttributeIndex].components = [];
-        }
-        type.schema.attributes[dzAttributeIndex].components.push(componentUid);
+        attr.components.push(componentUid);
       });
 
       setStatus(type, 'CHANGED');
@@ -417,13 +440,13 @@ const slice = createUndoRedoSlice({
       const type = getType(state, { forTarget, targetUid });
 
       const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
-
-      const currentDZComponents = (type?.schema.attributes[dzAttributeIndex]).components;
+      const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
+      const currentDZComponents = attr.components;
 
       const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
       setStatus(type, 'CHANGED');
-      type.schema.attributes[dzAttributeIndex].components = updatedComponents;
+      attr.components = updatedComponents;
     },
     editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
       const { attributeToSet, forTarget, targetUid, initialAttribute } = action.payload;
@@ -439,20 +462,20 @@ const slice = createUndoRedoSlice({
       const isEditingRelation = rest.type === 'relation';
 
       if (!isEditingRelation) {
-        setAttributeAt(type, initialAttributeIndex, attribute);
+        setAttributeAt(type, initialAttributeIndex, attribute as AnyAttribute);
         return;
       }
 
-      const updatedAttributes: AttributeType[] = get(type, ['schema', 'attributes']).slice();
+      const updatedAttributes = type.attributes.slice();
 
       // First create the current relation attribute updated
-      const toSet = {
+      const toSet: Relation = {
         name,
         relation: rest.relation,
         target: rest.target,
         targetAttribute: rest.targetAttribute,
         type: 'relation',
-      } as AttributeType;
+      };
 
       if (rest.private) {
         toSet.private = rest.private;
@@ -462,7 +485,7 @@ const slice = createUndoRedoSlice({
         toSet.pluginOptions = rest.pluginOptions;
       }
 
-      const currentAttributeIndex = updatedAttributes.findIndex((value: AttributeType) => {
+      const currentAttributeIndex = updatedAttributes.findIndex((value) => {
         return value.name !== undefined && value.name === initialAttribute.name;
       });
 
@@ -473,7 +496,7 @@ const slice = createUndoRedoSlice({
 
       let oppositeAttributeNameToRemove: string | null = null;
       let oppositeAttributeNameToUpdate: string | null = null;
-      let oppositeAttributeToCreate: AttributeType | null = null;
+      let oppositeAttributeToCreate: Relation | null = null;
       let initialOppositeAttribute = null;
 
       const currentUid = type.uid;
@@ -546,7 +569,6 @@ const slice = createUndoRedoSlice({
           initialOppositeAttribute = get(state, [
             'initialContentTypes',
             initialAttribute.target,
-            'schema',
             'attributes',
             oppositeAttributeIndex,
           ]);
@@ -566,7 +588,7 @@ const slice = createUndoRedoSlice({
           target: rest.target,
           targetAttribute: name,
           type: 'relation',
-        } as AttributeType;
+        } as Relation;
 
         if (rest.private) {
           oppositeAttributeToCreate.private = rest.private;
@@ -598,7 +620,7 @@ const slice = createUndoRedoSlice({
           target: rest.target,
           targetAttribute: name,
           type: 'relation',
-        } as AttributeType;
+        } as Relation;
 
         if (rest.private) {
           oppositeAttributeToCreate.private = rest.private;
@@ -618,7 +640,7 @@ const slice = createUndoRedoSlice({
       }
 
       setStatus(type, 'CHANGED');
-      set(type, ['schema', 'attributes'], updatedAttributes);
+      set(type, ['attributes'], updatedAttributes);
     },
     editCustomFieldAttribute: (state, action: PayloadAction<EditCustomFieldAttributePayload>) => {
       const { forTarget, targetUid, initialAttribute, attributeToSet } = action.payload;
@@ -628,7 +650,7 @@ const slice = createUndoRedoSlice({
 
       const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
 
-      setAttributeAt(type, initialAttributeIndex, attributeToSet);
+      setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
     },
     reloadPlugin: () => {
       return initialState;
@@ -647,9 +669,10 @@ const slice = createUndoRedoSlice({
       }
 
       const dzAttributeIndex = findAttributeIndex(type, dzName);
+      const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
 
       setStatus(type, 'CHANGED');
-      type.schema.attributes[dzAttributeIndex].components.splice(componentToRemoveIndex, 1);
+      attr.components.splice(componentToRemoveIndex, 1);
     },
     removeField: (state, action: PayloadAction<RemoveFieldPayload>) => {
       const { forTarget, targetUid, attributeToRemoveName } = action.payload;
@@ -657,7 +680,7 @@ const slice = createUndoRedoSlice({
       const type = getType(state, { forTarget, targetUid });
 
       const attributeToRemoveIndex = findAttributeIndex(type, attributeToRemoveName);
-      const attribute = type.schema.attributes[attributeToRemoveIndex];
+      const attribute = type.attributes[attributeToRemoveIndex];
 
       if (attribute.type === 'relation') {
         const { target, relation, targetAttribute: targetAttributeName } = attribute;
@@ -665,7 +688,7 @@ const slice = createUndoRedoSlice({
 
         const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(relationType!);
 
-        if (isBidirectionnal) {
+        if (isBidirectionnal && targetAttributeName) {
           const targetContentType = getType(state, { forTarget, targetUid: target });
           const targetAttributeIndex = findAttributeIndex(targetContentType, targetAttributeName);
 
@@ -674,7 +697,7 @@ const slice = createUndoRedoSlice({
       }
 
       // Find all uid fields that have the targetField set to the field we are removing
-      type.schema.attributes.forEach((attribute: AttributeType) => {
+      type.attributes.forEach((attribute) => {
         if (attribute.type === 'uid') {
           if (attribute.targetField === attributeToRemoveName) {
             delete attribute.targetField;
@@ -694,7 +717,7 @@ const slice = createUndoRedoSlice({
       }
 
       updateType(type, {
-        schema: {
+        info: {
           displayName: data.displayName,
           icon: data.icon,
         },
@@ -703,12 +726,23 @@ const slice = createUndoRedoSlice({
     updateSchema: (state, action: PayloadAction<UpdateSchemaPayload>) => {
       const { data, uid } = action.payload;
 
+      const { displayName, kind, draftAndPublish, pluginOptions } = data;
+
       const type = state.contentTypes[uid];
       if (!type) {
         return;
       }
 
-      updateType(type, { schema: data });
+      updateType(type, {
+        info: {
+          displayName,
+        },
+        kind,
+        options: {
+          draftAndPublish,
+        },
+        pluginOptions,
+      });
     },
     deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
       const uid = action.payload;
@@ -725,7 +759,7 @@ const slice = createUndoRedoSlice({
         const contentType = state.contentTypes[contentTypeUid];
 
         // remove from dynamic zones
-        contentType.schema.attributes.forEach((attribute) => {
+        contentType.attributes.forEach((attribute) => {
           if (attribute.type === 'dynamiczone') {
             const newComponents = attribute.components.filter(
               (component: unknown) => component !== uid
@@ -735,7 +769,7 @@ const slice = createUndoRedoSlice({
           }
         });
 
-        contentType.schema.attributes.forEach((attribute) => {
+        contentType.attributes.forEach((attribute) => {
           if (attribute.type === 'component' && attribute.component === uid) {
             setAttributeStatus(attribute, 'REMOVED');
             setStatus(contentType, 'CHANGED');
@@ -747,7 +781,7 @@ const slice = createUndoRedoSlice({
       Object.keys(state.components).forEach((componentUid) => {
         const component = state.components[componentUid];
 
-        component.schema.attributes.forEach((attribute) => {
+        component.attributes.forEach((attribute) => {
           if (attribute.type === 'component' && attribute.component === uid) {
             setAttributeStatus(attribute, 'REMOVED');
             setStatus(component, 'CHANGED');
@@ -770,7 +804,7 @@ const slice = createUndoRedoSlice({
       Object.keys(state.components).forEach((componentUid) => {
         const component = state.components[componentUid];
 
-        component.schema.attributes.forEach((attribute) => {
+        component.attributes.forEach((attribute) => {
           if (attribute.type === 'relation' && attribute.target === uid) {
             setAttributeStatus(attribute, 'REMOVED');
             setStatus(component, 'CHANGED');
@@ -782,7 +816,7 @@ const slice = createUndoRedoSlice({
       Object.keys(state.contentTypes).forEach((contentTypeUid) => {
         const contentType = state.contentTypes[contentTypeUid];
 
-        contentType.schema.attributes.forEach((attribute) => {
+        contentType.attributes.forEach((attribute) => {
           if (attribute.type === 'relation' && attribute.target === uid) {
             setAttributeStatus(attribute, 'REMOVED');
             setStatus(contentType, 'CHANGED');

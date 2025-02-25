@@ -24,7 +24,6 @@ import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavig
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
 import { actions, initialState } from './reducer';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
-import { createDataObject } from './utils/createDataObject';
 import { formatSchemas } from './utils/formatSchemas';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
@@ -32,14 +31,8 @@ import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfo
 import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import { validateSchema } from './utils/validateSchema';
 
-import type {
-  ContentTypes,
-  ContentType,
-  SchemaType,
-  DataManagerStateType,
-  Component,
-} from '../../types';
-import type { Internal } from '@strapi/types';
+import type { ContentTypes, ContentType, DataManagerStateType, Component } from '../../types';
+import type { Internal, Struct } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: ReactNode;
@@ -47,7 +40,7 @@ interface DataManagerProviderProps {
 
 interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
   initialAttribute: Record<string, any>;
 }
@@ -111,15 +104,13 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         fetchClient.get(`/content-type-builder/reserved-names`, reqOpts),
       ]);
 
-      const components = createDataObject(componentsResponse.data.data);
-      const formattedComponents = formatSchemas<Component>(components);
-      const contentTypes = createDataObject(contentTypesResponse.data.data);
-      const formattedContentTypes = formatSchemas<ContentType>(contentTypes);
+      const components = formatSchemas<Component>(componentsResponse.data.data);
+      const contentTypes = formatSchemas<ContentType>(contentTypesResponse.data.data);
 
       dispatch(
         actions.init({
-          components: formattedComponents,
-          contentTypes: formattedContentTypes,
+          components,
+          contentTypes,
           reservedNames: reservedNamesResponse.data,
         })
       );
@@ -218,28 +209,21 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       );
     };
 
-  const createSchema: DataManagerContextValue['createSchema'] = ({
+  const createSchema: DataManagerContextValue['createSchema'] = ({ data, uid }) => {
+    const payload = {
+      data,
+      uid,
+    };
+
+    dispatch(actions.createSchema(payload));
+  };
+
+  const createComponentSchema: DataManagerContextValue['createComponentSchema'] = ({
     data,
-    schemaType,
     uid,
     componentCategory,
   }) => {
-    if (schemaType === 'contentType') {
-      const payload = {
-        data,
-        uid,
-      };
-
-      dispatch(actions.createSchema(payload));
-    } else {
-      const payload = {
-        data,
-        uid,
-        componentCategory: componentCategory!,
-      };
-
-      dispatch(actions.createComponentSchema(payload));
-    }
+    dispatch(actions.createComponentSchema({ data, uid, componentCategory }));
   };
 
   const changeDynamicZoneComponents: DataManagerContextValue['changeDynamicZoneComponents'] = ({
@@ -313,7 +297,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     const allowedEndpoints = Object.keys(contentTypes)
       .filter((uid) => {
         return (
-          get(contentTypes, [uid, 'schema', 'visible'], true) === true &&
+          get(contentTypes, [uid, 'visible'], true) === true &&
           get(contentTypes, [uid, 'plugin'], false) === false
         );
       })
@@ -595,6 +579,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         initialContentTypes,
         contentTypes,
         createSchema,
+        createComponentSchema,
         deleteComponent,
         editCustomFieldAttribute,
         isInDevelopmentMode,

@@ -60,10 +60,10 @@ export const List = ({
   const onClickAddField = () => {
     trackUsage('hasClickedCTBAddFieldBanner');
 
-    onOpenModalAddField({ forTarget: type.schema.modelType, targetUid: type.uid });
+    onOpenModalAddField({ forTarget: type?.modelType, targetUid: type.uid });
   };
 
-  if (type.schema.attributes.length === 0 && isMain) {
+  if (type?.attributes.length === 0 && isMain) {
     return (
       <Table colCount={2} rowCount={2}>
         <Thead>
@@ -143,7 +143,7 @@ export const List = ({
             </thead>
           )}
           <tbody>
-            {type.schema.attributes.map((item: any) => {
+            {type?.attributes.map((item: any) => {
               const CustomRow = customRowComponent;
 
               return (
@@ -152,7 +152,7 @@ export const List = ({
                     {...item}
                     isNestedInDZComponent={isNestedInDZComponent}
                     targetUid={type.uid}
-                    editTarget={type.schema.modelType}
+                    editTarget={type.modelType}
                     firstLoopComponentUid={firstLoopComponentUid}
                     isFromDynamicZone={isFromDynamicZone}
                     secondLoopComponentUid={secondLoopComponentUid}
@@ -172,7 +172,7 @@ export const List = ({
                       components={item.components}
                       customRowComponent={customRowComponent}
                       addComponent={addComponentToDZ!}
-                      forTarget={type.schema.modelType}
+                      forTarget={type.modelType}
                       targetUid={type.uid}
                     />
                   )}
@@ -188,7 +188,7 @@ export const List = ({
           {formatMessage({
             id: getTrad(
               `form.button.add.field.to.${
-                type.schema.modelType === 'component' ? 'component' : type?.schema.kind
+                type.modelType === 'component' ? 'component' : type.kind
               }`
             ),
             defaultMessage: 'Add another field',

@@ -208,11 +208,11 @@ export const forms = {
       contentTypes: Record<Internal.UID.ContentType, ContentType>
     ) {
       const singularNames = Object.values(contentTypes).map((contentType) => {
-        return contentType.schema.singularName;
+        return contentType.info.singularName;
       });
 
       const pluralNames = Object.values(contentTypes).map((contentType: any) => {
-        return contentType?.schema?.pluralName ?? '';
+        return contentType?.info?.pluralName ?? '';
       });
 
       const takenNames = isEditing
@@ -221,29 +221,28 @@ export const forms = {
 
       const takenSingularNames = isEditing
         ? singularNames.filter((singName) => {
-            const { schema } = contentTypes[ctUid];
+            const { info } = contentTypes[ctUid];
 
-            return schema.singularName !== singName;
+            return info.singularName !== singName;
           })
         : singularNames;
 
       const takenPluralNames = isEditing
         ? pluralNames.filter((pluralName) => {
-            const { schema } = contentTypes[ctUid];
+            const { info } = contentTypes[ctUid];
 
-            return schema.pluralName !== pluralName;
+            return info.pluralName !== pluralName;
           })
         : pluralNames;
 
       // return the array of collection names not all normalized
       const collectionNames = Object.values(contentTypes).map((contentType) => {
-        return contentType?.schema?.collectionName ?? '';
+        return contentType?.collectionName ?? '';
       });
 
       const takenCollectionNames = isEditing
         ? collectionNames.filter((collectionName) => {
-            const { schema } = contentTypes[ctUid];
-            const currentCollectionName = schema.collectionName;
+            const { collectionName: currentCollectionName } = contentTypes[ctUid];
 
             return collectionName !== currentCollectionName;
           })

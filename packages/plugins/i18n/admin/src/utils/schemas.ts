@@ -11,17 +11,13 @@ import type { Schema } from '@strapi/types';
 // TODO: refactor for CTB refactors
 const mutateCTBContentTypeSchema = (
   nextSchema: {
-    schema: {
-      pluginOptions: Schema.ContentType['pluginOptions'];
-      attributes: Schema.Attribute.AnyAttribute[];
-    };
+    pluginOptions: Schema.ContentType['pluginOptions'];
+    attributes: Schema.Attribute.AnyAttribute[];
     uid?: string;
   },
   prevSchema?: {
-    schema: {
-      pluginOptions: Schema.ContentType['pluginOptions'];
-      attributes: Schema.Attribute.AnyAttribute[];
-    };
+    pluginOptions: Schema.ContentType['pluginOptions'];
+    attributes: Schema.Attribute.AnyAttribute[];
     uid?: string;
   }
 ) => {
@@ -30,13 +26,13 @@ const mutateCTBContentTypeSchema = (
   }
 
   // Don't perform mutations components
-  if (!doesPluginOptionsHaveI18nLocalized(nextSchema.schema.pluginOptions)) {
+  if (!doesPluginOptionsHaveI18nLocalized(nextSchema.pluginOptions)) {
     return nextSchema;
   }
 
-  const isNextSchemaLocalized = nextSchema.schema.pluginOptions.i18n.localized;
-  const isPrevSchemaLocalized = doesPluginOptionsHaveI18nLocalized(prevSchema.schema?.pluginOptions)
-    ? prevSchema.schema?.pluginOptions.i18n.localized
+  const isNextSchemaLocalized = nextSchema.pluginOptions.i18n.localized;
+  const isPrevSchemaLocalized = doesPluginOptionsHaveI18nLocalized(prevSchema?.pluginOptions)
+    ? prevSchema?.pluginOptions.i18n.localized
     : false;
 
   // No need to perform modification on the schema, if the i18n feature was not changed
@@ -46,29 +42,23 @@ const mutateCTBContentTypeSchema = (
   }
 
   if (isNextSchemaLocalized) {
-    const attributes = addLocalisationToFields(nextSchema.schema.attributes);
+    const attributes = addLocalisationToFields(nextSchema.attributes);
 
     return {
       ...nextSchema,
-      schema: {
-        ...nextSchema.schema,
-        attributes,
-      },
+      attributes,
     };
   }
 
   // Remove the i18n object from the pluginOptions
   if (!isNextSchemaLocalized) {
-    const pluginOptions = omit(nextSchema.schema.pluginOptions, 'i18n');
-    const attributes = disableAttributesLocalisation(nextSchema.schema.attributes);
+    const pluginOptions = omit(nextSchema.pluginOptions, 'i18n');
+    const attributes = disableAttributesLocalisation(nextSchema.attributes);
 
     return {
       ...nextSchema,
-      schema: {
-        ...nextSchema.schema,
-        pluginOptions,
-        attributes,
-      },
+      pluginOptions,
+      attributes,
     };
   }
 

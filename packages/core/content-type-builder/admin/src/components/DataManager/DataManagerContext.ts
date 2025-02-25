@@ -1,19 +1,19 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { createContext } from 'react';
 
-import type { SchemaType, Component, ContentType } from '../../types';
+import type { Component, ContentType } from '../../types';
 import type { Internal, Struct } from '@strapi/types';
 
 export interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
   initialAttribute: Record<string, any>;
 }
 export interface DataManagerContextValue {
   addAttribute: (opts: {
     attributeToSet: Record<string, any>;
-    forTarget: SchemaType;
+    forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     isEditing?: boolean;
     initialAttribute?: Record<string, any>;
@@ -22,42 +22,66 @@ export interface DataManagerContextValue {
   addCustomFieldAttribute: (params: CustomFieldAttributeParams) => void;
   editCustomFieldAttribute: (params: CustomFieldAttributeParams) => void;
   addCreatedComponentToDynamicZone: (opts: {
-    forTarget: SchemaType;
+    forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     dynamicZoneTarget: string;
     componentsToAdd: Internal.UID.Component[];
   }) => void;
+  createComponentSchema: (opts: {
+    data: {
+      icon: string;
+      displayName: string;
+    };
+    componentCategory: string;
+    uid: Internal.UID.Component;
+  }) => void;
   createSchema: (opts: {
-    data: Record<string, any>;
-    schemaType: SchemaType;
+    data: {
+      displayName: string;
+      singularName: string;
+      pluralName: string;
+      kind: Struct.ContentTypeKind;
+      draftAndPublish: boolean;
+      pluginOptions: Record<string, any>;
+    };
     uid: Internal.UID.Schema;
-    componentCategory?: string;
   }) => void;
   changeDynamicZoneComponents: (opts: {
-    forTarget: SchemaType;
+    forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     dynamicZoneTarget: string;
     newComponents: Internal.UID.Component[];
   }) => void;
   removeAttribute: (opts: {
-    forTarget: SchemaType;
+    forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     attributeToRemoveName: string;
   }) => void;
   deleteComponent(uid: Internal.UID.Component): void;
   deleteContentType(uid: Internal.UID.ContentType): void;
   removeComponentFromDynamicZone: (opts: {
-    forTarget: SchemaType;
+    forTarget: Struct.ModelType;
     targetUid: Internal.UID.Schema;
     dzName: string;
     componentToRemoveIndex: number;
   }) => void;
   sortedContentTypesList: any[]; // Define the actual type
   updateComponentSchema: (opts: {
-    data: Record<string, any>;
+    data: {
+      icon: string;
+      displayName: string;
+    };
     componentUID: Internal.UID.Component;
   }) => void;
-  updateSchema: (opts: { data: Record<string, any>; uid: Internal.UID.ContentType }) => void;
+  updateSchema: (opts: {
+    data: {
+      displayName: string;
+      kind: Struct.ContentTypeKind;
+      draftAndPublish: boolean;
+      pluginOptions: Record<string, any>;
+    };
+    uid: Internal.UID.ContentType;
+  }) => void;
   initialComponents: Record<Internal.UID.Component, Component>;
   components: Record<Internal.UID.Component, Component>;
   componentsGroupedByCategory: Record<string, Component[]>;

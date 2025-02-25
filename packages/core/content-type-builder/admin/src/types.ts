@@ -1,4 +1,4 @@
-import type { Internal, Schema } from '@strapi/types';
+import type { Schema, Struct, UID } from '@strapi/types';
 
 export type IntlLabel = {
   id: string;
@@ -6,22 +6,9 @@ export type IntlLabel = {
   values?: Record<string, any>;
 };
 
-export type SchemaType = 'contentType' | 'component';
-
 export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
 
 export type Status = 'UNCHANGED' | 'CHANGED' | 'REMOVED' | 'NEW';
-
-export type AttributeType = Schema.Attribute.AnyAttribute & {
-  name?: string;
-  target?: string;
-  targetAttribute?: string | null;
-  customField?: any;
-  default?: any;
-  repeatable?: boolean;
-  status?: Status;
-  [key: string]: any;
-};
 
 type Schema = {
   modelType: 'contentType' | 'component';
@@ -29,29 +16,73 @@ type Schema = {
   [key: string]: any;
 };
 
-export interface Component {
-  uid: Internal.UID.Component;
-  category?: string;
-  schema: Schema;
-  isTemporary?: boolean;
-  attributes?: AttributeType[];
+export type Base = {
+  name: string;
   status?: Status;
-  [key: string]: any;
-}
+  customField?: any;
+};
 
-export interface ContentType {
-  uid: Internal.UID.ContentType;
+export type Relation = Base & {
+  type: 'relation';
+  relation: Schema.Attribute.RelationKind.Any;
+  target: string;
+  targetAttribute: string | null;
+  configurable?: boolean;
+  private?: boolean;
+  pluginOptions?: Record<string, any>;
+};
+
+export type Media = Base & {
+  type: 'media';
+  multiple: boolean;
+  required: boolean;
+  configurable?: boolean;
+  private: boolean;
+  allowedTypes: string[];
+  pluginOptions?: Record<string, any>;
+};
+
+export type AnyAttribute = Base &
+  (
+    | Schema.Attribute.BigInteger
+    | Schema.Attribute.Boolean
+    | Schema.Attribute.Blocks
+    | Schema.Attribute.Component<UID.Component, boolean>
+    | Schema.Attribute.DateTime
+    | Schema.Attribute.Date
+    | Schema.Attribute.Decimal
+    | Schema.Attribute.DynamicZone
+    | Schema.Attribute.Email
+    | Schema.Attribute.Enumeration<string[]>
+    | Schema.Attribute.Float
+    | Schema.Attribute.Integer
+    | Schema.Attribute.JSON
+    | Schema.Attribute.Password
+    | Schema.Attribute.RichText
+    | Schema.Attribute.String
+    | Schema.Attribute.Text
+    | Schema.Attribute.Time
+    | Schema.Attribute.Timestamp
+    | Schema.Attribute.UID
+    /* The media & relation attributes have a different format in the CTB */
+    | Media
+    | Relation
+  );
+
+export type Component = Omit<Struct.ComponentSchema, 'attributes'> & {
+  isTemporary?: boolean;
+  status?: Status;
+  attributes: Array<AnyAttribute>;
+};
+
+export type ContentType = Omit<Struct.ContentTypeSchema, 'attributes'> & {
+  plugin?: string;
   isTemporary?: boolean;
   visible?: boolean;
-  name?: string;
-  title?: string;
-  plugin?: string;
-  to?: string;
-  restrictRelationsTo?: unknown;
-  schema: Schema;
   status?: Status;
-  [key: string]: any;
-}
+  restrictRelationsTo?: unknown;
+  attributes: Array<AnyAttribute>;
+};
 
 export type Components = Record<string, Component>;
 

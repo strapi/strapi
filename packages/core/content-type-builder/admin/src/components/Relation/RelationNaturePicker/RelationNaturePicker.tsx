@@ -54,16 +54,14 @@ export const RelationNaturePicker = ({
   const { contentTypes } = useDataManager();
 
   const dataType =
-    naturePickerType === 'component'
-      ? 'component'
-      : get(contentTypes, [targetUid, 'schema', 'kind'], '');
+    naturePickerType === 'component' ? 'component' : get(contentTypes, [targetUid, 'kind'], '');
 
   const relationsType = (
     dataType === 'collectionType' ? ctRelations : componentRelations
   ) as RelationType[];
 
   const areDisplayedNamesInverted = relationType === 'manyToOne';
-  const targetLabel = get(contentTypes, [target, 'schema', 'displayName'], 'unknown');
+  const targetLabel = get(contentTypes, [target, 'info', 'displayName'], 'unknown');
   const leftTarget = areDisplayedNamesInverted
     ? targetLabel
     : oneThatIsCreatingARelationWithAnother;
@@ -71,7 +69,7 @@ export const RelationNaturePicker = ({
     ? oneThatIsCreatingARelationWithAnother
     : targetLabel;
   const leftDisplayedValue = pluralize(leftTarget, relationType === 'manyToMany' ? 2 : 1);
-  const restrictedRelations = get(contentTypes, [target, 'schema', 'restrictRelationsTo'], null);
+  const restrictedRelations = get(contentTypes, [target, 'restrictRelationsTo'], null);
 
   const rightDisplayedValue = pluralize(
     rightTarget,

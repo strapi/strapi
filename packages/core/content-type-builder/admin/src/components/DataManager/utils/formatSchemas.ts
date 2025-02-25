@@ -1,18 +1,16 @@
-import { AttributeType, Component, ContentType } from '../../../types';
+import { Component, ContentType, AnyAttribute } from '../../../types';
 
 /**
  * Format the attributes to array instead of an object
  */
 export const formatSchemas = <TType extends Component | ContentType>(
-  schemas: Record<string, any>
+  schemas: any[]
 ): Record<string, TType> => {
-  return Object.keys(schemas).reduce((acc: any, current) => {
-    const schema = schemas[current].schema;
-
-    acc[current] = {
-      ...schemas[current],
+  return schemas.reduce((acc: any, schema) => {
+    acc[schema.uid] = {
       status: 'UNCHANGED',
-      schema: { ...schema, attributes: toAttributesArray(schema.attributes) },
+      ...schema,
+      attributes: toAttributesArray(schema.attributes),
     };
 
     return acc;
@@ -24,14 +22,14 @@ export const formatSchema = <TType extends Component | ContentType>(
 ): TType => {
   return {
     ...schema,
-    schema: { ...schema, attributes: toAttributesArray(schema.attributes) },
+    attributes: toAttributesArray(schema.attributes),
   } as TType;
 };
 
-export const toAttributesArray = (attributes: Record<string, AttributeType>) => {
-  return Object.keys(attributes).reduce((acc: AttributeType[], current: any) => {
+export const toAttributesArray = (attributes: Record<string, any>) => {
+  return Object.keys(attributes).reduce((acc, current: any) => {
     acc.push({ ...attributes[current], name: current });
 
     return acc;
-  }, []);
+  }, [] as AnyAttribute[]);
 };

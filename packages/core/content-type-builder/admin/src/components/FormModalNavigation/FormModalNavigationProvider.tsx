@@ -4,8 +4,7 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 
 import { FormModalNavigationContext } from './FormModalNavigationContext';
 
-import type { SchemaType } from '../../types';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 type FormModalNavigationProviderProps = {
   children: React.ReactNode;
@@ -56,12 +55,12 @@ export type OpenModalAddComponentsToDZPayload = {
 };
 
 export type OpenModalAddFieldPayload = {
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid?: Internal.UID.Schema;
 };
 
 export type OpenModalEditCustomFieldPayload = {
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
   attributeName: string;
   attributeType: string;
@@ -69,7 +68,7 @@ export type OpenModalEditCustomFieldPayload = {
 };
 
 export type OpenModalEditFieldPayload = {
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
   attributeName: string;
   attributeType: string;
@@ -78,13 +77,13 @@ export type OpenModalEditFieldPayload = {
 
 export type OpenModalEditSchemaPayload = {
   modalType: ModalType;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
-  kind: string;
+  kind?: string;
 };
 
 export type NavigateToChooseAttributeModalPayload = {
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
 };
 

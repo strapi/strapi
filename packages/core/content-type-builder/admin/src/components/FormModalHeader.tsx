@@ -59,7 +59,7 @@ export const FormModalHeader = ({
 
   const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
 
-  const displayName = type?.schema.displayName;
+  const displayName = type?.info.displayName;
 
   if (modalType === 'contentType') {
     icon = contentTypeKind;
@@ -99,12 +99,15 @@ export const FormModalHeader = ({
   headers = [
     {
       label: displayName,
-      info: { category: type?.category || null, name: type?.schema.displayName },
+      info: {
+        category: ('category' in type && type?.category) || '',
+        name: type?.info?.displayName,
+      },
     },
   ];
 
   if (modalType === 'chooseAttribute') {
-    icon = forTarget === 'component' ? 'component' : type.schema.kind;
+    icon = forTarget === 'component' ? 'component' : 'kind' in type ? type.kind : '';
   }
 
   if (modalType === 'addComponentToDynamicZone') {

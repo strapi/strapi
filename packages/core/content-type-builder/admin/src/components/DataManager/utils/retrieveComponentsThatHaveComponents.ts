@@ -1,14 +1,14 @@
 import get from 'lodash/get';
 
-import type { Component, AttributeType, Components } from '../../../types';
-import type { Internal } from '@strapi/types';
+import type { AnyAttribute, Component, Components } from '../../../types';
+import type { UID } from '@strapi/types';
 
 type ChildComponent = {
-  component: Internal.UID.Component;
+  component: UID.Component;
 };
 
 export type ComponentWithChildren = {
-  component: Internal.UID.Component;
+  component: UID.Component;
   childComponents: ChildComponent[];
 };
 
@@ -31,15 +31,16 @@ const retrieveComponentsThatHaveComponents = (allComponents: Components) => {
 };
 
 const getComponentWithChildComponents = (component: Component): ComponentWithChildren => {
-  const attributes = get(component, ['schema', 'attributes'], []) as AttributeType[];
   return {
     component: component.uid,
-    childComponents: attributes
-      .filter((attribute) => {
-        const { type } = attribute;
+    childComponents: component.attributes
+      .filter(
+        (attribute: AnyAttribute): attribute is AnyAttribute & { component: UID.Component } => {
+          const { type } = attribute;
 
-        return type === 'component';
-      })
+          return type === 'component';
+        }
+      )
       .map((attribute) => {
         return {
           component: attribute.component,

@@ -45,6 +45,7 @@ export const formatAttribute = (attribute: Schema.Attribute.AnyAttribute & Recor
     return {
       ...attribute,
       type: 'relation',
+      relation: attribute.relation,
       target: attribute.target,
       targetAttribute: attribute.inversedBy || attribute.mappedBy || null,
       configurable: configurable === false ? false : undefined,

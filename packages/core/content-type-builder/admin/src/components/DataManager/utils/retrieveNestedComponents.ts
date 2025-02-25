@@ -1,18 +1,18 @@
-import type { Components, AttributeType } from '../../../types';
-import type { Internal } from '@strapi/types';
+import type { Components, Component } from '../../../types';
+import type { UID } from '@strapi/types';
 
 export type NestedComponent = {
-  component: Internal.UID.Component;
-  uidsOfAllParents?: Internal.UID.Component[];
-  parentCompoUid?: Internal.UID.Component;
+  component: UID.Component;
+  uidsOfAllParents?: UID.Component[];
+  parentCompoUid?: UID.Component;
 };
 
 export const retrieveNestedComponents = (appComponents: Components): NestedComponent[] => {
   const nestedComponents = Object.keys(appComponents).reduce((acc: NestedComponent[], current) => {
-    const componentAttributes = appComponents?.[current]?.schema?.attributes ?? [];
+    const componentAttributes = appComponents?.[current]?.attributes ?? [];
     const currentComponentNestedCompos = getComponentsNestedWithinComponent(
       componentAttributes,
-      current as Internal.UID.Component
+      current as UID.Component
     );
     return [...acc, ...currentComponentNestedCompos];
   }, []);
@@ -21,14 +21,15 @@ export const retrieveNestedComponents = (appComponents: Components): NestedCompo
 };
 
 const getComponentsNestedWithinComponent = (
-  componentAttributes: AttributeType[],
-  parentCompoUid: Internal.UID.Component
+  componentAttributes: Component['attributes'],
+  parentCompoUid: UID.Component
 ) => {
   return componentAttributes.reduce((acc: NestedComponent[], current) => {
-    const { type, component } = current;
+    const { type } = current;
+
     if (type === 'component') {
       acc.push({
-        component,
+        component: current.component,
         parentCompoUid,
       });
     }

@@ -38,8 +38,13 @@ export const SelectComponents = ({
 }: SelectComponentsProps) => {
   const { formatMessage } = useIntl();
   const { componentsGroupedByCategory, contentTypes } = useDataManager();
-  const dzSchema = findAttribute(contentTypes[targetUid].schema.attributes, dynamicZoneTarget);
-  const alreadyUsedComponents = dzSchema?.components || [];
+  const dzSchema = findAttribute(contentTypes[targetUid].attributes, dynamicZoneTarget);
+
+  if (!dzSchema) {
+    return null;
+  }
+
+  const alreadyUsedComponents = 'components' in dzSchema ? dzSchema?.components : [];
 
   const filteredComponentsGroupedByCategory = Object.keys(componentsGroupedByCategory).reduce(
     (acc, current) => {
@@ -60,7 +65,7 @@ export const SelectComponents = ({
       const [categoryName, components] = current;
       const section = {
         label: categoryName,
-        children: components.map(({ uid, schema: { displayName } }) => {
+        children: components.map(({ uid, info: { displayName } }) => {
           return { label: displayName, value: uid };
         }),
       };

@@ -77,7 +77,7 @@ export const useContentTypeBuilderMenu = () => {
         .map((component) => ({
           name: component.uid,
           to: `/plugins/${pluginId}/component-categories/${category}/${component.uid}`,
-          title: component.schema.displayName,
+          title: component.info.displayName,
           status: component.status,
         }))
         .sort((a, b) => formatter.compare(a.title, b.title)),

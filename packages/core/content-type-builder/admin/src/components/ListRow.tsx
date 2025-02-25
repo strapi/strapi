@@ -15,8 +15,8 @@ import { useDataManager } from './DataManager/useDataManager';
 import { DisplayedType } from './DisplayedType';
 import { Status } from './Status';
 
-import type { SchemaType, Status as StatusType } from '../types';
-import type { Internal } from '@strapi/types';
+import type { Status as StatusType } from '../types';
+import type { Internal, Struct } from '@strapi/types';
 
 export const BoxWrapper = styled(Box)`
   position: relative;
@@ -25,7 +25,7 @@ export const BoxWrapper = styled(Box)`
 type ListRowProps = {
   configurable?: boolean;
   customField?: string | null;
-  editTarget: SchemaType;
+  editTarget: Struct.ModelType;
   firstLoopComponentUid?: string | null;
   isFromDynamicZone?: boolean;
   name: string;
@@ -71,7 +71,7 @@ export const ListRow = memo(
     const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
     const contentType = get(contentTypes, [target as keyof typeof contentTypes], {});
-    const contentTypeFriendlyName = get(contentType, ['schema', 'displayName'], '');
+    const contentTypeFriendlyName = get(contentType, ['info', 'displayName'], '');
     const isPluginContentType = get(contentType, 'plugin');
 
     const src = target ? 'relation' : ico;

@@ -50,7 +50,7 @@ import { createComponentUid, createUid } from './utils/createUid';
 import { getAttributesToDisplay } from './utils/getAttributesToDisplay';
 import { getFormInputNames } from './utils/getFormInputNames';
 
-import type { AttributeType, ContentType } from '../../types';
+import type { ContentType } from '../../types';
 import type { CustomFieldAttributeParams } from '../DataManager/DataManagerContext';
 import type { Internal } from '@strapi/types';
 
@@ -106,6 +106,7 @@ export const FormModal = () => {
     contentTypes,
     components,
     createSchema,
+    createComponentSchema,
     deleteComponent,
     deleteContentType,
     editCustomFieldAttribute,
@@ -157,18 +158,15 @@ export const FormModal = () => {
 
       // Edit content type
       if (modalType === 'contentType' && actionType === 'edit') {
-        const { displayName, draftAndPublish, kind, pluginOptions, pluralName, singularName } =
-          type.schema;
-
         dispatch(
           actions.setDataToEdit({
             data: {
-              displayName,
-              draftAndPublish,
-              kind,
-              pluginOptions,
-              pluralName,
-              singularName,
+              displayName: type.info.displayName,
+              draftAndPublish: type.options?.draftAndPublish,
+              kind: 'kind' in type && type.kind,
+              pluginOptions: type.pluginOptions,
+              pluralName: 'pluralName' in type.info && type.info.pluralName,
+              singularName: 'singularName' in type.info && type.info.singularName,
             },
           })
         );
@@ -179,9 +177,9 @@ export const FormModal = () => {
         dispatch(
           actions.setDataToEdit({
             data: {
-              displayName: type.schema.displayName,
-              category: type.category,
-              icon: type.schema.icon,
+              displayName: type.info.displayName,
+              category: 'category' in type && type.category,
+              icon: type.info.icon,
             },
           })
         );
@@ -209,9 +207,9 @@ export const FormModal = () => {
       // Set the predefined data structure to create an attribute
       if (attributeType) {
         const attributeToEditNotFormatted = findAttribute(
-          get(type, ['schema', 'attributes'], []),
+          get(type, ['attributes'], []),
           attributeName
-        ) as AttributeType;
+        );
         const attributeToEdit = {
           ...attributeToEditNotFormatted,
           name: attributeName,
@@ -220,7 +218,7 @@ export const FormModal = () => {
         // We need to set the repeatable key to false when editing a component
         // The API doesn't send this info
         if (attributeType === 'component' && actionType === 'edit') {
-          if (!attributeToEdit.repeatable) {
+          if (!('repeatable' in attributeToEdit) || !attributeToEdit.repeatable) {
             set(attributeToEdit, 'repeatable', false);
           }
         }
@@ -273,7 +271,7 @@ export const FormModal = () => {
   const isInFirstComponentStep = step === '1';
   const isPickingAttribute = modalType === 'chooseAttribute';
   const uid = createUid(modifiedData.displayName || '');
-  const attributes = get(type, ['schema', 'attributes'], null) as {
+  const attributes = get(type, ['attributes'], null) as {
     name: string;
   }[];
 
@@ -310,7 +308,7 @@ export const FormModal = () => {
       );
     } else if (isCreatingCustomFieldAttribute) {
       schema = forms.customField.schema({
-        schemaAttributes: get(type, ['schema', 'attributes'], []),
+        schemaAttributes: get(type, ['attributes'], []),
         attributeType: customField!.type,
         reservedNames,
         schemaData: { modifiedData, initialData },
@@ -335,16 +333,16 @@ export const FormModal = () => {
       // Check form validity for creating a 'common attribute'
       // We need to make sure that it is independent from the step
     } else if (isCreatingAttribute && !isInFirstComponentStep) {
-      const type = attributeType === 'relation' ? 'relation' : modifiedData.type;
+      const computedAttrbiuteType = attributeType === 'relation' ? 'relation' : modifiedData.type;
 
-      let alreadyTakenTargetContentTypeAttributes = [];
+      let alreadyTakenTargetContentTypeAttributes: any[] = [];
 
-      if (type === 'relation') {
+      if (computedAttrbiuteType === 'relation') {
         const targetContentTypeUID = get(modifiedData, ['target'], null);
 
         const targetContentTypeAttributes = get(
           contentTypes,
-          [targetContentTypeUID, 'schema', 'attributes'],
+          [targetContentTypeUID, 'attributes'],
           []
         );
 
@@ -364,8 +362,8 @@ export const FormModal = () => {
         );
       }
       schema = forms.attribute.schema(
-        get(type, 'schema', {}),
         type,
+        computedAttrbiuteType,
         reservedNames,
         alreadyTakenTargetContentTypeAttributes,
         { modifiedData, initialData },
@@ -469,8 +467,14 @@ export const FormModal = () => {
         // Create the content type schema
         if (isCreating) {
           createSchema({
-            data: { ...modifiedData, kind },
-            schemaType: modalType,
+            data: {
+              kind,
+              displayName: modifiedData.displayName,
+              draftAndPublish: modifiedData.draftAndPublish,
+              pluginOptions: modifiedData.pluginOptions,
+              singularName: modifiedData.singularName,
+              pluralName: modifiedData.pluralName,
+            },
             uid,
           });
 
@@ -487,7 +491,12 @@ export const FormModal = () => {
 
             await updateSchema({
               uid: contentType.uid,
-              data: modifiedData,
+              data: {
+                displayName: modifiedData.displayName,
+                kind: modifiedData.kind,
+                draftAndPublish: modifiedData.draftAndPublish,
+                pluginOptions: modifiedData.pluginOptions,
+              },
             });
           } else {
             toggleNotification({
@@ -505,9 +514,11 @@ export const FormModal = () => {
           const componentUid = createComponentUid(modifiedData.displayName, modifiedData.category);
           const { category, ...rest } = modifiedData;
 
-          createSchema({
-            data: rest,
-            schemaType: 'component',
+          createComponentSchema({
+            data: {
+              displayName: rest.displayName,
+              icon: rest.icon,
+            },
             uid: componentUid,
             componentCategory: category,
           });
@@ -520,7 +531,10 @@ export const FormModal = () => {
           onCloseModal();
         } else {
           updateComponentSchema({
-            data: modifiedData,
+            data: {
+              icon: modifiedData.icon,
+              displayName: modifiedData.displayName,
+            },
             componentUID: targetUid,
           });
 
@@ -672,19 +686,17 @@ export const FormModal = () => {
           // Step 2 of creating a component (which is setting the attribute name in the parent's schema)
         }
         // We are destructuring because the modifiedData object doesn't have the appropriate format to create a field
-        const { category, type, ...rest } = componentToCreate;
+        const { category, ...rest } = componentToCreate;
         // Create a the component temp UID
         // This could be refactored but I think it's more understandable to separate the logic
         const componentUid = createComponentUid(componentToCreate.displayName, category);
         // Create the component first and add it to the components data
-        createSchema({
+        createComponentSchema({
           // Component data
-          data: rest,
-          // Type will always be component
-          // It will dispatch the CREATE_COMPONENT_SCHEMA action
-          // So the component will be added in the main components object
-          // This might not be needed if we don't allow navigation between entries while editing
-          schemaType: type,
+          data: {
+            icon: rest.icon,
+            displayName: rest.displayName,
+          },
           uid: componentUid,
           componentCategory: category,
         });
@@ -716,14 +728,8 @@ export const FormModal = () => {
               category
             );
             // Create the component first and add it to the components data
-            createSchema({
-              // Component data
+            createComponentSchema({
               data: rest,
-              // Type will always be component
-              // It will dispatch the CREATE_COMPONENT_SCHEMA action
-              // So the component will be added in the main components object
-              // This might not be needed if we don't allow navigation between entries while editing
-              schemaType: type,
               uid: componentUid,
               componentCategory: category,
             });
@@ -883,7 +889,7 @@ export const FormModal = () => {
     formErrors,
     isAddingAComponentToAnotherComponent,
     isCreatingComponentWhileAddingAField,
-    mainBoxHeader: get(type, ['schema', 'displayName'], ''),
+    mainBoxHeader: get(type, ['info', 'displayName'], ''),
     modifiedData,
     naturePickerType: forTarget,
     isCreating,
@@ -925,7 +931,7 @@ export const FormModal = () => {
     advancedFormInputNames.includes(key)
   );
 
-  const schemaKind = get(contentTypes, [targetUid, 'schema', 'kind']);
+  const schemaKind = get(contentTypes, [targetUid, 'kind']);
 
   const checkIsEditingFieldName = () =>
     actionType === 'edit' && attributes.every(({ name }) => name !== modifiedData?.name);

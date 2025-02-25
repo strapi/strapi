@@ -23,7 +23,7 @@ export const RelationTargetPicker = ({
     isAllowedContentTypesForRelations
   );
 
-  const { plugin = null, schema: { displayName } = { displayName: 'error' } } =
+  const { plugin = null, info: { displayName } = { displayName: '' } } =
     contentTypes?.[target] ?? {};
 
   const handleSelect =

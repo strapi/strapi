@@ -12,15 +12,14 @@ import { ComponentList } from './ComponentList';
 import { useDataManager } from './DataManager/useDataManager';
 import { Tr } from './Tr';
 
-import type { SchemaType } from '../types';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 interface DynamicZoneListProps {
   addComponent: (name?: string) => void;
   components: Array<Internal.UID.Component>;
   customRowComponent?: ComponentType<any>;
   name?: string;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
 }
 

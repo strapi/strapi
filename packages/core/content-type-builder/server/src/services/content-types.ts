@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import { getOr, omit } from 'lodash/fp';
+import _, { rest } from 'lodash';
+import { getOr } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { UID, Struct } from '@strapi/types';
+import type { UID, Struct, Schema } from '@strapi/types';
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
 import { coreUids, pluginsUids } from './constants';
@@ -32,27 +32,40 @@ export const getRestrictRelationsTo = (contentType: Struct.ContentTypeSchema) =>
 /**
  * Format a contentType info to be used by the front-end
  */
-export const formatContentType = (contentType: any) => {
-  const { uid, kind, modelName, plugin, collectionName, info, modelType } = contentType;
+export const formatContentType = (
+  contentType: any
+): Struct.ContentTypeSchema & {
+  plugin?: string;
+  visible: boolean;
+  restrictRelationsTo: string[] | null;
+} => {
+  const {
+    uid,
+    options,
+    globalId,
+    pluginOptions,
+    kind,
+    modelName,
+    plugin,
+    collectionName,
+    info,
+    modelType,
+  } = contentType;
 
   return {
     uid,
+    modelName,
+    kind,
+    globalId,
+    options,
+    pluginOptions,
     plugin,
-    apiID: modelName,
-    schema: {
-      ...contentTypesUtils.getOptions(contentType),
-      displayName: info.displayName,
-      singularName: info.singularName,
-      pluralName: info.pluralName,
-      description: _.get(info, 'description', ''),
-      pluginOptions: contentType.pluginOptions,
-      kind: kind || 'collectionType',
-      collectionName,
-      attributes: formatAttributes(contentType),
-      visible: isContentTypeVisible(contentType),
-      restrictRelationsTo: getRestrictRelationsTo(contentType),
-      modelType,
-    },
+    collectionName,
+    info,
+    modelType,
+    attributes: formatAttributes(contentType),
+    visible: isContentTypeVisible(contentType),
+    restrictRelationsTo: getRestrictRelationsTo(contentType),
   };
 };
 

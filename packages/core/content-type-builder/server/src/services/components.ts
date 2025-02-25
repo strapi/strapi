@@ -1,5 +1,5 @@
 import type { Internal, Struct } from '@strapi/types';
-import { get, has } from 'lodash';
+import { has } from 'lodash';
 
 import { formatAttributes, replaceTemporaryUIDs } from '../utils/attributes';
 import createBuilder from './schema-builder';
@@ -7,23 +7,18 @@ import createBuilder from './schema-builder';
 /**
  * Formats a component attributes
  */
-export const formatComponent = (component: any) => {
-  const { uid, modelName, connection, collectionName, info, category, modelType } = component;
+export const formatComponent = (component: any): Struct.ComponentSchema => {
+  const { uid, globalId, modelName, collectionName, info, category, modelType } = component;
 
   return {
     uid,
+    modelName,
+    globalId,
+    modelType,
+    collectionName,
     category,
-    apiId: modelName,
-    schema: {
-      displayName: get(info, 'displayName'),
-      description: get(info, 'description', ''),
-      icon: get(info, 'icon'),
-      connection,
-      collectionName,
-      pluginOptions: component.pluginOptions,
-      attributes: formatAttributes(component),
-      modelType,
-    },
+    info,
+    attributes: formatAttributes(component),
   };
 };
 

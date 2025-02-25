@@ -19,8 +19,7 @@ import { getTrad } from '../../utils/getTrad';
 
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 
-import type { SchemaType } from '../../types';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 const LayoutsHeaderCustom = styled(Layouts.Header)`
   overflow-wrap: anywhere;
@@ -83,13 +82,12 @@ const ListView = () => {
     return null;
   }
 
-  const isTemporary = get(type, ['isTemporary'], false);
-
-  const isFromPlugin = has(type, ['plugin']);
+  const isTemporary = type.isTemporary ?? false;
+  const isFromPlugin = 'plugin' in type && type?.plugin !== undefined;
 
   const forTarget = contentTypeUid ? 'contentType' : 'component';
 
-  const label = get(type, ['schema', 'displayName'], '');
+  const label = type?.info?.displayName ?? '';
 
   const canEdit = isInDevelopmentMode && !isFromPlugin;
 
@@ -98,7 +96,7 @@ const ListView = () => {
   };
 
   const handleClickEditField = async (
-    forTarget: SchemaType,
+    forTarget: Struct.ModelType,
     targetUid: Internal.UID.Schema,
     attributeName: string,
     type: string,
@@ -127,19 +125,29 @@ const ListView = () => {
   };
 
   const onEdit = () => {
-    if (type?.schema?.kind === 'collectionType') {
-      trackUsage('willEditNameOfContentType');
-    }
+    if ('kind' in type) {
+      if (type?.kind === 'collectionType') {
+        trackUsage('willEditNameOfContentType');
+      }
 
-    if (type?.schema?.kind === 'singleType') {
-      trackUsage('willEditNameOfSingleType');
+      if (type?.kind === 'singleType') {
+        trackUsage('willEditNameOfSingleType');
+      }
+
+      onOpenModalEditSchema({
+        modalType: forTarget,
+        forTarget: forTarget,
+        targetUid: type.uid,
+        kind: type?.kind,
+      });
+
+      return;
     }
 
     onOpenModalEditSchema({
       modalType: forTarget,
       forTarget: forTarget,
       targetUid: type.uid,
-      kind: type?.schema?.kind,
     });
   };
 
@@ -164,7 +172,7 @@ const ListView = () => {
             onOpenModalAddField({ forTarget, targetUid: type.uid });
           }}
         >
-          {type.schema.attributes.length === 0 ? addNewFieldLabel : addAnotherFieldLabel}
+          {type.attributes.length === 0 ? addNewFieldLabel : addAnotherFieldLabel}
         </Button>
       }
       <LinkToCMSettingsView key="link-to-cm-settings-view" type={type} disabled={isTemporary} />

@@ -30,8 +30,8 @@ const cmPermissions: Record<string, Permission[]> = {
 };
 
 const getPermission = (type: Component | ContentType) => {
-  if (type.schema.modalType === 'contentType') {
-    if (type.sceham.kind === 'singleType') {
+  if (type.modelType === 'contentType') {
+    if (type.kind === 'singleType') {
       return cmPermissions.singleTypesConfigurations;
     }
 
@@ -47,9 +47,9 @@ interface LinkToCMSettingsViewProps {
 }
 
 const getLink = (type: Component | ContentType) => {
-  switch (type.schema.modelType) {
+  switch (type.modelType) {
     case 'contentType':
-      switch (type.schema.kind) {
+      switch (type.kind) {
         case 'singleType':
           return `/content-manager/single-types/${type.uid}/configurations/edit`;
         case 'collectionType':

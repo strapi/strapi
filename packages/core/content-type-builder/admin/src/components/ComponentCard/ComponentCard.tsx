@@ -7,8 +7,7 @@ import { useDataManager } from '../DataManager/useDataManager';
 
 import { ComponentIcon } from './ComponentIcon';
 
-import type { SchemaType } from '../../types';
-import type { Internal } from '@strapi/types';
+import type { Internal, Struct } from '@strapi/types';
 
 interface ComponentCardProps {
   component: string;
@@ -17,7 +16,7 @@ interface ComponentCardProps {
   isActive?: boolean;
   isInDevelopmentMode?: boolean;
   onClick?: () => void;
-  forTarget: SchemaType;
+  forTarget: Struct.ModelType;
   targetUid: Internal.UID.Schema;
 }
 
@@ -83,7 +82,7 @@ export const ComponentCard = ({
 }: ComponentCardProps) => {
   const { components, removeComponentFromDynamicZone } = useDataManager();
   const type = get(components, component);
-  const { icon, displayName } = type?.schema || {};
+  const { icon, displayName } = type?.info || {};
 
   const onClose = (e: any) => {
     e.stopPropagation();
@@ -122,7 +121,7 @@ export const ComponentCard = ({
       </Box>
 
       {isInDevelopmentMode && (
-        <CloseButton tag="button" onClick={onClose}>
+        <CloseButton cursor="pointer" tag="button" onClick={onClose}>
           <Cross />
         </CloseButton>
       )}

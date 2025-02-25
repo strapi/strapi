@@ -62,7 +62,7 @@ export const SelectComponent = ({
       const compos = components.map((component) => {
         return {
           uid: component.uid,
-          label: component.schema.displayName,
+          label: component.info.displayName,
           categoryName,
         };
       });
