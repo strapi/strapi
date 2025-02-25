@@ -709,24 +709,17 @@ test.describe('Edit View', () => {
       await page.getByRole('menuitem', { name: /hero image/i }).dispatchEvent('click');
 
       // Make sure we get the desired components order
-      const updatedComponents = await page
+      const componentTexts = await page
         .getByRole('listitem')
         .filter({ has: page.getByRole('heading') })
-        .all();
-      expect(updatedComponents).toHaveLength(5);
-      const [
-        firstUpdatedComponent,
-        secondUpdatedComponent,
-        thirdUpdatedComponent,
-        fourthUpdatedComponent,
-        fifthUpdatedComponent,
-      ] = updatedComponents;
+        .allTextContents();
 
-      expect(firstUpdatedComponent).toHaveText(/hero image/i);
-      expect(secondUpdatedComponent).toHaveText(/product carousel/i);
-      expect(thirdUpdatedComponent).toHaveText(/hero image/i);
-      expect(fourthUpdatedComponent).toHaveText(/content and image/i);
-      expect(fifthUpdatedComponent).toHaveText(/product carousel/i);
+      expect(componentTexts.length).toBe(5);
+      expect(componentTexts[0].toLowerCase()).toContain('hero image');
+      expect(componentTexts[1].toLowerCase()).toContain('product carousel');
+      expect(componentTexts[2].toLowerCase()).toContain('hero image');
+      expect(componentTexts[3].toLowerCase()).toContain('content and image');
+      expect(componentTexts[4].toLowerCase()).toContain('product carousel');
     });
   });
 });
