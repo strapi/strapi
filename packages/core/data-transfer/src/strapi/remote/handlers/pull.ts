@@ -259,7 +259,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         const BATCH_MAX_SIZE = 1024 * 1024; // 1MB
 
         if (!assets) {
-          throw new Error('bad');
+          throw new Error('Assets read stream could not be created');
         }
         /**
          * Generates batches of 1MB of data from the assets stream to avoid
