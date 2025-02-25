@@ -167,6 +167,16 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     const stream = this.streams?.[stage];
 
     const batchLength = () => Buffer.byteLength(JSON.stringify(batch));
+
+    const maybeConfirm = async (data: any) => {
+      try {
+        await this.confirm(data);
+      } catch (error) {
+        // Handle the error, log it, or take other appropriate actions
+        console.error('Error during confirmation:', error);
+      }
+    };
+
     const sendBatch = async () => {
       await this.confirm({
         type: 'transfer',
@@ -205,7 +215,8 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       }
       await this.confirm({ type: 'transfer', data: null, ended: true, error: null, id });
     } catch (e) {
-      await this.confirm({ type: 'transfer', data: null, ended: true, error: e, id });
+      // TODO: if this confirm fails, can we abort the whole transfer?
+      await maybeConfirm({ type: 'transfer', data: null, ended: true, error: e, id });
     }
   },
 
