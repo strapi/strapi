@@ -1,4 +1,5 @@
 import { PassThrough, Transform, Readable, Writable } from 'stream';
+import { pipeline } from 'stream/promises';
 import { extname } from 'path';
 import { EOL } from 'os';
 import type Chain from 'stream-chain';
@@ -547,34 +548,40 @@ class TransferEngine<
 
     this.#emitStageUpdate('start', stage);
 
-    await new Promise<void>((resolve, reject) => {
-      let stream: Readable = source;
+    try {
+      const streams: (Readable | Writable)[] = [source];
 
       if (transform) {
-        stream = stream.pipe(transform);
+        streams.push(transform);
       }
-
       if (tracker) {
-        stream = stream.pipe(tracker);
+        streams.push(tracker);
       }
 
-      this.#currentStream = stream
-        .pipe(destination)
-        .on('error', (e) => {
-          updateEndTime();
-          this.#emitStageUpdate('error', stage);
-          this.reportError(e, 'error');
-          destination.destroy(e);
-          reject(e);
-        })
-        .on('close', () => {
-          this.#currentStream = undefined;
-          updateEndTime();
-          resolve();
-        });
-    });
+      streams.push(destination);
 
-    this.#emitStageUpdate('finish', stage);
+      // NOTE: to debug/confirm backpressure issues from misbehaving stream, uncomment the following lines
+      // source.on('pause', () => console.log(`[${stage}] Source paused due to backpressure`));
+      // source.on('resume', () => console.log(`[${stage}] Source resumed`));
+      // destination.on('drain', () =>
+      //   console.log(`[${stage}] Destination drained, resuming data flow`)
+      // );
+      // destination.on('error', (err) => console.error(`[${stage}] Destination error:`, err));
+
+      await pipeline(streams);
+
+      this.#emitStageUpdate('finish', stage);
+    } catch (e) {
+      updateEndTime();
+      this.#emitStageUpdate('error', stage);
+      this.reportError(e as Error, 'error');
+      if (!destination.destroyed) {
+        destination.destroy(e as Error);
+      }
+    } finally {
+      this.#currentStream = undefined;
+      updateEndTime();
+    }
   }
 
   // Cause an ongoing transfer to abort gracefully
