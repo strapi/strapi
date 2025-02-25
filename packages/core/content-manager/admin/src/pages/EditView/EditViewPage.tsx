@@ -100,15 +100,11 @@ const EditViewPage = () => {
 
   const initialValues = getInitialFormValues(isCreatingDocument);
 
-  if (hasError) {
-    return <Page.Error />;
-  }
-
   if (isLoading && !document?.documentId) {
     return <Page.Loading />;
   }
 
-  if (!initialValues) {
+  if (!initialValues || hasError) {
     return <Page.Error />;
   }
 

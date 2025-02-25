@@ -376,7 +376,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
-  const { delete: deleteAction } = useDocumentActions();
+  const { delete: deleteAction, isLoading } = useDocumentActions();
   const { hasI18n, canDelete } = useI18n();
 
   // Get the current locale object, using the URL instead of document so it works while creating
@@ -419,6 +419,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
           </Typography>
         </Flex>
       ),
+      loading: isLoading,
       onConfirm: async () => {
         const unableToDelete =
           // We are unable to delete a collection type without a document ID
