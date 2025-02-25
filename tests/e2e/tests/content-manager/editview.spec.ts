@@ -714,11 +714,19 @@ test.describe('Edit View', () => {
         .filter({ has: page.getByRole('heading') })
         .all();
       expect(updatedComponents).toHaveLength(5);
-      expect(updatedComponents[0]).toHaveText(/hero image/i);
-      expect(updatedComponents[1]).toHaveText(/product carousel/i);
-      expect(updatedComponents[2]).toHaveText(/hero image/i);
-      expect(updatedComponents[3]).toHaveText(/content and image/i);
-      expect(updatedComponents[4]).toHaveText(/product carousel/i);
+      const [
+        firstUpdatedComponent,
+        secondUpdatedComponent,
+        thirdUpdatedComponent,
+        fourthUpdatedComponent,
+        fifthUpdatedComponent,
+      ] = updatedComponents;
+
+      expect(firstUpdatedComponent).toHaveText(/hero image/i);
+      expect(secondUpdatedComponent).toHaveText(/product carousel/i);
+      expect(thirdUpdatedComponent).toHaveText(/hero image/i);
+      expect(fourthUpdatedComponent).toHaveText(/content and image/i);
+      expect(fifthUpdatedComponent).toHaveText(/product carousel/i);
     });
   });
 });
