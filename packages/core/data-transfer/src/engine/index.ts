@@ -120,6 +120,8 @@ class TransferEngine<
     errors: {},
   };
 
+  #currentStreamController?: AbortController;
+
   onSchemaDiff(handler: SchemaDiffHandler) {
     this.#handlers?.schemaDiff?.push(handler);
   }
@@ -143,9 +145,6 @@ class TransferEngine<
 
     return !!context.ignore;
   }
-
-  // Save the currently open stream so that we can access it at any time
-  #currentStream?: Writable;
 
   constructor(sourceProvider: S, destinationProvider: D, options: ITransferEngineOptions) {
     this.diagnostics = createDiagnosticReporter();
@@ -509,6 +508,10 @@ class TransferEngine<
     transform?: PassThrough | Chain;
     tracker?: PassThrough;
   }) {
+    if (this.#aborted) {
+      throw new TransferEngineError('fatal', 'Transfer aborted.');
+    }
+
     const { stage, source, destination, transform, tracker } = options;
 
     const updateEndTime = () => {
@@ -568,7 +571,13 @@ class TransferEngine<
       // );
       // destination.on('error', (err) => console.error(`[${stage}] Destination error:`, err));
 
-      await pipeline(streams);
+      const controller = new AbortController();
+      const { signal } = controller;
+
+      // Store the controller so you can cancel later
+      this.#currentStreamController = controller;
+
+      await pipeline(streams, { signal });
 
       this.#emitStageUpdate('finish', stage);
     } catch (e) {
@@ -579,18 +588,16 @@ class TransferEngine<
         destination.destroy(e as Error);
       }
     } finally {
-      this.#currentStream = undefined;
       updateEndTime();
     }
   }
 
+  #aborted: boolean = false;
+
   // Cause an ongoing transfer to abort gracefully
   async abortTransfer(): Promise<void> {
-    const err = new TransferEngineError('fatal', 'Transfer aborted.');
-    if (!this.#currentStream) {
-      throw err;
-    }
-    this.#currentStream.destroy(err);
+    this.#aborted = true;
+    this.#currentStreamController?.abort();
   }
 
   async init(): Promise<void> {
