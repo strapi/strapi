@@ -27,7 +27,7 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
     retryMessageTimeout: number; // milliseconds to wait for a response from a message
     retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
   };
-  streamTimeout: number; // milliseconds to wait between chunks of an asset before aborting the transfer
+  streamTimeout?: number; // milliseconds to wait between chunks of an asset before aborting the transfer
 }
 
 type QueueableAction = Protocol.Client.TransferAssetFlow &
