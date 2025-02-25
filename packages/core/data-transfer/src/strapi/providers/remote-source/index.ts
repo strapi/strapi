@@ -27,6 +27,7 @@ export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourcePr
     retryMessageTimeout: number; // milliseconds to wait for a response from a message
     retryMessageMaxRetries: number; // max number of retries for a message before aborting transfer
   };
+  streamTimeout: number; // milliseconds to wait between chunks of an asset before aborting the transfer
 }
 
 type QueueableAction = Protocol.Client.TransferAssetFlow &
@@ -43,8 +44,16 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
   dispatcher: ReturnType<typeof createDispatcher> | null;
 
+  defaultOptions: Partial<IRemoteStrapiSourceProviderOptions> = {
+    streamTimeout: 15000,
+  };
+
   constructor(options: IRemoteStrapiSourceProviderOptions) {
-    this.options = options;
+    this.options = {
+      ...this.defaultOptions,
+      ...options,
+    };
+
     this.ws = null;
     this.dispatcher = null;
   }
@@ -136,8 +145,21 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
         stream: PassThrough;
         queue: Array<QueueableAction>;
         status: 'ok' | 'closed' | 'errored';
+        timeout?: NodeJS.Timeout;
       };
     } = {};
+
+    // Watch for stalled assets; if we don't receive a chunk within timeout, abort transfer
+    const resetTimeout = (assetID: string) => {
+      if (assets[assetID].timeout) {
+        clearTimeout(assets[assetID].timeout);
+      }
+      assets[assetID].timeout = setTimeout(() => {
+        this.#reportInfo(`Asset ${assetID} transfer stalled, aborting.`);
+        assets[assetID].status = 'errored';
+        assets[assetID].stream.destroy(new Error(`Asset ${assetID} transfer timed out`));
+      }, this.options.streamTimeout);
+    };
 
     stream
       /**
@@ -166,6 +188,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
               queue: [],
             };
 
+            resetTimeout(assetID);
+
             // Connect the individual asset stream to the main asset stage stream
             // Note: nothing is transferred until data chunks are fed to the asset stream
             await this.writeAsync(pass, assets[assetID]);
@@ -178,6 +202,13 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
             // If the asset hasn't been registered, or if it's been closed already, something is wrong
             if (!assets[assetID]) {
               throw new Error(`No id matching ${assetID} for stream action`);
+            }
+
+            // On every action, reset the timeout timer
+            if (action === 'stream') {
+              resetTimeout(assetID);
+            } else {
+              clearTimeout(assets[assetID].timeout);
             }
 
             if (assets[assetID].status === 'closed') {
@@ -207,7 +238,7 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
      * Start processing the queue for a given assetID
      *
      * Even though this is a loop that attempts to process the entire queue, it is safe to call this more than once
-     * for the same asset id because the queue is shared globally, the items are shifted off and immediately written
+     * for the same asset id because the queue is shared globally, the items are shifted off, and immediately written
      */
     const processQueue = async (id: string) => {
       if (!assets[id]) {
