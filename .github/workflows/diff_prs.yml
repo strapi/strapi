@@ -1,0 +1,54 @@
+name: Diff as PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: "Base branch to compare from (default: develop)."
+        default: "develop"
+        required: false
+      target_branch:
+        description: "Target branch to compare to."
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-prs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Merged PRs Between Branches
+        uses: ./.github/actions/pr_diff
+        with:
+          base_branch: ${{ github.event.inputs.base_branch }}
+          target_branch: ${{ github.event.inputs.target_branch }}
+
+      - name: Format output
+        shell: bash
+        run: |
+          # Check if there are merged PRs
+          if [ -z "${{ steps.pr_diff.outputs.prs }}" ]; then
+            echo "No merged pull requests found." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          # Write the Markdown table to the GitHub Actions summary
+          echo "### Merged Pull Requests Between '${{ github.event.inputs.base_branch }}' and '${{ github.event.inputs.target_branch }}'" >> $GITHUB_STEP_SUMMARY
+          echo "| PR Number | Title                      | Author      | Link                               |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|----------------------------|-------------|-----------------------------------|" >> $GITHUB_STEP_SUMMARY
+
+          for pr in $(echo "${{ steps.pr_diff.outputs.prs }}" | jq -c '.[]'); do
+            pr_number=$(echo "$pr" | jq -r '.number')
+            pr_title=$(echo "$pr" | jq -r '.title')
+            pr_author=$(echo "$pr" | jq -r '.author')
+            pr_link=$(echo "$pr" | jq -r '.html_url')
+
+            # Append each PR row to the summary table
+            echo "| #${pr_number} | ${pr_title} | ${pr_author} | [Link](${pr_link}) |" >> $GITHUB_STEP_SUMMARY
+          done
+
