@@ -87,21 +87,17 @@ const PreviewPage = () => {
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });
-
   const documentResponse = useDocument({
     model,
     collectionType,
     documentId,
     params,
   });
-
   const documentLayoutResponse = useDocumentLayout(model);
 
-  if (
-    previewUrlResponse.isLoading ||
-    documentLayoutResponse.isLoading ||
-    !documentResponse.document.documentId
-  ) {
+  const isLoading =
+    previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
+  if (isLoading && !documentResponse.document?.documentId) {
     return <Page.Loading />;
   }
 
