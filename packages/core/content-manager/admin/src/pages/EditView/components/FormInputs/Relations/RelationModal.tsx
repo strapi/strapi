@@ -11,7 +11,7 @@ import {
   Modal,
   Typography,
 } from '@strapi/design-system';
-import { ArrowLeft, WarningCircle, Link as LinkIcon } from '@strapi/icons';
+import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -176,7 +176,7 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
                   defaultMessage: 'Go to entry',
                 })}
               >
-                <LinkIcon />
+                <ArrowsOut />
               </IconButton>
             ) : (
               <IconButton
@@ -188,7 +188,7 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
                   defaultMessage: 'Go to entry',
                 })}
               >
-                <LinkIcon />
+                <ArrowsOut />
               </IconButton>
             )}
           </Flex>
