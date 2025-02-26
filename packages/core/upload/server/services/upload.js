@@ -167,6 +167,8 @@ module.exports = ({ strapi }) => ({
     currentFile.filepath = file.path;
     currentFile.getStream = () => fs.createReadStream(file.path);
 
+    await getService('provider').checkFileSize(currentFile);
+
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
       .plugin('upload')
       .service('image-manipulation');

@@ -41,6 +41,7 @@ export const PendingAssetStep = ({
   const assetCountRef = useRef(0);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const [currentAssetIndexUploading, setCurrentAssetIndexUploading] = useState(0);
   const [uploadStatus, setUploadStatus] = useState(Status.Idle);
 
   const handleSubmit = async (e) => {
@@ -127,7 +128,7 @@ export const PendingAssetStep = ({
           </Flex>
           <KeyboardNavigable tagName="article">
             <Grid gap={4}>
-              {assets.map((asset) => {
+              {assets.map((asset, index) => {
                 const assetKey = asset.url;
 
                 if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
@@ -142,6 +143,8 @@ export const PendingAssetStep = ({
                         onStatusChange={(status) => handleStatusChange(status, asset.rawFile)}
                         size="S"
                         folderId={folderId}
+                        performUpload={index === currentAssetIndexUploading}
+                        setCurrentAssetIndexUploading={setCurrentAssetIndexUploading}
                       />
                     </GridItem>
                   );

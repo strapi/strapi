@@ -36,6 +36,8 @@ export const UploadingAssetCard = ({
   onStatusChange,
   addUploadedFiles,
   folderId,
+  performUpload,
+  setCurrentAssetIndexUploading,
 }) => {
   const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
@@ -71,9 +73,17 @@ export const UploadingAssetCard = ({
       }
     };
 
+    if (!performUpload) return;
+
     uploadFile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [performUpload]);
+
+  useEffect(() => {
+    if (error) {
+      setCurrentAssetIndexUploading((i) => i + 1);
+    }
+  }, [error]);
 
   useEffect(() => {
     onStatusChange(status);

@@ -16,6 +16,12 @@ const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
+const getTransformQuality = () => {
+  const transformQuality = strapi.config.get('plugin.upload.transformQuality', 80);
+
+  return transformQuality > 100 ? 100 : transformQuality;
+};
+
 const writeStreamToFile = (stream, path) =>
   new Promise((resolve, reject) => {
     const writeStream = fs.createWriteStream(path);
@@ -119,7 +125,7 @@ const optimize = async (file) => {
     }
 
     // reduce image quality
-    transformer[format]({ quality: sizeOptimization ? 80 : 100 });
+    transformer[format]({ quality: sizeOptimization ? getTransformQuality() : 100 });
     // rotate image based on EXIF data
     if (autoOrientation) {
       transformer.rotate();
