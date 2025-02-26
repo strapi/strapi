@@ -22,16 +22,16 @@ import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
 import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
 import { DataManagerContext, type DataManagerContextValue } from './DataManagerContext';
-import { actions, initialState } from './reducer';
+import { actions, initialState, type State } from './reducer';
+import { useServerRestartWatcher } from './useServerRestartWatcher';
 import { sortContentType, stateToRequestData } from './utils/cleanData';
 import { formatSchemas } from './utils/formatSchemas';
 import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponentsThatHaveComponents';
 import { retrieveNestedComponents } from './utils/retrieveNestedComponents';
 import { retrieveSpecificInfoFromComponents } from './utils/retrieveSpecificInfoFromComponents';
-import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import { validateSchema } from './utils/validateSchema';
 
-import type { ContentTypes, ContentType, DataManagerStateType, Component } from '../../types';
+import type { ContentTypes, ContentType, Component } from '../../types';
 import type { Internal, Struct } from '@strapi/types';
 
 interface DataManagerProviderProps {
@@ -46,7 +46,7 @@ interface CustomFieldAttributeParams {
 }
 
 const selectState = (state: Record<string, unknown>) =>
-  (state['content-type-builder_dataManagerProvider'] || initialState) as DataManagerStateType;
+  (state['content-type-builder_dataManagerProvider'] || initialState) as State;
 
 const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const dispatch = useDispatch();
@@ -65,6 +65,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   // const { setCurrentStep, setStepState } = useGuidedTour('DataManagerProvider', (state) => state);
+  const serverRestartWatcher = useServerRestartWatcher();
 
   const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
   const plugin = getPlugin('content-type-builder');
@@ -114,6 +115,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
           reservedNames: reservedNamesResponse.data,
         })
       );
+
+      dispatch(actions.clearHistory());
     } catch (err) {
       console.error({ err });
       toggleNotification({
@@ -331,17 +334,20 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       return;
     }
 
-    const mutatedCTs = Object.entries(contentTypes).reduce((acc, [uid, contentType]) => {
-      acc[uid] = PluginForms.mutateContentTypeSchema(
-        contentType,
-        initialContentTypes[uid]
-      ) as ContentType;
+    const mutatedCTs = Object.entries(state.current.contentTypes).reduce(
+      (acc, [uid, contentType]) => {
+        acc[uid] = PluginForms.mutateContentTypeSchema(
+          contentType,
+          initialContentTypes[uid]
+        ) as ContentType;
 
-      return acc;
-    }, {} as ContentTypes);
+        return acc;
+      },
+      {} as ContentTypes
+    );
 
     const requestData = stateToRequestData({
-      ...state.current,
+      components: state.current.components,
       contentTypes: mutatedCTs,
     });
 
@@ -366,11 +372,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         data: requestData,
       });
     } catch (err) {
+      unlockAppWithAutoreload?.();
+
       console.error({ err });
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
+
+      return;
     }
 
     // if (
@@ -396,7 +406,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     // }
 
     // Make sure the server has restarted
-    await serverRestartWatcher(true);
+    await serverRestartWatcher();
 
     // Unlock the app
     unlockAppWithAutoreload?.();
@@ -560,7 +570,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const discardAllChanges = () => {
     dispatch(actions.discardAll());
-    getDataRef.current();
+  };
+
+  const history = {
+    undo,
+    redo,
+    discardAllChanges,
+    canUndo: state.past.length > 0,
+    canRedo: state.future.length > 0,
+    canDiscardAll: isModified,
   };
 
   return (
@@ -595,9 +613,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         saveSchema,
         isModified,
         applyChange,
-        undo,
-        redo,
-        discardAllChanges,
+        history,
       }}
     >
       {children}

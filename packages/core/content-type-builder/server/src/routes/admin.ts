@@ -183,5 +183,18 @@ export default {
         ],
       },
     },
+    {
+      method: 'GET',
+      path: '/update-schema-status',
+      handler: 'schema.getUpdateSchemaStatus',
+      config: {
+        policies: [
+          {
+            name: 'admin::hasPermissions',
+            config: { actions: ['plugin::content-type-builder.read'] },
+          },
+        ],
+      },
+    },
   ],
 };

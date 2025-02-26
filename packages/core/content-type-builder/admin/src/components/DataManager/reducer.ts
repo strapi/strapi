@@ -6,6 +6,7 @@ import {
   original,
   PayloadAction,
   SliceCaseReducers,
+  current,
 } from '@reduxjs/toolkit';
 import get from 'lodash/get';
 import merge from 'lodash/merge';
@@ -18,7 +19,8 @@ import { makeUnique } from '../../utils/makeUnique';
 import { formatSchema } from './utils/formatSchemas';
 
 import type {
-  DataManagerStateType,
+  Components,
+  ContentTypes,
   ContentType,
   Component,
   Status,
@@ -27,15 +29,18 @@ import type {
 } from '../../types';
 import type { Internal, Schema, Struct } from '@strapi/types';
 
-// TODO: Define all possible actions based on type
-export type Action<T = any> = {
-  type: T;
-  uid?: string;
-  mainDataKey: Struct.ModelType;
-  schemaType: 'component' | 'contentType';
-  attributeToRemoveName?: string;
+export interface DataManagerStateType {
+  components: Components;
+  initialComponents: Components;
+  contentTypes: ContentTypes;
+  initialContentTypes: ContentTypes;
+  reservedNames: {
+    models: string[];
+    attributes: string[];
+  };
+  isLoading: boolean;
   [key: string]: any;
-};
+}
 
 const initialState: DataManagerStateType = {
   components: {},
@@ -213,8 +218,8 @@ const updateType = (type: ContentType | Component, data: Record<string, any>) =>
 };
 
 type UndoRedoState<T> = {
-  past: T[];
-  future: T[];
+  past: Array<Partial<T>>;
+  future: Array<Partial<T>>;
   current: T;
 };
 
@@ -237,18 +242,26 @@ const isCallable = (obj: any): obj is (...args: any[]) => any => {
   return typeof obj === 'function';
 };
 
+// TODO: add state selector to only keep the relevant part of the state in the history
 const createUndoRedoSlice = <State, CaseReducers extends SliceCaseReducers<State>>(
-  opts: CreateSliceOptions<State, CaseReducers, string>
+  sliceOpts: CreateSliceOptions<State, CaseReducers, string>,
+  opts: {
+    excludeActionsFromHistory?: string[];
+    stateSelector?: (state: Draft<State> | undefined) => Draft<Partial<State>>;
+    discard?: (state: Draft<State>) => void;
+  } = {}
 ) => {
   const initialState: UndoRedoState<State> = {
     past: [],
     future: [],
-    current: isCallable(opts.initialState) ? opts.initialState() : opts.initialState,
+    current: isCallable(sliceOpts.initialState) ? sliceOpts.initialState() : sliceOpts.initialState,
   };
 
-  const wrappedReducers = Object.keys(opts.reducers).reduce(
+  const selector = opts.stateSelector || (<T>(state: Draft<T>): Draft<T> => state);
+
+  const wrappedReducers = Object.keys(sliceOpts.reducers).reduce(
     (acc, actionName: string) => {
-      const reducer = opts.reducers[actionName];
+      const reducer = sliceOpts.reducers[actionName];
 
       if (!isCallable(reducer)) {
         throw new Error('Reducer must be a function. prepapre not support in UndoRedo wrapper');
@@ -257,7 +270,17 @@ const createUndoRedoSlice = <State, CaseReducers extends SliceCaseReducers<State
       acc[actionName] = (state, action) => {
         const newCurrent = reducer(state.current as Draft<State>, action);
 
-        state.past.push(original(state.current)!);
+        if (opts.excludeActionsFromHistory?.includes(actionName)) {
+          if (newCurrent !== undefined) {
+            state.current = newCurrent as Draft<State>;
+          }
+
+          return;
+        }
+
+        const originalCurrent = original(state.current);
+
+        state.past.push(selector(originalCurrent)!);
         if (state.past.length > 10) {
           state.past.shift();
         }
@@ -274,7 +297,7 @@ const createUndoRedoSlice = <State, CaseReducers extends SliceCaseReducers<State
   ) as WrappedUndoRedoReducer<State, CaseReducers>;
 
   return createSlice<UndoRedoState<State>, UndoRedoReducer<State, CaseReducers>>({
-    name: opts.name,
+    name: sliceOpts.name,
     initialState,
     // @ts-expect-error - TS doesn't like the fact that we're adding extra reducers
     reducers: {
@@ -288,7 +311,9 @@ const createUndoRedoSlice = <State, CaseReducers extends SliceCaseReducers<State
 
         if (previous !== undefined) {
           state.future = [state.current, ...state.future];
-          state.current = previous;
+          // reapply the previous state partially
+          // @ts-expect-error - TS doesn't like the fact that we're mutating the state
+          state.current = { ...state.current, ...previous };
         }
       },
 
@@ -300,561 +325,597 @@ const createUndoRedoSlice = <State, CaseReducers extends SliceCaseReducers<State
         const next = state.future.shift();
         if (next != undefined) {
           state.past = [...state.past, state.current];
-          state.current = next;
+          // reapply the previous state partially
+          // @ts-expect-error - TS doesn't like the fact that we're mutating the state
+          state.current = { ...state.current, ...next };
         }
       },
 
-      discardAll: () => {
-        return initialState;
+      discardAll: (state) => {
+        if (opts.discard) {
+          opts.discard(state.current);
+        } else {
+          // @ts-expect-error - TS doesn't like the fact that we're mutating the state
+          state.current = initialState.current;
+        }
+        state.past = [];
+        state.future = [];
+      },
+
+      clearHistory: (state) => {
+        state.past = [];
+        state.future = [];
       },
     },
   });
 };
 
-const slice = createUndoRedoSlice({
-  name: 'data-manager',
-  initialState,
-  reducers: {
-    init: (state, action: PayloadAction<InitPayload>) => {
-      const { components, contentTypes, reservedNames } = action.payload;
+const slice = createUndoRedoSlice(
+  {
+    name: 'data-manager',
+    initialState,
+    reducers: {
+      init: (state, action: PayloadAction<InitPayload>) => {
+        const { components, contentTypes, reservedNames } = action.payload;
 
-      state.components = components;
-      state.initialComponents = components;
-      state.initialContentTypes = contentTypes;
-      state.contentTypes = contentTypes;
-      state.reservedNames = reservedNames;
-      state.isLoading = false;
-    },
-    createComponentSchema: (state, action: PayloadAction<CreateComponentSchemaPayload>) => {
-      const { uid, data, componentCategory } = action.payload;
+        state.components = components;
+        state.initialComponents = components;
+        state.initialContentTypes = contentTypes;
+        state.contentTypes = contentTypes;
+        state.reservedNames = reservedNames;
+        state.isLoading = false;
+      },
+      createComponentSchema: (state, action: PayloadAction<CreateComponentSchemaPayload>) => {
+        const { uid, data, componentCategory } = action.payload;
 
-      const newSchema: Component = {
-        uid: uid as Internal.UID.Component,
-        status: 'NEW',
-        isTemporary: true,
-        category: componentCategory,
-        modelName: data.displayName,
-        globalId: data.displayName,
-        info: {
-          icon: data.icon,
-          displayName: data.displayName,
-        },
-        attributes: [],
-        modelType: 'component',
-      };
+        const newSchema: Component = {
+          uid: uid as Internal.UID.Component,
+          status: 'NEW',
+          isTemporary: true,
+          category: componentCategory,
+          modelName: data.displayName,
+          globalId: data.displayName,
+          info: {
+            icon: data.icon,
+            displayName: data.displayName,
+          },
+          attributes: [],
+          modelType: 'component',
+        };
 
-      state.components[uid as string] = newSchema;
-    },
-    createSchema: (state, action: PayloadAction<CreateSchemaPayload>) => {
-      const { uid, data } = action.payload;
+        state.components[uid as string] = newSchema;
+      },
+      createSchema: (state, action: PayloadAction<CreateSchemaPayload>) => {
+        const { uid, data } = action.payload;
 
-      const { displayName, singularName, pluralName, kind, draftAndPublish, pluginOptions } = data;
+        const { displayName, singularName, pluralName, kind, draftAndPublish, pluginOptions } =
+          data;
 
-      const newSchema: ContentType = {
-        uid: uid as Internal.UID.ContentType,
-        status: 'NEW',
-        isTemporary: true,
-        visible: true,
-        modelType: 'contentType',
-        attributes: [],
-        kind,
-        modelName: displayName,
-        globalId: displayName,
-        options: {
-          draftAndPublish,
-        },
-        info: {
-          displayName,
-          singularName,
-          pluralName,
-        },
-        pluginOptions,
-      };
+        const newSchema: ContentType = {
+          uid: uid as Internal.UID.ContentType,
+          status: 'NEW',
+          isTemporary: true,
+          visible: true,
+          modelType: 'contentType',
+          restrictRelationsTo: null,
+          attributes: [],
+          kind,
+          modelName: displayName,
+          globalId: displayName,
+          options: {
+            draftAndPublish,
+          },
+          info: {
+            displayName,
+            singularName,
+            pluralName,
+          },
+          pluginOptions,
+        };
 
-      state.contentTypes[uid] = newSchema;
-    },
-    addAttribute: (state, action: PayloadAction<AddAttributePayload>) => {
-      const { attributeToSet, forTarget, targetUid } = action.payload;
+        state.contentTypes[uid] = newSchema;
+      },
+      addAttribute: (state, action: PayloadAction<AddAttributePayload>) => {
+        const { attributeToSet, forTarget, targetUid } = action.payload;
 
-      const type = getType(state, { forTarget, targetUid });
+        const type = getType(state, { forTarget, targetUid });
 
-      const attribute = createAttribute(omit(attributeToSet, 'createComponent'));
+        const attribute = createAttribute(omit(attributeToSet, 'createComponent'));
 
-      type.attributes.push(attribute);
+        type.attributes.push(attribute);
 
-      setStatus(type, 'CHANGED');
+        setStatus(type, 'CHANGED');
 
-      if (attribute.type === 'relation') {
-        const target = attribute.target;
-        const targetAttribute = attribute.targetAttribute || null;
-        const relation = attribute.relation;
-        const relationType = getRelationType(relation, targetAttribute);
+        if (attribute.type === 'relation') {
+          const target = attribute.target;
+          const targetAttribute = attribute.targetAttribute || null;
+          const relation = attribute.relation;
+          const relationType = getRelationType(relation, targetAttribute);
 
-        const isBidirectionalRelation = !['oneWay', 'manyWay'].includes(relationType);
+          const isBidirectionalRelation = !['oneWay', 'manyWay'].includes(relationType);
 
-        if (isBidirectionalRelation) {
-          const oppositeAttribute = createAttribute({
-            name: targetAttribute,
-            relation: getOppositeRelation(relationType),
-            target: type.uid,
-            targetAttribute: attribute.name,
-            type: 'relation',
-            private: attribute.private,
-          });
+          if (isBidirectionalRelation) {
+            const oppositeAttribute = createAttribute({
+              name: targetAttribute,
+              relation: getOppositeRelation(relationType),
+              target: type.uid,
+              targetAttribute: attribute.name,
+              type: 'relation',
+              private: attribute.private,
+            });
 
-          const targetType = getType(state, { forTarget, targetUid: target });
-          pushAttribute(targetType, oppositeAttribute);
+            const targetType = getType(state, { forTarget, targetUid: target });
+            pushAttribute(targetType, oppositeAttribute);
+          }
         }
-      }
-    },
-    addCustomFieldAttribute: (state, action: PayloadAction<AddCustomFieldAttributePayload>) => {
-      const { attributeToSet, forTarget, targetUid } = action.payload;
+      },
+      addCustomFieldAttribute: (state, action: PayloadAction<AddCustomFieldAttributePayload>) => {
+        const { attributeToSet, forTarget, targetUid } = action.payload;
 
-      const type = getType(state, { forTarget, targetUid });
+        const type = getType(state, { forTarget, targetUid });
 
-      pushAttribute(type, attributeToSet as AnyAttribute);
-    },
-    addCreatedComponentToDynamicZone: (
-      state,
-      action: PayloadAction<AddCreateComponentToDynamicZonePayload>
-    ) => {
-      const { dynamicZoneTarget, componentsToAdd, forTarget, targetUid } = action.payload;
+        pushAttribute(type, attributeToSet as AnyAttribute);
+      },
+      addCreatedComponentToDynamicZone: (
+        state,
+        action: PayloadAction<AddCreateComponentToDynamicZonePayload>
+      ) => {
+        const { dynamicZoneTarget, componentsToAdd, forTarget, targetUid } = action.payload;
 
-      const type = getType(state, { forTarget, targetUid });
+        const type = getType(state, { forTarget, targetUid });
 
-      const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
-      const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
+        const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
+        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
 
-      componentsToAdd.forEach((componentUid: Internal.UID.Component) => {
-        attr.components.push(componentUid);
-      });
+        componentsToAdd.forEach((componentUid: Internal.UID.Component) => {
+          attr.components.push(componentUid);
+        });
 
-      setStatus(type, 'CHANGED');
-    },
-    changeDynamicZoneComponents: (
-      state,
-      action: PayloadAction<ChangeDynamicZoneComponentsPayload>
-    ) => {
-      const { dynamicZoneTarget, newComponents, forTarget, targetUid } = action.payload;
+        setStatus(type, 'CHANGED');
+      },
+      changeDynamicZoneComponents: (
+        state,
+        action: PayloadAction<ChangeDynamicZoneComponentsPayload>
+      ) => {
+        const { dynamicZoneTarget, newComponents, forTarget, targetUid } = action.payload;
 
-      const type = getType(state, { forTarget, targetUid });
+        const type = getType(state, { forTarget, targetUid });
 
-      const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
-      const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
-      const currentDZComponents = attr.components;
+        const dzAttributeIndex = findAttributeIndex(type, dynamicZoneTarget);
+        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
+        const currentDZComponents = attr.components;
 
-      const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
+        const updatedComponents = makeUnique([...currentDZComponents, ...newComponents]);
 
-      setStatus(type, 'CHANGED');
-      attr.components = updatedComponents;
-    },
-    editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
-      const { attributeToSet, forTarget, targetUid, initialAttribute } = action.payload;
-      const { name, ...rest } = attributeToSet;
+        setStatus(type, 'CHANGED');
+        attr.components = updatedComponents;
+      },
+      editAttribute: (state, action: PayloadAction<EditAttributePayload>) => {
+        const { attributeToSet, forTarget, targetUid, initialAttribute } = action.payload;
+        const { name, ...rest } = attributeToSet;
 
-      const initialAttributeName = initialAttribute.name;
-      const type = getType(state, { forTarget, targetUid });
+        const initialAttributeName = initialAttribute.name;
+        const type = getType(state, { forTarget, targetUid });
 
-      const attribute = { ...attributeToSet, status: 'CHANGED' };
+        const attribute = { ...attributeToSet, status: 'CHANGED' };
 
-      const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
+        const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
 
-      const isEditingRelation = rest.type === 'relation';
+        const isEditingRelation = rest.type === 'relation';
 
-      if (!isEditingRelation) {
-        setAttributeAt(type, initialAttributeIndex, attribute as AnyAttribute);
-        return;
-      }
+        if (!isEditingRelation) {
+          setAttributeAt(type, initialAttributeIndex, attribute as AnyAttribute);
+          return;
+        }
 
-      const updatedAttributes = type.attributes.slice();
+        const updatedAttributes = type.attributes.slice();
 
-      // First create the current relation attribute updated
-      const toSet: Relation = {
-        name,
-        relation: rest.relation,
-        target: rest.target,
-        targetAttribute: rest.targetAttribute,
-        type: 'relation',
-      };
+        // First create the current relation attribute updated
+        const toSet: Relation = {
+          name,
+          relation: rest.relation,
+          target: rest.target,
+          targetAttribute: rest.targetAttribute,
+          type: 'relation',
+        };
 
-      if (rest.private) {
-        toSet.private = rest.private;
-      }
+        if (rest.private) {
+          toSet.private = rest.private;
+        }
 
-      if (rest.pluginOptions) {
-        toSet.pluginOptions = rest.pluginOptions;
-      }
+        if (rest.pluginOptions) {
+          toSet.pluginOptions = rest.pluginOptions;
+        }
 
-      const currentAttributeIndex = updatedAttributes.findIndex((value) => {
-        return value.name !== undefined && value.name === initialAttribute.name;
-      });
+        const currentAttributeIndex = updatedAttributes.findIndex((value) => {
+          return value.name !== undefined && value.name === initialAttribute.name;
+        });
 
-      // First set it in the updatedAttributes
-      if (currentAttributeIndex !== -1) {
-        updatedAttributes.splice(currentAttributeIndex, 1, toSet);
-      }
+        // First set it in the updatedAttributes
+        if (currentAttributeIndex !== -1) {
+          updatedAttributes.splice(currentAttributeIndex, 1, toSet);
+        }
 
-      let oppositeAttributeNameToRemove: string | null = null;
-      let oppositeAttributeNameToUpdate: string | null = null;
-      let oppositeAttributeToCreate: Relation | null = null;
-      let initialOppositeAttribute = null;
+        let oppositeAttributeNameToRemove: string | null = null;
+        let oppositeAttributeNameToUpdate: string | null = null;
+        let oppositeAttributeToCreate: Relation | null = null;
+        let initialOppositeAttribute = null;
 
-      const currentUid = type.uid;
-      const didChangeTargetRelation = initialAttribute.target !== rest.target;
-      const didCreateInternalRelation = rest.target === currentUid;
-      const relationType = getRelationType(rest.relation, rest.targetAttribute);
-      const initialRelationType = getRelationType(
-        initialAttribute.relation,
-        initialAttribute.targetAttribute
-      );
-      const hadInternalRelation = initialAttribute.target === currentUid;
-      const didChangeRelationType = initialRelationType !== relationType;
-      const shouldRemoveOppositeAttributeBecauseOfTargetChange =
-        didChangeTargetRelation &&
-        !didCreateInternalRelation &&
-        hadInternalRelation &&
-        isEditingRelation;
-      const shouldRemoveOppositeAttributeBecauseOfRelationTypeChange =
-        didChangeRelationType &&
-        hadInternalRelation &&
-        ['oneWay', 'manyWay'].includes(relationType!) &&
-        isEditingRelation;
-      const shouldUpdateOppositeAttributeBecauseOfRelationTypeChange =
-        !ONE_SIDE_RELATIONS.includes(initialRelationType!) &&
-        !ONE_SIDE_RELATIONS.includes(relationType!) &&
-        hadInternalRelation &&
-        didCreateInternalRelation &&
-        isEditingRelation;
-      const shouldCreateOppositeAttributeBecauseOfRelationTypeChange =
-        ONE_SIDE_RELATIONS.includes(initialRelationType!) &&
-        !ONE_SIDE_RELATIONS.includes(relationType!) &&
-        hadInternalRelation &&
-        didCreateInternalRelation &&
-        isEditingRelation;
-      const shouldCreateOppositeAttributeBecauseOfTargetChange =
-        didChangeTargetRelation &&
-        didCreateInternalRelation &&
-        !ONE_SIDE_RELATIONS.includes(relationType!);
-
-      // Store opposite attribute name to remove at the end of the loop
-      if (
-        shouldRemoveOppositeAttributeBecauseOfTargetChange ||
-        shouldRemoveOppositeAttributeBecauseOfRelationTypeChange
-      ) {
-        oppositeAttributeNameToRemove = initialAttribute.targetAttribute;
-      }
-
-      // In case of oneWay or manyWay relation there isn't an opposite attribute
-      if (oppositeAttributeNameToRemove) {
-        const indexToRemove = updatedAttributes.findIndex(
-          (value) => value.name === oppositeAttributeNameToRemove
+        const currentUid = type.uid;
+        const didChangeTargetRelation = initialAttribute.target !== rest.target;
+        const didCreateInternalRelation = rest.target === currentUid;
+        const relationType = getRelationType(rest.relation, rest.targetAttribute);
+        const initialRelationType = getRelationType(
+          initialAttribute.relation,
+          initialAttribute.targetAttribute
         );
+        const hadInternalRelation = initialAttribute.target === currentUid;
+        const didChangeRelationType = initialRelationType !== relationType;
+        const shouldRemoveOppositeAttributeBecauseOfTargetChange =
+          didChangeTargetRelation &&
+          !didCreateInternalRelation &&
+          hadInternalRelation &&
+          isEditingRelation;
+        const shouldRemoveOppositeAttributeBecauseOfRelationTypeChange =
+          didChangeRelationType &&
+          hadInternalRelation &&
+          ['oneWay', 'manyWay'].includes(relationType!) &&
+          isEditingRelation;
+        const shouldUpdateOppositeAttributeBecauseOfRelationTypeChange =
+          !ONE_SIDE_RELATIONS.includes(initialRelationType!) &&
+          !ONE_SIDE_RELATIONS.includes(relationType!) &&
+          hadInternalRelation &&
+          didCreateInternalRelation &&
+          isEditingRelation;
+        const shouldCreateOppositeAttributeBecauseOfRelationTypeChange =
+          ONE_SIDE_RELATIONS.includes(initialRelationType!) &&
+          !ONE_SIDE_RELATIONS.includes(relationType!) &&
+          hadInternalRelation &&
+          didCreateInternalRelation &&
+          isEditingRelation;
+        const shouldCreateOppositeAttributeBecauseOfTargetChange =
+          didChangeTargetRelation &&
+          didCreateInternalRelation &&
+          !ONE_SIDE_RELATIONS.includes(relationType!);
 
-        updatedAttributes.splice(indexToRemove, 1);
-      }
+        // Store opposite attribute name to remove at the end of the loop
+        if (
+          shouldRemoveOppositeAttributeBecauseOfTargetChange ||
+          shouldRemoveOppositeAttributeBecauseOfRelationTypeChange
+        ) {
+          oppositeAttributeNameToRemove = initialAttribute.targetAttribute;
+        }
 
-      // In order to preserve plugin options need to get the initial opposite attribute settings
-      if (!shouldRemoveOppositeAttributeBecauseOfTargetChange) {
-        const initialTargetContentType = get(state, [
-          'initialContentTypes',
-          initialAttribute.target,
-        ]);
-
-        if (initialTargetContentType) {
-          const oppositeAttributeIndex = findAttributeIndex(
-            initialTargetContentType,
-            initialAttribute.targetAttribute
+        // In case of oneWay or manyWay relation there isn't an opposite attribute
+        if (oppositeAttributeNameToRemove) {
+          const indexToRemove = updatedAttributes.findIndex(
+            (value) => value.name === oppositeAttributeNameToRemove
           );
 
-          initialOppositeAttribute = get(state, [
+          updatedAttributes.splice(indexToRemove, 1);
+        }
+
+        // In order to preserve plugin options need to get the initial opposite attribute settings
+        if (!shouldRemoveOppositeAttributeBecauseOfTargetChange) {
+          const initialTargetContentType = get(state, [
             'initialContentTypes',
             initialAttribute.target,
-            'attributes',
-            oppositeAttributeIndex,
           ]);
-        }
-      }
 
-      // TODO: set status if updating opposite side
-
-      // Create the opposite attribute
-      if (
-        shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
-        shouldCreateOppositeAttributeBecauseOfTargetChange
-      ) {
-        oppositeAttributeToCreate = {
-          name: rest.targetAttribute,
-          relation: getOppositeRelation(relationType),
-          target: rest.target,
-          targetAttribute: name,
-          type: 'relation',
-        } as Relation;
-
-        if (rest.private) {
-          oppositeAttributeToCreate.private = rest.private;
-        }
-
-        if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
-          oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
-        }
-
-        const indexOfInitialAttribute = updatedAttributes.findIndex(
-          ({ name }) => name === initialAttribute.name
-        );
-        const indexOfUpdatedAttribute = updatedAttributes.findIndex(
-          ({ name: attrName }) => name === attrName
-        );
-
-        const indexToInsert =
-          (indexOfInitialAttribute === -1 ? indexOfUpdatedAttribute : indexOfInitialAttribute) + 1;
-
-        updatedAttributes.splice(indexToInsert, 0, oppositeAttributeToCreate);
-      }
-
-      if (shouldUpdateOppositeAttributeBecauseOfRelationTypeChange) {
-        oppositeAttributeNameToUpdate = initialAttribute.targetAttribute;
-
-        oppositeAttributeToCreate = {
-          name: rest.targetAttribute,
-          relation: getOppositeRelation(relationType),
-          target: rest.target,
-          targetAttribute: name,
-          type: 'relation',
-        } as Relation;
-
-        if (rest.private) {
-          oppositeAttributeToCreate.private = rest.private;
-        }
-
-        if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
-          oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
-        }
-
-        if (oppositeAttributeNameToUpdate) {
-          const indexToUpdate = updatedAttributes.findIndex(
-            ({ name }) => name === oppositeAttributeNameToUpdate
-          );
-
-          updatedAttributes.splice(indexToUpdate, 1, oppositeAttributeToCreate);
-        }
-      }
-
-      setStatus(type, 'CHANGED');
-      set(type, ['attributes'], updatedAttributes);
-    },
-    editCustomFieldAttribute: (state, action: PayloadAction<EditCustomFieldAttributePayload>) => {
-      const { forTarget, targetUid, initialAttribute, attributeToSet } = action.payload;
-
-      const initialAttributeName = initialAttribute.name;
-      const type = getType(state, { forTarget, targetUid });
-
-      const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
-
-      setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
-    },
-    reloadPlugin: () => {
-      return initialState;
-    },
-    removeComponentFromDynamicZone: (
-      state,
-      action: PayloadAction<RemoveComponentFromDynamicZonePayload>
-    ) => {
-      const { dzName, componentToRemoveIndex, forTarget, targetUid } = action.payload;
-
-      const type =
-        forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
-
-      if (!type) {
-        return;
-      }
-
-      const dzAttributeIndex = findAttributeIndex(type, dzName);
-      const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
-
-      setStatus(type, 'CHANGED');
-      attr.components.splice(componentToRemoveIndex, 1);
-    },
-    removeField: (state, action: PayloadAction<RemoveFieldPayload>) => {
-      const { forTarget, targetUid, attributeToRemoveName } = action.payload;
-
-      const type = getType(state, { forTarget, targetUid });
-
-      const attributeToRemoveIndex = findAttributeIndex(type, attributeToRemoveName);
-      const attribute = type.attributes[attributeToRemoveIndex];
-
-      if (attribute.type === 'relation') {
-        const { target, relation, targetAttribute: targetAttributeName } = attribute;
-        const relationType = getRelationType(relation, targetAttributeName);
-
-        const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(relationType!);
-
-        if (isBidirectionnal && targetAttributeName) {
-          const targetContentType = getType(state, { forTarget, targetUid: target });
-          const targetAttributeIndex = findAttributeIndex(targetContentType, targetAttributeName);
-
-          removeAttributeAt(targetContentType, targetAttributeIndex);
-        }
-      }
-
-      // Find all uid fields that have the targetField set to the field we are removing
-      type.attributes.forEach((attribute) => {
-        if (attribute.type === 'uid') {
-          if (attribute.targetField === attributeToRemoveName) {
-            delete attribute.targetField;
-          }
-        }
-      });
-
-      removeAttributeAt(type, attributeToRemoveIndex);
-    },
-    // only edits a component in practice
-    updateComponentSchema: (state, action: PayloadAction<UpdateComponentSchemaPayload>) => {
-      const { data, uid } = action.payload;
-
-      const type = state.components[uid];
-      if (!type) {
-        return;
-      }
-
-      updateType(type, {
-        info: {
-          displayName: data.displayName,
-          icon: data.icon,
-        },
-      });
-    },
-    updateSchema: (state, action: PayloadAction<UpdateSchemaPayload>) => {
-      const { data, uid } = action.payload;
-
-      const { displayName, kind, draftAndPublish, pluginOptions } = data;
-
-      const type = state.contentTypes[uid];
-      if (!type) {
-        return;
-      }
-
-      updateType(type, {
-        info: {
-          displayName,
-        },
-        kind,
-        options: {
-          draftAndPublish,
-        },
-        pluginOptions,
-      });
-    },
-    deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
-      const uid = action.payload;
-
-      // remove the compo from the components
-      if (state.components[uid].status === 'NEW') {
-        delete state.components[uid];
-      } else {
-        setStatus(state.components[uid], 'REMOVED');
-      }
-
-      // remove the compo from the content types
-      Object.keys(state.contentTypes).forEach((contentTypeUid) => {
-        const contentType = state.contentTypes[contentTypeUid];
-
-        // remove from dynamic zones
-        contentType.attributes.forEach((attribute) => {
-          if (attribute.type === 'dynamiczone') {
-            const newComponents = attribute.components.filter(
-              (component: unknown) => component !== uid
+          if (initialTargetContentType) {
+            const oppositeAttributeIndex = findAttributeIndex(
+              initialTargetContentType,
+              initialAttribute.targetAttribute
             );
 
-            attribute.components = newComponents;
-          }
-        });
-
-        contentType.attributes.forEach((attribute) => {
-          if (attribute.type === 'component' && attribute.component === uid) {
-            setAttributeStatus(attribute, 'REMOVED');
-            setStatus(contentType, 'CHANGED');
-          }
-        });
-      });
-
-      // remove the compo from other components
-      Object.keys(state.components).forEach((componentUid) => {
-        const component = state.components[componentUid];
-
-        component.attributes.forEach((attribute) => {
-          if (attribute.type === 'component' && attribute.component === uid) {
-            setAttributeStatus(attribute, 'REMOVED');
-            setStatus(component, 'CHANGED');
-          }
-        });
-      });
-    },
-    deleteContentType: (state, action: PayloadAction<Internal.UID.ContentType>) => {
-      const uid = action.payload;
-      const type = state.contentTypes[uid];
-
-      // just drop new content types
-      if (type.status === 'NEW') {
-        delete state.contentTypes[uid];
-      } else {
-        setStatus(type, 'REMOVED');
-      }
-
-      // remove the content type from the components
-      Object.keys(state.components).forEach((componentUid) => {
-        const component = state.components[componentUid];
-
-        component.attributes.forEach((attribute) => {
-          if (attribute.type === 'relation' && attribute.target === uid) {
-            setAttributeStatus(attribute, 'REMOVED');
-            setStatus(component, 'CHANGED');
-          }
-        });
-      });
-
-      // remove the content type from the content types
-      Object.keys(state.contentTypes).forEach((contentTypeUid) => {
-        const contentType = state.contentTypes[contentTypeUid];
-
-        contentType.attributes.forEach((attribute) => {
-          if (attribute.type === 'relation' && attribute.target === uid) {
-            setAttributeStatus(attribute, 'REMOVED');
-            setStatus(contentType, 'CHANGED');
-          }
-        });
-      });
-    },
-
-    applyChange(
-      state,
-      reducerAction: PayloadAction<{
-        action: 'add' | 'update' | 'delete';
-        schema: Struct.Schema;
-      }>
-    ) {
-      const { action, schema } = reducerAction.payload;
-
-      switch (action) {
-        case 'add': {
-          // generate a uid ?
-          const uid = schema.uid;
-
-          if (schema.modelType === 'component') {
-            state.components[uid] = {
-              ...formatSchema(schema),
-              status: 'NEW',
-            };
-          } else {
-            state.contentTypes[uid] = {
-              ...formatSchema(schema),
-              status: 'NEW',
-            };
+            initialOppositeAttribute = get(state, [
+              'initialContentTypes',
+              initialAttribute.target,
+              'attributes',
+              oppositeAttributeIndex,
+            ]);
           }
         }
-      }
+
+        // TODO: set status if updating opposite side
+
+        // Create the opposite attribute
+        if (
+          shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
+          shouldCreateOppositeAttributeBecauseOfTargetChange
+        ) {
+          oppositeAttributeToCreate = {
+            name: rest.targetAttribute,
+            relation: getOppositeRelation(relationType),
+            target: rest.target,
+            targetAttribute: name,
+            type: 'relation',
+          } as Relation;
+
+          if (rest.private) {
+            oppositeAttributeToCreate.private = rest.private;
+          }
+
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
+          }
+
+          const indexOfInitialAttribute = updatedAttributes.findIndex(
+            ({ name }) => name === initialAttribute.name
+          );
+          const indexOfUpdatedAttribute = updatedAttributes.findIndex(
+            ({ name: attrName }) => name === attrName
+          );
+
+          const indexToInsert =
+            (indexOfInitialAttribute === -1 ? indexOfUpdatedAttribute : indexOfInitialAttribute) +
+            1;
+
+          updatedAttributes.splice(indexToInsert, 0, oppositeAttributeToCreate);
+        }
+
+        if (shouldUpdateOppositeAttributeBecauseOfRelationTypeChange) {
+          oppositeAttributeNameToUpdate = initialAttribute.targetAttribute;
+
+          oppositeAttributeToCreate = {
+            name: rest.targetAttribute,
+            relation: getOppositeRelation(relationType),
+            target: rest.target,
+            targetAttribute: name,
+            type: 'relation',
+          } as Relation;
+
+          if (rest.private) {
+            oppositeAttributeToCreate.private = rest.private;
+          }
+
+          if (initialOppositeAttribute && initialOppositeAttribute.pluginOptions) {
+            oppositeAttributeToCreate.pluginOptions = initialOppositeAttribute.pluginOptions;
+          }
+
+          if (oppositeAttributeNameToUpdate) {
+            const indexToUpdate = updatedAttributes.findIndex(
+              ({ name }) => name === oppositeAttributeNameToUpdate
+            );
+
+            updatedAttributes.splice(indexToUpdate, 1, oppositeAttributeToCreate);
+          }
+        }
+
+        setStatus(type, 'CHANGED');
+        set(type, ['attributes'], updatedAttributes);
+      },
+      editCustomFieldAttribute: (state, action: PayloadAction<EditCustomFieldAttributePayload>) => {
+        const { forTarget, targetUid, initialAttribute, attributeToSet } = action.payload;
+
+        const initialAttributeName = initialAttribute.name;
+        const type = getType(state, { forTarget, targetUid });
+
+        const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
+
+        setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
+      },
+      reloadPlugin: () => {
+        return initialState;
+      },
+      removeComponentFromDynamicZone: (
+        state,
+        action: PayloadAction<RemoveComponentFromDynamicZonePayload>
+      ) => {
+        const { dzName, componentToRemoveIndex, forTarget, targetUid } = action.payload;
+
+        const type =
+          forTarget === 'contentType' ? state.contentTypes[targetUid] : state.components[targetUid];
+
+        if (!type) {
+          return;
+        }
+
+        const dzAttributeIndex = findAttributeIndex(type, dzName);
+        const attr = type.attributes[dzAttributeIndex] as Schema.Attribute.DynamicZone;
+
+        setStatus(type, 'CHANGED');
+        attr.components.splice(componentToRemoveIndex, 1);
+      },
+      removeField: (state, action: PayloadAction<RemoveFieldPayload>) => {
+        const { forTarget, targetUid, attributeToRemoveName } = action.payload;
+
+        const type = getType(state, { forTarget, targetUid });
+
+        const attributeToRemoveIndex = findAttributeIndex(type, attributeToRemoveName);
+        const attribute = type.attributes[attributeToRemoveIndex];
+
+        if (attribute.type === 'relation') {
+          const { target, relation, targetAttribute: targetAttributeName } = attribute;
+          const relationType = getRelationType(relation, targetAttributeName);
+
+          const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(relationType!);
+
+          if (isBidirectionnal && targetAttributeName) {
+            const targetContentType = getType(state, { forTarget, targetUid: target });
+            const targetAttributeIndex = findAttributeIndex(targetContentType, targetAttributeName);
+
+            removeAttributeAt(targetContentType, targetAttributeIndex);
+          }
+        }
+
+        // Find all uid fields that have the targetField set to the field we are removing
+        type.attributes.forEach((attribute) => {
+          if (attribute.type === 'uid') {
+            if (attribute.targetField === attributeToRemoveName) {
+              delete attribute.targetField;
+            }
+          }
+        });
+
+        removeAttributeAt(type, attributeToRemoveIndex);
+      },
+      // only edits a component in practice
+      updateComponentSchema: (state, action: PayloadAction<UpdateComponentSchemaPayload>) => {
+        const { data, uid } = action.payload;
+
+        const type = state.components[uid];
+        if (!type) {
+          return;
+        }
+
+        updateType(type, {
+          info: {
+            displayName: data.displayName,
+            icon: data.icon,
+          },
+        });
+      },
+      updateSchema: (state, action: PayloadAction<UpdateSchemaPayload>) => {
+        const { data, uid } = action.payload;
+
+        const { displayName, kind, draftAndPublish, pluginOptions } = data;
+
+        const type = state.contentTypes[uid];
+        if (!type) {
+          return;
+        }
+
+        updateType(type, {
+          info: {
+            displayName,
+          },
+          kind,
+          options: {
+            draftAndPublish,
+          },
+          pluginOptions,
+        });
+      },
+      deleteComponent: (state, action: PayloadAction<Internal.UID.Component>) => {
+        const uid = action.payload;
+
+        // remove the compo from the components
+        if (state.components[uid].status === 'NEW') {
+          delete state.components[uid];
+        } else {
+          setStatus(state.components[uid], 'REMOVED');
+        }
+
+        // remove the compo from the content types
+        Object.keys(state.contentTypes).forEach((contentTypeUid) => {
+          const contentType = state.contentTypes[contentTypeUid];
+
+          // remove from dynamic zones
+          contentType.attributes.forEach((attribute) => {
+            if (attribute.type === 'dynamiczone') {
+              const newComponents = attribute.components.filter(
+                (component: unknown) => component !== uid
+              );
+
+              attribute.components = newComponents;
+            }
+          });
+
+          contentType.attributes.forEach((attribute) => {
+            if (attribute.type === 'component' && attribute.component === uid) {
+              setAttributeStatus(attribute, 'REMOVED');
+              setStatus(contentType, 'CHANGED');
+            }
+          });
+        });
+
+        // remove the compo from other components
+        Object.keys(state.components).forEach((componentUid) => {
+          const component = state.components[componentUid];
+
+          component.attributes.forEach((attribute) => {
+            if (attribute.type === 'component' && attribute.component === uid) {
+              setAttributeStatus(attribute, 'REMOVED');
+              setStatus(component, 'CHANGED');
+            }
+          });
+        });
+      },
+      deleteContentType: (state, action: PayloadAction<Internal.UID.ContentType>) => {
+        const uid = action.payload;
+        const type = state.contentTypes[uid];
+
+        // just drop new content types
+        if (type.status === 'NEW') {
+          delete state.contentTypes[uid];
+        } else {
+          setStatus(type, 'REMOVED');
+        }
+
+        // remove the content type from the components
+        Object.keys(state.components).forEach((componentUid) => {
+          const component = state.components[componentUid];
+
+          component.attributes.forEach((attribute) => {
+            if (attribute.type === 'relation' && attribute.target === uid) {
+              setAttributeStatus(attribute, 'REMOVED');
+              setStatus(component, 'CHANGED');
+            }
+          });
+        });
+
+        // remove the content type from the content types
+        Object.keys(state.contentTypes).forEach((contentTypeUid) => {
+          const contentType = state.contentTypes[contentTypeUid];
+
+          contentType.attributes.forEach((attribute) => {
+            if (attribute.type === 'relation' && attribute.target === uid) {
+              setAttributeStatus(attribute, 'REMOVED');
+              setStatus(contentType, 'CHANGED');
+            }
+          });
+        });
+      },
+
+      applyChange(
+        state,
+        reducerAction: PayloadAction<{
+          action: 'add' | 'update' | 'delete';
+          schema: Struct.Schema;
+        }>
+      ) {
+        const { action, schema } = reducerAction.payload;
+
+        switch (action) {
+          case 'add': {
+            // generate a uid ?
+            const uid = schema.uid;
+
+            if (schema.modelType === 'component') {
+              state.components[uid] = {
+                ...formatSchema(schema),
+                status: 'NEW',
+              };
+            } else {
+              state.contentTypes[uid] = {
+                ...formatSchema(schema),
+                status: 'NEW',
+              };
+            }
+          }
+        }
+      },
     },
   },
-});
+  {
+    excludeActionsFromHistory: ['reloadPlugin', 'init'],
+    stateSelector: (state) => {
+      if (!state) {
+        return {};
+      }
+
+      return {
+        components: state.components,
+        contentTypes: state.contentTypes,
+      };
+    },
+    discard: (state) => {
+      state.components = state.initialComponents;
+      state.contentTypes = state.initialContentTypes;
+    },
+  }
+);
 
 const setStatus = (type: ContentType | Component, status: Status) => {
   switch (type.status) {
@@ -880,5 +941,6 @@ const setAttributeStatus = (attribute: Record<string, any>, status: Status) => {
   }
 };
 
+export type State = UndoRedoState<DataManagerStateType>;
 export const { reducer, actions } = slice;
 export { initialState };

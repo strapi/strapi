@@ -7,8 +7,8 @@ import { pluginId } from '../../../pluginId';
 
 import type {
   Component,
+  Components,
   ContentTypes,
-  DataManagerStateType,
   ContentType,
   AnyAttribute,
 } from '../../../types';
@@ -91,7 +91,7 @@ const sortContentType = (types: ContentTypes) => {
   );
 };
 
-const stateToRequestData = (state: DataManagerStateType) => {
+const stateToRequestData = (state: { components: Components; contentTypes: ContentTypes }) => {
   const { components, contentTypes } = state;
 
   return {
@@ -129,6 +129,8 @@ const formatTypeForRequest = (type: ContentType | Component) => {
     uid: type.uid,
     category: 'category' in type ? type.category : undefined,
     ...omit(type, ['visible', 'uid', 'restrictRelationsTo', 'isTemporary']),
+    ...type.options,
+    ...type.info,
     attributes: type.attributes.map((attr) => {
       let action;
       // should we do a diff with the initial data instead of trusting the state status ??

@@ -99,9 +99,14 @@ export interface DataManagerContextValue {
   saveSchema(): void;
   isModified: boolean;
   applyChange: (opts: { action: 'add' | 'update' | 'delete'; schema: Struct.Schema }) => void;
-  undo(): void;
-  redo(): void;
-  discardAllChanges(): void;
+  history: {
+    undo(): void;
+    redo(): void;
+    discardAllChanges(): void;
+    canUndo: boolean;
+    canRedo: boolean;
+    canDiscardAll: boolean;
+  };
 }
 
 // @ts-expect-error need to pass initial value to params

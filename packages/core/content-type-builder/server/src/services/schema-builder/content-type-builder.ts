@@ -36,6 +36,11 @@ export default function createComponentBuilder() {
       }
 
       const targetCT = this.contentTypes.get(attribute.target);
+
+      if (!targetCT) {
+        throw new ApplicationError(`Content type ${attribute.target} not found`);
+      }
+
       const targetAttribute = targetCT.getAttribute(attribute.targetAttribute);
 
       if (!attribute.targetAttribute) {
@@ -63,6 +68,57 @@ export default function createComponentBuilder() {
       return targetCT.deleteAttribute(targetAttributeName);
     },
 
+    createContentTypeAttributes(
+      this: any,
+      uid: string,
+      attributes: CreateContentTypeInput['attributes']
+    ) {
+      if (!this.contentTypes.has(uid)) {
+        throw new ApplicationError('contentType.notFound');
+      }
+
+      const contentType = this.contentTypes.get(uid);
+
+      // support self referencing content type relation
+      Object.keys(attributes).forEach((key) => {
+        const { target } = attributes[key];
+        if (target === '__self__') {
+          attributes[key].target = uid;
+        }
+      });
+
+      contentType.setAttributes(this.convertAttributes(attributes));
+
+      Object.keys(attributes).forEach((key) => {
+        const attribute = attributes[key];
+
+        if (isRelation(attribute)) {
+          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
+            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
+              // self referencing relation
+              const targetAttribute = attributes[attribute.targetAttribute];
+
+              if (targetAttribute.dominant === undefined) {
+                attribute.dominant = true;
+              } else {
+                attribute.dominant = false;
+              }
+            } else {
+              attribute.dominant = true;
+            }
+          }
+
+          this.setRelation({
+            key,
+            uid,
+            attribute,
+          });
+        }
+      });
+
+      return contentType;
+    },
+
     /**
      * Creates a content type in memory to be written to files later on
      */
@@ -86,14 +142,6 @@ export default function createComponentBuilder() {
 
       this.contentTypes.set(uid, contentType);
 
-      // support self referencing content type relation
-      Object.keys(infos.attributes).forEach((key) => {
-        const { target } = infos.attributes[key];
-        if (target === '__self__') {
-          infos.attributes[key].target = uid;
-        }
-      });
-
       contentType
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
@@ -112,35 +160,9 @@ export default function createComponentBuilder() {
           draftAndPublish: infos.draftAndPublish,
         })
         .set('pluginOptions', infos.pluginOptions)
-        .set('config', infos.config)
-        .setAttributes(this.convertAttributes(infos.attributes));
+        .set('config', infos.config);
 
-      Object.keys(infos.attributes).forEach((key) => {
-        const attribute = infos.attributes[key];
-
-        if (isRelation(attribute)) {
-          if (['manyToMany', 'oneToOne'].includes(attribute.relation)) {
-            if (attribute.target === uid && attribute.targetAttribute !== undefined) {
-              // self referencing relation
-              const targetAttribute = infos.attributes[attribute.targetAttribute];
-
-              if (targetAttribute.dominant === undefined) {
-                attribute.dominant = true;
-              } else {
-                attribute.dominant = false;
-              }
-            } else {
-              attribute.dominant = true;
-            }
-          }
-
-          this.setRelation({
-            key,
-            uid,
-            attribute,
-          });
-        }
-      });
+      this.createContentTypeAttributes(uid, infos.attributes);
 
       return contentType;
     },

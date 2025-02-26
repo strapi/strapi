@@ -23,8 +23,11 @@ export const RelationTargetPicker = ({
     isAllowedContentTypesForRelations
   );
 
-  const { plugin = null, info: { displayName } = { displayName: '' } } =
-    contentTypes?.[target] ?? {};
+  const type = contentTypes[target];
+
+  if (!type) {
+    return null;
+  }
 
   const handleSelect =
     ({
@@ -60,7 +63,7 @@ export const RelationTargetPicker = ({
    */
   return (
     <Menu.Root>
-      <MenuTrigger>{`${displayName} ${plugin ? `(from: ${plugin})` : ''}`}</MenuTrigger>
+      <MenuTrigger>{`${type.info.displayName} ${type.plugin ? `(from: ${type.plugin})` : ''}`}</MenuTrigger>
       <Menu.Content zIndex="popover">
         {allowedContentTypesForRelation.map(({ uid, title, restrictRelationsTo, plugin }) => (
           <Menu.Item key={uid} onSelect={handleSelect({ uid, plugin, title, restrictRelationsTo })}>

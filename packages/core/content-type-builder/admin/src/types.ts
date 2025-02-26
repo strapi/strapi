@@ -78,24 +78,12 @@ export type Component = Omit<Struct.ComponentSchema, 'attributes'> & {
 export type ContentType = Omit<Struct.ContentTypeSchema, 'attributes'> & {
   plugin?: string;
   isTemporary?: boolean;
-  visible?: boolean;
-  status?: Status;
-  restrictRelationsTo?: unknown;
+  visible: boolean;
+  status: Status;
+  restrictRelationsTo?: string[] | null;
   attributes: Array<AnyAttribute>;
 };
 
 export type Components = Record<string, Component>;
 
 export type ContentTypes = Record<string, ContentType>;
-export interface DataManagerStateType {
-  components: Components;
-  initialComponents: Components;
-  contentTypes: ContentTypes;
-  initialContentTypes: ContentTypes;
-  reservedNames: {
-    models: string[];
-    attributes: string[];
-  };
-  isLoading: boolean;
-  [key: string]: any;
-}

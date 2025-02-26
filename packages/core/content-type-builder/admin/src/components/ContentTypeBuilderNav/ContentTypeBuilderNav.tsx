@@ -1,5 +1,6 @@
-import { Fragment, useId, useState } from 'react';
+import { Fragment, useId, useState, useEffect } from 'react';
 
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import {
   Box,
   SubNav,
@@ -11,6 +12,7 @@ import {
   IconButton,
   Menu,
   VisuallyHidden,
+  Dialog,
 } from '@strapi/design-system';
 import { ArrowClockwise, ChevronDown, Cross, More, Plus, Search } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
@@ -217,8 +219,54 @@ const SubSection = ({ label, children }: { label: string; children: React.ReactN
 
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
-  const { saveSchema, isModified, undo, redo, discardAllChanges } = useDataManager();
+  const { saveSchema, isModified, history } = useDataManager();
   const { formatMessage } = useIntl();
+
+  const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const [discardConfirmationModalIsOpen, setDiscardConfirmationModalIsOpen] = useState(false);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 's') {
+          if (isModified) {
+            e.preventDefault();
+            saveSchema();
+          }
+        } else if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault(); // Prevent browser default undo (e.g., in input fields)
+          history.undo();
+        } else if (e.key === 'y' || (e.shiftKey && e.key === 'z') || e.key === 'Z') {
+          e.preventDefault(); // Prevent browser default redo (e.g., in input fields)
+          history.redo();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  });
+
+  const discardHandler = () => {
+    setDiscardConfirmationModalIsOpen(true);
+  };
+
+  const discardChanges = () => {
+    setMenuIsOpen(false);
+    setDiscardConfirmationModalIsOpen(false);
+    history.discardAllChanges();
+  };
+
+  const undoHandler = () => {
+    history.undo();
+  };
+
+  const redoHandler = () => {
+    history.redo();
+  };
 
   const pluginName = formatMessage({
     id: getTrad('plugin.name'),
@@ -249,7 +297,7 @@ export const ContentTypeBuilderNav = () => {
               defaultMessage: 'Save',
             })}
           </Button>
-          <Menu.Root>
+          <Menu.Root open={menuIsOpen} onOpenChange={setMenuIsOpen}>
             <Menu.Trigger
               size="S"
               endIcon={null}
@@ -267,23 +315,13 @@ export const ContentTypeBuilderNav = () => {
               </VisuallyHidden>
             </Menu.Trigger>
             <Menu.Content zIndex={1}>
-              <Menu.Item
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.preventDefault();
-                  undo();
-                }}
-              >
+              <Menu.Item disabled={!history.canUndo} onSelect={undoHandler}>
                 <Flex gap={2}>
                   <ArrowCounterClockwise fill="neutral500" />
                   <Typography>Undo last change</Typography>
                 </Flex>
               </Menu.Item>
-              <Menu.Item
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.preventDefault();
-                  redo();
-                }}
-              >
+              <Menu.Item disabled={!history.canRedo} onSelect={redoHandler}>
                 <Typography>
                   <Flex gap={2}>
                     <ArrowClockwise fill="neutral500" />
@@ -293,15 +331,13 @@ export const ContentTypeBuilderNav = () => {
               </Menu.Item>
               <Menu.Separator />
               <Menu.Item
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  // TODO: add confirmation step <Blocker>
-                  e.preventDefault();
-                  discardAllChanges();
-                }}
+                disabled={!history.canDiscardAll}
+                color="danger500"
+                onSelect={discardHandler}
               >
                 <Flex gap={2}>
-                  <Cross fill="danger500" />
-                  <Typography textColor={'danger500'}>Discard all changes</Typography>
+                  <Cross />
+                  <Typography>Discard all changes</Typography>
                 </Flex>
               </Menu.Item>
             </Menu.Content>
@@ -380,6 +416,12 @@ export const ContentTypeBuilderNav = () => {
           </Fragment>
         ))}
       </Sections>
+      <Dialog.Root
+        open={discardConfirmationModalIsOpen}
+        onOpenChange={setDiscardConfirmationModalIsOpen}
+      >
+        <ConfirmDialog onConfirm={discardChanges} />
+      </Dialog.Root>
     </SubNavCustom>
   );
 };
