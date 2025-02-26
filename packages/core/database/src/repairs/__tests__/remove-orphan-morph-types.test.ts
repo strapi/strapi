@@ -189,4 +189,38 @@ describe('removeOrphanMorphType', () => {
     expect(mockDb.connection).toHaveBeenCalledWith('another_table_with_component_type');
     expect(mockDb.connection).not.toHaveBeenCalledWith('table_without_component_type');
   });
+
+  it('should query the database when there is no target for component and entity join table', async () => {
+    const mockMetadataMap = new Map([
+      [
+        'model1',
+        {
+          attributes: {
+            someRelation: {
+              type: 'relation',
+              relation: 'morphToMany',
+              joinTable: {
+                name: 'countries_cmps',
+                joinColumn: { name: 'entity_id', referencedColumn: 'id' },
+                pivotColumns: ['entity_id', 'cmp_id', 'field', 'component_type'],
+              },
+            },
+          },
+        },
+      ],
+    ]);
+
+    (mockDb.metadata.values as jest.Mock).mockReturnValue(mockMetadataMap.values());
+
+    mockDb.metadata.get = jest.fn().mockImplementation((type: string) => {
+      if (type === 'validType') {
+        return {}; // Simulate valid metadata
+      }
+      throw new Error('Metadata not found'); // Simulate missing metadata
+    }) as jest.MockedFunction<typeof mockDb.metadata.get>;
+
+    await removeOrphanMorphType(mockDb, { pivot: PIVOT_COLUMN });
+
+    expect(mockDb.connection).toHaveBeenCalledWith('countries_cmps');
+  });
 });
