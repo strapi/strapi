@@ -34,7 +34,7 @@ import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 
-import type { RelationsFormValue } from './FormInputs/Relations';
+import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
 
 /* -------------------------------------------------------------------------------------------------
