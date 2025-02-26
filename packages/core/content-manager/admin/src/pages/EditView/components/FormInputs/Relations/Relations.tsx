@@ -127,15 +127,7 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
 
 interface RelationsFieldProps
   extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
-    Pick<InputProps, 'hint'> {
-  documentModel?: string;
-  document?: ReturnType<UseDocument>['document'];
-  setCurrentDocument?: (newDocument: {
-    documentId: string;
-    model: string;
-    collectionType: string;
-  }) => void;
-}
+    Pick<InputProps, 'hint'> {}
 
 export interface RelationsFormValue {
   connect?: Relation[];

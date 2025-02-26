@@ -18,6 +18,7 @@ export const ResponsiveGridRoot = styled(Grid.Root)`
 // We need to use a different grid item for the responsive layout in the test environment
 // because @container is not supported in jsdom and it throws an error
 export const ResponsiveGridItem =
+  // TODO: we need to find a better solution to avoid using process.env.NODE_ENV in the code to fix the tests with this styled component
   process.env.NODE_ENV !== 'test'
     ? styled(Grid.Item)<{ col: number }>`
         grid-column: span 12;
@@ -34,9 +35,6 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   model?: string;
 }
 
-/**
- * Component that renders the form layout, in case the model is passed as a prompt we give priority to it instead of using the one from useDoc, which is the default behavior. This is useful for Relation modal where the model is not the one in the url but the one from the relation.
- */
 const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const documentMeta = useDocumentContext('FormLayout', (state) => state.meta);
