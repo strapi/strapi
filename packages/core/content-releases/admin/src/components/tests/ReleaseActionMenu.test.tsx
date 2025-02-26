@@ -15,11 +15,11 @@ describe('ReleaseActionMenu', () => {
       </ReleaseActionMenu.Root>
     );
 
-    const menuTrigger = await screen.findByRole('button', { name: 'Release action options' });
-    expect(menuTrigger).toBeInTheDocument();
+    await user.click(await screen.findByRole('button', { name: 'Release action options' }));
 
-    await user.click(menuTrigger);
-    expect(screen.getByRole('menuitem', { name: 'Remove from release' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Edit entry' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('menuitem', { name: 'Remove from release' })
+    ).toBeInTheDocument();
+    expect(await screen.findByRole('menuitem', { name: 'Edit entry' })).toBeInTheDocument();
   });
 });

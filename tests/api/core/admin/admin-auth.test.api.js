@@ -13,7 +13,6 @@ describe('Admin Auth End to End', () => {
   let rq;
   let strapi;
   let utils;
-
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -37,6 +36,38 @@ describe('Admin Auth End to End', () => {
         url: '/admin/login',
         method: 'POST',
         body: superAdmin.loginInfo,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data).toMatchObject({
+        token: expect.any(String),
+        user: {
+          firstname: expect.stringOrNull(),
+          lastname: expect.stringOrNull(),
+          username: expect.stringOrNull(),
+          email: expect.any(String),
+          isActive: expect.any(Boolean),
+        },
+      });
+    });
+
+    test('Can login with password that no longer passes validation', async () => {
+      // insert a user with a password that is over 72 bytes, which is not valid
+      const longPassword = `aA1${'b'.repeat(100)}`;
+      const someUser = await utils.createUser({
+        email: 'some-user@strapi.io',
+        firstname: 'some',
+        lastname: 'user',
+        password: longPassword,
+      });
+
+      const res = await rq({
+        url: '/admin/login',
+        method: 'POST',
+        body: {
+          email: someUser.email,
+          password: longPassword,
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -376,6 +407,42 @@ describe('Admin Auth End to End', () => {
             ],
           },
           message: '3 errors occurred',
+          name: 'ValidationError',
+        },
+      });
+    });
+
+    test('Fails on password of 73 bytes', async () => {
+      const password = `aA1${'b'.repeat(70)}`;
+      const res = await rq({
+        url: '/admin/register',
+        method: 'POST',
+        body: {
+          registrationToken: user.registrationToken,
+          userInfo: {
+            firstname: 'test',
+            lastname: 'Strapi',
+            password,
+          },
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toEqual({
+        data: null,
+        error: {
+          status: 400,
+          details: {
+            errors: [
+              {
+                message: 'userInfo.password must be less than 73 bytes',
+                name: 'ValidationError',
+                value: password,
+                path: ['userInfo', 'password'],
+              },
+            ],
+          },
+          message: 'userInfo.password must be less than 73 bytes',
           name: 'ValidationError',
         },
       });
