@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       base_branch:
-        description: "Base branch to compare from (default: develop)."
-        default: "develop"
+        description: 'Base branch to compare from (default: develop).'
+        default: 'develop'
         required: false
       target_branch:
-        description: "Target branch to compare to."
+        description: 'Target branch to compare to.'
         required: true
 
 permissions:
@@ -51,4 +51,3 @@ jobs:
             # Append each PR row to the summary table
             echo "| #${pr_number} | ${pr_title} | ${pr_author} | [Link](${pr_link}) |" >> $GITHUB_STEP_SUMMARY
           done
-
