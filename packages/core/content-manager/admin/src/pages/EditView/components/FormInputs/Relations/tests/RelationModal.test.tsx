@@ -175,13 +175,7 @@ describe('<RelationModal />', () => {
   it("doesn't render the modal if we pass an open prop to false", () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal
-          open={false}
-          onToggle={() => {}}
-          model="api::test.test"
-          id="abcdefg"
-          relationUrl="../collection-types/api::test.test/abcdefg?"
-        />
+        <RelationModal open={false} onToggle={() => {}} id="abcdefg" />
       </DocumentContextProvider>
     );
 
@@ -191,13 +185,7 @@ describe('<RelationModal />', () => {
   it('renders the modal if we pass an open prop to true', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal
-          open={true}
-          onToggle={() => {}}
-          model="api::test.test"
-          id="abcdefg"
-          relationUrl="../collection-types/api::test.test/abcdefg"
-        />
+        <RelationModal open={true} onToggle={() => {}} id="abcdefg" />
       </DocumentContextProvider>
     );
 
@@ -206,13 +194,7 @@ describe('<RelationModal />', () => {
   it('shows the modal with the Edit a relation title, the relation title, the X button and the Cancel button when the modal is to Edit a relation', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal
-          open={true}
-          onToggle={() => {}}
-          model="api::test.test"
-          id="abcdefg"
-          relationUrl="../collection-types/api::test.test/abcdefg?"
-        />
+        <RelationModal open={true} onToggle={() => {}} id="abcdefg" />
       </DocumentContextProvider>
     );
 
@@ -230,13 +212,7 @@ describe('<RelationModal />', () => {
   it('shows the modal with an icon button to open the document in fullpage', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal
-          open={true}
-          onToggle={() => {}}
-          model="api::test.test"
-          id="abcdefg"
-          relationUrl="../collection-types/api::test.test/abcdefg?"
-        />
+        <RelationModal open={true} onToggle={() => {}} id="abcdefg" />
       </DocumentContextProvider>
     );
 

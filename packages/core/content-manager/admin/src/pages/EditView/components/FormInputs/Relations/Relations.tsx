@@ -1539,9 +1539,7 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                   onToggle={() => {
                     setIsModalOpen(!isModalOpen);
                   }}
-                  model={targetModel}
                   id={documentId ? documentId : apiData?.documentId}
-                  relationUrl={href}
                 />
               )}
             </Flex>
