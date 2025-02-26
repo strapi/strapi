@@ -240,6 +240,6 @@ describe('<RelationModal />', () => {
       </DocumentContextProvider>
     );
 
-    expect(screen.getByRole('link', { name: 'Open fullpage' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Go to entry' })).toBeInTheDocument();
   });
 });
