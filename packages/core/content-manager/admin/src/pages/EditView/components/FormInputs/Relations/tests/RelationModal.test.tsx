@@ -226,4 +226,20 @@ describe('<RelationModal />', () => {
     expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
+
+  it('shows the modal with an icon button to open the document in fullpage', () => {
+    render(
+      <DocumentContextProvider {...relationContext}>
+        <RelationModal
+          open={true}
+          onToggle={() => {}}
+          model="api::test.test"
+          id="abcdefg"
+          relationUrl="../collection-types/api::test.test/abcdefg?"
+        />
+      </DocumentContextProvider>
+    );
+
+    expect(screen.getByRole('link', { name: 'Open fullpage' })).toBeInTheDocument();
+  });
 });

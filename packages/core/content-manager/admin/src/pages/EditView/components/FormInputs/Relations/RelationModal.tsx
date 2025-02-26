@@ -11,8 +11,9 @@ import {
   Modal,
   Typography,
 } from '@strapi/design-system';
-import { ArrowLeft, WarningCircle } from '@strapi/icons';
+import { ArrowLeft, WarningCircle, ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
@@ -149,20 +150,47 @@ const RelationModalBody = ({ id }: RelationModalBodyProps) => {
 
   const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
 
+  const getFullPageLink = (): string => {
+    const isSingleType = documentMeta.collectionType === SINGLE_TYPES;
+    const queryParams = documentResponse?.document?.locale
+      ? `?plugins[i18n][locale]=${documentResponse.document.locale}`
+      : '';
+
+    return `/content-manager/${documentMeta.collectionType}/${documentMeta.model}${isSingleType ? '' : '/' + documentMeta.documentId}${queryParams}`;
+  };
+
   const hasDraftAndPublished = documentResponse.schema?.options?.draftAndPublish ?? false;
 
   return (
     <Modal.Body>
       <DocumentRBAC permissions={permissions} model={documentMeta.model}>
-        <Flex direction="column" alignItems="flex-start" gap={2}>
-          <Typography tag="h2" variant="alpha">
-            {documentTitle}
-          </Typography>
-          {hasDraftAndPublished ? (
-            <Box marginTop={1}>
-              <DocumentStatus status={documentResponse.document?.status} />
-            </Box>
-          ) : null}
+        <Flex alignItems="flex-start" justifyContent="space-between" width="100%">
+          <Flex direction="column" alignItems="flex-start" gap={2}>
+            <Typography tag="h2" variant="alpha">
+              {documentTitle}
+            </Typography>
+            {hasDraftAndPublished ? (
+              <Box marginTop={1}>
+                <DocumentStatus status={documentResponse.document?.status} />
+              </Box>
+            ) : null}
+          </Flex>
+          <Flex>
+            <IconButton
+              tag={Link}
+              to={getFullPageLink()}
+              onClick={() => {
+                /*TODO: add Tracking*/
+              }}
+              variant="tertiary"
+              label={formatMessage({
+                id: 'content-manager.components.RelationInputModal.button-fullpage',
+                defaultMessage: 'Open fullpage',
+              })}
+            >
+              <ExternalLink />
+            </IconButton>
+          </Flex>
         </Flex>
         <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
           <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
