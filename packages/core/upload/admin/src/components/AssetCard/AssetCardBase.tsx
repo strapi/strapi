@@ -27,10 +27,15 @@ const Extension = styled.span`
 
 const CardActionsContainer = styled(CardAction)`
   opacity: 0;
+  z-index: 1;
 
   &:focus-within {
     opacity: 1;
   }
+`;
+
+const CardCheckboxWrapper = styled.div`
+  z-index: 1;
 `;
 
 const CardContainer = styled(Card)`
@@ -58,6 +63,7 @@ export interface AssetCardBaseProps {
   selected?: boolean;
   subtitle?: string;
   variant: 'Image' | 'Video' | 'Audio' | 'Doc';
+  className?: string;
 }
 
 export const AssetCardBase = ({
@@ -71,6 +77,7 @@ export const AssetCardBase = ({
   selected = false,
   subtitle = '',
   variant = 'Image',
+  className,
 }: AssetCardBaseProps) => {
   const { formatMessage } = useIntl();
 
@@ -90,12 +97,18 @@ export const AssetCardBase = ({
   };
 
   return (
-    <CardContainer role="button" height="100%" tabIndex={-1} onClick={handleClick}>
+    <CardContainer
+      className={className}
+      role="button"
+      height="100%"
+      tabIndex={-1}
+      onClick={handleClick}
+    >
       <CardHeader>
         {isSelectable && (
-          <div onClick={handlePropagationClick}>
+          <CardCheckboxWrapper onClick={handlePropagationClick}>
             <CardCheckbox checked={selected} onCheckedChange={onSelect} />
-          </div>
+          </CardCheckboxWrapper>
         )}
         {(onRemove || onEdit) && (
           <CardActionsContainer onClick={handlePropagationClick} position="end">
