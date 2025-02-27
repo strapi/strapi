@@ -30,23 +30,41 @@ const PurchaseReviewWorkflows = () => {
                 </Flex>
                 <Flex paddingTop={2} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
-                    Manage your content review process
+                    {formatMessage({
+                      id: 'settings.page.purchase.description',
+                      defaultMessage: 'Manage your content review process',
+                    })}
                   </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Customizable review stages</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'settings.page.purchase.perks1',
+                      defaultMessage: 'Customizable review stages',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Manage user permissions</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'settings.page.purchase.perks2',
+                      defaultMessage: 'Manage user permissions',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Support for webhooks</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'settings.page.purchase.perks3',
+                      defaultMessage: 'Support for webhooks',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2} marginTop={7}>
@@ -54,14 +72,20 @@ const PurchaseReviewWorkflows = () => {
                     variant="default"
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Review%20Workflows"
                   >
-                    Upgrade
+                    {formatMessage({
+                      id: 'Settings.purchase.page.upgrade.cta',
+                      defaultMessage: 'Upgrade',
+                    })}
                   </LinkButton>
                   <LinkButton
                     variant="tertiary"
                     endIcon={<ExternalLink />}
                     href="https://strapi.io/features/review-workflow?utm_campaign=In-Product-CTA&utm_source=Review%20Workflows"
                   >
-                    Learn more
+                    {formatMessage({
+                      id: 'Settings.purchase.page.learn-more.cta',
+                      defaultMessage: 'Learn more',
+                    })}
                   </LinkButton>
                 </Flex>
               </Flex>

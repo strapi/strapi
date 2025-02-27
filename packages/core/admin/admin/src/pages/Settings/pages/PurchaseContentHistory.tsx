@@ -30,23 +30,41 @@ const PurchaseContentHistory = () => {
                 </Flex>
                 <Flex paddingTop={2} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
-                    Instantly revert content changes
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.description',
+                      defaultMessage: 'Instantly revert content changes',
+                    })}
                   </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Browser your content history</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseContent-history.perks1',
+                      defaultMessage: 'Browse your content history',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Revert changes in one click</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseContent-history.perks2',
+                      defaultMessage: 'Revert changes in one click',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Track changes across locales</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseContent-history.perks3',
+                      defaultMessage: 'Track changes across locales',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2} marginTop={7}>
@@ -54,14 +72,20 @@ const PurchaseContentHistory = () => {
                     variant="default"
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Content-History"
                   >
-                    Upgrade
+                    {formatMessage({
+                      id: 'Settings.page.purchase.upgrade.cta',
+                      defaultMessage: 'Upgrade',
+                    })}
                   </LinkButton>
                   <LinkButton
                     variant="tertiary"
                     endIcon={<ExternalLink />}
                     href="https://strapi.io/features/content-history?utm_campaign=In-Product-CTA&utm_source=Content-History"
                   >
-                    Learn more
+                    {formatMessage({
+                      id: 'Settings.page.purchase.learn-more.cta',
+                      defaultMessage: 'Learn more',
+                    })}
                   </LinkButton>
                 </Flex>
               </Flex>

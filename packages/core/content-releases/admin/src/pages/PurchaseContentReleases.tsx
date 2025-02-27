@@ -30,26 +30,40 @@ const PurchaseContentReleases = () => {
                 </Flex>
                 <Flex paddingTop={2} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
-                    Group content and publish updates together
-                  </Typography>
-                </Flex>
-
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Add many entries to releases</Typography>
-                </Flex>
-
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    Quickly identify entries containing errors
+                    {formatMessage({
+                      id: 'pages.PurchaseRelease.description',
+                      defaultMessage: 'Group content and publish updates together',
+                    })}
                   </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
                   <Typography textColor="neutral700">
-                    Schedule their publication, or publish them manually
+                    {formatMessage({
+                      id: 'pages.PurchaseRelease.perks1',
+                      defaultMessage: 'Add many entries to releases',
+                    })}
+                  </Typography>
+                </Flex>
+
+                <Flex gap={2}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'pages.PurchaseRelease.perks2',
+                      defaultMessage: 'Quickly identify entries containing errors',
+                    })}
+                  </Typography>
+                </Flex>
+
+                <Flex gap={2}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'pages.PurchaseRelease.perks3',
+                      defaultMessage: 'Schedule their publication, or publish them manually',
+                    })}
                   </Typography>
                 </Flex>
 
@@ -58,14 +72,20 @@ const PurchaseContentReleases = () => {
                     variant="default"
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Releases"
                   >
-                    Upgrade
+                    {formatMessage({
+                      id: 'Settings.purchage.page.upgrade.cta',
+                      defaultMessage: 'Upgrade',
+                    })}
                   </LinkButton>
                   <LinkButton
                     variant="tertiary"
                     endIcon={<ExternalLink />}
                     href="https://strapi.io/features/releases?utm_campaign=In-Product-CTA&utm_source=Releases"
                   >
-                    Learn more
+                    {formatMessage({
+                      id: 'Settings.purchage.page.learn-more.cta',
+                      defaultMessage: 'Learn more',
+                    })}
                   </LinkButton>
                 </Flex>
               </Flex>

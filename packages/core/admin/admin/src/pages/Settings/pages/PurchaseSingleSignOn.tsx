@@ -30,23 +30,41 @@ const PurchaseSingleSignOn = () => {
                 </Flex>
                 <Flex paddingTop={2} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
-                    Simplify authentication for your team
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseSSO.description',
+                      defaultMessage: 'Simplify authentication for your team',
+                    })}
                   </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Unified authentication</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseSSO.perks1',
+                      defaultMessage: 'Unified authentication',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Enhanced security</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseSSO.perks2',
+                      defaultMessage: 'Enhanced security',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Support for webhooks</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseSSO.perks3',
+                      defaultMessage: 'Support for webhooks',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2} marginTop={7}>
@@ -54,14 +72,20 @@ const PurchaseSingleSignOn = () => {
                     variant="default"
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Single-sign-on"
                   >
-                    Upgrade
+                    {formatMessage({
+                      id: 'Settings.purchase.page.upgrade.cta',
+                      defaultMessage: 'Upgrade',
+                    })}
                   </LinkButton>
                   <LinkButton
                     variant="tertiary"
                     endIcon={<ExternalLink />}
                     href="https://strapi.io/features/single-sign-on-sso?utm_campaign=In-Product-CTA&utm_source=Single-sign-on"
                   >
-                    Learn more
+                    {formatMessage({
+                      id: 'Settings.purchase.page.learn-more.cta',
+                      defaultMessage: 'Learn more',
+                    })}
                   </LinkButton>
                 </Flex>
               </Flex>

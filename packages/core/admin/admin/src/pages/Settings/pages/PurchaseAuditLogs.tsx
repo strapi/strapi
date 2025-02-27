@@ -27,23 +27,41 @@ const PurchaseAuditLogs = () => {
                 </Flex>
                 <Flex paddingTop={2} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
-                    Track and review changes with your team
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.description',
+                      defaultMessage: 'Track and review changes with your team',
+                    })}
                   </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Easily track changes</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.perks1',
+                      defaultMessage: 'Easily track changes',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Review changes with ease</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.perks2',
+                      defaultMessage: 'Review changes with ease',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2}>
                   <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">Maintain security and compliance</Typography>
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.perks3',
+                      defaultMessage: 'Maintain security and compliance',
+                    })}
+                  </Typography>
                 </Flex>
 
                 <Flex gap={2} marginTop={7}>
@@ -51,14 +69,20 @@ const PurchaseAuditLogs = () => {
                     variant="default"
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Audit-Logs"
                   >
-                    Upgrade
+                    {formatMessage({
+                      id: 'Settings.page.purchase.upgrade.cta',
+                      defaultMessage: 'Upgrade',
+                    })}
                   </LinkButton>
                   <LinkButton
                     variant="tertiary"
                     endIcon={<ExternalLink />}
                     href="https://strapi.io/features/audit-logs?utm_campaign=In-Product-CTA&utm_source=Audit-Logs"
                   >
-                    Learn more
+                    {formatMessage({
+                      id: 'Settings.page.purchase.learn-more.cta',
+                      defaultMessage: 'Learn more',
+                    })}
                   </LinkButton>
                 </Flex>
               </Flex>
