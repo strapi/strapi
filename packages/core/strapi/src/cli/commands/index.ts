@@ -1,6 +1,7 @@
 import { buildStrapiCloudCommands as cloudCommands } from '@strapi/cloud-cli';
 
 import { command as createAdminUser } from './admin/create-user';
+import { command as deleteAdminUser } from './admin/delete-user';
 import { command as resetAdminUserPassword } from './admin/reset-user-password';
 import { command as listComponents } from './components/list';
 import { command as configurationDump } from './configuration/dump';
@@ -31,6 +32,7 @@ import { StrapiCommand } from '../types';
 
 export const commands: StrapiCommand[] = [
   createAdminUser,
+  deleteAdminUser,
   resetAdminUserPassword,
   listComponents,
   configurationDump,
