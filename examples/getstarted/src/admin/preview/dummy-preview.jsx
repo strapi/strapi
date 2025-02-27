@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
 
 // @ts-ignore
@@ -14,6 +14,20 @@ const PreviewComponent = () => {
     params: { locale, status },
     collectionType,
   });
+
+  React.useEffect(() => {
+    const handleStrapiUpdate = (event) => {
+      if (event.data?.type === 'strapiUpdate') {
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('message', handleStrapiUpdate);
+
+    return () => {
+      window.removeEventListener('message', handleStrapiUpdate);
+    };
+  }, []);
 
   return (
     <Layouts.Root>

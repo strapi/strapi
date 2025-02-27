@@ -156,6 +156,7 @@ const UnstablePreviewHeader = () => {
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
+  const iframeRef = usePreviewContext('PreviewHeader', (state) => state.iframeRef);
 
   const [{ query }] = useQueryParams<{
     status?: 'draft' | 'published';
@@ -183,6 +184,9 @@ const UnstablePreviewHeader = () => {
     documentId: document.documentId,
     document,
     meta,
+    onPreview: () => {
+      iframeRef?.current?.contentWindow?.postMessage({ type: 'strapiUpdate' });
+    },
   } satisfies DocumentActionProps;
 
   return (
