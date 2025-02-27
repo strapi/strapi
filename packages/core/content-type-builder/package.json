@@ -85,7 +85,7 @@
     "@testing-library/user-event": "14.4.3",
     "@types/pluralize": "0.0.30",
     "history": "^4.9.0",
-    "koa": "2.16.0",
+    "koa": "2.15.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
