@@ -84,7 +84,7 @@
     "@testing-library/user-event": "14.5.2",
     "@types/fs-extra": "11.0.4",
     "@types/pluralize": "0.0.30",
-    "koa": "2.15.4",
+    "koa": "2.16.0",
     "koa-body": "6.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",

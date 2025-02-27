@@ -111,7 +111,7 @@
     "invariant": "^2.2.4",
     "is-localhost-ip": "2.0.0",
     "jsonwebtoken": "9.0.0",
-    "koa": "2.15.4",
+    "koa": "2.16.0",
     "koa-compose": "4.1.0",
     "koa-passport": "6.0.0",
     "koa-static": "5.0.0",
