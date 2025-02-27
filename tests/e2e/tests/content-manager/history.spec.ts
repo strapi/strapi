@@ -224,7 +224,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await findAndClose(page, 'Saved Document');
 
       // Delete one of the authors, leaving only Coach Beard
-      await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
+      // await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
       // TODO: we need to renable this part when we implement the fullpage button
       // await page.getByRole('button', { name: 'More actions' }).click();
       // await page.getByRole('menuitem', { name: /delete entry/i }).click();
@@ -451,13 +451,14 @@ describeOnCondition(edition === 'EE')('History', () => {
 
       // Delete one of the authors, leaving only Coach Beard
       await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /delete entry/i }).click();
-      await page.getByRole('button', { name: /confirm/i }).click();
+      // TODO: renable this part of the e2e when we implement the fullpage button in the relation modal
+      // await page.getByRole('button', { name: /more actions/i }).click();
+      // await page.getByRole('menuitem', { name: /delete entry/i }).click();
+      // await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the history page
-      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
       // TODO: renable this part of the e2e when we implement the fullpage button in the relation modal
+      // await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
       // await page.waitForURL(HOMEPAGE_EDIT_URL);
       // await page.getByRole('button', { name: /more actions/i }).click();
       // await clickAndWait(page, page.getByRole('menuitem', { name: /content history/i }));
