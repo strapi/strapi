@@ -1431,8 +1431,17 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
     setCurrentDocument,
   } = data;
 
-  const { formatMessage } = useIntl();
+  const addDocumentToHistory = useDocumentContext(
+    'ListItem',
+    (state) => state.addDocumentToHistory
+  );
+  const contextIsModalOpen = useDocumentContext('ListItem', (state) => state.isModalOpen);
+  const setContextIsModalOpen = useDocumentContext('ListItem', (state) => state.setIsModalOpen);
+  const resetHistory = useDocumentContext('ListItem', (state) => state.resetHistory);
+  const meta = useDocumentContext('ListItem', (state) => state.meta);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const { formatMessage } = useIntl();
 
   const { id, label, status, documentId, href, apiData } = relations[index];
 
@@ -1465,6 +1474,9 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
         model: targetModel,
         collectionType: getCollectionType(href)!,
       };
+      if (contextIsModalOpen) {
+        addDocumentToHistory(meta);
+      }
       setCurrentDocument(newRelation);
     }
   };
@@ -1519,11 +1531,19 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                 <Tooltip description={label}>
                   {/*  eslint-disable-next-line no-console */}
                   {isModalOpen ? (
-                    <CustomTextButton onClick={handleChangeModalContent}>{label}</CustomTextButton>
+                    <CustomTextButton
+                      onClick={() => {
+                        handleChangeModalContent();
+                      }}
+                    >
+                      {label}
+                    </CustomTextButton>
                   ) : (
                     <CustomTextButton
                       onClick={() => {
-                        setIsModalOpen(true);
+                        if (setIsModalOpen) {
+                          setIsModalOpen(true);
+                        }
                         handleChangeModalContent();
                       }}
                     >
@@ -1537,7 +1557,9 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
                 <RelationModal
                   open={isModalOpen}
                   onToggle={() => {
-                    setIsModalOpen(!isModalOpen);
+                    setIsModalOpen(false);
+                    setContextIsModalOpen(false);
+                    resetHistory();
                   }}
                   model={targetModel}
                   id={documentId ? documentId : apiData?.documentId}

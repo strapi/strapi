@@ -46,6 +46,28 @@ const CustomModalContent = styled(Modal.Content)`
 
 const RelationModal = ({ open, onToggle, id, model, relationUrl }: RelationModalProps) => {
   const { formatMessage } = useIntl();
+  const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
+  const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
+  const documentLayoutResponse = useDocumentLayout(documentMeta.model);
+  const backButtonHistory = useDocumentContext(
+    'RelationModalBody',
+    (state) => state.backButtonHistory
+  );
+  const removeDocumentFromHistory = useDocumentContext(
+    'RelationModalBody',
+    (state) => state.removeDocumentFromHistory
+  );
+  const changeDocument = useDocumentContext('RelationModalBody', (state) => state.changeDocument);
+  const backButtonHistoryDisabled =
+    documentResponse.isLoading ||
+    documentLayoutResponse.isLoading ||
+    !!documentLayoutResponse.error ||
+    backButtonHistory.length === 0;
+
+  const handleClickBackButton = () => {
+    const itemRemoved = removeDocumentFromHistory();
+    changeDocument(itemRemoved);
+  };
 
   return (
     <Modal.Root open={open} onOpenChange={onToggle}>
@@ -56,8 +78,8 @@ const RelationModal = ({ open, onToggle, id, model, relationUrl }: RelationModal
               withTooltip={false}
               label="Back"
               variant="ghost"
-              disabled
-              onClick={() => {}}
+              disabled={backButtonHistoryDisabled}
+              onClick={handleClickBackButton}
               marginRight={1}
             >
               <ArrowLeft />
@@ -96,6 +118,13 @@ interface RelationModalBodyProps {
 }
 
 const RelationModalBody = ({ id }: RelationModalBodyProps) => {
+  const isModalOpen = useDocumentContext('RelationModalBody', (state) => state.isModalOpen);
+  const setIsModalOpen = useDocumentContext('RelationModalBody', (state) => state.setIsModalOpen);
+  React.useEffect(() => {
+    if (!isModalOpen) {
+      setIsModalOpen(true);
+    }
+  }, [isModalOpen, setIsModalOpen]);
   const { formatMessage } = useIntl();
   const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);

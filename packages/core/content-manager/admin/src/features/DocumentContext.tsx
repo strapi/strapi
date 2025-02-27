@@ -26,6 +26,12 @@ interface DocumentContextValue {
   document: ReturnType<UseDocument>;
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
+  backButtonHistory: DocumentMeta[];
+  addDocumentToHistory: (document: DocumentMeta) => void;
+  removeDocumentFromHistory: () => DocumentMeta;
+  resetHistory: () => void;
+  isModalOpen: boolean;
+  setIsModalOpen: (isOpen: boolean) => void;
 }
 
 const [DocumentProvider, useDocumentContext] =
@@ -55,12 +61,33 @@ const DocumentContextProvider = ({
    */
   const [currentDocumentMeta, changeDocument] = React.useState<DocumentMeta>(initialDocument);
   const document = useDocument(currentDocumentMeta);
+  const [backButtonHistory, setBackButtonHistory] = React.useState<DocumentMeta[]>([]);
+
+  // Handlers to add, remove and reset back button history
+  const addDocumentToHistory = (document: DocumentMeta) => {
+    setBackButtonHistory((prev) => [...prev, document]);
+  };
+  const removeDocumentFromHistory = () => {
+    const lastDocument = backButtonHistory[backButtonHistory.length - 1];
+    setBackButtonHistory((prev) => prev.slice(0, prev.length - 1));
+    return lastDocument;
+  };
+  const resetHistory = () => {
+    setBackButtonHistory([]);
+  };
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   return (
     <DocumentProvider
       changeDocument={changeDocument}
       document={document}
       meta={currentDocumentMeta}
+      backButtonHistory={backButtonHistory}
+      addDocumentToHistory={addDocumentToHistory}
+      removeDocumentFromHistory={removeDocumentFromHistory}
+      resetHistory={resetHistory}
+      isModalOpen={isModalOpen}
+      setIsModalOpen={setIsModalOpen}
     >
       {children}
     </DocumentProvider>
