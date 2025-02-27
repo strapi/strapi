@@ -402,7 +402,7 @@ export const BrowseStep = ({
                                 {
                                   id: getTrad('list.folder.subtitle'),
                                   defaultMessage:
-                                    '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
+                                    '{folderCount, plural, one {# folder} other {# folders}}, {filesCount, plural, one {# asset} other {# assets}}',
                                 },
                                 {
                                   folderCount: folder.children?.count,
