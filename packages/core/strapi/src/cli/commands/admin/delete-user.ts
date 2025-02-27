@@ -41,7 +41,7 @@ const promptQuestions: inquirer.QuestionCollection<Answers> = [
   {
     type: 'confirm',
     name: 'confirm',
-    message: 'Do you really want to create a new admin?',
+    message: 'Do you really want to delete this admin?',
   },
 ];
 
@@ -49,16 +49,14 @@ async function deleteAdmin({ email }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  const user = await app.admin.services.user.findOneByEmail({ email });
+  const user = await app.admin.services.user.findOneByEmail(email);
 
   if (!user) {
     console.error(`User with email "${email}" does not exist`);
     process.exit(1);
   }
 
-  await app.admin!.services.user.deleteById({
-    id: user.id,
-  });
+  await app.admin!.services.user.deleteById(user.id);
 
   console.log(`Successfully deleted admin`);
   process.exit(0);
