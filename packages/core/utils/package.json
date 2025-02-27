@@ -54,10 +54,10 @@
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
     "@strapi/types": "4.25.20",
-    "@types/koa": "2.13.4",
+    "@types/koa": "2.15.0",
     "@types/node": "18.18.4",
     "eslint-config-custom": "4.25.20",
-    "koa": "2.13.4",
+    "koa": "2.16.0",
     "koa-body": "4.2.0",
     "tsconfig": "4.25.20"
   },

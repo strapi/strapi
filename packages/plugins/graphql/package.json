@@ -73,7 +73,7 @@
     "@types/graphql-upload": "8.0.12",
     "cross-env": "^7.0.3",
     "eslint-config-custom": "4.25.20",
-    "koa": "2.13.4",
+    "koa": "2.16.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "5.3.4",
