@@ -693,7 +693,16 @@ const BlocksToolbar = () => {
       return false;
     }
 
-    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    const anchorIndex = editor.selection.anchor.path[0];
+
+    if (anchorIndex >= editor.children.length) {
+      editor.selection = {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 0 },
+      };
+    }
+
+    const selectedNode = editor.children[anchorIndex];
 
     if (['image', 'code'].includes(selectedNode.type)) {
       return true;
