@@ -9816,6 +9816,7 @@ __metadata:
     commander: "npm:8.3.0"
     esbuild-register: "npm:3.5.0"
     eslint-config-custom: "npm:5.10.3"
+    execa: "npm:5.1.1"
     fast-glob: "npm:3.3.2"
     fs-extra: "npm:11.2.0"
     jscodeshift: "npm:17.1.2"

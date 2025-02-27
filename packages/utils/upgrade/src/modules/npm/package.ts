@@ -1,22 +1,28 @@
 import assert from 'node:assert';
 import semver from 'semver';
+import execa from 'execa';
+import { packageManager } from '@strapi/utils';
 
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
 import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from './types';
 import type { Version } from '../version';
+import { Logger } from '../logger';
 
 export class Package implements PackageInterface {
   name: string;
 
-  packageURL: string;
+  cwd: string;
+
+  private logger: Logger;
 
   private npmPackage: NPMPackage | null;
 
-  constructor(name: string) {
+  constructor(name: string, cwd: string, logger: Logger) {
     this.name = name;
-    this.packageURL = `${constants.NPM_REGISTRY_URL}/${name}`;
+    this.cwd = cwd;
+    this.logger = logger;
     this.npmPackage = null;
   }
 
@@ -54,6 +60,46 @@ export class Package implements PackageInterface {
     );
   }
 
+  private async getRegistryFromPackageManager(): Promise<string | undefined> {
+    try {
+      const packageManagerName = await packageManager.getPreferred(this.cwd);
+      if (!packageManagerName) return;
+      switch (packageManagerName) {
+        case 'yarn': {
+          const { stdout } = await execa('yarn', ['config', 'get', 'npmRegistryServer'], {
+            timeout: 60_000,
+          });
+          return stdout.trim();
+        }
+        case 'npm': {
+          const { stdout } = await execa('npm', ['config', 'get', 'registry'], { timeout: 60_000 });
+          return stdout.trim();
+        }
+        default: {
+          this.logger.warn(`Unsupported package manager: ${packageManagerName}`);
+        }
+      }
+    } catch (_) {
+      this.logger.warn('Failed to determine registry URL from package manager');
+    }
+  }
+
+  private async determineRegistryUrl(): Promise<string> {
+    if (process.env.NPM_REGISTRY_URL) {
+      this.logger.debug(`Using NPM_REGISTRY_URL: ${process.env.NPM_REGISTRY_URL}`);
+      return process.env.NPM_REGISTRY_URL.replace(/\/$/, '');
+    }
+
+    const packageManagerRegistry = await this.getRegistryFromPackageManager();
+    if (packageManagerRegistry) {
+      this.logger.debug(`Using package manager registry: ${packageManagerRegistry}`);
+      return packageManagerRegistry.replace(/\/$/, '');
+    }
+
+    this.logger.debug(`Using default registry: ${constants.NPM_REGISTRY_URL}`);
+    return constants.NPM_REGISTRY_URL.replace(/\/$/, '');
+  }
+
   findVersion(version: Version.SemVer): NPMPackageVersion | undefined {
     const versions = this.getVersionsAsList();
 
@@ -61,10 +107,12 @@ export class Package implements PackageInterface {
   }
 
   async refresh() {
-    const response = await fetch(this.packageURL);
+    const packageURL = `${await this.determineRegistryUrl()}/${this.name}`;
+
+    const response = await fetch(packageURL);
 
     // TODO: Use a validation library to make sure the response structure is correct
-    assert(response.ok, `Request failed for ${this.packageURL}`);
+    assert(response.ok, `Request failed for ${packageURL}`);
 
     this.npmPackage = await response.json();
 
@@ -76,4 +124,5 @@ export class Package implements PackageInterface {
   }
 }
 
-export const npmPackageFactory = (name: string) => new Package(name);
+export const npmPackageFactory = (name: string, cwd: string, logger: Logger) =>
+  new Package(name, cwd, logger);
