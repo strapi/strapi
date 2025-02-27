@@ -8247,7 +8247,7 @@ __metadata:
     is-localhost-ip: "npm:2.0.0"
     js-cookie: "npm:2.2.1"
     jsonwebtoken: "npm:9.0.0"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     koa-bodyparser: "npm:4.4.1"
     koa-compose: "npm:4.1.0"
     koa-passport: "npm:5.0.0"
@@ -8369,13 +8369,13 @@ __metadata:
     "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.0"
     "@types/styled-components": "npm:5.1.32"
     axios: "npm:1.7.4"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.0"
     formik: "npm:2.4.0"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     node-schedule: "npm:2.1.1"
@@ -8408,7 +8408,7 @@ __metadata:
     "@strapi/utils": "npm:4.25.20"
     "@types/fs-extra": "npm:9.0.13"
     "@types/jest": "npm:29.5.2"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.0"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:18.18.4"
     "@types/semver": "npm:7.5.0"
@@ -8423,7 +8423,7 @@ __metadata:
     fs-extra: "npm:10.0.0"
     inquirer: "npm:8.2.5"
     knex: "npm:2.5.0"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
     resolve-cwd: "npm:3.0.0"
@@ -8741,7 +8741,7 @@ __metadata:
     "@strapi/utils": "npm:4.25.20"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     koa-bodyparser: "npm:4.4.1"
     lodash: "npm:4.17.21"
     qs: "npm:6.11.1"
@@ -8770,7 +8770,7 @@ __metadata:
     fs-extra: "npm:10.0.0"
     history: "npm:^4.9.0"
     immer: "npm:9.0.19"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     koa-bodyparser: "npm:4.4.1"
     lodash: "npm:4.17.21"
     pluralize: "npm:8.0.0"
@@ -8846,9 +8846,9 @@ __metadata:
     "@strapi/types": "npm:4.25.20"
     "@strapi/utils": "npm:4.25.20"
     "@testing-library/react": "npm:14.0.0"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.0"
     "@types/lodash": "npm:^4.14.191"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     prop-types: "npm:^15.8.1"
@@ -8860,7 +8860,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
-    koa: 2.13.4
+    koa: ^2.15.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
@@ -8891,7 +8891,7 @@ __metadata:
     graphql-playground-middleware-koa: "npm:^1.6.21"
     graphql-scalars: "npm:1.22.2"
     graphql-upload: "npm:^13.0.0"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     koa-compose: "npm:^4.1.0"
     lodash: "npm:4.17.21"
     nexus: "npm:1.3.0"
@@ -9041,7 +9041,7 @@ __metadata:
     immer: "npm:9.0.19"
     jsonwebtoken: "npm:9.0.0"
     jwk-to-pem: "npm:2.0.5"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     koa2-ratelimit: "npm:^1.1.2"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
@@ -9209,7 +9209,7 @@ __metadata:
     "@types/configstore": "npm:5.0.1"
     "@types/delegates": "npm:1.0.0"
     "@types/jest": "npm:29.5.2"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.0"
     "@types/koa-compress": "npm:4.0.3"
     "@types/koa-session": "npm:6.4.1"
     "@types/koa-static": "npm:4.0.2"
@@ -9243,7 +9243,7 @@ __metadata:
     https-proxy-agent: "npm:5.0.1"
     inquirer: "npm:8.2.5"
     is-docker: "npm:2.2.1"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     koa-body: "npm:4.2.0"
     koa-compose: "npm:4.1.0"
     koa-compress: "npm:5.1.0"
@@ -9300,13 +9300,13 @@ __metadata:
     "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/utils": "npm:4.25.20"
     "@types/jest": "npm:29.5.2"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.0"
     "@types/koa__router": "npm:12.0.0"
     "@types/node-schedule": "npm:2.1.7"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:4.25.20"
     https-proxy-agent: "npm:5.0.1"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     node-fetch: "npm:2.7.0"
     node-schedule: "npm:2.1.1"
     tsconfig: "npm:4.25.20"
@@ -9366,12 +9366,12 @@ __metadata:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/pack-up": "npm:4.23.0"
     "@strapi/types": "npm:4.25.20"
-    "@types/koa": "npm:2.13.4"
+    "@types/koa": "npm:2.15.0"
     "@types/node": "npm:18.18.4"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:4.25.20"
     http-errors: "npm:1.8.1"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.4"
     koa-body: "npm:4.2.0"
     lodash: "npm:4.17.21"
     p-map: "npm:4.0.0"
@@ -10453,9 +10453,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/koa@npm:2.13.4":
-  version: 2.13.4
-  resolution: "@types/koa@npm:2.13.4"
+"@types/koa@npm:2.15.0":
+  version: 2.15.0
+  resolution: "@types/koa@npm:2.15.0"
   dependencies:
     "@types/accepts": "npm:*"
     "@types/content-disposition": "npm:*"
@@ -10465,7 +10465,7 @@ __metadata:
     "@types/keygrip": "npm:*"
     "@types/koa-compose": "npm:*"
     "@types/node": "npm:*"
-  checksum: 10c0/040954632e40ebb6b881fae9da2d3e0c421bc61c05302b34d525cb5c512a75589c229853d59ded45445c327aaa6df47d1bbfecdcf054e31c0bc0305070751553
+  checksum: 10c0/3fd591e25ecffc32ffa7cb152d2c5caeccefe5a72cb09d187102d8f41101bdaeeb802a07a6672eac58f805fa59892e79c1cc203ca7b27b0de75d7eac508c2b47
   languageName: node
   linkType: hard
 
@@ -14693,13 +14693,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cookies@npm:~0.8.0":
-  version: 0.8.0
-  resolution: "cookies@npm:0.8.0"
+"cookies@npm:~0.9.0":
+  version: 0.9.1
+  resolution: "cookies@npm:0.9.1"
   dependencies:
     depd: "npm:~2.0.0"
     keygrip: "npm:~1.1.0"
-  checksum: 10c0/0af32f30d1ece0596efc05782c66b9d61659e20c6cc5b695452abf5ceb51883ef43c5c73d86badd7d028a0da7d39f864c95f33640aef04f97fad70f35986bea3
+  checksum: 10c0/3ffa1c0e992b62ee119adae4dd2ddd4a89166fa5434cd9bd9ff84ec4d2f14dfe2318a601280abfe32a4f64f884ec9345fb1912e488b002d188d2efa0d3919ba3
   languageName: node
   linkType: hard
 
@@ -15911,8 +15911,8 @@ __metadata:
   linkType: hard
 
 "elliptic@npm:^6.5.4":
-  version: 6.5.4
-  resolution: "elliptic@npm:6.5.4"
+  version: 6.6.1
+  resolution: "elliptic@npm:6.6.1"
   dependencies:
     bn.js: "npm:^4.11.9"
     brorand: "npm:^1.1.0"
@@ -15921,7 +15921,7 @@ __metadata:
     inherits: "npm:^2.0.4"
     minimalistic-assert: "npm:^1.0.1"
     minimalistic-crypto-utils: "npm:^1.0.1"
-  checksum: 10c0/5f361270292c3b27cf0843e84526d11dec31652f03c2763c6c2b8178548175ff5eba95341dd62baff92b2265d1af076526915d8af6cc9cb7559c44a62f8ca6e2
+  checksum: 10c0/8b24ef782eec8b472053793ea1e91ae6bee41afffdfcb78a81c0a53b191e715cbe1292aa07165958a9bbe675bd0955142560b1a007ffce7d6c765bcaf951a867
   languageName: node
   linkType: hard
 
@@ -22068,15 +22068,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"koa@npm:2.13.4":
-  version: 2.13.4
-  resolution: "koa@npm:2.13.4"
+"koa@npm:2.15.4":
+  version: 2.15.4
+  resolution: "koa@npm:2.15.4"
   dependencies:
     accepts: "npm:^1.3.5"
     cache-content-type: "npm:^1.0.0"
     content-disposition: "npm:~0.5.2"
     content-type: "npm:^1.0.4"
-    cookies: "npm:~0.8.0"
+    cookies: "npm:~0.9.0"
     debug: "npm:^4.3.2"
     delegates: "npm:^1.0.0"
     depd: "npm:^2.0.0"
@@ -22095,7 +22095,7 @@ __metadata:
     statuses: "npm:^1.5.0"
     type-is: "npm:^1.6.16"
     vary: "npm:^1.1.2"
-  checksum: 10c0/6c9428421402f4c4eeb137fca8c2685d386af4d01792f3c54d12186c5cc75fd8e2f90e944609c365bdd801cd67ae442e88785ac3552456348c2dcb5b5ecda395
+  checksum: 10c0/fd2171b4dba706d35244fe60403a61671717a167453349813757999dad280049ddd0dcdba23cda197a5a3538f4c034cf0fd1f9caeb849be1ca1eecaa78db2f99
   languageName: node
   linkType: hard
 

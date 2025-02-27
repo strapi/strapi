@@ -77,7 +77,7 @@
   },
   "resolutions": {
     "@strapi/design-system": "1.20.0-typescript.0",
-    "@types/koa": "2.13.4"
+    "@types/koa": "2.15.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
