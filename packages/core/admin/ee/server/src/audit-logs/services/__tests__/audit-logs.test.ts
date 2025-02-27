@@ -1,5 +1,4 @@
 import { createAuditLogsLifecycleService } from '../lifecycles';
-import createEventHub from '../../../../../../../core/dist/services/event-hub';
 import { scheduleJob } from 'node-schedule';
 
 import '@strapi/types';
@@ -51,7 +50,16 @@ describe('Audit logs service', () => {
       },
     },
     eventHub: {
-      ...createEventHub(),
+      subs: {} as Record<string, (...args: unknown[]) => unknown>,
+      emit(eventName: string, ...args: unknown[]) {
+        this.subs[eventName](...args);
+      },
+      on(eventName: string, func: (...args: unknown[]) => unknown) {
+        this.subs[eventName] = func;
+        return () => {
+          delete this.subs[eventName];
+        };
+      },
       subscribe: mockSubscribe,
     },
     hook: () => ({
@@ -71,6 +79,9 @@ describe('Audit logs service', () => {
     // Should not subscribe to events at first
     const lifecycle = createAuditLogsLifecycleService(strapi);
     await lifecycle.register();
+    const destroySpy = jest.spyOn(lifecycle, 'destroy');
+    const registerSpy = jest.spyOn(lifecycle, 'register');
+
     expect(mockSubscribe).not.toHaveBeenCalled();
 
     // Should subscribe to events when license gets enabled
@@ -83,10 +94,9 @@ describe('Audit logs service', () => {
     jest.mocked(strapi.ee.features.isEnabled).mockImplementationOnce(() => false);
     await strapi.eventHub.emit('ee.disable');
     expect(mockSubscribe).not.toHaveBeenCalled();
+    expect(destroySpy).toHaveBeenCalled();
 
     // Should recreate the service when license updates
-    const destroySpy = jest.spyOn(lifecycle, 'destroy');
-    const registerSpy = jest.spyOn(lifecycle, 'register');
     await strapi.eventHub.emit('ee.update');
     expect(destroySpy).toHaveBeenCalled();
     expect(registerSpy).toHaveBeenCalled();

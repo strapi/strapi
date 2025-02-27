@@ -25,6 +25,39 @@ export const locateFirstAfter = async (page: Page, firstText: string, secondText
   return item;
 };
 
+interface LocatorCriteria {
+  type: string; // The HTML tag type (e.g., "div", "button", "a")
+  text: string; // The text content to locate
+}
+
+export const locateSequence = async (page: Page, sequence: LocatorCriteria[]) => {
+  if (sequence.length < 2) {
+    throw new Error('Sequence must contain at least two elements.');
+  }
+
+  let xpathExpression = '';
+
+  // Build the XPath for the sequence
+  for (let i = 0; i < sequence.length; i++) {
+    const { type, text } = sequence[i];
+
+    const tagCondition = type ? `self::${type}` : 'self::*';
+    const textCondition = `contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), "${text.toLowerCase()}")`;
+
+    if (i === 0) {
+      // The first element in the sequence
+      xpathExpression += `//${type || '*'}[${textCondition}]`;
+    } else {
+      // Subsequent elements in the sequence
+      xpathExpression += `/following::*[${tagCondition} and ${textCondition}]`;
+    }
+  }
+
+  // Create the locator
+  const locator = page.locator(`xpath=${xpathExpression}`).first();
+  return locator;
+};
+
 /**
  * Navigate to a page and confirm the header, awaiting each step
  */
@@ -84,15 +117,22 @@ export const clickAndWait = async (page: Page, locator: Locator) => {
 /**
  * Look for an element containing text, and then click a sibling close button
  */
-export const findAndClose = async (
-  page: Page,
-  text: string,
-  role: string = 'status',
-  closeLabel: string = 'Close'
-) => {
+
+interface FindAndCloseOptions {
+  role?: string;
+  closeLabel?: string;
+  required?: boolean;
+}
+
+export const findAndClose = async (page: Page, text: string, options: FindAndCloseOptions = {}) => {
+  const { role = 'status', closeLabel = 'Close', required = true } = options;
+
   // Verify the popup text is visible.
   const elements = page.locator(`:has-text("${text}")[role="${role}"]`);
-  await expect(elements.first()).toBeVisible(); // expect at least one element
+
+  if (required) {
+    await expect(elements.first()).toBeVisible(); // expect at least one element
+  }
 
   // Find all 'Close' buttons that are siblings of the elements containing the specified text.
   const closeBtns = page.locator(
@@ -383,4 +423,19 @@ export const isElementBefore = async (firstLocator, secondLocator) => {
   return await firstHandle.evaluate((first, second) => {
     return !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
   }, secondHandle);
+};
+
+/**
+ * Ensures that the specified checkbox is in the desired checked state.
+ * If the checkbox's current state does not match the desired state, it clicks the checkbox to toggle it.
+ *
+ * @param {Locator} locator - Playwright locator for the checkbox element.
+ * @param {boolean} checked - Desired checked state of the checkbox (true for checked, false for unchecked).
+ * @returns {Promise<void>} - Resolves when the checkbox state is correctly set.
+ */
+export const ensureCheckbox = async (locator: Locator, checked: boolean) => {
+  const isChecked = await locator.isChecked();
+  if (isChecked !== checked) {
+    await locator.click();
+  }
 };

@@ -3,7 +3,6 @@ import * as React from 'react';
 import { FormErrors, Table, useTable } from '@strapi/admin/strapi-admin';
 import { Box, Typography, IconButton, Flex, Tooltip, Status, Modal } from '@strapi/design-system';
 import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strapi/icons';
-import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl, PrimitiveType } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -13,6 +12,8 @@ import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
 import { LocaleStatus } from './CMHeaderActions';
+
+import type { Modules } from '@strapi/types';
 
 type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 
