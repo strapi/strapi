@@ -160,7 +160,7 @@ test.describe('Edit View', () => {
       await expect(draft).toBeEnabled();
       await draft.click();
 
-      await expect(page.getByRole('link', { name: 'Led Tasso' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Led Tasso' })).toBeVisible();
 
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
@@ -243,7 +243,7 @@ test.describe('Edit View', () => {
       await expect(draft).toBeEnabled();
       await draft.click();
 
-      await expect(page.getByRole('link', { name: 'Led Tasso' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Led Tasso' })).toBeVisible();
 
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
 
