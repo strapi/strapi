@@ -56,7 +56,12 @@ async function deleteAdmin({ email }: CmdOptions) {
     process.exit(1);
   }
 
-  await app.admin!.services.user.deleteById(user.id);
+  try {
+    await app.admin!.services.user.deleteById(user.id);
+  } catch (err: any) {
+    console.error(err.message);
+    process.exit(1);
+  }
 
   console.log(`Successfully deleted admin`);
   process.exit(0);
