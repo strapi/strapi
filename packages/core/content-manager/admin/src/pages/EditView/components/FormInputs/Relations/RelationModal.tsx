@@ -13,7 +13,7 @@ import {
 } from '@strapi/design-system';
 import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
@@ -87,6 +87,7 @@ interface RelationModalBodyProps {
 
 const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
+  const { pathname, search } = useLocation();
   const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
   const documentLayoutResponse = useDocumentLayout(documentMeta.model);
@@ -148,7 +149,8 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
     return `/content-manager/${documentMeta.collectionType}/${documentMeta.model}${isSingleType ? '' : '/' + documentMeta.documentId}${queryParams}`;
   };
 
-  const modalDocumentSameAsEditViewDocument = window.location.pathname.includes(getFullPageLink());
+  const editViewUrl = `${pathname}${search}`;
+  const modalDocumentUrlEqualEditViewUrl = editViewUrl.includes(getFullPageLink());
 
   const hasDraftAndPublished = documentResponse.schema?.options?.draftAndPublish ?? false;
 
@@ -167,7 +169,7 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
             ) : null}
           </Flex>
           <Flex>
-            {modalDocumentSameAsEditViewDocument ? (
+            {modalDocumentUrlEqualEditViewUrl ? (
               <IconButton
                 onClick={onToggle}
                 variant="tertiary"
