@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generators",
-  "version": "5.9.0",
+  "version": "5.10.3",
   "description": "Interactive API generator.",
   "keywords": [
     "strapi",
@@ -35,8 +35,9 @@
     "dist/"
   ],
   "scripts": {
-    "build": "run -T npm-run-all clean --parallel build:code build:types copy-files",
-    "build:code": "run -T rollup -c",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T run-p build:code:rollup copy-files",
+    "build:code:rollup": "run -T rollup -c",
     "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "copy-files": "copyfiles -u 1 -a 'src/templates/**/*' 'src/files/**/*' dist",
@@ -48,8 +49,8 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/typescript-utils": "5.9.0",
-    "@strapi/utils": "5.9.0",
+    "@strapi/typescript-utils": "5.10.3",
+    "@strapi/utils": "5.10.3",
     "chalk": "4.1.2",
     "copyfiles": "2.4.1",
     "fs-extra": "11.2.0",
@@ -59,8 +60,8 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.9.0",
-    "tsconfig": "5.9.0"
+    "eslint-config-custom": "5.10.3",
+    "tsconfig": "5.10.3"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
