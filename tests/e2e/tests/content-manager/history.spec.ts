@@ -224,23 +224,25 @@ describeOnCondition(edition === 'EE')('History', () => {
       await findAndClose(page, 'Saved Document');
 
       // Delete one of the authors, leaving only Coach Beard
-      // await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
-      // TODO: we need to renable this part when we implement the fullpage button
-      // await page.getByRole('button', { name: 'More actions' }).click();
-      // await page.getByRole('menuitem', { name: /delete entry/i }).click();
-      // await page.getByRole('button', { name: /confirm/i }).click();
+      // open the modal
+      await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
+      // and click to open the modal in full page
+      await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
+      await page.getByRole('button', { name: 'More actions' }).click();
+      await page.getByRole('menuitem', { name: /delete entry/i }).click();
+      await page.getByRole('button', { name: /confirm/i }).click();
 
-      // // Go to the history page
-      // await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-      // await clickAndWait(page, page.getByRole('gridcell', { name: 'Zava retires' }));
-      // await page.waitForURL(ARTICLE_EDIT_URL);
-      // await goToHistoryPage(page);
-      // await page.waitForURL(ARTICLE_HISTORY_URL);
+      // Go to the history page
+      await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+      await clickAndWait(page, page.getByRole('gridcell', { name: 'Zava retires' }));
+      await page.waitForURL(ARTICLE_EDIT_URL);
+      await goToHistoryPage(page);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
 
-      // // Assert that the unknown relation alert is displayed
-      // await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();
-      // await expect(page.getByText('Will Kitman')).not.toBeVisible();
-      // await expect(page.getByText(/missing relation/i)).toBeVisible();
+      // Assert that the unknown relation alert is displayed
+      await expect(page.getByRole('link', { name: 'Coach Beard' })).toBeVisible();
+      await expect(page.getByText('Will Kitman')).not.toBeVisible();
+      await expect(page.getByText(/missing relation/i)).toBeVisible();
     });
 
     test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
@@ -450,24 +452,25 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Save' }).click();
 
       // Delete one of the authors, leaving only Coach Beard
+      // open the modal
       await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
-      // TODO: renable this part of the e2e when we implement the fullpage button in the relation modal
-      // await page.getByRole('button', { name: /more actions/i }).click();
-      // await page.getByRole('menuitem', { name: /delete entry/i }).click();
-      // await page.getByRole('button', { name: /confirm/i }).click();
+      // and click to open the modal in full page
+      await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /delete entry/i }).click();
+      await page.getByRole('button', { name: /confirm/i }).click();
 
       // Go to the history page
-      // TODO: renable this part of the e2e when we implement the fullpage button in the relation modal
-      // await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
-      // await page.waitForURL(HOMEPAGE_EDIT_URL);
-      // await page.getByRole('button', { name: /more actions/i }).click();
-      // await clickAndWait(page, page.getByRole('menuitem', { name: /content history/i }));
-      // await page.waitForURL(HOMEPAGE_HISTORY_URL);
+      await clickAndWait(page, page.getByRole('link', { name: 'Homepage' }));
+      await page.waitForURL(HOMEPAGE_EDIT_URL);
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await clickAndWait(page, page.getByRole('menuitem', { name: /content history/i }));
+      await page.waitForURL(HOMEPAGE_HISTORY_URL);
 
-      // // Assert that the unknown relation alert is displayed
-      // await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();
-      // await expect(page.getByText('Will Kitman')).not.toBeVisible();
-      // await expect(page.getByText(/missing relation/i)).toBeVisible();
+      // Assert that the unknown relation alert is displayed
+      await expect(page.getByRole('link', { name: 'Coach Beard' })).toBeVisible();
+      await expect(page.getByText('Will Kitman')).not.toBeVisible();
+      await expect(page.getByText(/missing relation/i)).toBeVisible();
     });
 
     test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
