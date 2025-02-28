@@ -29,6 +29,7 @@ import {
   useRegisterUserMutation,
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { getByteSize } from '../../../utils/strings';
 import { translatedErrors } from '../../../utils/translatedErrors';
 
 const REGISTER_USER_SCHEMA = yup.object().shape({
@@ -48,8 +49,10 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
         defaultMessage: 'Password must be less than 73 bytes',
       },
       function (value) {
-        if (!value) return true;
-        return new TextEncoder().encode(value).length <= 72;
+        if (!value || typeof value !== 'string') return true; // validated elsewhere
+
+        const byteSize = getByteSize(value);
+        return byteSize <= 72;
       }
     )
     .matches(/[a-z]/, {

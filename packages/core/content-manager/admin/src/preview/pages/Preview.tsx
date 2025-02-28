@@ -9,7 +9,7 @@ import {
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Portal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
@@ -17,6 +17,7 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { buildValidParams } from '../../utils/api';
+import { createYupSchema } from '../../utils/validation';
 import { PreviewContent, UnstablePreviewContent } from '../components/PreviewContent';
 import { PreviewHeader, UnstablePreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
@@ -43,6 +44,7 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * -----------------------------------------------------------------------------------------------*/
 
 const PreviewPage = () => {
+  const location = useLocation();
   const { formatMessage } = useIntl();
 
   // Read all the necessary data from the URL to find the right preview URL
@@ -57,6 +59,7 @@ const PreviewPage = () => {
   }>();
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
+    status?: string;
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -84,30 +87,29 @@ const PreviewPage = () => {
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });
-
   const documentResponse = useDocument({
     model,
     collectionType,
     documentId,
     params,
   });
-
   const documentLayoutResponse = useDocumentLayout(model);
 
-  if (
-    documentResponse.isLoading ||
-    previewUrlResponse.isLoading ||
-    documentLayoutResponse.isLoading
-  ) {
+  const isLoading =
+    previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
+  if (isLoading && !documentResponse.document?.documentId) {
     return <Page.Loading />;
   }
+
+  const initialValues = documentResponse.getInitialFormValues();
 
   if (
     previewUrlResponse.error ||
     documentLayoutResponse.error ||
     !documentResponse.document ||
     !documentResponse.meta ||
-    !documentResponse.schema
+    !documentResponse.schema ||
+    !initialValues
   ) {
     return <Page.Error />;
   }
@@ -117,6 +119,19 @@ const PreviewPage = () => {
   }
 
   const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
+
+  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
+    const yupSchema = createYupSchema(
+      documentResponse.schema?.attributes,
+      documentResponse.components,
+      {
+        status: documentResponse.document?.status,
+        ...options,
+      }
+    );
+
+    return yupSchema.validateSync(values, { abortEarly: false });
+  };
 
   return (
     <>
@@ -139,7 +154,29 @@ const PreviewPage = () => {
         schema={documentResponse.schema}
         layout={documentLayoutResponse.edit}
       >
-        <FormContext method="POST" initialValues={documentResponse.document} height="100%">
+        <FormContext
+          method="PUT"
+          disabled={
+            query.status === 'published' &&
+            documentResponse &&
+            documentResponse.document.status === 'published'
+          }
+          initialValues={documentResponse.getInitialFormValues()}
+          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+          height="100%"
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            const yupSchema = createYupSchema(
+              documentResponse.schema?.attributes,
+              documentResponse.components,
+              {
+                status: documentResponse.document?.status,
+                ...options,
+              }
+            );
+
+            return yupSchema.validate(values, { abortEarly: false });
+          }}
+        >
           <Flex direction="column" height="100%" alignItems="stretch">
             {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
               <>
@@ -174,6 +211,7 @@ const ProtectedPreviewPageImpl = () => {
   } = useRBAC([
     { action: 'plugin::content-manager.explorer.read', subject: model },
     { action: 'plugin::content-manager.explorer.update', subject: model },
+    { action: 'plugin::content-manager.explorer.publish', subject: model },
   ]);
 
   if (isLoading) {
