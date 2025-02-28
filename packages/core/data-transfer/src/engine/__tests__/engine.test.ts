@@ -1116,7 +1116,7 @@ describe('Transfer engine', () => {
 
       // Source that detects when it is paused
       const source = {
-        ...createSource({ entities: sourceData }),
+        ...createSource({ entities: sourceData as any }),
         createEntitiesReadStream() {
           const stream = Readable.from(sourceData, { objectMode: true });
           const originalPause = stream.pause.bind(stream);
@@ -1136,6 +1136,72 @@ describe('Transfer engine', () => {
 
       // Verify all data was transferred correctly
       expect(processedData).toEqual(sourceData);
-    }, 15000);
+    }, 2000);
+
+    test('assets source stream pauses under backpressure and data integrity is maintained', async () => {
+      const assetData = [
+        {
+          filename: 'test1.jpg',
+          filepath: posix.join(__dirname, 'test1.jpg'),
+          stats: { size: 100 },
+          stream: Readable.from(Array.from({ length: 100 }, (_, i) => i)), // Create 100 bytes of test data
+          metadata: { hash: 'test1', ext: '.jpg' },
+        },
+        {
+          filename: 'test2.jpg',
+          filepath: posix.join(__dirname, 'test2.jpg'),
+          stats: { size: 200 },
+          stream: Readable.from(Array.from({ length: 200 }, (_, i) => i)), // Create 200 bytes of test data
+          metadata: { hash: 'test2', ext: '.jpg' },
+        },
+      ];
+
+      let sourcePaused = false;
+      const processedData: IAsset[] = [];
+
+      // Slow destination that enforces backpressure
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createAssetsWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1, // Enforce backpressure by allowing only 1 chunk in buffer
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 50); // Simulate slow processing
+            },
+          });
+        },
+      };
+
+      // Source that detects when it is paused
+      const source = {
+        ...createSource({ assets: assetData as any }),
+        createAssetsReadStream() {
+          const stream = getAssetsMockSourceStream(assetData as any);
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function () {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      // Verify source stream was paused at some point
+      expect(sourcePaused).toBe(true);
+
+      // Verify all data was transferred correctly
+      expect(processedData).toHaveLength(assetData.length);
+      expect(processedData.map((asset) => asset.filename)).toEqual(
+        assetData.map((asset) => asset.filename)
+      );
+      expect(processedData.map((asset) => asset.stats.size)).toEqual(
+        assetData.map((asset) => asset.stats.size)
+      );
+    }, 3000);
   });
 });
