@@ -14,6 +14,7 @@ import { createComponentCollectionName } from './utils/createCollectionName';
 import { Attribute, getUsedAttributeNames, SchemaData } from './utils/getUsedAttributeNames';
 
 import type { ContentType } from '../../../types';
+import type { FormsAPI } from '../../../utils/formAPI';
 import type { Internal } from '@strapi/types';
 
 export type SchemaParams = {
@@ -32,8 +33,8 @@ type Base<TAttributesFormType extends 'base' | 'advanced'> = {
   type: keyof (typeof attributesForm)[TAttributesFormType];
   step: string;
   attributes: any;
-  extensions: any;
-  forTarget: string;
+  extensions?: any;
+  forTarget?: string;
 };
 
 export const forms = {
@@ -197,16 +198,18 @@ export const forms = {
     },
   },
   contentType: {
-    schema(
-      alreadyTakenNames: Array<string>,
-      isEditing: boolean,
-      ctUid: Internal.UID.ContentType,
+    schema(opts: {
+      alreadyTakenNames: Array<string>;
+      isEditing: boolean;
+      ctUid: Internal.UID.ContentType;
       reservedNames: {
         models: any;
-      },
-      extensions: any,
-      contentTypes: Record<Internal.UID.ContentType, ContentType>
-    ) {
+      };
+      formsApi: FormsAPI;
+      contentTypes: Record<Internal.UID.ContentType, ContentType>;
+    }) {
+      const { alreadyTakenNames, isEditing, ctUid, reservedNames, formsApi, contentTypes } = opts;
+
       const singularNames = Object.values(contentTypes).map((contentType) => {
         return contentType.info.singularName;
       });
@@ -257,7 +260,7 @@ export const forms = {
       });
 
       // FIXME
-      return extensions.makeValidator(
+      return formsApi.makeValidator(
         ['contentType'],
         contentTypeShape,
         takenNames,
@@ -267,19 +270,19 @@ export const forms = {
       );
     },
     form: {
-      base({ actionType }: any) {
+      base({ actionType }: { actionType: 'create' | 'edit' }) {
         if (actionType === 'create') {
           return contentTypeForm.base.create();
         }
 
         return contentTypeForm.base.edit();
       },
-      advanced({ extensions }: any) {
+      advanced({ formsApi }: { formsApi: FormsAPI }) {
         const baseForm = contentTypeForm.advanced
           .default()
           .sections.map((section) => section.items)
           .flat();
-        const itemsToAdd = extensions.getAdvancedForm(['contentType']);
+        const itemsToAdd = formsApi.getAdvancedForm(['contentType']);
 
         return {
           sections: [

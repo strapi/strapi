@@ -31,7 +31,6 @@ export const AllowedTypesSelect = ({
 }: AllowedTypesSelectProps) => {
   const { formatMessage } = useIntl();
 
-  /* eslint-disable indent */
   const displayedValue =
     value === null || value?.length === 0
       ? formatMessage({ id: 'global.none', defaultMessage: 'None' })
@@ -40,11 +39,10 @@ export const AllowedTypesSelect = ({
           .map((v) => upperFirst(v))
           .join(', ');
 
-  /* eslint-enable indent */
-
-  const label = intlLabel.id
-    ? formatMessage({ id: intlLabel.id, defaultMessage: intlLabel.defaultMessage })
-    : name;
+  const label =
+    intlLabel && intlLabel.id
+      ? formatMessage({ id: intlLabel.id, defaultMessage: intlLabel.defaultMessage })
+      : name;
 
   return (
     <Field.Root name={name}>
@@ -53,9 +51,9 @@ export const AllowedTypesSelect = ({
         customizeContent={() => displayedValue}
         onChange={(values: any[]) => {
           if (values.length > 0) {
-            onChange({ target: { name, value: values, type: 'allowed-types-select' } });
+            onChange({ target: { name, value: values } });
           } else {
-            onChange({ target: { name, value: null, type: 'allowed-types-select' } });
+            onChange({ target: { name, value: null } });
           }
         }}
         options={options}

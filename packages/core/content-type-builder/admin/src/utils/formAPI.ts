@@ -2,7 +2,30 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
-export const formsAPI: any = {
+export type FormsAPI = {
+  components: {
+    inputs: Record<string, any>;
+    add: (args: { id: string; component: any }) => void;
+  };
+  types: {
+    attribute: Record<string, any>;
+    contentType: Record<string, any>;
+    component: Record<string, any>;
+  };
+  contentTypeSchemaMutations: any[];
+  addContentTypeSchemaMutation: (cb: any) => void;
+  extendContentType: (args: any) => void;
+  extendFields: (fields: any, args: any) => void;
+  getAdvancedForm: (target: any, props?: any) => any;
+  makeCustomFieldValidator: (attributeShape: any, validator: any, ...validatorArgs: any) => any;
+  makeValidator: (target: any, initShape: any, ...args: any) => any;
+  mutateContentTypeSchema: (
+    data: Record<string, unknown>,
+    initialData: Record<string, unknown>
+  ) => any;
+};
+
+export const formsAPI: FormsAPI = {
   components: {
     inputs: {} as Record<string, any>,
     add({ id, component }: { id: string; component: any }) {

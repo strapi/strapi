@@ -20,7 +20,7 @@ interface CheckboxConfirmationProps {
   intlLabel: IntlMessage;
   isCreating?: boolean;
   name: string;
-  onChange: (event: { target: { name: string; value: boolean; type: string } }) => void;
+  onChange: (event: { target: { name: string; value: boolean } }) => void;
   value: boolean;
 }
 
@@ -37,7 +37,7 @@ const CheckboxConfirmation = ({
 
   const handleChange = (value: boolean) => {
     if (isCreating || value) {
-      return onChange({ target: { name, value, type: 'checkbox' } });
+      return onChange({ target: { name, value } });
     }
 
     if (!value) {
@@ -48,7 +48,7 @@ const CheckboxConfirmation = ({
   };
 
   const handleConfirm = () => {
-    onChange({ target: { name, value: false, type: 'checkbox' } });
+    onChange({ target: { name, value: false } });
   };
 
   const label = intlLabel.id

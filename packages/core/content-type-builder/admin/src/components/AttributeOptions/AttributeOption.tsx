@@ -34,6 +34,7 @@ type AttributeOptionProps = {
 export const AttributeOption = ({ type = 'text' }: AttributeOptionProps) => {
   const { formatMessage } = useIntl();
 
+  // TODO: do not depend on useForm and manage this at the top level
   const { onClickSelectField } = useFormModalNavigation();
 
   const handleClick = () => {

@@ -13,7 +13,7 @@ interface SelectCategoryProps {
     values?: Record<string, any>;
   };
   name: string;
-  onChange: (value: { target: { name: string; value: any; type: string } }) => void;
+  onChange: (value: { target: { name: string; value: any } }) => void;
   value?: string;
   isCreating?: boolean;
   dynamicZoneTarget?: string | null;
@@ -36,7 +36,7 @@ export const SelectCategory = ({
   const label = formatMessage(intlLabel);
 
   const handleChange = (value: any) => {
-    onChange({ target: { name, value, type: 'select-category' } });
+    onChange({ target: { name, value } });
   };
 
   const handleCreateOption = (value: any) => {

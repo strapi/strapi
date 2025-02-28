@@ -43,6 +43,12 @@ import { SingularName } from '../SingularName';
 import { TabForm } from '../TabForm';
 import { TextareaEnum } from '../TextareaEnum';
 
+import { ChooseAttributeModal } from './contentType/ChooseAttributeModal';
+import { CreateAttributeModal } from './contentType/CreateAttriubteModal';
+import { CreateComponentModal } from './contentType/CreateComponentModal';
+import { CreateContentTypeModal } from './contentType/CreateContentTypeModal';
+import { EditComponentModal } from './contentType/EditComponentModal';
+import { EditContentTypeModal } from './contentType/EditContentTypeModal';
 import { forms } from './forms/forms';
 import { actions, initialState, type State as FormModalState } from './reducer';
 import { canEditContentType } from './utils/canEditContentType';
@@ -60,6 +66,37 @@ const FormComponent = styled.form`
 
 const selectState = (state: Record<string, unknown>) =>
   (state['content-type-builder_formModal'] || initialState) as FormModalState;
+
+const getModal = ({ modalType, actionType }): React.ReactNode => {
+  switch (true) {
+    case modalType === 'contentType' && actionType === 'create':
+      return <CreateContentTypeModal />;
+    case modalType === 'component' && actionType === 'create':
+      return <CreateComponentModal />;
+    case modalType === 'contentType' && actionType === 'edit':
+      return <EditContentTypeModal />;
+    case modalType === 'component' && actionType === 'edit':
+      return <EditComponentModal />;
+    case modalType === 'chooseAttribute':
+      return <ChooseAttributeModal />;
+    case modalType === 'component' && actionType === 'create':
+      return 'createComponentFromCT';
+    case modalType === 'customField' && actionType === 'create':
+      return 'createCustomField';
+    case modalType === 'customField' && actionType === 'edit':
+      return 'editCustomField';
+    case modalType === 'attribute' && actionType === 'create':
+      return <CreateAttributeModal />;
+    case modalType === 'attribute' && actionType === 'edit':
+      return 'editAttribute';
+    case modalType === 'addComponentToDynamicZone':
+      return 'addComponentToDynamicZone';
+    case modalType === 'component' && actionType === 'edit' && has(actionType, 'componentToCreate'):
+      return 'createComponentFromDZ';
+    default:
+      return 'createContentType';
+  }
+};
 
 export const FormModal = () => {
   const {
@@ -126,6 +163,15 @@ export const FormModal = () => {
   } = reducerState;
 
   const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return getModal({
+    actionType,
+    modalType,
+  });
 
   React.useEffect(() => {
     if (isOpen) {
@@ -283,15 +329,15 @@ export const FormModal = () => {
         : modifiedData;
     // Check form validity for content type
     if (isCreatingContentType) {
-      schema = forms.contentType.schema(
-        Object.keys(contentTypes),
-        actionType === 'edit',
+      schema = forms.contentType.schema({
+        alreadyTakenNames: Object.keys(contentTypes),
+        isEditing: actionType === 'edit',
         // currentUID
-        (type?.uid ?? null) as Internal.UID.ContentType,
+        ctUid: (type?.uid ?? null) as Internal.UID.ContentType,
         reservedNames,
-        ctbFormsAPI,
-        contentTypes
-      );
+        formsApi: ctbFormsAPI,
+        contentTypes,
+      });
 
       // Check form validity for component
       // This is happening when the user click on the link from the left menu
@@ -904,6 +950,7 @@ export const FormModal = () => {
     actionType,
     attributes,
     extensions: ctbFormsAPI,
+    formsApi: ctbFormsAPI,
     forTarget,
     contentTypeSchema: type || {},
     customField,

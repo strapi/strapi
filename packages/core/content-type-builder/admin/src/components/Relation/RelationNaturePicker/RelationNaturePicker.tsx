@@ -60,6 +60,14 @@ export const RelationNaturePicker = ({
     dataType === 'collectionType' ? ctRelations : componentRelations
   ) as RelationType[];
 
+  console.log({
+    naturePickerType,
+    oneThatIsCreatingARelationWithAnother,
+    relationType,
+    target,
+    targetUid,
+  });
+
   const areDisplayedNamesInverted = relationType === 'manyToOne';
   const targetLabel = get(contentTypes, [target, 'info', 'displayName'], 'unknown');
   const leftTarget = areDisplayedNamesInverted

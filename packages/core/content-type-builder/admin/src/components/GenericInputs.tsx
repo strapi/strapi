@@ -28,15 +28,34 @@ import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl'
 import { parseDateValue } from '../utils/parseDateValue';
 import { handleTimeChange, handleTimeChangeEvent } from '../utils/timeFormat';
 
+import { AllowedTypesSelect } from './AllowedTypesSelect';
+import { BooleanDefaultValueSelect } from './BooleanDefaultValueSelect';
+import { BooleanRadioGroup } from './BooleanRadioGroup';
+import { CheckboxWithNumberField } from './CheckboxWithNumberField';
+import { ContentTypeRadioGroup } from './ContentTypeRadioGroup';
+import { CustomRadioGroup } from './CustomRadioGroup';
+import { DraftAndPublishToggle } from './DraftAndPublishToggle';
+import { IconPicker } from './IconPicker/IconPicker';
+import { PluralName } from './PluralName';
+import { Relation } from './Relation/Relation';
+import { SelectCategory } from './SelectCategory';
+import { SelectComponent } from './SelectComponent';
+import { SelectComponents } from './SelectComponents';
+import { SelectDateType } from './SelectDateType';
+import { SelectNumber } from './SelectNumber';
+import { SingularName } from './SingularName';
+import { TextareaEnum } from './TextareaEnum';
+
+import type { IntlLabel } from '../types';
 import type { Schema } from '@strapi/types';
 
-interface TranslationMessage extends MessageDescriptor {
-  values?: Record<string, PrimitiveType>;
-}
+// interface TranslationMessage extends MessageDescriptor {
+//   values?: Record<string, PrimitiveType>;
+// }
 
 interface InputOption {
   metadatas: {
-    intlLabel: TranslationMessage;
+    intlLabel: IntlLabel;
     disabled: boolean;
     hidden: boolean;
   };
@@ -56,10 +75,10 @@ interface GenericInputProps<
   attribute?: TAttribute;
   autoComplete?: string;
   customInputs?: Record<string, React.ComponentType<CustomInputProps<TAttribute>>>;
-  description?: TranslationMessage;
+  description?: IntlLabel;
   disabled?: boolean;
-  error?: string | TranslationMessage;
-  intlLabel: TranslationMessage;
+  error?: string | IntlLabel;
+  intlLabel: IntlLabel;
   labelAction?: React.ReactNode;
   name: string;
   onChange: (
@@ -73,7 +92,7 @@ interface GenericInputProps<
     shouldSetInitialValue?: boolean
   ) => void;
   options?: InputOption[];
-  placeholder?: TranslationMessage;
+  placeholder?: IntlLabel;
   required?: boolean;
   step?: number;
   type: string;
@@ -81,11 +100,33 @@ interface GenericInputProps<
   value?: Schema.Attribute.Value<TAttribute>;
   isNullable?: boolean;
   autoFocus?: boolean;
+  [key: string]: any;
 }
+
+const getBaseCustomInput = (type: string) =>
+  ({
+    'allowed-types-select': AllowedTypesSelect,
+    'boolean-radio-group': BooleanRadioGroup,
+    'checkbox-with-number-field': CheckboxWithNumberField,
+    'icon-picker': IconPicker,
+    'content-type-radio-group': ContentTypeRadioGroup,
+    'radio-group': CustomRadioGroup,
+    relation: Relation,
+    'select-category': SelectCategory,
+    'select-component': SelectComponent,
+    'select-components': SelectComponents,
+    'select-default-boolean': BooleanDefaultValueSelect,
+    'select-number': SelectNumber,
+    'select-date': SelectDateType,
+    'toggle-draft-publish': DraftAndPublishToggle,
+    'text-plural': PluralName,
+    'text-singular': SingularName,
+    'textarea-enum': TextareaEnum,
+  })[type];
 
 const GenericInput = ({
   autoComplete,
-  customInputs,
+  customInputs = {},
   description,
   disabled,
   intlLabel,
@@ -99,7 +140,6 @@ const GenericInput = ({
   step,
   type,
   value: defaultValue,
-  isNullable,
   autoFocus,
   attribute,
   ...rest
@@ -143,7 +183,7 @@ const GenericInput = ({
 
   const [showPassword, setShowPassword] = React.useState(false);
 
-  const CustomInput = customInputs ? customInputs[type] : null;
+  const CustomInput = customInputs[type] ?? getBaseCustomInput(type) ?? null;
 
   // the API always returns null, which throws an error in React,
   // therefore we cast this case to undefined
@@ -158,7 +198,7 @@ const GenericInput = ({
   */
   const valueWithEmptyStringFallback = value ?? '';
 
-  function getErrorMessage(error: string | TranslationMessage | undefined) {
+  function getErrorMessage(error: string | IntlLabel | undefined) {
     if (!error) {
       return null;
     }
@@ -183,26 +223,26 @@ const GenericInput = ({
   const errorMessage = getErrorMessage(error) ?? undefined;
 
   if (CustomInput) {
-    return (
-      <CustomInput
-        {...rest}
-        attribute={attribute}
-        description={description}
-        hint={hint}
-        disabled={disabled}
-        intlLabel={intlLabel}
-        labelAction={labelAction}
-        error={errorMessage || ''}
-        name={name}
-        onChange={onChange}
-        options={options}
-        required={required}
-        placeholder={placeholder}
-        type={type}
-        value={value}
-        autoFocus={autoFocus}
-      />
-    );
+    const componentProps = {
+      ...rest,
+      attribute,
+      description,
+      hint,
+      disabled,
+      intlLabel,
+      labelAction,
+      error: errorMessage || '',
+      name,
+      onChange,
+      options,
+      required,
+      placeholder,
+      type,
+      value,
+      autoFocus,
+    };
+
+    return <CustomInput {...componentProps} />;
   }
 
   const label = intlLabel.id

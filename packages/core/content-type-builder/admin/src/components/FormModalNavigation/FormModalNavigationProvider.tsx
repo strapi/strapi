@@ -30,7 +30,7 @@ const INITIAL_STATE_DATA: State = {
   dynamicZoneTarget: null,
   forTarget: null,
   modalType: null,
-  isOpen: true,
+  isOpen: false,
   showBackLink: false,
   kind: null,
   step: null,

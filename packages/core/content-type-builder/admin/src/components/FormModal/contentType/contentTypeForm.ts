@@ -126,6 +126,7 @@ export const contentTypeForm = {
                   defaultMessage: 'Type',
                 },
                 name: 'kind',
+                // TODO: this compo si semi generic for no reason just move the radio options inside the compo
                 type: 'content-type-radio-group',
                 size: 12,
                 radios: [

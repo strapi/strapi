@@ -1,7 +1,7 @@
 import { ComponentType, SVGProps } from 'react';
 
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
-import { Box } from '@strapi/design-system';
+import { Box, Flex } from '@strapi/design-system';
 import {
   BooleanField,
   CollectionType,
@@ -56,7 +56,7 @@ const iconByTypes: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   uid: UidField,
 };
 
-const IconBox = styled(Box)`
+const IconBox = styled(Flex)`
   svg {
     height: 100%;
     width: 100%;
