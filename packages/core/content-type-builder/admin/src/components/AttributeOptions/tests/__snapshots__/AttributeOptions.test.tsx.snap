@@ -90,12 +90,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c12 {
-  height: 1px;
-  border: none;
-  flex-shrink: 0;
-}
-
 .c0 {
   width: 100%;
   height: 100%;
@@ -106,6 +100,12 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 .c2 {
   min-width: 100%;
   padding-inline: 4px;
+}
+
+.c12 {
+  height: 1px;
+  border: none;
+  flex-shrink: 0;
 }
 
 .c1 {
