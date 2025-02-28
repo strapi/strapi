@@ -958,7 +958,6 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     targetModel,
   } = data;
   const changeDocument = useDocumentContext('RelationsList', (state) => state.changeDocument);
-  const currentDocument = useDocumentContext('RelationsList', (state) => state.document);
   const rootDocumentMeta = useDocumentContext('RelationsList', (state) => state.rootDocumentMeta);
 
   const { formatMessage } = useIntl();
