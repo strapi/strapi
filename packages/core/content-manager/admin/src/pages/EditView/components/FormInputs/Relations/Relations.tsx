@@ -1017,7 +1017,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       triggerRefetchDocument(
         document,
         // Favor the cache
-        false
+        true
       );
     } else {
       setIsModalOpen(true);
