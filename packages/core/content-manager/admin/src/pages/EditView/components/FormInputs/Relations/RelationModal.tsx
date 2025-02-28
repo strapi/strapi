@@ -149,9 +149,6 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
     return `/content-manager/${documentMeta.collectionType}/${documentMeta.model}${isSingleType ? '' : '/' + documentMeta.documentId}${queryParams}`;
   };
 
-  const editViewUrl = `${pathname}${search}`;
-  const modalDocumentUrlEqualEditViewUrl = editViewUrl.includes(getFullPageLink());
-
   const hasDraftAndPublished = documentResponse.schema?.options?.draftAndPublish ?? false;
 
   return (
@@ -169,30 +166,18 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
             ) : null}
           </Flex>
           <Flex>
-            {modalDocumentUrlEqualEditViewUrl ? (
-              <IconButton
-                onClick={onToggle}
-                variant="tertiary"
-                label={formatMessage({
-                  id: 'content-manager.components.RelationInputModal.button-fullpage',
-                  defaultMessage: 'Go to entry',
-                })}
-              >
-                <ArrowsOut />
-              </IconButton>
-            ) : (
-              <IconButton
-                tag={Link}
-                to={getFullPageLink()}
-                variant="tertiary"
-                label={formatMessage({
-                  id: 'content-manager.components.RelationInputModal.button-fullpage',
-                  defaultMessage: 'Go to entry',
-                })}
-              >
-                <ArrowsOut />
-              </IconButton>
-            )}
+            <IconButton
+              tag={Link}
+              to={getFullPageLink()}
+              onClick={onToggle}
+              variant="tertiary"
+              label={formatMessage({
+                id: 'content-manager.components.RelationInputModal.button-fullpage',
+                defaultMessage: 'Go to entry',
+              })}
+            >
+              <ArrowsOut />
+            </IconButton>
           </Flex>
         </Flex>
         <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>

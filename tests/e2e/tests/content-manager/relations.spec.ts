@@ -13,42 +13,26 @@ test.describe('Unstable Relations on the fly', () => {
     await login({ page });
   });
 
-  test('as a user I want to open a relation modal inside a collection', async ({ page }) => {
+  test('as a user I want to open a relation modal inside a collection and then open it full page', async ({
+    page,
+  }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
-    await clickAndWait(page, page.getByRole('gridcell', { name: 'Ted Lasso' }));
-    test('as a user I want to open a relation modal inside a collection and then open it full page', async ({
-      page,
-    }) => {
-      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-      await clickAndWait(
-        page,
-        page.getByRole('gridcell', { name: 'West Ham post match analysis' })
-      );
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
 
-    await expect(page.getByRole('heading', { name: 'Ted Lasso' })).toBeVisible();
-      await expect(
-        page.getByRole('heading', { name: 'West Ham post match analysis' })
-      ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
 
-    await clickAndWait(page, page.getByRole('button', { name: 'Pourquoi je préfère le' }));
+    // Add a new relation to the entry
+    await clickAndWait(page, page.getByRole('combobox', { name: 'authors' }));
+    await clickAndWait(page, page.getByLabel('Coach BeardDraft'));
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
     // it opens the edit relations modal
     await expect(page.getByText('Edit a relation')).toBeVisible();
+
+    // click on the full page icon
+    await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
+    await page.waitForURL(AUTHOR_EDIT_URL);
+    await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
   });
 });
-      // Add a new relation to the entry
-      await clickAndWait(page, page.getByRole('combobox', { name: 'authors' }));
-      await clickAndWait(page, page.getByLabel('Coach BeardDraft'));
-      await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
-      // it opens the edit relations modal
-      await expect(page.getByText('Edit a relation')).toBeVisible();
-
-      // click on the full page icon
-      await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
-      await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
-      await page.waitForURL(AUTHOR_EDIT_URL);
-      await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
-    });
-  }
-);
