@@ -68,6 +68,19 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     });
   },
 
+  onError(error) {
+    this.diagnostics?.report({
+      details: {
+        message: error.message,
+        error,
+        createdAt: new Date(),
+        name: error.name,
+        severity: 'fatal',
+      },
+      kind: 'error',
+    });
+  },
+
   assertValidTransferAction(this: PullHandler, action) {
     // Abstract the constant to string[] to allow looser check on the given action
     const validActions = VALID_TRANSFER_ACTIONS as unknown as string[];
@@ -173,7 +186,11 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         await this.confirm(data);
       } catch (error) {
         // Handle the error, log it, or take other appropriate actions
-        console.error('Error during confirmation:', error);
+
+        strapi?.log.error(
+          `[Data transfer] Message confirmation failed: ${(error as Error)?.message}`
+        );
+        this.onError(error as Error);
       }
     };
 
