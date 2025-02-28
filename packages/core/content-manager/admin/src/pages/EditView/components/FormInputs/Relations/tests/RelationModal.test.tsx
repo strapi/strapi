@@ -3,7 +3,7 @@ import { render, screen } from '@tests/utils';
 import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { RelationModal } from '../RelationModal';
 
-const relationContext = {
+export const relationContext = {
   initialDocument: {
     documentId: 'abcdefg',
     model: 'api::test.test',

@@ -1,20 +1,22 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition } from '../../utils/shared';
+import { clickAndWait } from '../../utils/shared';
 
 const AUTHOR_EDIT_URL =
   /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
 
-describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_RELATIONS_ON_THE_FLY === 'true')(
-  'Unstable Relations on the fly',
-  () => {
-    test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
-      await page.goto('/admin');
-      await login({ page });
-    });
+test.describe('Unstable Relations on the fly', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.goto('/admin');
+    await login({ page });
+  });
 
+  test('as a user I want to open a relation modal inside a collection', async ({ page }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'Ted Lasso' }));
     test('as a user I want to open a relation modal inside a collection and then open it full page', async ({
       page,
     }) => {
@@ -25,10 +27,16 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_RELATIONS_ON_THE_FLY ==
         page.getByRole('gridcell', { name: 'West Ham post match analysis' })
       );
 
+    await expect(page.getByRole('heading', { name: 'Ted Lasso' })).toBeVisible();
       await expect(
         page.getByRole('heading', { name: 'West Ham post match analysis' })
       ).toBeVisible();
 
+    await clickAndWait(page, page.getByRole('button', { name: 'Pourquoi je préfère le' }));
+    // it opens the edit relations modal
+    await expect(page.getByText('Edit a relation')).toBeVisible();
+  });
+});
       // Add a new relation to the entry
       await clickAndWait(page, page.getByRole('combobox', { name: 'authors' }));
       await clickAndWait(page, page.getByLabel('Coach BeardDraft'));
