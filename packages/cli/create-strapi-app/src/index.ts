@@ -118,9 +118,15 @@ async function run(args: string[]): Promise<void> {
 
   const rootPath = await checkInstallPath(appDirectory);
 
+  let userEmail = 'wedont@know.com';
   if (!options.skipCloud) {
-    await handleCloudLogin();
+    // WIP changed this from being a void return to returning the user info
+    const result = await handleCloudLogin();
+    userEmail = result?.email ?? 'wedont@know.com';
   }
+
+  // Now we need to pass that to the strapi app via the scope & access it in the admin UI
+  // console.log('USER EMAIL', userEmail);
 
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
 
@@ -154,6 +160,9 @@ async function run(args: string[]): Promise<void> {
       'react-dom': '^18.0.0',
       'react-router-dom': '^6.0.0',
       'styled-components': '^6.0.0',
+    },
+    userInfo: {
+      email: userEmail,
     },
   };
 

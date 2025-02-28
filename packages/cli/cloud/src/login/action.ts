@@ -19,12 +19,15 @@ export async function promptLogin(ctx: CLIContext) {
 
   if (response.login) {
     const loginSuccessful = await loginAction(ctx);
-    return loginSuccessful;
+    return loginSuccessful.isAuthenticated;
   }
+
   return false;
 }
 
-export default async function loginAction(ctx: CLIContext): Promise<boolean> {
+export default async function loginAction(
+  ctx: CLIContext
+): Promise<{ isAuthenticated: boolean; userInfo: any | null }> {
   const { logger } = ctx;
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
@@ -45,7 +48,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
           'To access your dashboard, please copy and paste the following URL into your web browser:'
         );
         logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
-        return true;
+        return { isAuthenticated: true, userInfo: userInfo.data.data };
       } catch (e) {
         logger.debug('Failed to fetch user info', e);
       }
@@ -60,7 +63,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
   } catch (e: unknown) {
     logger.error('🥲 Oops! Something went wrong while logging you in. Please try again.');
     logger.debug(e);
-    return false;
+    return { isAuthenticated: false, userInfo: null };
   }
   await trackEvent(ctx, cloudApiService, 'willLoginAttempt', {});
 
@@ -107,6 +110,8 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
 
   let isAuthenticated = false;
 
+  // TODO WIP using this to collect user info from the cloud login call
+  let userInfo: any;
   const authenticate = async () => {
     const spinner = logger.spinner('Waiting for authentication');
     spinner.start();
@@ -132,7 +137,14 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
           logger.debug('🔍 Fetching user information...');
           const cloudApiServiceWithToken = await cloudApiFactory(ctx, authTokenData.access_token);
           // Call to get user info to create the user in DB if not exists
-          await cloudApiServiceWithToken.getUserInfo();
+
+          // TODO consider all the different auth mechanisms
+          // What fields can we reliably extract from the user info?
+          const {
+            data: { data: userInfoFromCloudApiServiceWithToken },
+          } = await cloudApiServiceWithToken.getUserInfo();
+          userInfo = userInfoFromCloudApiServiceWithToken;
+
           logger.debug('🔍 User information fetched successfully!');
 
           try {
@@ -183,5 +195,6 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
   };
 
   await authenticate();
-  return isAuthenticated;
+
+  return { isAuthenticated, userInfo };
 }
