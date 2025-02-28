@@ -192,7 +192,7 @@ export default {
   async countDraftRelations(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-
+    const { query = {} } = ctx.request;
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -200,7 +200,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity({}, model);
+    const entity = await findEntity(query, model);
     if (!entity) {
       return ctx.notFound();
     }
