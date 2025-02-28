@@ -90,7 +90,7 @@ const MarketplacePage = () => {
     possibleCollections,
     possibleCategories,
     pagination,
-  } = useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery, strapiVersion });
+  } = useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery });
 
   if (!isOnline) {
     return <OfflineLayout />;
