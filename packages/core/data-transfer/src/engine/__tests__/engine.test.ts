@@ -1093,7 +1093,7 @@ describe('Transfer engine', () => {
       const sourceData = Array.from({ length: items }, (_, i) => ({
         id: i,
         type: 'api::foo.foo' as const,
-        data: { foo: 'bar', documentId: `doc${i}` },
+        data: { foo: 'bar', documentId: `doc${i}`, id: i },
       }));
 
       let sourcePaused = false;
@@ -1116,7 +1116,7 @@ describe('Transfer engine', () => {
 
       // Source that detects when it is paused
       const source = {
-        ...createSource({ entities: sourceData as any }),
+        ...createSource({ entities: sourceData }),
         createEntitiesReadStream() {
           const stream = Readable.from(sourceData, { objectMode: true });
           const originalPause = stream.pause.bind(stream);
@@ -1134,25 +1134,47 @@ describe('Transfer engine', () => {
       // Verify source stream was paused at some point
       expect(sourcePaused).toBe(true);
 
-      // Verify all data was transferred correctly
-      expect(processedData).toEqual(sourceData);
+      // Look for `id` at root instead of `data.id`
+      const expectedProcessedData = sourceData.map(({ id, data, ...rest }) => ({
+        ...rest,
+        id,
+        data: { ...data, id: undefined },
+      }));
+      // Compare processed data with transformed expected data
+      expect(processedData).toEqual(expectedProcessedData);
     }, 2000);
 
     test('assets source stream pauses under backpressure and data integrity is maintained', async () => {
-      const assetData = [
+      const assetData: IAsset[] = [
         {
           filename: 'test1.jpg',
           filepath: posix.join(__dirname, 'test1.jpg'),
           stats: { size: 100 },
           stream: Readable.from(Array.from({ length: 100 }, (_, i) => i)), // Create 100 bytes of test data
-          metadata: { hash: 'test1', ext: '.jpg' },
+          metadata: {
+            hash: 'test1',
+            ext: '.jpg',
+            id: 0,
+            name: '',
+            mime: '',
+            size: 0,
+            url: '',
+          },
         },
         {
           filename: 'test2.jpg',
           filepath: posix.join(__dirname, 'test2.jpg'),
           stats: { size: 200 },
           stream: Readable.from(Array.from({ length: 200 }, (_, i) => i)), // Create 200 bytes of test data
-          metadata: { hash: 'test2', ext: '.jpg' },
+          metadata: {
+            hash: 'test2',
+            ext: '.jpg',
+            id: 0,
+            name: '',
+            mime: '',
+            size: 0,
+            url: '',
+          },
         },
       ];
 
@@ -1176,9 +1198,9 @@ describe('Transfer engine', () => {
 
       // Source that detects when it is paused
       const source = {
-        ...createSource({ assets: assetData as any }),
+        ...createSource({ assets: assetData }),
         createAssetsReadStream() {
-          const stream = getAssetsMockSourceStream(assetData as any);
+          const stream = getAssetsMockSourceStream(assetData);
           const originalPause = stream.pause.bind(stream);
           stream.pause = function () {
             sourcePaused = true;
