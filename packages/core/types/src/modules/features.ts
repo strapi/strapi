@@ -1,6 +1,7 @@
 export interface FeaturesConfig {
   future?: {
     unstablePreviewSideEditor?: boolean;
+    unstableRelationsOnTheFly?: boolean;
   };
 }
 
