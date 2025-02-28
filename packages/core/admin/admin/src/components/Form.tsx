@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Button, Dialog, useCallbackRef, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  type BoxProps,
+  Button,
+  Dialog,
+  useCallbackRef,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
@@ -114,7 +121,8 @@ interface FormHelpers<TFormValues extends FormValues = FormValues>
   extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
+  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
+    Pick<BoxProps, 'width' | 'height'> {
   children:
     | React.ReactNode
     | ((
@@ -424,7 +432,15 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     const composedRefs = useComposedRefs(formRef, ref);
 
     return (
-      <form ref={composedRefs} method={method} noValidate onSubmit={handleSubmit}>
+      <Box
+        tag="form"
+        ref={composedRefs}
+        method={method}
+        noValidate
+        onSubmit={handleSubmit}
+        width={props.width}
+        height={props.height}
+      >
         <FormProvider
           disabled={disabled}
           onChange={handleChange}
@@ -451,7 +467,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
               })
             : props.children}
         </FormProvider>
-      </form>
+      </Box>
     );
   }
 ) as <TFormValues extends FormValues>(
