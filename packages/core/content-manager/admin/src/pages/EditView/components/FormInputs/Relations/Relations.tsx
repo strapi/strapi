@@ -29,7 +29,6 @@ import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { styled } from 'styled-components';
 
@@ -38,13 +37,13 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
-import { type UseDocument, useDoc } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../../hooks/useDragAndDrop';
+import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
@@ -944,6 +943,7 @@ const CustomTextButton = styled(TextButton)`
 `;
 
 const ListItem = ({ data, index, style }: ListItemProps) => {
+  const [triggerRefetchDocument] = useLazyGetDocumentQuery();
   const {
     ariaDescribedBy,
     canDrag = false,
@@ -958,6 +958,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     targetModel,
   } = data;
   const changeDocument = useDocumentContext('RelationsList', (state) => state.changeDocument);
+  const rootDocumentMeta = useDocumentContext('RelationsList', (state) => state.rootDocumentMeta);
 
   const { formatMessage } = useIntl();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -995,6 +996,27 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       };
 
       changeDocument(newRelation);
+    }
+  };
+
+  const handleToggleModal = () => {
+    if (isModalOpen) {
+      setIsModalOpen(false);
+      const document = {
+        collectionType: rootDocumentMeta.collectionType,
+        model: rootDocumentMeta.model,
+        documentId: rootDocumentMeta.documentId,
+      };
+      // Change back to the root document
+      changeDocument(document);
+      // Read from cache or refetch root document
+      triggerRefetchDocument(
+        document,
+        // Favor the cache
+        false
+      );
+    } else {
+      setIsModalOpen(true);
     }
   };
 
@@ -1061,14 +1083,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
-              {isModalOpen && (
-                <RelationModal
-                  open={isModalOpen}
-                  onToggle={() => {
-                    setIsModalOpen(!isModalOpen);
-                  }}
-                />
-              )}
+              {isModalOpen && <RelationModal open={isModalOpen} onToggle={handleToggleModal} />}
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>

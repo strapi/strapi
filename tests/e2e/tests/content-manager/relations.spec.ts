@@ -37,5 +37,9 @@ test.describe('Unstable Relations on the fly', () => {
     await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
     await expect(name).toHaveValue('Mr. Coach Beard');
     await expect(page.getByRole('status', { name: 'Published' }).first()).toBeVisible();
+
+    // Close the relation modal to see the updated relation on the root document
+    await page.getByRole('button', { name: 'Close modal' }).click();
+    await expect(page.getByRole('button', { name: 'Mr. Coach Beard' })).toBeVisible();
   });
 });

@@ -29,6 +29,7 @@ interface DocumentMeta {
 }
 
 interface DocumentContextValue {
+  rootDocumentMeta: DocumentMeta;
   document: ReturnType<UseDocument>;
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
@@ -70,6 +71,12 @@ const DocumentContextProvider = ({
     <DocumentProvider
       changeDocument={changeDocument}
       document={document}
+      rootDocumentMeta={{
+        documentId: initialDocument.documentId,
+        model: initialDocument.model,
+        collectionType: initialDocument.collectionType,
+        params: initialDocument.params,
+      }}
       meta={currentDocumentMeta}
     >
       {children}

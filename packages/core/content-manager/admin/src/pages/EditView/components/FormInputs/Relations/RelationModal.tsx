@@ -18,7 +18,6 @@ import {
 } from '@strapi/design-system';
 import { ArrowLeft, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
