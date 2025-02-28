@@ -17,7 +17,7 @@ test.describe('Unstable Relations on the fly', () => {
     page,
   }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
 
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
