@@ -1087,4 +1087,55 @@ describe('Transfer engine', () => {
       });
     });
   });
+  describe('backpressure', () => {
+    test('source stream pauses under backpressure and data integrity is maintained', async () => {
+      const items = 10;
+      const sourceData = Array.from({ length: items }, (_, i) => ({
+        id: i,
+        type: 'api::foo.foo' as const,
+        data: { foo: 'bar', documentId: `doc${i}` },
+      }));
+
+      let sourcePaused = false;
+      const processedData: typeof sourceData = [];
+
+      // Slow destination that enforces backpressure
+      const slowDestination: IDestinationProvider = {
+        ...completeDestination,
+        createEntitiesWriteStream() {
+          return new Writable({
+            objectMode: true,
+            highWaterMark: 1, // Enforce backpressure by allowing only 1 chunk in buffer
+            write(chunk, _encoding, callback) {
+              processedData.push(chunk);
+              setTimeout(callback, 10); // Simulate slow processing
+            },
+          });
+        },
+      };
+
+      // Source that detects when it is paused
+      const source = {
+        ...createSource({ entities: sourceData }),
+        createEntitiesReadStream() {
+          const stream = Readable.from(sourceData, { objectMode: true });
+          const originalPause = stream.pause.bind(stream);
+          stream.pause = function () {
+            sourcePaused = true;
+            return originalPause();
+          };
+          return stream;
+        },
+      };
+
+      const engine = createTransferEngine(source, slowDestination, defaultOptions);
+      await engine.transfer();
+
+      // Verify source stream was paused at some point
+      expect(sourcePaused).toBe(true);
+
+      // Verify all data was transferred correctly
+      expect(processedData).toEqual(sourceData);
+    }, 15000);
+  });
 });
