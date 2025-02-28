@@ -54,8 +54,8 @@
   },
   "dependencies": {
     "@sentry/node": "7.112.2",
-    "@strapi/design-system": "2.0.0-rc.17",
-    "@strapi/icons": "2.0.0-rc.17"
+    "@strapi/design-system": "2.0.0-rc.18",
+    "@strapi/icons": "2.0.0-rc.18"
   },
   "devDependencies": {
     "@strapi/strapi": "5.10.4",
