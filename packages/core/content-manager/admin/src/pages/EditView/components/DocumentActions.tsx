@@ -545,6 +545,9 @@ const PublishAction: DocumentActionComponent = ({
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
 
+  const rootDocumentMeta = useDocumentContext('PublishAction', (state) => state.rootDocumentMeta);
+  const currentDocumentMeta = useDocumentContext('PublishAction', (state) => state.meta);
+
   React.useEffect(() => {
     if (isErrorDraftRelations) {
       toggleNotification({
@@ -650,12 +653,13 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
+      const isPublishingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
       const res = await publish(
         {
           collectionType,
           model,
           documentId,
-          params,
+          params: isPublishingRelation ? currentDocumentMeta.params : params,
         },
         transformData(formValues)
       );
@@ -775,6 +779,9 @@ const UpdateAction: DocumentActionComponent = ({
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
+  const rootDocumentMeta = useDocumentContext('UpdateAction', (state) => state.rootDocumentMeta);
+  const currentDocumentMeta = useDocumentContext('UpdateAction', (state) => state.meta);
+
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
 
@@ -826,12 +833,14 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
+        const isEditingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
+
         const res = await update(
           {
             collectionType,
             model,
             documentId,
-            params,
+            params: isEditingRelation ? currentDocumentMeta.params : params,
           },
           transformData(document)
         );

@@ -25,7 +25,7 @@ interface DocumentMeta {
    * The parsed query params
    * i.e. ?i18n=en parsed to { i18n: 'en' }
    */
-  params?: Record<string, string>;
+  params?: Record<string, string | string[] | null>;
 }
 
 interface DocumentContextValue {

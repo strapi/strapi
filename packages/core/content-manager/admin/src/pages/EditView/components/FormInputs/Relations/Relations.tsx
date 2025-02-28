@@ -958,12 +958,13 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     targetModel,
   } = data;
   const changeDocument = useDocumentContext('RelationsList', (state) => state.changeDocument);
+  const currentDocument = useDocumentContext('RelationsList', (state) => state.document);
   const rootDocumentMeta = useDocumentContext('RelationsList', (state) => state.rootDocumentMeta);
 
   const { formatMessage } = useIntl();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  const { href, id, label, status, documentId, apiData } = relations[index];
+  const { href, id, label, status, documentId, apiData, locale } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -993,6 +994,9 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
         documentId: documentId ?? apiData?.documentId,
         model: targetModel,
         collectionType: getCollectionType(href)!,
+        params: {
+          locale: locale || null,
+        },
       };
 
       changeDocument(newRelation);
