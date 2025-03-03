@@ -175,6 +175,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         error: null,
         id,
       });
+      batch = [];
     };
 
     if (!stream) {
@@ -187,7 +188,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
           batch.push(chunk);
           if (batchLength() >= batchSize) {
             await sendBatch();
-            batch = [];
           }
         } else {
           await this.confirm({
@@ -202,7 +202,6 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
       if (batch.length > 0 && stage !== 'assets') {
         await sendBatch();
-        batch = [];
       }
       await this.confirm({ type: 'transfer', data: null, ended: true, error: null, id });
     } catch (e) {
@@ -260,7 +259,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
         const BATCH_MAX_SIZE = 1024 * 1024; // 1MB
 
         if (!assets) {
-          throw new Error('bad');
+          throw new Error('Assets read stream could not be created');
         }
         /**
          * Generates batches of 1MB of data from the assets stream to avoid
