@@ -60,7 +60,75 @@ test.describe('Unstable Relations on the fly', () => {
     await expect(page.getByText('Edit a relation')).toBeVisible();
 
     // click on the full page icon
-    await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
+    await page.waitForURL(AUTHOR_EDIT_URL);
+    await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
+  });
+
+  test('I want to click on a nested relation in the relation modal without saving the data in the form', async ({
+    page,
+  }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+
+    // Open the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
+
+    const name = page.getByRole('textbox', { name: 'name' });
+    await name.fill('Mr. Coach Beard');
+
+    // Open the nested relation
+    await clickAndWait(page, page.getByRole('button', { name: 'West Ham post match analysis' }));
+
+    // Check the confirmation modal is shown and click confirm
+    await clickAndWait(page, page.locator('button').filter({ hasText: 'Confirm' }).nth(1));
+
+    // Check the nested relation modal is shown
+    await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
+  });
+
+  test('I want to click to close the relation modal without saving the data in the form', async ({
+    page,
+  }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+
+    // Open the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
+
+    const name = page.getByRole('textbox', { name: 'name' });
+    await name.fill('Mr. Coach Beard');
+
+    // Click the Close button
+    await clickAndWait(page, page.getByRole('button', { name: 'Close modal' }));
+
+    // Check the confirmation modal is shown and click confirm
+    await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
+
+    await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
+  });
+
+  test('I want to click the button to open the full page without saving the data in the form', async ({
+    page,
+  }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+
+    // Open the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
+
+    const name = page.getByRole('textbox', { name: 'name' });
+    await name.fill('Mr. Coach Beard');
+
+    // click on the full page icon
+    await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
+
+    // Check the confirmation modal is shown and click confirm
+    await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
+
     await page.waitForURL(AUTHOR_EDIT_URL);
     await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
   });

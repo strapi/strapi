@@ -231,8 +231,8 @@ const RelationModalBody = ({ onToggle }: RelationModalBodyProps) => {
 
   const getFullPageLink = (): string => {
     const isSingleType = documentMeta.collectionType === SINGLE_TYPES;
-    const queryParams = documentResponse?.document?.locale
-      ? `?plugins[i18n][locale]=${documentResponse.document.locale}`
+    const queryParams = documentMeta.params?.locale
+      ? `?plugins[i18n][locale]=${documentMeta.params.locale}`
       : '';
 
     return `/content-manager/${documentMeta.collectionType}/${documentMeta.model}${isSingleType ? '' : '/' + documentMeta.documentId}${queryParams}`;
