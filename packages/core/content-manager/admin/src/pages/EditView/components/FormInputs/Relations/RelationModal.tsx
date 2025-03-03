@@ -94,7 +94,7 @@ const RelationModalBody = () => {
   const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
   const documentLayoutResponse = useDocumentLayout(documentMeta.model);
-  const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
+  const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
   const initialValues = documentResponse.getInitialFormValues();
 
