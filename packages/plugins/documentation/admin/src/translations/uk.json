@@ -1,4 +1,5 @@
 {
+  "coming-soon": "Цей вміст наразі будується і повернеться через кілька тижнів!",
   "components.Row.open": "Відкрити",
   "components.Row.regenerate": "Згенерувати",
   "containers.HomePage.Block.title": "Версії",
@@ -19,5 +20,23 @@
   "error.noVersion": "Необхідна версія",
   "error.regenerateDoc": "Під час генерування документації сталася помилка",
   "error.regenerateDoc.versionMissing": "Версія, яку ви намагаєтесь згенерувати не існує.",
-  "notification.update.success": "Налаштування оновлено"
+  "notification.delete.success": "Документ видалено",
+  "notification.generate.success": "Документ згенеровано",
+  "notification.update.success": "Налаштування оновлено",
+  "pages.PluginPage.Button.open": "Відкрити документацію",
+  "pages.PluginPage.header.description": "Налаштувати плаґін документації",
+  "pages.PluginPage.table.generated": "Останнє створення",
+  "pages.PluginPage.table.icon.regenerate": "Перегенерувати {target}",
+  "pages.PluginPage.table.icon.show": "Відкрити {target}",
+  "pages.PluginPage.table.version": "Версія",
+  "pages.SettingsPage.header.description": "Налаштувати плаґін документації",
+  "pages.SettingsPage.header.save": "Зберегти",
+  "pages.SettingsPage.toggle.hint": "Зробити кінцеву точку документації приватною",
+  "pages.SettingsPage.toggle.label": "Обмежений доступ",
+  "plugin.description.long": "Створіть документ OpenAPI та візуалізуйте ваш API за допомогою SWAGGER UI.",
+  "plugin.description.short": "Створіть документ OpenAPI та візуалізуйте ваш API за допомогою SWAGGER UI.",
+  "plugin.name": "Документація",
+  "Input.error.contain.lowercase": "Пароль повинен містити принаймні одну малу літеру",
+  "Input.error.contain.number": "Пароль повинен містити принаймні одну цифру",
+  "Input.error.contain.uppercase": "Пароль повинен містити принаймні одну велику літеру"
 }
