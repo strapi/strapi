@@ -37,7 +37,7 @@ const UnstablePreviewContent = () => {
         paddingRight={isSideEditorOpen ? 6 : 0}
         transition="all 0.2s ease-in-out"
       >
-        <FormLayout layout={layout.layout} hasBackground />
+        <FormLayout layout={layout.layout} hasBackground={false} />
       </Box>
       <Box position="relative" flex={1} height="100%" overflow="hidden">
         <Box
