@@ -7,9 +7,11 @@ import {
   createContext,
   Form as FormContext,
 } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, Portal } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
+import { ArrowLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
@@ -17,9 +19,10 @@ import { DocumentContextProvider } from '../../features/DocumentContext';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { FormLayout } from '../../pages/EditView/components/FormLayout';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
-import { PreviewContent, UnstablePreviewContent } from '../components/PreviewContent';
+import { PreviewContent } from '../components/PreviewContent';
 import { PreviewHeader, UnstablePreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 
@@ -36,6 +39,7 @@ interface PreviewContextValue {
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
   layout: EditLayout;
+  iframeRef?: React.RefObject<HTMLIFrameElement>;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -44,9 +48,18 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * PreviewPage
  * -----------------------------------------------------------------------------------------------*/
 
+const AnimatedArrow = styled(ArrowLeft)<{ isSideEditorOpen: boolean }>`
+  will-change: transform;
+  rotate: ${(props) => (props.isSideEditorOpen ? '0deg' : '180deg')};
+  transition: rotate 0.2s ease-in-out;
+`;
+
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
+
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
 
   // Read all the necessary data from the URL to find the right preview URL
   const {
@@ -62,6 +75,7 @@ const PreviewPage = () => {
     plugins?: Record<string, unknown>;
     status?: string;
   }>();
+
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
   if (!collectionType) {
@@ -133,6 +147,8 @@ const PreviewPage = () => {
     return yupSchema.validateSync(values, { abortEarly: false });
   };
 
+  const previewUrl = previewUrlResponse.data.data.url;
+
   return (
     <>
       <Page.Title>
@@ -154,12 +170,13 @@ const PreviewPage = () => {
         }}
       >
         <PreviewProvider
-          url={previewUrlResponse.data.data.url}
+          url={previewUrl}
           document={documentResponse.document}
           title={documentTitle}
           meta={documentResponse.meta}
           schema={documentResponse.schema}
           layout={documentLayoutResponse.edit}
+          iframeRef={iframeRef}
         >
           <FormContext
             method="PUT"
@@ -188,7 +205,65 @@ const PreviewPage = () => {
               {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
                 <>
                   <UnstablePreviewHeader />
-                  <UnstablePreviewContent />
+                  <Flex flex={1} overflow="auto" alignItems="stretch">
+                    <Box
+                      overflow="auto"
+                      width={isSideEditorOpen ? '50%' : 0}
+                      borderWidth="0 1px 0 0"
+                      borderColor="neutral150"
+                      paddingTop={6}
+                      paddingBottom={6}
+                      // Remove horizontal padding when the editor is closed or it won't fully disappear
+                      paddingLeft={isSideEditorOpen ? 6 : 0}
+                      paddingRight={isSideEditorOpen ? 6 : 0}
+                      transition="all 0.2s ease-in-out"
+                    >
+                      <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground />
+                    </Box>
+                    <Box position="relative" flex={1} height="100%" overflow="hidden">
+                      <Box
+                        data-testid="preview-iframe"
+                        ref={iframeRef}
+                        src={previewUrl}
+                        /**
+                         * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+                         * history stack. This is an issue for us as it means clicking the back button will not let us
+                         * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+                         * different iframe when the preview URL changes. So we set a key prop to force React
+                         * to mount a different node when the src changes.
+                         */
+                        key={previewUrl}
+                        title={formatMessage({
+                          id: 'content-manager.preview.panel.title',
+                          defaultMessage: 'Preview',
+                        })}
+                        width="100%"
+                        height="100%"
+                        borderWidth={0}
+                        tag="iframe"
+                      />
+                      <IconButton
+                        variant="tertiary"
+                        label={formatMessage(
+                          isSideEditorOpen
+                            ? {
+                                id: 'content-manager.preview.content.close-editor',
+                                defaultMessage: 'Close editor',
+                              }
+                            : {
+                                id: 'content-manager.preview.content.open-editor',
+                                defaultMessage: 'Open editor',
+                              }
+                        )}
+                        onClick={() => setIsSideEditorOpen((prev) => !prev)}
+                        position="absolute"
+                        top={2}
+                        left={2}
+                      >
+                        <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
+                      </IconButton>
+                    </Box>
+                  </Flex>
                 </>
               ) : (
                 <>

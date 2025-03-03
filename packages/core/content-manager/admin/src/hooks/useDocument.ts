@@ -63,6 +63,7 @@ type UseDocument = (
   schema?: Schema;
   schemas?: Schema[];
   hasError?: boolean;
+  refetch: () => void;
   validate: (document: Document) => null | FormErrors;
   /**
    * Get the document's title
@@ -115,6 +116,7 @@ const useDocument: UseDocument = (args, opts) => {
     isLoading: isLoadingDocument,
     isFetching: isFetchingDocument,
     error,
+    refetch,
   } = useGetDocumentQuery(args, {
     ...opts,
     skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
@@ -227,6 +229,7 @@ const useDocument: UseDocument = (args, opts) => {
     validate,
     getTitle,
     getInitialFormValues,
+    refetch,
   } satisfies ReturnType<UseDocument>;
 };
 

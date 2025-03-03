@@ -68,6 +68,19 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     });
   },
 
+  onError(error) {
+    this.diagnostics?.report({
+      details: {
+        message: error.message,
+        error,
+        createdAt: new Date(),
+        name: error.name,
+        severity: 'fatal',
+      },
+      kind: 'error',
+    });
+  },
+
   assertValidTransferAction(this: PullHandler, action) {
     // Abstract the constant to string[] to allow looser check on the given action
     const validActions = VALID_TRANSFER_ACTIONS as unknown as string[];
@@ -167,6 +180,20 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
     const stream = this.streams?.[stage];
 
     const batchLength = () => Buffer.byteLength(JSON.stringify(batch));
+
+    const maybeConfirm = async (data: any) => {
+      try {
+        await this.confirm(data);
+      } catch (error) {
+        // Handle the error, log it, or take other appropriate actions
+
+        strapi?.log.error(
+          `[Data transfer] Message confirmation failed: ${(error as Error)?.message}`
+        );
+        this.onError(error as Error);
+      }
+    };
+
     const sendBatch = async () => {
       await this.confirm({
         type: 'transfer',
@@ -205,7 +232,8 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
       }
       await this.confirm({ type: 'transfer', data: null, ended: true, error: null, id });
     } catch (e) {
-      await this.confirm({ type: 'transfer', data: null, ended: true, error: e, id });
+      // TODO: if this confirm fails, can we abort the whole transfer?
+      await maybeConfirm({ type: 'transfer', data: null, ended: true, error: e, id });
     }
   },
 
