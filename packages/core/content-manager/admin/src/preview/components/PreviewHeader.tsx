@@ -177,7 +177,7 @@ const UnstablePreviewHeader = () => {
   };
 
   const hasDraftAndPublish = schema.options?.draftAndPublish ?? false;
-  const props = {
+  const documentActionProps = {
     activeTab: query.status ?? null,
     collectionType: schema.kind === 'collectionType' ? 'collection-types' : 'single-types',
     model: schema.uid,
@@ -231,7 +231,7 @@ const UnstablePreviewHeader = () => {
           </IconButton>
           <InjectionZone area="preview.actions" />
           <DescriptionComponentRenderer
-            props={props}
+            props={documentActionProps}
             descriptions={(
               plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
             ).getDocumentActions('preview')}

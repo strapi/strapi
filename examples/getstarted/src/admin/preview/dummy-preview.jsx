@@ -8,7 +8,7 @@ import { Grid, Flex, Typography, JSONInput } from '@strapi/design-system';
 
 const PreviewComponent = () => {
   const { uid: model, documentId, locale, status, collectionType } = useParams();
-  const { document } = useDocument({
+  const { document, refetch } = useDocument({
     model,
     documentId,
     params: { locale, status },
@@ -18,7 +18,7 @@ const PreviewComponent = () => {
   React.useEffect(() => {
     const handleStrapiUpdate = (event) => {
       if (event.data?.type === 'strapiUpdate') {
-        window.location.reload();
+        refetch();
       }
     };
 
