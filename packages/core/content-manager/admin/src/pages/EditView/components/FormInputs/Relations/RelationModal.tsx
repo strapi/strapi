@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form as FormContext, useRBAC } from '@strapi/admin/strapi-admin';
+import { Form as FormContext, useRBAC, Blocker } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -27,7 +27,6 @@ import { FormLayout } from '../../FormLayout';
 interface RelationModalProps {
   open: boolean;
   onToggle: () => void;
-  id?: string;
 }
 
 export function getCollectionType(url: string) {
@@ -43,49 +42,52 @@ const CustomModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
-const RelationModal = ({ open, onToggle, id }: RelationModalProps) => {
+const RelationModal = ({ open, onToggle }: RelationModalProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Modal.Root open={open} onOpenChange={onToggle}>
-      <CustomModalContent>
-        <Modal.Header>
-          <Flex>
-            <IconButton
-              withTooltip={false}
-              label="Back"
-              variant="ghost"
-              disabled
-              onClick={() => {}}
-              marginRight={1}
-            >
-              <ArrowLeft />
-            </IconButton>
-            <Typography tag="span" fontWeight={600}>
-              {formatMessage({
-                id: 'content-manager.components.RelationInputModal.modal-title',
-                defaultMessage: 'Edit a relation',
-              })}
-            </Typography>
-          </Flex>
-        </Modal.Header>
-        <RelationModalBody id={id} onToggle={onToggle} />
-        <Modal.Footer>
-          <Button onClick={onToggle} variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-          </Button>
-        </Modal.Footer>
-      </CustomModalContent>
-    </Modal.Root>
+    <>
+      <Modal.Root open={open} onOpenChange={onToggle}>
+        <CustomModalContent>
+          <Modal.Header gap={2}>
+            <Flex justifyContent="space-between" alignItems="center" width="100%">
+              <Flex gap={2}>
+                <IconButton
+                  withTooltip={false}
+                  label="Back"
+                  variant="ghost"
+                  disabled
+                  onClick={() => {}}
+                  marginRight={1}
+                >
+                  <ArrowLeft />
+                </IconButton>
+                <Typography tag="span" fontWeight={600}>
+                  {formatMessage({
+                    id: 'content-manager.components.RelationInputModal.modal-title',
+                    defaultMessage: 'Edit a relation',
+                  })}
+                </Typography>
+              </Flex>
+            </Flex>
+          </Modal.Header>
+          <RelationModalBody onToggle={onToggle} />
+          <Modal.Footer>
+            <Button onClick={onToggle} variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+          </Modal.Footer>
+        </CustomModalContent>
+      </Modal.Root>
+    </>
   );
 };
 
 interface RelationModalBodyProps {
-  id?: string;
   onToggle: () => void;
 }
 
-const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
+const RelationModalBody = ({ onToggle }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
   const { pathname, search } = useLocation();
   const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
@@ -96,7 +98,7 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
 
   const {
     permissions = [],
-    isLoading,
+    isLoading: isLoadingPermissions,
     error,
   } = useRBAC(
     PERMISSIONS.map((action) => ({
@@ -105,7 +107,9 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
     }))
   );
 
-  if (isLoading || documentResponse.isLoading || documentLayoutResponse.isLoading) {
+  const isLoading =
+    isLoadingPermissions || documentLayoutResponse.isLoading || documentResponse.isLoading;
+  if (isLoading && !documentResponse.document?.documentId) {
     return (
       <Loader small>
         {formatMessage({
@@ -149,43 +153,65 @@ const RelationModalBody = ({ id, onToggle }: RelationModalBodyProps) => {
     return `/content-manager/${documentMeta.collectionType}/${documentMeta.model}${isSingleType ? '' : '/' + documentMeta.documentId}${queryParams}`;
   };
 
+  const editViewUrl = `${pathname}${search}`;
+  const modalDocumentUrlEqualEditViewUrl = editViewUrl.includes(getFullPageLink());
+
   const hasDraftAndPublished = documentResponse.schema?.options?.draftAndPublish ?? false;
 
   return (
     <Modal.Body>
       <DocumentRBAC permissions={permissions} model={documentMeta.model}>
-        <Flex alignItems="flex-start" justifyContent="space-between" width="100%">
-          <Flex direction="column" alignItems="flex-start" gap={2}>
-            <Typography tag="h2" variant="alpha">
-              {documentTitle}
-            </Typography>
+        <FormContext initialValues={initialValues} method="PUT">
+          <Flex alignItems="flex-start" direction="column" gap={2}>
+            <Flex width="100%" justifyContent="space-between" gap={2}>
+              <Typography tag="h2" variant="alpha">
+                {documentTitle}
+              </Typography>
+              <Flex gap={2}>
+                {modalDocumentUrlEqualEditViewUrl ? (
+                  <IconButton
+                    onClick={onToggle}
+                    variant="tertiary"
+                    label={formatMessage({
+                      id: 'content-manager.components.RelationInputModal.button-fullpage',
+                      defaultMessage: 'Go to entry',
+                    })}
+                  >
+                    <ArrowsOut />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    tag={Link}
+                    to={getFullPageLink()}
+                    variant="tertiary"
+                    label={formatMessage({
+                      id: 'content-manager.components.RelationInputModal.button-fullpage',
+                      defaultMessage: 'Go to entry',
+                    })}
+                  >
+                    <ArrowsOut />
+                  </IconButton>
+                )}
+              </Flex>
+            </Flex>
             {hasDraftAndPublished ? (
-              <Box marginTop={1}>
+              <Box>
                 <DocumentStatus status={documentResponse.document?.status} />
               </Box>
             ) : null}
           </Flex>
-          <Flex>
-            <IconButton
-              tag={Link}
-              to={getFullPageLink()}
-              onClick={onToggle}
-              variant="tertiary"
-              label={formatMessage({
-                id: 'content-manager.components.RelationInputModal.button-fullpage',
-                defaultMessage: 'Go to entry',
-              })}
-            >
-              <ArrowsOut />
-            </IconButton>
-          </Flex>
-        </Flex>
-        <FormContext initialValues={initialValues} method={id ? 'PUT' : 'POST'}>
           <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
             <Box overflow="auto" flex={1}>
               <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground={false} />
             </Box>
           </Flex>
+          <Blocker
+            bodyMessage={formatMessage({
+              id: 'content-manager.components.RelationInputModal.confirmation-message',
+              defaultMessage:
+                'Some changes were not saved. Are you sure you want to open another relation? All changes that were not saved will be lost.',
+            })}
+          />
         </FormContext>
       </DocumentRBAC>
     </Modal.Body>
