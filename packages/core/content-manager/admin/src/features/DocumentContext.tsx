@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createContext } from '@strapi/admin/strapi-admin';
 
 import { useDocument, type UseDocument } from '../hooks/useDocument';
+import { buildValidParams } from '../utils/api';
 
 interface DocumentMeta {
   /**
@@ -20,18 +21,18 @@ interface DocumentMeta {
    * i.e. collection-types or single-types
    */
   collectionType: string;
+  /**
+   * Query params object
+   * i.e. { locale: 'fr' }
+   */
+  params?: Record<string, string | string[] | null>;
 }
 
 interface DocumentContextValue {
+  rootDocumentMeta: DocumentMeta;
   document: ReturnType<UseDocument>;
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
-  backButtonHistory: DocumentMeta[];
-  addDocumentToHistory: (document: DocumentMeta) => void;
-  removeDocumentFromHistory: () => DocumentMeta;
-  resetHistory: () => void;
-  isModalOpen: boolean;
-  setIsModalOpen: (isOpen: boolean) => void;
 }
 
 const [DocumentProvider, useDocumentContext] =
@@ -60,34 +61,23 @@ const DocumentContextProvider = ({
    * one of the root level document's relations.
    */
   const [currentDocumentMeta, changeDocument] = React.useState<DocumentMeta>(initialDocument);
-  const document = useDocument(currentDocumentMeta);
-  const [backButtonHistory, setBackButtonHistory] = React.useState<DocumentMeta[]>([]);
-
-  // Handlers to add, remove and reset back button history
-  const addDocumentToHistory = (document: DocumentMeta) => {
-    setBackButtonHistory((prev) => [...prev, document]);
-  };
-  const removeDocumentFromHistory = () => {
-    const lastDocument = backButtonHistory[backButtonHistory.length - 1];
-    setBackButtonHistory((prev) => prev.slice(0, prev.length - 1));
-    return lastDocument;
-  };
-  const resetHistory = () => {
-    setBackButtonHistory([]);
-  };
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const params = React.useMemo(
+    () => buildValidParams(currentDocumentMeta.params ?? {}),
+    [currentDocumentMeta.params]
+  );
+  const document = useDocument({ ...currentDocumentMeta, params });
 
   return (
     <DocumentProvider
       changeDocument={changeDocument}
       document={document}
+      rootDocumentMeta={{
+        documentId: initialDocument.documentId,
+        model: initialDocument.model,
+        collectionType: initialDocument.collectionType,
+        params: initialDocument.params,
+      }}
       meta={currentDocumentMeta}
-      backButtonHistory={backButtonHistory}
-      addDocumentToHistory={addDocumentToHistory}
-      removeDocumentFromHistory={removeDocumentFromHistory}
-      resetHistory={resetHistory}
-      isModalOpen={isModalOpen}
-      setIsModalOpen={setIsModalOpen}
     >
       {children}
     </DocumentProvider>

@@ -342,7 +342,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
           const fileId = fileEntitiesMapper?.[uploadData.id];
           if (!fileId) {
-            callback(new Error(`File ID not found for ID: ${uploadData.id}`));
+            return callback(new Error(`File ID not found for ID: ${uploadData.id}`));
           }
 
           try {
@@ -389,9 +389,9 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
                 provider,
               },
             });
-            callback();
+            return callback();
           } catch (error) {
-            callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
+            return callback(new Error(`Error while uploading asset ${chunk.filename} ${error}`));
           }
         });
       },
