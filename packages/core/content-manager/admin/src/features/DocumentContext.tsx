@@ -3,6 +3,7 @@ import * as React from 'react';
 import { createContext } from '@strapi/admin/strapi-admin';
 
 import { useDocument, type UseDocument } from '../hooks/useDocument';
+import { useDocumentLayout } from '../hooks/useDocumentLayout';
 import { buildValidParams } from '../utils/api';
 
 interface DocumentMeta {
