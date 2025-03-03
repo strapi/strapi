@@ -33,8 +33,6 @@ interface DocumentContextValue {
   document: ReturnType<UseDocument>;
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
-  showBlocker: boolean;
-  changeShowBlocker: (show: boolean) => void;
 }
 
 const [DocumentProvider, useDocumentContext] =
@@ -63,7 +61,6 @@ const DocumentContextProvider = ({
    * one of the root level document's relations.
    */
   const [currentDocumentMeta, changeDocument] = React.useState<DocumentMeta>(initialDocument);
-  const [showBlocker, changeShowBlocker] = React.useState(false);
   const params = React.useMemo(
     () => buildValidParams(currentDocumentMeta.params ?? {}),
     [currentDocumentMeta.params]
@@ -81,8 +78,6 @@ const DocumentContextProvider = ({
         params: initialDocument.params,
       }}
       meta={currentDocumentMeta}
-      showBlocker={showBlocker}
-      changeShowBlocker={changeShowBlocker}
     >
       {children}
     </DocumentProvider>

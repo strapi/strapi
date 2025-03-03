@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form as FormContext, useRBAC, Blocker } from '@strapi/admin/strapi-admin';
+import { Form as FormContext, useRBAC } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -205,13 +205,6 @@ const RelationModalBody = ({ onToggle }: RelationModalBodyProps) => {
               <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground={false} />
             </Box>
           </Flex>
-          <Blocker
-            bodyMessage={formatMessage({
-              id: 'content-manager.components.RelationInputModal.confirmation-message',
-              defaultMessage:
-                'Some changes were not saved. Are you sure you want to open another relation? All changes that were not saved will be lost.',
-            })}
-          />
         </FormContext>
       </DocumentRBAC>
     </Modal.Body>

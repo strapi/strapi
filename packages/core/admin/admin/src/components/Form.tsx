@@ -762,23 +762,15 @@ const isErrorMessageDescriptor = (object?: object): object is TranslationMessage
 interface BlockerProps {
   onProceed?: () => void;
   onCancel?: () => void;
-  bodyMessage?: string;
-  showBlocker?: boolean;
 }
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({
-  onProceed = () => {},
-  onCancel = () => {},
-  bodyMessage,
-  showBlocker = false,
-}: BlockerProps) => {
+const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
-  // Store the router blocker state
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
     return (
       !isSubmitting &&
@@ -788,15 +780,11 @@ const Blocker = ({
     );
   });
 
-  // Show dialog if either the router blocker is active or showBlocker prop is true
-  const shouldShowBlocker =
-    blocker.state === 'blocked' || (modified && !isSubmitting && showBlocker);
-
-  if (shouldShowBlocker) {
+  if (blocker.state === 'blocked') {
     const handleCancel = (isOpen: boolean) => {
       if (!isOpen) {
         onCancel();
-        blocker?.reset?.();
+        blocker.reset();
       }
     };
 
@@ -810,12 +798,10 @@ const Blocker = ({
             })}
           </Dialog.Header>
           <Dialog.Body icon={<WarningCircle width="24px" height="24px" fill="danger600" />}>
-            {bodyMessage
-              ? bodyMessage
-              : formatMessage({
-                  id: 'global.prompt.unsaved',
-                  defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
-                })}
+            {formatMessage({
+              id: 'global.prompt.unsaved',
+              defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+            })}
           </Dialog.Body>
           <Dialog.Footer>
             <Dialog.Cancel>
@@ -829,10 +815,7 @@ const Blocker = ({
             <Button
               onClick={() => {
                 onProceed();
-                // Only proceed with router navigation if it was the trigger
-                if (blocker.state === 'blocked') {
-                  blocker?.proceed?.();
-                }
+                blocker.proceed();
               }}
               variant="danger"
             >
