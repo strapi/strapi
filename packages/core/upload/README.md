@@ -1,1 +1,0 @@
-# strapi-plugin-upload
