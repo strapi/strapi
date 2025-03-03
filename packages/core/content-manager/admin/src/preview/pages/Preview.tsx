@@ -62,7 +62,6 @@ const PreviewPage = () => {
     plugins?: Record<string, unknown>;
     status?: string;
   }>();
-
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
   if (!collectionType) {

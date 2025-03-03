@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
 
 test.describe('Unstable Relations on the fly', () => {
   test.beforeEach(async ({ page }) => {
@@ -10,15 +10,36 @@ test.describe('Unstable Relations on the fly', () => {
     await login({ page });
   });
 
-  test('as a user I want to open a relation modal inside a collection', async ({ page }) => {
+  test('I want to edit an existing relation in a modal and save and publish the related document', async ({
+    page,
+  }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
-    await clickAndWait(page, page.getByRole('gridcell', { name: 'Ted Lasso' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
 
-    await expect(page.getByRole('heading', { name: 'Ted Lasso' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
 
-    await clickAndWait(page, page.getByRole('button', { name: 'Pourquoi je préfère le' }));
-    // it opens the edit relations modal
+    // Open the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
     await expect(page.getByText('Edit a relation')).toBeVisible();
+
+    // Confirm the relation is initialized with correct data
+    const name = page.getByRole('textbox', { name: 'name' });
+    await expect(name).toHaveValue('Coach Beard');
+
+    // Save the related document as draft
+    await name.fill('Mr. Coach Beard');
+    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+    await expect(name).toHaveValue('Mr. Coach Beard');
+    await expect(page.getByRole('status', { name: 'Draft' }).first()).toBeVisible();
+
+    // Publish the related document
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await expect(name).toHaveValue('Mr. Coach Beard');
+    await expect(page.getByRole('status', { name: 'Published' }).first()).toBeVisible();
+
+    // Close the relation modal to see the updated relation on the root document
+    await page.getByRole('button', { name: 'Close modal' }).click();
+    await expect(page.getByRole('button', { name: 'Mr. Coach Beard' })).toBeVisible();
   });
 });

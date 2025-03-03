@@ -166,6 +166,28 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
   })),
+  useStrapiApp: jest.fn((name, getter) =>
+    getter({
+      customFields: {
+        get: jest.fn(),
+      },
+      plugins: {
+        'content-manager': {
+          initializer: jest.fn(),
+          injectionZones: {},
+          isReady: true,
+          name: 'content-manager',
+          pluginId: 'content-manager',
+          injectComponent: jest.fn(),
+          getInjectedComponents: jest.fn(),
+          apis: {
+            getDocumentActions: () => [],
+            getHeaderActions: () => [],
+          },
+        },
+      },
+    })
+  ),
 }));
 
 describe('<RelationModal />', () => {
@@ -175,13 +197,7 @@ describe('<RelationModal />', () => {
   it("doesn't render the modal if we pass an open prop to false", () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal
-          open={false}
-          onToggle={() => {}}
-          model="api::test.test"
-          id="abcdefg"
-          relationUrl="../collection-types/api::test.test/abcdefg?"
-        />
+        <RelationModal open={false} onToggle={() => {}} />
       </DocumentContextProvider>
     );
 
@@ -191,13 +207,7 @@ describe('<RelationModal />', () => {
   it('renders the modal if we pass an open prop to true', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal
-          open={true}
-          onToggle={() => {}}
-          model="api::test.test"
-          id="abcdefg"
-          relationUrl="../collection-types/api::test.test/abcdefg"
-        />
+        <RelationModal open={true} onToggle={() => {}} />
       </DocumentContextProvider>
     );
 
@@ -206,13 +216,7 @@ describe('<RelationModal />', () => {
   it('shows the modal with the Edit a relation title, the relation title, the X button and the Cancel button when the modal is to Edit a relation', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal
-          open={true}
-          onToggle={() => {}}
-          model="api::test.test"
-          id="abcdefg"
-          relationUrl="../collection-types/api::test.test/abcdefg?"
-        />
+        <RelationModal open={true} onToggle={() => {}} />
       </DocumentContextProvider>
     );
 
