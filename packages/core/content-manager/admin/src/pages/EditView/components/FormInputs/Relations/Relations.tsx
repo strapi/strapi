@@ -959,6 +959,11 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   } = data;
   const changeDocument = useDocumentContext('RelationsList', (state) => state.changeDocument);
   const rootDocumentMeta = useDocumentContext('RelationsList', (state) => state.rootDocumentMeta);
+  const confirmationDialog = useDocumentContext(
+    'RelationsList',
+    (state) => state.confirmationDialog
+  );
+  const { isFormModified, setIsConfirmationOpen, setOnConfirm } = confirmationDialog;
 
   const { formatMessage } = useIntl();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -988,17 +993,23 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
 
   const handleChangeModalContent = () => {
-    if (changeDocument) {
-      const newRelation = {
-        documentId: documentId ?? apiData?.documentId,
-        model: targetModel,
-        collectionType: getCollectionType(href)!,
-        params: {
-          locale: locale || null,
-        },
-      };
-
+    const newRelation = {
+      documentId: documentId ?? apiData?.documentId,
+      model: targetModel,
+      collectionType: getCollectionType(href)!,
+      params: {
+        locale: locale || null,
+      },
+    };
+    if (changeDocument && !isFormModified) {
       changeDocument(newRelation);
+    } else {
+      const handleConfirm = () => {
+        changeDocument(newRelation);
+        setIsConfirmationOpen(false);
+      };
+      setOnConfirm(() => () => handleConfirm());
+      setIsConfirmationOpen(true);
     }
   };
 
