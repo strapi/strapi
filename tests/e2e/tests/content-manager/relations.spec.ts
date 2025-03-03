@@ -55,16 +55,12 @@ test.describe('Unstable Relations on the fly', () => {
 
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
 
-    // Add a new relation to the entry
-    await clickAndWait(page, page.getByRole('combobox', { name: 'authors' }));
-    await clickAndWait(page, page.getByLabel('Coach BeardDraft'));
+    // Open the relation modal
     await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
-    // it opens the edit relations modal
     await expect(page.getByText('Edit a relation')).toBeVisible();
 
     // click on the full page icon
     await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
-    await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
     await page.waitForURL(AUTHOR_EDIT_URL);
     await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
   });
