@@ -238,6 +238,6 @@ describe('<RelationModal />', () => {
       </DocumentContextProvider>
     );
 
-    expect(screen.getByRole('link', { name: 'Go to entry' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Go to entry' })).toBeInTheDocument();
   });
 });
