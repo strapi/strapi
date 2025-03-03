@@ -1,7 +1,7 @@
 import { render, screen } from '@tests/utils';
 
 import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
-import { RelationModal } from '../RelationModal';
+import { RelationModalWrapper } from '../RelationModal';
 
 export const relationContext = {
   initialDocument: {
@@ -197,7 +197,7 @@ describe('<RelationModal />', () => {
   it("doesn't render the modal if we pass an open prop to false", () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal open={false} onToggle={() => {}} />
+        <RelationModalWrapper open={false} onToggle={() => {}} />
       </DocumentContextProvider>
     );
 
@@ -207,7 +207,7 @@ describe('<RelationModal />', () => {
   it('renders the modal if we pass an open prop to true', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal open={true} onToggle={() => {}} />
+        <RelationModalWrapper open={true} onToggle={() => {}} />
       </DocumentContextProvider>
     );
 
@@ -216,7 +216,7 @@ describe('<RelationModal />', () => {
   it('shows the modal with the Edit a relation title, the relation title, the X button and the Cancel button when the modal is to Edit a relation', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal open={true} onToggle={() => {}} />
+        <RelationModalWrapper open={true} onToggle={() => {}} />
       </DocumentContextProvider>
     );
 
@@ -234,7 +234,7 @@ describe('<RelationModal />', () => {
   it('shows the modal with an icon button to open the document in fullpage', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal open={true} onToggle={() => {}} />
+        <RelationModalWrapper open={true} onToggle={() => {}} />
       </DocumentContextProvider>
     );
 

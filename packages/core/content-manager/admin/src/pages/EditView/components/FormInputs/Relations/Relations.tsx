@@ -54,7 +54,7 @@ import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
-import { RelationModal, getCollectionType } from '../Relations/RelationModal';
+import { RelationModalWrapper, getCollectionType } from '../Relations/RelationModal';
 
 import type { Schema } from '@strapi/types';
 
@@ -1086,7 +1086,9 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                 </Tooltip>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
-              {isModalOpen && <RelationModal open={isModalOpen} onToggle={handleToggleModal} />}
+              {isModalOpen && (
+                <RelationModalWrapper open={isModalOpen} onToggle={handleToggleModal} />
+              )}
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>

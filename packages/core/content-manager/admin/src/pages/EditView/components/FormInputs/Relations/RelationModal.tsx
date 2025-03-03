@@ -51,6 +51,31 @@ const CustomModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
+const RelationModalWrapper = ({ open, onToggle }: RelationModalProps) => {
+  const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
+  const initialValues = documentResponse.getInitialFormValues();
+  return (
+    <FormContext
+      method="PUT"
+      initialValues={initialValues}
+      validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+        const yupSchema = createYupSchema(
+          documentResponse.schema?.attributes,
+          documentResponse.components,
+          {
+            status: documentResponse.document?.status,
+            ...options,
+          }
+        );
+
+        return yupSchema.validate(values, { abortEarly: false });
+      }}
+    >
+      <RelationModal open={open} onToggle={onToggle} />
+    </FormContext>
+  );
+};
+
 const RelationModal = ({ open, onToggle }: RelationModalProps) => {
   const { formatMessage } = useIntl();
 
@@ -177,111 +202,94 @@ const RelationModalBody = ({ onToggle }: RelationModalBodyProps) => {
   return (
     <Modal.Body>
       <DocumentRBAC permissions={permissions} model={documentMeta.model}>
-        <FormContext
-          initialValues={initialValues}
-          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-            const yupSchema = createYupSchema(
-              documentResponse.schema?.attributes,
-              documentResponse.components,
-              {
-                status: documentResponse.document?.status,
-                ...options,
-              }
-            );
-
-            return yupSchema.validate(values, { abortEarly: false });
-          }}
-          method="PUT"
-        >
-          <Flex alignItems="flex-start" direction="column" gap={2}>
-            <Flex width="100%" justifyContent="space-between" gap={2}>
-              <Typography tag="h2" variant="alpha">
-                {documentTitle}
-              </Typography>
-              <Flex gap={2}>
-                {modalDocumentUrlEqualEditViewUrl ? (
-                  <IconButton
-                    onClick={onToggle}
-                    variant="tertiary"
-                    label={formatMessage({
-                      id: 'content-manager.components.RelationInputModal.button-fullpage',
-                      defaultMessage: 'Go to entry',
-                    })}
-                  >
-                    <ArrowsOut />
-                  </IconButton>
-                ) : (
-                  <IconButton
-                    tag={Link}
-                    to={getFullPageLink()}
-                    variant="tertiary"
-                    label={formatMessage({
-                      id: 'content-manager.components.RelationInputModal.button-fullpage',
-                      defaultMessage: 'Go to entry',
-                    })}
-                  >
-                    <ArrowsOut />
-                  </IconButton>
-                )}
-                <DescriptionComponentRenderer
-                  props={props}
-                  descriptions={(
-                    plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-                  ).getDocumentActions('relation-modal')}
+        <Flex alignItems="flex-start" direction="column" gap={2}>
+          <Flex width="100%" justifyContent="space-between" gap={2}>
+            <Typography tag="h2" variant="alpha">
+              {documentTitle}
+            </Typography>
+            <Flex gap={2}>
+              {modalDocumentUrlEqualEditViewUrl ? (
+                <IconButton
+                  onClick={onToggle}
+                  variant="tertiary"
+                  label={formatMessage({
+                    id: 'content-manager.components.RelationInputModal.button-fullpage',
+                    defaultMessage: 'Go to entry',
+                  })}
                 >
-                  {(actions) => {
-                    const filteredActions = actions.filter((action) => {
-                      return [action.position].flat().includes('relation-modal');
-                    });
-                    const [primaryAction, secondaryAction] = filteredActions;
+                  <ArrowsOut />
+                </IconButton>
+              ) : (
+                <IconButton
+                  tag={Link}
+                  to={getFullPageLink()}
+                  variant="tertiary"
+                  label={formatMessage({
+                    id: 'content-manager.components.RelationInputModal.button-fullpage',
+                    defaultMessage: 'Go to entry',
+                  })}
+                >
+                  <ArrowsOut />
+                </IconButton>
+              )}
+              <DescriptionComponentRenderer
+                props={props}
+                descriptions={(
+                  plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+                ).getDocumentActions('relation-modal')}
+              >
+                {(actions) => {
+                  const filteredActions = actions.filter((action) => {
+                    return [action.position].flat().includes('relation-modal');
+                  });
+                  const [primaryAction, secondaryAction] = filteredActions;
 
-                    if (!primaryAction && !secondaryAction) return null;
+                  if (!primaryAction && !secondaryAction) return null;
 
-                    // Both actions are available when draft and publish enabled
-                    if (primaryAction && secondaryAction) {
-                      return (
-                        <>
-                          {/* Save */}
-                          <DocumentActionButton
-                            {...secondaryAction}
-                            variant={secondaryAction.variant || 'secondary'}
-                          />
-                          {/* Publish */}
-                          <DocumentActionButton
-                            {...primaryAction}
-                            variant={primaryAction.variant || 'default'}
-                          />
-                        </>
-                      );
-                    }
-
-                    // Otherwise we just have the save action
+                  // Both actions are available when draft and publish enabled
+                  if (primaryAction && secondaryAction) {
                     return (
-                      <DocumentActionButton
-                        {...primaryAction}
-                        variant={primaryAction.variant || 'secondary'}
-                      />
+                      <>
+                        {/* Save */}
+                        <DocumentActionButton
+                          {...secondaryAction}
+                          variant={secondaryAction.variant || 'secondary'}
+                        />
+                        {/* Publish */}
+                        <DocumentActionButton
+                          {...primaryAction}
+                          variant={primaryAction.variant || 'default'}
+                        />
+                      </>
                     );
-                  }}
-                </DescriptionComponentRenderer>
-              </Flex>
-            </Flex>
-            {hasDraftAndPublished ? (
-              <Box>
-                <DocumentStatus status={documentResponse.document?.status} />
-              </Box>
-            ) : null}
-          </Flex>
+                  }
 
-          <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
-            <Box overflow="auto" flex={1}>
-              <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground={false} />
-            </Box>
+                  // Otherwise we just have the save action
+                  return (
+                    <DocumentActionButton
+                      {...primaryAction}
+                      variant={primaryAction.variant || 'secondary'}
+                    />
+                  );
+                }}
+              </DescriptionComponentRenderer>
+            </Flex>
           </Flex>
-        </FormContext>
+          {hasDraftAndPublished ? (
+            <Box>
+              <DocumentStatus status={documentResponse.document?.status} />
+            </Box>
+          ) : null}
+        </Flex>
+
+        <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
+          <Box overflow="auto" flex={1}>
+            <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground={false} />
+          </Box>
+        </Flex>
       </DocumentRBAC>
     </Modal.Body>
   );
 };
 
-export { RelationModal };
+export { RelationModalWrapper };
