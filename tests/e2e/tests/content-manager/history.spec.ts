@@ -227,7 +227,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // open the Relation modal
       await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
       // Click to go to the related document
-      await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
+      await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
       await page.getByRole('button', { name: 'More actions' }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
@@ -455,7 +455,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Open the relation modal
       await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
       // Click to go to the related document
-      await clickAndWait(page, page.getByRole('link', { name: 'Go to entry' }));
+      await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
