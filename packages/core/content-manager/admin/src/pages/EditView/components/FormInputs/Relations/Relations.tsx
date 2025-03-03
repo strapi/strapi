@@ -43,6 +43,7 @@ import {
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../../hooks/useDragAndDrop';
+import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
@@ -942,6 +943,7 @@ const CustomTextButton = styled(TextButton)`
 `;
 
 const ListItem = ({ data, index, style }: ListItemProps) => {
+  const [triggerRefetchDocument] = useLazyGetDocumentQuery();
   const {
     ariaDescribedBy,
     canDrag = false,
@@ -995,6 +997,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
           locale: locale || null,
         },
       };
+
       changeDocument(newRelation);
     }
   };
@@ -1009,6 +1012,12 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       };
       // Change back to the root document
       changeDocument(document);
+      // Read from cache or refetch root document
+      triggerRefetchDocument(
+        document,
+        // Favor the cache
+        true
+      );
     } else {
       setIsModalOpen(true);
     }

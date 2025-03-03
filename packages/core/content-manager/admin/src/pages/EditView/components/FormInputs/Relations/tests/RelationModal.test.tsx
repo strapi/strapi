@@ -166,6 +166,28 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
   })),
+  useStrapiApp: jest.fn((name, getter) =>
+    getter({
+      customFields: {
+        get: jest.fn(),
+      },
+      plugins: {
+        'content-manager': {
+          initializer: jest.fn(),
+          injectionZones: {},
+          isReady: true,
+          name: 'content-manager',
+          pluginId: 'content-manager',
+          injectComponent: jest.fn(),
+          getInjectedComponents: jest.fn(),
+          apis: {
+            getDocumentActions: () => [],
+            getHeaderActions: () => [],
+          },
+        },
+      },
+    })
+  ),
 }));
 
 describe('<RelationModal />', () => {
