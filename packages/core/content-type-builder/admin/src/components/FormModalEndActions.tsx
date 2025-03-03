@@ -274,113 +274,113 @@ export const FormModalEndActions = ({
     );
   }
 
-  if (isContentTypeModal) {
-    return (
-      <Flex gap={2}>
-        {!isCreatingContentType && (
-          <>
-            <Button
-              type="button"
-              variant="danger"
-              onClick={(e: SyntheticEvent) => {
-                e.preventDefault();
-                deleteContentType();
-              }}
-            >
-              {formatMessage({
-                id: 'global.delete',
-                defaultMessage: 'Delete',
-              })}
-            </Button>
-            <Button
-              type="submit"
-              variant="default"
-              onClick={(e: SyntheticEvent) => {
-                e.preventDefault();
+  // if (isContentTypeModal) {
+  //   return (
+  //     <Flex gap={2}>
+  //       {!isCreatingContentType && (
+  //         <>
+  //           <Button
+  //             type="button"
+  //             variant="danger"
+  //             onClick={(e: SyntheticEvent) => {
+  //               e.preventDefault();
+  //               deleteContentType();
+  //             }}
+  //           >
+  //             {formatMessage({
+  //               id: 'global.delete',
+  //               defaultMessage: 'Delete',
+  //             })}
+  //           </Button>
+  //           <Button
+  //             type="submit"
+  //             variant="default"
+  //             onClick={(e: SyntheticEvent) => {
+  //               e.preventDefault();
 
-                onSubmitEditContentType(e, false);
-              }}
-            >
-              {formatMessage({
-                id: 'global.finish',
-                defaultMessage: 'Finish',
-              })}
-            </Button>
-          </>
-        )}
-        {isCreatingContentType && (
-          <Button
-            type="submit"
-            variant="secondary"
-            onClick={(e: SyntheticEvent) => {
-              e.preventDefault();
+  //               onSubmitEditContentType(e, false);
+  //             }}
+  //           >
+  //             {formatMessage({
+  //               id: 'global.finish',
+  //               defaultMessage: 'Finish',
+  //             })}
+  //           </Button>
+  //         </>
+  //       )}
+  //       {isCreatingContentType && (
+  //         <Button
+  //           type="submit"
+  //           variant="secondary"
+  //           onClick={(e: SyntheticEvent) => {
+  //             e.preventDefault();
 
-              onSubmitCreateContentType(e, true);
-            }}
-          >
-            {formatMessage({
-              id: 'global.continue',
-              defaultMessage: 'Continue',
-            })}
-          </Button>
-        )}
-      </Flex>
-    );
-  }
+  //             onSubmitCreateContentType(e, true);
+  //           }}
+  //         >
+  //           {formatMessage({
+  //             id: 'global.continue',
+  //             defaultMessage: 'Continue',
+  //           })}
+  //         </Button>
+  //       )}
+  //     </Flex>
+  //   );
+  // }
 
-  if (isComponentModal) {
-    return (
-      <Flex gap={2}>
-        {!isCreatingComponent && (
-          <>
-            <Button
-              type="button"
-              variant="danger"
-              onClick={(e: SyntheticEvent) => {
-                e.preventDefault();
-                deleteComponent();
-              }}
-            >
-              {formatMessage({
-                id: 'global.delete',
-                defaultMessage: 'Delete',
-              })}
-            </Button>
-            <Button
-              type="submit"
-              variant="default"
-              onClick={(e: SyntheticEvent) => {
-                e.preventDefault();
+  // if (isComponentModal) {
+  //   return (
+  //     <Flex gap={2}>
+  //       {!isCreatingComponent && (
+  //         <>
+  //           <Button
+  //             type="button"
+  //             variant="danger"
+  //             onClick={(e: SyntheticEvent) => {
+  //               e.preventDefault();
+  //               deleteComponent();
+  //             }}
+  //           >
+  //             {formatMessage({
+  //               id: 'global.delete',
+  //               defaultMessage: 'Delete',
+  //             })}
+  //           </Button>
+  //           <Button
+  //             type="submit"
+  //             variant="default"
+  //             onClick={(e: SyntheticEvent) => {
+  //               e.preventDefault();
 
-                onSubmitEditComponent(e, false);
-              }}
-            >
-              {formatMessage({
-                id: 'global.finish',
-                defaultMessage: 'Finish',
-              })}
-            </Button>
-          </>
-        )}
-        {isCreatingComponent && (
-          <Button
-            type="submit"
-            variant="secondary"
-            onClick={(e: SyntheticEvent) => {
-              e.preventDefault();
+  //               onSubmitEditComponent(e, false);
+  //             }}
+  //           >
+  //             {formatMessage({
+  //               id: 'global.finish',
+  //               defaultMessage: 'Finish',
+  //             })}
+  //           </Button>
+  //         </>
+  //       )}
+  //       {isCreatingComponent && (
+  //         <Button
+  //           type="submit"
+  //           variant="secondary"
+  //           onClick={(e: SyntheticEvent) => {
+  //             e.preventDefault();
 
-              onSubmitCreateComponent(e, true);
-            }}
-          >
-            {formatMessage({
-              id: 'global.continue',
-              defaultMessage: 'Continue',
-            })}
-          </Button>
-        )}
-      </Flex>
-    );
-  }
+  //             onSubmitCreateComponent(e, true);
+  //           }}
+  //         >
+  //           {formatMessage({
+  //             id: 'global.continue',
+  //             defaultMessage: 'Continue',
+  //           })}
+  //         </Button>
+  //       )}
+  //     </Flex>
+  //   );
+  // }
 
   if (isCustomFieldModal) {
     return (

@@ -3,7 +3,6 @@ import { Link, Button, Flex } from '@strapi/design-system';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
 
 import { useFormsAPI } from '../../../hooks/useFormsAPI';
 import { getTrad } from '../../../utils/getTrad';
@@ -17,19 +16,21 @@ export const CreateAttributeModal = () => {
   const {
     onCloseModal,
     forTarget,
-    modalType,
-    customFieldUid,
     targetUid,
     attributeType,
     step,
     onOpenModalAddField,
     onNavigateToChooseAttributeModal,
+    onNavigateToCreateComponentStep2,
   } = useFormModalNavigation();
-  const { components, contentTypes } = useDataManager();
-  const getCustomField = useStrapiApp('CreateAttributeModal', (state) => state.customFields.get);
+  const { components, contentTypes, addAttribute } = useDataManager();
   const formsApi = useFormsAPI();
 
   const type = forTarget === 'component' ? components[targetUid] : contentTypes[targetUid];
+
+  if (!type) {
+    throw new Error('The content type does not exist');
+  }
 
   const displayName = type?.info.displayName;
 
@@ -71,25 +72,69 @@ export const CreateAttributeModal = () => {
     }
   };
 
-  const customField = getCustomField(customFieldUid);
+  const intlLabel = { id: getTrad(`attribute.${attributeType}`) };
 
-  const intlLabel =
-    modalType === 'customField'
-      ? customField?.intlLabel
-      : { id: getTrad(`attribute.${attributeType}`) };
+  const backLink =
+    step === null ||
+    (step === '1' && (
+      <Link
+        aria-label={formatMessage({
+          id: getTrad('modalForm.header.back'),
+          defaultMessage: 'Back',
+        })}
+        startIcon={<ArrowLeft />}
+        onClick={() => onOpenModalAddField({ forTarget, targetUid })}
+        href="#back"
+        isExternal={false}
+      />
+    ));
 
-  const backLink = (
-    <Link
-      aria-label={formatMessage({
-        id: getTrad('modalForm.header.back'),
-        defaultMessage: 'Back',
-      })}
-      startIcon={<ArrowLeft />}
-      onClick={() => onOpenModalAddField({ forTarget, targetUid })}
-      href="#back"
-      isExternal={false}
-    />
-  );
+  // let dataToSet;
+
+  // if (attributeType === 'component') {
+  //   if (step === '1') {
+  //     dataToSet = {
+  //       type: 'component',
+  //       createComponent: true,
+  //       componentToCreate: { type: 'component' },
+  //     };
+  //   } else {
+  //     dataToSet = {
+  //       ...options,
+  //       type: 'component',
+  //       repeatable: true,
+  //     };
+  //   }
+  // } else if (attributeType === 'dynamiczone') {
+  //   dataToSet = {
+  //     ...options,
+  //     type: 'dynamiczone',
+  //     components: [],
+  //   };
+  // } else if (attributeType === 'text') {
+  //   dataToSet = { ...options, type: 'string' };
+  // } else if (attributeType === 'number' || attributeType === 'date') {
+  //   dataToSet = options;
+  // } else if (attributeType === 'media') {
+  //   dataToSet = {
+  //     allowedTypes: ['images', 'files', 'videos', 'audios'],
+  //     type: 'media',
+  //     multiple: true,
+  //     ...options,
+  //   };
+  // } else if (attributeType === 'enumeration') {
+  //   dataToSet = { ...options, type: 'enumeration', enum: [] };
+  // } else if (attributeType === 'relation') {
+  //   dataToSet = {
+  //     name: snakeCase(nameToSetForRelation),
+  //     relation: 'oneToOne',
+  //     targetAttribute: null,
+  //     target: targetUid,
+  //     type: 'relation',
+  //   };
+  // } else {
+  //   dataToSet = { ...options, type: attributeType, default: null };
+  // }
 
   return (
     <Formik
@@ -104,19 +149,25 @@ export const CreateAttributeModal = () => {
         console.log('submit', values);
 
         // try {
-        //    schema = forms.component.schema(
-        //   Object.keys(components) as Internal.UID.Component[],
-        //   modifiedData.category || '',
+        // schema = forms.attribute.schema(
+        //   type,
+        //   computedAttrbiuteType,
         //   reservedNames,
-        //   actionType === 'edit',
-        //   components,
-        //   modifiedData.displayName || '',
-        //   (type?.uid ?? null) as Internal.UID.Component
-        //   // ctbFormsAPI
+        //   alreadyTakenTargetContentTypeAttributes,
+        //   { modifiedData, initialData },
+        //   ctbFormsAPI
+        // );
         // );
         // } catch (err) {
         //   setErrors(err);
         // }
+
+        addAttribute({
+          attributeToSet: values,
+          forTarget,
+          targetUid,
+          isEditing: false,
+        });
       }}
     >
       {({ dirty, submitForm }) => {
@@ -128,55 +179,70 @@ export const CreateAttributeModal = () => {
           }
         };
 
-        const endActions = (
-          <Flex gap={2}>
+        const isCreatingComponentAttribute = false;
+
+        const endActions =
+          step === '1' ? (
             <Button
-              type="submit"
               variant="secondary"
-              startIcon={<Plus />}
-              onClick={async (e) => {
-                // add field
+              type="submit"
+              onClick={(e) => {
                 e.preventDefault();
-                try {
+
+                // trackUsage('willCreateComponentFromAttributesModal');
+
+                // If we were to create the component before
+                // dispatch(actions.resetPropsAndSaveCurrentData({}));
+
+                onNavigateToCreateComponentStep2();
+              }}
+            >
+              {isCreatingComponentAttribute
+                ? formatMessage({
+                    id: getTrad('form.button.configure-component'),
+                    defaultMessage: 'Configure the component',
+                  })
+                : formatMessage({
+                    id: getTrad('form.button.select-component'),
+                    defaultMessage: 'Configure the component',
+                  })}
+            </Button>
+          ) : (
+            <Flex gap={2}>
+              <Button
+                type="submit"
+                variant="secondary"
+                startIcon={<Plus />}
+                onClick={async (e) => {
+                  e.preventDefault();
                   await submitForm();
-
-                  // if errors stop
-
                   onNavigateToChooseAttributeModal({
                     forTarget,
                     targetUid,
                   });
-                } catch (e) {}
-              }}
-            >
-              {formatMessage({
-                id: getTrad('form.button.add-field'),
-                defaultMessage: 'Add another field',
-              })}
-            </Button>
-            <Button
-              type="button"
-              variant="default"
-              onClick={async (e) => {
-                e.preventDefault();
-                // submit and finish
-
-                try {
+                }}
+              >
+                {formatMessage({
+                  id: getTrad('form.button.add-field'),
+                  defaultMessage: 'Add another field',
+                })}
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                onClick={async (e) => {
+                  e.preventDefault();
                   await submitForm();
-
-                  // if errors stop
-
                   onCloseModal();
-                } catch (e) {}
-              }}
-            >
-              {formatMessage({
-                id: 'global.finish',
-                defaultMessage: 'Finish',
-              })}
-            </Button>
-          </Flex>
-        );
+                }}
+              >
+                {formatMessage({
+                  id: 'global.finish',
+                  defaultMessage: 'Finish',
+                })}
+              </Button>
+            </Flex>
+          );
 
         return (
           <FormModal.Root onClose={onClose}>
@@ -185,10 +251,15 @@ export const CreateAttributeModal = () => {
               header={{
                 title: formatMessage(
                   {
-                    id: getTrad('modalForm.sub-header.attribute.create'),
+                    id: getTrad(
+                      `modalForm.sub-header.attribute.create${
+                        step !== 'null' && step !== null ? '.step' : ''
+                      }`
+                    ),
                   },
                   {
                     type: intlLabel ? formatMessage(intlLabel) : '',
+                    step,
                   }
                 ),
                 subTitle: formatMessage({

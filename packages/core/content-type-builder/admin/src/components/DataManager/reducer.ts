@@ -236,6 +236,7 @@ type UndoRedoReducer<TState, TReducers extends SliceCaseReducers<TState>> = Wrap
   undo: CaseReducer<UndoRedoState<TState>>;
   redo: CaseReducer<UndoRedoState<TState>>;
   discardAll: CaseReducer<UndoRedoState<TState>>;
+  clearHistory: CaseReducer<UndoRedoState<TState>>;
 };
 
 const isCallable = (obj: any): obj is (...args: any[]) => any => {

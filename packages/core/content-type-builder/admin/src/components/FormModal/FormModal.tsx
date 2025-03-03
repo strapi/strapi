@@ -47,6 +47,7 @@ import { ChooseAttributeModal } from './contentType/ChooseAttributeModal';
 import { CreateAttributeModal } from './contentType/CreateAttriubteModal';
 import { CreateComponentModal } from './contentType/CreateComponentModal';
 import { CreateContentTypeModal } from './contentType/CreateContentTypeModal';
+import { EditAttributeModal } from './contentType/EditAttriubteModal';
 import { EditComponentModal } from './contentType/EditComponentModal';
 import { EditContentTypeModal } from './contentType/EditContentTypeModal';
 import { forms } from './forms/forms';
@@ -79,8 +80,6 @@ const getModal = ({ modalType, actionType }): React.ReactNode => {
       return <EditComponentModal />;
     case modalType === 'chooseAttribute':
       return <ChooseAttributeModal />;
-    case modalType === 'component' && actionType === 'create':
-      return 'createComponentFromCT';
     case modalType === 'customField' && actionType === 'create':
       return 'createCustomField';
     case modalType === 'customField' && actionType === 'edit':
@@ -88,13 +87,13 @@ const getModal = ({ modalType, actionType }): React.ReactNode => {
     case modalType === 'attribute' && actionType === 'create':
       return <CreateAttributeModal />;
     case modalType === 'attribute' && actionType === 'edit':
-      return 'editAttribute';
+      return <EditAttributeModal />;
     case modalType === 'addComponentToDynamicZone':
       return 'addComponentToDynamicZone';
     case modalType === 'component' && actionType === 'edit' && has(actionType, 'componentToCreate'):
       return 'createComponentFromDZ';
     default:
-      return 'createContentType';
+      throw new Error('This case is not handled');
   }
 };
 
@@ -287,6 +286,7 @@ export const FormModal = () => {
             );
           }
         } else {
+          console.log('setAttributeDataSchema');
           dispatch(
             actions.setAttributeDataSchema({
               attributeType,

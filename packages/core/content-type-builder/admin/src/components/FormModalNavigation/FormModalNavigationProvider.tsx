@@ -261,6 +261,7 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
         modalType: 'attribute',
         step: '2',
         activeTab: 'basic',
+        //TODO: add info we need for next steps
       };
     });
   };
