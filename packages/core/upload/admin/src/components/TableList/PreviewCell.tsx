@@ -3,7 +3,7 @@ import { Folder } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../constants';
+import { AssetType } from '../../enums';
 import {
   createAssetUrl,
   getFileExtension,
