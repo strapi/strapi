@@ -352,7 +352,7 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didPublishEntry', { documentId: res.data.data.documentId });
+        trackUsage('didPublishEntry', { documentId });
 
         toggleNotification({
           type: 'success',
