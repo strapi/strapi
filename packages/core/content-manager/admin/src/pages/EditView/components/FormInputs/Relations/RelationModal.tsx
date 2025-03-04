@@ -4,7 +4,6 @@ import {
   ConfirmDialog,
   DescriptionComponentRenderer,
   Form as FormContext,
-  useForm,
   useRBAC,
   useStrapiApp,
 } from '@strapi/admin/strapi-admin';
@@ -123,6 +122,7 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
     if (isFormModified) {
       setIsConfirmationOpen(true);
     } else {
+      handleToggleModal();
     }
   };
 
@@ -146,7 +146,11 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
   const editViewUrl = `${pathname}${search}`;
   const modalDocumentUrlEqualEditViewUrl = editViewUrl.includes(getFullPageLink());
   const handleRedirection = () => {
-    navigate(getFullPageLink());
+    if (modalDocumentUrlEqualEditViewUrl) {
+      handleToggleModal();
+    } else {
+      navigate(getFullPageLink());
+    }
   };
 
   const handleConfirm = () => {
@@ -181,7 +185,10 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
     >
       {({ modified, isSubmitting }) => (
         <>
-          <Modal.Root open={isModalOpen} onOpenChange={handleToggleModal}>
+          <Modal.Root
+            open={isModalOpen}
+            onOpenChange={() => handleCloseModal(modified && !isSubmitting)}
+          >
             <Modal.Trigger>
               <Tooltip description={triggerButtonLabel}>
                 <CustomTextButton
@@ -259,9 +266,6 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
                 <ConfirmDialog
                   onConfirm={() => {
                     handleConfirm();
-                    setIsConfirmationOpen(false);
-                  }}
-                  onCancel={() => {
                     setIsConfirmationOpen(false);
                   }}
                   variant="danger"
