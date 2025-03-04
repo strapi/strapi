@@ -91,7 +91,7 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
   const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
   // handler for the confirmation dialog to be used when we confirm the choice
   const [confirmationDialogPosition, setConfirmationDialogPosition] = React.useState<
-    'cancel' | 'navigate'
+    'cancel' | 'navigate' | 'changeDocument'
   >();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
@@ -126,12 +126,8 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
     }
   };
 
-  const handleChangeModalContent = (isFormModified: boolean) => {
-    if (!isFormModified) {
-      changeDocument(newDocument);
-    } else {
-      setIsConfirmationOpen(true);
-    }
+  const handleChangeModalContent = () => {
+    changeDocument(newDocument);
   };
 
   const getFullPageLink = (): string => {
@@ -161,6 +157,9 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
       case 'navigate':
         handleRedirection();
         break;
+      case 'changeDocument':
+        handleChangeModalContent();
+        break;
       default:
         handleToggleModal();
     }
@@ -183,104 +182,116 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
         return yupSchema.validate(values, { abortEarly: false });
       }}
     >
-      {({ modified, isSubmitting }) => (
-        <>
-          <Modal.Root
-            open={isModalOpen}
-            onOpenChange={() => handleCloseModal(modified && !isSubmitting)}
-          >
-            <Modal.Trigger>
-              <Tooltip description={triggerButtonLabel}>
-                <CustomTextButton
-                  onClick={() => {
-                    handleChangeModalContent(modified && !isSubmitting);
-                    setIsModalOpen(true);
-                  }}
-                >
-                  {triggerButtonLabel}
-                </CustomTextButton>
-              </Tooltip>
-            </Modal.Trigger>
-            <CustomModalContent>
-              <Modal.Header gap={2}>
-                <Flex justifyContent="space-between" alignItems="center" width="100%">
-                  <Flex gap={2}>
-                    <IconButton
-                      withTooltip={false}
-                      label="Back"
-                      variant="ghost"
-                      disabled
-                      onClick={() => {}}
-                      marginRight={1}
-                    >
-                      <ArrowLeft />
-                    </IconButton>
-                    <Typography tag="span" fontWeight={600}>
-                      {formatMessage({
-                        id: 'content-manager.components.RelationInputModal.modal-title',
-                        defaultMessage: 'Edit a relation',
-                      })}
-                    </Typography>
+      {({ modified, isSubmitting }) => {
+        return (
+          <>
+            <Modal.Root
+              open={isModalOpen}
+              onOpenChange={() => handleCloseModal(modified && !isSubmitting)}
+            >
+              <Modal.Trigger>
+                <Tooltip description={triggerButtonLabel}>
+                  <CustomTextButton
+                    onClick={() => {
+                      setConfirmationDialogPosition('changeDocument');
+                      if (modified && !isSubmitting) {
+                        setIsConfirmationOpen(true);
+                      } else {
+                        handleChangeModalContent();
+                      }
+                      if (!isModalOpen) {
+                        setIsModalOpen(true);
+                      }
+                    }}
+                  >
+                    {triggerButtonLabel}
+                  </CustomTextButton>
+                </Tooltip>
+              </Modal.Trigger>
+              <CustomModalContent>
+                <Modal.Header gap={2}>
+                  <Flex justifyContent="space-between" alignItems="center" width="100%">
+                    <Flex gap={2}>
+                      <IconButton
+                        withTooltip={false}
+                        label="Back"
+                        variant="ghost"
+                        disabled
+                        onClick={() => {}}
+                        marginRight={1}
+                      >
+                        <ArrowLeft />
+                      </IconButton>
+                      <Typography tag="span" fontWeight={600}>
+                        {formatMessage({
+                          id: 'content-manager.components.RelationInputModal.modal-title',
+                          defaultMessage: 'Edit a relation',
+                        })}
+                      </Typography>
+                    </Flex>
                   </Flex>
-                </Flex>
-              </Modal.Header>
-              <RelationModalBody>
-                <IconButton
-                  onClick={() => {
-                    setConfirmationDialogPosition('navigate');
+                </Modal.Header>
+                <RelationModalBody>
+                  <IconButton
+                    onClick={() => {
+                      setConfirmationDialogPosition('navigate');
 
-                    if (modified && !isSubmitting) {
-                      setIsConfirmationOpen(true);
-                    } else {
-                      navigate(getFullPageLink());
-                    }
-                  }}
-                  variant="tertiary"
-                  label={formatMessage({
-                    id: 'content-manager.components.RelationInputModal.button-fullpage',
-                    defaultMessage: 'Go to entry',
-                  })}
-                >
-                  <ArrowsOut />
-                </IconButton>
-              </RelationModalBody>
-              <Modal.Footer>
-                <Button
-                  onClick={() => {
-                    setConfirmationDialogPosition('cancel');
-                    if (modified && !isSubmitting) {
-                      setIsConfirmationOpen(true);
-                    } else {
-                      handleToggleModal();
-                    }
-                  }}
-                  variant="tertiary"
-                >
-                  {formatMessage({
-                    id: 'app.components.Button.cancel',
-                    defaultMessage: 'Cancel',
-                  })}
-                </Button>
-              </Modal.Footer>
-              <Dialog.Root open={isConfirmationOpen}>
-                <ConfirmDialog
-                  onConfirm={() => {
-                    handleConfirm();
-                    setIsConfirmationOpen(false);
-                  }}
-                  variant="danger"
-                >
-                  {formatMessage({
-                    id: 'content-manager.components.RelationInputModal.confirmation-message',
-                    defaultMessage:
-                      'Some changes were not saved. Are you sure you want to close this relation? All changes that were not saved will be lost.',
-                  })}
-                </ConfirmDialog>
-              </Dialog.Root>
-            </CustomModalContent>
-          </Modal.Root>
-        </>
-      )}
+                      if (modified && !isSubmitting) {
+                        setIsConfirmationOpen(true);
+                      } else {
+                        navigate(getFullPageLink());
+                      }
+                    }}
+                    variant="tertiary"
+                    label={formatMessage({
+                      id: 'content-manager.components.RelationInputModal.button-fullpage',
+                      defaultMessage: 'Go to entry',
+                    })}
+                  >
+                    <ArrowsOut />
+                  </IconButton>
+                </RelationModalBody>
+                <Modal.Footer>
+                  <Button
+                    onClick={() => {
+                      setConfirmationDialogPosition('cancel');
+                      if (modified && !isSubmitting) {
+                        setIsConfirmationOpen(true);
+                      } else {
+                        handleToggleModal();
+                      }
+                    }}
+                    variant="tertiary"
+                  >
+                    {formatMessage({
+                      id: 'app.components.Button.cancel',
+                      defaultMessage: 'Cancel',
+                    })}
+                  </Button>
+                </Modal.Footer>
+                <Dialog.Root open={isConfirmationOpen}>
+                  <ConfirmDialog
+                    onConfirm={() => {
+                      handleConfirm();
+                      setIsConfirmationOpen(false);
+                    }}
+                    onCancel={() => {
+                      setIsConfirmationOpen(false);
+                    }}
+                    variant="danger"
+                  >
+                    {formatMessage({
+                      id: 'content-manager.components.RelationInputModal.confirmation-message',
+                      defaultMessage:
+                        'Some changes were not saved. Are you sure you want to close this relation? All changes that were not saved will be lost.',
+                    })}
+                  </ConfirmDialog>
+                </Dialog.Root>
+              </CustomModalContent>
+            </Modal.Root>
+          </>
+        );
+      }}
     </FormContext>
   );
 };
