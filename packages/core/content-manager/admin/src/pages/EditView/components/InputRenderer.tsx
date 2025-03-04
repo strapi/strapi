@@ -30,13 +30,16 @@ import type { DistributiveOmit } from 'react-redux';
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id: rootId } = useDoc();
+  const rootDocumentMeta = useDocumentContext('InputRenderer', (state) => state.rootDocumentMeta);
   const documentMeta = useDocumentContext('InputRenderer', (state) => state.meta);
-  const documentResponse = useDocumentContext('InputRenderer', (state) => state.document);
   const documentLayout = useDocumentLayout(documentMeta.model);
+  const rootDocumentLayout = useDocumentLayout(rootDocumentMeta.model);
 
-  const document = documentResponse?.document;
-  const collectionType = documentMeta.collectionType;
+  // Merge all components into a single object
+  const components = {
+    ...rootDocumentLayout.edit.components,
+    ...documentLayout.edit.components,
+  };
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
@@ -46,9 +49,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
-  let idToCheck = rootId;
-  if (collectionType === SINGLE_TYPES) {
-    idToCheck = document?.documentId;
+  let idToCheck = rootDocumentMeta.documentId;
+  if (documentMeta.collectionType === SINGLE_TYPES) {
+    idToCheck = documentMeta.documentId;
   }
 
   const editableFields = idToCheck ? canUpdateFields : canCreateFields;
@@ -67,15 +70,6 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
-
-  const {
-    edit: { components: rootDocumentComponents },
-  } = useDocLayout();
-
-  const components =
-    Object.keys(rootDocumentComponents).length !== 0
-      ? rootDocumentComponents
-      : documentLayout.edit.components;
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);

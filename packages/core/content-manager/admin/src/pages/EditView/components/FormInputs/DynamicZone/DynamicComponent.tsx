@@ -59,9 +59,14 @@ const DynamicComponent = ({
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
   const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
+  const rootDocumentMeta = useDocumentContext(
+    'DynamicComponent',
+    (state) => state.rootDocumentMeta
+  );
+  const isRootDocument = rootDocumentMeta.model === documentMeta.model;
   const {
     edit: { components },
-  } = useDocumentLayout(documentMeta.model);
+  } = useDocumentLayout(isRootDocument ? documentMeta.model : rootDocumentMeta.model);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
