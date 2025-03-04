@@ -185,7 +185,10 @@ const UnstablePreviewHeader = () => {
     document,
     meta,
     onPreview: () => {
-      iframeRef?.current?.contentWindow?.postMessage({ type: 'strapiUpdate' });
+      iframeRef?.current?.contentWindow?.postMessage(
+        { type: 'strapiUpdate' },
+        new URL(iframeRef.current.src).origin
+      );
     },
   } satisfies DocumentActionProps;
 
