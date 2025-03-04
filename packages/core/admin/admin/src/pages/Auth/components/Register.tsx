@@ -353,7 +353,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
             {
               firstname: userInfo?.firstname || '',
               lastname: userInfo?.lastname || '',
-              email: userInfo?.email || '',
+              email: userInfo?.email || (process.env.STRAPI_ADMIN_CREATED_BY_EMAIL as string) || '',
               password: '',
               confirmPassword: '',
               registrationToken: registrationToken || undefined,

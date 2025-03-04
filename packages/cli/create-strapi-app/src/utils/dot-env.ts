@@ -25,6 +25,9 @@ DATABASE_USERNAME=<%= database.connection.username %>
 DATABASE_PASSWORD=<%= database.connection.password %>
 DATABASE_SSL=<%= database.connection.ssl %>
 DATABASE_FILENAME=<%= database.connection.filename %>
+
+# User Info
+STRAPI_ADMIN_CREATED_BY_EMAIL=<%= userInfo.email %>
 `;
 
 export function generateDotEnv(scope: Scope) {
@@ -41,6 +44,9 @@ export function generateDotEnv(scope: Scope) {
         ...scope.database.connection,
         ssl: scope.database.connection?.ssl || false,
       },
+    },
+    userInfo: {
+      email: scope.userInfo?.email,
     },
   });
 }
