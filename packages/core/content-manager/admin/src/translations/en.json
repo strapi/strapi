@@ -55,6 +55,7 @@
   "components.LimitSelect.itemsPerPage": "Items per page",
   "components.NotAllowedInput.text": "No permissions to see this field",
   "components.RelationInput.icon-button-aria-label": "Drag",
+  "components.RelationInputModal.modal-title": "Edit a relation",
   "components.RepeatableComponent.error-message": "The component(s) contain error(s)",
   "components.Search.placeholder": "Search for an entry...",
   "components.Select.draft-info-title": "Draft",

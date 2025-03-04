@@ -26,6 +26,7 @@ import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
@@ -34,13 +35,13 @@ import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 
-import type { RelationsFormValue } from './FormInputs/Relations';
+import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
 
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
-type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview';
+type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview' | 'relation-modal';
 
 interface DocumentActionDescription {
   label: string;
@@ -518,7 +519,7 @@ const PublishAction: DocumentActionComponent = ({
   document,
   onPreview,
 }) => {
-  const { schema } = useDoc();
+  const schema = useDocumentContext('PublishAction', (state) => state.document.schema);
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -544,6 +545,9 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+
+  const rootDocumentMeta = useDocumentContext('PublishAction', (state) => state.rootDocumentMeta);
+  const currentDocumentMeta = useDocumentContext('PublishAction', (state) => state.meta);
 
   React.useEffect(() => {
     if (isErrorDraftRelations) {
@@ -650,12 +654,13 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
+      const isPublishingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
       const res = await publish(
         {
           collectionType,
           model,
           documentId,
-          params,
+          params: isPublishingRelation ? currentDocumentMeta.params : params,
         },
         transformData(formValues)
       );
@@ -694,7 +699,7 @@ const PublishAction: DocumentActionComponent = ({
 
   return {
     loading: isLoading,
-    position: ['panel', 'preview'],
+    position: ['panel', 'preview', 'relation-modal'],
     /**
      * Disabled when:
      *  - currently if you're cloning a document we don't support publish & clone at the same time.
@@ -753,7 +758,7 @@ const PublishAction: DocumentActionComponent = ({
 };
 
 PublishAction.type = 'publish';
-PublishAction.position = ['panel', 'preview'];
+PublishAction.position = ['panel', 'preview', 'relation-modal'];
 
 const UpdateAction: DocumentActionComponent = ({
   activeTab,
@@ -779,6 +784,9 @@ const UpdateAction: DocumentActionComponent = ({
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
+
+  const rootDocumentMeta = useDocumentContext('UpdateAction', (state) => state.rootDocumentMeta);
+  const currentDocumentMeta = useDocumentContext('UpdateAction', (state) => state.meta);
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -831,12 +839,14 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
+        const isEditingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
+
         const res = await update(
           {
             collectionType,
             model,
             documentId,
-            params,
+            params: isEditingRelation ? currentDocumentMeta.params : params,
           },
           transformData(document)
         );
@@ -930,12 +940,12 @@ const UpdateAction: DocumentActionComponent = ({
       defaultMessage: 'Save',
     }),
     onClick: handleUpdate,
-    position: ['panel', 'preview'],
+    position: ['panel', 'preview', 'relation-modal'],
   };
 };
 
 UpdateAction.type = 'update';
-UpdateAction.position = ['panel', 'preview'];
+UpdateAction.position = ['panel', 'preview', 'relation-modal'];
 
 const UNPUBLISH_DRAFT_OPTIONS = {
   KEEP: 'keep',
