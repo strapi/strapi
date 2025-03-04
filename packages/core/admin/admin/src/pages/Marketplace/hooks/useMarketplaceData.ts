@@ -14,7 +14,6 @@ interface UseMarketplaceDataParams {
   debouncedSearch: string;
   query?: MarketplacePageQuery;
   tabQuery: TabQuery;
-  strapiVersion?: string | null;
 }
 
 type Collections =
@@ -102,7 +101,6 @@ function useMarketplaceData({
   debouncedSearch,
   query,
   tabQuery,
-  strapiVersion,
 }: UseMarketplaceDataParams) {
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
@@ -133,7 +131,6 @@ function useMarketplaceData({
     ...tabQuery.plugin,
     pagination: paginationParams,
     search: debouncedSearch,
-    version: strapiVersion,
   };
 
   const { data: pluginsResponse, status: pluginsStatus } = useQuery(
@@ -172,7 +169,6 @@ function useMarketplaceData({
     ...tabQuery.provider,
     pagination: paginationParams,
     search: debouncedSearch,
-    version: strapiVersion,
   };
 
   const { data: providersResponse, status: providersStatus } = useQuery(
