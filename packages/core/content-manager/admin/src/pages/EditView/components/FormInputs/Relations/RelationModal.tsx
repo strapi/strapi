@@ -18,6 +18,8 @@ import {
   Loader,
   Modal,
   Typography,
+  Tooltip,
+  TextButton,
 } from '@strapi/design-system';
 import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -29,6 +31,7 @@ import { PERMISSIONS } from '../../../../../constants/plugin';
 import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
+import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -37,8 +40,18 @@ import { FormLayout } from '../../FormLayout';
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
 
 interface RelationModalProps {
-  open: boolean;
+  triggerButtonLabel: string;
+  newDocument: {
+    documentId: string;
+    model: string;
+    collectionType: string;
+    params: Record<string, string | null>;
+  };
+  setIsConfirmationOpen: (isOpen: boolean) => void;
+  setOnConfirm: (onConfirm: () => void) => void;
+  open?: boolean;
   onToggle: () => void;
+  setIsModalOpen: (isOpen: boolean) => void;
 }
 
 export function getCollectionType(url: string) {
@@ -54,15 +67,52 @@ const CustomModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
-const RelationModalWrapper = ({ open, onToggle }: RelationModalProps) => {
+type RelationModalWrapperProps = Omit<
+  RelationModalProps,
+  | 'setOnConfirm'
+  | 'setIsConfirmationOpen'
+  | 'isFormModified'
+  | 'open'
+  | 'onToggle'
+  | 'setIsModalOpen'
+>;
+
+const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModalWrapperProps) => {
+  const [triggerRefetchDocument] = useLazyGetDocumentQuery();
   const { formatMessage } = useIntl();
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
-  const confirmationDialog = useDocumentContext(
+  const rootDocumentMeta = useDocumentContext(
     'RelationModalBody',
-    (state) => state.confirmationDialog
+    (state) => state.rootDocumentMeta
   );
-  const { isConfirmationOpen, setIsConfirmationOpen, onConfirm } = confirmationDialog;
+  const changeDocument = useDocumentContext('RelationModalBody', (state) => state.changeDocument);
+  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
+  // handler for the confirmation dialog to be used when we confirm the choice
+  const [onConfirm, setOnConfirm] = React.useState<() => void>(() => () => {});
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
   const initialValues = documentResponse.getInitialFormValues();
+
+  const handleToggleModal = () => {
+    if (isModalOpen) {
+      setIsModalOpen(false);
+      const document = {
+        collectionType: rootDocumentMeta.collectionType,
+        model: rootDocumentMeta.model,
+        documentId: rootDocumentMeta.documentId,
+      };
+      // Change back to the root document
+      changeDocument(document);
+      // Read from cache or refetch root document
+      triggerRefetchDocument(
+        document,
+        // Favor the cache
+        true
+      );
+    } else {
+      setIsModalOpen(true);
+    }
+  };
   return (
     <FormContext
       method="PUT"
@@ -80,7 +130,15 @@ const RelationModalWrapper = ({ open, onToggle }: RelationModalProps) => {
         return yupSchema.validate(values, { abortEarly: false });
       }}
     >
-      <RelationModal open={open} onToggle={onToggle} />
+      <RelationModal
+        open={isModalOpen}
+        onToggle={handleToggleModal}
+        triggerButtonLabel={triggerButtonLabel}
+        newDocument={newDocument}
+        setIsModalOpen={setIsModalOpen}
+        setIsConfirmationOpen={setIsConfirmationOpen}
+        setOnConfirm={setOnConfirm}
+      />
       <Dialog.Root
         open={isConfirmationOpen}
         onOpenChange={() => setIsConfirmationOpen(!isConfirmationOpen)}
@@ -97,34 +155,67 @@ const RelationModalWrapper = ({ open, onToggle }: RelationModalProps) => {
   );
 };
 
-const RelationModal = ({ open, onToggle }: RelationModalProps) => {
+const CustomTextButton = styled(TextButton)`
+  & > span {
+    font-size: ${({ theme }) => theme.fontSizes[2]};
+  }
+`;
+
+const RelationModal = ({
+  open,
+  onToggle,
+  triggerButtonLabel,
+  newDocument,
+  setIsModalOpen,
+  setIsConfirmationOpen,
+  setOnConfirm,
+}: RelationModalProps) => {
   const { formatMessage } = useIntl();
-  const confirmationDialog = useDocumentContext(
-    'RelationModalBody',
-    (state) => state.confirmationDialog
-  );
-  const { isFormModified, setIsFormModified, setIsConfirmationOpen, setOnConfirm } =
-    confirmationDialog;
   const modified = useForm('RelationModal', (state) => state.modified);
   const isSubmitting = useForm('RelationModal', (state) => state.isSubmitting);
-  setIsFormModified(!isSubmitting && modified);
+  const isFormModified = modified && !isSubmitting;
+  const changeDocument = useDocumentContext('RelationsList', (state) => state.changeDocument);
 
   const handleCloseModal = () => {
-    if (isFormModified) {
+    if (!isSubmitting && modified) {
       setIsConfirmationOpen(true);
       const handleConfirmation = () => {
         onToggle();
-        setIsFormModified(false);
+        setIsConfirmationOpen(false);
       };
       setOnConfirm(() => () => handleConfirmation());
     } else {
       onToggle();
-      setIsFormModified(false);
+    }
+  };
+
+  const handleChangeModalContent = () => {
+    if (!isFormModified) {
+      changeDocument(newDocument);
+    } else {
+      const handleConfirm = () => {
+        changeDocument(newDocument);
+        setIsConfirmationOpen(false);
+      };
+      setOnConfirm(() => () => handleConfirm());
+      setIsConfirmationOpen(true);
     }
   };
 
   return (
     <Modal.Root open={open} onOpenChange={handleCloseModal}>
+      <Modal.Trigger>
+        <Tooltip description={triggerButtonLabel}>
+          <CustomTextButton
+            onClick={() => {
+              handleChangeModalContent();
+              setIsModalOpen(true);
+            }}
+          >
+            {triggerButtonLabel}
+          </CustomTextButton>
+        </Tooltip>
+      </Modal.Trigger>
       <CustomModalContent>
         <Modal.Header gap={2}>
           <Flex justifyContent="space-between" alignItems="center" width="100%">
@@ -148,7 +239,12 @@ const RelationModal = ({ open, onToggle }: RelationModalProps) => {
             </Flex>
           </Flex>
         </Modal.Header>
-        <RelationModalBody onToggle={onToggle} />
+        <RelationModalBody
+          onToggle={onToggle}
+          setIsConfirmationOpen={setIsConfirmationOpen}
+          setOnConfirm={setOnConfirm}
+          isFormModified={isFormModified}
+        />
         <Modal.Footer>
           <Button onClick={handleCloseModal} variant="tertiary">
             {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
@@ -161,20 +257,22 @@ const RelationModal = ({ open, onToggle }: RelationModalProps) => {
 
 interface RelationModalBodyProps {
   onToggle: () => void;
+  setIsConfirmationOpen: (isOpen: boolean) => void;
+  setOnConfirm: (onConfirm: () => void) => void;
+  isFormModified: boolean;
 }
 
-const RelationModalBody = ({ onToggle }: RelationModalBodyProps) => {
+const RelationModalBody = ({
+  onToggle,
+  setIsConfirmationOpen,
+  setOnConfirm,
+  isFormModified,
+}: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
-  const confirmationDialog = useDocumentContext(
-    'RelationModalBody',
-    (state) => state.confirmationDialog
-  );
-  const { isFormModified, setIsConfirmationOpen, setOnConfirm, setIsFormModified } =
-    confirmationDialog;
   const documentLayoutResponse = useDocumentLayout(documentMeta.model);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
@@ -261,16 +359,14 @@ const RelationModalBody = ({ onToggle }: RelationModalBodyProps) => {
       setIsConfirmationOpen(true);
       if (modalDocumentUrlEqualEditViewUrl) {
         const handleConfirmation = () => {
-          setIsConfirmationOpen(false);
-          setIsFormModified(false);
           onToggle();
+          setIsConfirmationOpen(false);
         };
         setOnConfirm(() => () => handleConfirmation());
       } else {
         const handleConfirmation = () => {
           navigate(getFullPageLink());
           setIsConfirmationOpen(false);
-          setIsFormModified(false);
         };
         setOnConfirm(() => () => handleConfirmation());
       }

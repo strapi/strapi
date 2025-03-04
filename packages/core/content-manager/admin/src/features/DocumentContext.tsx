@@ -33,15 +33,6 @@ interface DocumentContextValue {
   document: ReturnType<UseDocument>;
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
-  confirmationDialog: {
-    isFormModified: boolean;
-    setIsFormModified: (isModified: boolean) => void;
-    // New confirmation dialog related properties
-    isConfirmationOpen: boolean;
-    setIsConfirmationOpen: (isOpen: boolean) => void;
-    onConfirm: () => void;
-    setOnConfirm: (onConfirm: () => void) => void;
-  };
 }
 
 const [DocumentProvider, useDocumentContext] =
@@ -76,12 +67,6 @@ const DocumentContextProvider = ({
   );
   const document = useDocument({ ...currentDocumentMeta, params });
 
-  const [isFormModified, setIsFormModified] = React.useState<boolean>(false);
-  // New state for confirmation dialog
-  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
-  // handler for the confirmation dialog to be used when we confirm the choice
-  const [onConfirm, setOnConfirm] = React.useState<() => void>(() => () => {});
-
   return (
     <DocumentProvider
       changeDocument={changeDocument}
@@ -93,14 +78,6 @@ const DocumentContextProvider = ({
         params: initialDocument.params,
       }}
       meta={currentDocumentMeta}
-      confirmationDialog={{
-        isFormModified,
-        setIsFormModified,
-        isConfirmationOpen,
-        setIsConfirmationOpen,
-        onConfirm,
-        setOnConfirm,
-      }}
     >
       {children}
     </DocumentProvider>
