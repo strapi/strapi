@@ -187,7 +187,16 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
           <>
             <Modal.Root
               open={isModalOpen}
-              onOpenChange={() => handleCloseModal(modified && !isSubmitting)}
+              onOpenChange={() => {
+                if (isModalOpen) {
+                  setConfirmationDialogPosition('cancel');
+                  if (modified && !isSubmitting) {
+                    setIsConfirmationOpen(true);
+                  } else {
+                    handleToggleModal();
+                  }
+                }
+              }}
             >
               <Modal.Trigger>
                 <Tooltip description={triggerButtonLabel}>
@@ -199,6 +208,7 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
                       } else {
                         handleChangeModalContent();
                       }
+
                       if (!isModalOpen) {
                         setIsModalOpen(true);
                       }
