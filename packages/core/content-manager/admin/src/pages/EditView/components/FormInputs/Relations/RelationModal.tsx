@@ -6,6 +6,7 @@ import {
   Form as FormContext,
   useRBAC,
   useStrapiApp,
+  createContext,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -27,7 +28,7 @@ import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
-import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { type DocumentMeta, useDocumentContext } from '../../../../../features/DocumentContext';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
@@ -37,6 +38,11 @@ import { DocumentStatus } from '../../DocumentStatus';
 import { FormLayout } from '../../FormLayout';
 
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
+
+interface RelationModalProps {
+  triggerButtonLabel: string;
+  relation: DocumentMeta;
+}
 
 export function getCollectionType(url: string) {
   const regex = new RegExp(`(${COLLECTION_TYPES}|${SINGLE_TYPES})`);
@@ -51,36 +57,30 @@ const CustomModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
-interface RelationModalWrapperProps {
-  triggerButtonLabel: string;
-  relation: {
-    documentId: string;
-    model: string;
-    collectionType: string;
-    params: Record<string, string | null>;
-  };
-}
-
-const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWrapperProps) => {
+const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
-  const [triggerRefetchDocument] = useLazyGetDocumentQuery();
   const { formatMessage } = useIntl();
-  const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
+
+  const [triggerRefetchDocument] = useLazyGetDocumentQuery();
+
+  const currentDocument = useDocumentContext('RelationModalBody', (state) => state.document);
   const rootDocumentMeta = useDocumentContext(
     'RelationModalBody',
     (state) => state.rootDocumentMeta
   );
-  const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
+  const currentDocumentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const changeDocument = useDocumentContext('RelationModalBody', (state) => state.changeDocument);
-  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
-  // handler for the confirmation dialog to be used when we confirm the choice
-  const [confirmationDialogPosition, setConfirmationDialogPosition] = React.useState<
-    'cancel' | 'navigate' | 'changeDocument'
-  >();
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  const initialValues = documentResponse.getInitialFormValues();
+  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState(false);
+  const [isNavigating, setIsNavigating] = React.useState(false);
+
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  // Get parent modal context if it exists
+  const parentContext = useRelationModal('RelationModalWrapper', (state) => state);
+  const isNested = parentContext.depth > 0;
+  // Track this modal's depth
+  const depth = isNested ? parentContext.depth + 1 : 1;
 
   const handleToggleModal = () => {
     if (isModalOpen) {
@@ -99,23 +99,25 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWra
         true
       );
     } else {
+      changeDocument(relation);
       setIsModalOpen(true);
     }
   };
 
   const getFullPageLink = (): string => {
-    const isSingleType = documentMeta.collectionType === SINGLE_TYPES;
-    const queryParams = documentMeta.params?.locale
-      ? `?plugins[i18n][locale]=${documentMeta.params.locale}`
+    const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
+    const queryParams = currentDocumentMeta.params?.locale
+      ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
       : '';
 
-    return `/content-manager/${documentMeta.collectionType}/${documentMeta.model}${isSingleType ? '' : '/' + documentMeta.documentId}${queryParams}`;
+    return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
   };
 
   const handleRedirection = () => {
     const editViewUrl = `${pathname}${search}`;
-    const modalDocumentUrlEqualEditViewUrl = editViewUrl.includes(getFullPageLink());
-    if (modalDocumentUrlEqualEditViewUrl) {
+    const isRootDocumentUrl = editViewUrl.includes(getFullPageLink());
+
+    if (isRootDocumentUrl) {
       handleToggleModal();
     } else {
       navigate(getFullPageLink());
@@ -123,31 +125,23 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWra
   };
 
   const handleConfirm = () => {
-    switch (confirmationDialogPosition) {
-      case 'cancel':
-        handleToggleModal();
-        break;
-      case 'navigate':
-        handleRedirection();
-        break;
-      case 'changeDocument':
-        changeDocument(relation);
-        break;
-      default:
-        handleToggleModal();
+    if (isNavigating) {
+      handleRedirection();
+    } else {
+      handleToggleModal();
     }
   };
 
   return (
     <FormContext
       method="PUT"
-      initialValues={initialValues}
+      initialValues={currentDocument.getInitialFormValues()}
       validate={(values: Record<string, unknown>, options: Record<string, string>) => {
         const yupSchema = createYupSchema(
-          documentResponse.schema?.attributes,
-          documentResponse.components,
+          currentDocument.schema?.attributes,
+          currentDocument.components,
           {
-            status: documentResponse.document?.status,
+            status: currentDocument.document?.status,
             ...options,
           }
         );
@@ -155,14 +149,13 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWra
         return yupSchema.validate(values, { abortEarly: false });
       }}
     >
-      {({ modified, isSubmitting }) => {
+      {({ modified, isSubmitting, resetForm }) => {
         return (
-          <>
+          <RelationModalProvider parentModified={modified} depth={depth}>
             <Modal.Root
               open={isModalOpen}
               onOpenChange={() => {
                 if (isModalOpen) {
-                  setConfirmationDialogPosition('cancel');
                   if (modified && !isSubmitting) {
                     setIsConfirmationOpen(true);
                   } else {
@@ -175,15 +168,21 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWra
                 <Tooltip description={triggerButtonLabel}>
                   <CustomTextButton
                     onClick={() => {
-                      setConfirmationDialogPosition('changeDocument');
-                      if (modified && !isSubmitting) {
+                      // Check if parent modal has unsaved changes
+                      if (isNested && parentContext.parentModified) {
                         setIsConfirmationOpen(true);
+                        // Return early to avoid opening the modal
+                        return;
                       } else {
-                        changeDocument(relation);
-                      }
+                        if (modified && !isSubmitting) {
+                          setIsConfirmationOpen(true);
+                        } else {
+                          handleToggleModal();
+                        }
 
-                      if (!isModalOpen) {
-                        setIsModalOpen(true);
+                        if (!isModalOpen) {
+                          setIsModalOpen(true);
+                        }
                       }
                     }}
                   >
@@ -217,7 +216,7 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWra
                 <RelationModalBody>
                   <IconButton
                     onClick={() => {
-                      setConfirmationDialogPosition('navigate');
+                      setIsNavigating(true);
 
                       if (modified && !isSubmitting) {
                         setIsConfirmationOpen(true);
@@ -237,7 +236,6 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWra
                 <Modal.Footer>
                   <Button
                     onClick={() => {
-                      setConfirmationDialogPosition('cancel');
                       if (modified && !isSubmitting) {
                         setIsConfirmationOpen(true);
                       } else {
@@ -252,32 +250,46 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWra
                     })}
                   </Button>
                 </Modal.Footer>
-                <Dialog.Root open={isConfirmationOpen}>
-                  <ConfirmDialog
-                    onConfirm={() => {
-                      handleConfirm();
-                      setIsConfirmationOpen(false);
-                    }}
-                    onCancel={() => {
-                      setIsConfirmationOpen(false);
-                    }}
-                    variant="danger"
-                  >
-                    {formatMessage({
-                      id: 'content-manager.components.RelationInputModal.confirmation-message',
-                      defaultMessage:
-                        'Some changes were not saved. Are you sure you want to close this relation? All changes that were not saved will be lost.',
-                    })}
-                  </ConfirmDialog>
-                </Dialog.Root>
               </CustomModalContent>
             </Modal.Root>
-          </>
+            <Dialog.Root open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen}>
+              <ConfirmDialog
+                onConfirm={() => {
+                  handleConfirm();
+                  setIsConfirmationOpen(false);
+                  resetForm();
+                }}
+                onCancel={() => {
+                  setIsConfirmationOpen(false);
+                }}
+                variant="danger"
+              >
+                {formatMessage({
+                  id: 'content-manager.components.RelationInputModal.confirmation-message',
+                  defaultMessage:
+                    'Some changes were not saved. Are you sure you want to close this relation? All changes that were not saved will be lost.',
+                })}
+              </ConfirmDialog>
+            </Dialog.Root>
+          </RelationModalProvider>
         );
       }}
     </FormContext>
   );
 };
+
+interface RelationModalContextValue {
+  parentModified: boolean;
+  depth: number;
+}
+
+const [RelationModalProvider, useRelationModal] = createContext<RelationModalContextValue>(
+  'RelationModal',
+  {
+    parentModified: false,
+    depth: 0,
+  }
+);
 
 const CustomTextButton = styled(TextButton)`
   & > span {
@@ -286,6 +298,9 @@ const CustomTextButton = styled(TextButton)`
 `;
 
 interface RelationModalBodyProps {
+  /**
+   * Additional modal actions such as "Open in full page"
+   */
   children: React.ReactNode;
 }
 
