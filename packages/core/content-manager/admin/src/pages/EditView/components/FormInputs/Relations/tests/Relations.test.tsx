@@ -5,14 +5,22 @@ import { Route, Routes } from 'react-router-dom';
 import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
 
-export const relationContext = {
+const relationContext = {
   initialDocument: {
     documentId: 'abcdefg',
     model: 'api::test.test',
     collectionType: 'collection-types',
   },
-  setCurrentDocument: jest.fn(),
 };
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}));
+
+jest.mock('../../../../../../services/documents', () => ({
+  useLazyGetDocumentQuery: jest.fn(() => [jest.fn()]),
+}));
 
 jest.mock('../../../../../../hooks/useDocument', () => ({
   useDoc: jest.fn(() => ({})),

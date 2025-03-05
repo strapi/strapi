@@ -82,7 +82,7 @@ test.describe('Unstable Relations on the fly', () => {
     await clickAndWait(page, page.getByRole('button', { name: 'West Ham post match analysis' }));
 
     // Check the confirmation modal is shown and click confirm
-    await clickAndWait(page, page.locator('button').filter({ hasText: 'Confirm' }).nth(1));
+    await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
 
     // Check the nested relation modal is shown
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
