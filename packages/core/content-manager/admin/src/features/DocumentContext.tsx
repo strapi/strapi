@@ -33,6 +33,9 @@ interface DocumentContextValue {
   document: ReturnType<UseDocument>;
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
+  documentHistory: DocumentMeta[];
+  addDocumentToHistory: (document: DocumentMeta) => void;
+  getPreviousDocument: () => DocumentMeta | undefined;
 }
 
 const [DocumentProvider, useDocumentContext] =
@@ -67,6 +70,22 @@ const DocumentContextProvider = ({
   );
   const document = useDocument({ ...currentDocumentMeta, params });
 
+  const [documentHistory, setDocumentHistory] = React.useState<DocumentMeta[]>([]);
+
+  const addDocumentToHistory = (document: DocumentMeta) => {
+    setDocumentHistory([...documentHistory, document]);
+  };
+
+  const getPreviousDocument = () => {
+    if (documentHistory.length === 0) return undefined;
+
+    const lastDocument = documentHistory[documentHistory.length - 1];
+
+    setDocumentHistory([...documentHistory].slice(0, documentHistory.length - 1));
+
+    return lastDocument;
+  };
+
   return (
     <DocumentProvider
       changeDocument={changeDocument}
@@ -78,11 +97,14 @@ const DocumentContextProvider = ({
         params: initialDocument.params,
       }}
       meta={currentDocumentMeta}
+      documentHistory={documentHistory}
+      addDocumentToHistory={addDocumentToHistory}
+      getPreviousDocument={getPreviousDocument}
     >
       {children}
     </DocumentProvider>
   );
 };
 
-export { DocumentContextProvider, useDocumentContext };
+export { useDocumentContext, DocumentContextProvider };
 export type { DocumentMeta };
