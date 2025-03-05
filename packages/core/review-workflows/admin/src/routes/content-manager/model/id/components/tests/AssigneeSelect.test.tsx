@@ -103,6 +103,7 @@ describe('AssigneeSelect', () => {
       validate: jest.fn(),
       getInitialFormValues: jest.fn(),
       getTitle: jest.fn(),
+      refetch: jest.fn(),
       document: {
         documentId: '12345',
         id: 12345,
