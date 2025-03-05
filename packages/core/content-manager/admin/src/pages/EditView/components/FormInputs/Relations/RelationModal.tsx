@@ -38,21 +38,6 @@ import { FormLayout } from '../../FormLayout';
 
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
 
-interface RelationModalProps {
-  triggerButtonLabel: string;
-  newDocument: {
-    documentId: string;
-    model: string;
-    collectionType: string;
-    params: Record<string, string | null>;
-  };
-  setIsConfirmationOpen: (isOpen: boolean) => void;
-  setOnConfirm: (onConfirm: () => void) => void;
-  open?: boolean;
-  onToggle: () => void;
-  setIsModalOpen: (isOpen: boolean) => void;
-}
-
 export function getCollectionType(url: string) {
   const regex = new RegExp(`(${COLLECTION_TYPES}|${SINGLE_TYPES})`);
   const match = url.match(regex);
@@ -66,17 +51,17 @@ const CustomModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
-type RelationModalWrapperProps = Omit<
-  RelationModalProps,
-  | 'setOnConfirm'
-  | 'setIsConfirmationOpen'
-  | 'isFormModified'
-  | 'open'
-  | 'onToggle'
-  | 'setIsModalOpen'
->;
+interface RelationModalWrapperProps {
+  triggerButtonLabel: string;
+  relation: {
+    documentId: string;
+    model: string;
+    collectionType: string;
+    params: Record<string, string | null>;
+  };
+};
 
-const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModalWrapperProps) => {
+const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWrapperProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const [triggerRefetchDocument] = useLazyGetDocumentQuery();
@@ -118,18 +103,6 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
     }
   };
 
-  const handleCloseModal = (isFormModified: boolean) => {
-    if (isFormModified) {
-      setIsConfirmationOpen(true);
-    } else {
-      handleToggleModal();
-    }
-  };
-
-  const handleChangeModalContent = () => {
-    changeDocument(newDocument);
-  };
-
   const getFullPageLink = (): string => {
     const isSingleType = documentMeta.collectionType === SINGLE_TYPES;
     const queryParams = documentMeta.params?.locale
@@ -139,9 +112,9 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
     return `/content-manager/${documentMeta.collectionType}/${documentMeta.model}${isSingleType ? '' : '/' + documentMeta.documentId}${queryParams}`;
   };
 
-  const editViewUrl = `${pathname}${search}`;
-  const modalDocumentUrlEqualEditViewUrl = editViewUrl.includes(getFullPageLink());
   const handleRedirection = () => {
+    const editViewUrl = `${pathname}${search}`;
+    const modalDocumentUrlEqualEditViewUrl = editViewUrl.includes(getFullPageLink());
     if (modalDocumentUrlEqualEditViewUrl) {
       handleToggleModal();
     } else {
@@ -158,7 +131,7 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
         handleRedirection();
         break;
       case 'changeDocument':
-        handleChangeModalContent();
+        changeDocument(relation);
         break;
       default:
         handleToggleModal();
@@ -206,7 +179,7 @@ const RelationModalWrapper = ({ newDocument, triggerButtonLabel }: RelationModal
                       if (modified && !isSubmitting) {
                         setIsConfirmationOpen(true);
                       } else {
-                        handleChangeModalContent();
+                        changeDocument(relation);
                       }
 
                       if (!isModalOpen) {

@@ -1025,7 +1025,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                 <RelationModalWrapper
                   triggerButtonLabel={label}
-                  newDocument={{
+                  relation={{
                     documentId: documentId ?? apiData?.documentId,
                     model: targetModel,
                     collectionType: getCollectionType(href)!,
