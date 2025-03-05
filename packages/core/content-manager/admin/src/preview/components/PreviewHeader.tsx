@@ -187,6 +187,7 @@ const UnstablePreviewHeader = () => {
     onPreview: () => {
       iframeRef?.current?.contentWindow?.postMessage(
         { type: 'strapiUpdate' },
+        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
         new URL(iframeRef.current.src).origin
       );
     },
