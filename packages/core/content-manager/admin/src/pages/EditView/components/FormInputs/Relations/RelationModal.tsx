@@ -59,7 +59,7 @@ interface RelationModalWrapperProps {
     collectionType: string;
     params: Record<string, string | null>;
   };
-};
+}
 
 const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalWrapperProps) => {
   const navigate = useNavigate();
