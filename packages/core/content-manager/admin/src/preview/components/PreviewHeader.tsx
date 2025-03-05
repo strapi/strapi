@@ -15,6 +15,7 @@ import { useIntl } from 'react-intl';
 import { Link, type To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { InjectionZone } from '../../components/InjectionZone';
 import { DocumentActionButton } from '../../pages/EditView/components/DocumentActions';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
@@ -121,29 +122,27 @@ const PreviewTabs = () => {
   }
 
   return (
-    <>
-      <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
-        <Tabs.List
-          aria-label={formatMessage({
-            id: 'preview.tabs.label',
-            defaultMessage: 'Document status',
+    <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
+      <Tabs.List
+        aria-label={formatMessage({
+          id: 'preview.tabs.label',
+          defaultMessage: 'Document status',
+        })}
+      >
+        <StatusTab value="draft">
+          {formatMessage({
+            id: 'content-manager.containers.List.draft',
+            defaultMessage: 'draft',
           })}
-        >
-          <StatusTab value="draft">
-            {formatMessage({
-              id: 'content-manager.containers.List.draft',
-              defaultMessage: 'draft',
-            })}
-          </StatusTab>
-          <StatusTab value="published" disabled={documentStatus === 'draft'}>
-            {formatMessage({
-              id: 'content-manager.containers.List.published',
-              defaultMessage: 'published',
-            })}
-          </StatusTab>
-        </Tabs.List>
-      </Tabs.Root>
-    </>
+        </StatusTab>
+        <StatusTab value="published" disabled={documentStatus === 'draft'}>
+          {formatMessage({
+            id: 'content-manager.containers.List.published',
+            defaultMessage: 'published',
+          })}
+        </StatusTab>
+      </Tabs.List>
+    </Tabs.Root>
   );
 };
 
@@ -157,6 +156,7 @@ const UnstablePreviewHeader = () => {
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
+  const iframeRef = usePreviewContext('PreviewHeader', (state) => state.iframeRef);
 
   const [{ query }] = useQueryParams<{
     status?: 'draft' | 'published';
@@ -177,13 +177,20 @@ const UnstablePreviewHeader = () => {
   };
 
   const hasDraftAndPublish = schema.options?.draftAndPublish ?? false;
-  const props = {
+  const documentActionProps = {
     activeTab: query.status ?? null,
     collectionType: schema.kind === 'collectionType' ? 'collection-types' : 'single-types',
     model: schema.uid,
     documentId: document.documentId,
     document,
     meta,
+    onPreview: () => {
+      iframeRef?.current?.contentWindow?.postMessage(
+        { type: 'strapiUpdate' },
+        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+        new URL(iframeRef.current.src).origin
+      );
+    },
   } satisfies DocumentActionProps;
 
   return (
@@ -212,7 +219,9 @@ const UnstablePreviewHeader = () => {
         gap={2}
         justifyContent={hasDraftAndPublish ? 'space-between' : 'flex-end'}
       >
-        <PreviewTabs />
+        <Flex flex="1 1 70%">
+          <PreviewTabs />
+        </Flex>
         <Flex gap={2}>
           <IconButton
             type="button"
@@ -224,8 +233,9 @@ const UnstablePreviewHeader = () => {
           >
             <LinkIcon />
           </IconButton>
+          <InjectionZone area="preview.actions" />
           <DescriptionComponentRenderer
-            props={props}
+            props={documentActionProps}
             descriptions={(
               plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
             ).getDocumentActions('preview')}
