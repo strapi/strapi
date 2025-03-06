@@ -29,6 +29,8 @@ test.describe('Create single type with all field types', () => {
     await resetFiles();
   });
 
+  // TODO: confirm that other relation types do not exist in the relation type picker
+
   test('Can create a collection type with all field types (except relations)', async ({ page }) => {
     const attributes: AddAttribute[] = [
       { type: 'text', name: 'testtext' },
@@ -45,6 +47,22 @@ test.describe('Create single type with all field types', () => {
       { type: 'password', name: 'testpassword' },
       { type: 'media', name: 'testmediasingle', media: { multiple: false } },
       { type: 'media', name: 'testmediamultiple', media: { multiple: true } },
+      {
+        type: 'relation',
+        name: 'testonewayrelation',
+        relation: {
+          type: 'oneWay',
+          target: { select: 'Article', name: 'testonewayrelationtarget' },
+        },
+      },
+      {
+        type: 'relation',
+        name: 'testmanywayrelation',
+        relation: {
+          type: 'manyWay',
+          target: { select: 'Article', name: 'testmanywayrelationtarget' },
+        },
+      },
       {
         type: 'enumeration',
         name: 'testenumeration',
