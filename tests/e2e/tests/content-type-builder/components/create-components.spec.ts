@@ -93,55 +93,19 @@ test.describe('Create a new component', () => {
       },
       {
         type: 'relation',
-        name: 'testonewayrelation',
+        name: 'comptestonewayrelation',
         relation: {
           type: 'oneWay',
-          target: { select: 'Article', name: 'testonewayrelationtarget' },
+          target: { select: 'Article', name: 'comptestonewayrelationtarget' },
         },
         advanced: advancedRequired,
       },
       {
         type: 'relation',
-        name: 'testonetoonerelation',
-        relation: {
-          type: 'oneToOne',
-          target: { select: 'Article', name: 'testonetoonerelationtarget' },
-        },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testonetomanyrelation',
-        relation: {
-          type: 'oneToMany',
-          target: { select: 'Article', name: 'testonetomanyrelationtarget' },
-        },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testmanytoonerelation',
-        relation: {
-          type: 'manyToOne',
-          target: { select: 'Article', name: 'testmanytoonerelationtarget' },
-        },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testmanytomanyrelation',
-        relation: {
-          type: 'manyToMany',
-          target: { select: 'Article', name: 'testmanytomanyrelationtarget' },
-        },
-        advanced: advancedRequired,
-      },
-      {
-        type: 'relation',
-        name: 'testmanywayrelation',
+        name: 'comptestmanywayrelation',
         relation: {
           type: 'manyWay',
-          target: { select: 'Article', name: 'testmanywayrelationtarget' },
+          target: { select: 'Article', name: 'comptestmanywayrelationtarget' },
         },
         advanced: advancedRequired,
       },
