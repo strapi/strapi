@@ -22,6 +22,7 @@ Action
 Ensure that the Super Admin can assign, remove, or update roles for users effectively.
 
 **Test Steps:**
+
 - Log in as a Super Admin and navigate to the Users management page.
 - Select a user (Editor role) from the list and open their edit page.
 - Remove the current role (`Editor`) and assign a new role (`Author`).
@@ -125,4 +126,3 @@ To cover a comprehensive end-to-end flow combining creating, editing, assigning,
 - Edit the role's permissions and verify the changes in the list.
 - Revert the user to their previously assigned role.
 - Delete the newly created role and verify that it has been successfully removed.
-
