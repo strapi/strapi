@@ -32,7 +32,7 @@ test.describe('Create single type with all field types', () => {
   const advancedRequired = { required: true };
   const advancedRegex = { required: true, regexp: '^(?!.*fail).*' };
 
-  test('Can create a collection type with all field types (except relations)', async ({ page }) => {
+  test('Can create a collection type with all field types', async ({ page }) => {
     const attributes: AddAttribute[] = [
       { type: 'text', name: 'testtext', advanced: advancedRegex },
       { type: 'boolean', name: 'testboolean', advanced: advancedRequired },
