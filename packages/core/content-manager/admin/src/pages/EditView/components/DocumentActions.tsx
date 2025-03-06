@@ -516,6 +516,7 @@ const PublishAction: DocumentActionComponent = ({
   collectionType,
   meta,
   document,
+  onPreview,
 }) => {
   const { schema } = useDoc();
   const navigate = useNavigate();
@@ -678,6 +679,10 @@ const PublishAction: DocumentActionComponent = ({
       }
     } finally {
       setSubmitting(false);
+
+      if (onPreview) {
+        onPreview();
+      }
     }
   };
 
@@ -755,6 +760,7 @@ const UpdateAction: DocumentActionComponent = ({
   documentId,
   model,
   collectionType,
+  onPreview,
 }) => {
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
@@ -867,6 +873,9 @@ const UpdateAction: DocumentActionComponent = ({
       }
     } finally {
       setSubmitting(false);
+      if (onPreview) {
+        onPreview();
+      }
     }
   }, [
     clone,
