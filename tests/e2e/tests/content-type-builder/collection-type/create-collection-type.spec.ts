@@ -42,6 +42,11 @@ test.describe('Create collection type with all field types', () => {
       { type: 'media', name: 'testmediasingle', media: { multiple: false } },
       { type: 'media', name: 'testmediamultiple', media: { multiple: true } },
       {
+        type: 'relation',
+        name: 'testonewayrelation',
+        relation: { type: 'oneWay', target: { select: 'Article' } },
+      },
+      {
         type: 'enumeration',
         name: 'testenumeration',
         enumeration: { values: ['first', 'second', 'third'] },
