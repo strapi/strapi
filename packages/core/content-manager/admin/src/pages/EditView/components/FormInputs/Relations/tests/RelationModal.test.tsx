@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { RelationModalWrapper } from '../RelationModal';
 
-export const relationContext = {
+const relationContext = {
   initialDocument: {
     documentId: 'abcdefg',
     model: 'api::test.test',

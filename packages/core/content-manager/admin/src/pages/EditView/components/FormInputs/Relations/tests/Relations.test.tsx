@@ -5,13 +5,12 @@ import { Route, Routes } from 'react-router-dom';
 import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
 
-export const relationContext = {
+const relationContext = {
   initialDocument: {
     documentId: 'abcdefg',
     model: 'api::test.test',
     collectionType: 'collection-types',
   },
-  setCurrentDocument: jest.fn(),
 };
 
 jest.mock('../../../../../../hooks/useDocument', () => ({
@@ -62,114 +61,6 @@ jest.mock('../../../../../../hooks/useDocument', () => ({
   })),
 }));
 
-jest.mock('../../../../../../hooks/useDocumentLayout', () => ({
-  useDocLayout: jest.fn(() => ({
-    edit: {
-      components: {},
-    },
-  })),
-  useDocumentLayout: jest.fn().mockReturnValue({
-    edit: {
-      components: {},
-      layout: [
-        [
-          [
-            {
-              attribute: { pluginOptions: {}, type: 'string' },
-              disabled: false,
-              hint: '',
-              label: 'name',
-              name: 'name',
-              mainField: undefined,
-              placeholder: '',
-              required: false,
-              type: 'string',
-              unique: false,
-              visible: true,
-              size: 6,
-            },
-            {
-              attribute: {
-                relation: 'oneToOne',
-                relationType: 'oneToOne',
-                target: 'api::category.category',
-                targetModel: 'api::category.category',
-                type: 'relation',
-              },
-              disabled: false,
-              hint: '',
-              label: 'category',
-              mainField: {
-                name: 'name',
-                type: 'string',
-              },
-              name: 'category',
-              required: false,
-              size: 6,
-              type: 'relation',
-              visible: true,
-              unique: false,
-            },
-          ],
-        ],
-      ],
-      settings: {
-        mainField: 'name',
-      },
-    },
-    error: false,
-    isLoading: false,
-    list: {
-      layout: [
-        {
-          attribute: {
-            type: 'integer',
-          },
-          label: 'id',
-          name: 'id',
-          searchable: true,
-          sortable: true,
-        },
-        {
-          attribute: {
-            pluginOptions: {},
-            type: 'string',
-          },
-          label: 'name',
-          name: 'name',
-          searchable: true,
-          sortable: true,
-        },
-        {
-          attribute: {
-            relation: 'oneToOne',
-            relationType: 'oneToOne',
-            target: 'api::category.category',
-            targetModel: 'api::category.category',
-            type: 'relation',
-          },
-          label: 'category',
-          name: 'category',
-          mainField: {
-            name: 'name',
-            type: 'string',
-          },
-          searchable: true,
-          sortable: true,
-        },
-      ],
-    },
-  }),
-}));
-
-jest.mock('@strapi/admin/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/admin/strapi-admin'),
-  useRBAC: jest.fn(() => ({
-    isLoading: false,
-    allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
-  })),
-}));
-
 const render = ({
   initialEntries,
   ...props
@@ -198,17 +89,7 @@ const render = ({
             <Route
               path="/content-manager/:collectionType/:slug/:id"
               element={
-                <Form
-                  method="PUT"
-                  initialValues={{
-                    relations: {
-                      connect: [],
-                      disconnect: [],
-                    },
-                  }}
-                >
-                  <DocumentContextProvider {...relationContext}>{children}</DocumentContextProvider>
-                </Form>
+                <DocumentContextProvider {...relationContext}>{children}</DocumentContextProvider>
               }
             />
           </Routes>
