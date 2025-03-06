@@ -120,7 +120,7 @@ export const RelationNaturePicker = ({
           </KeyboardNavigable>
         </Flex>
       </Wrapper>
-      <InfosWrapper justifyContent="center" aria-live="polite">
+      <InfosWrapper justifyContent="center">
         <Typography>{truncate(leftDisplayedValue, { length: 24 })}&nbsp;</Typography>
         <Typography textColor="primary600">
           {formatMessage({ id: getTrad(`relation.${relationType}`) })}&nbsp;
