@@ -27,7 +27,7 @@ export interface AddAttribute {
 
 // keys are the relation types used by the RelationNaturePicker component
 // locatorText is the text that should be displayed for the relation type
-// inverse is used to identify the inverse relation type(s)
+// inverted denotes the inverse relation type(s)
 export const relationsMap: Record<
   string,
   { locatorText: string; hasInverse: boolean; inverted?: boolean }
