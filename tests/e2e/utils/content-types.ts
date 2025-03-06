@@ -296,9 +296,10 @@ export const addRelationAttribute = async (page: Page, attribute: AddRelationAtt
   const relationText = relationsMap[relation?.type]?.locatorText;
 
   // Click the correct relation type button
-  await page.locator(`button[aria-label="${relationText}"]`).click();
+  // instead of using aria-label we need to use data-relation-type with the relation type itself
+  await page.locator(`button[data-relation-type="${relation?.type}"]`).click();
   // check that the button is now aria-pressed
-  await expect(page.locator(`button[aria-label="${relationText}"]`)).toHaveAttribute(
+  await expect(page.locator(`button[data-relation-type="${relation?.type}"]`)).toHaveAttribute(
     'aria-pressed',
     'true'
   );

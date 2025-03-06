@@ -47,6 +47,31 @@ test.describe('Create collection type with all field types', () => {
         relation: { type: 'oneWay', target: { select: 'Article' } },
       },
       {
+        type: 'relation',
+        name: 'testonetoonerelation',
+        relation: { type: 'oneToOne', target: { select: 'Article' } },
+      },
+      {
+        type: 'relation',
+        name: 'testonetomanyrelation',
+        relation: { type: 'oneToMany', target: { select: 'Article' } },
+      },
+      {
+        type: 'relation',
+        name: 'testmanytoonerelation',
+        relation: { type: 'manyToOne', target: { select: 'Article' } },
+      },
+      {
+        type: 'relation',
+        name: 'testmanytomanyrelation',
+        relation: { type: 'manyToMany', target: { select: 'Article' } },
+      },
+      {
+        type: 'relation',
+        name: 'testmanywayrelation',
+        relation: { type: 'manyWay', target: { select: 'Article' } },
+      },
+      {
         type: 'enumeration',
         name: 'testenumeration',
         enumeration: { values: ['first', 'second', 'third'] },
