@@ -108,8 +108,11 @@ export const RelationNaturePicker = ({
                     }}
                     padding={2}
                     type="button"
+                    aria-label={formatMessage({ id: getTrad(`relation.${relation}`) })}
+                    aria-pressed={relationType === relation}
+                    data-relation-type={relation}
                   >
-                    <Asset key={relation} />
+                    <Asset key={relation} aria-hidden="true" />
                   </IconWrapper>
                 );
               })}
@@ -117,7 +120,7 @@ export const RelationNaturePicker = ({
           </KeyboardNavigable>
         </Flex>
       </Wrapper>
-      <InfosWrapper justifyContent="center">
+      <InfosWrapper justifyContent="center" aria-live="polite">
         <Typography>{truncate(leftDisplayedValue, { length: 24 })}&nbsp;</Typography>
         <Typography textColor="primary600">
           {formatMessage({ id: getTrad(`relation.${relationType}`) })}&nbsp;
