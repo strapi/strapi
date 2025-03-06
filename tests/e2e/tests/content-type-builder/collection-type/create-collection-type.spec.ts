@@ -44,32 +44,50 @@ test.describe('Create collection type with all field types', () => {
       {
         type: 'relation',
         name: 'testonewayrelation',
-        relation: { type: 'oneWay', target: { select: 'Article' } },
+        relation: {
+          type: 'oneWay',
+          target: { select: 'Article', name: 'testonewayrelationtarget' },
+        },
       },
       {
         type: 'relation',
         name: 'testonetoonerelation',
-        relation: { type: 'oneToOne', target: { select: 'Article' } },
+        relation: {
+          type: 'oneToOne',
+          target: { select: 'Article', name: 'testonetoonerelationtarget' },
+        },
       },
       {
         type: 'relation',
         name: 'testonetomanyrelation',
-        relation: { type: 'oneToMany', target: { select: 'Article' } },
+        relation: {
+          type: 'oneToMany',
+          target: { select: 'Article', name: 'testonetomanyrelationtarget' },
+        },
       },
       {
         type: 'relation',
         name: 'testmanytoonerelation',
-        relation: { type: 'manyToOne', target: { select: 'Article' } },
+        relation: {
+          type: 'manyToOne',
+          target: { select: 'Article', name: 'testmanytoonerelationtarget' },
+        },
       },
       {
         type: 'relation',
         name: 'testmanytomanyrelation',
-        relation: { type: 'manyToMany', target: { select: 'Article' } },
+        relation: {
+          type: 'manyToMany',
+          target: { select: 'Article', name: 'testmanytomanyrelationtarget' },
+        },
       },
       {
         type: 'relation',
         name: 'testmanywayrelation',
-        relation: { type: 'manyWay', target: { select: 'Article' } },
+        relation: {
+          type: 'manyWay',
+          target: { select: 'Article', name: 'testmanywayrelationtarget' },
+        },
       },
       {
         type: 'enumeration',

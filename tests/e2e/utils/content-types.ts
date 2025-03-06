@@ -18,26 +18,12 @@ export interface AddAttribute {
   };
   relation?: {
     type: keyof typeof relationsMap;
-    target: RightProperty<RelationType>;
+    target: {
+      name?: string;
+      select?: string;
+    };
   };
 }
-
-type RelationType = keyof typeof relationsMap;
-
-type HasInverse<T extends RelationType> = (typeof relationsMap)[T]['hasInverse'] extends true
-  ? true
-  : false;
-
-// Conditional right property type based on hasInverse
-type RightProperty<T extends RelationType> =
-  HasInverse<T> extends true
-    ? {
-        name?: string;
-        select?: string;
-      }
-    : {
-        select?: string;
-      };
 
 // keys are the relation types used by the RelationNaturePicker component
 // locatorText is the text that should be displayed for the relation type
