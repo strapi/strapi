@@ -37,6 +37,7 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
+import { useDocument } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
@@ -148,11 +149,16 @@ export interface RelationsFormValue {
  */
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
-    const documentMeta = useDocumentContext('RelationsField', (state) => state.meta);
-    const documentResponse = useDocumentContext('RelationsField', (state) => state.document);
+    const currentDocumentMeta = useDocumentContext('RelationsField', (state) => state.meta);
+    const currentDocument = useDocumentContext('RelationsField', (state) => state.document);
+    const rootDocumentMeta = useDocumentContext(
+      'RelationsField',
+      (state) => state.rootDocumentMeta
+    );
 
     const [currentPage, setCurrentPage] = React.useState(1);
-    const documentId = documentResponse.document?.documentId;
+    const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
+    const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
@@ -176,7 +182,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
      */
-    const id = componentId ? componentId.toString() : documentId;
+    const id = componentId ? componentId.toString() : documentMeta.documentId;
     const model = componentUID ?? documentMeta.model;
 
     /**
@@ -186,6 +192,9 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * individual components. Therefore we split the string and take the last item.
      */
     const [targetField] = props.name.split('.').slice(-1);
+    const hasTargetField = Object.keys(currentDocument.schema?.attributes ?? {}).includes(
+      targetField
+    );
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
@@ -201,7 +210,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id,
+        skip: !id || !hasTargetField,
         selectFromResult: (result) => {
           return {
             ...result,
@@ -326,7 +335,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           <RelationsInput
             disabled={isDisabled}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
-            id={componentUID ? (componentId ? `${componentId}` : '') : documentId}
+            id={componentUID ? (componentId ? `${componentId}` : '') : documentMeta.documentId}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
             onChange={handleConnect}
@@ -467,6 +476,7 @@ const RelationsInput = ({
   });
   const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams();
+  const currentDocumentMeta = useDocumentContext('RelationsInput', (state) => state.meta);
 
   const { formatMessage } = useIntl();
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
@@ -494,7 +504,7 @@ const RelationsInput = ({
       model,
       targetField,
       params: {
-        ...buildValidParams(query),
+        ...(currentDocumentMeta?.params ?? buildValidParams(query)),
         id: id ?? '',
         pageSize: 10,
         idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
@@ -511,6 +521,7 @@ const RelationsInput = ({
     query,
     searchForTrigger,
     searchParamsDebounced,
+    currentDocumentMeta,
   ]);
 
   const handleSearch = async (search: string) => {

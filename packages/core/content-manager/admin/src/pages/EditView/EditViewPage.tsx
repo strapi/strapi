@@ -45,6 +45,7 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
 
+  const doc = useDoc();
   const {
     document,
     meta,
@@ -57,7 +58,7 @@ const EditViewPage = () => {
     hasError,
     getTitle,
     getInitialFormValues,
-  } = useDoc();
+  } = doc;
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
@@ -185,10 +186,10 @@ const EditViewPage = () => {
                 <Grid.Root paddingTop={8} gap={4}>
                   <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
                     <Tabs.Content value="draft">
-                      <FormLayout layout={layout} />
+                      <FormLayout layout={layout} document={doc} />
                     </Tabs.Content>
                     <Tabs.Content value="published">
-                      <FormLayout layout={layout} />
+                      <FormLayout layout={layout} document={doc} />
                     </Tabs.Content>
                   </Grid.Item>
                   <Grid.Item col={3} s={12} direction="column" alignItems="stretch">

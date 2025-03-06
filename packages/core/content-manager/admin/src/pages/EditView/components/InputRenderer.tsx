@@ -6,12 +6,13 @@ import {
   InputRenderer as FormInputRenderer,
   useField,
 } from '@strapi/admin/strapi-admin';
+import { ContentTypeKind } from '@strapi/types/dist/struct';
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
+import { useDoc, UseDocument } from '../../../hooks/useDocument';
 import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
@@ -27,16 +28,18 @@ import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
+  document: ReturnType<UseDocument>;
+};
 
-const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id: rootId } = useDoc();
-  const documentMeta = useDocumentContext('InputRenderer', (state) => state.meta);
-  const documentResponse = useDocumentContext('InputRenderer', (state) => state.document);
-  const documentLayout = useDocumentLayout(documentMeta.model);
+const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
+  const { model: rootModel } = useDoc();
+  const documentLayout = useDocumentLayout(document.schema?.modelName ?? rootModel);
 
-  const document = documentResponse?.document;
-  const collectionType = documentMeta.collectionType;
+  const collectionType =
+    document.schema?.kind === ('collection-type' as ContentTypeKind)
+      ? 'collection-types'
+      : 'single-types';
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
@@ -46,9 +49,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
-  let idToCheck = rootId;
+  let idToCheck = document.document?.documentId;
   if (collectionType === SINGLE_TYPES) {
-    idToCheck = document?.documentId;
+    idToCheck = document?.document?.documentId;
   }
 
   const editableFields = idToCheck ? canUpdateFields : canCreateFields;
@@ -68,14 +71,7 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
 
   const hint = useFieldHint(providedHint, props.attribute);
 
-  const {
-    edit: { components: rootDocumentComponents },
-  } = useDocLayout();
-
-  const components =
-    Object.keys(rootDocumentComponents).length !== 0
-      ? rootDocumentComponents
-      : documentLayout.edit.components;
+  const components = documentLayout.edit.components;
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);

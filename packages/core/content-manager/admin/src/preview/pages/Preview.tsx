@@ -218,7 +218,11 @@ const PreviewPage = () => {
                       paddingRight={isSideEditorOpen ? 6 : 0}
                       transition="all 0.2s ease-in-out"
                     >
-                      <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground />
+                      <FormLayout
+                        layout={documentLayoutResponse.edit.layout}
+                        document={documentResponse}
+                        hasBackground
+                      />
                     </Box>
                     <Box position="relative" flex={1} height="100%" overflow="hidden">
                       <Box
