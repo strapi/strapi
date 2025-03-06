@@ -43,7 +43,6 @@ import {
   UseDragAndDropOptions,
   useDragAndDrop,
 } from '../../../../../hooks/useDragAndDrop';
-import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import {
   useGetRelationsQuery,
   useLazySearchRelationsQuery,
@@ -54,7 +53,7 @@ import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
-import { RelationModal, getCollectionType } from '../Relations/RelationModal';
+import { RelationModalWrapper, getCollectionType } from '../Relations/RelationModal';
 
 import type { Schema } from '@strapi/types';
 
@@ -936,14 +935,7 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
   };
 }
 
-const CustomTextButton = styled(TextButton)`
-  & > span {
-    font-size: ${({ theme }) => theme.fontSizes[2]};
-  }
-`;
-
 const ListItem = ({ data, index, style }: ListItemProps) => {
-  const [triggerRefetchDocument] = useLazyGetDocumentQuery();
   const {
     ariaDescribedBy,
     canDrag = false,
@@ -957,13 +949,10 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     relations,
     targetModel,
   } = data;
-  const changeDocument = useDocumentContext('RelationsList', (state) => state.changeDocument);
-  const rootDocumentMeta = useDocumentContext('RelationsList', (state) => state.rootDocumentMeta);
 
   const { formatMessage } = useIntl();
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-  const { href, id, label, status, documentId, apiData, locale } = relations[index];
+  const { href, id, label, status, documentId, apiData } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -986,42 +975,6 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     );
 
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
-
-  const handleChangeModalContent = () => {
-    if (changeDocument) {
-      const newRelation = {
-        documentId: documentId ?? apiData?.documentId,
-        model: targetModel,
-        collectionType: getCollectionType(href)!,
-        params: {
-          locale: locale || null,
-        },
-      };
-
-      changeDocument(newRelation);
-    }
-  };
-
-  const handleToggleModal = () => {
-    if (isModalOpen) {
-      setIsModalOpen(false);
-      const document = {
-        collectionType: rootDocumentMeta.collectionType,
-        model: rootDocumentMeta.model,
-        documentId: rootDocumentMeta.documentId,
-      };
-      // Change back to the root document
-      changeDocument(document);
-      // Read from cache or refetch root document
-      triggerRefetchDocument(
-        document,
-        // Favor the cache
-        true
-      );
-    } else {
-      setIsModalOpen(true);
-    }
-  };
 
   React.useEffect(() => {
     dragPreviewRef(getEmptyImage());
@@ -1070,23 +1023,19 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             ) : null}
             <Flex width="100%" minWidth={0} justifyContent="space-between">
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                <Tooltip description={label}>
-                  {isModalOpen ? (
-                    <CustomTextButton onClick={handleChangeModalContent}>{label}</CustomTextButton>
-                  ) : (
-                    <CustomTextButton
-                      onClick={() => {
-                        handleChangeModalContent();
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      {label}
-                    </CustomTextButton>
-                  )}
-                </Tooltip>
+                <RelationModalWrapper
+                  triggerButtonLabel={label}
+                  relation={{
+                    documentId: documentId ?? apiData?.documentId,
+                    model: targetModel,
+                    collectionType: getCollectionType(href)!,
+                    params: {
+                      locale: apiData?.locale || null,
+                    },
+                  }}
+                />
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
-              {isModalOpen && <RelationModal open={isModalOpen} onToggle={handleToggleModal} />}
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>

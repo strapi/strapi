@@ -1,16 +1,28 @@
-import { render, screen } from '@tests/utils';
+import { render, screen, fireEvent } from '@tests/utils';
+import { useNavigate } from 'react-router-dom';
 
 import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
-import { RelationModal } from '../RelationModal';
+import { RelationModalWrapper } from '../RelationModal';
 
-export const relationContext = {
+const relationContext = {
   initialDocument: {
     documentId: 'abcdefg',
     model: 'api::test.test',
     collectionType: 'collection-types',
   },
-  setCurrentDocument: jest.fn(),
 };
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}));
+
+jest.mock('../../../../../../services/documents', () => ({
+  useLazyGetDocumentQuery: jest.fn(() => [jest.fn()]),
+}));
+
+const mockNavigate = jest.fn();
+(useNavigate as jest.Mock).mockReturnValue(mockNavigate);
 
 jest.mock('../../../../../../hooks/useDocument', () => ({
   useDoc: jest.fn(() => ({})),
@@ -190,36 +202,49 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   ),
 }));
 
+const relation = {
+  documentId: 'abcdefg',
+  model: 'api::test.test',
+  collectionType: 'collection-types',
+  params: {},
+};
+
 describe('<RelationModal />', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it("doesn't render the modal if we pass an open prop to false", () => {
+
+  it('renders the trigger button correctly', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal open={false} onToggle={() => {}} />
+        <RelationModalWrapper triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
-    expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument();
+    expect(screen.getByText('Open Modal')).toBeInTheDocument();
   });
 
-  it('renders the modal if we pass an open prop to true', () => {
+  it('does not render the modal by default', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal open={true} onToggle={() => {}} />
+        <RelationModalWrapper triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
-    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
-  it('shows the modal with the Edit a relation title, the relation title, the X button and the Cancel button when the modal is to Edit a relation', () => {
+
+  it('opens the modal when clicking the trigger button', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModal open={true} onToggle={() => {}} />
+        <RelationModalWrapper triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
+    const button = screen.getByText('Open Modal');
+    fireEvent.click(button);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Edit a relation')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', {
@@ -229,5 +254,40 @@ describe('<RelationModal />', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+  });
+
+  it('closes the modal when clicking the cancel button', () => {
+    render(
+      <DocumentContextProvider {...relationContext}>
+        <RelationModalWrapper triggerButtonLabel="Open Modal" relation={relation} />
+      </DocumentContextProvider>
+    );
+
+    const button = screen.getByText('Open Modal');
+    fireEvent.click(button);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    fireEvent.click(cancelButton);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('navigates to full page when "Go to entry" is clicked', () => {
+    render(
+      <DocumentContextProvider {...relationContext}>
+        <RelationModalWrapper triggerButtonLabel="Open Modal" relation={relation} />
+      </DocumentContextProvider>
+    );
+
+    fireEvent.click(screen.getByText('Open Modal'));
+
+    const goToEntryButton = screen.getByRole('button', { name: /go to entry/i });
+    fireEvent.click(goToEntryButton);
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/content-manager/collection-types/api::test.test/abcdefg'
+    );
   });
 });
