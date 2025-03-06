@@ -56,6 +56,54 @@ test.describe('Create a new component', () => {
       { type: 'media', name: 'testmediasingle', media: { multiple: false } },
       { type: 'media', name: 'testmediamultiple', media: { multiple: true } },
       {
+        type: 'relation',
+        name: 'testonewayrelation',
+        relation: {
+          type: 'oneWay',
+          target: { select: 'Article', name: 'testonewayrelationtarget' },
+        },
+      },
+      {
+        type: 'relation',
+        name: 'testonetoonerelation',
+        relation: {
+          type: 'oneToOne',
+          target: { select: 'Article', name: 'testonetoonerelationtarget' },
+        },
+      },
+      {
+        type: 'relation',
+        name: 'testonetomanyrelation',
+        relation: {
+          type: 'oneToMany',
+          target: { select: 'Article', name: 'testonetomanyrelationtarget' },
+        },
+      },
+      {
+        type: 'relation',
+        name: 'testmanytoonerelation',
+        relation: {
+          type: 'manyToOne',
+          target: { select: 'Article', name: 'testmanytoonerelationtarget' },
+        },
+      },
+      {
+        type: 'relation',
+        name: 'testmanytomanyrelation',
+        relation: {
+          type: 'manyToMany',
+          target: { select: 'Article', name: 'testmanytomanyrelationtarget' },
+        },
+      },
+      {
+        type: 'relation',
+        name: 'testmanywayrelation',
+        relation: {
+          type: 'manyWay',
+          target: { select: 'Article', name: 'testmanywayrelationtarget' },
+        },
+      },
+      {
         type: 'enumeration',
         name: 'testenumeration',
         enumeration: { values: ['first', 'second', 'third'] },
