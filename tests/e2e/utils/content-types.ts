@@ -295,6 +295,14 @@ export const addRelationAttribute = async (page: Page, attribute: AddRelationAtt
   const targetSelect = target?.select;
   const relationText = relationsMap[relation?.type]?.locatorText;
 
+  // Click the correct relation type button
+  await page.locator(`button[aria-label="${relationText}"]`).click();
+  // check that the button is now aria-pressed
+  await expect(page.locator(`button[aria-label="${relationText}"]`)).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+
   // Select the relation type if `targetSelect` is provided
   const dialog = page.getByRole('dialog'); // Locate the dialog
   const relationTypePicker = dialog.locator('button[aria-haspopup="menu"]'); // Find the button inside it
@@ -304,9 +312,15 @@ export const addRelationAttribute = async (page: Page, attribute: AddRelationAtt
     await page.getByRole('menuitem', { name: targetSelect }).click();
   }
 
-  // If `target.name` exists (checked via `hasInverse` type guard), fill in "Target attribute"
+  //  fill in target attribute or ensure it is disabled
+  const targetAttributeInput = page.locator('input[name="targetAttribute"]');
+
   if (hasInverse(relation)) {
-    await page.getByRole('textbox', { name: 'Target attribute' }).fill(relation.target.name);
+    if (relation.target.name) {
+      await targetAttributeInput.fill(relation.target.name);
+    }
+  } else {
+    await expect(targetAttributeInput).toBeDisabled();
   }
 
   // Verify expected text in the relation type picker
