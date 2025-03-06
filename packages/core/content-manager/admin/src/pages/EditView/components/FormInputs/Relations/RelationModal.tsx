@@ -85,17 +85,15 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   const currentDocumentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const changeDocument = useDocumentContext('RelationModalBody', (state) => state.changeDocument);
   const documentHistory = useDocumentContext('RelationModalBody', (state) => state.documentHistory);
-  const addDocumentToHistory = useDocumentContext(
+  const setDocumentHistory = useDocumentContext(
     'RelationModalBody',
-    (state) => state.addDocumentToHistory
-  );
-  const getPreviousDocument = useDocumentContext(
-    'RelationModalBody',
-    (state) => state.getPreviousDocument
+    (state) => state.setDocumentHistory
   );
 
   const [isConfirmationOpen, setIsConfirmationOpen] = React.useState(false);
-  const [isNavigating, setIsNavigating] = React.useState(false);
+  const [actionPosition, setActionPosition] = React.useState<'cancel' | 'back' | 'navigate'>(
+    'cancel'
+  );
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   // NOTE: Not sure about this relation modal context, maybe we should move this to DocumentContext?
@@ -105,6 +103,19 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   const depth = parentContext ? parentContext.depth + 1 : 0;
   // Check if this is a nested modal
   const isNested = depth > 0;
+
+  const addDocumentToHistory = (document: DocumentMeta) =>
+    setDocumentHistory([...documentHistory, document]);
+
+  const getPreviousDocument = () => {
+    if (documentHistory.length === 0) return undefined;
+
+    const lastDocument = documentHistory[documentHistory.length - 1];
+
+    setDocumentHistory([...documentHistory].slice(0, documentHistory.length - 1));
+
+    return lastDocument;
+  };
 
   const handleToggleModal = () => {
     if (isModalOpen) {
@@ -116,6 +127,10 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
       };
       // Change back to the root document
       changeDocument(document);
+      // Reset the document history
+      setDocumentHistory([]);
+      // Reset action position
+      setActionPosition('cancel');
       // Read from cache or refetch root document
       triggerRefetchDocument(
         document,
@@ -149,8 +164,13 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   };
 
   const handleConfirm = () => {
-    if (isNavigating) {
+    if (actionPosition === 'navigate') {
       handleRedirection();
+    } else if (actionPosition === 'back') {
+      const previousRelation = getPreviousDocument();
+      if (previousRelation) {
+        changeDocument(previousRelation);
+      }
     } else {
       handleToggleModal();
     }
@@ -231,9 +251,14 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                         variant="ghost"
                         disabled={!hasHistory}
                         onClick={() => {
-                          const previousRelation = getPreviousDocument();
-                          if (previousRelation) {
-                            changeDocument(previousRelation);
+                          setActionPosition('back');
+                          if (modified && !isSubmitting) {
+                            setIsConfirmationOpen(true);
+                          } else {
+                            const previousRelation = getPreviousDocument();
+                            if (previousRelation) {
+                              changeDocument(previousRelation);
+                            }
                           }
                         }}
                         marginRight={1}
@@ -252,7 +277,7 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                 <RelationModalBody>
                   <IconButton
                     onClick={() => {
-                      setIsNavigating(true);
+                      setActionPosition('navigate');
 
                       if (modified && !isSubmitting) {
                         setIsConfirmationOpen(true);

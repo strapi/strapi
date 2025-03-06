@@ -34,8 +34,7 @@ interface DocumentContextValue {
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
   documentHistory: DocumentMeta[];
-  addDocumentToHistory: (document: DocumentMeta) => void;
-  getPreviousDocument: () => DocumentMeta | undefined;
+  setDocumentHistory: (document: DocumentMeta[]) => void;
 }
 
 const [DocumentProvider, useDocumentContext] =
@@ -72,20 +71,6 @@ const DocumentContextProvider = ({
 
   const [documentHistory, setDocumentHistory] = React.useState<DocumentMeta[]>([]);
 
-  const addDocumentToHistory = (document: DocumentMeta) => {
-    setDocumentHistory([...documentHistory, document]);
-  };
-
-  const getPreviousDocument = () => {
-    if (documentHistory.length === 0) return undefined;
-
-    const lastDocument = documentHistory[documentHistory.length - 1];
-
-    setDocumentHistory([...documentHistory].slice(0, documentHistory.length - 1));
-
-    return lastDocument;
-  };
-
   return (
     <DocumentProvider
       changeDocument={changeDocument}
@@ -98,8 +83,7 @@ const DocumentContextProvider = ({
       }}
       meta={currentDocumentMeta}
       documentHistory={documentHistory}
-      addDocumentToHistory={addDocumentToHistory}
-      getPreviousDocument={getPreviousDocument}
+      setDocumentHistory={setDocumentHistory}
     >
       {children}
     </DocumentProvider>
