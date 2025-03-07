@@ -37,16 +37,12 @@ export const Upload = () => {
   }, [isLoading, isError, config, rawQuery, setQuery]);
 
   if (isLoading) {
-    return (
-      <>
-        <Page.Title>{title}</Page.Title>
-        <Page.Loading />
-      </>
-    );
+    return <Page.Loading />;
   }
 
   return (
     <Page.Main>
+      <Page.Title>{title}</Page.Title>
       {rawQuery ? (
         <React.Suspense fallback={<Page.Loading />}>
           <Routes>

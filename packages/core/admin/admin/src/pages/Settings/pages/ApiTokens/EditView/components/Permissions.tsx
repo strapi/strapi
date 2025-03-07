@@ -22,6 +22,7 @@ export const Permissions = ({ ...props }) => {
         paddingRight={7}
         direction="column"
         alignItems="stretch"
+        gap={6}
       >
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="delta" tag="h2">

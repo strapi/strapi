@@ -23,15 +23,16 @@ function createContext<ContextValueType extends object | null>(
     return <Context.Provider value={value}>{children}</Context.Provider>;
   };
 
-  const useContext = <Selected,>(
+  function useContext<Selected>(
     consumerName: string,
     selector: (value: ContextValueType) => Selected
-  ): Selected =>
-    ContextSelector.useContextSelector(Context, (ctx) => {
+  ): Selected {
+    return ContextSelector.useContextSelector(Context, (ctx) => {
       if (ctx) return selector(ctx);
       // it's a required context.
       throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
     });
+  }
 
   Provider.displayName = rootComponentName + 'Provider';
 

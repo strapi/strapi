@@ -23,9 +23,11 @@ export const ResponsiveGridItem = styled(Grid.Item)`
   }
 `;
 
-interface FormLayoutProps extends Pick<EditLayout, 'layout'> {}
+interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
+  hasBackground?: boolean;
+}
 
-const FormLayout = ({ layout }: FormLayoutProps) => {
+const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const { model } = useDoc();
 
@@ -56,14 +58,13 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
         return (
           <Box
             key={index}
-            hasRadius
-            background="neutral0"
-            shadow="tableShadow"
-            paddingLeft={6}
-            paddingRight={6}
-            paddingTop={6}
-            paddingBottom={6}
-            borderColor="neutral150"
+            {...(!hasBackground && {
+              padding: 6,
+              borderColor: 'neutral150',
+              background: 'neutral0',
+              hasRadius: true,
+              shadow: 'tableShadow',
+            })}
           >
             <Flex direction="column" alignItems="stretch" gap={6}>
               {panel.map((row, gridRowIndex) => (

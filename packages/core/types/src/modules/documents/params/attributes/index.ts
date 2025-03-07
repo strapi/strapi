@@ -77,7 +77,7 @@ export type ScalarValues = GetValue<
  */
 export type GetValues<TSchemaUID extends UID.Schema> = {
   id?: ID;
-  documentId?: TSchemaUID;
+  documentId?: DocumentID;
 } & OmitRelationsWithoutTarget<
   TSchemaUID,
   {

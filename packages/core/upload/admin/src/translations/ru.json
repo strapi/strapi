@@ -12,7 +12,7 @@
   "control-card.save": "Сохранить",
   "filter.add": "Добавить фильтр",
   "form.button.replace-media": "Заменить медиа",
-  "form.input.decription.file-alt": "Этот текст будет показан, если ресурс не может быть отображён.",
+  "form.input.description.file-alt": "Этот текст будет показан, если ресурс не может быть отображён.",
   "form.input.label.file-alt": "Альтернативный текст",
   "form.input.label.file-caption": "Заголовок",
   "form.input.label.file-name": "Имя файла",

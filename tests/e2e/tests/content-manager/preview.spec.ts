@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, findAndClose, skipCtbTour } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 
 test.describe('Preview', () => {
@@ -108,3 +108,69 @@ test.describe('Preview', () => {
     );
   });
 });
+
+describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR === 'true')(
+  'Unstable Preview',
+  () => {
+    test.beforeEach(async ({ page }) => {
+      await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, {
+        coreStore: false,
+      });
+      await resetFiles();
+      await page.goto('/admin');
+      await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
+      await login({ page });
+      await page.waitForURL('/admin');
+    });
+
+    test('I can edit the form to save the document as draft, modified, or published', async ({
+      page,
+    }) => {
+      // Open an edit view for a content type that has preview
+      await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+      await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+      // Open the preview page
+      await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+
+      const titleBox = page.getByRole('textbox', { name: 'title' });
+      const saveButton = page.getByRole('button', { name: /save/i });
+      const publishButton = page.getByRole('button', { name: /publish/i });
+      const draftTab = page.getByRole('tab', { name: /^Draft$/ });
+      const publishedTab = page.getByRole('tab', { name: /^Published$/ });
+
+      // Confirm initial state
+      await expect(titleBox).toHaveValue(/west ham post match/i);
+      await expect(page.getByRole('status', { name: /draft/i })).toBeVisible();
+      await expect(draftTab).toHaveAttribute('aria-selected', 'true');
+      await expect(draftTab).toBeEnabled();
+      await expect(publishedTab).toHaveAttribute('aria-selected', 'false');
+      await expect(publishedTab).toBeDisabled();
+
+      // Update and save
+      await titleBox.fill('West Ham pre match pep talk');
+      await expect(saveButton).toBeEnabled();
+      await clickAndWait(page, saveButton);
+      await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
+      await expect(page.getByRole('status', { name: /draft/i })).toBeVisible();
+
+      // Publish
+      await expect(publishButton).toBeEnabled();
+      await clickAndWait(page, publishButton);
+      await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
+      await expect(page.getByRole('status', { name: /published/i })).toBeVisible();
+      await expect(publishedTab).toBeEnabled();
+      await clickAndWait(page, publishedTab);
+      await expect(titleBox).toBeDisabled();
+
+      // Modify
+      await clickAndWait(page, draftTab);
+      titleBox.fill('West Ham pre match jokes');
+      await expect(saveButton).toBeEnabled();
+      await clickAndWait(page, saveButton);
+      await expect(titleBox).toHaveValue(/west ham pre match jokes/i);
+      await expect(page.getByRole('status', { name: /modified/i })).toBeVisible();
+    });
+  }
+);

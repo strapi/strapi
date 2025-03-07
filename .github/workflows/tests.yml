@@ -239,6 +239,16 @@ jobs:
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
+        # Add the Trunk Analytics Uploader step
+      - name: Upload results to trunk
+        if: '!cancelled()'
+        uses: trunk-io/analytics-uploader@main
+        with:
+          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          org-slug: strapi
+          token: ${{ secrets.TRUNK_API_TOKEN }}
+        continue-on-error: true
+
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
@@ -272,7 +282,6 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
-          enableFutureFeatures: true
           jestOptions: '--project=${{ matrix.project }} --shard=${{ matrix.shard }}'
 
       - uses: actions/upload-artifact@v4

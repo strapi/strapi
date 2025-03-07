@@ -193,7 +193,7 @@
   "admin.pages.MarketPlacePage.head": "マーケットプレイス - プラグイン",
   "admin.pages.MarketPlacePage.submit.plugin.link": "プラグインを送信",
   "admin.pages.MarketPlacePage.subtitle": "Get more out of Strapi",
-  "anErrorOccurred": "Woops! Something went wrong. Please, try again.",
+  "anErrorOccurred": "Whoops! Something went wrong. Please, try again.",
   "app.component.CopyToClipboard.label": "Copy to clipboard",
   "app.component.search.label": "{target}を検索",
   "app.component.table.duplicate": "{target}を復元",

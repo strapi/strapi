@@ -1,10 +1,14 @@
 {
   "scripts": {
-    "develop": "strapi develop",
-    "start": "strapi start",
     "build": "strapi build",
-    "strapi": "strapi",
     "deploy": "strapi deploy",
+    "develop": "strapi develop",
+    "dev": "strapi develop",
+    "console": "strapi console",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry",
     "seed:example": "node ./scripts/seed.js"
   },
   "dependencies": {

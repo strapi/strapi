@@ -13,7 +13,6 @@ import DataManagerProvider from '../../components/DataManagerProvider/DataManage
 import { FormModalNavigationProvider } from '../../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import { PERMISSIONS } from '../../constants';
 import { pluginId } from '../../pluginId';
-import { RecursivePath } from '../RecursivePath/RecursivePath';
 
 const ListView = lazy(() => import('../ListView/ListView'));
 
@@ -32,20 +31,20 @@ const App = () => {
     }
   }, []);
 
-  // FIXME Error here
   return (
     <Page.Protect permissions={PERMISSIONS.main}>
       <Page.Title>{title}</Page.Title>
       <AutoReloadOverlayBlockerProvider>
         <FormModalNavigationProvider>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore */}
           <DataManagerProvider>
             <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
               <Suspense fallback={<Page.Loading />}>
                 <Routes>
                   <Route path="content-types/:uid" element={<ListView />} />
-                  <Route path={`component-categories/:categoryUid/*`} element={<RecursivePath />} />
+                  <Route
+                    path={`component-categories/:categoryUid/:componentUid`}
+                    element={<ListView />}
+                  />
                 </Routes>
               </Suspense>
             </Layouts.Root>

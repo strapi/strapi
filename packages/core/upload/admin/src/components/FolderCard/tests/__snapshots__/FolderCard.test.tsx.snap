@@ -127,9 +127,13 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c6 {
+  display: inline-flex;
+  pointer-events: auto!important;
   width: 100%;
   height: 100%;
   cursor: pointer;
+  justify-content: center;
+  align-items: center;
 }
 
 .c1 {
@@ -194,7 +198,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
           <span
             class="c6"
             data-state="unchecked"
-            style="pointer-events: auto; display: inline-flex;"
+            style="pointer-events: none;"
           />
         </button>
       </div>

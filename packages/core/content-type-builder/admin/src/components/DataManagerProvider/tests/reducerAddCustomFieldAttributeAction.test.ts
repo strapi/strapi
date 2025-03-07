@@ -1,7 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 
-import { ADD_CUSTOM_FIELD_ATTRIBUTE } from '../constants';
-import { reducer, initialState } from '../reducer';
+import { reducer, initialState, actions } from '../reducer';
 
 import type { Component, ContentType } from '../../../types';
 
@@ -27,13 +26,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action: any = {
-      type: ADD_CUSTOM_FIELD_ATTRIBUTE,
+    const action = actions.addCustomFieldAttribute({
       attributeToSet: newCustomFieldAttribute,
       forTarget: 'contentType',
       targetUid: 'api::test.test',
-      initialAttribute: {},
-    };
+    });
 
     const state: any = {
       ...initialState,
@@ -83,13 +80,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action: any = {
-      type: ADD_CUSTOM_FIELD_ATTRIBUTE,
+    const action = actions.addCustomFieldAttribute({
       attributeToSet: newCustomFieldAttribute,
       forTarget: 'component',
       targetUid: 'basic.simple',
-      initialAttribute: {},
-    };
+    });
 
     const state: any = {
       ...initialState,
@@ -166,13 +161,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_CUSTOM_FIELD_AT
       customField: 'plugin::mycustomfields.color',
     };
 
-    const action: any = {
-      type: ADD_CUSTOM_FIELD_ATTRIBUTE,
+    const action = actions.addCustomFieldAttribute({
       attributeToSet: newCustomFieldAttribute,
       forTarget: 'components',
       targetUid: 'basic.simple',
-      initialAttribute: {},
-    };
+    });
 
     const updatedComponent = cloneDeep(componentSchema);
     updatedComponent.schema.attributes.push(newCustomFieldAttribute);

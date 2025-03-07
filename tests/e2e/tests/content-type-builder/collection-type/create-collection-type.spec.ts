@@ -9,7 +9,7 @@ test.describe('Create collection type with all field types', () => {
   test.describe.configure({ timeout: 300000 });
 
   test.beforeEach(async ({ page }) => {
-    await sharedSetup('ctb-edit-st', page, {
+    await sharedSetup('ctb-edit-ct', page, {
       login: true,
       skipTour: true,
       resetFiles: true,

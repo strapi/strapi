@@ -461,7 +461,7 @@ const SelectedEntriesModalContent = ({
 
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
-  const { publishMany: bulkPublishAction } = useDocumentActions();
+  const { publishMany: bulkPublishAction, isLoading: isPublishing } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
 
   const selectedRows = useTable('publishAction', (state) => state.selectedRows);
@@ -541,7 +541,7 @@ const SelectedEntriesModalContent = ({
               selectedEntriesPublishedCount === selectedEntries.length ||
               isLoading
             }
-            loading={isSubmittingForm}
+            loading={isPublishing || isSubmittingForm}
           >
             {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
           </Button>
@@ -550,7 +550,7 @@ const SelectedEntriesModalContent = ({
       <ConfirmDialogPublishAll
         isOpen={isDialogOpen}
         onToggleDialog={toggleDialog}
-        isConfirmButtonLoading={isSubmittingForm}
+        isConfirmButtonLoading={isPublishing || isSubmittingForm}
         onConfirm={handleConfirmBulkPublish}
       />
     </>

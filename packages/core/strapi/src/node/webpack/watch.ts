@@ -4,7 +4,7 @@ import { promisify } from 'node:util';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import { webpack } from 'webpack';
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import type { BuildContext } from '../create-build-context';
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
 

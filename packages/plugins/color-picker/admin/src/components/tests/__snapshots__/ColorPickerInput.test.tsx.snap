@@ -125,6 +125,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 
 <div>
   <form
+    class=""
     method="POST"
     novalidate=""
   >

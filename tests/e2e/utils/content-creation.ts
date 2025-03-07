@@ -139,7 +139,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
 
     // all other cases can be handled as text fills
     default:
-      await page.getByLabel(name).fill(String(value));
+      await page.getByLabel(name).last().fill(String(value));
       break;
   }
 };
@@ -184,7 +184,7 @@ export const verifyFields = async (page: Page, fields: FieldValue[]): Promise<vo
         break;
       // TODO: component fields should actually check that they are in the same component
       default:
-        const fieldValue = await page.getByLabel(name).inputValue();
+        const fieldValue = await page.getByLabel(name, { exact: true }).inputValue();
         expect(fieldValue).toBe(String(value)); // Verify text/numeric input values
         break;
     }
@@ -211,16 +211,18 @@ export const createContent = async (
 ): Promise<void> => {
   await navToHeader(page, ['Content Manager', contentType], contentType);
 
-  await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }));
+  await clickAndWait(page, page.getByRole('link', { name: 'Create new entry' }).last());
 
   await fillFields(page, fields);
 
   if (options.save) {
+    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
     await findAndClose(page, 'Saved Document', { required: options.verify });
   }
 
   if (options.publish) {
+    await expect(page.getByRole('button', { name: 'Publish' })).toBeEnabled();
     await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
     await findAndClose(page, 'Published Document', { required: options.verify });
   }

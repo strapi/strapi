@@ -8,6 +8,9 @@ import { previewAdmin } from './preview';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
+// NOTE: we have to preload it to ensure chunks will have it available as global
+import 'prismjs';
+
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {

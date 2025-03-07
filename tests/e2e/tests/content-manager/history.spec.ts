@@ -28,11 +28,9 @@ const goToHistoryPage = async (page: Page) => {
   await moreActionsButton.click();
   const historyButton = page.getByRole('menuitem', { name: /content history/i });
 
-  // TODO find out why the history button sometimes doesn't appear. Reloading shouldn't be necessary
   if (await historyButton.isVisible()) {
     await clickAndWait(page, historyButton);
   } else {
-    await page.reload();
     await goToHistoryPage(page);
   }
 };

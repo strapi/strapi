@@ -41,8 +41,6 @@ test.describe('Edit collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
-    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
-    // Fix the bug then remove this
     await waitForRestart(page);
 
     await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
@@ -66,10 +64,6 @@ test.describe('Edit collection type', () => {
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
-    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
-    // Fix the bug then remove this
-    await page.reload();
-
     // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
     await page.getByRole('button', { name: 'Edit' }).first().click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
@@ -88,10 +82,6 @@ test.describe('Edit collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
-
-    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
-    // Fix the bug then remove this
-    await page.reload();
 
     // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
     await page.getByRole('button', { name: 'Edit' }).first().click();
@@ -176,9 +166,6 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    // TODO: fix bug that requires a page refresh to see that content types have been updated
-    await page.reload();
-
     await expect(page.getByRole('heading', { name: newname })).toBeVisible();
   });
 
@@ -191,9 +178,6 @@ test.describe('Edit collection type', () => {
     await page.getByRole('button', { name: 'Delete', exact: true }).click();
 
     await waitForRestart(page);
-
-    // TODO: fix bug that requires a page refresh to see that content types have been updated
-    await page.reload();
 
     await expect(page.getByRole('heading', { name: ctName })).not.toBeVisible();
   });

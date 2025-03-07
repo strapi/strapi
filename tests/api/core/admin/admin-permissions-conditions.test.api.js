@@ -63,6 +63,7 @@ describe('Admin Permissions - Conditions', () => {
     users: [
       { firstname: 'Alice', lastname: 'Foo', email: 'alice.foo@test.com' },
       { firstname: 'Bob', lastname: 'Bar', email: 'bob.bar@test.com' },
+      { firstName: 'Charlie', lastName: 'Baz', email: 'charlie.baz@test.com' },
     ],
   };
 
@@ -73,12 +74,16 @@ describe('Admin Permissions - Conditions', () => {
 
     // Create the foobar role
     const role = await utils.createRole(localTestData.role);
+    const otherRole = await utils.createRole({
+      name: 'otherRole',
+      description: 'Another dummy test role',
+    });
 
     // Assign permissions to the foobar role
     const permissions = await utils.assignPermissionsToRole(role.id, localTestData.permissions);
     Object.assign(role, { permissions });
 
-    // Create users with the new role & create associated auth requests
+    // Create users with the new roles & create associated auth requests
     const users = [];
 
     for (let i = 0; i < localTestData.users.length; i += 1) {
@@ -86,7 +91,7 @@ describe('Admin Permissions - Conditions', () => {
       const userAttributes = {
         ...userFixture,
         password: localTestData.userPassword,
-        roles: [role.id],
+        roles: [i === localTestData.users.length - 1 ? otherRole.id : role.id],
       };
 
       const createdUser = await utils.createUser(userAttributes);
@@ -158,13 +163,46 @@ describe('Admin Permissions - Conditions', () => {
     const { documentId } = localTestData.entry;
     const modelName = getModelName();
     const rq = getUserRequest(1);
-    const res = await rq({
+    const editViewRes = await rq({
       method: 'GET',
       url: `/content-manager/collection-types/api::${modelName}.${modelName}/${documentId}`,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toMatchObject(localTestData.entry);
+    expect(editViewRes.statusCode).toBe(200);
+    expect(editViewRes.body.data).toMatchObject(localTestData.entry);
+
+    // The document should also be available in the homepage content manager widgets
+    const homepageRecentlyUpdatedRes = await rq({
+      method: 'GET',
+      url: '/admin/homepage/recent-documents?action=update',
+    });
+
+    expect(homepageRecentlyUpdatedRes.statusCode).toBe(200);
+    expect(homepageRecentlyUpdatedRes.body.data).toHaveLength(1);
+    expect(homepageRecentlyUpdatedRes.body.data[0].documentId).toBe(
+      editViewRes.body.data.documentId
+    );
+  });
+
+  test('User C cannot read the entry created by user A', async () => {
+    const { documentId } = localTestData.entry;
+    const modelName = getModelName();
+    const rq = getUserRequest(2);
+    const editViewRes = await rq({
+      method: 'GET',
+      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${documentId}`,
+    });
+
+    expect(editViewRes.statusCode).toBe(403);
+
+    // The document should not be available in the homepage content manager widgets
+    const homepageRecentlyUpdatedRes = await rq({
+      method: 'GET',
+      url: '/admin/homepage/recent-documents?action=update',
+    });
+
+    expect(homepageRecentlyUpdatedRes.statusCode).toBe(200);
+    expect(homepageRecentlyUpdatedRes.body.data).toHaveLength(0);
   });
 
   test('User B cannot delete the entry created by user A', async () => {

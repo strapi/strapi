@@ -21,6 +21,7 @@ describe('DocAssetCard', () => {
           name="hello.png"
           extension="png"
           selected={false}
+          isSelectable={true}
           onSelect={jest.fn()}
           onEdit={jest.fn()}
           size="S"
