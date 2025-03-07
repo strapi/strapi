@@ -57,6 +57,19 @@ const CustomModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
+interface RelationModalContextValue {
+  parentModified: boolean;
+  depth: number;
+}
+
+const [RelationModalProvider, useRelationModal] = createContext<RelationModalContextValue>(
+  'RelationModal',
+  {
+    parentModified: false,
+    depth: 0,
+  }
+);
+
 const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
@@ -71,16 +84,40 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   );
   const currentDocumentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const changeDocument = useDocumentContext('RelationModalBody', (state) => state.changeDocument);
+  const documentHistory = useDocumentContext('RelationModalBody', (state) => state.documentHistory);
+  const setDocumentHistory = useDocumentContext(
+    'RelationModalBody',
+    (state) => state.setDocumentHistory
+  );
 
   const [isConfirmationOpen, setIsConfirmationOpen] = React.useState(false);
-  const [isNavigating, setIsNavigating] = React.useState(false);
+  const [actionPosition, setActionPosition] = React.useState<'cancel' | 'back' | 'navigate'>(
+    'cancel'
+  );
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
+  // NOTE: Not sure about this relation modal context, maybe we should move this to DocumentContext?
   // Get parent modal context if it exists
   const parentContext = useRelationModal('RelationModalWrapper', (state) => state);
-  const isNested = parentContext.depth > 0;
-  // Track this modal's depth
-  const depth = isNested ? parentContext.depth + 1 : 1;
+  // Get depth of nested modals
+  const depth = parentContext ? parentContext.depth + 1 : 0;
+  // Check if this is a nested modal
+  const isNested = depth > 0;
+
+  const addDocumentToHistory = (document: DocumentMeta) =>
+    setDocumentHistory((prev) => [...prev, document]);
+
+  const getPreviousDocument = () => {
+    if (documentHistory.length === 0) return undefined;
+
+    const lastDocument = documentHistory[documentHistory.length - 1];
+
+    return lastDocument;
+  };
+
+  const removeLastDocumentFromHistory = () => {
+    setDocumentHistory((prev) => [...prev].slice(0, prev.length - 1));
+  };
 
   const handleToggleModal = () => {
     if (isModalOpen) {
@@ -92,6 +129,10 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
       };
       // Change back to the root document
       changeDocument(document);
+      // Reset the document history
+      setDocumentHistory([]);
+      // Reset action position
+      setActionPosition('cancel');
       // Read from cache or refetch root document
       triggerRefetchDocument(
         document,
@@ -125,8 +166,14 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   };
 
   const handleConfirm = () => {
-    if (isNavigating) {
+    if (actionPosition === 'navigate') {
       handleRedirection();
+    } else if (actionPosition === 'back') {
+      const previousRelation = getPreviousDocument();
+      if (previousRelation) {
+        removeLastDocumentFromHistory();
+        changeDocument(previousRelation);
+      }
     } else {
       handleToggleModal();
     }
@@ -150,6 +197,9 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
       }}
     >
       {({ modified, isSubmitting, resetForm }) => {
+        // We don't count the root document, so history starts after 1
+        const hasHistory = documentHistory.length > 1;
+
         return (
           <RelationModalProvider parentModified={modified} depth={depth}>
             <Modal.Root
@@ -177,6 +227,10 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                         if (modified && !isSubmitting) {
                           setIsConfirmationOpen(true);
                         } else {
+                          // Add current relation to history before opening a new one
+                          if (currentDocumentMeta && Object.keys(currentDocumentMeta).length > 0) {
+                            addDocumentToHistory(currentDocumentMeta);
+                          }
                           handleToggleModal();
                         }
 
@@ -198,8 +252,19 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                         withTooltip={false}
                         label="Back"
                         variant="ghost"
-                        disabled
-                        onClick={() => {}}
+                        disabled={!hasHistory}
+                        onClick={() => {
+                          setActionPosition('back');
+                          if (modified && !isSubmitting) {
+                            setIsConfirmationOpen(true);
+                          } else {
+                            const previousRelation = getPreviousDocument();
+                            if (previousRelation) {
+                              removeLastDocumentFromHistory();
+                              changeDocument(previousRelation);
+                            }
+                          }
+                        }}
                         marginRight={1}
                       >
                         <ArrowLeft />
@@ -216,7 +281,7 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                 <RelationModalBody>
                   <IconButton
                     onClick={() => {
-                      setIsNavigating(true);
+                      setActionPosition('navigate');
 
                       if (modified && !isSubmitting) {
                         setIsConfirmationOpen(true);
@@ -277,19 +342,6 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
     </FormContext>
   );
 };
-
-interface RelationModalContextValue {
-  parentModified: boolean;
-  depth: number;
-}
-
-const [RelationModalProvider, useRelationModal] = createContext<RelationModalContextValue>(
-  'RelationModal',
-  {
-    parentModified: false,
-    depth: 0,
-  }
-);
 
 const CustomTextButton = styled(TextButton)`
   & > span {

@@ -65,6 +65,35 @@ test.describe('Unstable Relations on the fly', () => {
     await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
   });
 
+  test('I want to open some nested relations and click the back button to open the initial relation', async ({
+    page,
+  }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+
+    // Open the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
+    await expect(page.getByRole('button', { name: 'Back' })).toBeDisabled();
+
+    // Open a nested relation
+    await clickAndWait(page, page.getByRole('button', { name: 'West Ham post match analysis' }));
+    await expect(page.getByRole('button', { name: 'Back' })).toBeEnabled();
+    // and another nested relation
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
+    await expect(page.getByRole('button', { name: 'Back' })).toBeEnabled();
+
+    // click on the Back button once
+    await clickAndWait(page, page.getByRole('button', { name: 'Back' }));
+    await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Back' })).toBeEnabled();
+
+    // click on the Back button again
+    await clickAndWait(page, page.getByRole('button', { name: 'Back' }));
+    await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Back' })).toBeDisabled();
+  });
+
   test('I want to click on a nested relation in the relation modal without saving the data in the form', async ({
     page,
   }) => {
@@ -131,5 +160,33 @@ test.describe('Unstable Relations on the fly', () => {
 
     await page.waitForURL(AUTHOR_EDIT_URL);
     await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
+  });
+
+  test('I want to click the back button to open the previous relation without saving the data in the form', async ({
+    page,
+  }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+
+    // Open the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
+
+    // Open a nested relation
+    await clickAndWait(page, page.getByRole('button', { name: 'West Ham post match analysis' }));
+    // and another nested relation
+    await clickAndWait(page, page.getByRole('button', { name: 'Coach Beard' }));
+
+    // Change the name of the author
+    const name = page.getByRole('textbox', { name: 'name' });
+    await name.fill('Mr. Coach Beard');
+
+    // click on the Back button
+    await clickAndWait(page, page.getByRole('button', { name: 'Back' }));
+
+    // Check the confirmation modal is shown and click confirm
+    await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
+
+    await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
   });
 });
