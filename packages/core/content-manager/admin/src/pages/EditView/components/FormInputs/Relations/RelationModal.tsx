@@ -105,16 +105,18 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   const isNested = depth > 0;
 
   const addDocumentToHistory = (document: DocumentMeta) =>
-    setDocumentHistory([...documentHistory, document]);
+    setDocumentHistory((prev) => [...prev, document]);
 
   const getPreviousDocument = () => {
     if (documentHistory.length === 0) return undefined;
 
     const lastDocument = documentHistory[documentHistory.length - 1];
 
-    setDocumentHistory([...documentHistory].slice(0, documentHistory.length - 1));
-
     return lastDocument;
+  };
+
+  const removeLastDocumentFromHistory = () => {
+    setDocumentHistory((prev) => [...prev].slice(0, prev.length - 1));
   };
 
   const handleToggleModal = () => {
@@ -169,6 +171,7 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
     } else if (actionPosition === 'back') {
       const previousRelation = getPreviousDocument();
       if (previousRelation) {
+        removeLastDocumentFromHistory();
         changeDocument(previousRelation);
       }
     } else {
@@ -257,6 +260,7 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                           } else {
                             const previousRelation = getPreviousDocument();
                             if (previousRelation) {
+                              removeLastDocumentFromHistory();
                               changeDocument(previousRelation);
                             }
                           }

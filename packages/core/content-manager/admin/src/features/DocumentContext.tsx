@@ -34,7 +34,7 @@ interface DocumentContextValue {
   meta: DocumentMeta;
   changeDocument: (newRelation: DocumentMeta) => void;
   documentHistory: DocumentMeta[];
-  setDocumentHistory: (document: DocumentMeta[]) => void;
+  setDocumentHistory: React.Dispatch<React.SetStateAction<DocumentMeta[]>>;
 }
 
 const [DocumentProvider, useDocumentContext] =
