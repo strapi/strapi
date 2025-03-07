@@ -1,27 +1,71 @@
-import { Flex, Typography } from '@strapi/design-system';
+import { Button, Flex, Typography } from '@strapi/design-system';
+import { Sparkle } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
+import { NextLogo } from '../../components/AIChat/components/Attachments/components/NextLogo';
+import { useStrapiChat } from '../../components/AIChat/providers/ChatProvider';
 import { getTrad } from '../../utils/getTrad';
+// Styled container that implements responsive behavior
+const ResponsiveContainer = styled(Flex)`
+  @container (max-width: 200px) {
+    .hide-on-small {
+      display: none;
+    }
+  }
+  container-type: inline-size;
+`;
 
 export const EmptyState = () => {
   const { formatMessage } = useIntl();
 
   const pluginName = formatMessage({
-    id: getTrad('plugin.name'),
-    defaultMessage: 'Content-Type Builder',
+    id: getTrad('table.content.create-first-content-type.title'),
+    defaultMessage: 'No content types',
   });
 
+  const { openChat } = useStrapiChat();
+
   return (
-    <>
-      <Flex justifyContent="center" alignItems="center" height="100%" direction="column">
-        <Typography variant="alpha">{pluginName}</Typography>
-        <Typography variant="delta">
+    <ResponsiveContainer
+      justifyContent="center"
+      height="100%"
+      width={'400px'}
+      maxWidth="70%"
+      margin="auto"
+      direction="column"
+      gap={6}
+    >
+      <EmptyDocuments width="160px" height="88px" />
+
+      <Flex gap={2} alignItems="center" direction="column">
+        <Typography variant="beta" textAlign="center">
+          {pluginName}
+        </Typography>
+        <Typography
+          variant="omega"
+          textAlign="center"
+          textColor="neutral600"
+          className="hide-on-small"
+        >
           {formatMessage({
-            id: getTrad('table.content.create-first-content-type'),
-            defaultMessage: 'Create your first Collection-Type',
+            id: getTrad('table.content.create-first-content-type.description'),
+            defaultMessage:
+              'Create collection types, single types and components in order to build your schema.',
           })}
         </Typography>
       </Flex>
-    </>
+
+      {/* Chat is not available on small screens either way */}
+      <Flex gap={2} direction="column" className="hide-on-small">
+        <Button startIcon={<NextLogo size={16} />} variant="tertiary">
+          Import a Next.js app
+        </Button>
+        <Button startIcon={<Sparkle />} variant="tertiary" onClick={() => openChat()}>
+          Start with a prompt
+        </Button>
+      </Flex>
+    </ResponsiveContainer>
   );
 };

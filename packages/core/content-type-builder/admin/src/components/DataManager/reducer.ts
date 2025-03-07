@@ -735,26 +735,53 @@ const slice = createUndoRedoSlice(
         const { action, schema } = reducerAction.payload;
 
         switch (action) {
-          case 'add': {
-            // generate a uid ?
+          case 'add':
+            {
+              const uid = schema.uid;
+
+              if (schema.modelType === 'component') {
+                state.components[uid] = schema;
+              } else {
+                state.contentTypes[uid] = schema;
+              }
+            }
+            break;
+          case 'update':
+            {
+              const uid = schema.uid;
+
+              // Find the schema, if the state was "create", we should keep it as it was before
+
+              if (schema.modelType === 'component') {
+                const component = state.components[uid];
+                state.components[uid] = {
+                  ...schema,
+                  status: component?.status === 'NEW' ? 'NEW' : schema.status,
+                };
+              } else {
+                const contentType = state.contentTypes[uid];
+                state.contentTypes[uid] = {
+                  ...schema,
+                  status: contentType?.status === 'NEW' ? 'NEW' : schema.status,
+                };
+              }
+            }
+            break;
+          case 'delete': {
             const uid = schema.uid;
 
             if (schema.modelType === 'component') {
-              state.components[uid] = {
-                ...formatSchema(schema),
-                status: 'NEW',
-              };
+              delete state.components[uid];
             } else {
-              state.contentTypes[uid] = {
-                ...formatSchema(schema),
-                status: 'NEW',
-              };
+              delete state.contentTypes[uid];
             }
+            break;
           }
         }
       },
     },
   },
+
   {
     limit: 50,
     excludeActionsFromHistory: ['reloadPlugin', 'init'],

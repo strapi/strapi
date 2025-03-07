@@ -178,7 +178,8 @@
   "relation.oneToOne": "tem e pertence a um",
   "relation.oneWay": "pertence a um",
   "table.button.no-fields": "Adicionar novo campo",
-  "table.content.create-first-content-type": "Crie seu primeiro tipo de coleção",
+  "table.content.create-first-content-type.title": "Nenhum tipo de conteúdo",
+  "table.content.create-first-content-type.description": "Crie tipos de coleção, tipos únicos e componentes para construir seu esquema.",
   "table.content.no-fields.collection-type": "Adicione seu primeiro campo a este Tipo de Coleção",
   "table.content.no-fields.component": "Adicione seu primeiro campo a este Componente"
 }

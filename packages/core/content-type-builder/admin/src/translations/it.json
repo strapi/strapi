@@ -155,5 +155,10 @@
   "relation.manyWay": "ha molti",
   "relation.oneToMany": "appartiene a molti",
   "relation.oneToOne": "ha e appartiene a un",
-  "relation.oneWay": "ha un"
+  "relation.oneWay": "ha un",
+  "table.button.no-fields": "Aggiungi nuovo campo",
+  "table.content.create-first-content-type.title": "Nessun tipo di contenuto",
+  "table.content.create-first-content-type.description": "Crea tipi di collezione, tipi singoli e componenti per costruire il tuo schema.",
+  "table.content.no-fields.collection-type": "Aggiungi il tuo primo campo a questa Collezione",
+  "table.content.no-fields.component": "Aggiungi il tuo primo campo a questo componente"
 }

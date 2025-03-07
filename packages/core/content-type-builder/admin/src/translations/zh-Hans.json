@@ -135,5 +135,10 @@
   "relation.manyWay": "有很多",
   "relation.oneToMany": "属于很多",
   "relation.oneToOne": "有一个",
-  "relation.oneWay": "有一个"
+  "relation.oneWay": "有一个",
+  "table.button.no-fields": "添加新字段",
+  "table.content.create-first-content-type.title": "没有内容类型",
+  "table.content.create-first-content-type.description": "创建集合类型、单一类型和组件以构建您的模式。",
+  "table.content.no-fields.collection-type": "在此集合类型中添加你的第一个字段",
+  "table.content.no-fields.component": "在这个组件中添加你的第一个字段"
 }

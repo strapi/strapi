@@ -7,6 +7,9 @@ import { Page, useGuidedTour, Layouts, useAppInfo } from '@strapi/admin/strapi-a
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
+import { Chat } from '../../components/AIChat/Chat';
+import { ChatProvider } from '../../components/AIChat/providers/ChatProvider';
+import { SchemaChatProvider } from '../../components/AIChat/providers/SchemaProvider';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManager/DataManagerProvider';

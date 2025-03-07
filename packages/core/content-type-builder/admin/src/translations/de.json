@@ -178,7 +178,8 @@
   "relation.oneToOne": "hat und gehört zu ein(-er/-em)",
   "relation.oneWay": "hat ein(-e/-en)",
   "table.button.no-fields": "Neues Feld hinzufügen",
-  "table.content.create-first-content-type": "Erstelle deinen ersten Inhalts-Typ",
+  "table.content.create-first-content-type.title": "Keine Inhaltstypen",
+  "table.content.create-first-content-type.description": "Erstellen Sie Sammlungstypen, Einzeltypen und Komponenten, um Ihr Schema zu erstellen.",
   "table.content.no-fields.collection-type": "Füge diesem Inhalts-Typ das erstes Feld hinzu",
   "table.content.no-fields.component": "Füge dieser Komponente das erstes Feld hinzu"
 }

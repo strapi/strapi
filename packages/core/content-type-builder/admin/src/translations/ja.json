@@ -40,5 +40,10 @@
   "relation.manyToOne": "has many",
   "relation.oneToMany": "belongs to many",
   "relation.oneToOne": "has and belongs to one",
-  "relation.oneWay": "has one"
+  "relation.oneWay": "has one",
+  "table.button.no-fields": "フィールドを追加",
+  "table.content.create-first-content-type.title": "コンテンツタイプがありません",
+  "table.content.create-first-content-type.description": "スキーマを構築するためにコレクションタイプ、シングルタイプ、コンポーネントを作成します。",
+  "table.content.no-fields.collection-type": "このコレクションタイプに最初のフィールドを追加する",
+  "table.content.no-fields.component": "このコンポーネントに最初のフィールドを追加する"
 }

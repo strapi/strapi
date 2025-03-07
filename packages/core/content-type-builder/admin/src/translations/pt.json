@@ -41,5 +41,10 @@
   "relation.manyToOne": "tem vários",
   "relation.oneToMany": "pertence a vários",
   "relation.oneToOne": "tem e pertence a um",
-  "relation.oneWay": "tem um"
+  "relation.oneWay": "tem um",
+  "table.button.no-fields": "Adicionar novo campo",
+  "table.content.create-first-content-type.title": "Nenhum tipo de conteúdo",
+  "table.content.create-first-content-type.description": "Crie tipos de coleção, tipos únicos e componentes para construir o seu esquema.",
+  "table.content.no-fields.collection-type": "Adicione o seu primeiro campo a este Tipo de Coleção",
+  "table.content.no-fields.component": "Adicione o seu primeiro campo a este componente"
 }
