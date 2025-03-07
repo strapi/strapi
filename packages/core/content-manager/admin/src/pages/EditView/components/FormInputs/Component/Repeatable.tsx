@@ -18,7 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDoc } from '../../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
@@ -51,7 +51,10 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const { components } = useDoc();
+  const components = useDocumentContext(
+    'RepeatableComponent',
+    (state) => state.document.components
+  );
 
   const {
     value = [],

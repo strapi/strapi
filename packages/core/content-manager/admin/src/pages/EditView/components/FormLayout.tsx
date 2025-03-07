@@ -2,7 +2,7 @@ import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDoc } from '../../../hooks/useDocument';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
@@ -15,21 +15,30 @@ export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;
 `;
 
-export const ResponsiveGridItem = styled(Grid.Item)`
-  grid-column: span 12;
-
-  @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
-    ${({ col }) => col && `grid-column: span ${col};`}
-  }
-`;
+// We need to use a different grid item for the responsive layout in the test environment
+// because @container is not supported in jsdom and it throws an error
+export const ResponsiveGridItem =
+  // TODO: we need to find a better solution to avoid using process.env.NODE_ENV in the code to fix the tests with this styled component
+  process.env.NODE_ENV !== 'test'
+    ? styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+        @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+          ${({ col }) => col && `grid-column: span ${col};`}
+        }
+      `
+    : styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+      `;
 
 interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   hasBackground?: boolean;
+  model?: string;
 }
 
-const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
+const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { model } = useDoc();
+  const documentMeta = useDocumentContext('FormLayout', (state) => state.meta);
+  const model = documentMeta.model;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -58,7 +67,7 @@ const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
         return (
           <Box
             key={index}
-            {...(!hasBackground && {
+            {...(hasBackground && {
               padding: 6,
               borderColor: 'neutral150',
               background: 'neutral0',
