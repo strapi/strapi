@@ -17,12 +17,14 @@ export interface MediaLibraryDialogProps {
   allowedTypes?: AllowedTypes[];
   onClose: () => void;
   onSelectAssets: (selectedAssets: File[]) => void;
+  initiallySelectedAssets?: File[];
 }
 
 export const MediaLibraryDialog = ({
   onClose,
   onSelectAssets,
   allowedTypes = ['files', 'images', 'videos', 'audios'],
+  initiallySelectedAssets,
 }: MediaLibraryDialogProps) => {
   const [step, setStep] = React.useState(STEPS.AssetSelect);
   const [folderId, setFolderId] = React.useState<number | null>(null);
@@ -33,6 +35,7 @@ export const MediaLibraryDialog = ({
         <AssetDialog
           allowedTypes={allowedTypes}
           folderId={folderId}
+          initiallySelectedAssets={initiallySelectedAssets}
           open
           onClose={onClose}
           onValidate={onSelectAssets}
