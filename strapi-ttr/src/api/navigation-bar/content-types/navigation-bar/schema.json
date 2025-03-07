@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "navigation_bars",
+  "info": {
+    "singularName": "navigation-bar",
+    "pluralName": "navigation-bars",
+    "displayName": "Navigation Bar",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "to": {
+      "type": "string",
+      "required": true,
+      "unique": false
+    },
+    "subNavigation": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::sub-navigation.sub-navigation",
+      "mappedBy": "navigation_bar"
+    }
+  }
+}

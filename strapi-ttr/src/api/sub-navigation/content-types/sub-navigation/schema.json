@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sub_navigations",
+  "info": {
+    "singularName": "sub-navigation",
+    "pluralName": "sub-navigations",
+    "displayName": "Sub Navigation",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "to": {
+      "type": "string"
+    },
+    "navigation_bar": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::navigation-bar.navigation-bar",
+      "inversedBy": "subNavigation"
+    }
+  }
+}
