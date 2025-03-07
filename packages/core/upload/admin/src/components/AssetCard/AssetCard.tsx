@@ -1,4 +1,4 @@
-import { AssetType } from '../../constants';
+import { AssetType } from '../../enums';
 import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
 
 import { AudioAssetCard } from './AudioAssetCard';
