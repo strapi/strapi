@@ -15,7 +15,11 @@ function assertCloudError(e: unknown): asserts e is CloudError {
   }
 }
 
-export async function handleCloudLogin(): Promise<void> {
+export async function handleCloudLogin(): Promise<{
+  // Modify the return type to include user information
+  // TODO will return more (first name, last name) but `strapi/cloud` is currently limited to email
+  email: string;
+} | void> {
   const logger = cloudServices.createLogger({
     silent: false,
     debug: process.argv.includes('--debug'),
@@ -49,7 +53,16 @@ export async function handleCloudLogin(): Promise<void> {
     };
 
     try {
-      await cloudCli.login.action(cliContext);
+      // Adjusted `cloudCli.login.action` to return the user info available at the moment
+      const {
+        // @ts-expect-error WIP
+        userInfo: {
+          // TODO just working with email for now it would require changes on `strapi/cloud` to access firstname and lastname
+          email,
+        },
+      } = await cloudCli.login.action(cliContext);
+
+      return { email };
     } catch (e: Error | CloudError | unknown) {
       logger.debug(e);
       try {
