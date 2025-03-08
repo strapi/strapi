@@ -99,6 +99,7 @@
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-swc": "0.4.0",
+    "@strapi/admin-test-utils": "workspace:*",
     "@strapi/eslint-config": "0.2.0",
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "0.3.10",
