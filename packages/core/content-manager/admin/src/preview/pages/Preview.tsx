@@ -8,7 +8,7 @@ import {
   Form as FormContext,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
-import { ArrowLeft } from '@strapi/icons';
+import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -47,7 +47,7 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * PreviewPage
  * -----------------------------------------------------------------------------------------------*/
 
-const AnimatedArrow = styled(ArrowLeft)<{ isSideEditorOpen: boolean }>`
+const AnimatedArrow = styled(ArrowLineLeft)<{ isSideEditorOpen: boolean }>`
   will-change: transform;
   rotate: ${(props) => (props.isSideEditorOpen ? '0deg' : '180deg')};
   transition: rotate 0.2s ease-in-out;
@@ -175,7 +175,7 @@ const PreviewPage = () => {
           disabled={
             query.status === 'published' &&
             documentResponse &&
-            documentResponse.document.status === 'published'
+            documentResponse.document.status !== 'draft'
           }
           initialValues={documentResponse.getInitialFormValues()}
           initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}

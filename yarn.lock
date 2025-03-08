@@ -8638,7 +8638,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     typescript: "npm:5.4.4"
     use-context-selector: "npm:1.4.1"
-    vite: "npm:5.4.11"
+    vite: "npm:5.4.13"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
@@ -9640,7 +9640,7 @@ __metadata:
     style-loader: "npm:3.3.4"
     tsconfig: "npm:5.11.0"
     typescript: "npm:5.4.4"
-    vite: "npm:5.4.11"
+    vite: "npm:5.4.13"
     webpack: "npm:^5.90.3"
     webpack-bundle-analyzer: "npm:^4.10.1"
     webpack-dev-middleware: "npm:6.1.2"
@@ -17849,7 +17849,7 @@ __metadata:
     react-dom: "npm:rc"
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
-    vite: "npm:5.4.11"
+    vite: "npm:5.4.13"
   languageName: unknown
   linkType: soft
 
@@ -31316,9 +31316,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:5.4.11":
-  version: 5.4.11
-  resolution: "vite@npm:5.4.11"
+"vite@npm:5.4.13":
+  version: 5.4.13
+  resolution: "vite@npm:5.4.13"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -31355,7 +31355,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/d536bb7af57dd0eca2a808f95f5ff1d7b7ffb8d86e17c6893087680a0448bd0d15e07475270c8a6de65cb5115592d037130a1dd979dc76bcef8c1dda202a1874
+  checksum: 10c0/313bf5bdcd39bec028a3abe1eede082406ec171dda3fbf96f7651a20c287cf041a882e2c852d08c0e960b03f988f0b97dd8a8b8426d48e98da5bf7b69e72e7b9
   languageName: node
   linkType: hard
 
