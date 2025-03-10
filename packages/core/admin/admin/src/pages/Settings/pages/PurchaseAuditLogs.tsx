@@ -1,5 +1,5 @@
 import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
-import { ExternalLink, Check, Lightning } from '@strapi/icons';
+import { ExternalLink, Check, ListSearch } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
@@ -18,14 +18,22 @@ const PurchaseAuditLogs = () => {
         <Layouts.Header
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
         />
-        <Box marginLeft={10} marginRight={10} shadow="filterShadow" hasRadius background="neutral0">
+        <Box
+          marginLeft={10}
+          marginRight={10}
+          shadow="filterShadow"
+          hasRadius
+          background="neutral0"
+          borderColor={'neutral150'}
+          overflow={'hidden'}
+        >
           <Grid.Root>
-            <Grid.Item col={6} s={12}>
-              <Flex direction="column" alignItems="flex-start" padding={7} gap={2}>
+            <Grid.Item col={6} s={12} alignItems={'flex-start'}>
+              <Flex direction="column" alignItems="flex-start" padding={7} width={'100%'}>
                 <Flex>
-                  <Lightning fill="primary600" width={`24px`} height={`24px`} />
+                  <ListSearch fill="primary600" width={`24px`} height={`24px`} />
                 </Flex>
-                <Flex paddingTop={2} paddingBottom={4}>
+                <Flex paddingTop={3} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
                     {formatMessage({
                       id: 'Settings.page.PurchaseAudit-logs.description',
@@ -33,37 +41,52 @@ const PurchaseAuditLogs = () => {
                     })}
                   </Typography>
                 </Flex>
+                <Flex direction="column" alignItems={'flex-start'} gap={2}>
+                  <Flex gap={2}>
+                    <Check
+                      fill="success500"
+                      width={`16px`}
+                      height={`16px`}
+                      style={{ flexShrink: 0 }}
+                    />
+                    <Typography textColor="neutral700">
+                      {formatMessage({
+                        id: 'Settings.page.PurchaseAudit-logs.perks1',
+                        defaultMessage: 'Easily track changes',
+                      })}
+                    </Typography>
+                  </Flex>
 
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'Settings.page.PurchaseAudit-logs.perks1',
-                      defaultMessage: 'Easily track changes',
-                    })}
-                  </Typography>
+                  <Flex gap={2}>
+                    <Check
+                      fill="success500"
+                      width={`16px`}
+                      height={`16px`}
+                      style={{ flexShrink: 0 }}
+                    />
+                    <Typography textColor="neutral700">
+                      {formatMessage({
+                        id: 'Settings.page.PurchaseAudit-logs.perks2',
+                        defaultMessage: 'Review changes with ease',
+                      })}
+                    </Typography>
+                  </Flex>
+
+                  <Flex gap={2}>
+                    <Check
+                      fill="success500"
+                      width={`16px`}
+                      height={`16px`}
+                      style={{ flexShrink: 0 }}
+                    />
+                    <Typography textColor="neutral700">
+                      {formatMessage({
+                        id: 'Settings.page.PurchaseAudit-logs.perks3',
+                        defaultMessage: 'Maintain security and compliance',
+                      })}
+                    </Typography>
+                  </Flex>
                 </Flex>
-
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'Settings.page.PurchaseAudit-logs.perks2',
-                      defaultMessage: 'Review changes with ease',
-                    })}
-                  </Typography>
-                </Flex>
-
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'Settings.page.PurchaseAudit-logs.perks3',
-                      defaultMessage: 'Maintain security and compliance',
-                    })}
-                  </Typography>
-                </Flex>
-
                 <Flex gap={2} marginTop={7}>
                   <LinkButton
                     variant="default"
@@ -87,8 +110,8 @@ const PurchaseAuditLogs = () => {
                 </Flex>
               </Flex>
             </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100">
-              <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
+            <Grid.Item col={6} s={12} background="primary100" minHeight={'280px'}>
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <img
                   src={illustration}
                   alt="purchase-page-audit-logs-illustration"
