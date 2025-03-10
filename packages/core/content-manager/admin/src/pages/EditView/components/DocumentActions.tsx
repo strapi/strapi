@@ -547,7 +547,10 @@ const PublishAction: DocumentActionComponent = ({
   const formValues = useForm('PublishAction', ({ values }) => values);
 
   const rootDocumentMeta = useDocumentContext('PublishAction', (state) => state.rootDocumentMeta);
-  const currentDocumentMeta = useDocumentContext('PublishAction', (state) => state.meta);
+  const currentDocumentMeta = useDocumentContext(
+    'PublishAction',
+    (state) => state.currentDocumentMeta
+  );
 
   React.useEffect(() => {
     if (isErrorDraftRelations) {
@@ -786,7 +789,10 @@ const UpdateAction: DocumentActionComponent = ({
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
   const rootDocumentMeta = useDocumentContext('UpdateAction', (state) => state.rootDocumentMeta);
-  const currentDocumentMeta = useDocumentContext('UpdateAction', (state) => state.meta);
+  const currentDocumentMeta = useDocumentContext(
+    'UpdateAction',
+    (state) => state.currentDocumentMeta
+  );
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);

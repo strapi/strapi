@@ -70,7 +70,24 @@ const [RelationModalProvider, useRelationModal] = createContext<RelationModalCon
   }
 );
 
+function useTraceUpdate(props) {
+  const prev = React.useRef(props);
+  React.useEffect(() => {
+    const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+      if (prev.current[k] !== v) {
+        ps[k] = [prev.current[k], v];
+      }
+      return ps;
+    }, {});
+    if (Object.keys(changedProps).length > 0) {
+      console.log('Changed props:', changedProps);
+    }
+    prev.current = props;
+  });
+}
+
 const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalProps) => {
+  useTraceUpdate({ relation, triggerButtonLabel });
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { formatMessage } = useIntl();
@@ -78,24 +95,18 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   const [triggerRefetchDocument] = useLazyGetDocumentQuery();
 
   const currentDocument = useDocumentContext('RelationModalBody', (state) => state.document);
+  const state = useDocumentContext('RelationModalWrapper', (state) => state.state);
+  const dispatch = useDocumentContext('RelationModalWrapper', (state) => state.dispatch);
+  const currentDocumentMeta = useDocumentContext(
+    'RelationModalWrapper',
+    (state) => state.currentDocumentMeta
+  );
   const rootDocumentMeta = useDocumentContext(
-    'RelationModalBody',
+    'RelationModalWrapper',
     (state) => state.rootDocumentMeta
   );
-  const currentDocumentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
-  const changeDocument = useDocumentContext('RelationModalBody', (state) => state.changeDocument);
-  const documentHistory = useDocumentContext('RelationModalBody', (state) => state.documentHistory);
-  const setDocumentHistory = useDocumentContext(
-    'RelationModalBody',
-    (state) => state.setDocumentHistory
-  );
 
-  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState(false);
-  const [actionPosition, setActionPosition] = React.useState<'cancel' | 'back' | 'navigate'>(
-    'cancel'
-  );
-
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  console.log('relation modal', state);
   // NOTE: Not sure about this relation modal context, maybe we should move this to DocumentContext?
   // Get parent modal context if it exists
   const parentContext = useRelationModal('RelationModalWrapper', (state) => state);
@@ -103,47 +114,6 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   const depth = parentContext ? parentContext.depth + 1 : 0;
   // Check if this is a nested modal
   const isNested = depth > 0;
-
-  const addDocumentToHistory = (document: DocumentMeta) =>
-    setDocumentHistory((prev) => [...prev, document]);
-
-  const getPreviousDocument = () => {
-    if (documentHistory.length === 0) return undefined;
-
-    const lastDocument = documentHistory[documentHistory.length - 1];
-
-    return lastDocument;
-  };
-
-  const removeLastDocumentFromHistory = () => {
-    setDocumentHistory((prev) => [...prev].slice(0, prev.length - 1));
-  };
-
-  const handleToggleModal = () => {
-    if (isModalOpen) {
-      setIsModalOpen(false);
-      const document = {
-        collectionType: rootDocumentMeta.collectionType,
-        model: rootDocumentMeta.model,
-        documentId: rootDocumentMeta.documentId,
-      };
-      // Change back to the root document
-      changeDocument(document);
-      // Reset the document history
-      setDocumentHistory([]);
-      // Reset action position
-      setActionPosition('cancel');
-      // Read from cache or refetch root document
-      triggerRefetchDocument(
-        document,
-        // Favor the cache
-        true
-      );
-    } else {
-      changeDocument(relation);
-      setIsModalOpen(true);
-    }
-  };
 
   const getFullPageLink = (): string => {
     const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
@@ -154,28 +124,44 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
     return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
   };
 
-  const handleRedirection = () => {
-    const editViewUrl = `${pathname}${search}`;
-    const isRootDocumentUrl = editViewUrl.includes(getFullPageLink());
-
-    if (isRootDocumentUrl) {
-      handleToggleModal();
-    } else {
-      navigate(getFullPageLink());
-    }
-  };
-
   const handleConfirm = () => {
-    if (actionPosition === 'navigate') {
-      handleRedirection();
-    } else if (actionPosition === 'back') {
-      const previousRelation = getPreviousDocument();
-      if (previousRelation) {
-        removeLastDocumentFromHistory();
-        changeDocument(previousRelation);
+    // TODO switch case
+    if (state.confirmDialogIntent === 'navigate') {
+      // handleRedirection();
+
+      const editViewUrl = `${pathname}${search}`;
+      const isRootDocumentUrl = editViewUrl.includes(getFullPageLink());
+
+      if (isRootDocumentUrl) {
+        // Change back to the root document
+        dispatch({
+          type: 'CLOSE_MODAL',
+          payload: { hasUnsavedChanges: false },
+        });
+        // Read from cache or refetch root document
+        triggerRefetchDocument(
+          rootDocumentMeta,
+          // Favor the cache
+          true
+        );
+      } else {
+        navigate(getFullPageLink());
       }
+    } else if (state.confirmDialogIntent === 'back') {
+      if (state.documentHistory.length > 1) {
+        dispatch({ type: 'GO_BACK', payload: { hasUnsavedChanges: false } });
+      }
+    } else if (state.confirmDialogIntent === 'open') {
+      dispatch({
+        type: 'GO_TO_RELATION',
+        payload: { document: currentDocumentMeta, hasUnsavedChanges: false },
+      });
     } else {
-      handleToggleModal();
+      // When people are trying to close the modal without saving
+      dispatch({
+        type: 'CLOSE_MODAL',
+        payload: { hasUnsavedChanges: false },
+      });
     }
   };
 
@@ -198,46 +184,37 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
     >
       {({ modified, isSubmitting, resetForm }) => {
         // We don't count the root document, so history starts after 1
-        const hasHistory = documentHistory.length > 1;
+        const hasHistory = state.documentHistory.length > 1;
+        const hasUnsavedChanges = modified && !isSubmitting;
 
         return (
           <RelationModalProvider parentModified={modified} depth={depth}>
             <Modal.Root
-              open={isModalOpen}
-              onOpenChange={() => {
-                if (isModalOpen) {
-                  if (modified && !isSubmitting) {
-                    setIsConfirmationOpen(true);
-                  } else {
-                    handleToggleModal();
-                  }
+              open={state.isModalOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  // do we need to do something here?
+                } else {
+                  dispatch({
+                    type: 'CLOSE_MODAL',
+                    payload: { hasUnsavedChanges },
+                  });
                 }
               }}
             >
               <Modal.Trigger>
-                <Tooltip description={triggerButtonLabel}>
+                <Tooltip label={triggerButtonLabel}>
                   <CustomTextButton
                     onClick={() => {
-                      // Check if parent modal has unsaved changes
-                      if (isNested && parentContext.parentModified) {
-                        setIsConfirmationOpen(true);
-                        // Return early to avoid opening the modal
-                        return;
-                      } else {
-                        if (modified && !isSubmitting) {
-                          setIsConfirmationOpen(true);
-                        } else {
-                          // Add current relation to history before opening a new one
-                          if (currentDocumentMeta && Object.keys(currentDocumentMeta).length > 0) {
-                            addDocumentToHistory(currentDocumentMeta);
-                          }
-                          handleToggleModal();
-                        }
+                      const parentHasUnsavedChanges = isNested && parentContext.parentModified;
 
-                        if (!isModalOpen) {
-                          setIsModalOpen(true);
-                        }
-                      }
+                      dispatch({
+                        type: 'GO_TO_RELATION',
+                        payload: {
+                          document: relation,
+                          hasUnsavedChanges: parentHasUnsavedChanges || hasUnsavedChanges,
+                        },
+                      });
                     }}
                   >
                     {triggerButtonLabel}
@@ -250,20 +227,14 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                     <Flex gap={2}>
                       <IconButton
                         withTooltip={false}
-                        label="Back"
+                        label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
                         variant="ghost"
                         disabled={!hasHistory}
                         onClick={() => {
-                          setActionPosition('back');
-                          if (modified && !isSubmitting) {
-                            setIsConfirmationOpen(true);
-                          } else {
-                            const previousRelation = getPreviousDocument();
-                            if (previousRelation) {
-                              removeLastDocumentFromHistory();
-                              changeDocument(previousRelation);
-                            }
-                          }
+                          dispatch({
+                            type: 'GO_BACK',
+                            payload: { hasUnsavedChanges },
+                          });
                         }}
                         marginRight={1}
                       >
@@ -281,11 +252,10 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                 <RelationModalBody>
                   <IconButton
                     onClick={() => {
-                      setActionPosition('navigate');
+                      dispatch({ type: 'GO_FULL_PAGE', payload: { hasUnsavedChanges } });
 
-                      if (modified && !isSubmitting) {
-                        setIsConfirmationOpen(true);
-                      } else {
+                      // Navigation cannot happen in the reducer because it's a side effect
+                      if (!hasUnsavedChanges) {
                         navigate(getFullPageLink());
                       }
                     }}
@@ -301,11 +271,10 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                 <Modal.Footer>
                   <Button
                     onClick={() => {
-                      if (modified && !isSubmitting) {
-                        setIsConfirmationOpen(true);
-                      } else {
-                        handleToggleModal();
-                      }
+                      dispatch({
+                        type: 'CLOSE_MODAL',
+                        payload: { hasUnsavedChanges },
+                      });
                     }}
                     variant="tertiary"
                   >
@@ -317,15 +286,21 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                 </Modal.Footer>
               </CustomModalContent>
             </Modal.Root>
-            <Dialog.Root open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen}>
+            <Dialog.Root
+              open={state.isConfirmDialogOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  dispatch({ type: 'CANCEL_CONFIRM_DIALOG' });
+                }
+              }}
+            >
               <ConfirmDialog
                 onConfirm={() => {
                   handleConfirm();
-                  setIsConfirmationOpen(false);
                   resetForm();
                 }}
                 onCancel={() => {
-                  setIsConfirmationOpen(false);
+                  dispatch({ type: 'CANCEL_CONFIRM_DIALOG' });
                 }}
                 variant="danger"
               >
@@ -359,9 +334,12 @@ interface RelationModalBodyProps {
 const RelationModalBody = ({ children }: RelationModalBodyProps) => {
   const { formatMessage } = useIntl();
 
-  const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
+  const currentDocumentMeta = useDocumentContext(
+    'RelationModalBody',
+    (state) => state.currentDocumentMeta
+  );
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
-  const documentLayoutResponse = useDocumentLayout(documentMeta.model);
+  const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
   const initialValues = documentResponse.getInitialFormValues();
@@ -373,7 +351,7 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
   } = useRBAC(
     PERMISSIONS.map((action) => ({
       action,
-      subject: documentMeta.model,
+      subject: currentDocumentMeta.model,
     }))
   );
 
@@ -392,7 +370,7 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
 
   if (
     error ||
-    !documentMeta.model ||
+    !currentDocumentMeta.model ||
     documentLayoutResponse.error ||
     !documentResponse.document ||
     !documentResponse.meta ||
@@ -417,16 +395,16 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
 
   const props = {
     activeTab: 'draft',
-    collectionType: documentMeta.collectionType,
-    model: documentMeta.model,
-    documentId: documentMeta.documentId,
+    collectionType: currentDocumentMeta.collectionType,
+    model: currentDocumentMeta.model,
+    documentId: currentDocumentMeta.documentId,
     document: documentResponse.document,
     meta: documentResponse.meta,
   } satisfies DocumentActionProps;
 
   return (
     <Modal.Body>
-      <DocumentRBAC permissions={permissions} model={documentMeta.model}>
+      <DocumentRBAC permissions={permissions} model={currentDocumentMeta.model}>
         <Flex alignItems="flex-start" direction="column" gap={2}>
           <Flex width="100%" justifyContent="space-between" gap={2}>
             <Typography tag="h2" variant="alpha">

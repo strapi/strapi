@@ -148,7 +148,7 @@ export interface RelationsFormValue {
  */
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
-    const documentMeta = useDocumentContext('RelationsField', (state) => state.meta);
+    const documentMeta = useDocumentContext('RelationsField', (state) => state.currentDocumentMeta);
     const documentResponse = useDocumentContext('RelationsField', (state) => state.document);
 
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -1025,6 +1025,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                 <RelationModalWrapper
                   triggerButtonLabel={label}
+                  // todo: this keeps changing. Maybe memoize?
                   relation={{
                     documentId: documentId ?? apiData?.documentId,
                     model: targetModel,

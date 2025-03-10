@@ -29,27 +29,102 @@ interface DocumentMeta {
 }
 
 interface DocumentContextValue {
+  state: State;
+  dispatch: React.Dispatch<Action>;
   rootDocumentMeta: DocumentMeta;
   document: ReturnType<UseDocument>;
-  meta: DocumentMeta;
-  changeDocument: (newRelation: DocumentMeta) => void;
-  documentHistory: DocumentMeta[];
-  setDocumentHistory: React.Dispatch<React.SetStateAction<DocumentMeta[]>>;
+  currentDocumentMeta: DocumentMeta;
 }
 
 const [DocumentProvider, useDocumentContext] =
   createContext<DocumentContextValue>('DocumentContext');
 
+interface State {
+  documentHistory: DocumentMeta[];
+  confirmDialogIntent: null | 'back' | 'open' | 'navigate';
+  // TODO: remove this boolean and rely on the confirmDialogIntent to display the dialog or not
+  isConfirmDialogOpen: boolean;
+  isModalOpen: boolean;
+}
+
+type Action =
+  | {
+      type: 'GO_TO_RELATION';
+      payload: {
+        document: DocumentMeta;
+        hasUnsavedChanges: boolean;
+      };
+    }
+  | {
+      type: 'GO_BACK';
+      payload: { hasUnsavedChanges: boolean };
+    }
+  | {
+      type: 'GO_FULL_PAGE';
+      payload: { hasUnsavedChanges: boolean };
+    }
+  | {
+      type: 'CANCEL_CONFIRM_DIALOG';
+    }
+  | {
+      type: 'CLOSE_MODAL';
+      payload: { hasUnsavedChanges: boolean };
+    };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'GO_TO_RELATION':
+      if (action.payload.hasUnsavedChanges) {
+        return { ...state, confirmDialogIntent: 'open' };
+      }
+
+      return {
+        ...state,
+        documentHistory: [...state.documentHistory, action.payload.document],
+        confirmDialogIntent: null,
+        isConfirmDialogOpen: false,
+        isModalOpen: true,
+      };
+    case 'GO_BACK':
+      if (action.payload.hasUnsavedChanges) {
+        return { ...state, confirmDialogIntent: 'back' };
+      }
+
+      return {
+        ...state,
+        documentHistory: state.documentHistory.slice(0, state.documentHistory.length - 1),
+        confirmDialogIntent: null,
+      };
+    case 'GO_FULL_PAGE':
+      if (action.payload.hasUnsavedChanges) {
+        return { ...state, confirmDialogIntent: 'navigate', isConfirmDialogOpen: true };
+      }
+
+      return {
+        ...state,
+        confirmDialogIntent: null,
+      };
+    case 'CANCEL_CONFIRM_DIALOG':
+      return {
+        ...state,
+        confirmDialogIntent: null,
+        isConfirmDialogOpen: false,
+      };
+    case 'CLOSE_MODAL':
+      return {
+        ...state,
+        documentHistory: [],
+        confirmDialogIntent: null,
+        isConfirmDialogOpen: false,
+        isModalOpen: false,
+      };
+    default:
+      return state;
+  }
+}
+
 /**
  * TODO: Document in contributor docs, Add unit test
- *
- * This context provider and its associated hook are used to access a document at its root level
- * and expose a function to change the current document being viewed to one of the root level docuemnt's relations.
- *
- * The useDocumentContext hook exposes:
- * - meta: information about the currentDocument,
- * - document: the actual document,
- * - changeDocument: a function to change the current document to one of its relations.
  */
 const DocumentContextProvider = ({
   children,
@@ -59,31 +134,38 @@ const DocumentContextProvider = ({
   initialDocument: DocumentMeta;
 }) => {
   /**
-   * Initialize with the "root" document and expose a setter method to change to
-   * one of the root level document's relations.
+   * The reducer manages all the dynamic data of the context.
+   * Everything else in the context provider is derived from this state.
    */
-  const [currentDocumentMeta, changeDocument] = React.useState<DocumentMeta>(initialDocument);
+  const [state, dispatch] = React.useReducer(reducer, {
+    documentHistory: [],
+    confirmDialogIntent: null,
+    isConfirmDialogOpen: false,
+    isModalOpen: false,
+  });
+
+  const currentDocumentMeta = state.documentHistory.at(-1) ?? initialDocument;
+
   const params = React.useMemo(
     () => buildValidParams(currentDocumentMeta.params ?? {}),
     [currentDocumentMeta.params]
   );
   const document = useDocument({ ...currentDocumentMeta, params });
 
-  const [documentHistory, setDocumentHistory] = React.useState<DocumentMeta[]>([]);
+  const rootDocumentMeta = {
+    documentId: initialDocument.documentId,
+    model: initialDocument.model,
+    collectionType: initialDocument.collectionType,
+    params: initialDocument.params,
+  } satisfies DocumentMeta;
 
   return (
     <DocumentProvider
-      changeDocument={changeDocument}
+      state={state}
+      dispatch={dispatch}
       document={document}
-      rootDocumentMeta={{
-        documentId: initialDocument.documentId,
-        model: initialDocument.model,
-        collectionType: initialDocument.collectionType,
-        params: initialDocument.params,
-      }}
-      meta={currentDocumentMeta}
-      documentHistory={documentHistory}
-      setDocumentHistory={setDocumentHistory}
+      rootDocumentMeta={rootDocumentMeta}
+      currentDocumentMeta={currentDocumentMeta}
     >
       {children}
     </DocumentProvider>

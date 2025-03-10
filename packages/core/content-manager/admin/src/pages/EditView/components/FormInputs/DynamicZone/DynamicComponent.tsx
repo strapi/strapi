@@ -58,7 +58,7 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
-  const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
+  const documentMeta = useDocumentContext('DynamicComponent', (state) => state.currentDocumentMeta);
   const {
     edit: { components },
   } = useDocumentLayout(documentMeta.model);

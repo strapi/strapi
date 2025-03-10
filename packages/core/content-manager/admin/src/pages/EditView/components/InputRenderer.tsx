@@ -31,7 +31,7 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
 const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
   const { id: rootId } = useDoc();
-  const documentMeta = useDocumentContext('InputRenderer', (state) => state.meta);
+  const documentMeta = useDocumentContext('InputRenderer', (state) => state.currentDocumentMeta);
   const documentResponse = useDocumentContext('InputRenderer', (state) => state.document);
   const documentLayout = useDocumentLayout(documentMeta.model);
 

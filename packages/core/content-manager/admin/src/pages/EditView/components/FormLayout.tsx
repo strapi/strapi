@@ -37,7 +37,7 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
 
 const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const documentMeta = useDocumentContext('FormLayout', (state) => state.meta);
+  const documentMeta = useDocumentContext('FormLayout', (state) => state.currentDocumentMeta);
   const model = documentMeta.model;
 
   return (

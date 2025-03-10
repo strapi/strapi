@@ -9,7 +9,6 @@
     "name": "Country"
   },
   "options": {
-    "comment": "",
     "draftAndPublish": false
   },
   "pluginOptions": {
@@ -38,6 +37,11 @@
           "localized": true
         }
       }
+    },
+    "embassies": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::address.address"
     }
   }
 }

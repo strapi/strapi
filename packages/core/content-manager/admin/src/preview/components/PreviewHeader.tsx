@@ -86,7 +86,7 @@ const Status = () => {
   // Get status
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
-  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.currentDocumentMeta);
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
   if (!hasDraftAndPublished) {
@@ -107,7 +107,7 @@ const PreviewTabs = () => {
   // Get status
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
-  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.currentDocumentMeta);
   const hasDraftAndPublish = schema?.options?.draftAndPublish ?? false;
   const documentStatus = getDocumentStatus(document, meta);
 
@@ -154,7 +154,7 @@ const UnstablePreviewHeader = () => {
   const title = usePreviewContext('PreviewHeader', (state) => state.title);
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
-  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.currentDocumentMeta);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
   const iframeRef = usePreviewContext('PreviewHeader', (state) => state.iframeRef);
 
