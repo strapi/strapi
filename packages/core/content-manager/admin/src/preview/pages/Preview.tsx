@@ -175,7 +175,7 @@ const PreviewPage = () => {
           disabled={
             query.status === 'published' &&
             documentResponse &&
-            documentResponse.document.status === 'published'
+            documentResponse.document.status !== 'draft'
           }
           initialValues={documentResponse.getInitialFormValues()}
           initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
