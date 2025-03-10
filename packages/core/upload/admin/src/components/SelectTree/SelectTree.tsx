@@ -18,7 +18,7 @@ import { getValuesToClose } from './utils/getValuesToClose';
 const hasParent = (option: FlattenedNode<string | number | null>) => !option.parent;
 
 export type OptionSelectTree = {
-  value: string | number | null;
+  value: string | number;
   label?: string;
   children?: OptionSelectTree[];
 };
@@ -32,7 +32,7 @@ export interface SelectTreeProps<
 > {
   maxDisplayDepth?: number;
   defaultValue?: {
-    value?: string | number | null;
+    value?: string | number;
   };
   options: OptionSelectTree[];
   onChange?: (value: Record<string, string | number>) => void;
@@ -86,7 +86,7 @@ export const SelectTree = ({
     }
   }, [openValues, flatDefaultOptions, optionsFiltered]);
 
-  const handleToggle = (value: string | number | null) => {
+  const handleToggle = (value: string | number) => {
     if (openValues.includes(value)) {
       const valuesToClose = getValuesToClose(flatDefaultOptions, value);
       setOpenValues((prev) => prev.filter((prevData) => !valuesToClose.includes(prevData)));
@@ -124,12 +124,12 @@ interface SelectProps<
   ariaErrorMessage?: string;
   options: OptionSelectTree[];
   defaultValue?: {
-    value?: string | number | null;
+    value?: string | number;
   };
   isSearchable?: boolean;
   maxDisplayDepth?: number;
-  openValues?: (string | number | null)[];
-  onOptionToggle?: (value: string | number | null) => void;
+  openValues?: (string | number)[];
+  onOptionToggle?: (value: string | number) => void;
 }
 
 const Select = ({

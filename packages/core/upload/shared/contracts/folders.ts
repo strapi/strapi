@@ -44,7 +44,7 @@ export type FolderNode = Partial<Omit<Folder, 'children'>> & {
 };
 
 type FolderNodeWithValue = Omit<FolderNode, 'children'> & {
-  value: string | number | null;
+  value: string | number;
   children: FolderNodeWithValue[];
 };
 
