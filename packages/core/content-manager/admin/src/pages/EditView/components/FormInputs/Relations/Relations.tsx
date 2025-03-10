@@ -99,6 +99,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
 /* -------------------------------------------------------------------------------------------------
  * RelationsField
  * -----------------------------------------------------------------------------------------------*/
+
 const RELATIONS_TO_DISPLAY = 5;
 const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
 
@@ -159,11 +160,12 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
     /**
-     * A document shares a document id across dimensions, however,
-     * a document being created in a new dimension (en document is being created as french)
-     * then the documentId does not exist yet on the actual document, but we are aware of what it will be
-     * since it is defined on the english dimension (documentMeta). We use the actual documentId for the dimension
-     * in order to be sure we always fetch the correct relations for the document when it hasn't been created yet.
+     * This value is the actual documentId on the created document.
+     * A document shares a documentId across dimensions.
+     * If a document is being created in a new dimension (e.g. creating french dimension of english document),
+     * we are aware of what the documentId will be via the english dimension's documentMeta, but we should use the
+     * french dimension's documentId which is undefined until it is created. This is important for fetching the correct relations
+     * at the right time (create vs update).
      */
     const dimensionSpecificDocumentId = currentDocument.document?.documentId;
 
