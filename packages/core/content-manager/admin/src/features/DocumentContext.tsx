@@ -79,7 +79,6 @@ const DocumentContextProvider = ({
         documentId: initialDocument.documentId,
         model: initialDocument.model,
         collectionType: initialDocument.collectionType,
-        params: initialDocument.params,
       }}
       meta={currentDocumentMeta}
       documentHistory={documentHistory}
