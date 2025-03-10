@@ -21,6 +21,7 @@ test.describe('Update a new component', () => {
   const addedAttribute = {
     type: 'text',
     name: 'addedtext',
+    advanced: { required: true, regexp: '^(?!.*fail).*' },
   };
 
   const componentAttributeName = 'mycomponentname';
