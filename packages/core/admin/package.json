@@ -81,7 +81,7 @@
     "@strapi/typescript-utils": "4.25.20",
     "@strapi/utils": "4.25.20",
     "@vitejs/plugin-react-swc": "3.5.0",
-    "axios": "1.7.4",
+    "axios": "1.8.2",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "browserslist": "^4.22.2",
