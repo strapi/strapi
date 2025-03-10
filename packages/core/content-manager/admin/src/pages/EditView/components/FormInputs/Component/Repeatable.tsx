@@ -51,10 +51,8 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const components = useDocumentContext(
-    'RepeatableComponent',
-    (state) => state.document.components
-  );
+  const currentDocument = useDocumentContext('RepeatableComponent', (state) => state.document);
+  const components = currentDocument.components;
 
   const {
     value = [],
@@ -304,6 +302,7 @@ const RepeatableComponent = ({
                               ...field,
                               label: translatedLabel,
                               name: completeFieldName,
+                              document: currentDocument,
                             })}
                           </ResponsiveGridItem>
                         );
