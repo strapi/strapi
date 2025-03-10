@@ -20,7 +20,6 @@ import { styled } from 'styled-components';
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../features/DocumentContext';
-import { useDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
