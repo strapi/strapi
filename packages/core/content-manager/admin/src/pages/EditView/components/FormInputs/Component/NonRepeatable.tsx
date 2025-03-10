@@ -2,6 +2,7 @@ import { useField } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
@@ -19,6 +20,7 @@ const NonRepeatableComponent = ({
   const { value } = useField(name);
   const level = useComponent('NonRepeatableComponent', (state) => state.level);
   const isNested = level > 0;
+  const currentDocument = useDocumentContext('NonRepeatableComponent', (state) => state.document);
 
   return (
     <ComponentProvider id={value?.id} uid={attribute.component} level={level + 1} type="component">
@@ -58,7 +60,12 @@ const NonRepeatableComponent = ({
                       direction="column"
                       alignItems="stretch"
                     >
-                      {children({ ...field, label: translatedLabel, name: completeFieldName })}
+                      {children({
+                        ...field,
+                        label: translatedLabel,
+                        name: completeFieldName,
+                        document: currentDocument,
+                      })}
                     </ResponsiveGridItem>
                   );
                 })}

@@ -15,7 +15,6 @@ import {
   Flex,
   IconButton,
   TextButton,
-  Tooltip,
   Typography,
   VisuallyHidden,
   useComposedRefs,
@@ -37,7 +36,6 @@ import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
-import { useDocument } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
@@ -161,8 +159,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
     const { formatMessage } = useIntl();
-    const [{ query }] = useQueryParams();
-    const params = buildValidParams(query);
+
+    const params = currentDocumentMeta.params;
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
@@ -178,12 +176,13 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       setCurrentPage(1);
     }, [isSubmitting]);
 
+    const component = componentUID && currentDocument.components[componentUID];
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
      */
-    const id = componentId ? componentId.toString() : documentMeta.documentId;
-    const model = componentUID ?? documentMeta.model;
+    const model = component ? component.uid : documentMeta.model;
+    const id = component && componentId ? componentId.toString() : documentMeta.documentId;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -192,9 +191,22 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * individual components. Therefore we split the string and take the last item.
      */
     const [targetField] = props.name.split('.').slice(-1);
-    const hasTargetField = Object.keys(currentDocument.schema?.attributes ?? {}).includes(
-      targetField
-    );
+
+    const schemaAttributes = component
+      ? (component.attributes ?? {})
+      : (currentDocument.schema?.attributes ?? {});
+
+    /**
+     * Confirm the target field is related to the current document
+     */
+    const isRelatedToCurrentDocument =
+      Object.values(schemaAttributes).filter(
+        (attribute) =>
+          attribute.type === 'relation' &&
+          'target' in attribute &&
+          'target' in props.attribute &&
+          attribute.target === props.attribute.target
+      ).length > 0 && Object.keys(schemaAttributes).includes(targetField);
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
@@ -210,7 +222,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id || !hasTargetField,
+        skip: !id || !isRelatedToCurrentDocument,
         selectFromResult: (result) => {
           return {
             ...result,
@@ -335,10 +347,17 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           <RelationsInput
             disabled={isDisabled}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
-            id={componentUID ? (componentId ? `${componentId}` : '') : documentMeta.documentId}
+            id={
+              componentUID && component
+                ? componentId
+                  ? `${componentId}`
+                  : ''
+                : documentMeta.documentId
+            }
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
             onChange={handleConnect}
+            isRelatedToCurrentDocument={isRelatedToCurrentDocument}
             {...props}
           />
           {'pagination' in data &&
@@ -443,6 +462,7 @@ const addLabelAndHref =
 interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
   id?: string;
   model: string;
+  isRelatedToCurrentDocument: boolean;
   onChange: (
     relation: Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> & {
       [key: string]: any;
@@ -467,6 +487,7 @@ const RelationsInput = ({
   unique: _unique,
   'aria-label': _ariaLabel,
   onChange,
+  isRelatedToCurrentDocument,
   ...props
 }: RelationsInputProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
@@ -500,11 +521,15 @@ const RelationsInput = ({
      */
     const [targetField] = name.split('.').slice(-1);
 
+    // Return early if there is not relation to the document
+    if (!isRelatedToCurrentDocument) return;
+
+    const params = currentDocumentMeta.params ?? buildValidParams(query);
     searchForTrigger({
       model,
       targetField,
       params: {
-        ...(currentDocumentMeta?.params ?? buildValidParams(query)),
+        ...params,
         id: id ?? '',
         pageSize: 10,
         idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
@@ -521,6 +546,7 @@ const RelationsInput = ({
     query,
     searchForTrigger,
     searchParamsDebounced,
+    isRelatedToCurrentDocument,
     currentDocumentMeta,
   ]);
 
@@ -963,7 +989,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
 
   const { formatMessage } = useIntl();
 
-  const { href, id, label, status, documentId, apiData } = relations[index];
+  const { href, id, label, status, documentId, apiData, locale } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -1041,7 +1067,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                     model: targetModel,
                     collectionType: getCollectionType(href)!,
                     params: {
-                      locale: apiData?.locale || null,
+                      locale: locale || null,
                     },
                   }}
                 />

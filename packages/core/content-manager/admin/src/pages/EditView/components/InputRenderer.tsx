@@ -10,10 +10,9 @@ import { ContentTypeKind } from '@strapi/types/dist/struct';
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
-import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc, UseDocument } from '../../../hooks/useDocument';
-import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
+import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
@@ -34,12 +33,10 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
 
 const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
   const { model: rootModel } = useDoc();
-  const documentLayout = useDocumentLayout(document.schema?.modelName ?? rootModel);
+  const documentLayout = useDocumentLayout(document.schema?.uid ?? rootModel);
 
   const collectionType =
-    document.schema?.kind === ('collection-type' as ContentTypeKind)
-      ? 'collection-types'
-      : 'single-types';
+    document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
