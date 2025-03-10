@@ -158,10 +158,19 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
     const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
+    /**
+     * A document shares a document id across dimensions, however,
+     * a document being created in a new dimension (en document is being created as french)
+     * then the documentId does not exist yet on the actual document, but we are aware of what it will be
+     * since it is defined on the english dimension (documentMeta). We use the actual documentId for the dimension
+     * in order to be sure we always fetch the correct relations for the document when it hasn't been created yet.
+     */
+    const dimensionSpecificDocumentId = currentDocument.document?.documentId;
+
     const { formatMessage } = useIntl();
 
     const [{ query }] = useQueryParams();
-    const params = currentDocumentMeta.params ?? buildValidParams(query);
+    const params = documentMeta.params ?? buildValidParams(query);
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
@@ -183,7 +192,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * Same with `uid` and `documentModel`.
      */
     const model = component ? component.uid : documentMeta.model;
-    const id = component && componentId ? componentId.toString() : documentMeta.documentId;
+    const id = component && componentId ? componentId.toString() : dimensionSpecificDocumentId;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -198,7 +207,9 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       : (currentDocument.schema?.attributes ?? {});
 
     /**
-     * Confirm the target field is related to the current document
+     * Confirm the target field is related to the current document.
+     * Since relations can exist in a modal on top of the root document,
+     * we need to ensure we are fetching relations for the correct document (root document vs related document),
      */
     const isRelatedToCurrentDocument =
       Object.values(schemaAttributes).filter(
@@ -353,7 +364,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
                 ? componentId
                   ? `${componentId}`
                   : ''
-                : documentMeta.documentId
+                : dimensionSpecificDocumentId
             }
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
@@ -499,6 +510,9 @@ const RelationsInput = ({
   const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams();
   const currentDocumentMeta = useDocumentContext('RelationsInput', (state) => state.meta);
+  const rootDocumentMeta = useDocumentContext('RelationsInput', (state) => state.rootDocumentMeta);
+  const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
+  const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
   const { formatMessage } = useIntl();
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
@@ -522,10 +536,11 @@ const RelationsInput = ({
      */
     const [targetField] = name.split('.').slice(-1);
 
-    // Return early if there is not relation to the document
+    // Return early if there is no relation to the document
     if (!isRelatedToCurrentDocument) return;
 
-    const params = currentDocumentMeta.params ?? buildValidParams(query);
+    const params = documentMeta.params ?? buildValidParams(query);
+
     searchForTrigger({
       model,
       targetField,
@@ -548,7 +563,7 @@ const RelationsInput = ({
     searchForTrigger,
     searchParamsDebounced,
     isRelatedToCurrentDocument,
-    currentDocumentMeta,
+    documentMeta,
   ]);
 
   const handleSearch = async (search: string) => {
@@ -1068,7 +1083,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                     model: targetModel,
                     collectionType: getCollectionType(href)!,
                     params: {
-                      locale: locale || null,
+                      locale: locale || apiData?.locale || null,
                     },
                   }}
                 />
