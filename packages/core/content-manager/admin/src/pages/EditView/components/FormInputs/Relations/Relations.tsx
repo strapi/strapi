@@ -160,7 +160,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const { formatMessage } = useIntl();
 
-    const params = currentDocumentMeta.params;
+    const [{ query }] = useQueryParams();
+    const params = currentDocumentMeta.params ?? buildValidParams(query);
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
