@@ -1461,7 +1461,7 @@ const UnstableListItem = ({ data, index, style }: ListItemProps) => {
             ) : null}
             <Flex width="100%" minWidth={0} justifyContent="space-between">
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                <Tooltip description={label}>
+                <Tooltip label={label}>
                   {/*  eslint-disable-next-line no-console */}
                   <CustomTextButton onClick={() => console.log('OPEN MODAL')}>
                     {label}
@@ -1577,7 +1577,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             ) : null}
             <Flex width="100%" minWidth={0} justifyContent="space-between">
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                <Tooltip description={label}>
+                <Tooltip label={label}>
                   {href ? (
                     <LinkEllipsis tag={NavLink} to={href} isExternal={false}>
                       {label}
