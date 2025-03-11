@@ -171,6 +171,14 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR ===
       await clickAndWait(page, saveButton);
       await expect(titleBox).toHaveValue(/west ham pre match jokes/i);
       await expect(page.getByRole('status', { name: /modified/i })).toBeVisible();
+
+      // Edit form again and try switching tab without saving
+      await titleBox.fill('West Ham pre match jokes and banter');
+      await clickAndWait(page, publishedTab);
+      await expect(
+        page.getByRole('dialog', { name: /all your modifications will be lost/i })
+      ).toBeVisible();
+      await page.getByRole('button', { name: /cancel/i }).click();
     });
   }
 );
