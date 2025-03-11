@@ -159,15 +159,8 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
     const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
-    /**
-     * This value is the actual documentId on the created document.
-     * A document shares a documentId across dimensions.
-     * If a document is being created in a new dimension (e.g. creating french dimension of english document),
-     * we are aware of what the documentId will be via the english dimension's documentMeta, but we should use the
-     * french dimension's documentId which is undefined until it is created. This is important for fetching the correct relations
-     * at the right time (create vs update).
-     */
-    const dimensionSpecificDocumentId = currentDocument.document?.documentId;
+    // Use the documentId from the actual document, not the params (meta)
+    const documentId = currentDocument.document?.documentId;
 
     const { formatMessage } = useIntl();
 
@@ -194,7 +187,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * Same with `uid` and `documentModel`.
      */
     const model = component ? component.uid : documentMeta.model;
-    const id = component && componentId ? componentId.toString() : dimensionSpecificDocumentId;
+    const id = component && componentId ? componentId.toString() : documentId;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -361,13 +354,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           <RelationsInput
             disabled={isDisabled}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
-            id={
-              componentUID && component
-                ? componentId
-                  ? `${componentId}`
-                  : ''
-                : dimensionSpecificDocumentId
-            }
+            id={componentUID && component ? (componentId ? `${componentId}` : '') : documentId}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
             onChange={handleConnect}
