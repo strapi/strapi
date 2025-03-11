@@ -31,6 +31,14 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
   document: ReturnType<UseDocument>;
 };
 
+/**
+ * @internal
+ *
+ * @description An abstraction around the regular form input renderer designed
+ * specifically to be used in the EditView of the content-manager this understands
+ * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
+ * components such as Blocks / Relations.
+ */
 const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
   const { model: rootModel } = useDoc();
   const documentLayout = useDocumentLayout(document.schema?.uid ?? rootModel);

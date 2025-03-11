@@ -16,10 +16,13 @@ export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;
 `;
 
-// We need to use a different grid item for the responsive layout in the test environment
-// because @container is not supported in jsdom and it throws an error
 export const ResponsiveGridItem =
-  // TODO: we need to find a better solution to avoid using process.env.NODE_ENV in the code to fix the tests with this styled component
+  /**
+   * TODO:
+   * JSDOM cannot handle container queries.
+   * This is a temporary workaround so that tests do not fail in the CI when jestdom throws an error
+   * for failing to parse the stylesheet.
+   */
   process.env.NODE_ENV !== 'test'
     ? styled(Grid.Item)<{ col: number }>`
         grid-column: span 12;
