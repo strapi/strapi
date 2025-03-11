@@ -175,10 +175,9 @@ describeOnCondition(process.env.STRAPI_FEATURES_UNSTABLE_PREVIEW_SIDE_EDITOR ===
       // Edit form again and try switching tab without saving
       await titleBox.fill('West Ham pre match jokes and banter');
       await clickAndWait(page, publishedTab);
-      await expect(
-        page.getByRole('dialog', { name: /all your modifications will be lost/i })
-      ).toBeVisible();
-      await page.getByRole('button', { name: /cancel/i }).click();
+      const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+      await expect(confirmationDialog).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: /cancel/i }).click();
     });
   }
 );
