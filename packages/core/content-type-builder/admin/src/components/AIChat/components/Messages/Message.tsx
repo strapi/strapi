@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
 import { Typography, Box, IconButton, Flex } from '@strapi/design-system';
-import { Duplicate } from '@strapi/icons';
+import { ThumbUp, ThumbDown } from '@strapi/icons';
 import Markdown from 'react-markdown';
 import { styled } from 'styled-components';
 
-import { STRAPI_CODE_MIME_TYPE } from '../../lib/constants';
+import { useFeedbackModal } from '../../FeedbackModal';
+import { useFeedback } from '../../hooks/useFeedback';
 import {
   Message as TMessage,
   MessageContent,
@@ -14,7 +14,7 @@ import {
   AssistantMessage as AssistantMessageType,
 } from '../../lib/types/messages';
 import { AnimatedBox } from '../AnimatedBox';
-import { ProjectAttachment } from '../Attachments/ProjectAttachment';
+import { AttachmentPreview } from '../Attachments/AttachmentPreview';
 
 import { Marker } from './Marker';
 
@@ -52,31 +52,65 @@ const MarkdownStyles = styled(Typography)`
     font-weight: bold;
   }
 
-  /* Optional: code blocks, blockquotes, etc. */
+  /* code blocks, blockquotes, etc. */
   code {
     background-color: ${({ theme }) => theme.colors.neutral100};
     padding: 0.2em 0.4em;
     border-radius: ${({ theme }) => theme.borderRadius};
+    border-color: ${({ theme }) => theme.colors.neutral150};
+    border-style: solid;
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas,
+      monospace;
+  }
+
+  /* links */
+  a {
+    color: ${({ theme }) => theme.colors.primary};
+    background-color: ${({ theme }) => theme.colors.neutral100};
+    padding: 0.2em 0.4em;
+    border-radius: ${({ theme }) => theme.borderRadius};
+    border-color: ${({ theme }) => theme.colors.neutral150};
+    border-style: solid;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;
 
-const MessageContent = ({ content }: { content: MessageContent }) => {
+const MessageContent = ({
+  content,
+}: {
+  content: MessageContent;
+  status?: 'loading' | 'success' | 'error';
+}) => {
   if (content.type === 'text') {
     return (
       <MarkdownStyles>
-        <Markdown>{content.text}</Markdown>
+        <Markdown
+          components={{
+            a: ({ node, ...props }) => <a target="_blank" rel="noopener noreferrer" {...props} />,
+          }}
+        >
+          {content.text}
+        </Markdown>
       </MarkdownStyles>
     );
   }
 
   if (content.type === 'marker') {
-    return <Marker title={content.title} steps={content.steps} state={content.state} />;
+    return <Marker {...content} />;
   }
 
   return null;
 };
 
 const UserMessage = ({ message }: { message: UserMessageType }) => {
+  const hasText = message.contents.some(
+    (content) => content.type === 'text' && content.text.trim() !== ''
+  );
+
   return (
     <AnimatedBox
       as={Flex}
@@ -86,42 +120,26 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
       gap={2}
       maxWidth="80%"
     >
-      <Box
-        background="primary100"
-        borderColor="primary200"
-        borderStyle="none"
-        padding={3}
-        hasRadius
-      >
-        {message.contents.map((content, index) => {
-          if (content.type !== 'text') return null;
-          return <Typography key={index}>{content.text}</Typography>;
-        })}
-      </Box>
-      {/* Code Attachments */}
-      {message.attachments
-        .filter((attachment) => attachment.contentType === STRAPI_CODE_MIME_TYPE)
-        .map((attachment, idx) => (
-          <ProjectAttachment key={`${attachment.name}-${idx}`} name={attachment.name!} />
-        ))}
+      {hasText ? (
+        <Box background="neutral150" borderStyle="none" padding={3} hasRadius>
+          {message.contents.map((content, index) => {
+            if (content.type !== 'text') return null;
+            return <Typography key={index}>{content.text}</Typography>;
+          })}
+        </Box>
+      ) : null}
+
+      {/* Attachments */}
+      {message.attachments.map((attachment, idx) => (
+        <AttachmentPreview key={`${attachment.name}-${idx}`} attachment={attachment as any} />
+      ))}
     </AnimatedBox>
   );
 };
 
 const AssistantMessage = ({ message }: { message: AssistantMessageType }) => {
-  const { toggleNotification } = useNotification();
-  const handleCopyToClipboard = () => {
-    const textContent = message.contents
-      .filter((content) => content.type === 'text')
-      .map((content: any) => content.text)
-      .join('\n\n');
-
-    navigator.clipboard.writeText(textContent);
-    toggleNotification({
-      type: 'success',
-      message: 'Copied to clipboard',
-    });
-  };
+  const { upvoteMessage } = useFeedback();
+  const { openFeedbackModal } = useFeedbackModal();
 
   return (
     <Box style={{ alignSelf: 'flex-start' }} maxWidth="90%">
@@ -129,9 +147,25 @@ const AssistantMessage = ({ message }: { message: AssistantMessageType }) => {
         <MessageContent key={index} content={content} />
       ))}
       {message.status !== 'loading' ? (
-        <IconButton label="Copy to clipboard" size="S" onClick={handleCopyToClipboard}>
-          <Duplicate />
-        </IconButton>
+        <Flex>
+          <IconButton
+            label="Upvote"
+            size="S"
+            variant="ghost"
+            onClick={() => upvoteMessage(message.id)}
+          >
+            <ThumbUp />
+          </IconButton>
+          <IconButton
+            label="Downvote"
+            size="S"
+            variant="ghost"
+            // For downvoting, user must provide specific feedback
+            onClick={() => openFeedbackModal(message.id)}
+          >
+            <ThumbDown />
+          </IconButton>
+        </Flex>
       ) : null}
     </Box>
   );

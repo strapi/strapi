@@ -1,19 +1,10 @@
-import { Typography, Flex, Box } from '@strapi/design-system';
+import { Typography, Flex, Box, Link } from '@strapi/design-system';
 import { Check, Loader, Cross, ChevronDown } from '@strapi/icons';
+import { Link as RouterLink } from 'react-router-dom';
 import { styled, keyframes } from 'styled-components';
 
+import { MarkerContent } from '../../lib/types/messages';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../Collapsible';
-
-interface Step {
-  id: string;
-  description: string;
-}
-
-interface MarkerProps {
-  title: string;
-  state: 'success' | 'loading' | 'error';
-  steps: Step[];
-}
 
 const rotate = keyframes`
   from {
@@ -34,7 +25,32 @@ const RotatingIcon = styled(Box)<{ $open: boolean }>`
     ${({ theme }) => theme.motion.easings.easeOutQuad};
 `;
 
-export const Marker = ({ title, steps, state }: MarkerProps) => {
+const Status = ({ status }: { status: string }) => {
+  switch (status) {
+    case 'update':
+      return (
+        <Typography fontWeight="semiBold" textColor="warning500">
+          M
+        </Typography>
+      );
+    case 'remove':
+      return (
+        <Typography fontWeight="semiBold" textColor="danger500">
+          D
+        </Typography>
+      );
+    case 'create':
+      return (
+        <Typography fontWeight="semiBold" textColor="success500">
+          N
+        </Typography>
+      );
+    default:
+      return null;
+  }
+};
+
+export const Marker = ({ title, steps, state }: MarkerContent) => {
   const getStateIcon = () => {
     switch (state) {
       case 'success':
@@ -77,18 +93,27 @@ export const Marker = ({ title, steps, state }: MarkerProps) => {
           )}
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Box padding={3}>
-            <Flex gap={2} direction="column" alignItems="flex-start">
-              {steps.map((step) => (
-                <div key={step.id}>
-                  <Flex gap={2} alignItems="center">
-                    {getStateIcon()}
+          <Flex gap={3} padding={3} direction="column">
+            {steps.map((step) => (
+              <Flex
+                key={step.id}
+                gap={2}
+                justifyContent="space-between"
+                width="100%"
+                padding={[0, 1]}
+              >
+                {/* <Typography>{step.description}</Typography> */}
+                {step.link ? (
+                  <Link tag={RouterLink} to={step.link}>
                     <Typography>{step.description}</Typography>
-                  </Flex>
-                </div>
-              ))}
-            </Flex>
-          </Box>
+                  </Link>
+                ) : (
+                  <Typography>{step.description}</Typography>
+                )}
+                <Status status={step.status} />
+              </Flex>
+            ))}
+          </Flex>
         </CollapsibleContent>
       </Collapsible>
     </Box>

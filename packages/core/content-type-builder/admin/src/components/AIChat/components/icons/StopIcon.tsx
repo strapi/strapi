@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface StopIconProps extends React.SVGProps<SVGSVGElement> {}
 
 export const StopIcon = (props: StopIconProps) => {

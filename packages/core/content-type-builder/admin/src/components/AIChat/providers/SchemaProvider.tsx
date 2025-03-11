@@ -22,9 +22,7 @@ const TYPE_TO_ACTION: Record<string, 'add' | 'update' | 'delete'> = {
 export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
   const [lastRevisedId, setLastRevisedId] = useState<string | null>(null);
   const { messages } = useStrapiChat();
-  const { applyChange } = useDataManager();
-  // console.log(Object.values(contentTypes).filter((c) => c.visible));
-  // console.log(Object.values(components));
+  const { contentTypes, components, applyChange } = useDataManager();
 
   useEffect(() => {
     const latestMessage = messages[messages.length - 1];
@@ -41,11 +39,13 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
     if (!newSchemaChanges.length) return;
 
     newSchemaChanges.forEach((change: SchemaChange) => {
-      const newSchema = transformChatToCTB(change.schema);
+      const oldSchema =
+        contentTypes[change.schema.uid as any] || components[change.schema.uid as any];
+      const newSchema = transformChatToCTB(change.schema, oldSchema);
 
       applyChange({
         action: TYPE_TO_ACTION[change.type]!,
-        schema: newSchema as any,
+        schema: newSchema,
       });
     });
 

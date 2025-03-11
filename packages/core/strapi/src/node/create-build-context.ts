@@ -96,6 +96,9 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     ADMIN_PATH: adminPublicPath,
     STRAPI_ADMIN_BACKEND_URL: sameOrigin ? serverPublicPath : serverAbsoluteUrl,
     STRAPI_TELEMETRY_DISABLED: String(strapiInstance.telemetry.isDisabled),
+    // TODO: Use production url as default
+    STRAPI_ADMIN_AI_URL: process.env.STRAPI_ADMIN_AI_URL || 'http://localhost:3001',
+    STRAPI_ADMIN_AI_API_KEY: process.env.STRAPI_ADMIN_AI_API_KEY,
   });
 
   const envKeys = Object.keys(env);

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SchemaChange, SchemaChangeAnnotation, ToolAnnotation } from '../types/annotations';
-import { AssistantMessage, MarkerContent, Message, UserMessage } from '../types/messages';
+import { AssistantMessage, MarkerContent, Message, Status, UserMessage } from '../types/messages';
 
 import type { Message as RawMessage, ToolInvocation } from 'ai';
 
@@ -18,8 +18,8 @@ function transformToolCall(
 
   if (toolCall.state !== 'result' && toolCall.state !== 'call') return;
 
-  let state: 'loading' | 'success' | 'error' = 'success';
-  if (!options.error && toolCall.state !== 'result' && !options.isLoading) {
+  let state: Status = 'success';
+  if (!options.error && toolCall.state !== 'result' && options.isLoading) {
     state = 'loading';
   }
 
@@ -36,24 +36,17 @@ function transformToolCall(
       state,
       title:
         state === 'success'
-          ? `Generated ${numSchemas} schema${numSchemas === 1 ? '' : 's'}`
-          : 'Generating Schema',
+          ? `Updated ${numSchemas} schema${numSchemas === 1 ? '' : 's'}`
+          : 'Updating schemas',
       steps: schemaChanges.map((change: SchemaChange) => {
-        let description;
-
-        if (change.type === 'create') {
-          description = `Created ${change.schema.name} schema`;
-        } else if (change.type === 'update') {
-          description = `Updated ${change.schema.name} schema`;
-        } else if (change.type === 'remove') {
-          description = `Removed ${change.schema.name} schema`;
-        } else {
-          description = `Unknown change type: ${change.type}`;
-        }
-
         return {
           id: change.revisionId,
-          description: description,
+          description: change.schema.name,
+          status: change.type,
+          link:
+            change.schema.modelType === 'component'
+              ? `/plugins/content-type-builder/component-categories/${change.schema.category}/${change.schema.uid}` // Component
+              : `/plugins/content-type-builder/content-types/${change.schema.uid}`, // Collection Type
         };
       }),
     };

@@ -3,7 +3,7 @@ import { WarningCircle } from '@strapi/icons';
 
 interface AlertProps {
   title: string;
-  variant?: 'danger';
+  variant?: 'danger' | 'warning';
 }
 
 const COLORS = {
@@ -11,6 +11,11 @@ const COLORS = {
     background: 'danger100',
     borderColor: 'danger200',
     textColor: 'danger700',
+  },
+  warning: {
+    background: 'warning100',
+    borderColor: 'warning200',
+    textColor: 'warning600',
   },
 };
 
@@ -24,7 +29,7 @@ export const Alert = ({ title, variant = 'danger' }: AlertProps) => {
       width="100%"
     >
       <Flex gap={2}>
-        <WarningCircle fill={COLORS[variant].textColor} />
+        <WarningCircle style={{ minWidth: '16px' }} fill={COLORS[variant].textColor} />
         <Typography variant="omega" textColor={COLORS[variant].textColor}>
           {title}
         </Typography>

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 import { Box } from '@strapi/design-system';
 import { styled } from 'styled-components';
@@ -21,18 +21,37 @@ const TextAreaElement = styled(Box).attrs({ as: 'textarea' })`
   line-height: ${({ theme }) => theme.lineHeights[4]};
   font-size: ${({ theme }) => theme.fontSizes[2]};
   color: ${({ theme }) => theme.colors.neutral800};
+  padding-bottom: ${({ theme }) => theme.spaces[1]};
+  overflow-y: auto;
 
-  ::placeholder {
-    color: ${({ theme }) => theme.colors.neutral500};
-  }
+  /* Show partial lines when content exceeds visible area */
+  height: ${({ rows, theme }) =>
+    rows === 5
+      ? `calc(${rows} * ${theme.lineHeights[4]} * 1em + 0.7em)`
+      : `calc(${rows} * ${theme.lineHeights[4]} * 1em)`};
 
-  &:disabled {
+  &:disabled,
+  &::placeholder {
     color: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 export const ResizableTextArea = ({ value, onChange, onSubmit, placeholder }: TextAreaProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [rows, setRows] = useState(1);
+
+  const calculateRows = (text: string) => {
+    if (!text) return 1;
+    // Count newlines in the text
+    const lineCount = (text.match(/\n/g) || []).length + 1;
+    // Limit to a maximum of 5 rows
+    return Math.min(lineCount, 5);
+  };
+
+  // Update rows when value changes
+  useEffect(() => {
+    setRows(calculateRows(value));
+  }, [value]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!textareaRef.current?.value.trim()) {
@@ -61,7 +80,7 @@ export const ResizableTextArea = ({ value, onChange, onSubmit, placeholder }: Te
       onChange={onChange}
       onKeyDown={handleKeyDown}
       placeholder={placeholder}
-      rows={1}
+      rows={rows}
     />
   );
 };

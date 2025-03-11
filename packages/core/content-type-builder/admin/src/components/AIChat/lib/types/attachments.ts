@@ -1,3 +1,5 @@
+import type { Attachment as AIAttachment } from 'ai';
+
 export type Project = {
   id: string;
   name: string;
@@ -8,3 +10,8 @@ export type Project = {
     content: string;
   }[];
 };
+
+export type Attachment = {
+  id: string;
+  status: 'loading' | 'ready';
+} & AIAttachment;

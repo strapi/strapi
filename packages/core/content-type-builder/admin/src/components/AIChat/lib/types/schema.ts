@@ -14,5 +14,4 @@ export type Schema = {
     localized?: boolean;
   };
   attributes: Record<string, { type: string; [key: string]: any }>;
-  sources?: string[];
 };

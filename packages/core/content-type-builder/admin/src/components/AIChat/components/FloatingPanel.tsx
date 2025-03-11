@@ -1,54 +1,10 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext } from 'react';
 
 import { Box, Flex, IconButton } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
-import { styled, keyframes } from 'styled-components';
+import { styled } from 'styled-components';
 
-export const ANIMATIONS = {
-  slideUpIn: keyframes`
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  `,
-
-  slideUpOut: keyframes`
-    from {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-  `,
-
-  slideDownIn: keyframes`
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  `,
-
-  slideDownOut: keyframes`
-    from {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-  `,
-};
+import { ANIMATIONS } from './animations';
 
 type PanelSize = 'sm' | 'md' | 'lg';
 type PanelPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
@@ -80,6 +36,9 @@ const PANEL_POSITIONS: Record<PanelPosition, { [key: string]: number }> = {
   'top-left': { top: 4, left: 4 },
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Panel Root
+ * -----------------------------------------------------------------------------------------------*/
 interface RootProps {
   children: React.ReactNode;
   size?: PanelSize;
@@ -108,6 +67,7 @@ const FixedWrapper = styled(Box)<{ $position: PanelPosition }>`
 const PanelContainer = styled(Box)<{ $size: PanelSize; $position: PanelPosition }>`
   width: ${({ $size }) => PANEL_SIZES[$size].width};
   max-height: 85vh;
+  max-width: 85vw;
   display: flex;
   flex-direction: column;
   height: ${({ $size }) => PANEL_SIZES[$size].height};
@@ -155,24 +115,27 @@ const Root = ({
             {children}
           </PanelContainer>
         ) : null}
-        {toggleIcon && !isOpen && (
-          <IconButton onClick={onToggle} label="Toggle panel" variant="default">
-            {toggleIcon}
-          </IconButton>
-        )}
+        {toggleIcon && !isOpen && toggleIcon}
       </FixedWrapper>
     </PanelContext.Provider>
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Header
+ * -----------------------------------------------------------------------------------------------*/
 const Header = ({ children }: { children: React.ReactNode }) => (
-  <Box padding={[2, 4]} borderColor="neutral150" borderStyle="solid" borderWidth="0 0 1px 0">
+  // Adjust padding to fit title and right icons
+  <Box padding={[2, 2, 2, 4]} borderColor="neutral150" borderStyle="solid" borderWidth="0 0 1px 0">
     <Flex justifyContent="space-between" alignItems="center">
       {children}
     </Flex>
   </Box>
 );
 
+/* -------------------------------------------------------------------------------------------------
+ * Body
+ * -----------------------------------------------------------------------------------------------*/
 const Body = ({ children }: { children: React.ReactNode }) => {
   return (
     <Box padding={4} flex="1" overflow="auto">
@@ -181,13 +144,19 @@ const Body = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Footer
+ * -----------------------------------------------------------------------------------------------*/
 const Footer = ({ children }: { children: React.ReactNode }) => <Box padding={4}>{children}</Box>;
 
-const Close = () => {
+/* -------------------------------------------------------------------------------------------------
+ * Close Panel
+ * -----------------------------------------------------------------------------------------------*/
+const Close = ({ label }: { label?: string }) => {
   const { onToggle } = usePanel();
 
   return (
-    <IconButton onClick={onToggle} variant="ghost" label="Close panel">
+    <IconButton onClick={onToggle} variant="ghost" label={label || 'Close'}>
       <Cross />
     </IconButton>
   );

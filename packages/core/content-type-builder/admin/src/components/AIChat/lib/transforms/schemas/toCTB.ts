@@ -1,3 +1,5 @@
+import isEqual from 'lodash/isEqual';
+import omit from 'lodash/omit';
 import pluralize from 'pluralize';
 
 import { Schema } from '../../types/schema';
@@ -10,11 +12,79 @@ const ACTION_TO_STATUS: Record<Schema['action'], ContentType['status']> = {
   update: 'CHANGED',
 };
 
-const transformAttributesFromChatToCTB = (attributes: Schema['attributes']): AnyAttribute[] => {
-  return Object.entries(attributes).map(([name, attribute]) => ({
+/**
+ * Creates a new attribute with the specified status
+ */
+const createAttributeWithStatus = (
+  name: string,
+  attributeData: Record<string, any>,
+  status: AnyAttribute['status']
+): AnyAttribute =>
+  ({
     name,
-    ...attribute,
-  })) as any;
+    status,
+    ...attributeData,
+  }) as AnyAttribute;
+
+/**
+ * Determines the status of an attribute by comparing new and old versions
+ */
+const determineAttributeStatus = (
+  newAttr: Record<string, any>,
+  oldAttr?: AnyAttribute
+): AnyAttribute['status'] => {
+  if (!oldAttr) {
+    return 'NEW';
+  }
+
+  // Compare attributes without the status field to determine if they've changed
+  const newAttrWithoutStatus = omit(newAttr, ['status']);
+  const oldAttrWithoutStatus = omit(oldAttr, ['status']);
+
+  if (!isEqual(newAttrWithoutStatus, oldAttrWithoutStatus)) {
+    return 'CHANGED';
+  }
+
+  // If unchanged, keep the previous status
+  return oldAttr.status;
+};
+
+/**
+ * Transform attributes from Chat format to CTB format
+ * Also performs a diff to determine the status of each attribute
+ */
+const transformAttributesFromChatToCTB = (
+  { action, attributes }: Schema,
+  oldSchema?: ContentType | Component
+): AnyAttribute[] => {
+  // If it's a new schema or no oldAttributes provided, all attributes are NEW
+  if (action === 'create' || !oldSchema) {
+    return Object.entries(attributes).map(([name, attribute]) =>
+      createAttributeWithStatus(name, attribute, 'NEW')
+    );
+  }
+
+  // Convert old attributes array to a lookup map for faster access
+  const oldAttributesMap = oldSchema.attributes.reduce(
+    (acc, attr) => ({ ...acc, [attr.name]: attr }),
+    {} as Record<string, AnyAttribute>
+  );
+
+  // Process current attributes (new and changed)
+  const processedAttributes = Object.entries(attributes).map(([name, attr]) => {
+    const oldAttr = oldAttributesMap[name];
+    const status = determineAttributeStatus({ ...attr, name }, oldAttr);
+
+    return createAttributeWithStatus(name, attr, status);
+  });
+
+  // Find removed attributes (exist in old but not in new)
+  const removedAttributes = Object.entries(oldAttributesMap)
+    .filter(([name]) => !attributes[name])
+    .map(([name, oldAttr]) => createAttributeWithStatus(name, oldAttr, 'REMOVED'));
+
+  // Combine both sets of attributes
+  return [...processedAttributes, ...removedAttributes];
 };
 
 /**
@@ -25,15 +95,18 @@ const transformAttributesFromChatToCTB = (attributes: Schema['attributes']): Any
  *
  * We need to keep track of which changes have been made
  */
-export const transformChatToCTB = (schema: Schema): ContentType | Component => {
-  const singularName = pluralize.singular(schema.name).toLowerCase();
-  const pluralName = pluralize.plural(schema.name).toLowerCase();
+export const transformChatToCTB = (
+  schema: Schema,
+  oldSchema?: ContentType | Component
+): ContentType | Component => {
+  const singularName = pluralize.singular(schema.name).toLowerCase().replace(' ', '-');
+  const pluralName = pluralize.plural(schema.name).toLowerCase().replace(' ', '-');
 
   if (schema.modelType === 'component') {
     return {
       category: schema.category || 'default',
       modelName: singularName,
-      attributes: transformAttributesFromChatToCTB(schema.attributes),
+      attributes: transformAttributesFromChatToCTB(schema, oldSchema),
       info: {
         displayName: schema.name,
         description: schema.description,
@@ -41,26 +114,26 @@ export const transformChatToCTB = (schema: Schema): ContentType | Component => {
         // icon: schema.icon,
       },
       modelType: schema.modelType,
-      uid: `${schema.category}.${singularName}`,
+      uid: schema.uid as any,
       collectionName: pluralName,
-      isTemporary: true,
+      // isTemporary: true,
       status: schema.action ? ACTION_TO_STATUS[schema.action] : 'NEW',
       globalId: singularName,
     } satisfies Component;
   }
 
   return {
-    uid: `api::${singularName}.${singularName}`,
+    uid: schema.uid as any,
     modelType: schema.modelType,
     modelName: singularName,
     kind: schema.kind!,
     info: {
-      displayName: schema.name,
+      displayName: schema.name.charAt(0).toUpperCase() + schema.name.slice(1),
       singularName,
       pluralName,
     },
     collectionName: pluralName,
-    attributes: transformAttributesFromChatToCTB(schema.attributes),
+    attributes: transformAttributesFromChatToCTB(schema, oldSchema),
     options: {
       draftAndPublish: schema.options?.draftAndPublish,
     },
@@ -70,8 +143,9 @@ export const transformChatToCTB = (schema: Schema): ContentType | Component => {
       },
     },
     visible: true,
-    isTemporary: true,
+    // isTemporary: true,
     status: schema.action ? ACTION_TO_STATUS[schema.action] : 'NEW',
     globalId: singularName,
+    restrictRelationsTo: null, // TODO: not sure what this is about
   } satisfies ContentType;
 };

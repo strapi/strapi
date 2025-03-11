@@ -1,15 +1,30 @@
-import { ReactNode } from 'react';
+import { ReactNode, createContext, useContext } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { Trash, WarningCircle } from '@strapi/icons';
 import { styled } from 'styled-components';
+
+/* -------------------------------------------------------------------------------------------------
+ * Attachment Context
+ * -----------------------------------------------------------------------------------------------*/
+
+interface AttachmentContextValue {
+  error?: string | null;
+}
+
+const AttachmentContext = createContext<AttachmentContextValue>({ error: null });
+
+const useAttachmentContext = () => useContext(AttachmentContext);
 
 /* -------------------------------------------------------------------------------------------------
  * Attachment Root
  * -----------------------------------------------------------------------------------------------*/
 
-interface AttachmentRootProps {
+export interface AttachmentRootProps {
   children: ReactNode;
+  error?: string | null;
+  minWidth?: string;
+  maxWidth?: string;
 }
 
 const StyledRoot = styled(Box)`
@@ -20,18 +35,34 @@ const StyledRoot = styled(Box)`
 `;
 
 // TODO: How to make this a button instead?
-const Root = ({ children }: AttachmentRootProps) => {
+const Root = ({ children, error = null, minWidth, maxWidth }: AttachmentRootProps) => {
   return (
-    <StyledRoot
-      background="neutral0"
-      hasRadius
-      borderColor="neutral200"
-      borderStyle="solid"
-      borderWidth="1px"
-      padding={2}
-    >
-      <Flex gap={2}>{children}</Flex>
-    </StyledRoot>
+    <AttachmentContext.Provider value={{ error }}>
+      <Flex
+        direction="column"
+        alignItems="flex-start"
+        gap={2}
+        minWidth={minWidth}
+        maxWidth={maxWidth}
+      >
+        <StyledRoot
+          background="neutral0"
+          hasRadius
+          borderColor="neutral200"
+          borderStyle="solid"
+          borderWidth="1px"
+          padding={2}
+          width="100%"
+        >
+          <Flex gap={2}>{children}</Flex>
+        </StyledRoot>
+        {error && (
+          <Typography variant="pi" textColor="danger500">
+            {error}
+          </Typography>
+        )}
+      </Flex>
+    </AttachmentContext.Provider>
   );
 };
 
@@ -44,9 +75,11 @@ interface AttachmentPreviewProps {
 }
 
 const Preview = ({ children }: AttachmentPreviewProps) => {
+  const { error } = useAttachmentContext();
+
   return (
-    <Flex alignItems="center" justifyContent="center" shrink={0}>
-      {children}
+    <Flex alignItems="center" justifyContent="center">
+      {error ? <WarningCircle fill="danger500" /> : children}
     </Flex>
   );
 };
@@ -95,3 +128,5 @@ export const Attachment = {
   Title,
   Remove,
 };
+
+export { useAttachmentContext };

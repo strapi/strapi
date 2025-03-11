@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-import { Box, Flex, Typography, inputFocusStyle } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
@@ -26,7 +26,11 @@ export interface InputRootProps extends React.ComponentPropsWithoutRef<typeof Fl
 
 export const Root = ({ children, isLoading = false, ...props }: InputRootProps) => {
   return (
-    <InputContext.Provider value={{ isLoading }}>
+    <InputContext.Provider
+      value={{
+        isLoading,
+      }}
+    >
       <Flex
         direction="column"
         alignItems={'flex-start'}
@@ -71,7 +75,7 @@ interface InputAttachmentsProps extends React.ComponentPropsWithoutRef<typeof Fl
 
 const Attachments = ({ children, gap = 2, ...props }: InputAttachmentsProps) => {
   return (
-    <Flex gap={gap} wrap="wrap" paddingBottom={2} {...props}>
+    <Flex gap={gap} wrap="wrap" paddingBottom={2} maxHeight="150px" overflow="auto" {...props}>
       {children}
     </Flex>
   );
@@ -82,11 +86,6 @@ const Attachments = ({ children, gap = 2, ...props }: InputAttachmentsProps) => 
  * -----------------------------------------------------------------------------------------------*/
 
 const InputContainer = styled(Box)``;
-// const InputContainer = styled(Box)`
-//   &:focus-within {
-//     ${inputFocusStyle()}
-//   }
-// `;
 
 interface ContentProps extends React.ComponentPropsWithoutRef<typeof Box> {
   children: React.ReactNode;
@@ -101,7 +100,6 @@ const Content = ({ children, disclaimer, ...props }: ContentProps) => {
       borderColor="neutral200"
       borderWidth="1px"
       borderStyle="solid"
-      shadow="filterShadow"
       width="100%"
       {...props}
     >

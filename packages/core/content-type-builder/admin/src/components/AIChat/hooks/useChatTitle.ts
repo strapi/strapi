@@ -5,16 +5,18 @@ import { useState, useCallback } from 'react';
 
 import { Message } from '../lib/types/messages';
 
-const CREATE_CHAT_URL = 'http://localhost:3001/generate-title';
+import { useFetchGenerateTitle } from './useAIFetch';
 
 interface UseChatTitleProps {
+  chatId: string;
   messages: Message[];
 }
 
-export const useChatTitle = ({ messages }: UseChatTitleProps) => {
+export const useChatTitle = ({ chatId, messages }: UseChatTitleProps) => {
   const [title, setTitle] = useState<string | undefined>(undefined);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<boolean>(false);
+
+  // Use the endpoint-specific hook
+  const { fetch: fetchGenerateTitle, error, isPending: isGenerating } = useFetchGenerateTitle();
 
   const generateTitle = useCallback(async () => {
     const firstMessage = messages.at(0);
@@ -24,45 +26,28 @@ export const useChatTitle = ({ messages }: UseChatTitleProps) => {
       return;
     }
 
-    setIsGenerating(true);
-
     const firstMessageContent = firstMessage.contents
       .map((content) => (content.type === 'text' ? content.text : ''))
       .join('\n');
 
-    try {
-      const response = await fetch(CREATE_CHAT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer e22a341695db2bcf737b776b9efbc2c66997da7dde5b087db7166a1d749b7b479a723e6ab1e7288e`,
-        },
-        body: JSON.stringify({
-          message: firstMessageContent,
-        }),
-      });
+    const result = await fetchGenerateTitle({
+      body: { chatId, message: firstMessageContent },
+    });
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      const generatedTitle = data.title;
-      setTitle(generatedTitle);
-    } catch (error) {
-      console.error('Error generating chat title:', error);
-      setError(true);
-    } finally {
-      setIsGenerating(false);
+    if (result?.data) {
+      setTitle(result.data.title);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.at(0)?.id, isGenerating]);
+  }, [messages, title, isGenerating, error, fetchGenerateTitle, chatId]);
+
+  const resetTitle = useCallback(() => {
+    setTitle(undefined);
+  }, []);
 
   return {
     title,
-    setTitle,
-    generateTitle,
     isGenerating,
+    error,
+    generateTitle,
+    resetTitle,
   };
 };

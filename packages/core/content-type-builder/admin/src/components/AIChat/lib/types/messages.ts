@@ -2,11 +2,19 @@ import { SchemaChange } from './annotations';
 
 import type { Attachment } from 'ai';
 
+export type Status = 'loading' | 'success' | 'error';
+
 export interface MarkerContent {
   type: 'marker';
   title: string;
-  state: 'loading' | 'success' | 'error';
-  steps: Array<{ id: string; description: string }>;
+  state: Status;
+  link?: string;
+  steps: Array<{
+    id: string;
+    description: string;
+    status: 'created' | 'updated' | 'removed';
+    link?: string;
+  }>;
 }
 
 export interface TextContent {
@@ -31,7 +39,7 @@ export type AssistantMessage = {
   role: 'assistant';
   schemaChanges: SchemaChange[];
   contents: MessageContent[];
-  status: 'loading' | 'success' | 'error';
+  status: Status;
 };
 
 export type Message = UserMessage | AssistantMessage;

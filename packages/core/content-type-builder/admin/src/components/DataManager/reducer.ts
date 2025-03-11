@@ -6,7 +6,6 @@ import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
 
 import { createUndoRedoSlice } from './undoRedo';
-import { formatSchema } from './utils/formatSchemas';
 
 import type {
   Components,
@@ -771,9 +770,9 @@ const slice = createUndoRedoSlice(
             const uid = schema.uid;
 
             if (schema.modelType === 'component') {
-              delete state.components[uid];
+              state.components[uid].status = 'REMOVED';
             } else {
-              delete state.contentTypes[uid];
+              state.contentTypes[uid].status = 'REMOVED';
             }
             break;
           }

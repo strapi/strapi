@@ -1,12 +1,13 @@
 import { Button, Flex, Typography } from '@strapi/design-system';
-import { Sparkle } from '@strapi/icons';
+import { Sparkle, Folder } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { NextLogo } from '../../components/AIChat/components/Attachments/components/NextLogo';
 import { useStrapiChat } from '../../components/AIChat/providers/ChatProvider';
+import { useUploadProjectToChat } from '../../components/AIChat/UploadCodeModal';
 import { getTrad } from '../../utils/getTrad';
+
 // Styled container that implements responsive behavior
 const ResponsiveContainer = styled(Flex)`
   @container (max-width: 200px) {
@@ -25,14 +26,15 @@ export const EmptyState = () => {
     defaultMessage: 'No content types',
   });
 
-  const { openChat } = useStrapiChat();
+  const { isChatEnabled, openChat } = useStrapiChat();
+  const { openCodeUpload } = useUploadProjectToChat();
 
   return (
     <ResponsiveContainer
       justifyContent="center"
       height="100%"
       width={'400px'}
-      maxWidth="70%"
+      maxWidth="90%"
       margin="auto"
       direction="column"
       gap={6}
@@ -43,12 +45,7 @@ export const EmptyState = () => {
         <Typography variant="beta" textAlign="center">
           {pluginName}
         </Typography>
-        <Typography
-          variant="omega"
-          textAlign="center"
-          textColor="neutral600"
-          className="hide-on-small"
-        >
+        <Typography variant="omega" textAlign="center" textColor="neutral600">
           {formatMessage({
             id: getTrad('table.content.create-first-content-type.description'),
             defaultMessage:
@@ -58,14 +55,22 @@ export const EmptyState = () => {
       </Flex>
 
       {/* Chat is not available on small screens either way */}
-      <Flex gap={2} direction="column" className="hide-on-small">
-        <Button startIcon={<NextLogo size={16} />} variant="tertiary">
-          Import a Next.js app
-        </Button>
-        <Button startIcon={<Sparkle />} variant="tertiary" onClick={() => openChat()}>
-          Start with a prompt
-        </Button>
-      </Flex>
+      {isChatEnabled && (
+        <Flex gap={2} direction="column" className="hide-on-small">
+          <Button startIcon={<Folder />} variant="tertiary" onClick={() => openCodeUpload(true)}>
+            {formatMessage({
+              id: getTrad('table.content.create-first-content-type.import-code'),
+              defaultMessage: 'Import code',
+            })}
+          </Button>
+          <Button startIcon={<Sparkle />} variant="tertiary" onClick={openChat}>
+            {formatMessage({
+              id: getTrad('table.content.create-first-content-type.start-with-prompt'),
+              defaultMessage: 'Start with a prompt',
+            })}
+          </Button>
+        </Flex>
+      )}
     </ResponsiveContainer>
   );
 };
