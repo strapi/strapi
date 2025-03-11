@@ -1,46 +1,112 @@
-import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
-import { ExternalLink } from '@strapi/icons';
-import { EmptyPermissions } from '@strapi/icons/symbols';
+import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
+import { ExternalLink, Check, Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
+import { useTypedSelector } from '../../../core/store/hooks';
+import darkIllustration from '../assets/purchase-page-audit-logs-illustration-dark.svg';
+import lightIllustration from '../assets/purchase-page-audit-logs-illustration-light.svg';
 
 const PurchaseAuditLogs = () => {
   const { formatMessage } = useIntl();
+  const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
 
+  const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
     <Layouts.Root>
       <Main>
         <Layouts.Header
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
-          subtitle={formatMessage({
-            id: 'Settings.permissions.auditLogs.listview.header.subtitle',
-            defaultMessage: 'Logs of all the activities that happened in your environment',
-          })}
         />
-        <Box paddingLeft={10} paddingRight={10}>
-          <EmptyStateLayout
-            icon={<EmptyPermissions width="16rem" />}
-            content={formatMessage({
-              id: 'Settings.permissions.auditLogs.not-available',
-              defaultMessage:
-                'Audit Logs is only available as part of a paid plan. Upgrade to get a searchable and filterable display of all activities.',
-            })}
-            action={
-              <LinkButton
-                variant="default"
-                endIcon={<ExternalLink />}
-                href="https://strapi.io/features/audit-logs?utm_campaign=In-Product-CTA&utm_source=Audit-Logs"
-                isExternal
-                target="_blank"
-              >
-                {formatMessage({
-                  id: 'global.learn-more',
-                  defaultMessage: 'Learn more',
-                })}
-              </LinkButton>
-            }
-          />
+        <Box marginLeft={10} marginRight={10} shadow="filterShadow" hasRadius background="neutral0">
+          <Grid.Root>
+            <Grid.Item col={6} s={12}>
+              <Flex direction="column" alignItems="flex-start" padding={7} gap={2}>
+                <Flex>
+                  <Lightning fill="primary600" width={`24px`} height={`24px`} />
+                </Flex>
+                <Flex paddingTop={2} paddingBottom={4}>
+                  <Typography variant="beta" fontWeight="bold">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.description',
+                      defaultMessage: 'Track and review changes with your team',
+                    })}
+                  </Typography>
+                </Flex>
+
+                <Flex gap={2}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.perks1',
+                      defaultMessage: 'Easily track changes',
+                    })}
+                  </Typography>
+                </Flex>
+
+                <Flex gap={2}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.perks2',
+                      defaultMessage: 'Review changes with ease',
+                    })}
+                  </Typography>
+                </Flex>
+
+                <Flex gap={2}>
+                  <Check fill="success500" width={`16px`} height={`16px`} />
+                  <Typography textColor="neutral700">
+                    {formatMessage({
+                      id: 'Settings.page.PurchaseAudit-logs.perks3',
+                      defaultMessage: 'Maintain security and compliance',
+                    })}
+                  </Typography>
+                </Flex>
+
+                <Flex gap={2} marginTop={7}>
+                  <LinkButton
+                    variant="default"
+                    href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Audit-Logs"
+                  >
+                    {formatMessage({
+                      id: 'Settings.page.purchase.upgrade.cta',
+                      defaultMessage: 'Upgrade',
+                    })}
+                  </LinkButton>
+                  <LinkButton
+                    variant="tertiary"
+                    endIcon={<ExternalLink />}
+                    href="https://strapi.io/features/audit-logs?utm_campaign=In-Product-CTA&utm_source=Audit-Logs"
+                  >
+                    {formatMessage({
+                      id: 'Settings.page.purchase.learn-more.cta',
+                      defaultMessage: 'Learn more',
+                    })}
+                  </LinkButton>
+                </Flex>
+              </Flex>
+            </Grid.Item>
+            <Grid.Item col={6} s={12} background="primary100">
+              <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
+                <img
+                  src={illustration}
+                  alt="purchase-page-audit-logs-illustration"
+                  width="100%"
+                  height="100%"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'top left',
+                  }}
+                />
+              </div>
+            </Grid.Item>
+          </Grid.Root>
         </Box>
       </Main>
     </Layouts.Root>
