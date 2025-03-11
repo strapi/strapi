@@ -213,7 +213,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           'target' in attribute &&
           'target' in props.attribute &&
           attribute.target === props.attribute.target
-      ).length > 0 && Object.keys(schemaAttributes).includes(targetField);
+      ).length > 0;
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {

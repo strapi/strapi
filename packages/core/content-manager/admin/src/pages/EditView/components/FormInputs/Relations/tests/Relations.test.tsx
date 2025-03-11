@@ -7,59 +7,11 @@ import { RelationsInput, RelationsFieldProps } from '../Relations';
 
 const relationContext = {
   initialDocument: {
-    documentId: 'abcdefg',
-    model: 'api::test.test',
+    documentId: '12345',
+    model: 'api::address.address',
     collectionType: 'collection-types',
   },
 };
-
-jest.mock('../../../../../../hooks/useDocument', () => ({
-  useDoc: jest.fn(() => ({})),
-  useDocument: jest.fn(() => ({
-    isLoading: false,
-    components: {},
-    document: {
-      category: {
-        count: 1,
-      },
-      createdAt: '2025-02-10T09:44:42.354Z',
-      createdBy: {
-        firstname: 'John',
-        id: '1',
-        lastname: 'Doe',
-        username: 'johndoe',
-      },
-      documentId: 'abcdefg',
-      id: 1,
-      locale: null,
-      name: 'test',
-      updatedAt: '2025-02-10T09:44:42.354Z',
-      updatedBy: {
-        firstname: 'John',
-        id: '1',
-        lastname: 'Doe',
-        username: 'johndoe',
-      },
-    },
-    getTitle: jest.fn().mockReturnValue('Test'),
-    getInitialFormValues: jest.fn().mockReturnValue({
-      name: 'test',
-      category: {
-        connect: [],
-        disconnect: [],
-      },
-    }),
-    meta: {
-      availableLocales: [],
-      availableStatus: [],
-    },
-    schema: {
-      options: {
-        draftAndPublish: false,
-      },
-    },
-  })),
-}));
 
 const render = ({
   initialEntries,
@@ -117,7 +69,7 @@ describe('Relations', () => {
     expect(await screen.findAllByRole('option')).toHaveLength(3);
   });
 
-  it('should by render the relations list when there is data from the API', async () => {
+  it('should render the relations list when there is data from the API', async () => {
     render();
 
     expect(screen.getByLabelText('relations')).toBe(screen.getByRole('combobox'));
