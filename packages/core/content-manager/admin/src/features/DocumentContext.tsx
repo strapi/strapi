@@ -50,6 +50,7 @@ const [DocumentProvider, useDocumentContext] =
  * - meta: information about the currentDocument,
  * - document: the actual document,
  * - changeDocument: a function to change the current document to one of its relations.
+ * - rootDocumentMeta: information about the root level document (current page)
  */
 const DocumentContextProvider = ({
   children,
@@ -79,7 +80,6 @@ const DocumentContextProvider = ({
         documentId: initialDocument.documentId,
         model: initialDocument.model,
         collectionType: initialDocument.collectionType,
-        params: initialDocument.params,
       }}
       meta={currentDocumentMeta}
       documentHistory={documentHistory}

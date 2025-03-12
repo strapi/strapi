@@ -59,9 +59,15 @@ const DynamicComponent = ({
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
   const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
+  const rootDocumentMeta = useDocumentContext(
+    'DynamicComponent',
+    (state) => state.rootDocumentMeta
+  );
+  const isRootDocument = rootDocumentMeta.model === documentMeta.model;
   const {
     edit: { components },
-  } = useDocumentLayout(documentMeta.model);
+  } = useDocumentLayout(isRootDocument ? documentMeta.model : rootDocumentMeta.model);
+  const document = useDocumentContext('DynamicComponent', (state) => state.document);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
@@ -269,9 +275,17 @@ const DynamicComponent = ({
                                   alignItems="stretch"
                                 >
                                   {children ? (
-                                    children({ ...fieldWithTranslatedLabel, name: fieldName })
+                                    children({
+                                      ...fieldWithTranslatedLabel,
+                                      document,
+                                      name: fieldName,
+                                    })
                                   ) : (
-                                    <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                                    <InputRenderer
+                                      {...fieldWithTranslatedLabel}
+                                      document={document}
+                                      name={fieldName}
+                                    />
                                   )}
                                 </ResponsiveGridItem>
                               );

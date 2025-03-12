@@ -486,7 +486,11 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
 
         <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
           <Box overflow="auto" flex={1}>
-            <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground={false} />
+            <FormLayout
+              layout={documentLayoutResponse.edit.layout}
+              document={documentResponse}
+              hasBackground={false}
+            />
           </Box>
         </Flex>
       </DocumentRBAC>

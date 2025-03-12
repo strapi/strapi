@@ -2,10 +2,11 @@ import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDocumentContext } from '../../../features/DocumentContext';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
+
+import type { UseDocument } from '../../../hooks/useDocument';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
   sm: '27.5rem', // 440px
@@ -15,10 +16,13 @@ export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;
 `;
 
-// We need to use a different grid item for the responsive layout in the test environment
-// because @container is not supported in jsdom and it throws an error
 export const ResponsiveGridItem =
-  // TODO: we need to find a better solution to avoid using process.env.NODE_ENV in the code to fix the tests with this styled component
+  /**
+   * TODO:
+   * JSDOM cannot handle container queries.
+   * This is a temporary workaround so that tests do not fail in the CI when jestdom throws an error
+   * for failing to parse the stylesheet.
+   */
   process.env.NODE_ENV !== 'test'
     ? styled(Grid.Item)<{ col: number }>`
         grid-column: span 12;
@@ -33,12 +37,12 @@ export const ResponsiveGridItem =
 interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   hasBackground?: boolean;
   model?: string;
+  document: ReturnType<UseDocument>;
 }
 
-const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
+const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const documentMeta = useDocumentContext('FormLayout', (state) => state.meta);
-  const model = documentMeta.model;
+  const model = document.schema?.modelName;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -58,7 +62,7 @@ const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                <InputRenderer {...fieldWithTranslatedLabel} />
+                <InputRenderer {...fieldWithTranslatedLabel} document={document} />
               </Grid.Item>
             </Grid.Root>
           );
@@ -95,7 +99,7 @@ const FormLayout = ({ layout, hasBackground = true }: FormLayoutProps) => {
                         direction="column"
                         alignItems="stretch"
                       >
-                        <InputRenderer {...fieldWithTranslatedLabel} />
+                        <InputRenderer {...fieldWithTranslatedLabel} document={document} />
                       </ResponsiveGridItem>
                     );
                   })}

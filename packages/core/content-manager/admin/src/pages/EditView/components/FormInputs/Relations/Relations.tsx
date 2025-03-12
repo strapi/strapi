@@ -15,7 +15,6 @@ import {
   Flex,
   IconButton,
   TextButton,
-  Tooltip,
   Typography,
   VisuallyHidden,
   useComposedRefs,
@@ -100,6 +99,7 @@ function useHandleDisconnect(fieldName: string, consumerName: string) {
 /* -------------------------------------------------------------------------------------------------
  * RelationsField
  * -----------------------------------------------------------------------------------------------*/
+
 const RELATIONS_TO_DISPLAY = 5;
 const ONE_WAY_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'];
 
@@ -148,15 +148,24 @@ export interface RelationsFormValue {
  */
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
-    const documentMeta = useDocumentContext('RelationsField', (state) => state.meta);
-    const documentResponse = useDocumentContext('RelationsField', (state) => state.document);
+    const currentDocumentMeta = useDocumentContext('RelationsField', (state) => state.meta);
+    const currentDocument = useDocumentContext('RelationsField', (state) => state.document);
+    const rootDocumentMeta = useDocumentContext(
+      'RelationsField',
+      (state) => state.rootDocumentMeta
+    );
 
     const [currentPage, setCurrentPage] = React.useState(1);
-    const documentId = documentResponse.document?.documentId;
+    const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
+    const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
+
+    // Use the documentId from the actual document, not the params (meta)
+    const documentId = currentDocument.document?.documentId;
 
     const { formatMessage } = useIntl();
+
     const [{ query }] = useQueryParams();
-    const params = buildValidParams(query);
+    const params = documentMeta.params ?? buildValidParams(query);
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
@@ -172,12 +181,13 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       setCurrentPage(1);
     }, [isSubmitting]);
 
+    const component = componentUID && currentDocument.components[componentUID];
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
      */
-    const id = componentId ? componentId.toString() : documentId;
-    const model = componentUID ?? documentMeta.model;
+    const model = component ? component.uid : documentMeta.model;
+    const id = component && componentId ? componentId.toString() : documentId;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
@@ -186,6 +196,24 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * individual components. Therefore we split the string and take the last item.
      */
     const [targetField] = props.name.split('.').slice(-1);
+
+    const schemaAttributes = component
+      ? (component.attributes ?? {})
+      : (currentDocument.schema?.attributes ?? {});
+
+    /**
+     * Confirm the target field is related to the current document.
+     * Since relations can exist in a modal on top of the root document,
+     * we need to ensure we are fetching relations for the correct document (root document vs related document),
+     */
+    const isRelatedToCurrentDocument =
+      Object.values(schemaAttributes).filter(
+        (attribute) =>
+          attribute.type === 'relation' &&
+          'target' in attribute &&
+          'target' in props.attribute &&
+          attribute.target === props.attribute.target
+      ).length > 0;
 
     const { data, isLoading, isFetching } = useGetRelationsQuery(
       {
@@ -201,7 +229,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id,
+        skip: !id || !isRelatedToCurrentDocument,
         selectFromResult: (result) => {
           return {
             ...result,
@@ -326,10 +354,11 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           <RelationsInput
             disabled={isDisabled}
             // NOTE: we should not default to using the documentId if the component is being created (componentUID is undefined)
-            id={componentUID ? (componentId ? `${componentId}` : '') : documentId}
+            id={componentUID && component ? (componentId ? `${componentId}` : '') : documentId}
             label={`${label} ${relationsCount > 0 ? `(${relationsCount})` : ''}`}
             model={model}
             onChange={handleConnect}
+            isRelatedToCurrentDocument={isRelatedToCurrentDocument}
             {...props}
           />
           {'pagination' in data &&
@@ -434,6 +463,7 @@ const addLabelAndHref =
 interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
   id?: string;
   model: string;
+  isRelatedToCurrentDocument: boolean;
   onChange: (
     relation: Pick<RelationResult, 'documentId' | 'id' | 'locale' | 'status'> & {
       [key: string]: any;
@@ -458,6 +488,7 @@ const RelationsInput = ({
   unique: _unique,
   'aria-label': _ariaLabel,
   onChange,
+  isRelatedToCurrentDocument,
   ...props
 }: RelationsInputProps) => {
   const [textValue, setTextValue] = React.useState<string | undefined>('');
@@ -467,6 +498,10 @@ const RelationsInput = ({
   });
   const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams();
+  const currentDocumentMeta = useDocumentContext('RelationsInput', (state) => state.meta);
+  const rootDocumentMeta = useDocumentContext('RelationsInput', (state) => state.rootDocumentMeta);
+  const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
+  const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
   const { formatMessage } = useIntl();
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
@@ -490,11 +525,16 @@ const RelationsInput = ({
      */
     const [targetField] = name.split('.').slice(-1);
 
+    // Return early if there is no relation to the document
+    if (!isRelatedToCurrentDocument) return;
+
+    const params = documentMeta.params ?? buildValidParams(query);
+
     searchForTrigger({
       model,
       targetField,
       params: {
-        ...buildValidParams(query),
+        ...params,
         id: id ?? '',
         pageSize: 10,
         idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
@@ -511,6 +551,8 @@ const RelationsInput = ({
     query,
     searchForTrigger,
     searchParamsDebounced,
+    isRelatedToCurrentDocument,
+    documentMeta,
   ]);
 
   const handleSearch = async (search: string) => {
@@ -952,7 +994,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
 
   const { formatMessage } = useIntl();
 
-  const { href, id, label, status, documentId, apiData } = relations[index];
+  const { href, id, label, status, documentId, apiData, locale } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
@@ -1030,7 +1072,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                     model: targetModel,
                     collectionType: getCollectionType(href)!,
                     params: {
-                      locale: apiData?.locale || null,
+                      locale: locale || apiData?.locale || null,
                     },
                   }}
                 />

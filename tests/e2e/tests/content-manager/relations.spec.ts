@@ -189,4 +189,23 @@ test.describe('Unstable Relations on the fly', () => {
 
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
   });
+
+  test('I want to open a relation inside a dynamic zone component, update its content, and save', async ({
+    page,
+  }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    // Step 1. Got to Shop single-type
+    await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
+    // Step 2. Choose the product carousel component and open its toggle
+    await page.getByRole('button', { name: 'Product carousel' }).click();
+    // Step 3. Select a product
+    await page.getByRole('combobox', { name: 'products' }).click();
+    await page.getByRole('option', { name: 'Nike Mens 23/24 Away Stadium Jersey' }).click();
+    // Step 4. Open the relation modal
+    await page.getByRole('button', { name: 'Nike Mens 23/24 Away Stadium Jersey' }).click();
+    await expect(page.getByText('Edit a relation')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
+    ).toBeVisible();
+  });
 });
