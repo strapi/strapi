@@ -1064,7 +1064,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               </IconButton>
             ) : null}
             <Flex width="100%" minWidth={0} justifyContent="space-between">
-              <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+              <Box minWidth={0} paddingTop={1} paddingBottom={1} marginRight={4} overflow="hidden">
                 <RelationModalWrapper
                   triggerButtonLabel={label}
                   relation={{

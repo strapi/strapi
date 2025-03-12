@@ -240,7 +240,7 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
                       }
                     }}
                   >
-                    {triggerButtonLabel}
+                    <Typography ellipsis>{triggerButtonLabel}</Typography>
                   </CustomTextButton>
                 </Tooltip>
               </Modal.Trigger>
