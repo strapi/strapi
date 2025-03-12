@@ -129,7 +129,9 @@ async function run(args: string[]): Promise<void> {
 
   // TO REMOVE
   console.log(`[CLI] deviceId: ${deviceId}, isDeviceIdUsingProjectId: ${isDeviceIdUsingProjectId}`);
-  console.log(`[CLI] ${isDeviceIdUsingProjectId ? `deviceId not saved in package.json` : `deviceId should be saved in package.json`}`);
+  console.log(
+    `[CLI] ${isDeviceIdUsingProjectId ? `deviceId not saved in package.json` : `deviceId should be saved in package.json`}`
+  );
 
   const scope: Scope = {
     rootPath,

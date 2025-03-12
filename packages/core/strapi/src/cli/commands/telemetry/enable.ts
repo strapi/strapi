@@ -95,7 +95,11 @@ const action = async () => {
     process.exit(0);
   }
 
-  await sendEvent('didOptInTelemetry', updatedPackageJSON.strapi.uuid, updatedPackageJSON.strapi?.deviceId);
+  await sendEvent(
+    'didOptInTelemetry',
+    updatedPackageJSON.strapi.uuid,
+    updatedPackageJSON.strapi?.deviceId
+  );
   console.log(`${chalk.green('Successfully opted into and enabled Strapi telemetry')}`);
   process.exit(0);
 };
