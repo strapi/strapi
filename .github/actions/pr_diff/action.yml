@@ -32,7 +32,7 @@ runs:
         OWNER: ${{ inputs.owner }}
         REPO: ${{ inputs.repo }}
         BASE_BRANCH: ${{ inputs.base_branch }}
-        TARGET_BRANCH: ${{ inputs. target_branch }}
+        TARGET_BRANCH: ${{ inputs.target_branch }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 branding:
   icon: 'git-pull-request'
