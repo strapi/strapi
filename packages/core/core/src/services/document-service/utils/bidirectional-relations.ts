@@ -73,6 +73,12 @@ const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
           continue;
         }
 
+        // If it's a self referencing relation, there is no need to sync any relation
+        // The order will already be handled as both sides are inside the same content type
+        if (model.uid === uid) {
+          continue;
+        }
+
         const joinTable = attribute.joinTable;
         if (!joinTable) {
           continue;
@@ -150,6 +156,11 @@ const sync = async (
       const sourceColumn = joinTable.inverseJoinColumn.name;
       const targetColumn = joinTable.joinColumn.name;
       const orderColumn = joinTable.orderColumnName;
+
+      // Failsafe in case those don't exist
+      if (!sourceColumn || !targetColumn || !orderColumn) {
+        continue;
+      }
 
       // Update order values for each relation
       // TODO: Find a way to batch it more efficiently
