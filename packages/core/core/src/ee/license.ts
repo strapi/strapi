@@ -87,11 +87,13 @@ const fetchLicense = async (
   key: string,
   projectId: string
 ) => {
+  const { deviceId: randomDeviceId } = strapi.config;
+
   const response = await strapi
     .fetch(`https://license.strapi.io/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, projectId, deviceId: machineID() }),
+      body: JSON.stringify({ key, projectId, deviceId: machineID(projectId, randomDeviceId) }), // NOTE: Doing nothing on the LR with the deviceId
     })
     .catch(throwError);
 

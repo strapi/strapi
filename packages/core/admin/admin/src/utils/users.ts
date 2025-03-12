@@ -24,13 +24,14 @@ const getDisplayName = ({ firstname, lastname, username, email }: Partial<User> 
  * hashAdminUserEmail
  * -----------------------------------------------------------------------------------------------*/
 
-const hashAdminUserEmail = async (payload?: User) => {
+const hashAdminUserEmail = async (payload?: User, projectId?: string | null) => {
   if (!payload || !payload.email) {
     return null;
   }
 
   try {
-    return await digestMessage(payload.email);
+    const messageToDigest = projectId ? `${payload.email}-${projectId}` : payload.email;
+    return await digestMessage(messageToDigest);
   } catch (error) {
     return null;
   }

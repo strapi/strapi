@@ -57,6 +57,7 @@ export interface Scope {
   isQuickstart?: boolean;
   uuid?: string;
   deviceId?: string;
+  isDeviceIdUsingProjectId?: boolean;
   database: DatabaseInfo;
   tmpPath?: string;
   packageJsonStrapi?: Record<string, unknown>;

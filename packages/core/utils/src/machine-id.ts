@@ -1,12 +1,13 @@
-import { randomUUID } from 'crypto';
+import crypto from 'crypto';
 import { machineIdSync } from 'node-machine-id';
 
-export default () => {
+export default (projectId: string, deviceId: string) => {
+  if (deviceId)
+    return deviceId;
   try {
-    const deviceId = machineIdSync();
-    return deviceId;
+    const machineId = machineIdSync();
+    return projectId ? crypto.createHash('sha256').update(`${machineId}-${projectId}`).digest('hex') : crypto.randomUUID();
   } catch (error) {
-    const deviceId = randomUUID();
-    return deviceId;
+    return crypto.randomUUID();
   }
 };

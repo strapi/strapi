@@ -11,6 +11,7 @@ import { sendEvent } from '../../utils/telemetry';
 type PackageJson = {
   strapi?: {
     uuid?: string;
+    deviceId?: string;
     telemetryDisabled?: boolean;
   };
 };
@@ -94,7 +95,7 @@ const action = async () => {
     process.exit(0);
   }
 
-  await sendEvent('didOptInTelemetry', updatedPackageJSON.strapi.uuid);
+  await sendEvent('didOptInTelemetry', updatedPackageJSON.strapi.uuid, updatedPackageJSON.strapi?.deviceId);
   console.log(`${chalk.green('Successfully opted into and enabled Strapi telemetry')}`);
   process.exit(0);
 };

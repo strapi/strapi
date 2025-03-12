@@ -11,8 +11,9 @@ const readPackageJSON = async (path: string) => {
   try {
     const packageObj = await fse.readJson(path);
     const uuid = packageObj.strapi ? packageObj.strapi.uuid : null;
+    const deviceId = packageObj.strapi ? packageObj.strapi.deviceId : null;
 
-    return { uuid, packageObj };
+    return { uuid, deviceId, packageObj };
   } catch (err) {
     if (err instanceof Error) {
       console.error(`${chalk.red('Error')}: ${err.message}`);
@@ -40,7 +41,7 @@ const action = async () => {
     process.exit(0);
   }
 
-  const { uuid, packageObj } = (await readPackageJSON(packageJSONPath)) ?? {};
+  const { uuid, deviceId, packageObj } = (await readPackageJSON(packageJSONPath)) ?? {};
 
   if ((packageObj.strapi && packageObj.strapi.telemetryDisabled) || !uuid) {
     console.log(`${chalk.yellow('Warning:')} telemetry is already disabled`);
@@ -66,7 +67,7 @@ const action = async () => {
     process.exit(0);
   }
 
-  await sendEvent('didOptOutTelemetry', uuid);
+  await sendEvent('didOptOutTelemetry', uuid, deviceId);
   console.log(`${chalk.green('Successfully opted out of Strapi telemetry')}`);
   process.exit(0);
 };

@@ -40,8 +40,9 @@ const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi:
  * Create a send function for event with all the necessary metadata
  */
 export default (strapi: Core.Strapi): Sender => {
-  const { uuid } = strapi.config;
-  const deviceId = machineID();
+  const { uuid, deviceId: randomDeviceId } = strapi.config;
+
+  const deviceId = machineID(uuid, randomDeviceId);
 
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');

@@ -38,7 +38,6 @@ const AdminLayout = () => {
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
-
   const [tagName, setTagName] = React.useState<string>(strapiVersion);
 
   React.useEffect(() => {
@@ -78,12 +77,12 @@ const AdminLayout = () => {
   }, [userRoles, appInfo?.autoReload, setGuidedTourVisibility]);
 
   React.useEffect(() => {
-    hashAdminUserEmail(userInfo).then((id) => {
+    hashAdminUserEmail(userInfo, appInfo?.projectId).then((id) => {
       if (id) {
         setUserId(id);
       }
     });
-  }, [userInfo]);
+  }, [userInfo, appInfo?.projectId]);
 
   const { trackUsage } = useTracking();
 

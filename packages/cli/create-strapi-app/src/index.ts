@@ -124,6 +124,8 @@ async function run(args: string[]): Promise<void> {
 
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
 
+  const randomUUID = crypto.randomUUID();
+  const { deviceId, isDeviceIdUsingProjectId } = machineID();
   const scope: Scope = {
     rootPath,
     name: basename(rootPath),
@@ -139,9 +141,10 @@ async function run(args: string[]): Promise<void> {
     packageJsonStrapi: {
       template: options.template,
     },
-    uuid: (process.env.STRAPI_UUID_PREFIX || '') + crypto.randomUUID(),
+    uuid: (process.env.STRAPI_UUID_PREFIX || '') + randomUUID,
     docker: process.env.DOCKER === 'true',
-    deviceId: machineID(),
+    deviceId,
+    isDeviceIdUsingProjectId,
     tmpPath,
     gitInit: true,
     devDependencies: {},
