@@ -156,7 +156,7 @@ const UnstablePreviewHeader = () => {
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
-  const iframeRef = usePreviewContext('PreviewHeader', (state) => state.iframeRef);
+  const onPreview = usePreviewContext('PreviewHeader', (state) => state.onPreview);
 
   const [{ query }] = useQueryParams<{
     status?: 'draft' | 'published';
@@ -184,13 +184,7 @@ const UnstablePreviewHeader = () => {
     documentId: document.documentId,
     document,
     meta,
-    onPreview: () => {
-      iframeRef?.current?.contentWindow?.postMessage(
-        { type: 'strapiUpdate' },
-        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
-        new URL(iframeRef.current.src).origin
-      );
-    },
+    onPreview,
   } satisfies DocumentActionProps;
 
   return (

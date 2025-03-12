@@ -362,6 +362,7 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
   const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
   const documentLayoutResponse = useDocumentLayout(documentMeta.model);
+  const onPreview = useDocumentContext('RelationModalBody', (state) => state.onPreview);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
   const initialValues = documentResponse.getInitialFormValues();
@@ -422,6 +423,7 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
     documentId: documentMeta.documentId,
     document: documentResponse.document,
     meta: documentResponse.meta,
+    onPreview,
   } satisfies DocumentActionProps;
 
   return (

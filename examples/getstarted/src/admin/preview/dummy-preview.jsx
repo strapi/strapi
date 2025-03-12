@@ -11,7 +11,11 @@ const PreviewComponent = () => {
   const { document, refetch } = useDocument({
     model,
     documentId,
-    params: { locale, status },
+    params: {
+      locale,
+      status,
+      populate: '*'
+    },
     collectionType,
   });
 

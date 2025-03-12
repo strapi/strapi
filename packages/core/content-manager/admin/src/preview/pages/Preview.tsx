@@ -40,7 +40,7 @@ interface PreviewContextValue {
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
   layout: EditLayout;
-  iframeRef?: React.RefObject<HTMLIFrameElement>;
+  onPreview?: () => void;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -150,6 +150,14 @@ const PreviewPage = () => {
 
   const previewUrl = previewUrlResponse.data.data.url;
 
+  const onPreview = () => {
+    iframeRef?.current?.contentWindow?.postMessage(
+      { type: 'strapiUpdate' },
+      // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+      new URL(iframeRef.current.src).origin
+    );
+  };
+
   return (
     <>
       <Page.Title>
@@ -169,6 +177,7 @@ const PreviewPage = () => {
           model,
           collectionType,
         }}
+        onPreview={onPreview}
       >
         <PreviewProvider
           url={previewUrl}
@@ -177,7 +186,7 @@ const PreviewPage = () => {
           meta={documentResponse.meta}
           schema={documentResponse.schema}
           layout={documentLayoutResponse.edit}
-          iframeRef={iframeRef}
+          onPreview={onPreview}
         >
           <FormContext
             method="PUT"
