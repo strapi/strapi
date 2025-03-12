@@ -74,6 +74,7 @@ const load = async (uid: UID.ContentType, { oldVersions }: LoadContext) => {
         }
 
         // If it's a self referencing relation, there is no need to sync any relation
+        // The order will already be handled as both sides are inside the same content type
         if (model.uid === uid) {
           continue;
         }
