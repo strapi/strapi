@@ -1,5 +1,5 @@
 export interface FeaturesConfig {
-  future?: {};
+  future?: object;
 }
 
 export interface FeaturesService {
