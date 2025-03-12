@@ -18,8 +18,8 @@ describe('user email hash', () => {
         get: jest.fn(() => ctx),
       },
       config: {
-        get: jest.fn()
-      }
+        get: jest.fn(),
+      },
     };
 
     const hash = crypto.createHash('sha256').update('testemail@strapi.io').digest('hex');
@@ -36,8 +36,8 @@ describe('user email hash', () => {
         get: jest.fn(() => ctx),
       },
       config: {
-        get: jest.fn()
-      }
+        get: jest.fn(),
+      },
     };
 
     const userId = generateAdminUserHash(strapi as any);
