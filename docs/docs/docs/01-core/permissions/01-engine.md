@@ -13,6 +13,7 @@ The permission engine is the entity responsible for generating new ability insta
 actions, and conditions.
 
 This is the abstraction used by other Strapi systems to create their custom permissions' engine:
+
 - [RBAC](https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/services/permission/engine.ts)
 - [Transfer Tokens](https://github.com/strapi/strapi/blob/develop/packages/core/admin/server/src/services/transfer/permission.ts)
 - [API Tokens](https://github.com/strapi/strapi/blob/develop/packages/core/core/src/services/content-api/permissions/engine.ts)
@@ -78,7 +79,7 @@ sequenceDiagram
 ### Available Hooks
 
 | Hook Name                          | Phase            | Purpose                                                      |
-|------------------------------------|------------------|--------------------------------------------------------------|
+| ---------------------------------- | ---------------- | ------------------------------------------------------------ |
 | before-format::validate.permission | Pre-formatting   | Initial validation                                           |
 | format.permission                  | Formatting       | Transform permission                                         |
 | after-format::validate.permission  | Post-formatting  | Validate formatted permission                                |
@@ -88,10 +89,10 @@ sequenceDiagram
 ### Hook Implementation Example
 
 ```typescript
-const engine = permissions.engine.new({providers});
+const engine = permissions.engine.new({ providers });
 
 // Validation hook
-engine.on('before-format::validate.permission', ({permission}) => {
+engine.on('before-format::validate.permission', ({ permission }) => {
   if (permission.action === 'delete' && !permission.conditions.includes('isAdmin')) {
     return false; // Prevent non-admin delete
   }
@@ -99,12 +100,12 @@ engine.on('before-format::validate.permission', ({permission}) => {
 });
 
 // Format hook
-engine.on('format.permission', ({permission}) => {
+engine.on('format.permission', ({ permission }) => {
   // Add timestamp to tracking actions
   if (permission.action.startsWith('track')) {
     return {
       ...permission,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
   return permission;
@@ -145,12 +146,12 @@ It must implement the `CustomAbilityBuilder` interface.
 
 ```typescript
 const customAbilityBuilder = () => {
-  const {can, build} = new AbilityBuilder(Ability);
+  const { can, build } = new AbilityBuilder(Ability);
 
   return {
     can(permission) {
       // Custom permission logic
-      const {action, subject, properties = {}, condition} = permission;
+      const { action, subject, properties = {}, condition } = permission;
       return can(action, subject, properties.fields, condition);
     },
 
@@ -160,15 +161,15 @@ const customAbilityBuilder = () => {
         conditionsMatcher: (rule, context) => {
           // Custom condition matching logic
           return true / false;
-        }
+        },
       });
-    }
+    },
   };
 };
 
 const engine = permissions.engine.new({
   providers,
-  abilityBuilderFactory: customAbilityBuilder
+  abilityBuilderFactory: customAbilityBuilder,
 });
 ```
 
@@ -178,10 +179,10 @@ const engine = permissions.engine.new({
 const permission = domain.permission.create({
   action: 'update',
   subject: 'article',
-  conditions: ['isOwner']
+  conditions: ['isOwner'],
 });
 
-engine.on('before-evaluate.permission', ({permission}) => {
+engine.on('before-evaluate.permission', ({ permission }) => {
   // Add dynamic conditions based on context
   if (permission.action === 'update') {
     permission.conditions.push('isNotLocked');
