@@ -224,7 +224,7 @@ const PreviewPage = () => {
                         <FormLayout
                           layout={documentLayoutResponse.edit.layout}
                           document={documentResponse}
-                          hasBackground
+                          hasBackground={false}
                         />
                       </Box>
                       <Box position="relative" flex={1} height="100%" overflow="hidden">
