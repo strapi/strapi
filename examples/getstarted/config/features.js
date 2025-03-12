@@ -1,3 +1,5 @@
 module.exports = ({ env }) => ({
-  future: {},
+  future: {
+    unstablePreviewSideEditor: true,
+  },
 });
