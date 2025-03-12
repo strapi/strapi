@@ -35,6 +35,7 @@ interface DocumentContextValue {
   changeDocument: (newRelation: DocumentMeta) => void;
   documentHistory: DocumentMeta[];
   setDocumentHistory: React.Dispatch<React.SetStateAction<DocumentMeta[]>>;
+  onPreview?: () => void;
 }
 
 const [DocumentProvider, useDocumentContext] =
@@ -55,9 +56,11 @@ const [DocumentProvider, useDocumentContext] =
 const DocumentContextProvider = ({
   children,
   initialDocument,
+  onPreview,
 }: {
   children: React.ReactNode | React.ReactNode[];
   initialDocument: DocumentMeta;
+  onPreview?: () => void;
 }) => {
   /**
    * Initialize with the "root" document and expose a setter method to change to
@@ -84,6 +87,7 @@ const DocumentContextProvider = ({
       meta={currentDocumentMeta}
       documentHistory={documentHistory}
       setDocumentHistory={setDocumentHistory}
+      onPreview={onPreview}
     >
       {children}
     </DocumentProvider>

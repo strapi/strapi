@@ -16,6 +16,7 @@ import { Link, type To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
+import { useDocumentContext } from '../../features/DocumentContext';
 import { DocumentActionButton } from '../../pages/EditView/components/DocumentActions';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
@@ -156,7 +157,7 @@ const UnstablePreviewHeader = () => {
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
-  const iframeRef = usePreviewContext('PreviewHeader', (state) => state.iframeRef);
+  const onPreview = useDocumentContext('PreviewHeader', (state) => state.onPreview);
 
   const [{ query }] = useQueryParams<{
     status?: 'draft' | 'published';
@@ -184,13 +185,7 @@ const UnstablePreviewHeader = () => {
     documentId: document.documentId,
     document,
     meta,
-    onPreview: () => {
-      iframeRef?.current?.contentWindow?.postMessage(
-        { type: 'strapiUpdate' },
-        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
-        new URL(iframeRef.current.src).origin
-      );
-    },
+    onPreview,
   } satisfies DocumentActionProps;
 
   return (
