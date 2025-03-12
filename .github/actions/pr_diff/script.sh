@@ -41,17 +41,18 @@ validate_repo_name() {
         exit 1
     fi
 }
+
 # GitHub repository owner
-OWNER="strapi"
+OWNER="${OWNER:-strapi}"
 
 # GitHub repository name
-REPO="strapi"
+REPO="${REPO:-strapi}"
 
-# Default base branch
-BASE_BRANCH="develop"
+# Base branch
+BASE_BRANCH="${BASE_BRANCH:-develop}"
 
-# Target branch (to be provided as an argument)
-TARGET_BRANCH="develop"
+# Target branch
+TARGET_BRANCH="${TARGET_BRANCH:-develop}"
 
 # Validate inputs
 validate_repo_name "$OWNER"
