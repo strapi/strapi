@@ -14,7 +14,7 @@ const PreviewComponent = () => {
     params: {
       locale,
       status,
-      populate: '*'
+      populate: '*',
     },
     collectionType,
   });

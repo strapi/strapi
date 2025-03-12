@@ -40,7 +40,6 @@ interface PreviewContextValue {
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
   layout: EditLayout;
-  onPreview?: () => void;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -186,7 +185,6 @@ const PreviewPage = () => {
           meta={documentResponse.meta}
           schema={documentResponse.schema}
           layout={documentLayoutResponse.edit}
-          onPreview={onPreview}
         >
           <FormContext
             method="PUT"

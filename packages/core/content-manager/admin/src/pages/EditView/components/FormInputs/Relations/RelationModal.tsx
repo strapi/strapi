@@ -70,23 +70,23 @@ const [RelationModalProvider, useRelationModal] = createContext<RelationModalCon
   }
 );
 
-const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalProps) => {
+const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { formatMessage } = useIntl();
 
   const [triggerRefetchDocument] = useLazyGetDocumentQuery();
 
-  const currentDocument = useDocumentContext('RelationModalBody', (state) => state.document);
+  const currentDocument = useDocumentContext('RelationModalForm', (state) => state.document);
   const rootDocumentMeta = useDocumentContext(
-    'RelationModalBody',
+    'RelationModalForm',
     (state) => state.rootDocumentMeta
   );
-  const currentDocumentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
-  const changeDocument = useDocumentContext('RelationModalBody', (state) => state.changeDocument);
-  const documentHistory = useDocumentContext('RelationModalBody', (state) => state.documentHistory);
+  const currentDocumentMeta = useDocumentContext('RelationModalForm', (state) => state.meta);
+  const changeDocument = useDocumentContext('RelationModalForm', (state) => state.changeDocument);
+  const documentHistory = useDocumentContext('RelationModalForm', (state) => state.documentHistory);
   const setDocumentHistory = useDocumentContext(
-    'RelationModalBody',
+    'RelationModalForm',
     (state) => state.setDocumentHistory
   );
 
@@ -98,7 +98,7 @@ const RelationModalWrapper = ({ relation, triggerButtonLabel }: RelationModalPro
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   // NOTE: Not sure about this relation modal context, maybe we should move this to DocumentContext?
   // Get parent modal context if it exists
-  const parentContext = useRelationModal('RelationModalWrapper', (state) => state);
+  const parentContext = useRelationModal('RelationModalForm', (state) => state);
   // Get depth of nested modals
   const depth = parentContext ? parentContext.depth + 1 : 0;
   // Check if this is a nested modal
@@ -361,8 +361,8 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
 
   const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
   const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
-  const documentLayoutResponse = useDocumentLayout(documentMeta.model);
   const onPreview = useDocumentContext('RelationModalBody', (state) => state.onPreview);
+  const documentLayoutResponse = useDocumentLayout(documentMeta.model);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
   const initialValues = documentResponse.getInitialFormValues();
@@ -500,4 +500,4 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
   );
 };
 
-export { RelationModalWrapper };
+export { RelationModalForm };
