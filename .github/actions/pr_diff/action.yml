@@ -27,11 +27,7 @@ runs:
       shell: bash
       run: |
         chmod +x ./script.sh
-        ./script.sh \
-          -b "${{ inputs.base_branch }}" \
-          -t "${{ inputs.target_branch }}" \
-          -o "${{ inputs.owner }}" \
-          -r "${{ inputs.repo }}"
+        ./script.sh
       env:
         OWNER: ${{ inputs.owner }}
         REPO: ${{ inputs.repo }}
