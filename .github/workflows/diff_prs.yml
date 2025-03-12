@@ -23,8 +23,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch Merged PRs Between Branches
+        id: pr_diff
         uses: ./.github/actions/pr_diff
         with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.repository }}
           base_branch: ${{ github.event.inputs.base_branch }}
           target_branch: ${{ github.event.inputs.target_branch }}
 
