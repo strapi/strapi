@@ -31,6 +31,9 @@ const hashAdminUserEmail = async (payload?: User, projectId?: string | null) => 
 
   try {
     const messageToDigest = projectId ? `${payload.email}-${projectId}` : payload.email;
+    // TO REMOVE
+    // eslint-disable-next-line no-console
+    console.log(`[ADMIN] userId: ${await digestMessage(messageToDigest)}`);
     return await digestMessage(messageToDigest);
   } catch (error) {
     return null;

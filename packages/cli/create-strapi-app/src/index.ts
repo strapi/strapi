@@ -126,6 +126,11 @@ async function run(args: string[]): Promise<void> {
 
   const randomUUID = crypto.randomUUID();
   const { deviceId, isDeviceIdUsingProjectId } = machineID();
+
+  // TO REMOVE
+  console.log(`[CLI] deviceId: ${deviceId}, isDeviceIdUsingProjectId: ${isDeviceIdUsingProjectId}`);
+  console.log(`[CLI] ${isDeviceIdUsingProjectId ? `deviceId not saved in package.json` : `deviceId should be saved in package.json`}`);
+
   const scope: Scope = {
     rootPath,
     name: basename(rootPath),
