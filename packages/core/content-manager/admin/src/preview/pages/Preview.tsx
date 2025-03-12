@@ -6,6 +6,7 @@ import {
   useRBAC,
   createContext,
   Form as FormContext,
+  Blocker,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
 import { ArrowLineLeft } from '@strapi/icons';
@@ -201,81 +202,84 @@ const PreviewPage = () => {
               return yupSchema.validate(values, { abortEarly: false });
             }}
           >
-            <Flex direction="column" height="100%" alignItems="stretch">
-              {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
-                <>
-                  <UnstablePreviewHeader />
-                  <Flex flex={1} overflow="auto" alignItems="stretch">
-                    <Box
-                      overflow="auto"
-                      width={isSideEditorOpen ? '50%' : 0}
-                      borderWidth="0 1px 0 0"
-                      borderColor="neutral150"
-                      paddingTop={6}
-                      paddingBottom={6}
-                      // Remove horizontal padding when the editor is closed or it won't fully disappear
-                      paddingLeft={isSideEditorOpen ? 6 : 0}
-                      paddingRight={isSideEditorOpen ? 6 : 0}
-                      transition="all 0.2s ease-in-out"
-                    >
-                      <FormLayout
-                        layout={documentLayoutResponse.edit.layout}
-                        document={documentResponse}
-                        hasBackground
-                      />
-                    </Box>
-                    <Box position="relative" flex={1} height="100%" overflow="hidden">
+            {({ resetForm }) => (
+              <Flex direction="column" height="100%" alignItems="stretch">
+                {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
+                  <>
+                    <Blocker onProceed={resetForm} />
+                    <UnstablePreviewHeader />
+                    <Flex flex={1} overflow="auto" alignItems="stretch">
                       <Box
-                        data-testid="preview-iframe"
-                        ref={iframeRef}
-                        src={previewUrl}
-                        /**
-                         * For some reason, changing an iframe's src tag causes the browser to add a new item in the
-                         * history stack. This is an issue for us as it means clicking the back button will not let us
-                         * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
-                         * different iframe when the preview URL changes. So we set a key prop to force React
-                         * to mount a different node when the src changes.
-                         */
-                        key={previewUrl}
-                        title={formatMessage({
-                          id: 'content-manager.preview.panel.title',
-                          defaultMessage: 'Preview',
-                        })}
-                        width="100%"
-                        height="100%"
-                        borderWidth={0}
-                        tag="iframe"
-                      />
-                      <IconButton
-                        variant="tertiary"
-                        label={formatMessage(
-                          isSideEditorOpen
-                            ? {
-                                id: 'content-manager.preview.content.close-editor',
-                                defaultMessage: 'Close editor',
-                              }
-                            : {
-                                id: 'content-manager.preview.content.open-editor',
-                                defaultMessage: 'Open editor',
-                              }
-                        )}
-                        onClick={() => setIsSideEditorOpen((prev) => !prev)}
-                        position="absolute"
-                        top={2}
-                        left={2}
+                        overflow="auto"
+                        width={isSideEditorOpen ? '50%' : 0}
+                        borderWidth="0 1px 0 0"
+                        borderColor="neutral150"
+                        paddingTop={6}
+                        paddingBottom={6}
+                        // Remove horizontal padding when the editor is closed or it won't fully disappear
+                        paddingLeft={isSideEditorOpen ? 6 : 0}
+                        paddingRight={isSideEditorOpen ? 6 : 0}
+                        transition="all 0.2s ease-in-out"
                       >
-                        <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
-                      </IconButton>
-                    </Box>
-                  </Flex>
-                </>
-              ) : (
-                <>
-                  <PreviewHeader />
-                  <PreviewContent />
-                </>
-              )}
-            </Flex>
+                        <FormLayout
+                          layout={documentLayoutResponse.edit.layout}
+                          document={documentResponse}
+                          hasBackground
+                        />
+                      </Box>
+                      <Box position="relative" flex={1} height="100%" overflow="hidden">
+                        <Box
+                          data-testid="preview-iframe"
+                          ref={iframeRef}
+                          src={previewUrl}
+                          /**
+                           * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+                           * history stack. This is an issue for us as it means clicking the back button will not let us
+                           * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+                           * different iframe when the preview URL changes. So we set a key prop to force React
+                           * to mount a different node when the src changes.
+                           */
+                          key={previewUrl}
+                          title={formatMessage({
+                            id: 'content-manager.preview.panel.title',
+                            defaultMessage: 'Preview',
+                          })}
+                          width="100%"
+                          height="100%"
+                          borderWidth={0}
+                          tag="iframe"
+                        />
+                        <IconButton
+                          variant="tertiary"
+                          label={formatMessage(
+                            isSideEditorOpen
+                              ? {
+                                  id: 'content-manager.preview.content.close-editor',
+                                  defaultMessage: 'Close editor',
+                                }
+                              : {
+                                  id: 'content-manager.preview.content.open-editor',
+                                  defaultMessage: 'Open editor',
+                                }
+                          )}
+                          onClick={() => setIsSideEditorOpen((prev) => !prev)}
+                          position="absolute"
+                          top={2}
+                          left={2}
+                        >
+                          <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
+                        </IconButton>
+                      </Box>
+                    </Flex>
+                  </>
+                ) : (
+                  <>
+                    <PreviewHeader />
+                    <PreviewContent />
+                  </>
+                )}
+              </Flex>
+            )}
           </FormContext>
         </PreviewProvider>
       </DocumentContextProvider>
