@@ -7,9 +7,5 @@
   "settings.not-available": "Review Workflows is only available as part of the Enterprise Edition. Upgrade to create and manage workflows.",
   "settings.review-workflows.workflow.stageRequiredToPublish.label": "Required stage for publishing",
   "settings.review-workflows.workflow.stageRequiredToPublish.any": "Any stage",
-  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Prevents entries from being published if they are not at the required stage.",
-  "settings.page.purchase.description": "Manage your content review process",
-  "settings.page.purchase.perks1": "Customizable review stages",
-  "settings.page.purchase.perks2": "Manage user permissions",
-  "settings.page.purchase.perks3": "Support for webhooks"
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Prevents entries from being published if they are not at the required stage."
 }

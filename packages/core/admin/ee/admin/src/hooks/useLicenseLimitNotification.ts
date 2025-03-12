@@ -35,12 +35,14 @@ export const useLicenseLimitNotification = () => {
     const shouldDisplayNotification =
       !isNil(permittedSeats) &&
       !window.sessionStorage.getItem(`${STORAGE_KEY_PREFIX}-${pathname}`) &&
-      licenseLimitStatus === 'OVER_LIMIT';
+      (licenseLimitStatus === 'AT_LIMIT' || licenseLimitStatus === 'OVER_LIMIT');
 
     let notificationType: NotificationConfig['type'];
 
     if (licenseLimitStatus === 'OVER_LIMIT') {
       notificationType = 'danger';
+    } else if (licenseLimitStatus === 'AT_LIMIT') {
+      notificationType = 'warning';
     }
 
     if (shouldDisplayNotification) {

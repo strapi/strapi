@@ -1,17 +1,13 @@
-import { Box, Main, Flex, Typography, Grid, LinkButton } from '@strapi/design-system';
-import { ExternalLink, Check, ClockCounterClockwise } from '@strapi/icons';
+import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { ExternalLink } from '@strapi/icons';
+import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
-import { useTypedSelector } from '../../../core/store/hooks';
-import darkIllustration from '../assets/purchase-page-content-history-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-content-history-illustration-light.svg';
 
 const PurchaseContentHistory = () => {
   const { formatMessage } = useIntl();
-  const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
 
-  const illustration = currentTheme === 'light' ? lightIllustration : darkIllustration;
   return (
     <Layouts.Root>
       <Main>
@@ -20,96 +16,34 @@ const PurchaseContentHistory = () => {
             id: 'Settings.content-history.title',
             defaultMessage: 'Content History',
           })}
+          subtitle={formatMessage({
+            id: 'Settings.content-history.description',
+            defaultMessage: 'Get more control over every step of your content’s lifecycle.',
+          })}
         />
-        <Box marginLeft={10} marginRight={10} shadow="filterShadow" hasRadius background="neutral0">
-          <Grid.Root>
-            <Grid.Item col={6} s={12}>
-              <Flex direction="column" alignItems="flex-start" padding={7} gap={2}>
-                <Flex>
-                  <ClockCounterClockwise fill="primary600" width={`24px`} height={`24px`} />
-                </Flex>
-                <Flex paddingTop={2} paddingBottom={4}>
-                  <Typography variant="beta" fontWeight="bold">
-                    {formatMessage({
-                      id: 'Settings.page.PurchaseAudit-logs.description',
-                      defaultMessage: 'Instantly revert content changes',
-                    })}
-                  </Typography>
-                </Flex>
-
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'Settings.page.PurchaseContent-history.perks1',
-                      defaultMessage: 'Browse your content history',
-                    })}
-                  </Typography>
-                </Flex>
-
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'Settings.page.PurchaseContent-history.perks2',
-                      defaultMessage: 'Revert changes in one click',
-                    })}
-                  </Typography>
-                </Flex>
-
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'Settings.page.PurchaseContent-history.perks3',
-                      defaultMessage: 'Track changes across locales',
-                    })}
-                  </Typography>
-                </Flex>
-
-                <Flex gap={2} marginTop={7}>
-                  <LinkButton
-                    variant="default"
-                    href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Content-History"
-                  >
-                    {formatMessage({
-                      id: 'Settings.page.purchase.upgrade.cta',
-                      defaultMessage: 'Upgrade',
-                    })}
-                  </LinkButton>
-                  <LinkButton
-                    variant="tertiary"
-                    endIcon={<ExternalLink />}
-                    href="https://strapi.io/features/content-history?utm_campaign=In-Product-CTA&utm_source=Content-History"
-                  >
-                    {formatMessage({
-                      id: 'Settings.page.purchase.learn-more.cta',
-                      defaultMessage: 'Learn more',
-                    })}
-                  </LinkButton>
-                </Flex>
-              </Flex>
-            </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100">
-              <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
-                <img
-                  src={illustration}
-                  alt="purchase-page-content-history-illustration"
-                  width="100%"
-                  height="100%"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'top left',
-                  }}
-                />
-              </div>
-            </Grid.Item>
-          </Grid.Root>
+        <Box paddingLeft={10} paddingRight={10}>
+          <EmptyStateLayout
+            icon={<EmptyPermissions width="16rem" />}
+            content={formatMessage({
+              id: 'Settings.content-history.not-available',
+              defaultMessage:
+                "Content History is only available as part of a paid plan. Upgrade to get full control over your content's lifecycle.",
+            })}
+            action={
+              <LinkButton
+                variant="default"
+                endIcon={<ExternalLink />}
+                href="https://strapi.io/features/content-history?utm_campaign=In-Product-CTA&utm_source=Content-History"
+                isExternal
+                target="_blank"
+              >
+                {formatMessage({
+                  id: 'global.learn-more',
+                  defaultMessage: 'Learn more',
+                })}
+              </LinkButton>
+            }
+          />
         </Box>
       </Main>
     </Layouts.Root>

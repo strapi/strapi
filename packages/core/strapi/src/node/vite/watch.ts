@@ -1,7 +1,6 @@
 import path from 'node:path';
 import http from 'node:http';
 import fs from 'node:fs/promises';
-import { Server } from 'node:net';
 import type { Core } from '@strapi/types';
 
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
@@ -13,33 +12,6 @@ interface ViteWatcher {
 }
 
 const HMR_DEFAULT_PORT = 5173;
-const MAX_PORT_ATTEMPTS = 30;
-
-const findAvailablePort = (
-  startingPort: number,
-  attemptsLeft = MAX_PORT_ATTEMPTS
-): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    if (attemptsLeft <= 0) {
-      reject(new Error(`No available ports found after ${MAX_PORT_ATTEMPTS} attempts.`));
-      return;
-    }
-
-    const server = new Server();
-    server.listen(startingPort, () => {
-      const { port } = server.address() as { port: number };
-      server.close(() => resolve(port));
-    });
-
-    server.on('error', (err: any) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(findAvailablePort(startingPort + 1, attemptsLeft - 1));
-      } else {
-        reject(err);
-      }
-    });
-  });
-};
 
 const createHMRServer = () => {
   return http.createServer(
@@ -61,15 +33,10 @@ const createHMRServer = () => {
 const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
   const hmrServer = createHMRServer();
 
-  // Allowing Vite to find an available port doesn't work, so we'll find an available port manually
-  // and use that. There is therefore a very slight race condition if you start up two servers at the same time
-  // one might fail, or it might start up but listen on the wrong port.
-  const availablePort = await findAvailablePort(HMR_DEFAULT_PORT);
   ctx.options.hmrServer = hmrServer;
-  ctx.options.hmrClientPort = availablePort;
+  ctx.options.hmrClientPort = HMR_DEFAULT_PORT;
 
   const config = await resolveDevelopmentConfig(ctx);
-
   const finalConfig = await mergeConfigWithUserConfig(config, ctx);
 
   const hmrConfig = config.server?.hmr;
@@ -78,7 +45,7 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
   if (typeof hmrConfig === 'object' && hmrConfig.server === hmrServer) {
     // Only restart the hmr server when Strapi's server is listening
     strapi.server.httpServer.on('listening', async () => {
-      hmrServer.listen(availablePort);
+      hmrServer.listen(hmrConfig.clientPort ?? hmrConfig.port ?? HMR_DEFAULT_PORT);
     });
   }
 

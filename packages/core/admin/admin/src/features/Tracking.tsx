@@ -131,6 +131,7 @@ interface EventWithoutProperties {
     | 'didNotCreateFirstAdmin'
     | 'didNotSaveComponent'
     | 'didPluginLearnMore'
+    | 'didPublishEntry'
     | 'didBulkPublishEntries'
     | 'didNotBulkPublishEntries'
     | 'didUnpublishEntry'
@@ -182,6 +183,7 @@ interface EventWithoutProperties {
     | 'willEditStage'
     | 'willFilterEntries'
     | 'willInstallPlugin'
+    | 'willPublishEntry'
     | 'willUnpublishEntry'
     | 'willSaveComponent'
     | 'willSaveContentType'
@@ -315,23 +317,14 @@ interface DeleteEntryEvents {
 interface CreateEntryEvents {
   name: 'willCreateEntry' | 'didCreateEntry' | 'didNotCreateEntry';
   properties: {
-    documentId?: string;
     status?: string;
     error?: unknown;
-  };
-}
-
-interface PublishEntryEvents {
-  name: 'willPublishEntry' | 'didPublishEntry';
-  properties: {
-    documentId?: string;
   };
 }
 
 interface UpdateEntryEvents {
   name: 'willEditEntry' | 'didEditEntry' | 'didNotEditEntry';
   properties: {
-    documentId?: string;
     status?: string;
     error?: unknown;
   };
@@ -355,7 +348,6 @@ interface DidPublishRelease {
 
 type EventsWithProperties =
   | CreateEntryEvents
-  | PublishEntryEvents
   | DidAccessTokenListEvent
   | DidChangeModeEvent
   | DidCropFileEvent

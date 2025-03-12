@@ -337,7 +337,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const publish: IUseDocumentActs['publish'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, data) => {
       try {
-        trackUsage('willPublishEntry', { documentId });
+        trackUsage('willPublishEntry');
 
         const res = await publishDocument({
           collectionType,
@@ -352,7 +352,7 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didPublishEntry', { documentId });
+        trackUsage('didPublishEntry');
 
         toggleNotification({
           type: 'success',
@@ -439,7 +439,7 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didEditEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
           type: 'success',
           message: formatMessage({
@@ -571,7 +571,7 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didCreateEntry', trackerProperty);
 
         toggleNotification({
           type: 'success',
