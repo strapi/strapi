@@ -33,6 +33,7 @@ interface State {
   aliasCounter: number;
   filters: any;
   search: string;
+  processed: boolean;
 }
 
 export interface QueryBuilder {
@@ -154,6 +155,7 @@ const createQueryBuilder = (
       aliasCounter: 0,
       filters: null,
       search: null,
+      _processed: false,
     },
     initialState
   );
@@ -410,16 +412,22 @@ const createQueryBuilder = (
     },
 
     runSubQuery() {
+      const originalType = state.type;
+
       this.select('id');
       const subQB = this.getKnexQuery();
 
       const nestedSubQuery = db.getConnection().select('id').from(subQB.as('subQuery'));
       const connection = db.getConnection(tableName);
 
-      return (connection[state.type] as Knex)().whereIn('id', nestedSubQuery);
+      return (connection[originalType] as Knex)().whereIn('id', nestedSubQuery);
     },
 
     processState() {
+      if (this.state.processed) {
+        return;
+      }
+
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
 
       if (!_.isNil(state.filters)) {
@@ -440,6 +448,8 @@ const createQueryBuilder = (
       state.data = helpers.toRow(meta, state.data);
 
       this.processSelect();
+
+      this.state.processed = true;
     },
 
     shouldUseDistinct() {
@@ -502,11 +512,13 @@ const createQueryBuilder = (
 
       const qb = db.getConnection(aliasedTableName);
 
+      // The state should always be processed before calling shouldUseSubQuery as it
+      // relies on the presence or absence of joins to determine the need of a subquery
+      this.processState();
+
       if (this.shouldUseSubQuery()) {
         return this.runSubQuery();
       }
-
-      this.processState();
 
       switch (state.type) {
         case 'select': {
