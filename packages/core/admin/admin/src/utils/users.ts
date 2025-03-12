@@ -24,17 +24,13 @@ const getDisplayName = ({ firstname, lastname, username, email }: Partial<User> 
  * hashAdminUserEmail
  * -----------------------------------------------------------------------------------------------*/
 
-const hashAdminUserEmail = async (payload?: User, projectId?: string | null) => {
+const hashAdminUserEmail = async (payload?: User) => {
   if (!payload || !payload.email) {
     return null;
   }
 
   try {
-    const messageToDigest = projectId ? `${payload.email}-${projectId}` : payload.email;
-    // TO REMOVE
-    // eslint-disable-next-line no-console
-    console.log(`[ADMIN] userId: ${await digestMessage(messageToDigest)}`);
-    return await digestMessage(messageToDigest);
+    return await digestMessage(payload.email);
   } catch (error) {
     return null;
   }

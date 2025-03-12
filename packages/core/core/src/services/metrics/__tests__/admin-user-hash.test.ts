@@ -17,9 +17,6 @@ describe('user email hash', () => {
       requestContext: {
         get: jest.fn(() => ctx),
       },
-      config: {
-        get: jest.fn(),
-      },
     };
 
     const hash = crypto.createHash('sha256').update('testemail@strapi.io').digest('hex');
@@ -34,9 +31,6 @@ describe('user email hash', () => {
     const strapi = {
       requestContext: {
         get: jest.fn(() => ctx),
-      },
-      config: {
-        get: jest.fn(),
       },
     };
 

@@ -77,12 +77,12 @@ const AdminLayout = () => {
   }, [userRoles, appInfo?.autoReload, setGuidedTourVisibility]);
 
   React.useEffect(() => {
-    hashAdminUserEmail(userInfo, appInfo?.projectId).then((id) => {
+    hashAdminUserEmail(userInfo).then((id) => {
       if (id) {
         setUserId(id);
       }
     });
-  }, [userInfo, appInfo?.projectId]);
+  }, [userInfo]);
 
   const { trackUsage } = useTracking();
 
