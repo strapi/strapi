@@ -155,7 +155,7 @@ const createQueryBuilder = (
       aliasCounter: 0,
       filters: null,
       search: null,
-      _processed: false,
+      processed: false,
     },
     initialState
   );
