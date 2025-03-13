@@ -7,8 +7,12 @@ interface Options {
 type TailParams<T extends (...args: any[]) => any> =
   Parameters<T> extends [unknown, ...infer U] ? U : never;
 
+function nextResetDate(): number {
+  return Date.now() + 24 * 60 * 60 * 1000; // Now + 24 hours.
+}
+
 export default (sender: Sender, { limitedEvents = [] }: Options = {}) => {
-  let currentDay = new Date().getDate();
+  let cacheExpiresAt = nextResetDate();
   const eventCache = new Map();
 
   return async (event: string, ...args: TailParams<Sender>) => {
@@ -16,9 +20,9 @@ export default (sender: Sender, { limitedEvents = [] }: Options = {}) => {
       return sender(event, ...args);
     }
 
-    if (new Date().getDate() !== currentDay) {
+    if (Date.now() > cacheExpiresAt) {
       eventCache.clear();
-      currentDay = new Date().getDate();
+      cacheExpiresAt = nextResetDate();
     }
 
     if (eventCache.has(event)) {

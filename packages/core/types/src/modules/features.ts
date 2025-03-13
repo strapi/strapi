@@ -1,5 +1,8 @@
 export interface FeaturesConfig {
-  future?: object;
+  future?: {
+    unstablePreviewSideEditor?: boolean;
+    unstableRelationsOnTheFly?: boolean;
+  };
 }
 
 export interface FeaturesService {
