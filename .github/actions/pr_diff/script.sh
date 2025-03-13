@@ -232,5 +232,24 @@ echo "Final list of merged PRs:"
 echo "$prs" | jq '.'
 
 # Set the JSON-formatted PRs as the GitHub Action output
-# Ensure the output is properly escaped
-echo "::set-output name=prs::$(echo "$prs" | jq -c '.')"
+
+# Check if there are merged PRs
+if [ "$(echo "$prs" | jq -r 'length')" -eq 0 ]; then
+  echo "No merged pull requests found." >> $GITHUB_STEP_SUMMARY
+  exit 0
+fi
+
+# Write the Markdown table to the GitHub Actions summary
+echo "### Merged Pull Requests Between '${BASE_BRANCH}' and '${TARGET_BRANCH}'" >> $GITHUB_STEP_SUMMARY
+echo "| PR Number | Title                      | Author      | Link                               |" >> $GITHUB_STEP_SUMMARY
+echo "|-----------|----------------------------|-------------|-----------------------------------|" >> $GITHUB_STEP_SUMMARY
+
+echo "$prs" | jq -c '.[]' | while read -r pr; do
+  pr_number=$(echo "$pr" | jq -r '.number')
+  pr_title=$(echo "$pr" | jq -r '.title')
+  pr_author=$(echo "$pr" | jq -r '.author')
+  pr_link=$(echo "$pr" | jq -r '.url')
+
+  # Append each PR row to the summary table
+  echo "| #${pr_number} | ${pr_title} | ${pr_author} | [Link](${pr_link}) |" >> $GITHUB_STEP_SUMMARY
+done
