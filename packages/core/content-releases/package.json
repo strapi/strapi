@@ -60,7 +60,7 @@
     "@strapi/icons": "1.19.0",
     "@strapi/types": "workspace:*",
     "@strapi/utils": "4.25.20",
-    "axios": "1.7.4",
+    "axios": "1.8.2",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.0",
     "formik": "2.4.0",
