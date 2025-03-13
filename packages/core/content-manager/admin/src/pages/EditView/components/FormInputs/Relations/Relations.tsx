@@ -52,7 +52,7 @@ import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
-import { RelationModalWrapper, getCollectionType } from '../Relations/RelationModal';
+import { RelationModalForm, getCollectionType } from '../Relations/RelationModal';
 
 import type { Schema } from '@strapi/types';
 
@@ -1065,7 +1065,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             ) : null}
             <Flex width="100%" minWidth={0} justifyContent="space-between">
               <Box minWidth={0} paddingTop={1} paddingBottom={1} marginRight={4} overflow="hidden">
-                <RelationModalWrapper
+                <RelationModalForm
                   triggerButtonLabel={label}
                   relation={{
                     documentId: documentId ?? apiData?.documentId,
