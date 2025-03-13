@@ -28,8 +28,10 @@ import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
+import { buildValidParams } from '../../../../../exports';
 import { type DocumentMeta, useDocumentContext } from '../../../../../features/DocumentContext';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
+import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import { createYupSchema } from '../../../../../utils/validation';
@@ -57,18 +59,147 @@ const CustomModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
-interface RelationModalContextValue {
-  parentModified: boolean;
-  depth: number;
+/* -------------------------------------------------------------------------------------------------
+ * RelationContextWrapper
+ * -----------------------------------------------------------------------------------------------*/
+
+interface State {
+  documentHistory: DocumentMeta[];
+  confirmDialogIntent: null | 'close' | 'back' | 'open' | 'navigate';
+  isModalOpen: boolean;
 }
 
-const [RelationModalProvider, useRelationModal] = createContext<RelationModalContextValue>(
-  'RelationModal',
-  {
-    parentModified: false,
-    depth: 0,
+type Action =
+  | {
+      type: 'GO_TO_RELATION';
+      payload: {
+        document: DocumentMeta;
+        // TODO: rename something like shouldAskConfirmation
+        shouldAskConfirmation: boolean;
+      };
+    }
+  | {
+      type: 'GO_BACK';
+      payload: { shouldAskConfirmation: boolean };
+    }
+  | {
+      type: 'GO_FULL_PAGE';
+      payload: { shouldAskConfirmation: boolean };
+    }
+  | {
+      type: 'CANCEL_CONFIRM_DIALOG';
+    }
+  | {
+      type: 'CLOSE_MODAL';
+      payload: { shouldAskConfirmation: boolean };
+    };
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'GO_TO_RELATION':
+      if (action.payload.shouldAskConfirmation) {
+        return { ...state, confirmDialogIntent: 'open' };
+      }
+
+      return {
+        ...state,
+        documentHistory: [...state.documentHistory, action.payload.document],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+      };
+    case 'GO_BACK':
+      if (action.payload.shouldAskConfirmation) {
+        return { ...state, confirmDialogIntent: 'back' };
+      }
+
+      return {
+        ...state,
+        documentHistory: state.documentHistory.slice(0, state.documentHistory.length - 1),
+        confirmDialogIntent: null,
+      };
+    case 'GO_FULL_PAGE':
+      if (action.payload.shouldAskConfirmation) {
+        return { ...state, confirmDialogIntent: 'navigate' };
+      }
+
+      return {
+        ...state,
+        confirmDialogIntent: null,
+      };
+    case 'CANCEL_CONFIRM_DIALOG':
+      return {
+        ...state,
+        confirmDialogIntent: null,
+      };
+    case 'CLOSE_MODAL':
+      if (action.payload.shouldAskConfirmation) {
+        return { ...state, confirmDialogIntent: 'close' };
+      }
+
+      return {
+        ...state,
+        documentHistory: [],
+        confirmDialogIntent: null,
+        isModalOpen: false,
+      };
+    default:
+      return state;
   }
-);
+}
+
+interface RelationModalContextValue {
+  state: State;
+  dispatch: React.Dispatch<Action>;
+  rootDocumentMeta: DocumentMeta;
+  currentDocumentMeta: DocumentMeta;
+  currentDocument: ReturnType<UseDocument>;
+  onPreview?: () => void;
+}
+
+const [RelationModalProvider, useRelationModal] =
+  createContext<RelationModalContextValue>('RelationModal');
+
+const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => {
+  const rootDocument = useDoc();
+
+  const [state, dispatch] = React.useReducer(reducer, {
+    documentHistory: [],
+    confirmDialogIntent: null,
+    isModalOpen: false,
+  });
+
+  if (!rootDocument.document) {
+    throw new Error('Root document not found');
+  }
+
+  // TODO: Return children directly if the context is already in the tree
+
+  const rootDocumentMeta: DocumentMeta = {
+    documentId: rootDocument.document.documentId,
+    model: rootDocument.model,
+    collectionType: rootDocument.collectionType,
+  };
+
+  const currentDocumentMeta = state.documentHistory.at(-1) ?? rootDocumentMeta;
+
+  const params = React.useMemo(
+    () => buildValidParams(currentDocumentMeta.params ?? {}),
+    [currentDocumentMeta.params]
+  );
+  const currentDocument = useDocument({ ...currentDocumentMeta, params });
+
+  return (
+    <RelationModalProvider
+      rootDocumentMeta={rootDocumentMeta}
+      state={state}
+      dispatch={dispatch}
+      currentDocumentMeta={currentDocumentMeta}
+      currentDocument={currentDocument}
+    >
+      {children}
+    </RelationModalProvider>
+  );
+};
 
 const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps) => {
   const navigate = useNavigate();
@@ -77,71 +208,28 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
 
   const [triggerRefetchDocument] = useLazyGetDocumentQuery();
 
-  const currentDocument = useDocumentContext('RelationModalForm', (state) => state.document);
-  const rootDocumentMeta = useDocumentContext(
+  const state = useRelationModal('RelationModalForm', (state) => state.state);
+  const dispatch = useRelationModal('RelationModalForm', (state) => state.dispatch);
+  const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
+  const currentDocumentMeta = useRelationModal(
     'RelationModalForm',
-    (state) => state.rootDocumentMeta
+    (state) => state.currentDocumentMeta
   );
-  const currentDocumentMeta = useDocumentContext('RelationModalForm', (state) => state.meta);
-  const changeDocument = useDocumentContext('RelationModalForm', (state) => state.changeDocument);
-  const documentHistory = useDocumentContext('RelationModalForm', (state) => state.documentHistory);
-  const setDocumentHistory = useDocumentContext(
-    'RelationModalForm',
-    (state) => state.setDocumentHistory
-  );
+  const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
 
-  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState(false);
-  const [actionPosition, setActionPosition] = React.useState<'cancel' | 'back' | 'navigate'>(
-    'cancel'
-  );
-
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  // NOTE: Not sure about this relation modal context, maybe we should move this to DocumentContext?
-  // Get parent modal context if it exists
-  const parentContext = useRelationModal('RelationModalForm', (state) => state);
-  // Get depth of nested modals
-  const depth = parentContext ? parentContext.depth + 1 : 0;
-  // Check if this is a nested modal
-  const isNested = depth > 0;
-
-  const addDocumentToHistory = (document: DocumentMeta) =>
-    setDocumentHistory((prev) => [...prev, document]);
-
-  const getPreviousDocument = () => {
-    if (documentHistory.length === 0) return undefined;
-
-    const lastDocument = documentHistory[documentHistory.length - 1];
-
-    return lastDocument;
-  };
-
-  const removeLastDocumentFromHistory = () => {
-    setDocumentHistory((prev) => [...prev].slice(0, prev.length - 1));
-  };
-
-  const handleToggleModal = () => {
-    if (isModalOpen) {
-      setIsModalOpen(false);
-      const document = {
-        collectionType: rootDocumentMeta.collectionType,
-        model: rootDocumentMeta.model,
-        documentId: rootDocumentMeta.documentId,
-      };
-      // Change back to the root document
-      changeDocument(document);
-      // Reset the document history
-      setDocumentHistory([]);
-      // Reset action position
-      setActionPosition('cancel');
-      // Read from cache or refetch root document
+  const handleCloseModal = (hasUnsavedChanges: boolean) => {
+    if (hasUnsavedChanges) {
+      dispatch({ type: 'CLOSE_MODAL', payload: { shouldAskConfirmation: true } });
+    } else {
+      dispatch({ type: 'CLOSE_MODAL', payload: { shouldAskConfirmation: false } });
+      // TODO: check if we can avoid this by relying on RTK invalidatesTags.
+      // If so we can delete this function and dispatch the events directly
       triggerRefetchDocument(
-        document,
+        // TODO check if params should be removed (as they were before)
+        rootDocumentMeta,
         // Favor the cache
         true
       );
-    } else {
-      changeDocument(relation);
-      setIsModalOpen(true);
     }
   };
 
@@ -159,23 +247,24 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
     const isRootDocumentUrl = editViewUrl.includes(getFullPageLink());
 
     if (isRootDocumentUrl) {
-      handleToggleModal();
+      handleCloseModal(false);
     } else {
       navigate(getFullPageLink());
     }
   };
 
   const handleConfirm = () => {
-    if (actionPosition === 'navigate') {
+    if (state.confirmDialogIntent === 'navigate') {
       handleRedirection();
-    } else if (actionPosition === 'back') {
-      const previousRelation = getPreviousDocument();
-      if (previousRelation) {
-        removeLastDocumentFromHistory();
-        changeDocument(previousRelation);
-      }
-    } else {
-      handleToggleModal();
+    } else if (state.confirmDialogIntent === 'back') {
+      dispatch({ type: 'GO_BACK', payload: { shouldAskConfirmation: false } });
+    } else if (state.confirmDialogIntent === 'close') {
+      handleCloseModal(false);
+    } else if (state.confirmDialogIntent === 'open') {
+      dispatch({
+        type: 'GO_TO_RELATION',
+        payload: { document: relation, shouldAskConfirmation: false },
+      });
     }
   };
 
@@ -198,50 +287,31 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
     >
       {({ modified, isSubmitting, resetForm }) => {
         // We don't count the root document, so history starts after 1
-        const hasHistory = documentHistory.length > 1;
+        const hasHistory = state.documentHistory.length > 1;
+        const hasUnsavedChanges = modified && !isSubmitting;
 
         return (
-          <RelationModalProvider parentModified={modified} depth={depth}>
+          <RelationContextWrapper>
             <Modal.Root
-              open={isModalOpen}
-              onOpenChange={() => {
-                if (isModalOpen) {
-                  if (modified && !isSubmitting) {
-                    setIsConfirmationOpen(true);
-                  } else {
-                    handleToggleModal();
-                  }
+              open={state.isModalOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  dispatch({
+                    type: 'GO_TO_RELATION',
+                    // NOTE: the document used to be currentDocumentMeta
+                    payload: { document: relation, shouldAskConfirmation: hasUnsavedChanges },
+                  });
+                } else {
+                  dispatch({
+                    type: 'CLOSE_MODAL',
+                    payload: { shouldAskConfirmation: hasUnsavedChanges },
+                  });
                 }
               }}
             >
               <Modal.Trigger>
-                <Tooltip description={triggerButtonLabel}>
-                  <CustomTextButton
-                    onClick={() => {
-                      // Check if parent modal has unsaved changes
-                      if (isNested && parentContext.parentModified) {
-                        setIsConfirmationOpen(true);
-                        // Return early to avoid opening the modal
-                        return;
-                      } else {
-                        if (modified && !isSubmitting) {
-                          setIsConfirmationOpen(true);
-                        } else {
-                          // Add current relation to history before opening a new one
-                          if (currentDocumentMeta && Object.keys(currentDocumentMeta).length > 0) {
-                            addDocumentToHistory(currentDocumentMeta);
-                          }
-                          handleToggleModal();
-                        }
-
-                        if (!isModalOpen) {
-                          setIsModalOpen(true);
-                        }
-                      }
-                    }}
-                  >
-                    {triggerButtonLabel}
-                  </CustomTextButton>
+                <Tooltip label={triggerButtonLabel}>
+                  <CustomTextButton>{triggerButtonLabel}</CustomTextButton>
                 </Tooltip>
               </Modal.Trigger>
               <CustomModalContent>
@@ -250,20 +320,14 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
                     <Flex gap={2}>
                       <IconButton
                         withTooltip={false}
-                        label="Back"
+                        label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
                         variant="ghost"
                         disabled={!hasHistory}
                         onClick={() => {
-                          setActionPosition('back');
-                          if (modified && !isSubmitting) {
-                            setIsConfirmationOpen(true);
-                          } else {
-                            const previousRelation = getPreviousDocument();
-                            if (previousRelation) {
-                              removeLastDocumentFromHistory();
-                              changeDocument(previousRelation);
-                            }
-                          }
+                          dispatch({
+                            type: 'GO_BACK',
+                            payload: { shouldAskConfirmation: hasUnsavedChanges },
+                          });
                         }}
                         marginRight={1}
                       >
@@ -281,11 +345,16 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
                 <RelationModalBody>
                   <IconButton
                     onClick={() => {
-                      setActionPosition('navigate');
-
-                      if (modified && !isSubmitting) {
-                        setIsConfirmationOpen(true);
+                      if (hasUnsavedChanges) {
+                        dispatch({
+                          type: 'GO_FULL_PAGE',
+                          payload: { shouldAskConfirmation: true },
+                        });
                       } else {
+                        dispatch({
+                          type: 'GO_FULL_PAGE',
+                          payload: { shouldAskConfirmation: false },
+                        });
                         navigate(getFullPageLink());
                       }
                     }}
@@ -299,33 +368,25 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
                   </IconButton>
                 </RelationModalBody>
                 <Modal.Footer>
-                  <Button
-                    onClick={() => {
-                      if (modified && !isSubmitting) {
-                        setIsConfirmationOpen(true);
-                      } else {
-                        handleToggleModal();
-                      }
-                    }}
-                    variant="tertiary"
-                  >
-                    {formatMessage({
-                      id: 'app.components.Button.cancel',
-                      defaultMessage: 'Cancel',
-                    })}
-                  </Button>
+                  <Modal.Close>
+                    <Button variant="tertiary">
+                      {formatMessage({
+                        id: 'app.components.Button.cancel',
+                        defaultMessage: 'Cancel',
+                      })}
+                    </Button>
+                  </Modal.Close>
                 </Modal.Footer>
               </CustomModalContent>
             </Modal.Root>
-            <Dialog.Root open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen}>
+            <Dialog.Root open={state.confirmDialogIntent != null}>
               <ConfirmDialog
                 onConfirm={() => {
                   handleConfirm();
-                  setIsConfirmationOpen(false);
                   resetForm();
                 }}
                 onCancel={() => {
-                  setIsConfirmationOpen(false);
+                  dispatch({ type: 'CANCEL_CONFIRM_DIALOG' });
                 }}
                 variant="danger"
               >
@@ -336,7 +397,7 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
                 })}
               </ConfirmDialog>
             </Dialog.Root>
-          </RelationModalProvider>
+          </RelationContextWrapper>
         );
       }}
     </FormContext>
