@@ -1,14 +1,33 @@
 import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { useDoc } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
 
-interface FormLayoutProps extends Pick<EditLayout, 'layout'> {}
+export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
+  sm: '27.5rem', // 440px
+};
 
-const FormLayout = ({ layout }: FormLayoutProps) => {
+export const ResponsiveGridRoot = styled(Grid.Root)`
+  container-type: inline-size;
+`;
+
+export const ResponsiveGridItem = styled(Grid.Item)`
+  grid-column: span 12;
+
+  @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+    ${({ col }) => col && `grid-column: span ${col};`}
+  }
+`;
+
+interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
+  hasBackground?: boolean;
+}
+
+const FormLayout = ({ layout, hasBackground = false }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const { model } = useDoc();
 
@@ -39,18 +58,17 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
         return (
           <Box
             key={index}
-            hasRadius
-            background="neutral0"
-            shadow="tableShadow"
-            paddingLeft={6}
-            paddingRight={6}
-            paddingTop={6}
-            paddingBottom={6}
-            borderColor="neutral150"
+            {...(!hasBackground && {
+              padding: 6,
+              borderColor: 'neutral150',
+              background: 'neutral0',
+              hasRadius: true,
+              shadow: 'tableShadow',
+            })}
           >
             <Flex direction="column" alignItems="stretch" gap={6}>
               {panel.map((row, gridRowIndex) => (
-                <Grid.Root key={gridRowIndex} gap={4}>
+                <ResponsiveGridRoot key={gridRowIndex} gap={4}>
                   {row.map(({ size, ...field }) => {
                     const fieldWithTranslatedLabel = {
                       ...field,
@@ -60,7 +78,7 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
                       }),
                     };
                     return (
-                      <Grid.Item
+                      <ResponsiveGridItem
                         col={size}
                         key={field.name}
                         s={12}
@@ -69,10 +87,10 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
                         alignItems="stretch"
                       >
                         <InputRenderer {...fieldWithTranslatedLabel} />
-                      </Grid.Item>
+                      </ResponsiveGridItem>
                     );
                   })}
-                </Grid.Root>
+                </ResponsiveGridRoot>
               ))}
             </Flex>
           </Box>

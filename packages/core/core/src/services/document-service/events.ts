@@ -1,4 +1,4 @@
-import { UID, Utils, Modules, Core } from '@strapi/types';
+import type { UID, Utils, Modules, Core } from '@strapi/types';
 import { sanitize } from '@strapi/utils';
 
 import { getDeepPopulate } from './utils/populate';

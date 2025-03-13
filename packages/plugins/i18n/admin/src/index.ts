@@ -139,28 +139,6 @@ export default {
       });
 
       ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
-        validator: (args: any) => ({
-          i18n: yup.object().shape({
-            localized: yup.bool().test({
-              name: 'ensure-unique-localization',
-              message: getTranslation('plugin.schema.i18n.ensure-unique-localization'),
-              test(value) {
-                if (value === undefined || value) {
-                  return true;
-                }
-
-                const unique = get(args, ['3', 'modifiedData', 'unique'], null);
-
-                // Unique fields must be localized
-                if (unique && !value) {
-                  return false;
-                }
-
-                return true;
-              },
-            }),
-          }),
-        }),
         form: {
           advanced({ contentTypeSchema, forTarget, type, step }: any) {
             if (forTarget !== 'contentType') {

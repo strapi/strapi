@@ -58,6 +58,9 @@ describe('content-manager', () => {
               "publishModalAdditionalInfos": [],
               "unpublishModalAdditionalInfos": [],
             },
+            "preview": {
+              "actions": [],
+            },
           },
           "name": "Content Manager",
         }
