@@ -33,7 +33,7 @@ runs:
         REPO: ${{ inputs.repo }}
         BASE_BRANCH: ${{ inputs.base_branch }}
         TARGET_BRANCH: ${{ inputs.target_branch }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
 branding:
   icon: 'git-pull-request'
   color: 'blue'
