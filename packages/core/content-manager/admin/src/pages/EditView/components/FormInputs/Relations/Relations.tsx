@@ -34,7 +34,7 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { DocumentMeta, useDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
@@ -52,7 +52,11 @@ import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
-import { RelationModalForm, getCollectionType } from '../Relations/RelationModal';
+import {
+  RelationCard,
+  RelationContextWrapper,
+  getCollectionType,
+} from '../Relations/RelationModal';
 
 import type { Schema } from '@strapi/types';
 
@@ -1022,6 +1026,21 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     dragPreviewRef(getEmptyImage());
   }, [dragPreviewRef]);
 
+  const safeDocumentId = documentId ?? apiData?.documentId;
+  const safeLocale = locale ?? apiData?.locale ?? null;
+  const documentMeta = React.useMemo(
+    () =>
+      ({
+        documentId: safeDocumentId,
+        model: targetModel,
+        collectionType: getCollectionType(href)!,
+        params: {
+          locale: safeLocale,
+        },
+      }) as DocumentMeta,
+    [safeDocumentId, href, safeLocale, targetModel]
+  );
+
   return (
     <Box
       style={style}
@@ -1065,17 +1084,9 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             ) : null}
             <Flex width="100%" minWidth={0} justifyContent="space-between">
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                <RelationModalForm
-                  triggerButtonLabel={label}
-                  relation={{
-                    documentId: documentId ?? apiData?.documentId,
-                    model: targetModel,
-                    collectionType: getCollectionType(href)!,
-                    params: {
-                      locale: locale || apiData?.locale || null,
-                    },
-                  }}
-                />
+                <RelationContextWrapper>
+                  <RelationCard triggerButtonLabel={label} relation={documentMeta} />
+                </RelationContextWrapper>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
             </Flex>

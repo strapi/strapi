@@ -95,6 +95,11 @@ type Action =
     };
 
 function reducer(state: State, action: Action): State {
+  console.log(
+    `dispatching ${action.type} with payload: `,
+    'payload' in action ? action.payload : null
+  );
+
   switch (action.type) {
     case 'GO_TO_RELATION':
       if (action.payload.shouldAskConfirmation) {
@@ -172,8 +177,6 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
     throw new Error('Root document not found');
   }
 
-  // TODO: Return children directly if the context is already in the tree
-
   const rootDocumentMeta: DocumentMeta = {
     documentId: rootDocument.document.documentId,
     model: rootDocument.model,
@@ -188,6 +191,17 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
   );
   const currentDocument = useDocument({ ...currentDocumentMeta, params });
 
+  const memoizedChildren = React.useMemo(() => children, [children]);
+
+  // Return children directly if the context is already in the tree
+  try {
+    useRelationModal('RelationModalWrapper', () => null);
+    // If we reach that point without an error, the context is already in the tree
+    return memoizedChildren;
+  } catch (e) {
+    // Silently catch the error. We will wrap children in the context provider below
+  }
+
   return (
     <RelationModalProvider
       rootDocumentMeta={rootDocumentMeta}
@@ -196,12 +210,12 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
     >
-      {children}
+      {memoizedChildren}
     </RelationModalProvider>
   );
 };
 
-const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps) => {
+const RelationCard = ({ relation, triggerButtonLabel }: RelationModalProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { formatMessage } = useIntl();
@@ -209,6 +223,8 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
   const [triggerRefetchDocument] = useLazyGetDocumentQuery();
 
   const state = useRelationModal('RelationModalForm', (state) => state.state);
+  const id = React.useId(); // for debugging
+  console.log('state', state, id);
   const dispatch = useRelationModal('RelationModalForm', (state) => state.dispatch);
   const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
   const currentDocumentMeta = useRelationModal(
@@ -291,7 +307,7 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
         const hasUnsavedChanges = modified && !isSubmitting;
 
         return (
-          <RelationContextWrapper>
+          <>
             <Modal.Root
               open={state.isModalOpen}
               onOpenChange={(open) => {
@@ -309,11 +325,11 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
                 }
               }}
             >
-              <Modal.Trigger>
-                <Tooltip label={triggerButtonLabel}>
+              <Tooltip label={triggerButtonLabel}>
+                <Modal.Trigger>
                   <CustomTextButton>{triggerButtonLabel}</CustomTextButton>
-                </Tooltip>
-              </Modal.Trigger>
+                </Modal.Trigger>
+              </Tooltip>
               <CustomModalContent>
                 <Modal.Header gap={2}>
                   <Flex justifyContent="space-between" alignItems="center" width="100%">
@@ -397,7 +413,7 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
                 })}
               </ConfirmDialog>
             </Dialog.Root>
-          </RelationContextWrapper>
+          </>
         );
       }}
     </FormContext>
@@ -441,6 +457,7 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
 
   const isLoading =
     isLoadingPermissions || documentLayoutResponse.isLoading || documentResponse.isLoading;
+
   if (isLoading && !documentResponse.document?.documentId) {
     return (
       <Loader small>
@@ -561,4 +578,4 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
   );
 };
 
-export { RelationModalForm };
+export { RelationCard, RelationContextWrapper };
