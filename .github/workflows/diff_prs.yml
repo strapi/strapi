@@ -26,8 +26,8 @@ jobs:
         id: pr_diff
         uses: ./.github/actions/pr_diff
         with:
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.repository }}
+          owner: strapi
+          repo: strapi
           base_branch: ${{ github.event.inputs.base_branch }}
           target_branch: ${{ github.event.inputs.target_branch }}
 
