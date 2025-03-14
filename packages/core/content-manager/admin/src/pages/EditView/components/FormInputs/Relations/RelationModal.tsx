@@ -239,6 +239,7 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
                         }
                       }
                     }}
+                    width="100%"
                   >
                     {triggerButtonLabel}
                   </CustomTextButton>
@@ -346,6 +347,10 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
 const CustomTextButton = styled(TextButton)`
   & > span {
     font-size: ${({ theme }) => theme.fontSizes[2]};
+    width: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 `;
 
