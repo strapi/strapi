@@ -149,7 +149,7 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
   confirmPassword: yup
     .string()
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Confirm password is required',
     })
     .nullable()
