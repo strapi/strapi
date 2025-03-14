@@ -116,6 +116,12 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
   label: string;
   position?: RelationPosition;
   __temp_key__: string;
+  apiData?: {
+    documentId: RelationResult['documentId'];
+    id: RelationResult['id'];
+    locale?: RelationResult['locale'];
+    position: RelationPosition;
+  };
 }
 
 interface RelationsFieldProps
@@ -748,7 +754,7 @@ const RelationsList = ({
             ...{
               apiData: {
                 id: relation.id,
-                documentId: relation.documentId,
+                documentId: relation.documentId ?? relation?.apiData?.documentId ?? '',
                 locale: relation.locale,
                 position,
               },
