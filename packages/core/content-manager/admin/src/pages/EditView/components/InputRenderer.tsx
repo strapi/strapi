@@ -42,6 +42,7 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
 const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
   const { model: rootModel } = useDoc();
   const documentLayout = useDocumentLayout(document.schema?.uid ?? rootModel);
+  const components = documentLayout.edit.components;
 
   const collectionType =
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
@@ -75,8 +76,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
-
-  const components = documentLayout.edit.components;
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);

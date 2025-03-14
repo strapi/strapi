@@ -63,10 +63,20 @@ const DynamicComponent = ({
     'DynamicComponent',
     (state) => state.rootDocumentMeta
   );
-  const isRootDocument = rootDocumentMeta.model === documentMeta.model;
+
   const {
-    edit: { components },
-  } = useDocumentLayout(isRootDocument ? documentMeta.model : rootDocumentMeta.model);
+    edit: { components: rootComponents },
+  } = useDocumentLayout(rootDocumentMeta.model);
+  const {
+    edit: { components: relatedComponents },
+  } = useDocumentLayout(documentMeta.model);
+
+  // Merge the root level components and related components
+  const components = React.useMemo(
+    () => ({ ...rootComponents, ...relatedComponents }),
+    [rootComponents, relatedComponents]
+  );
+
   const document = useDocumentContext('DynamicComponent', (state) => state.document);
 
   const title = React.useMemo(() => {
