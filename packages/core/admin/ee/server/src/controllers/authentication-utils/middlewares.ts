@@ -109,6 +109,7 @@ export const redirectWithAuth: Core.MiddlewareHandler = (ctx) => {
   strapi.eventHub.emit('admin.auth.success', { user: sanitizedUser, provider });
 
   ctx.cookies.set('jwtToken', jwt, cookiesOptions);
+  ctx.cookies.set('rememberMe', 'true', cookiesOptions);
   ctx.redirect(redirectUrls.success);
 };
 
