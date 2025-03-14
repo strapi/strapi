@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@tests/utils';
 import { useNavigate } from 'react-router-dom';
 
 import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
-import { RelationModalForm } from '../RelationModal';
+import { RelationCard } from '../RelationModal';
 
 const relationContext = {
   initialDocument: {
@@ -217,7 +217,7 @@ describe('<RelationModal />', () => {
   it('renders the trigger button correctly', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
+        <RelationCard triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
@@ -227,7 +227,7 @@ describe('<RelationModal />', () => {
   it('does not render the modal by default', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
+        <RelationCard triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
@@ -237,7 +237,7 @@ describe('<RelationModal />', () => {
   it('opens the modal when clicking the trigger button', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
+        <RelationCard triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
@@ -259,7 +259,7 @@ describe('<RelationModal />', () => {
   it('closes the modal when clicking the cancel button', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
+        <RelationCard triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
@@ -277,7 +277,7 @@ describe('<RelationModal />', () => {
   it('navigates to full page when "Go to entry" is clicked', () => {
     render(
       <DocumentContextProvider {...relationContext}>
-        <RelationModalForm triggerButtonLabel="Open Modal" relation={relation} />
+        <RelationCard triggerButtonLabel="Open Modal" relation={relation} />
       </DocumentContextProvider>
     );
 
