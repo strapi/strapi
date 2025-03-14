@@ -4,7 +4,9 @@ import * as React from 'react';
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
 import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
+import cropperjscss from 'cropperjs/dist/cropper.css?raw';
 import { useIntl } from 'react-intl';
+import { createGlobalStyle } from 'styled-components';
 
 import { AssetType } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
@@ -26,8 +28,6 @@ import {
 } from './PreviewComponents';
 
 import type { File as FileDefinition, RawFile } from '../../../../../shared/contracts/files';
-
-import 'cropperjs/dist/cropper.css';
 
 interface Asset extends Omit<FileDefinition, 'folder'> {
   isLocal?: boolean;
@@ -60,6 +60,7 @@ export const PreviewBox = ({
   replacementFile,
   trackedLocation,
 }: PreviewBoxProps) => {
+  const CropperjsStyle = createGlobalStyle`${cropperjscss}`;
   const { trackUsage } = useTracking();
   const previewRef = React.useRef(null);
   const [isCropImageReady, setIsCropImageReady] = React.useState(false);
@@ -166,6 +167,7 @@ export const PreviewBox = ({
 
   return (
     <>
+      <CropperjsStyle />
       <RelativeBox hasRadius background="neutral150" borderColor="neutral200">
         {isCropperReady && isInCroppingMode && (
           <CroppingActions
