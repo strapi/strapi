@@ -60,7 +60,7 @@ export const loadConfiguration = (opts: StrapiOptions) => {
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
-    deviceId: _.get(pkgJSON, 'strapi.deviceId'),
+    installId: _.get(pkgJSON, 'strapi.installId'),
     packageJsonStrapi: _.omit(_.get(pkgJSON, 'strapi', {}), 'uuid'),
     info: {
       ...pkgJSON,

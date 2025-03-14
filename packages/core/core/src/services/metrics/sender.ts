@@ -4,7 +4,7 @@ import _ from 'lodash';
 import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
 import tsUtils from '@strapi/typescript-utils';
-import { env, machineID } from '@strapi/utils';
+import { env, installID } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { generateAdminUserHash } from './admin-user-hash';
 
@@ -40,9 +40,9 @@ const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi:
  * Create a send function for event with all the necessary metadata
  */
 export default (strapi: Core.Strapi): Sender => {
-  const { uuid, deviceId: randomDeviceId } = strapi.config;
+  const { uuid, installId: installIdFromPackageJson } = strapi.config;
 
-  const deviceId = machineID(uuid, randomDeviceId);
+  const installId = installID(uuid, installIdFromPackageJson);
 
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');
@@ -72,14 +72,14 @@ export default (strapi: Core.Strapi): Sender => {
     const userId = generateAdminUserHash(strapi);
 
     // TO REMOVE
-    console.log(`[TELEMETRY INSTANCE] deviceId: ${deviceId}, userId: ${userId}`);
+    console.log(`[TELEMETRY INSTANCE] installId: ${installId}, userId: ${userId}`);
 
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({
         event,
         userId,
-        deviceId,
+        installId,
         eventProperties: payload.eventProperties,
         userProperties: userId ? { ...anonymousUserProperties, ...payload.userProperties } : {},
         groupProperties: {

@@ -1,12 +1,12 @@
-import { machineID } from '@strapi/utils';
+import { installID } from '@strapi/utils';
 
-export const sendEvent = async (event: string, uuid: string, deviceId?: any) => {
+export const sendEvent = async (event: string, uuid: string, installId?: any) => {
   try {
     await fetch('https://analytics.strapi.io/api/v2/track', {
       method: 'POST',
       body: JSON.stringify({
         event,
-        deviceId: machineID(uuid, deviceId),
+        deviceId: installID(uuid, installId),
         groupProperties: { projectId: uuid },
       }),
       headers: {

@@ -10,7 +10,7 @@ import { handleCloudLogin } from './cloud';
 import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
-import { machineID } from './utils/machine-id';
+import { installID } from './utils/install-id';
 import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
@@ -125,13 +125,11 @@ async function run(args: string[]): Promise<void> {
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
 
   const randomUUID = crypto.randomUUID();
-  const { deviceId, isDeviceIdUsingProjectId } = machineID();
+  const uuid = (process.env.STRAPI_UUID_PREFIX || '') + randomUUID;
+  const installId = installID(uuid);
 
   // TO REMOVE
-  console.log(`[CLI] deviceId: ${deviceId}, isDeviceIdUsingProjectId: ${isDeviceIdUsingProjectId}`);
-  console.log(
-    `[CLI] ${isDeviceIdUsingProjectId ? `deviceId not saved in package.json` : `deviceId should be saved in package.json`}`
-  );
+  console.log(`[CLI] installId: ${installId}`);
 
   const scope: Scope = {
     rootPath,
@@ -148,10 +146,9 @@ async function run(args: string[]): Promise<void> {
     packageJsonStrapi: {
       template: options.template,
     },
-    uuid: (process.env.STRAPI_UUID_PREFIX || '') + randomUUID,
+    uuid,
     docker: process.env.DOCKER === 'true',
-    deviceId,
-    isDeviceIdUsingProjectId,
+    installId,
     tmpPath,
     gitInit: true,
     devDependencies: {},
