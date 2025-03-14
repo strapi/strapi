@@ -802,9 +802,7 @@ const RelationsList = ({
             ...{
               apiData: {
                 id: relation.id,
-                documentId: relation.documentId
-                  ? relation.documentId
-                  : relation.apiData?.documentId || '',
+                documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
                 locale: relation.locale || relation.apiData?.locale,
                 position,
               },
