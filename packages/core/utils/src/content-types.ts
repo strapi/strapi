@@ -17,7 +17,7 @@ const ID_ATTRIBUTE = 'id';
 const DOC_ID_ATTRIBUTE = 'documentId';
 
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
-const FIRST_PUBLISHED_AT_ATTRIBUTE = 'firstPublishedAt'
+const FIRST_PUBLISHED_AT_ATTRIBUTE = 'firstPublishedAt';
 const CREATED_BY_ATTRIBUTE = 'createdBy';
 const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 
