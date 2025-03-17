@@ -1,6 +1,5 @@
 import { join } from 'path';
 import { Duplex, PassThrough, Readable } from 'stream';
-import * as webStream from 'stream/web';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { Core } from '@strapi/types';
 
