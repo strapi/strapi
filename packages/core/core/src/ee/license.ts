@@ -93,7 +93,11 @@ const fetchLicense = async (
     .fetch(`https://license.strapi.io/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, projectId, installId: installID(projectId, installIdFromPackageJson) }), // NOTE: Doing nothing on the LR with the installId
+      body: JSON.stringify({
+        key,
+        projectId,
+        installId: installID(projectId, installIdFromPackageJson),
+      }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwError);
 
