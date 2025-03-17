@@ -29,7 +29,7 @@ function getFileStream(
 
       if (res.body) {
         // pipe the image data
-        Readable.fromWeb(new webStream.ReadableStream(res.body)).pipe(readableStream);
+        Readable.fromWeb(res.body as any).pipe(readableStream);
       } else {
         readableStream.emit('error', new Error('Empty data found for file'));
       }
