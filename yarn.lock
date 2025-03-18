@@ -9016,6 +9016,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/openapi@workspace:packages/core/openapi":
+  version: 0.0.0-use.local
+  resolution: "@strapi/openapi@workspace:packages/core/openapi"
+  languageName: unknown
+  linkType: soft
+
 "@strapi/pack-up@npm:^5.0.1":
   version: 5.1.0
   resolution: "@strapi/pack-up@npm:5.1.0"
