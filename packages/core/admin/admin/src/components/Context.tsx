@@ -25,12 +25,15 @@ function createContext<ContextValueType extends object | null>(
 
   function useContext<Selected>(
     consumerName: string,
-    selector: (value: ContextValueType) => Selected
+    selector: (value: ContextValueType) => Selected,
+    shouldThrowOnMissingContext = true
   ): Selected {
     return ContextSelector.useContextSelector(Context, (ctx) => {
       if (ctx) return selector(ctx);
       // it's a required context.
-      throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
+      if (shouldThrowOnMissingContext) {
+        throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
+      }
     });
   }
 

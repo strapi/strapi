@@ -164,7 +164,12 @@ interface RelationModalContextValue {
 const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
+let totalInstances = 0;
 const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => {
+  React.useEffect(() => {
+    totalInstances++;
+  }, []);
+
   const rootDocument = useDoc();
 
   const [state, dispatch] = React.useReducer(reducer, {
@@ -177,11 +182,16 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
     throw new Error('Root document not found');
   }
 
-  const rootDocumentMeta: DocumentMeta = {
-    documentId: rootDocument.document.documentId,
-    model: rootDocument.model,
-    collectionType: rootDocument.collectionType,
-  };
+  const rootDocumentId = rootDocument.document.documentId;
+
+  const rootDocumentMeta: DocumentMeta = React.useMemo(
+    () => ({
+      documentId: rootDocumentId,
+      model: rootDocument.model,
+      collectionType: rootDocument.collectionType,
+    }),
+    [rootDocument.collectionType, rootDocumentId, rootDocument.model]
+  );
 
   const currentDocumentMeta = state.documentHistory.at(-1) ?? rootDocumentMeta;
 
@@ -191,31 +201,35 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
   );
   const currentDocument = useDocument({ ...currentDocumentMeta, params });
 
-  const memoizedChildren = React.useMemo(() => children, [children]);
+  const parentContextValue = useRelationModal('RelationContextWrapper', (state) => state, false);
 
-  // Return children directly if the context is already in the tree
-  try {
-    useRelationModal('RelationModalWrapper', () => null);
-    // If we reach that point without an error, the context is already in the tree
-    return memoizedChildren;
-  } catch (e) {
-    // Silently catch the error. We will wrap children in the context provider below
+  if (totalInstances > 3) {
+    console.log('maxed out instances', parentContextValue);
+    return <p>maxed out instances</p>;
   }
 
+  // If we already have a parent context, use it directly without creating a new provider
+  if (parentContextValue) {
+    console.log('rendering children directly', parentContextValue);
+    return <p>nested relation label</p>;
+    // return children;
+  }
+
+  // Otherwise, create a new context provider with stable props
   return (
     <RelationModalProvider
-      rootDocumentMeta={rootDocumentMeta}
       state={state}
       dispatch={dispatch}
+      rootDocumentMeta={rootDocumentMeta}
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
     >
-      {memoizedChildren}
+      {children}
     </RelationModalProvider>
   );
 };
 
-const RelationCard = ({ relation, triggerButtonLabel }: RelationModalProps) => {
+const RelationCardInner = ({ relation, triggerButtonLabel }: RelationModalProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { formatMessage } = useIntl();
@@ -225,6 +239,7 @@ const RelationCard = ({ relation, triggerButtonLabel }: RelationModalProps) => {
   const state = useRelationModal('RelationModalForm', (state) => state.state);
   const id = React.useId(); // for debugging
   console.log('state', state, id);
+
   const dispatch = useRelationModal('RelationModalForm', (state) => state.dispatch);
   const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
   const currentDocumentMeta = useRelationModal(
@@ -284,141 +299,155 @@ const RelationCard = ({ relation, triggerButtonLabel }: RelationModalProps) => {
     }
   };
 
+  // TODO: fix
+  const hasUnsavedChanges = false;
+
   return (
-    <FormContext
-      method="PUT"
-      initialValues={currentDocument.getInitialFormValues()}
-      validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-        const yupSchema = createYupSchema(
-          currentDocument.schema?.attributes,
-          currentDocument.components,
-          {
-            status: currentDocument.document?.status,
-            ...options,
+    <>
+      <Modal.Root
+        open={state.isModalOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            dispatch({
+              type: 'GO_TO_RELATION',
+              // NOTE: the document used to be currentDocumentMeta
+              payload: { document: relation, shouldAskConfirmation: hasUnsavedChanges },
+            });
+          } else {
+            dispatch({
+              type: 'CLOSE_MODAL',
+              payload: { shouldAskConfirmation: hasUnsavedChanges },
+            });
           }
-        );
+        }}
+      >
+        <FormContext
+          method="PUT"
+          initialValues={currentDocument.getInitialFormValues()}
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            const yupSchema = createYupSchema(
+              currentDocument.schema?.attributes,
+              currentDocument.components,
+              {
+                status: currentDocument.document?.status,
+                ...options,
+              }
+            );
 
-        return yupSchema.validate(values, { abortEarly: false });
-      }}
-    >
-      {({ modified, isSubmitting, resetForm }) => {
-        // We don't count the root document, so history starts after 1
-        const hasHistory = state.documentHistory.length > 1;
-        const hasUnsavedChanges = modified && !isSubmitting;
-
-        return (
-          <>
-            <Modal.Root
-              open={state.isModalOpen}
-              onOpenChange={(open) => {
-                if (open) {
-                  dispatch({
-                    type: 'GO_TO_RELATION',
-                    // NOTE: the document used to be currentDocumentMeta
-                    payload: { document: relation, shouldAskConfirmation: hasUnsavedChanges },
-                  });
-                } else {
-                  dispatch({
-                    type: 'CLOSE_MODAL',
-                    payload: { shouldAskConfirmation: hasUnsavedChanges },
-                  });
-                }
-              }}
-            >
-              <Tooltip label={triggerButtonLabel}>
-                <Modal.Trigger>
-                  <CustomTextButton>{triggerButtonLabel}</CustomTextButton>
-                </Modal.Trigger>
-              </Tooltip>
-              <CustomModalContent>
-                <Modal.Header gap={2}>
-                  <Flex justifyContent="space-between" alignItems="center" width="100%">
-                    <Flex gap={2}>
-                      <IconButton
-                        withTooltip={false}
-                        label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
-                        variant="ghost"
-                        disabled={!hasHistory}
-                        onClick={() => {
-                          dispatch({
-                            type: 'GO_BACK',
-                            payload: { shouldAskConfirmation: hasUnsavedChanges },
-                          });
-                        }}
-                        marginRight={1}
-                      >
-                        <ArrowLeft />
-                      </IconButton>
-                      <Typography tag="span" fontWeight={600}>
-                        {formatMessage({
-                          id: 'content-manager.components.RelationInputModal.modal-title',
-                          defaultMessage: 'Edit a relation',
-                        })}
-                      </Typography>
+            return yupSchema.validate(values, { abortEarly: false });
+          }}
+        >
+          {({ modified, isSubmitting, resetForm }) => {
+            // We don't count the root document, so history starts after 1
+            const hasHistory = state.documentHistory.length > 1;
+            const hasUnsavedChanges = modified && !isSubmitting;
+            return (
+              <>
+                <Tooltip label={triggerButtonLabel}>
+                  <Modal.Trigger>
+                    <CustomTextButton>{triggerButtonLabel}</CustomTextButton>
+                  </Modal.Trigger>
+                </Tooltip>
+                <CustomModalContent>
+                  <Modal.Header gap={2}>
+                    <Flex justifyContent="space-between" alignItems="center" width="100%">
+                      <Flex gap={2}>
+                        <IconButton
+                          withTooltip={false}
+                          label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
+                          variant="ghost"
+                          disabled={!hasHistory}
+                          onClick={() => {
+                            dispatch({
+                              type: 'GO_BACK',
+                              payload: { shouldAskConfirmation: hasUnsavedChanges },
+                            });
+                          }}
+                          marginRight={1}
+                        >
+                          <ArrowLeft />
+                        </IconButton>
+                        <Typography tag="span" fontWeight={600}>
+                          {formatMessage({
+                            id: 'content-manager.components.RelationInputModal.modal-title',
+                            defaultMessage: 'Edit a relation',
+                          })}
+                        </Typography>
+                      </Flex>
                     </Flex>
-                  </Flex>
-                </Modal.Header>
-                <RelationModalBody>
-                  <IconButton
-                    onClick={() => {
-                      if (hasUnsavedChanges) {
-                        dispatch({
-                          type: 'GO_FULL_PAGE',
-                          payload: { shouldAskConfirmation: true },
-                        });
-                      } else {
-                        dispatch({
-                          type: 'GO_FULL_PAGE',
-                          payload: { shouldAskConfirmation: false },
-                        });
-                        navigate(getFullPageLink());
-                      }
-                    }}
-                    variant="tertiary"
-                    label={formatMessage({
-                      id: 'content-manager.components.RelationInputModal.button-fullpage',
-                      defaultMessage: 'Go to entry',
-                    })}
-                  >
-                    <ArrowsOut />
-                  </IconButton>
-                </RelationModalBody>
-                <Modal.Footer>
-                  <Modal.Close>
-                    <Button variant="tertiary">
-                      {formatMessage({
-                        id: 'app.components.Button.cancel',
-                        defaultMessage: 'Cancel',
+                  </Modal.Header>
+                  <RelationModalBody>
+                    <IconButton
+                      onClick={() => {
+                        if (hasUnsavedChanges) {
+                          dispatch({
+                            type: 'GO_FULL_PAGE',
+                            payload: { shouldAskConfirmation: true },
+                          });
+                        } else {
+                          dispatch({
+                            type: 'GO_FULL_PAGE',
+                            payload: { shouldAskConfirmation: false },
+                          });
+                          navigate(getFullPageLink());
+                        }
+                      }}
+                      variant="tertiary"
+                      label={formatMessage({
+                        id: 'content-manager.components.RelationInputModal.button-fullpage',
+                        defaultMessage: 'Go to entry',
                       })}
-                    </Button>
-                  </Modal.Close>
-                </Modal.Footer>
-              </CustomModalContent>
-            </Modal.Root>
-            <Dialog.Root open={state.confirmDialogIntent != null}>
-              <ConfirmDialog
-                onConfirm={() => {
-                  handleConfirm();
-                  resetForm();
-                }}
-                onCancel={() => {
-                  dispatch({ type: 'CANCEL_CONFIRM_DIALOG' });
-                }}
-                variant="danger"
-              >
-                {formatMessage({
-                  id: 'content-manager.components.RelationInputModal.confirmation-message',
-                  defaultMessage:
-                    'Some changes were not saved. Are you sure you want to close this relation? All changes that were not saved will be lost.',
-                })}
-              </ConfirmDialog>
-            </Dialog.Root>
-          </>
-        );
-      }}
-    </FormContext>
+                    >
+                      <ArrowsOut />
+                    </IconButton>
+                  </RelationModalBody>
+                  <Modal.Footer>
+                    <Modal.Close>
+                      <Button variant="tertiary">
+                        {formatMessage({
+                          id: 'app.components.Button.cancel',
+                          defaultMessage: 'Cancel',
+                        })}
+                      </Button>
+                    </Modal.Close>
+                  </Modal.Footer>
+                </CustomModalContent>
+              </>
+            );
+          }}
+        </FormContext>
+      </Modal.Root>
+      <Dialog.Root open={state.confirmDialogIntent != null}>
+        <ConfirmDialog
+          onConfirm={() => {
+            handleConfirm();
+            // TODO: fix scope
+            // resetForm();
+          }}
+          onCancel={() => {
+            dispatch({ type: 'CANCEL_CONFIRM_DIALOG' });
+          }}
+          variant="danger"
+        >
+          {formatMessage({
+            id: 'content-manager.components.RelationInputModal.confirmation-message',
+            defaultMessage:
+              'Some changes were not saved. Are you sure you want to close this relation? All changes that were not saved will be lost.',
+          })}
+        </ConfirmDialog>
+      </Dialog.Root>
+    </>
   );
 };
+
+const RelationCard = React.memo((props: RelationModalProps) => {
+  console.log('relationcard', props);
+  return (
+    <RelationContextWrapper>
+      <RelationCardInner {...props} />
+    </RelationContextWrapper>
+  );
+});
 
 const CustomTextButton = styled(TextButton)`
   & > span {
@@ -578,4 +607,4 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
   );
 };
 
-export { RelationCard, RelationContextWrapper };
+export { RelationCard };
