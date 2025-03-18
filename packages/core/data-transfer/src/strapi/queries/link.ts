@@ -302,9 +302,7 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
         assignOrderColumns();
         const qb = connection.insert(payload).into(addSchema(joinTable.name));
         if (trx) {
-          await trx.transaction(async (nestedTrx) => {
-            await qb.transacting(nestedTrx);
-          });
+          await qb.transacting(trx);
         }
       }
 
