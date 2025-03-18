@@ -1,6 +1,7 @@
 import { join } from 'path';
 import { Duplex, PassThrough, Readable } from 'stream';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
+import * as webStream from 'stream/web';
 import type { Core } from '@strapi/types';
 
 import type { IAsset, IFile } from '../../../../types';
@@ -28,7 +29,7 @@ function getFileStream(
 
       if (res.body) {
         // pipe the image data
-        Readable.fromWeb(res.body as any).pipe(readableStream);
+        Readable.fromWeb(res.body as webStream.ReadableStream<Uint8Array>).pipe(readableStream);
       } else {
         readableStream.emit('error', new Error('Empty data found for file'));
       }
