@@ -7,6 +7,7 @@ import {
   useRBAC,
   useStrapiApp,
   createContext,
+  useForm,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -18,7 +19,6 @@ import {
   Loader,
   Modal,
   Typography,
-  Tooltip,
   TextButton,
 } from '@strapi/design-system';
 import { ArrowLeft, ArrowsOut, WarningCircle } from '@strapi/icons';
@@ -67,6 +67,7 @@ interface State {
   documentHistory: DocumentMeta[];
   confirmDialogIntent: null | 'close' | 'back' | 'open' | 'navigate';
   isModalOpen: boolean;
+  hasUnsavedChanges: boolean;
 }
 
 type Action =
@@ -74,35 +75,32 @@ type Action =
       type: 'GO_TO_RELATION';
       payload: {
         document: DocumentMeta;
-        // TODO: rename something like shouldAskConfirmation
-        shouldAskConfirmation: boolean;
+        shouldBypassConfirmation: boolean;
       };
     }
   | {
       type: 'GO_BACK';
-      payload: { shouldAskConfirmation: boolean };
+      payload: { shouldBypassConfirmation: boolean };
     }
   | {
       type: 'GO_FULL_PAGE';
-      payload: { shouldAskConfirmation: boolean };
     }
   | {
       type: 'CANCEL_CONFIRM_DIALOG';
     }
   | {
       type: 'CLOSE_MODAL';
-      payload: { shouldAskConfirmation: boolean };
+      payload: { shouldBypassConfirmation: boolean };
+    }
+  | {
+      type: 'SET_HAS_UNSAVED_CHANGES';
+      payload: { hasUnsavedChanges: boolean };
     };
 
 function reducer(state: State, action: Action): State {
-  console.log(
-    `dispatching ${action.type} with payload: `,
-    'payload' in action ? action.payload : null
-  );
-
   switch (action.type) {
     case 'GO_TO_RELATION':
-      if (action.payload.shouldAskConfirmation) {
+      if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
         return { ...state, confirmDialogIntent: 'open' };
       }
 
@@ -113,7 +111,7 @@ function reducer(state: State, action: Action): State {
         isModalOpen: true,
       };
     case 'GO_BACK':
-      if (action.payload.shouldAskConfirmation) {
+      if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
         return { ...state, confirmDialogIntent: 'back' };
       }
 
@@ -123,7 +121,7 @@ function reducer(state: State, action: Action): State {
         confirmDialogIntent: null,
       };
     case 'GO_FULL_PAGE':
-      if (action.payload.shouldAskConfirmation) {
+      if (state.hasUnsavedChanges) {
         return { ...state, confirmDialogIntent: 'navigate' };
       }
 
@@ -137,7 +135,7 @@ function reducer(state: State, action: Action): State {
         confirmDialogIntent: null,
       };
     case 'CLOSE_MODAL':
-      if (action.payload.shouldAskConfirmation) {
+      if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
         return { ...state, confirmDialogIntent: 'close' };
       }
 
@@ -146,6 +144,11 @@ function reducer(state: State, action: Action): State {
         documentHistory: [],
         confirmDialogIntent: null,
         isModalOpen: false,
+      };
+    case 'SET_HAS_UNSAVED_CHANGES':
+      return {
+        ...state,
+        hasUnsavedChanges: action.payload.hasUnsavedChanges,
       };
     default:
       return state;
@@ -164,11 +167,30 @@ interface RelationModalContextValue {
 const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
-let totalInstances = 0;
-const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => {
+const FormWatcher = () => {
+  const modified = useForm('FormWatcher', (state) => state.modified);
+  const isSubmitting = useForm('FormWatcher', (state) => state.isSubmitting);
+
+  const dispatch = useRelationModal('FormWatcher', (state) => state.dispatch);
+  const hasUnsavedChanges = modified && !isSubmitting;
+
   React.useEffect(() => {
-    totalInstances++;
-  }, []);
+    dispatch({ type: 'SET_HAS_UNSAVED_CHANGES', payload: { hasUnsavedChanges } });
+  }, [hasUnsavedChanges, dispatch]);
+
+  return null;
+};
+
+const RelationRenderer = ({
+  children,
+  trigger,
+  relation,
+}: {
+  children: React.ReactNode;
+  trigger: React.ReactNode;
+  relation: RelationModalProps['relation'];
+}) => {
+  const { formatMessage } = useIntl();
 
   const rootDocument = useDoc();
 
@@ -176,6 +198,7 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
     documentHistory: [],
     confirmDialogIntent: null,
     isModalOpen: false,
+    hasUnsavedChanges: false,
   });
 
   if (!rootDocument.document) {
@@ -183,7 +206,6 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
   }
 
   const rootDocumentId = rootDocument.document.documentId;
-
   const rootDocumentMeta: DocumentMeta = React.useMemo(
     () => ({
       documentId: rootDocumentId,
@@ -203,19 +225,15 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
 
   const parentContextValue = useRelationModal('RelationContextWrapper', (state) => state, false);
 
-  if (totalInstances > 3) {
-    console.log('maxed out instances', parentContextValue);
-    return <p>maxed out instances</p>;
-  }
-
-  // If we already have a parent context, use it directly without creating a new provider
+  // A parent relation is already rendering a modal. In this case simply render the trigger
   if (parentContextValue) {
-    console.log('rendering children directly', parentContextValue);
-    return <p>nested relation label</p>;
-    // return children;
+    return trigger;
   }
 
-  // Otherwise, create a new context provider with stable props
+  /**
+   * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
+   * pieces that will be used by potential child relations: the context, header, form, and footer.
+   */
   return (
     <RelationModalProvider
       state={state}
@@ -224,12 +242,88 @@ const RelationContextWrapper = ({ children }: { children: React.ReactNode }) => 
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
     >
-      {children}
+      <Modal.Root
+        open={state.isModalOpen}
+        onOpenChange={(open) => {
+          if (open) {
+            dispatch({
+              type: 'GO_TO_RELATION',
+              // NOTE: the document used to be currentDocumentMeta
+              payload: { document: relation, shouldBypassConfirmation: false },
+            });
+          } else {
+            dispatch({
+              type: 'CLOSE_MODAL',
+              payload: { shouldBypassConfirmation: false },
+            });
+          }
+        }}
+      >
+        <FormContext
+          method="PUT"
+          initialValues={currentDocument.getInitialFormValues()}
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            const yupSchema = createYupSchema(
+              currentDocument.schema?.attributes,
+              currentDocument.components,
+              {
+                status: currentDocument.document?.status,
+                ...options,
+              }
+            );
+
+            return yupSchema.validate(values, { abortEarly: false });
+          }}
+        >
+          <FormWatcher />
+          {trigger}
+          <CustomModalContent>
+            <Modal.Header gap={2}>
+              <Flex justifyContent="space-between" alignItems="center" width="100%">
+                <Flex gap={2}>
+                  <IconButton
+                    withTooltip={false}
+                    label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
+                    variant="ghost"
+                    disabled={state.documentHistory.length < 2}
+                    onClick={() => {
+                      dispatch({
+                        type: 'GO_BACK',
+                        payload: { shouldBypassConfirmation: false },
+                      });
+                    }}
+                    marginRight={1}
+                  >
+                    <ArrowLeft />
+                  </IconButton>
+                  <Typography tag="span" fontWeight={600}>
+                    {formatMessage({
+                      id: 'content-manager.components.RelationInputModal.modal-title',
+                      defaultMessage: 'Edit a relation',
+                    })}
+                  </Typography>
+                </Flex>
+              </Flex>
+            </Modal.Header>
+            <Modal.Body>{children}</Modal.Body>
+            <Modal.Footer>
+              <Modal.Close>
+                <Button variant="tertiary">
+                  {formatMessage({
+                    id: 'app.components.Button.cancel',
+                    defaultMessage: 'Cancel',
+                  })}
+                </Button>
+              </Modal.Close>
+            </Modal.Footer>
+          </CustomModalContent>
+        </FormContext>
+      </Modal.Root>
     </RelationModalProvider>
   );
 };
 
-const RelationCardInner = ({ relation, triggerButtonLabel }: RelationModalProps) => {
+const RelationCardInner = ({ relation }: RelationModalProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { formatMessage } = useIntl();
@@ -237,8 +331,6 @@ const RelationCardInner = ({ relation, triggerButtonLabel }: RelationModalProps)
   const [triggerRefetchDocument] = useLazyGetDocumentQuery();
 
   const state = useRelationModal('RelationModalForm', (state) => state.state);
-  const id = React.useId(); // for debugging
-  console.log('state', state, id);
 
   const dispatch = useRelationModal('RelationModalForm', (state) => state.dispatch);
   const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
@@ -246,13 +338,11 @@ const RelationCardInner = ({ relation, triggerButtonLabel }: RelationModalProps)
     'RelationModalForm',
     (state) => state.currentDocumentMeta
   );
-  const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
 
-  const handleCloseModal = (hasUnsavedChanges: boolean) => {
-    if (hasUnsavedChanges) {
-      dispatch({ type: 'CLOSE_MODAL', payload: { shouldAskConfirmation: true } });
-    } else {
-      dispatch({ type: 'CLOSE_MODAL', payload: { shouldAskConfirmation: false } });
+  const handleCloseModal = (shouldBypassConfirmation: boolean) => {
+    dispatch({ type: 'CLOSE_MODAL', payload: { shouldBypassConfirmation } });
+
+    if (shouldBypassConfirmation || !state.hasUnsavedChanges) {
       // TODO: check if we can avoid this by relying on RTK invalidatesTags.
       // If so we can delete this function and dispatch the events directly
       triggerRefetchDocument(
@@ -278,7 +368,7 @@ const RelationCardInner = ({ relation, triggerButtonLabel }: RelationModalProps)
     const isRootDocumentUrl = editViewUrl.includes(getFullPageLink());
 
     if (isRootDocumentUrl) {
-      handleCloseModal(false);
+      handleCloseModal(true);
     } else {
       navigate(getFullPageLink());
     }
@@ -288,135 +378,38 @@ const RelationCardInner = ({ relation, triggerButtonLabel }: RelationModalProps)
     if (state.confirmDialogIntent === 'navigate') {
       handleRedirection();
     } else if (state.confirmDialogIntent === 'back') {
-      dispatch({ type: 'GO_BACK', payload: { shouldAskConfirmation: false } });
+      dispatch({ type: 'GO_BACK', payload: { shouldBypassConfirmation: true } });
     } else if (state.confirmDialogIntent === 'close') {
-      handleCloseModal(false);
+      handleCloseModal(true);
     } else if (state.confirmDialogIntent === 'open') {
       dispatch({
         type: 'GO_TO_RELATION',
-        payload: { document: relation, shouldAskConfirmation: false },
+        payload: { document: relation, shouldBypassConfirmation: true },
       });
     }
   };
 
-  // TODO: fix
-  const hasUnsavedChanges = false;
-
   return (
     <>
-      <Modal.Root
-        open={state.isModalOpen}
-        onOpenChange={(open) => {
-          if (open) {
+      <RelationEditView>
+        <IconButton
+          onClick={() => {
             dispatch({
-              type: 'GO_TO_RELATION',
-              // NOTE: the document used to be currentDocumentMeta
-              payload: { document: relation, shouldAskConfirmation: hasUnsavedChanges },
+              type: 'GO_FULL_PAGE',
             });
-          } else {
-            dispatch({
-              type: 'CLOSE_MODAL',
-              payload: { shouldAskConfirmation: hasUnsavedChanges },
-            });
-          }
-        }}
-      >
-        <FormContext
-          method="PUT"
-          initialValues={currentDocument.getInitialFormValues()}
-          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-            const yupSchema = createYupSchema(
-              currentDocument.schema?.attributes,
-              currentDocument.components,
-              {
-                status: currentDocument.document?.status,
-                ...options,
-              }
-            );
-
-            return yupSchema.validate(values, { abortEarly: false });
+            if (!state.hasUnsavedChanges) {
+              navigate(getFullPageLink());
+            }
           }}
+          variant="tertiary"
+          label={formatMessage({
+            id: 'content-manager.components.RelationInputModal.button-fullpage',
+            defaultMessage: 'Go to entry',
+          })}
         >
-          {({ modified, isSubmitting, resetForm }) => {
-            // We don't count the root document, so history starts after 1
-            const hasHistory = state.documentHistory.length > 1;
-            const hasUnsavedChanges = modified && !isSubmitting;
-            return (
-              <>
-                <Tooltip label={triggerButtonLabel}>
-                  <Modal.Trigger>
-                    <CustomTextButton>{triggerButtonLabel}</CustomTextButton>
-                  </Modal.Trigger>
-                </Tooltip>
-                <CustomModalContent>
-                  <Modal.Header gap={2}>
-                    <Flex justifyContent="space-between" alignItems="center" width="100%">
-                      <Flex gap={2}>
-                        <IconButton
-                          withTooltip={false}
-                          label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
-                          variant="ghost"
-                          disabled={!hasHistory}
-                          onClick={() => {
-                            dispatch({
-                              type: 'GO_BACK',
-                              payload: { shouldAskConfirmation: hasUnsavedChanges },
-                            });
-                          }}
-                          marginRight={1}
-                        >
-                          <ArrowLeft />
-                        </IconButton>
-                        <Typography tag="span" fontWeight={600}>
-                          {formatMessage({
-                            id: 'content-manager.components.RelationInputModal.modal-title',
-                            defaultMessage: 'Edit a relation',
-                          })}
-                        </Typography>
-                      </Flex>
-                    </Flex>
-                  </Modal.Header>
-                  <RelationModalBody>
-                    <IconButton
-                      onClick={() => {
-                        if (hasUnsavedChanges) {
-                          dispatch({
-                            type: 'GO_FULL_PAGE',
-                            payload: { shouldAskConfirmation: true },
-                          });
-                        } else {
-                          dispatch({
-                            type: 'GO_FULL_PAGE',
-                            payload: { shouldAskConfirmation: false },
-                          });
-                          navigate(getFullPageLink());
-                        }
-                      }}
-                      variant="tertiary"
-                      label={formatMessage({
-                        id: 'content-manager.components.RelationInputModal.button-fullpage',
-                        defaultMessage: 'Go to entry',
-                      })}
-                    >
-                      <ArrowsOut />
-                    </IconButton>
-                  </RelationModalBody>
-                  <Modal.Footer>
-                    <Modal.Close>
-                      <Button variant="tertiary">
-                        {formatMessage({
-                          id: 'app.components.Button.cancel',
-                          defaultMessage: 'Cancel',
-                        })}
-                      </Button>
-                    </Modal.Close>
-                  </Modal.Footer>
-                </CustomModalContent>
-              </>
-            );
-          }}
-        </FormContext>
-      </Modal.Root>
+          <ArrowsOut />
+        </IconButton>
+      </RelationEditView>
       <Dialog.Root open={state.confirmDialogIntent != null}>
         <ConfirmDialog
           onConfirm={() => {
@@ -440,12 +433,37 @@ const RelationCardInner = ({ relation, triggerButtonLabel }: RelationModalProps)
   );
 };
 
-const RelationCard = React.memo((props: RelationModalProps) => {
-  console.log('relationcard', props);
+const ModalTrigger = ({
+  children,
+  relation,
+}: {
+  children: React.ReactNode;
+  relation: DocumentMeta;
+}) => {
+  const dispatch = useRelationModal('ModalTrigger', (state) => state.dispatch);
+
   return (
-    <RelationContextWrapper>
+    <CustomTextButton
+      onClick={() => {
+        dispatch({
+          type: 'GO_TO_RELATION',
+          payload: { document: relation, shouldBypassConfirmation: false },
+        });
+      }}
+    >
+      {children}
+    </CustomTextButton>
+  );
+};
+
+const RelationCard = React.memo((props: RelationModalProps) => {
+  return (
+    <RelationRenderer
+      relation={props.relation}
+      trigger={<ModalTrigger relation={props.relation}>{props.triggerButtonLabel}</ModalTrigger>}
+    >
       <RelationCardInner {...props} />
-    </RelationContextWrapper>
+    </RelationRenderer>
   );
 });
 
@@ -455,23 +473,23 @@ const CustomTextButton = styled(TextButton)`
   }
 `;
 
-interface RelationModalBodyProps {
-  /**
-   * Additional modal actions such as "Open in full page"
-   */
-  children: React.ReactNode;
-}
-
-const RelationModalBody = ({ children }: RelationModalBodyProps) => {
+/**
+ * The mini edit view for a relation that is displayed inside a modal.
+ * It's complete with its header, document actions and form layout.
+ */
+const RelationEditView = ({ children }: { children: React.ReactNode }) => {
   const { formatMessage } = useIntl();
 
-  const documentMeta = useDocumentContext('RelationModalBody', (state) => state.meta);
-  const documentResponse = useDocumentContext('RelationModalBody', (state) => state.document);
+  const currentDocumentMeta = useRelationModal(
+    'RelationModalBody',
+    (state) => state.currentDocumentMeta
+  );
+  const currentDocument = useRelationModal('RelationModalBody', (state) => state.currentDocument);
   const onPreview = useDocumentContext('RelationModalBody', (state) => state.onPreview);
-  const documentLayoutResponse = useDocumentLayout(documentMeta.model);
+  const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
-  const initialValues = documentResponse.getInitialFormValues();
+  const initialValues = currentDocument.getInitialFormValues();
 
   const {
     permissions = [],
@@ -480,14 +498,14 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
   } = useRBAC(
     PERMISSIONS.map((action) => ({
       action,
-      subject: documentMeta.model,
+      subject: currentDocumentMeta.model,
     }))
   );
 
   const isLoading =
-    isLoadingPermissions || documentLayoutResponse.isLoading || documentResponse.isLoading;
+    isLoadingPermissions || documentLayoutResponse.isLoading || currentDocument.isLoading;
 
-  if (isLoading && !documentResponse.document?.documentId) {
+  if (isLoading && !currentDocument.document?.documentId) {
     return (
       <Loader small>
         {formatMessage({
@@ -500,11 +518,11 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
 
   if (
     error ||
-    !documentMeta.model ||
+    !currentDocumentMeta.model ||
     documentLayoutResponse.error ||
-    !documentResponse.document ||
-    !documentResponse.meta ||
-    !documentResponse.schema ||
+    !currentDocument.document ||
+    !currentDocument.meta ||
+    !currentDocument.schema ||
     !initialValues
   ) {
     return (
@@ -520,90 +538,88 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
     );
   }
 
-  const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
-  const hasDraftAndPublished = documentResponse.schema?.options?.draftAndPublish ?? false;
+  const documentTitle = currentDocument.getTitle(documentLayoutResponse.edit.settings.mainField);
+  const hasDraftAndPublished = currentDocument.schema?.options?.draftAndPublish ?? false;
 
   const props = {
     activeTab: 'draft',
-    collectionType: documentMeta.collectionType,
-    model: documentMeta.model,
-    documentId: documentMeta.documentId,
-    document: documentResponse.document,
-    meta: documentResponse.meta,
+    collectionType: currentDocumentMeta.collectionType,
+    model: currentDocumentMeta.model,
+    documentId: currentDocumentMeta.documentId,
+    document: currentDocument.document,
+    meta: currentDocument.meta,
     onPreview,
   } satisfies DocumentActionProps;
 
   return (
-    <Modal.Body>
-      <DocumentRBAC permissions={permissions} model={documentMeta.model}>
-        <Flex alignItems="flex-start" direction="column" gap={2}>
-          <Flex width="100%" justifyContent="space-between" gap={2}>
-            <Typography tag="h2" variant="alpha">
-              {documentTitle}
-            </Typography>
-            <Flex gap={2}>
-              {children}
-              <DescriptionComponentRenderer
-                props={props}
-                descriptions={(
-                  plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-                ).getDocumentActions('relation-modal')}
-              >
-                {(actions) => {
-                  const filteredActions = actions.filter((action) => {
-                    return [action.position].flat().includes('relation-modal');
-                  });
-                  const [primaryAction, secondaryAction] = filteredActions;
+    <DocumentRBAC permissions={permissions} model={currentDocumentMeta.model}>
+      <Flex alignItems="flex-start" direction="column" gap={2}>
+        <Flex width="100%" justifyContent="space-between" gap={2}>
+          <Typography tag="h2" variant="alpha">
+            {documentTitle}
+          </Typography>
+          <Flex gap={2}>
+            {children}
+            <DescriptionComponentRenderer
+              props={props}
+              descriptions={(
+                plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+              ).getDocumentActions('relation-modal')}
+            >
+              {(actions) => {
+                const filteredActions = actions.filter((action) => {
+                  return [action.position].flat().includes('relation-modal');
+                });
+                const [primaryAction, secondaryAction] = filteredActions;
 
-                  if (!primaryAction && !secondaryAction) return null;
+                if (!primaryAction && !secondaryAction) return null;
 
-                  // Both actions are available when draft and publish enabled
-                  if (primaryAction && secondaryAction) {
-                    return (
-                      <>
-                        {/* Save */}
-                        <DocumentActionButton
-                          {...secondaryAction}
-                          variant={secondaryAction.variant || 'secondary'}
-                        />
-                        {/* Publish */}
-                        <DocumentActionButton
-                          {...primaryAction}
-                          variant={primaryAction.variant || 'default'}
-                        />
-                      </>
-                    );
-                  }
-
-                  // Otherwise we just have the save action
+                // Both actions are available when draft and publish enabled
+                if (primaryAction && secondaryAction) {
                   return (
-                    <DocumentActionButton
-                      {...primaryAction}
-                      variant={primaryAction.variant || 'secondary'}
-                    />
+                    <>
+                      {/* Save */}
+                      <DocumentActionButton
+                        {...secondaryAction}
+                        variant={secondaryAction.variant || 'secondary'}
+                      />
+                      {/* Publish */}
+                      <DocumentActionButton
+                        {...primaryAction}
+                        variant={primaryAction.variant || 'default'}
+                      />
+                    </>
                   );
-                }}
-              </DescriptionComponentRenderer>
-            </Flex>
-          </Flex>
-          {hasDraftAndPublished ? (
-            <Box>
-              <DocumentStatus status={documentResponse.document?.status} />
-            </Box>
-          ) : null}
-        </Flex>
+                }
 
-        <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
-          <Box overflow="auto" flex={1}>
-            <FormLayout
-              layout={documentLayoutResponse.edit.layout}
-              document={documentResponse}
-              hasBackground={false}
-            />
-          </Box>
+                // Otherwise we just have the save action
+                return (
+                  <DocumentActionButton
+                    {...primaryAction}
+                    variant={primaryAction.variant || 'secondary'}
+                  />
+                );
+              }}
+            </DescriptionComponentRenderer>
+          </Flex>
         </Flex>
-      </DocumentRBAC>
-    </Modal.Body>
+        {hasDraftAndPublished ? (
+          <Box>
+            <DocumentStatus status={currentDocument.document?.status} />
+          </Box>
+        ) : null}
+      </Flex>
+
+      <Flex flex={1} overflow="auto" alignItems="stretch" paddingTop={7}>
+        <Box overflow="auto" flex={1}>
+          <FormLayout
+            layout={documentLayoutResponse.edit.layout}
+            document={currentDocument}
+            hasBackground={false}
+          />
+        </Box>
+      </Flex>
+    </DocumentRBAC>
   );
 };
 
