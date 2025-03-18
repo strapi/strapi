@@ -156,6 +156,7 @@ const UnstablePreviewHeader = () => {
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
+  const iframeRef = usePreviewContext('PreviewHeader', (state) => state.iframeRef);
 
   const [{ query }] = useQueryParams<{
     status?: 'draft' | 'published';
@@ -176,13 +177,20 @@ const UnstablePreviewHeader = () => {
   };
 
   const hasDraftAndPublish = schema.options?.draftAndPublish ?? false;
-  const props = {
+  const documentActionProps = {
     activeTab: query.status ?? null,
     collectionType: schema.kind === 'collectionType' ? 'collection-types' : 'single-types',
     model: schema.uid,
     documentId: document.documentId,
     document,
     meta,
+    onPreview: () => {
+      iframeRef?.current?.contentWindow?.postMessage(
+        { type: 'strapiUpdate' },
+        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+        new URL(iframeRef.current.src).origin
+      );
+    },
   } satisfies DocumentActionProps;
 
   return (
@@ -227,7 +235,7 @@ const UnstablePreviewHeader = () => {
           </IconButton>
           <InjectionZone area="preview.actions" />
           <DescriptionComponentRenderer
-            props={props}
+            props={documentActionProps}
             descriptions={(
               plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
             ).getDocumentActions('preview')}
