@@ -6,10 +6,10 @@ import {
   InputRenderer as FormInputRenderer,
   useField,
 } from '@strapi/admin/strapi-admin';
-import { ContentTypeKind } from '@strapi/types/dist/struct';
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc, UseDocument } from '../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
@@ -41,8 +41,17 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  */
 const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
   const { model: rootModel } = useDoc();
-  const documentLayout = useDocumentLayout(document.schema?.uid ?? rootModel);
-  const components = documentLayout.edit.components;
+  const rootDocumentMeta = useDocumentContext(
+    'DynamicComponent',
+    (state) => state.rootDocumentMeta
+  );
+  const {
+    edit: { components: rootComponents },
+  } = useDocumentLayout(rootDocumentMeta.model);
+  const {
+    edit: { components: relatedComponents },
+  } = useDocumentLayout(document.schema?.uid ?? rootModel);
+  const components = { ...rootComponents, ...relatedComponents };
 
   const collectionType =
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
