@@ -127,7 +127,7 @@
   "Settings.application.customization.modal.upload.from-url": "从URL",
   "Settings.application.customization.modal.upload.from-url.input-label": "URL",
   "Settings.application.customization.modal.upload.next": "下一步",
-  "Settings.application.customization.size-details": "最大尺寸:{dimension}×{dimension},最大文件大小:{size}KB",
+  "Settings.application.customization.size-details": "最大尺寸:{dimension}×{dimension},最大文件大小:{size}KB",  
   "Settings.application.description": "管理面板的全局信息",
   "Settings.application.edition-title": "当前计划",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {社区版} other {企业版}}",
