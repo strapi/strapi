@@ -93,7 +93,7 @@ export const AdminSeatInfoEE = () => {
           {
             id: 'Settings.application.ee.admin-seats.add-seats',
             defaultMessage:
-              '{isHostedOnStrapiCloud, select, true {Add seats} other {Manage seats}}',
+              'Manage seats',
           },
           { isHostedOnStrapiCloud }
         )}
