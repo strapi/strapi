@@ -26,10 +26,10 @@ import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
-import { useNewDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
+import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
@@ -521,7 +521,7 @@ const PublishAction: DocumentActionComponent = ({
 }) => {
   const {
     currentDocument: { schema },
-  } = useNewDocumentContext('PublishAction');
+  } = useDocumentContext('PublishAction');
 
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
@@ -548,7 +548,7 @@ const PublishAction: DocumentActionComponent = ({
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
 
-  const { currentDocumentMeta } = useNewDocumentContext('PublishAction');
+  const { currentDocumentMeta } = useDocumentContext('PublishAction');
 
   React.useEffect(() => {
     if (isErrorDraftRelations) {
@@ -792,7 +792,7 @@ const UpdateAction: DocumentActionComponent = ({
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
-  const { currentDocumentMeta } = useNewDocumentContext('UpdateAction');
+  const { currentDocumentMeta } = useDocumentContext('UpdateAction');
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);

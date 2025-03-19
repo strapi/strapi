@@ -19,7 +19,7 @@ import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext, useNewDocumentContext } from '../../../../../features/DocumentContext';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
@@ -58,7 +58,7 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
-  const { currentDocumentMeta, currentDocument } = useNewDocumentContext('DynamicComponent');
+  const { currentDocumentMeta, currentDocument } = useDocumentContext('DynamicComponent');
   const {
     edit: { components },
   } = useDocumentLayout(currentDocumentMeta.model);

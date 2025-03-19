@@ -33,8 +33,8 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { type DocumentMeta, useNewDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
+import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
   DROP_SENSITIVITY,
@@ -146,7 +146,7 @@ export interface RelationsFormValue {
  */
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
-    const { currentDocument, currentDocumentMeta } = useNewDocumentContext('RelationsField');
+    const { currentDocument, currentDocumentMeta } = useDocumentContext('RelationsField');
 
     const [currentPage, setCurrentPage] = React.useState(1);
 
@@ -485,7 +485,7 @@ const RelationsInput = ({
     page: 1,
   });
   const { toggleNotification } = useNotification();
-  const { currentDocumentMeta } = useNewDocumentContext('RelationsInput');
+  const { currentDocumentMeta } = useDocumentContext('RelationsInput');
 
   const { formatMessage } = useIntl();
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
