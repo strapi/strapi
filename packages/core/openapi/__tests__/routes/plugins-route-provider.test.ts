@@ -1,14 +1,14 @@
 import type { Core } from '@strapi/types';
 
-import { ApiRoutesProvider } from '../../../src/routes';
-import { StrapiMock } from '../../mocks';
+import { PluginRoutesProvider } from '../../src/routes';
+import { StrapiMock } from '../mocks';
 
-describe('ApiRoutesProvider', () => {
+describe('PluginRoutesProvider', () => {
   describe('routes', () => {
-    it('should return all registered routes', () => {
+    it('should return only content-api routes', () => {
       // Arrange
       const strapiMock = new StrapiMock() as unknown as Core.Strapi;
-      const provider = new ApiRoutesProvider(strapiMock);
+      const provider = new PluginRoutesProvider(strapiMock);
 
       // Act
       const { routes } = provider;
@@ -18,16 +18,17 @@ describe('ApiRoutesProvider', () => {
     });
   });
 
-  describe('Symbol.Iterator', () =>
+  describe('Symbol.Iterator', () => {
     it('should be iterable', () => {
       // Arrange
       const strapiMock = new StrapiMock() as unknown as Core.Strapi;
-      const provider = new ApiRoutesProvider(strapiMock);
+      const provider = new PluginRoutesProvider(strapiMock);
 
       // Act
       const routes = [...provider];
 
       // Assert
       expect(routes).toHaveLength(6);
-    }));
+    });
+  });
 });

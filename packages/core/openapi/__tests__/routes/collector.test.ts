@@ -1,6 +1,6 @@
-import { RouteCollector } from '../../../src/routes';
-import { routes } from '../../fixtures';
-import { RouteMatcherMock, RoutesProviderMock } from '../../mocks';
+import { RouteCollector } from '../../src/routes';
+import { routes } from '../fixtures';
+import { RouteMatcherMock, RoutesProviderMock } from '../mocks';
 
 describe('RouteCollector', () => {
   afterEach(() => {

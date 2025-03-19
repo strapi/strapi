@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 
-import { RouteMatcher } from '../../../src/routes';
+import { RouteMatcher } from '../../src/routes';
 
 describe('RouteMatcher', () => {
   it('should correctly match a route', () => {
