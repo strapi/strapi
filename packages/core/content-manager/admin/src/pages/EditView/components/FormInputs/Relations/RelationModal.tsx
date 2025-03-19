@@ -30,10 +30,11 @@ import { styled } from 'styled-components';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { buildValidParams } from '../../../../../exports';
-import { type DocumentMeta, useDocumentContext } from '../../../../../features/DocumentContext';
+import { type DocumentMeta } from '../../../../../features/DocumentContext';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
+import { usePreviewContext } from '../../../../../preview/pages/Preview';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
@@ -480,7 +481,7 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
     (state) => state.currentDocumentMeta
   );
   const currentDocument = useRelationModal('RelationModalBody', (state) => state.currentDocument);
-  const onPreview = useDocumentContext('RelationModalBody', (state) => state.onPreview);
+  const onPreview = usePreviewContext('RelationEditView', (state) => state.onPreview, false);
   const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
