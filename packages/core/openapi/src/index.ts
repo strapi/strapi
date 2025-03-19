@@ -1,1 +1,1 @@
-export const openapi = 42;
+export {};

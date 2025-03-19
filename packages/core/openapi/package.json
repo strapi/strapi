@@ -54,5 +54,13 @@
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "debug": "4.3.4",
+    "path-to-regexp": "8.2.0"
+  },
+  "devDependencies": {
+    "@strapi/types": "5.11.2",
+    "@types/debug": "^4"
   }
 }

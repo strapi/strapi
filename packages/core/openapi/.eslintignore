@@ -3,5 +3,6 @@ node_modules/
 jest.config.js
 dist/
 scripts/
+coverage/
 
 rollup.config.mjs
