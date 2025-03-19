@@ -19,7 +19,7 @@ export abstract class AbstractRoutesProvider implements RoutesProvider {
   /**
    * @param strapi - The Strapi instance used to retrieve and manage routes.
    */
-  protected constructor(strapi: Core.Strapi) {
+  public constructor(strapi: Core.Strapi) {
     this._strapi = strapi;
   }
 
