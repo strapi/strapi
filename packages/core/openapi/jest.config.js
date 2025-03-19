@@ -5,6 +5,15 @@ module.exports = {
   transform: {
     '^.+\\.ts$': ['@swc/jest'],
   },
-  testMatch: ['<rootDir>/**/*.test.ts'],
+  testMatch: ['<rootDir>/__tests__/unit/**/*.test.ts'],
   displayName: 'Strapi - OpenAPI',
+  coveragePathIgnorePatterns: ['/node_modules/', '/__tests__/'],
+  coverageThreshold: {
+    global: {
+      branches: 95,
+      functions: 95,
+      lines: 95,
+      statements: 95,
+    },
+  },
 };
