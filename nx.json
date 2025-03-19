@@ -12,7 +12,8 @@
       "!{projectRoot}/jest.config.front.js",
       "!{projectRoot}/tsconfig.eslint.json",
       "!{projectRoot}/.eslintignore",
-      "!{projectRoot}/.eslintrc.js"
+      "!{projectRoot}/.eslintrc.js",
+      "!{projectRoot}/rollup.config.mjs"
     ]
   },
   "cli": {
