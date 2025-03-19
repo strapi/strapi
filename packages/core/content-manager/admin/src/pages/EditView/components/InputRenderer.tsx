@@ -9,9 +9,10 @@ import {
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc, UseDocument } from '../../../hooks/useDocument';
-import { useDocLayout, useDocumentLayout } from '../../../hooks/useDocumentLayout';
+import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
@@ -40,9 +41,17 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  */
 const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
   const { model: rootModel } = useDoc();
-  const docLayout = useDocLayout();
-  const documentLayout = useDocumentLayout(document.schema?.uid ?? rootModel);
-  const components = { ...docLayout.edit.components, ...documentLayout.edit.components };
+  const rootDocumentMeta = useDocumentContext(
+    'DynamicComponent',
+    (state) => state.rootDocumentMeta
+  );
+  const {
+    edit: { components: rootComponents },
+  } = useDocumentLayout(rootDocumentMeta.model);
+  const {
+    edit: { components: relatedComponents },
+  } = useDocumentLayout(document.schema?.uid ?? rootModel);
+  const components = { ...rootComponents, ...relatedComponents };
 
   const collectionType =
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
