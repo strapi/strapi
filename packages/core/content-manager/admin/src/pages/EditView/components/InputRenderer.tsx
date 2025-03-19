@@ -42,7 +42,7 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const { model: rootModel } = useDoc();
   const docLayout = useDocLayout();
   const documentLayout = useDocumentLayout(document.schema?.uid ?? rootModel);
-  const components = { ...documentLayout.edit.components, ...docLayout.edit.components };
+  const components = { ...docLayout.edit.components, ...documentLayout.edit.components };
 
   const collectionType =
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
