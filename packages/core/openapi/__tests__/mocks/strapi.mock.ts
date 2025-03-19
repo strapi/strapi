@@ -5,7 +5,7 @@ export class StrapiMock {
     return {
       'api-a': {
         routes: {
-          'router-a': { routes: routes.foobar },
+          'router-a': { routes: routes.test },
         },
       },
       'api-b': {

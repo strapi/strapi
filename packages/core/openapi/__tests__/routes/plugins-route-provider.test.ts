@@ -1,6 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { PluginRoutesProvider } from '../../src/routes';
+import { routes as routesFixtures } from '../fixtures';
 import { StrapiMock } from '../mocks';
 
 describe('PluginRoutesProvider', () => {
@@ -14,7 +15,7 @@ describe('PluginRoutesProvider', () => {
       const { routes } = provider;
 
       // Assert
-      expect(routes).toHaveLength(6);
+      expect(routes).toHaveLength(routesFixtures.test.length + routesFixtures.foobar.length);
     });
   });
 
@@ -28,7 +29,7 @@ describe('PluginRoutesProvider', () => {
       const routes = [...provider];
 
       // Assert
-      expect(routes).toHaveLength(6);
+      expect(routes).toHaveLength(routesFixtures.test.length + routesFixtures.foobar.length);
     });
   });
 });
