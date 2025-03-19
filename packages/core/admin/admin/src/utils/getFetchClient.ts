@@ -1,6 +1,8 @@
 import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
 
+import { getCookieValue } from './cookies';
+
 import type { errors } from '@strapi/utils';
 
 export type ApiError =
@@ -72,7 +74,7 @@ const isFetchError = (error: unknown): error is FetchError => {
 
 const getToken = () =>
   JSON.parse(
-    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN) ?? '""'
+    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? getCookieValue(STORAGE_KEYS.TOKEN) ?? '""'
   );
 
 type FetchClient = {
