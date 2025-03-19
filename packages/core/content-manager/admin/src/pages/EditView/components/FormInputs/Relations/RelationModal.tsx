@@ -175,6 +175,10 @@ const RelationModalForm = ({ relation, triggerButtonLabel }: RelationModalProps)
         changeDocument(previousRelation);
       }
     } else {
+      // Add current relation to history before opening a new one in case we are opening a new one
+      if (currentDocumentMeta && Object.keys(currentDocumentMeta).length > 0) {
+        addDocumentToHistory(currentDocumentMeta);
+      }
       handleToggleModal();
     }
   };
