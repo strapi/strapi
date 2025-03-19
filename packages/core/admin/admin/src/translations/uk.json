@@ -131,7 +131,7 @@
   "Settings.application.description": "Глобальна інформація панелі адміністрації",
   "Settings.application.edition-title": "поточний план",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Додайте місця} other {Зверніться до відділу продажів}}",
+  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {Додайте місця} other {Керування місця}}",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "На вичерпанні ліміту: додайте місця, щоб запросити більше користувачів",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "Отримати допомогу",

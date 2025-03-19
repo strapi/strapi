@@ -7,8 +7,7 @@ import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
-const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
-const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
+const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -86,7 +85,7 @@ export const AdminSeatInfoEE = () => {
         )}
       </Flex>
       <Link
-        href={isHostedOnStrapiCloud ? BILLING_STRAPI_CLOUD_URL : BILLING_SELF_HOSTED_URL}
+        href={MANAGE_SEATS_URL}
         isExternal
         endIcon={<ExternalLink />}
       >
@@ -94,7 +93,7 @@ export const AdminSeatInfoEE = () => {
           {
             id: 'Settings.application.ee.admin-seats.add-seats',
             defaultMessage:
-              '{isHostedOnStrapiCloud, select, true {Add seats} other {Contact sales}}',
+              '{isHostedOnStrapiCloud, select, true {Add seats} other {Manage seats}}',
           },
           { isHostedOnStrapiCloud }
         )}

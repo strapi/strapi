@@ -618,7 +618,7 @@
   "Settings.application.description": "المعلومات العالمية للوحة الإدارة",
   "Settings.application.edition-title": "الإصدار الحالي",
   "Settings.application.ee-or-ce": "{communityEdition، select، true {Community Edition} أخرى {Enterprise Edition}}",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud، select، true {Add seat} other {Contact sales}}",
+  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud، select، true {Add seat} other {Manage seats}}",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "عند الحد: أضف مقاعد لدعوة المزيد من المستخدمين",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "احصل على مساعدة",

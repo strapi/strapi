@@ -109,8 +109,8 @@ describe('useLicenseLimitNotification', () => {
         "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       title: 'Over seat limit (6/5)',
       link: {
-        url: 'https://strapi.io/billing/request-seats',
-        label: 'CONTACT SALES',
+        url: 'https://https://strapi.io/billing/manage-seats',
+        label: 'MANAGE SEATS',
       },
       blockTransition: true,
       onClose: expect.any(Function),

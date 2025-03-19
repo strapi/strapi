@@ -132,7 +132,7 @@
   "Settings.tokens.ListView.headers.lastUsedAt": "Dernière utilisation",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "Limite atteinte : ajouter des places pour inviter d'autres utilisateurs",
-  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {AJouter des places} other {Contacter le service clients}}",
+  "Settings.application.ee.admin-seats.add-seats": "{isHostedOnStrapiCloud, select, true {AJouter des places} other {Gérer les places}}",
   "Settings.application.customization": "Customisation",
   "Settings.application.customization.auth-logo.carousel-hint": "Remplacer le logo dans la page de connexion",
   "Settings.application.customization.carousel-hint": "Changer le logo dans l'interface d'administration (dimensions maximales: {dimension}x{dimension}, poids maximal du fichier : {size}KB)",
