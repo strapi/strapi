@@ -19,7 +19,7 @@ import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { useDocumentContext, useNewDocumentContext } from '../../../../../features/DocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
@@ -58,16 +58,10 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
-  const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
-  const rootDocumentMeta = useDocumentContext(
-    'DynamicComponent',
-    (state) => state.rootDocumentMeta
-  );
-  const isRootDocument = rootDocumentMeta.model === documentMeta.model;
+  const { currentDocumentMeta, currentDocument } = useNewDocumentContext('DynamicComponent');
   const {
     edit: { components },
-  } = useDocumentLayout(isRootDocument ? documentMeta.model : rootDocumentMeta.model);
-  const document = useDocumentContext('DynamicComponent', (state) => state.document);
+  } = useDocumentLayout(currentDocumentMeta.model);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
@@ -277,13 +271,13 @@ const DynamicComponent = ({
                                   {children ? (
                                     children({
                                       ...fieldWithTranslatedLabel,
-                                      document,
+                                      document: currentDocument,
                                       name: fieldName,
                                     })
                                   ) : (
                                     <InputRenderer
                                       {...fieldWithTranslatedLabel}
-                                      document={document}
+                                      document={currentDocument}
                                       name={fieldName}
                                     />
                                   )}

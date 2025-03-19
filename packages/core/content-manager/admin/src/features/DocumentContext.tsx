@@ -1,8 +1,9 @@
 import * as React from 'react';
 
-import { createContext } from '@strapi/admin/strapi-admin';
+import { createContext, useQueryParams } from '@strapi/admin/strapi-admin';
 
-import { useDocument, type UseDocument } from '../hooks/useDocument';
+import { useDoc, useDocument, type UseDocument } from '../hooks/useDocument';
+import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
 import { buildValidParams } from '../utils/api';
 
 interface DocumentMeta {
@@ -94,5 +95,43 @@ const DocumentContextProvider = ({
   );
 };
 
-export { useDocumentContext, DocumentContextProvider };
+interface NewDocumentContextValue {
+  currentDocumentMeta: DocumentMeta;
+  currentDocument: ReturnType<UseDocument>;
+}
+
+function useNewDocumentContext(consumerName: string): NewDocumentContextValue {
+  // Try to get state from the relation modal context first
+  const currentRelationDocumentMeta = useRelationModal(
+    consumerName,
+    (state) => state.currentDocumentMeta,
+    false
+  );
+  const currentRelationDocument = useRelationModal(
+    consumerName,
+    (state) => state.currentDocument,
+    false
+  );
+
+  // Then try to get the same state from the URL
+  const { collectionType, model, id: documentId } = useDoc();
+  const [{ query }] = useQueryParams();
+
+  // TODO: look into why we never seem to pass any params
+  const params = React.useMemo(() => buildValidParams(query ?? {}), [query]);
+  const urlDocumentMeta: DocumentMeta = { collectionType, model, documentId: documentId!, params };
+  const urlDocument = useDocument(urlDocumentMeta);
+
+  /**
+   * If there's modal state, use it in priority as it's the most specific
+   * Fallback to the state derived from the URL, which is the default behavior,
+   * used for the edit view, history and preview.
+   */
+  return {
+    currentDocumentMeta: currentRelationDocumentMeta ?? urlDocumentMeta,
+    currentDocument: currentRelationDocument ?? urlDocument,
+  };
+}
+
+export { useDocumentContext, useNewDocumentContext, DocumentContextProvider };
 export type { DocumentMeta };

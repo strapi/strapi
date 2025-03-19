@@ -26,7 +26,7 @@ import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
-import { useDocumentContext } from '../../../features/DocumentContext';
+import { useNewDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
@@ -519,7 +519,10 @@ const PublishAction: DocumentActionComponent = ({
   document,
   onPreview,
 }) => {
-  const schema = useDocumentContext('PublishAction', (state) => state.document.schema);
+  const {
+    currentDocument: { schema },
+  } = useNewDocumentContext('PublishAction');
+
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -536,8 +539,7 @@ const PublishAction: DocumentActionComponent = ({
   const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
   const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
 
-  const [{ query, rawQuery }] = useQueryParams();
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const [{ rawQuery }] = useQueryParams();
 
   const modified = useForm('PublishAction', ({ modified }) => modified);
   const setSubmitting = useForm('PublishAction', ({ setSubmitting }) => setSubmitting);
@@ -546,8 +548,7 @@ const PublishAction: DocumentActionComponent = ({
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
 
-  const rootDocumentMeta = useDocumentContext('PublishAction', (state) => state.rootDocumentMeta);
-  const currentDocumentMeta = useDocumentContext('PublishAction', (state) => state.meta);
+  const { currentDocumentMeta } = useNewDocumentContext('PublishAction');
 
   React.useEffect(() => {
     if (isErrorDraftRelations) {
@@ -609,7 +610,7 @@ const PublishAction: DocumentActionComponent = ({
         collectionType,
         model,
         documentId,
-        params,
+        params: currentDocumentMeta.params,
       });
 
       if (error) {
@@ -622,7 +623,15 @@ const PublishAction: DocumentActionComponent = ({
     };
 
     fetchDraftRelationsCount();
-  }, [isListView, document, documentId, countDraftRelations, collectionType, model, params]);
+  }, [
+    isListView,
+    document,
+    documentId,
+    countDraftRelations,
+    collectionType,
+    model,
+    currentDocumentMeta.params,
+  ]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -654,13 +663,12 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
-      const isPublishingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
       const res = await publish(
         {
           collectionType,
           model,
           documentId,
-          params: isPublishingRelation ? currentDocumentMeta.params : params,
+          params: currentDocumentMeta.params,
         },
         transformData(formValues)
       );
@@ -774,8 +782,7 @@ const UpdateAction: DocumentActionComponent = ({
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
   const { create, update, clone, isLoading } = useDocumentActions();
-  const [{ query, rawQuery }] = useQueryParams();
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const [{ rawQuery }] = useQueryParams();
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -785,8 +792,7 @@ const UpdateAction: DocumentActionComponent = ({
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
-  const rootDocumentMeta = useDocumentContext('UpdateAction', (state) => state.rootDocumentMeta);
-  const currentDocumentMeta = useDocumentContext('UpdateAction', (state) => state.meta);
+  const { currentDocumentMeta } = useNewDocumentContext('UpdateAction');
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -818,7 +824,7 @@ const UpdateAction: DocumentActionComponent = ({
           {
             model,
             documentId: cloneMatch.params.origin!,
-            params,
+            params: currentDocumentMeta.params,
           },
           transformData(document)
         );
@@ -839,14 +845,12 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const isEditingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
-
         const res = await update(
           {
             collectionType,
             model,
             documentId,
-            params: isEditingRelation ? currentDocumentMeta.params : params,
+            params: currentDocumentMeta.params,
           },
           transformData(document)
         );
@@ -860,7 +864,7 @@ const UpdateAction: DocumentActionComponent = ({
         const res = await create(
           {
             model,
-            params,
+            params: currentDocumentMeta.params,
           },
           transformData(document)
         );
@@ -900,7 +904,6 @@ const UpdateAction: DocumentActionComponent = ({
     model,
     modified,
     navigate,
-    params,
     rawQuery,
     resetForm,
     setErrors,
@@ -908,6 +911,8 @@ const UpdateAction: DocumentActionComponent = ({
     toggleNotification,
     update,
     validate,
+    currentDocumentMeta.params,
+    onPreview,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux

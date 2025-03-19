@@ -11,7 +11,7 @@ import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
-import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { useNewDocumentContext } from '../../../../../features/DocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
@@ -60,8 +60,9 @@ const DynamicZone = ({
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
   const [liveText, setLiveText] = React.useState('');
 
-  const document = useDocumentContext('DynamicZone', (state) => state.document);
-  const { components, isLoading } = document;
+  const {
+    currentDocument: { components, isLoading },
+  } = useNewDocumentContext('DynamicZone');
 
   const disabled = disabledProp || isLoading;
   const { addFieldRow, removeFieldRow, moveFieldRow } = useForm(

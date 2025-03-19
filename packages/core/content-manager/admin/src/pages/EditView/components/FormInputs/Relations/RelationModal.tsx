@@ -8,6 +8,7 @@ import {
   useStrapiApp,
   createContext,
   useForm,
+  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -192,8 +193,6 @@ const RelationRenderer = ({
 }) => {
   const { formatMessage } = useIntl();
 
-  const rootDocument = useDoc();
-
   const [state, dispatch] = React.useReducer(reducer, {
     documentHistory: [],
     confirmDialogIntent: null,
@@ -201,27 +200,24 @@ const RelationRenderer = ({
     hasUnsavedChanges: false,
   });
 
+  const rootDocument = useDoc();
+
   if (!rootDocument.document) {
     throw new Error('Root document not found');
   }
 
-  const rootDocumentId = rootDocument.document.documentId;
-  const rootDocumentMeta: DocumentMeta = React.useMemo(
-    () => ({
-      documentId: rootDocumentId,
-      model: rootDocument.model,
-      collectionType: rootDocument.collectionType,
-    }),
-    [rootDocument.collectionType, rootDocumentId, rootDocument.model]
-  );
+  const [{ query }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query ?? {}), [query]);
+
+  const rootDocumentMeta: DocumentMeta = {
+    documentId: rootDocument.document.documentId,
+    model: rootDocument.model,
+    collectionType: rootDocument.collectionType,
+    params,
+  };
 
   const currentDocumentMeta = state.documentHistory.at(-1) ?? rootDocumentMeta;
-
-  const params = React.useMemo(
-    () => buildValidParams(currentDocumentMeta.params ?? {}),
-    [currentDocumentMeta.params]
-  );
-  const currentDocument = useDocument({ ...currentDocumentMeta, params });
+  const currentDocument = useDocument(currentDocumentMeta);
 
   const parentContextValue = useRelationModal('RelationContextWrapper', (state) => state, false);
 
@@ -248,7 +244,6 @@ const RelationRenderer = ({
           if (open) {
             dispatch({
               type: 'GO_TO_RELATION',
-              // NOTE: the document used to be currentDocumentMeta
               payload: { document: relation, shouldBypassConfirmation: false },
             });
           } else {
@@ -623,4 +618,4 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export { RelationCard };
+export { RelationCard, useRelationModal };

@@ -6,7 +6,6 @@ import {
   useForm,
   useNotification,
   useFocusInputField,
-  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -34,7 +33,7 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { DocumentMeta, useDocumentContext } from '../../../../../features/DocumentContext';
+import { type DocumentMeta, useNewDocumentContext } from '../../../../../features/DocumentContext';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
@@ -47,7 +46,6 @@ import {
   useLazySearchRelationsQuery,
   RelationResult,
 } from '../../../../../services/relations';
-import { buildValidParams } from '../../../../../utils/api';
 import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -148,24 +146,14 @@ export interface RelationsFormValue {
  */
 const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
   ({ disabled, label, ...props }, ref) => {
-    const currentDocumentMeta = useDocumentContext('RelationsField', (state) => state.meta);
-    const currentDocument = useDocumentContext('RelationsField', (state) => state.document);
-    const rootDocumentMeta = useDocumentContext(
-      'RelationsField',
-      (state) => state.rootDocumentMeta
-    );
+    const { currentDocument, currentDocumentMeta } = useNewDocumentContext('RelationsField');
 
     const [currentPage, setCurrentPage] = React.useState(1);
-    const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
-    const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
 
     // Use the documentId from the actual document, not the params (meta)
     const documentId = currentDocument.document?.documentId;
 
     const { formatMessage } = useIntl();
-
-    const [{ query }] = useQueryParams();
-    const params = documentMeta.params ?? buildValidParams(query);
 
     const isMorph = props.attribute.relation.toLowerCase().includes('morph');
     const isDisabled = isMorph || disabled;
@@ -186,7 +174,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
      */
-    const model = component ? component.uid : documentMeta.model;
+    const model = component ? component.uid : currentDocumentMeta.model;
     const id = component && componentId ? componentId.toString() : documentId;
 
     /**
@@ -222,7 +210,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         // below we don't run the query if there is no id.
         id,
         params: {
-          ...params,
+          ...currentDocumentMeta.params,
           pageSize: RELATIONS_TO_DISPLAY,
           page: currentPage,
         },
@@ -497,11 +485,7 @@ const RelationsInput = ({
     page: 1,
   });
   const { toggleNotification } = useNotification();
-  const [{ query }] = useQueryParams();
-  const currentDocumentMeta = useDocumentContext('RelationsInput', (state) => state.meta);
-  const rootDocumentMeta = useDocumentContext('RelationsInput', (state) => state.rootDocumentMeta);
-  const isRootDocument = rootDocumentMeta.documentId === currentDocumentMeta.documentId;
-  const documentMeta = isRootDocument ? rootDocumentMeta : currentDocumentMeta;
+  const { currentDocumentMeta } = useNewDocumentContext('RelationsInput');
 
   const { formatMessage } = useIntl();
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
@@ -528,13 +512,11 @@ const RelationsInput = ({
     // Return early if there is no relation to the document
     if (!isRelatedToCurrentDocument) return;
 
-    const params = documentMeta.params ?? buildValidParams(query);
-
     searchForTrigger({
       model,
       targetField,
       params: {
-        ...params,
+        ...currentDocumentMeta.params,
         id: id ?? '',
         pageSize: 10,
         idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
@@ -548,11 +530,10 @@ const RelationsInput = ({
     id,
     model,
     name,
-    query,
     searchForTrigger,
     searchParamsDebounced,
     isRelatedToCurrentDocument,
-    documentMeta,
+    currentDocumentMeta.params,
   ]);
 
   const handleSearch = async (search: string) => {
