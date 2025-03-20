@@ -42,6 +42,14 @@ const basePlugins = () => [
   dynamicImportVars({}),
 ];
 
+const isInput = (id, input) => {
+  if (typeof input === 'string') {
+    return id.includes(path.resolve(input));
+  }
+
+  return Object.values(input).some((i) => id.includes(path.resolve(i)));
+};
+
 const baseConfig = (opts = {}) => {
   const { rootDir, outDir = './dist', input = './src/index.ts', ...rest } = opts;
 
@@ -50,6 +58,25 @@ const baseConfig = (opts = {}) => {
     external: isExernal,
     output: baseOutput({ outDir, rootDir }),
     plugins: basePlugins(),
+    onwarn(warning, warn) {
+      if (warning.code === 'MIXED_EXPORTS') {
+        // json files are always mixed exports
+        if (warning?.id?.endsWith('.json')) {
+          return;
+        }
+
+        // we only care about mixed exports in our input files
+        if (warning.id && !isInput(warning.id, input)) {
+          return;
+        }
+      }
+
+      if (warning.code === 'UNUSED_EXTERNAL_IMPORT' && warning.exporter === 'react') {
+        return;
+      }
+
+      warn(warning);
+    },
     ...rest,
   });
 };

@@ -1,11 +1,7 @@
-import { lazy } from 'react';
-
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 
-// import { EditPage } from './EditPage';
-
-const EditPage = lazy(() => import('./EditPage').then((module) => ({ default: module.EditPage })));
+import { EditPage } from './EditPage';
 
 const ProtectedCreatePage = () => {
   const permissions = useTypedSelector(

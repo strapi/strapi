@@ -2,6 +2,7 @@
   "namedInputs": {
     "default": ["{projectRoot}/**/*"],
     "production": [
+      "{workspaceRoot}/rollup.utils.mjs",
       "!{projectRoot}/**/*.test.ts",
       "!{projectRoot}/**/*.test.js",
       "!{projectRoot}/**/*.test.api.js",
@@ -12,8 +13,7 @@
       "!{projectRoot}/jest.config.front.js",
       "!{projectRoot}/tsconfig.eslint.json",
       "!{projectRoot}/.eslintignore",
-      "!{projectRoot}/.eslintrc.js",
-      "!{projectRoot}/rollup.config.mjs"
+      "!{projectRoot}/.eslintrc.js"
     ]
   },
   "cli": {

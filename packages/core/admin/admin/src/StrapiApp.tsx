@@ -330,8 +330,6 @@ class StrapiApp {
         try {
           const { default: data } = await import(`./translations/${locale}.js`);
 
-          console.log(data);
-
           return { data, locale };
         } catch {
           try {

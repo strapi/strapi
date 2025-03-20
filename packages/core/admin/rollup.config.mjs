@@ -22,13 +22,5 @@ export default defineConfig([
       test: './admin/tests/index.ts',
     },
     outDir: './dist/admin',
-    onwarn(warning, warn) {
-      // Suppress the "default is never used" warning for React
-      if (warning.code === 'UNUSED_EXTERNAL_IMPORT' && warning.exporter === 'react') {
-        return;
-      }
-
-      warn(warning); // Log other warnings
-    },
   }),
 ]);
