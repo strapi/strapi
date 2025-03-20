@@ -429,6 +429,7 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
     document: documentResponse.document,
     meta: documentResponse.meta,
     onPreview,
+    fromRelationModal: true,
   } satisfies DocumentActionProps;
 
   return (
