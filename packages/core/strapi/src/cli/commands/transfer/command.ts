@@ -54,7 +54,6 @@ const command = () => {
             const hasToken = Boolean(process.env.STRAPI_TRANSFER_TOKEN);
 
             console.info('ℹ️  Data transfer documentation: https://docs.strapi.io/dev-docs/data-management/transfer');
-            console.log(); // Empty line for better readability
 
             if (hasUrl && hasToken) {
               console.info('ℹ️  Found transfer configuration in your environment:');
