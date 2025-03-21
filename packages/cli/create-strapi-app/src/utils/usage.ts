@@ -81,7 +81,7 @@ export async function trackError({ scope, error }: { scope: Scope; error?: Track
 
   try {
     return await trackEvent('didNotCreateProject', {
-      deviceId: scope.deviceId,
+      deviceId: scope.installId,
       ...properties,
     });
   } catch (err) {
@@ -103,7 +103,7 @@ export async function trackUsage({
 
   try {
     return await trackEvent(event, {
-      deviceId: scope.deviceId,
+      deviceId: scope.installId,
       ...properties,
     });
   } catch (err) {

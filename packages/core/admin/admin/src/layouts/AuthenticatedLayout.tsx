@@ -38,7 +38,6 @@ const AdminLayout = () => {
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
-
   const [tagName, setTagName] = React.useState<string>(strapiVersion);
 
   React.useEffect(() => {
