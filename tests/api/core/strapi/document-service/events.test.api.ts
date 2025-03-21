@@ -27,7 +27,6 @@ const eventPayload = {
   },
 };
 
-// Add this helper at the top of the file
 const waitForEvent = (eventHub: typeof strapi.eventHub, eventName: string) =>
   new Promise<any>((resolve) => eventHub.on(eventName, resolve));
 
