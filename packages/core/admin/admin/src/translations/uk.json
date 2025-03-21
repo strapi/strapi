@@ -132,7 +132,7 @@
   "Settings.application.edition-title": "поточний план",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
   "Settings.application.ee.admin-seats.add-seats": "Керування місця",
-  "Settings.application.ee.admin-seats.support": "Зверніться до служби підтримки",
+  "Settings.application.ee.admin-seats.support": "Зв'яжіться з відділом продажів",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "На вичерпанні ліміту: додайте місця, щоб запросити більше користувачів",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "Отримати допомогу",

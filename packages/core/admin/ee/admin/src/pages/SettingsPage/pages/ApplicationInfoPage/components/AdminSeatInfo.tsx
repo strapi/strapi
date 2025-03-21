@@ -9,7 +9,6 @@ import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
 const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
-const SUPPORT_URL = 'mailto:support@strapi.io';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -87,15 +86,15 @@ export const AdminSeatInfoEE = () => {
         )}
       </Flex>
       {type === 'gold' ? (
-        <Link href={SUPPORT_URL} endIcon={<ExternalLink />}>
+        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />}>
           {formatMessage({
             id: 'Settings.application.ee.admin-seats.support',
-            defaultMessage: 'Please contact the support team',
+            defaultMessage: 'Contact sales',
           })}
         </Link>
       ) : (
         <Link
-          href={isHostedOnStrapiCloud ? BILLING_SELF_HOSTED_URL : MANAGE_SEATS_URL}
+          href={MANAGE_SEATS_URL}
           isExternal
           endIcon={<ExternalLink />}
         >
