@@ -28920,6 +28920,8 @@ __metadata:
 "strapi-plugin-local-plugin@workspace:examples/getstarted/src/plugins/local-plugin":
   version: 0.0.0-use.local
   resolution: "strapi-plugin-local-plugin@workspace:examples/getstarted/src/plugins/local-plugin"
+  dependencies:
+    fractional-indexing: "npm:3.2.0"
   languageName: unknown
   linkType: soft
 

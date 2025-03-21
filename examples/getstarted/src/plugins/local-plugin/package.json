@@ -7,5 +7,8 @@
     "name": "local-plugin",
     "description": "This plugin is linked as a local plugin",
     "kind": "plugin"
+  },
+  "dependencies": {
+    "fractional-indexing": "3.2.0"
   }
 }
