@@ -19,6 +19,7 @@ function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true })
   const getFeature = React.useCallback<GetFeatureType>(
     (name) => {
       const feature = data?.data?.features.find((feature) => feature.name === name);
+      console.log(data);
 
       if (feature && 'options' in feature) {
         return feature.options;
@@ -29,7 +30,7 @@ function useLicenseLimits({ enabled }: UseLicenseLimitsArgs = { enabled: true })
     [data]
   );
 
-  return { license: data?.data, getFeature, isError, isLoading };
+  return { license: data?.data, getFeature, isError, isLoading,  };
 }
 
 export { useLicenseLimits };
