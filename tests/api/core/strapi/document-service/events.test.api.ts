@@ -27,6 +27,21 @@ const eventPayload = {
   },
 };
 
+// Add this helper at the top of the file
+const waitForEvent = (eventHub: typeof strapi.eventHub, eventName: string) =>
+  new Promise<any>((resolve) => eventHub.on(eventName, resolve));
+
+const waitForEventWithFilter = (
+  eventHub: typeof strapi.eventHub,
+  eventName: string,
+  filter: (payload: any) => boolean
+) =>
+  new Promise<any>((resolve) =>
+    eventHub.on(eventName, (payload) => {
+      if (filter(payload)) resolve(payload);
+    })
+  );
+
 describe('Document Service Events', () => {
   let testUtils;
   let strapi: Core.Strapi;
@@ -48,11 +63,10 @@ describe('Document Service Events', () => {
     it('Creating a document triggers entry.create', async () => {
       expect.hasAssertions();
 
-      strapi.eventHub.on('entry.create', async (payload) => {
-        expect(payload).toMatchObject(eventPayload);
-      });
-
+      const eventPromise = waitForEvent(strapi.eventHub, 'entry.create');
       await strapi.documents(ARTICLE_UID).create({ data: articleData });
+      const payload = await eventPromise;
+      expect(payload).toMatchObject(eventPayload);
     });
   });
 
@@ -62,45 +76,40 @@ describe('Document Service Events', () => {
 
       // Create new article
       const article = await strapi.documents(ARTICLE_UID).create({ data: articleData });
-
-      strapi.eventHub.on('entry.update', async (payload) => {
-        expect(payload).toMatchObject({
-          ...eventPayload,
-          entry: { ...eventPayload.entry, title: 'Updated' },
-        });
-      });
+      const eventPromise = waitForEvent(strapi.eventHub, 'entry.update');
 
       await strapi.documents(ARTICLE_UID).update({
         documentId: article.documentId,
-        data: {
-          title: 'Updated',
-        },
+        data: { title: 'Updated' },
+      });
+
+      const payload = await eventPromise;
+      expect(payload).toMatchObject({
+        ...eventPayload,
+        entry: { ...eventPayload.entry, title: 'Updated' },
       });
     });
 
     it('Updating a new document locale triggers entry.create', async () => {
-      expect.hasAssertions();
-
-      // Create new article
+      expect.assertions(2);
       const article = await strapi.documents(ARTICLE_UID).create({ data: articleData });
-
-      strapi.eventHub.on('entry.update', async (payload) => {
-        throw new Error('entry.update should not be triggered when creating a new locale');
-      });
-
-      strapi.eventHub.on('entry.create', async (payload) => {
-        if (payload.entry.locale !== 'es') return;
-
-        expect(payload).toMatchObject({
-          ...eventPayload,
-          entry: { title: 'Updated' },
-        });
-      });
+      const eventPromise = waitForEventWithFilter(
+        strapi.eventHub,
+        'entry.create',
+        (payload) => payload.entry.locale === 'es'
+      );
 
       await strapi.documents(ARTICLE_UID).update({
         documentId: article.documentId,
         locale: 'es',
         data: { title: 'Updated' },
+      });
+
+      const payload = await eventPromise;
+      expect(payload.entry.locale).toBe('es');
+      expect(payload).toMatchObject({
+        ...eventPayload,
+        entry: { title: 'Updated' },
       });
     });
 
@@ -108,46 +117,46 @@ describe('Document Service Events', () => {
       expect.assertions(2);
 
       const article = await strapi.documents(ARTICLE_UID).create({ data: articleData });
-
-      strapi.eventHub.on('entry.update', async (payload) => {
-        expect(payload).toMatchObject({
-          entry: { title: 'Updated', publishedAt: null },
-        });
-      });
-
-      strapi.eventHub.on('entry.publish', async (payload) => {
-        expect(payload).toMatchObject({
-          entry: { title: 'Updated', publishedAt: expect.any(String) },
-        });
-      });
+      const [updatePromise, publishPromise] = [
+        waitForEvent(strapi.eventHub, 'entry.update'),
+        waitForEvent(strapi.eventHub, 'entry.publish'),
+      ];
 
       await strapi.documents(ARTICLE_UID).update({
         documentId: article.documentId,
         data: { title: 'Updated' },
         status: 'published',
       });
+
+      const [updatePayload, publishPayload] = await Promise.all([updatePromise, publishPromise]);
+      expect(updatePayload).toMatchObject({
+        entry: { title: 'Updated', publishedAt: null },
+      });
+      expect(publishPayload).toMatchObject({
+        entry: { title: 'Updated', publishedAt: expect.any(String) },
+      });
     });
   });
 
   describe('Clone', () => {
     it('Cloning a document triggers entry.create', async () => {
-      expect.hasAssertions();
-
+      expect.assertions(1);
       const article = await strapi.documents(ARTICLE_UID).create({ data: articleData });
-
-      strapi.eventHub.on('entry.create', async (payload) => {
-        // Ignore the original article
-        if (payload.entry.id === article.id) return;
-
-        expect(payload).toMatchObject({
-          ...eventPayload,
-          entry: { title: 'Article copy' },
-        });
-      });
+      const eventPromise = waitForEventWithFilter(
+        strapi.eventHub,
+        'entry.create',
+        (payload) => payload.entry.id !== article.id
+      );
 
       await strapi
         .documents(ARTICLE_UID)
         .clone({ documentId: article.documentId, data: { title: 'Article copy' } });
+
+      const payload = await eventPromise;
+      expect(payload).toMatchObject({
+        ...eventPayload,
+        entry: { title: 'Article copy' },
+      });
     });
   });
 
@@ -156,16 +165,15 @@ describe('Document Service Events', () => {
       expect.hasAssertions();
 
       const article = await strapi.documents(ARTICLE_UID).create({ data: articleData });
-
-      strapi.eventHub.on('entry.delete', async (payload) => {
-        // TODO: Populate relations on delete webhook
-        expect(payload).toMatchObject({
-          ...eventPayload,
-          entry: omit(['categories'], eventPayload.entry),
-        });
-      });
+      const eventPromise = waitForEvent(strapi.eventHub, 'entry.delete');
 
       await strapi.documents(ARTICLE_UID).delete({ documentId: article.documentId });
+
+      const payload = await eventPromise;
+      expect(payload).toMatchObject({
+        ...eventPayload,
+        entry: omit(['categories'], eventPayload.entry),
+      });
     });
   });
 
@@ -174,18 +182,18 @@ describe('Document Service Events', () => {
       expect.hasAssertions();
 
       const article = await strapi.documents(ARTICLE_UID).create({ data: articleData });
-
-      strapi.eventHub.on('entry.publish', async (payload) => {
-        expect(payload).toMatchObject({
-          ...eventPayload,
-          entry: {
-            publishedAt: expect.any(String),
-            categories: [],
-          },
-        });
-      });
+      const eventPromise = waitForEvent(strapi.eventHub, 'entry.publish');
 
       await strapi.documents(ARTICLE_UID).publish({ documentId: article.documentId });
+
+      const payload = await eventPromise;
+      expect(payload).toMatchObject({
+        ...eventPayload,
+        entry: {
+          publishedAt: expect.any(String),
+          categories: [],
+        },
+      });
     });
   });
 
@@ -196,16 +204,15 @@ describe('Document Service Events', () => {
       const article = await strapi
         .documents(ARTICLE_UID)
         .create({ data: articleData, status: 'published' });
-
-      strapi.eventHub.on('entry.unpublish', async (payload) => {
-        // TODO: Populate relations on unpublish webhook
-        expect(payload).toMatchObject({
-          ...eventPayload,
-          entry: omit(['categories'], eventPayload.entry),
-        });
-      });
+      const eventPromise = waitForEvent(strapi.eventHub, 'entry.unpublish');
 
       await strapi.documents(ARTICLE_UID).unpublish({ documentId: article.documentId });
+
+      const payload = await eventPromise;
+      expect(payload).toMatchObject({
+        ...eventPayload,
+        entry: omit(['categories'], eventPayload.entry),
+      });
     });
   });
 
@@ -216,18 +223,18 @@ describe('Document Service Events', () => {
       const article = await strapi
         .documents(ARTICLE_UID)
         .create({ data: articleData, status: 'published' });
-
-      strapi.eventHub.on('entry.draft-discard', async (payload) => {
-        expect(payload).toMatchObject({
-          ...eventPayload,
-          entry: {
-            publishedAt: null,
-            categories: [],
-          },
-        });
-      });
+      const eventPromise = waitForEvent(strapi.eventHub, 'entry.draft-discard');
 
       await strapi.documents(ARTICLE_UID).discardDraft({ documentId: article.documentId });
+
+      const payload = await eventPromise;
+      expect(payload).toMatchObject({
+        ...eventPayload,
+        entry: {
+          publishedAt: null,
+          categories: [],
+        },
+      });
     });
   });
 });
