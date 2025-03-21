@@ -41,7 +41,7 @@ export const AdminSeatInfoEE = () => {
   if (!permittedSeats) {
     return null;
   }
-  console.log(window.strapi);
+  console.log(window.strapi.ee.type);
 
   return (
     <Grid.Item col={6} s={12} direction="column" alignItems="stretch">

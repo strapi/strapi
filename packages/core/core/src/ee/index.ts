@@ -243,7 +243,7 @@ export default Object.freeze({
     return ee.licenseInfo.seats;
   },
 
-  get licenseType() {
+  get type() {
     return ee.licenseInfo.type;
   },
 
