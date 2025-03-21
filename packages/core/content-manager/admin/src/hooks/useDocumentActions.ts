@@ -58,7 +58,10 @@ type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
   | Pick<TResponse, 'data'>
   | { error: BaseQueryError | SerializedError };
 
-type UseDocumentActions = (fromPreview?: boolean) => {
+type UseDocumentActions = (
+  fromPreview?: boolean,
+  fromRelationModal?: boolean
+) => {
   /**
    * @description Attempts to clone a document based on the provided sourceId.
    * This will return a list of the fields as an error if it's unable to clone.
@@ -189,7 +192,7 @@ type IUseDocumentActs = ReturnType<UseDocumentActions>;
  *
  * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document-operations} for more information
  */
-const useDocumentActions: UseDocumentActions = (fromPreview = false) => {
+const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelationModal = false) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -352,7 +355,7 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false) => {
           return { error: res.error };
         }
 
-        trackUsage('didPublishEntry', { documentId, fromPreview });
+        trackUsage('didPublishEntry', { documentId, fromPreview, fromRelationModal });
 
         toggleNotification({
           type: 'success',
@@ -372,7 +375,15 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false) => {
         throw err;
       }
     },
-    [trackUsage, publishDocument, fromPreview, toggleNotification, formatMessage, formatAPIError]
+    [
+      trackUsage,
+      publishDocument,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [publishManyDocuments, { isLoading: isPublishingMany }] = usePublishManyDocumentsMutation();
@@ -443,6 +454,7 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false) => {
           ...trackerProperty,
           documentId: res.data.data.documentId,
           fromPreview,
+          fromRelationModal,
         });
         toggleNotification({
           type: 'success',
@@ -464,7 +476,15 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false) => {
         throw err;
       }
     },
-    [trackUsage, updateDocument, fromPreview, toggleNotification, formatMessage, formatAPIError]
+    [
+      trackUsage,
+      updateDocument,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [unpublishDocument] = useUnpublishDocumentMutation();

@@ -83,6 +83,7 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
 interface DocumentActionProps extends EditViewContext {
   onPreview?: () => void;
   fromPreview?: boolean;
+  fromRelationModal?: boolean;
 }
 
 interface DocumentActionComponent

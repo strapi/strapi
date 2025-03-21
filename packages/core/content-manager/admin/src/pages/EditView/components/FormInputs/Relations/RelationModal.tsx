@@ -433,6 +433,8 @@ const RelationModalBody = ({ children }: RelationModalBodyProps) => {
     document: documentResponse.document,
     meta: documentResponse.meta,
     onPreview,
+    fromRelationModal: true,
+    fromPreview: onPreview !== undefined,
   } satisfies DocumentActionProps;
 
   return (
