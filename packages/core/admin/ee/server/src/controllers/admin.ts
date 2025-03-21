@@ -7,9 +7,9 @@ export default {
   async getProjectType() {
     const flags = strapi.config.get('admin.flags', {});
     try {
-      return { data: { isEE: strapi.EE, features: strapi.ee.features.list(), flags, licenseType: strapi.ee.type } };
+      return { data: { isEE: strapi.EE, features: strapi.ee.features.list(), flags, type: strapi.ee.type } };
     } catch (err) {
-      return { data: { isEE: false, features: [], flags, licenseType: strapi.ee.type } };
+      return { data: { isEE: false, features: [], flags, type: strapi.ee.type } };
     }
   },
 
@@ -48,7 +48,7 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
-      licenseType: strapi.ee.type,
+      type: strapi.ee.type,
       features: strapi.ee.features.list() ?? [],
     };
 

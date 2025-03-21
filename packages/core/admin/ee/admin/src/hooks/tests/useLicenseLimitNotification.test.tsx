@@ -13,7 +13,7 @@ const baseLicenseInfo = {
   shouldStopCreate: true,
   licenseLimitStatus: 'AT_LIMIT',
   isHostedOnStrapiCloud: false,
-  licenseType: 'gold',
+  type: 'gold',
 };
 
 // TODO: refactor
