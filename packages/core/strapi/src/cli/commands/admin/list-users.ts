@@ -54,6 +54,7 @@ const action = async () => {
  */
 const command: StrapiCommand = () => {
   return createCommand('admin:list-users')
+    .alias('admin:list')
     .description('List all the admin users')
     .action(runAction('admin:list-users', action));
 };
