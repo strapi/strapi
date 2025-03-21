@@ -7,6 +7,7 @@ import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
+const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
 
 export const AdminSeatInfoEE = () => {
@@ -40,6 +41,7 @@ export const AdminSeatInfoEE = () => {
   if (!permittedSeats) {
     return null;
   }
+  console.log(window.strapi);
 
   return (
     <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
@@ -85,7 +87,7 @@ export const AdminSeatInfoEE = () => {
         )}
       </Flex>
       <Link
-        href={MANAGE_SEATS_URL}
+        href={isHostedOnStrapiCloud ? BILLING_SELF_HOSTED_URL : MANAGE_SEATS_URL}
         isExternal
         endIcon={<ExternalLink />}
       >
@@ -94,8 +96,7 @@ export const AdminSeatInfoEE = () => {
             id: 'Settings.application.ee.admin-seats.add-seats',
             defaultMessage:
               'Manage seats',
-          },
-          { isHostedOnStrapiCloud }
+          }
         )}
       </Link>
     </Grid.Item>
