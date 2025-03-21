@@ -11,7 +11,7 @@ export default {
         data: { isEE: strapi.EE, features: strapi.ee.features.list(), flags, type: strapi.ee.type },
       };
     } catch (err) {
-      return { data: { isEE: false, features: [], flags, type: strapi.ee.type } };
+      return { data: { isEE: false, features: [], flags } };
     }
   },
 
