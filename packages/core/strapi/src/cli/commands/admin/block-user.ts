@@ -8,38 +8,46 @@ import { runAction } from '../../utils/helpers';
 
 interface CmdOptions {
   email?: string;
-  block?: boolean;
+  block?: string;
 }
 
 interface Answers {
   email: string;
-  block: boolean;
+  block: string;
 }
 
 const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
   { type: 'input', name: 'email', message: 'User email?' },
-  { type: 'checkbox', name: 'block', message: 'User Blocked?' },
+  { type: 'input', name: 'block', message: 'User Blocked?' },
 ];
 
 async function setBlock({ email, block }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  const user = await app.admin.services.user.findOneByEmail(email);
+  const cleanEmail = email?.trim().toLowerCase();
+  const cleanBlock = block?.trim().toLowerCase();
+
+  if (cleanBlock !== 'true' && cleanBlock !== 'false') {
+    console.error('Invalid block status. Use "true" or "false".');
+    process.exit(1);
+  }
+
+  const user = await app.admin.services.user.findOneByEmail(cleanEmail);
 
   if (!user) {
-    console.error(`User with email "${email}" does not exist`);
+    console.error(`User with email "${cleanEmail}" does not exist`);
     process.exit(1);
   }
 
   try {
-    await app.admin!.services.user.updateById(user.id, { blocked: block });
+    await app.admin!.services.user.updateById(user.id, { blocked: cleanBlock });
   } catch (err: any) {
     console.error(err.message);
     process.exit(1);
   }
 
-  console.log(`Successfully set user's block status`);
+  console.log(`Successfully set ${cleanEmail} block status to ${cleanBlock}`);
   process.exit(0);
 }
 
@@ -59,8 +67,6 @@ const action = async (cmdOptions: CmdOptions = {}) => {
     console.error('Missing required options `email` or `block`');
     process.exit(1);
   }
-
-  console.log('block value', block);
 
   return setBlock({ email, block });
 };

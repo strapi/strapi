@@ -16,7 +16,7 @@ const action = async () => {
   const list = await app.admin.services.user.findPage({
     select: ['id', 'firstname', 'lastname', 'email', 'isActive', 'blocked'],
     populate: ['roles'],
-    pageSize: 25,
+    pageSize: 100,
   });
 
   const infoTable = new CLITable({
