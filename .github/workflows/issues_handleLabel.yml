@@ -152,10 +152,10 @@ jobs:
 
             Hello @${{ github.event.issue.user.login }},
 
-            We ask that you please follow the [issue template](https://raw.githubusercontent.com/strapi/strapi/master/.github/ISSUE_TEMPLATE/BUG_REPORT.md).
-            A proper issue submission let's us better understand the origin of your bug and therefore help you. We will reopen your issue when we receive the issue following the template guidelines and properly fill out the template. You can see the template guidelines for bug reports [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
+            We ask that you please follow the issue template.
+            A proper issue submission let's us better understand the origin of your bug and therefore help you. You can see the template guidelines for bug reports [here](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md#reporting-an-issue).
 
-            Please update the issue with the template and we can reopen this report.
+            Please create a new issue and completely fill out the issue template, you can [open a new issue here](https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml).
 
             Thank you.
       - name: 'Close: invalid bug report template'
@@ -202,7 +202,7 @@ jobs:
         with:
           project-url: https://github.com/orgs/strapi/projects/13
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: docs, source: external, source: generators:app, source: generators, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:pack-up, source: utils:upgrade'
+          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: docs, source: external, source: generators:app, source: generators, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:upgrade'
           label-operator: OR
       - name: assign issues to Content squad project
         uses: actions/add-to-project@v0.4.1
