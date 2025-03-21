@@ -518,6 +518,8 @@ const PublishAction: DocumentActionComponent = ({
   meta,
   document,
   onPreview,
+  fromPreview = false,
+  fromRelationModal = false,
 }) => {
   const schema = useDocumentContext('PublishAction', (state) => state.document.schema);
   const navigate = useNavigate();
@@ -528,7 +530,7 @@ const PublishAction: DocumentActionComponent = ({
   const { id } = useParams();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
-  const { publish, isLoading } = useDocumentActions();
+  const { publish, isLoading } = useDocumentActions(fromPreview, fromRelationModal);
   const [
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
@@ -766,6 +768,8 @@ const UpdateAction: DocumentActionComponent = ({
   model,
   collectionType,
   onPreview,
+  fromPreview = false,
+  fromRelationModal = false,
 }) => {
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
@@ -773,7 +777,7 @@ const UpdateAction: DocumentActionComponent = ({
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { create, update, clone, isLoading } = useDocumentActions();
+  const { create, update, clone, isLoading } = useDocumentActions(fromPreview, fromRelationModal);
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
@@ -892,6 +896,8 @@ const UpdateAction: DocumentActionComponent = ({
     cloneMatch?.params.origin,
     collectionType,
     create,
+    currentDocumentMeta.documentId,
+    currentDocumentMeta.params,
     document,
     documentId,
     formatMessage,
@@ -900,9 +906,11 @@ const UpdateAction: DocumentActionComponent = ({
     model,
     modified,
     navigate,
+    onPreview,
     params,
     rawQuery,
     resetForm,
+    rootDocumentMeta.documentId,
     setErrors,
     setSubmitting,
     toggleNotification,

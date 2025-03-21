@@ -325,6 +325,8 @@ interface PublishEntryEvents {
   name: 'willPublishEntry' | 'didPublishEntry';
   properties: {
     documentId?: string;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 
@@ -334,6 +336,8 @@ interface UpdateEntryEvents {
     documentId?: string;
     status?: string;
     error?: unknown;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 
