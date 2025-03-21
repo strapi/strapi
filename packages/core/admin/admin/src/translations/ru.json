@@ -132,6 +132,7 @@
   "Settings.application.edition-title": "Текущий план",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
   "Settings.application.ee.admin-seats.add-seats": "Управление места",
+  "Settings.application.ee.admin-seats.support": "Пожалуйста, свяжитесь с командой поддержки",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "При исчерпании лимита: добавьте места, чтобы пригласить больше пользователей",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "Получить помощь",
