@@ -68,7 +68,7 @@ async function deleteAdmin({ email }: CmdOptions) {
 }
 
 /**
- * Create new admin user
+ * Delete an admin user
  */
 const action = async (cmdOptions: CmdOptions = {}) => {
   let { email } = cmdOptions;
@@ -97,7 +97,7 @@ const action = async (cmdOptions: CmdOptions = {}) => {
 };
 
 /**
- * `$ strapi admin:create-user`
+ * `$ strapi admin:delete-user`
  */
 const command: StrapiCommand = () => {
   return createCommand('admin:delete-user')
