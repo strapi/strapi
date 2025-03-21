@@ -133,7 +133,7 @@
   "Settings.application.edition-title": "current edition",
   "Settings.application.ee-or-ce": "{communityEdition, select, true {Community Edition} other {Enterprise Edition}}",
   "Settings.application.ee.admin-seats.add-seats": "Manage seats",
-  "Settings.application.ee.admin-seats.support": "Please contact the support team",
+  "Settings.application.ee.admin-seats.support": "Contact sales",
   "Settings.application.ee.admin-seats.at-limit-tooltip": "At limit: add seats to invite more users",
   "Settings.application.ee.admin-seats.count": "<text>{enforcementUserCount}</text>/{permittedSeats}",
   "Settings.application.get-help": "Get help",
