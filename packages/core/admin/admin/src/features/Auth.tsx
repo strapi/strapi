@@ -71,7 +71,7 @@ interface AuthProviderProps {
 
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
-  USER: 'userInfo',
+  STATUS: 'isLoggedIn',
 };
 
 const AuthProvider = ({
@@ -149,7 +149,7 @@ const AuthProvider = ({
      * This will log a user out of all tabs if they log out in one tab.
      */
     const handleUserStorageChange = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEYS.USER && event.newValue === null) {
+      if (event.key === STORAGE_KEYS.STATUS && event.newValue === null) {
         clearStateAndLogout();
       }
     };
