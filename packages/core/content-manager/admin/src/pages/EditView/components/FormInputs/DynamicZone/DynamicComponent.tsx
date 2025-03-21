@@ -18,6 +18,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
+import { InjectionZone } from '../../../../../components/InjectionZone';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
@@ -148,6 +149,12 @@ const DynamicComponent = ({
       >
         <Drag />
       </IconButton>
+      <InjectionZone
+        area="editView.dynamic-zone-actions"
+        slug={componentUid}
+        name={name}
+        index={index}
+      />
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
           <IconButton

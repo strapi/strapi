@@ -17,6 +17,7 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { InjectionZone } from '../../../../../components/InjectionZone';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
@@ -459,6 +460,12 @@ const Component = ({
               >
                 <Drag />
               </IconButton>
+              <InjectionZone
+                area="editView.repeatable-component-actions"
+                slug={name}
+                name={componentKey}
+                index={index}
+              />
             </Accordion.Actions>
           </Accordion.Header>
           <Accordion.Content>
