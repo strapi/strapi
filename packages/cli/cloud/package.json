@@ -31,7 +31,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "source": "./src/index.ts",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "bin": "./bin/index.js",
   "files": [
     "./dist",
