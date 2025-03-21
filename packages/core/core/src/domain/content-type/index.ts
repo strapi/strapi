@@ -14,6 +14,7 @@ const {
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
+  FIRST_PUBLISHED_AT_ATTRIBUTE,
   CREATED_BY_ATTRIBUTE,
   UPDATED_BY_ATTRIBUTE,
 } = contentTypesUtils.constants;
@@ -74,6 +75,16 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
   schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
     type: 'datetime',
     configurable: false,
+    writable: true,
+    visible: false,
+    default() {
+      return new Date();
+    },
+  };
+
+  schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
+    type: 'datetime',
+    configurable: true,
     writable: true,
     visible: false,
     default() {
