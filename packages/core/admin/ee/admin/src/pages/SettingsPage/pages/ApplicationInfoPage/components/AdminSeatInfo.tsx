@@ -7,8 +7,8 @@ import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
-const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
 const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
+const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
 
 export const AdminSeatInfoEE = () => {
   const { formatMessage } = useIntl();
@@ -35,7 +35,7 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud } =
+  const { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud, type } =
     license;
 
   if (!permittedSeats) {
@@ -85,20 +85,25 @@ export const AdminSeatInfoEE = () => {
           </Tooltip>
         )}
       </Flex>
-      <Link
-        href={isHostedOnStrapiCloud ? BILLING_STRAPI_CLOUD_URL : BILLING_SELF_HOSTED_URL}
-        isExternal
-        endIcon={<ExternalLink />}
-      >
-        {formatMessage(
-          {
+      {type === 'gold' ? (
+        <Link href={BILLING_SELF_HOSTED_URL} endIcon={<ExternalLink />}>
+          {formatMessage({
+            id: 'Settings.application.ee.admin-seats.support',
+            defaultMessage: 'Contact sales',
+          })}
+        </Link>
+      ) : (
+        <Link
+          href={MANAGE_SEATS_URL}
+          isExternal
+          endIcon={<ExternalLink />}
+        >
+          {formatMessage({
             id: 'Settings.application.ee.admin-seats.add-seats',
-            defaultMessage:
-              '{isHostedOnStrapiCloud, select, true {Add seats} other {Contact sales}}',
-          },
-          { isHostedOnStrapiCloud }
-        )}
-      </Link>
+            defaultMessage: 'Manage seats',
+          })}
+        </Link>
+      )}
     </Grid.Item>
   );
 };

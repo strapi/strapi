@@ -15,8 +15,7 @@ import { useLicenseLimits } from './useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
 
-const BILLING_STRAPI_CLOUD_URL = 'https://cloud.strapi.io/profile/billing';
-const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
+const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
 
 export const useLicenseLimitNotification = () => {
   const { formatMessage } = useIntl();
@@ -67,14 +66,13 @@ export const useLicenseLimitNotification = () => {
           }
         ),
         link: {
-          url: isHostedOnStrapiCloud ? BILLING_STRAPI_CLOUD_URL : BILLING_SELF_HOSTED_URL,
+          url: MANAGE_SEATS_URL,
           label: formatMessage(
             {
               id: 'notification.ee.warning.seat-limit.link',
               defaultMessage:
-                '{isHostedOnStrapiCloud, select, true {ADD SEATS} other {CONTACT SALES}}',
-            },
-            { isHostedOnStrapiCloud }
+                'Manage seats',
+            }
           ),
         },
         blockTransition: true,

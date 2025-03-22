@@ -40,6 +40,7 @@ export interface Strapi extends Container {
   EE?: boolean;
   ee: {
     seats: number | null | undefined;
+    type: string | null | undefined;
     isEE: boolean;
     features: {
       isEnabled: (feature: string) => boolean;
