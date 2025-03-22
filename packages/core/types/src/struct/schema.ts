@@ -134,6 +134,8 @@ export interface SchemaOptions {
    * This would decide whether the changes made to a document are published immediately or saved as a draft for later.
    */
   draftAndPublish?: boolean;
+
+  firstPublishedAtField?: boolean;
 }
 
 /**

@@ -51,6 +51,8 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
 
   addCreatorFields(schema);
 
+  addFirstPublishedAt(schema);
+
   return schema;
 };
 
@@ -81,16 +83,19 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
       return new Date();
     },
   };
+};
 
-  schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
-    type: 'datetime',
-    configurable: true,
-    writable: true,
-    visible: false,
-    default() {
-      return new Date();
-    },
-  };
+const addFirstPublishedAt = (schema: Schema.ContentType) => {
+  const enabled = _.get(schema, 'options.firstPublishedAtField', false);
+
+  if (enabled) {
+    schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
+      type: 'datetime',
+      configurable: false,
+      writable: true,
+      visible: false,
+    };
+  }
 };
 
 const addCreatorFields = (schema: Schema.ContentType) => {

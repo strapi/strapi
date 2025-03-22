@@ -7,6 +7,7 @@ import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
 import * as components from './components';
+import * as FPA from './first-published-at';
 
 import { createEntriesService } from './entries';
 import { pickSelectionParams } from './params';
@@ -274,10 +275,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function publish(opts = {} as any) {
     const { documentId, ...params } = opts;
 
-    const queryParams = await async.pipe(
+    let queryParams = await async.pipe(
       validateParams,
       i18n.defaultLocale(contentType),
-      i18n.multiLocaleToLookup(contentType)
+      i18n.multiLocaleToLookup(contentType),
+      FPA.addFirstPublishedAt(uid, documentId, contentType)
     )(params);
 
     const [draftsToPublish, oldPublishedVersions] = await Promise.all([
@@ -296,7 +298,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           documentId,
           publishedAt: { $ne: null },
         },
-        select: ['id', 'locale'],
+        select: ['id', 'locale', 'firstPublishedAt'],
       }),
     ]);
 
@@ -315,9 +317,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
     // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(draftsToPublish, (draft: any) =>
-      entries.publish(draft, queryParams)
-    );
+    const publishedEntries = await async.map(draftsToPublish, (draft: any) => {
+      return entries.publish(draft, queryParams);
+    });
 
     // Sync unidirectional relations with the new published entries
     await unidirectionalRelations.sync(

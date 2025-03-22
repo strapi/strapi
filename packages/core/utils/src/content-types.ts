@@ -116,6 +116,9 @@ const getOptions = (model: Model) =>
 const hasDraftAndPublish = (model: Model) =>
   _.get(model, 'options.draftAndPublish', false) === true;
 
+const hasFirstPublishedAtField = (model: Model) =>
+  _.get(model, 'options.firstPublishedAtField', false) === true;
+
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
@@ -278,6 +281,7 @@ export {
   getOptions,
   isDraft,
   hasDraftAndPublish,
+  hasFirstPublishedAtField,
   isSingleType,
   isCollectionType,
   isKind,

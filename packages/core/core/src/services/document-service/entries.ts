@@ -9,6 +9,8 @@ import { transformParamsToQuery } from './transform/query';
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { transformData } from './transform/data';
+import _ from 'lodash';
+import { removeFirstPublishedAt } from './first-published-at';
 
 const createEntriesService = (
   uid: UID.ContentType,
@@ -80,15 +82,33 @@ const createEntriesService = (
 
     const entryData = applyTransforms(contentType, dataWithComponents);
 
-    return strapi.db
-      .query(uid)
-      .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
+    // firstPublishedAt field should not be part of draft entry
+    const entryDataWithoutFirstPubslihedAt = removeFirstPublishedAt(entryData);
+
+    return strapi.db.query(uid).update({
+      ...query,
+      where: { id: entryToUpdate.id },
+      data: entryDataWithoutFirstPubslihedAt,
+    });
   }
 
   async function publishEntry(entry: any, params = {} as any) {
+    const now = new Date();
+
     return async.pipe(
       omit('id'),
-      assoc('publishedAt', new Date()),
+      assoc('publishedAt', now),
+      (draft) => {
+        const firstPublishedAtEnabled = _.get(params, 'firstPublishedAtField.required', false);
+        if (firstPublishedAtEnabled) {
+          const firstPublishedValue =
+            _.get(params, 'data.firstPublishedAt', null) ||
+            _.get(params, 'firstPublishedAtField.value', now);
+          return assoc('firstPublishedAt', firstPublishedValue || now, draft);
+        }
+
+        return draft;
+      },
       (draft) => {
         const opts = { uid, locale: draft.locale, status: 'published', allowMissingId: true };
         return transformData(draft, opts);
