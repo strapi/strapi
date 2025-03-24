@@ -16,14 +16,14 @@ import { styled } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
+import { DocumentContextProvider } from '../../features/DocumentContext';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
-import { PreviewContent } from '../components/PreviewContent';
-import { PreviewHeader, UnstablePreviewHeader } from '../components/PreviewHeader';
+import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 
 import type { UID } from '@strapi/types';
@@ -39,7 +39,6 @@ interface PreviewContextValue {
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
   layout: EditLayout;
-  iframeRef?: React.RefObject<HTMLIFrameElement>;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -149,6 +148,16 @@ const PreviewPage = () => {
 
   const previewUrl = previewUrlResponse.data.data.url;
 
+  const onPreview = () => {
+    iframeRef?.current?.contentWindow?.postMessage(
+      { type: 'strapiUpdate' },
+      // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+      new URL(iframeRef.current.src).origin
+    );
+  };
+
+  const hasAdvancedPreview = window.strapi.features.isEnabled('cms-advanced-preview');
+
   return (
     <>
       <Page.Title>
@@ -162,45 +171,51 @@ const PreviewPage = () => {
           }
         )}
       </Page.Title>
-      <PreviewProvider
-        url={previewUrl}
-        document={documentResponse.document}
-        title={documentTitle}
-        meta={documentResponse.meta}
-        schema={documentResponse.schema}
-        layout={documentLayoutResponse.edit}
-        iframeRef={iframeRef}
+      <DocumentContextProvider
+        initialDocument={{
+          documentId: documentId || '',
+          model,
+          collectionType,
+        }}
+        onPreview={onPreview}
       >
-        <FormContext
-          method="PUT"
-          disabled={
-            query.status === 'published' &&
-            documentResponse &&
-            documentResponse.document.status !== 'draft'
-          }
-          initialValues={documentResponse.getInitialFormValues()}
-          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
-          height="100%"
-          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-            const yupSchema = createYupSchema(
-              documentResponse.schema?.attributes,
-              documentResponse.components,
-              {
-                status: documentResponse.document?.status,
-                ...options,
-              }
-            );
-
-            return yupSchema.validate(values, { abortEarly: false });
-          }}
+        <PreviewProvider
+          url={previewUrl}
+          document={documentResponse.document}
+          title={documentTitle}
+          meta={documentResponse.meta}
+          schema={documentResponse.schema}
+          layout={documentLayoutResponse.edit}
         >
-          {({ resetForm }) => (
-            <Flex direction="column" height="100%" alignItems="stretch">
-              {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
-                <>
-                  <Blocker onProceed={resetForm} />
-                  <UnstablePreviewHeader />
-                  <Flex flex={1} overflow="auto" alignItems="stretch">
+          <FormContext
+            method="PUT"
+            disabled={
+              query.status === 'published' &&
+              documentResponse &&
+              documentResponse.document.status === 'published'
+            }
+            initialValues={documentResponse.getInitialFormValues()}
+            initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+            height="100%"
+            validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+              const yupSchema = createYupSchema(
+                documentResponse.schema?.attributes,
+                documentResponse.components,
+                {
+                  status: documentResponse.document?.status,
+                  ...options,
+                }
+              );
+
+              return yupSchema.validate(values, { abortEarly: false });
+            }}
+          >
+            {({ resetForm }) => (
+              <Flex direction="column" height="100%" alignItems="stretch">
+                <Blocker onProceed={resetForm} />
+                <PreviewHeader />
+                <Flex flex={1} overflow="auto" alignItems="stretch">
+                  {hasAdvancedPreview && (
                     <Box
                       overflow="auto"
                       width={isSideEditorOpen ? '50%' : 0}
@@ -213,30 +228,37 @@ const PreviewPage = () => {
                       paddingRight={isSideEditorOpen ? 6 : 0}
                       transition="all 0.2s ease-in-out"
                     >
-                      <FormLayout layout={documentLayoutResponse.edit.layout} hasBackground />
-                    </Box>
-                    <Box position="relative" flex={1} height="100%" overflow="hidden">
-                      <Box
-                        data-testid="preview-iframe"
-                        ref={iframeRef}
-                        src={previewUrl}
-                        /**
-                         * For some reason, changing an iframe's src tag causes the browser to add a new item in the
-                         * history stack. This is an issue for us as it means clicking the back button will not let us
-                         * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
-                         * different iframe when the preview URL changes. So we set a key prop to force React
-                         * to mount a different node when the src changes.
-                         */
-                        key={previewUrl}
-                        title={formatMessage({
-                          id: 'content-manager.preview.panel.title',
-                          defaultMessage: 'Preview',
-                        })}
-                        width="100%"
-                        height="100%"
-                        borderWidth={0}
-                        tag="iframe"
+                      <FormLayout
+                        layout={documentLayoutResponse.edit.layout}
+                        document={documentResponse}
+                        hasBackground={false}
                       />
+                    </Box>
+                  )}
+
+                  <Box position="relative" flex={1} height="100%" overflow="hidden">
+                    <Box
+                      data-testid="preview-iframe"
+                      ref={iframeRef}
+                      src={previewUrl}
+                      /**
+                       * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+                       * history stack. This is an issue for us as it means clicking the back button will not let us
+                       * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+                       * different iframe when the preview URL changes. So we set a key prop to force React
+                       * to mount a different node when the src changes.
+                       */
+                      key={previewUrl}
+                      title={formatMessage({
+                        id: 'content-manager.preview.panel.title',
+                        defaultMessage: 'Preview',
+                      })}
+                      width="100%"
+                      height="100%"
+                      borderWidth={0}
+                      tag="iframe"
+                    />
+                    {hasAdvancedPreview && (
                       <IconButton
                         variant="tertiary"
                         label={formatMessage(
@@ -257,19 +279,14 @@ const PreviewPage = () => {
                       >
                         <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
                       </IconButton>
-                    </Box>
-                  </Flex>
-                </>
-              ) : (
-                <>
-                  <PreviewHeader />
-                  <PreviewContent />
-                </>
-              )}
-            </Flex>
-          )}
-        </FormContext>
-      </PreviewProvider>
+                    )}
+                  </Box>
+                </Flex>
+              </Flex>
+            )}
+          </FormContext>
+        </PreviewProvider>
+      </DocumentContextProvider>
     </>
   );
 };
