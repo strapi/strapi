@@ -784,7 +784,6 @@ describe('Core API - Validate', () => {
       'createdAt',
       'updatedAt',
       'publishedAt',
-      'firstPublishedAt',
     ];
 
     describe('No fields param', () => {
