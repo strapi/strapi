@@ -112,7 +112,6 @@ const fetchLicense = async (
         throwError();
     }
   } else {
-    console.log('validate');
     throwError();
   }
 };
