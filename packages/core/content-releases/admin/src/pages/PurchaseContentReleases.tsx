@@ -21,14 +21,22 @@ const PurchaseContentReleases = () => {
             defaultMessage: 'Releases',
           })}
         />
-        <Box marginLeft={10} marginRight={10} shadow="filterShadow" hasRadius background="neutral0">
+        <Box
+          marginLeft={10}
+          marginRight={10}
+          shadow="filterShadow"
+          hasRadius
+          background="neutral0"
+          borderColor={'neutral150'}
+          overflow={'hidden'}
+        >
           <Grid.Root>
-            <Grid.Item col={6} s={12}>
-              <Flex direction="column" alignItems="flex-start" padding={7} gap={2}>
+            <Grid.Item col={6} s={12} alignItems={'flex-start'}>
+              <Flex direction="column" alignItems="flex-start" padding={7} width={'100%'}>
                 <Flex>
                   <PaperPlane fill="primary600" width={`24px`} height={`24px`} />
                 </Flex>
-                <Flex paddingTop={2} paddingBottom={4}>
+                <Flex paddingTop={3} paddingBottom={4}>
                   <Typography variant="beta" fontWeight="bold">
                     {formatMessage({
                       id: 'pages.PurchaseRelease.description',
@@ -37,34 +45,51 @@ const PurchaseContentReleases = () => {
                   </Typography>
                 </Flex>
 
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'pages.PurchaseRelease.perks1',
-                      defaultMessage: 'Add many entries to releases',
-                    })}
-                  </Typography>
-                </Flex>
+                <Flex direction="column" alignItems={'flex-start'} gap={2}>
+                  <Flex gap={2}>
+                    <Check
+                      fill="success500"
+                      width={`16px`}
+                      height={`16px`}
+                      style={{ flexShrink: 0 }}
+                    />
+                    <Typography textColor="neutral700">
+                      {formatMessage({
+                        id: 'pages.PurchaseRelease.perks1',
+                        defaultMessage: 'Add many entries to releases',
+                      })}
+                    </Typography>
+                  </Flex>
 
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'pages.PurchaseRelease.perks2',
-                      defaultMessage: 'Quickly identify entries containing errors',
-                    })}
-                  </Typography>
-                </Flex>
+                  <Flex gap={2}>
+                    <Check
+                      fill="success500"
+                      width={`16px`}
+                      height={`16px`}
+                      style={{ flexShrink: 0 }}
+                    />
+                    <Typography textColor="neutral700">
+                      {formatMessage({
+                        id: 'pages.PurchaseRelease.perks2',
+                        defaultMessage: 'Quickly identify entries containing errors',
+                      })}
+                    </Typography>
+                  </Flex>
 
-                <Flex gap={2}>
-                  <Check fill="success500" width={`16px`} height={`16px`} />
-                  <Typography textColor="neutral700">
-                    {formatMessage({
-                      id: 'pages.PurchaseRelease.perks3',
-                      defaultMessage: 'Schedule their publication, or publish them manually',
-                    })}
-                  </Typography>
+                  <Flex gap={2}>
+                    <Check
+                      fill="success500"
+                      width={`16px`}
+                      height={`16px`}
+                      style={{ flexShrink: 0 }}
+                    />
+                    <Typography textColor="neutral700">
+                      {formatMessage({
+                        id: 'pages.PurchaseRelease.perks3',
+                        defaultMessage: 'Schedule their publication, or publish them manually',
+                      })}
+                    </Typography>
+                  </Flex>
                 </Flex>
 
                 <Flex gap={2} marginTop={7}>
@@ -73,7 +98,7 @@ const PurchaseContentReleases = () => {
                     href="https://strapi.io/pricing-self-hosted?utm_campaign=In-Product-CTA&utm_source=Releases"
                   >
                     {formatMessage({
-                      id: 'Settings.purchage.page.upgrade.cta',
+                      id: 'Settings.page.purchase.upgrade.cta',
                       defaultMessage: 'Upgrade',
                     })}
                   </LinkButton>
@@ -83,15 +108,15 @@ const PurchaseContentReleases = () => {
                     href="https://strapi.io/features/releases?utm_campaign=In-Product-CTA&utm_source=Releases"
                   >
                     {formatMessage({
-                      id: 'Settings.purchage.page.learn-more.cta',
+                      id: 'Settings.page.purchase.learn-more.cta',
                       defaultMessage: 'Learn more',
                     })}
                   </LinkButton>
                 </Flex>
               </Flex>
             </Grid.Item>
-            <Grid.Item col={6} s={12} background="primary100">
-              <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
+            <Grid.Item col={6} s={12} background="primary100" minHeight={'280px'}>
+              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <img
                   src={illustration}
                   alt="purchase-page-content-releases-illustration"
