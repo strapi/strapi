@@ -109,8 +109,8 @@ describe('useLicenseLimitNotification', () => {
         "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       title: 'Over seat limit (6/5)',
       link: {
-        url: 'https://https://strapi.io/billing/manage-seats',
-        label: 'MANAGE SEATS',
+        url: 'https://strapi.io/billing/manage-seats',
+        label: 'Manage seats',
       },
       blockTransition: true,
       onClose: expect.any(Function),
@@ -135,8 +135,8 @@ describe('useLicenseLimitNotification', () => {
         "Add seats to invite Users. If you already did it but it's not reflected in Strapi yet, make sure to restart your app.",
       title: 'Over seat limit (5/5)',
       link: {
-        url: 'https://cloud.strapi.io/profile/billing',
-        label: 'ADD SEATS',
+        url: 'https://strapi.io/billing/manage-seats',
+        label: 'Manage seats',
       },
       blockTransition: true,
       onClose: expect.any(Function),
