@@ -69,7 +69,7 @@ export const useLicenseLimitNotification = () => {
           url: type === 'gold' ? BILLING_SELF_HOSTED_URL : MANAGE_SEATS_URL,
           label: formatMessage({
             id: 'notification.ee.warning.seat-limit.link',
-            defaultMessage: 'Manage seats',
+            defaultMessage: type === 'gold' ? 'Contact sales' : 'Manage seats',
           }),
         },
         blockTransition: true,
