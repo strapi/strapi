@@ -67,13 +67,10 @@ export const useLicenseLimitNotification = () => {
         ),
         link: {
           url: MANAGE_SEATS_URL,
-          label: formatMessage(
-            {
-              id: 'notification.ee.warning.seat-limit.link',
-              defaultMessage:
-                'Manage seats',
-            }
-          ),
+          label: formatMessage({
+            id: 'notification.ee.warning.seat-limit.link',
+            defaultMessage: 'Manage seats',
+          }),
         },
         blockTransition: true,
         onClose() {

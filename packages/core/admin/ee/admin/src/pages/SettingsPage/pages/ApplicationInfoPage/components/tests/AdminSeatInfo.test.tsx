@@ -90,9 +90,6 @@ describe('<AdminSeatInfo />', () => {
     expect(
       // eslint-disable-next-line testing-library/no-node-access
       getByText('Contact sales').closest('a')
-    ).toHaveAttribute(
-      'href',
-      'https://strapi.io/billing/request-seats'
-    );
+    ).toHaveAttribute('href', 'https://strapi.io/billing/request-seats');
   });
 });

@@ -35,8 +35,7 @@ export const AdminSeatInfoEE = () => {
     return null;
   }
 
-  const { licenseLimitStatus, enforcementUserCount, permittedSeats, isHostedOnStrapiCloud, type } =
-    license;
+  const { licenseLimitStatus, enforcementUserCount, permittedSeats, type } = license;
 
   if (!permittedSeats) {
     return null;
@@ -93,11 +92,7 @@ export const AdminSeatInfoEE = () => {
           })}
         </Link>
       ) : (
-        <Link
-          href={MANAGE_SEATS_URL}
-          isExternal
-          endIcon={<ExternalLink />}
-        >
+        <Link href={MANAGE_SEATS_URL} isExternal endIcon={<ExternalLink />}>
           {formatMessage({
             id: 'Settings.application.ee.admin-seats.add-seats',
             defaultMessage: 'Manage seats',
