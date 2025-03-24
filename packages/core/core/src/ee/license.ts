@@ -23,6 +23,7 @@ const DEFAULT_FEATURES = {
     { name: 'review-workflows' },
     { name: 'cms-content-releases' },
     { name: 'cms-content-history', options: { retentionDays: 99999 } },
+    { name: 'cms-advanced-preview' },
   ],
 };
 
@@ -111,6 +112,7 @@ const fetchLicense = async (
         throwError();
     }
   } else {
+    console.log('validate');
     throwError();
   }
 };
