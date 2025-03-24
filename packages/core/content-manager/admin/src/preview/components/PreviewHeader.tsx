@@ -185,6 +185,7 @@ const PreviewHeader = () => {
     document,
     meta,
     onPreview,
+    fromPreview: true,
   } satisfies DocumentActionProps;
 
   return (

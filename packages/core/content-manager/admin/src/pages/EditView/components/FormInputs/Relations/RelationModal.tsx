@@ -482,6 +482,10 @@ const RelationModal = React.memo((props: RelationModalProps) => {
 const StyledTextButton = styled(TextButton)`
   & > span {
     font-size: ${({ theme }) => theme.fontSizes[2]};
+    width: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 `;
 
@@ -561,6 +565,8 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
     document: currentDocument.document,
     meta: currentDocument.meta,
     onPreview,
+    fromRelationModal: true,
+    fromPreview: onPreview !== undefined,
   } satisfies DocumentActionProps;
 
   return (

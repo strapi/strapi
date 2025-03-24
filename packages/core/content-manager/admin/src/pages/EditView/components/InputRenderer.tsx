@@ -6,12 +6,12 @@ import {
   InputRenderer as FormInputRenderer,
   useField,
 } from '@strapi/admin/strapi-admin';
-import { ContentTypeKind } from '@strapi/types/dist/struct';
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc, UseDocument } from '../../../hooks/useDocument';
+import { type UseDocument } from '../../../hooks/useDocument';
+import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
@@ -40,8 +40,10 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * components such as Blocks / Relations.
  */
 const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
-  const { model: rootModel } = useDoc();
-  const documentLayout = useDocumentLayout(document.schema?.uid ?? rootModel);
+  const { currentDocumentMeta } = useDocumentContext('DynamicComponent');
+  const {
+    edit: { components },
+  } = useDocumentLayout(currentDocumentMeta.model);
 
   const collectionType =
     document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
@@ -75,8 +77,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
-
-  const components = documentLayout.edit.components;
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);

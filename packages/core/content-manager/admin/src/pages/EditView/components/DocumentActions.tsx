@@ -896,6 +896,7 @@ const UpdateAction: DocumentActionComponent = ({
     cloneMatch?.params.origin,
     collectionType,
     create,
+    currentDocumentMeta.params,
     document,
     documentId,
     formatMessage,
@@ -911,7 +912,6 @@ const UpdateAction: DocumentActionComponent = ({
     toggleNotification,
     update,
     validate,
-    currentDocumentMeta.params,
     onPreview,
   ]);
 
