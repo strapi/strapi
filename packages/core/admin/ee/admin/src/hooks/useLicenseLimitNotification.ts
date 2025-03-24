@@ -24,8 +24,7 @@ export const useLicenseLimitNotification = () => {
   const { toggleNotification } = useNotification();
   const { pathname } = useLocation();
 
-  const { enforcementUserCount, permittedSeats, licenseLimitStatus, type } =
-    license ?? {};
+  const { enforcementUserCount, permittedSeats, licenseLimitStatus, type } = license ?? {};
 
   React.useEffect(() => {
     if (isError || isLoading) {
