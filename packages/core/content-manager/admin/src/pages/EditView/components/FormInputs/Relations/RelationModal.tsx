@@ -333,7 +333,7 @@ const RelationModalRenderer = ({
  * Will be wrapped in a Modal.Body by the RelationModalRenderer.
  * Cannot be moved directly inside RelationModal because it needs access to the context via hooks.
  */
-const RelationModalBody = ({ relation }: RelationModalProps) => {
+const RelationModalBody = () => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { formatMessage } = useIntl();
@@ -474,7 +474,7 @@ const RelationModal = React.memo((props: RelationModalProps) => {
       relation={props.relation}
       trigger={<ModalTrigger relation={props.relation}>{props.triggerButtonLabel}</ModalTrigger>}
     >
-      <RelationModalBody {...props} />
+      <RelationModalBody />
     </RelationModalRenderer>
   );
 });
@@ -635,4 +635,5 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export { RelationModal, useRelationModal };
+export { RelationModal, reducer, useRelationModal };
+export type { State, Action };
