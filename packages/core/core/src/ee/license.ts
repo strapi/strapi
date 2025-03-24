@@ -96,7 +96,7 @@ const fetchLicense = async (
       body: JSON.stringify({
         key,
         projectId,
-        installId: installID(projectId, installIdFromPackageJson),
+        deviceId: installID(projectId, installIdFromPackageJson),
       }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwError);
