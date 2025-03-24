@@ -86,7 +86,9 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
 };
 
 const addFirstPublishedAt = (schema: Schema.ContentType) => {
-  const enabled = _.get(schema, 'options.firstPublishedAtField', false);
+  const enabled =
+    _.get(schema, 'options.firstPublishedAtField', false) &&
+    _.get(schema, 'options.draftAndPublish', false);
 
   if (enabled) {
     schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {

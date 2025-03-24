@@ -275,7 +275,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
   async function publish(opts = {} as any) {
     const { documentId, ...params } = opts;
 
-    let queryParams = await async.pipe(
+    const queryParams = await async.pipe(
       validateParams,
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType),
@@ -298,7 +298,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
           documentId,
           publishedAt: { $ne: null },
         },
-        select: ['id', 'locale', 'firstPublishedAt'],
+        select: ['id', 'locale'],
       }),
     ]);
 

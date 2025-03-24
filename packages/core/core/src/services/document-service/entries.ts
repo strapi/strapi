@@ -1,5 +1,6 @@
 import type { UID, Modules } from '@strapi/types';
 import { async } from '@strapi/utils';
+import _ from 'lodash';
 import { assoc, omit } from 'lodash/fp';
 
 import * as components from './components';
@@ -9,7 +10,6 @@ import { transformParamsToQuery } from './transform/query';
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
 import { transformData } from './transform/data';
-import _ from 'lodash';
 import { removeFirstPublishedAt } from './first-published-at';
 
 const createEntriesService = (
@@ -80,15 +80,15 @@ const createEntriesService = (
       validData
     );
 
-    const entryData = applyTransforms(contentType, dataWithComponents);
-
-    // firstPublishedAt field should not be part of draft entry
-    const entryDataWithoutFirstPubslihedAt = removeFirstPublishedAt(entryData);
+    const entryData = await async.pipe(
+      applyTransforms(contentType),
+      removeFirstPublishedAt // firstPublishedAt data should not be part of draft data
+    )(dataWithComponents);
 
     return strapi.db.query(uid).update({
       ...query,
       where: { id: entryToUpdate.id },
-      data: entryDataWithoutFirstPubslihedAt,
+      data: entryData,
     });
   }
 

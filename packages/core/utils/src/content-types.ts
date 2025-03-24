@@ -117,7 +117,7 @@ const hasDraftAndPublish = (model: Model) =>
   _.get(model, 'options.draftAndPublish', false) === true;
 
 const hasFirstPublishedAtField = (model: Model) =>
-  _.get(model, 'options.firstPublishedAtField', false) === true;
+  _.get(model, 'options.firstPublishedAtField', false) === true && hasDraftAndPublish(model);
 
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
