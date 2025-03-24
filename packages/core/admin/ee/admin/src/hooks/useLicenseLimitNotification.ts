@@ -15,6 +15,7 @@ import { useLicenseLimits } from './useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
 
+const BILLING_SELF_HOSTED_URL = 'https://strapi.io/billing/request-seats';
 const MANAGE_SEATS_URL = 'https://strapi.io/billing/manage-seats';
 
 export const useLicenseLimitNotification = () => {
@@ -23,7 +24,7 @@ export const useLicenseLimitNotification = () => {
   const { toggleNotification } = useNotification();
   const { pathname } = useLocation();
 
-  const { enforcementUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
+  const { enforcementUserCount, permittedSeats, licenseLimitStatus, type } =
     license ?? {};
 
   React.useEffect(() => {
@@ -66,7 +67,7 @@ export const useLicenseLimitNotification = () => {
           }
         ),
         link: {
-          url: MANAGE_SEATS_URL,
+          url: type === 'gold' ? BILLING_SELF_HOSTED_URL : MANAGE_SEATS_URL,
           label: formatMessage({
             id: 'notification.ee.warning.seat-limit.link',
             defaultMessage: 'Manage seats',
@@ -87,7 +88,7 @@ export const useLicenseLimitNotification = () => {
     permittedSeats,
     licenseLimitStatus,
     enforcementUserCount,
-    isHostedOnStrapiCloud,
     isError,
+    type,
   ]);
 };
