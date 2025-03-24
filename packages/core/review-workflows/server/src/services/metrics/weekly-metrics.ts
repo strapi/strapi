@@ -60,7 +60,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       let weeklySchedule = currentSchedule;
 
       if (!currentSchedule || !lastWeeklyUpdate || lastWeeklyUpdate + ONE_WEEK < now.getTime()) {
-        weeklySchedule = getWeeklyCronScheduleAt(add(now, { seconds: 10 }));
+        weeklySchedule = getWeeklyCronScheduleAt(add(now, { seconds: 15 }));
         await setMetricsStoreValue({ ...metricsInfoStored, weeklySchedule });
       }
 
