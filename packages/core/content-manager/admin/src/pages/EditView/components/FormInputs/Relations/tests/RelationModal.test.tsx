@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@tests/utils';
 import { useNavigate } from 'react-router-dom';
 
-import { RelationCard } from '../RelationModal';
+import { RelationModal } from '../RelationModal';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -206,19 +206,19 @@ describe('<RelationModal />', () => {
   });
 
   it('renders the trigger button correctly', () => {
-    render(<RelationCard triggerButtonLabel="Open Modal" relation={relation} />);
+    render(<RelationModal triggerButtonLabel="Open Modal" relation={relation} />);
 
     expect(screen.getByText('Open Modal')).toBeInTheDocument();
   });
 
   it('does not render the modal by default', () => {
-    render(<RelationCard triggerButtonLabel="Open Modal" relation={relation} />);
+    render(<RelationModal triggerButtonLabel="Open Modal" relation={relation} />);
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('opens the modal when clicking the trigger button', () => {
-    render(<RelationCard triggerButtonLabel="Open Modal" relation={relation} />);
+    render(<RelationModal triggerButtonLabel="Open Modal" relation={relation} />);
 
     const button = screen.getByText('Open Modal');
     fireEvent.click(button);
@@ -236,7 +236,7 @@ describe('<RelationModal />', () => {
   });
 
   it('closes the modal when clicking the cancel button', () => {
-    render(<RelationCard triggerButtonLabel="Open Modal" relation={relation} />);
+    render(<RelationModal triggerButtonLabel="Open Modal" relation={relation} />);
 
     const button = screen.getByText('Open Modal');
     fireEvent.click(button);
@@ -250,7 +250,7 @@ describe('<RelationModal />', () => {
   });
 
   it('navigates to full page when "Go to entry" is clicked', () => {
-    render(<RelationCard triggerButtonLabel="Open Modal" relation={relation} />);
+    render(<RelationModal triggerButtonLabel="Open Modal" relation={relation} />);
 
     fireEvent.click(screen.getByText('Open Modal'));
 

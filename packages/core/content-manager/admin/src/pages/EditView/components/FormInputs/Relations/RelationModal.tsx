@@ -30,9 +30,9 @@ import { styled } from 'styled-components';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../../../../../constants/collections';
 import { PERMISSIONS } from '../../../../../constants/plugin';
 import { buildValidParams } from '../../../../../exports';
-import { type DocumentMeta } from '../../../../../features/DocumentContext';
 import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
+import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { usePreviewContext } from '../../../../../preview/pages/Preview';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
@@ -43,18 +43,13 @@ import { FormLayout } from '../../FormLayout';
 
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
 
-interface RelationModalProps {
-  triggerButtonLabel: string;
-  relation: DocumentMeta;
-}
-
 export function getCollectionType(url: string) {
   const regex = new RegExp(`(${COLLECTION_TYPES}|${SINGLE_TYPES})`);
   const match = url.match(regex);
   return match ? match[1] : undefined;
 }
 
-const CustomModalContent = styled(Modal.Content)`
+const StyledModalContent = styled(Modal.Content)`
   width: 90%;
   max-width: 100%;
   height: 90%;
@@ -67,7 +62,12 @@ const CustomModalContent = styled(Modal.Content)`
 
 interface State {
   documentHistory: DocumentMeta[];
-  confirmDialogIntent: null | 'close' | 'back' | 'open' | 'navigate';
+  confirmDialogIntent:
+    | null // No dialog
+    | 'close' // Close the modal
+    | 'back' // Go back one document in the modal's history
+    | 'navigate' // Open the document in the edit view instead of in the modal
+    | DocumentMeta; // Open a specific document in the modal
   isModalOpen: boolean;
   hasUnsavedChanges: boolean;
 }
@@ -103,7 +103,7 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'GO_TO_RELATION':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
-        return { ...state, confirmDialogIntent: 'open' };
+        return { ...state, confirmDialogIntent: action.payload.document };
       }
 
       return {
@@ -119,7 +119,7 @@ function reducer(state: State, action: Action): State {
 
       return {
         ...state,
-        documentHistory: state.documentHistory.slice(0, state.documentHistory.length - 1),
+        documentHistory: state.documentHistory.slice(0, -1),
         confirmDialogIntent: null,
       };
     case 'GO_FULL_PAGE':
@@ -169,6 +169,12 @@ interface RelationModalContextValue {
 const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
+/**
+ * This component does not return UI.
+ * It is needed because we need to consume state from the form context in order to lift it up
+ * into the modal context. It is not possible otherwise because the modal needs the form state,
+ * but it must be a parent of the form.
+ */
 const FormWatcher = () => {
   const modified = useForm('FormWatcher', (state) => state.modified);
   const isSubmitting = useForm('FormWatcher', (state) => state.isSubmitting);
@@ -183,14 +189,17 @@ const FormWatcher = () => {
   return null;
 };
 
-const RelationRenderer = ({
+/**
+ * Component responsible of rendering its children wrapped in a modal and in context if needed
+ */
+const RelationModalRenderer = ({
   children,
   trigger,
   relation,
 }: {
   children: React.ReactNode;
   trigger: React.ReactNode;
-  relation: RelationModalProps['relation'];
+  relation: DocumentMeta;
 }) => {
   const { formatMessage } = useIntl();
 
@@ -273,7 +282,7 @@ const RelationRenderer = ({
         >
           <FormWatcher />
           {trigger}
-          <CustomModalContent>
+          <StyledModalContent>
             <Modal.Header gap={2}>
               <Flex justifyContent="space-between" alignItems="center" width="100%">
                 <Flex gap={2}>
@@ -312,14 +321,19 @@ const RelationRenderer = ({
                 </Button>
               </Modal.Close>
             </Modal.Footer>
-          </CustomModalContent>
+          </StyledModalContent>
         </FormContext>
       </Modal.Root>
     </RelationModalProvider>
   );
 };
 
-const RelationCardInner = ({ relation }: RelationModalProps) => {
+/**
+ * All the main content (not header and footer) of the relation modal, plus the confirmation dialog.
+ * Will be wrapped in a Modal.Body by the RelationModalRenderer.
+ * Cannot be moved directly inside RelationModal because it needs access to the context via hooks.
+ */
+const RelationModalBody = ({ relation }: RelationModalProps) => {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
   const { formatMessage } = useIntl();
@@ -327,7 +341,6 @@ const RelationCardInner = ({ relation }: RelationModalProps) => {
   const [triggerRefetchDocument] = useLazyGetDocumentQuery();
 
   const state = useRelationModal('RelationModalForm', (state) => state.state);
-
   const dispatch = useRelationModal('RelationModalForm', (state) => state.dispatch);
   const rootDocumentMeta = useRelationModal('RelationModalForm', (state) => state.rootDocumentMeta);
   const currentDocumentMeta = useRelationModal(
@@ -371,16 +384,20 @@ const RelationCardInner = ({ relation }: RelationModalProps) => {
   };
 
   const handleConfirm = () => {
+    if (state.confirmDialogIntent === null) {
+      return;
+    }
     if (state.confirmDialogIntent === 'navigate') {
       handleRedirection();
     } else if (state.confirmDialogIntent === 'back') {
       dispatch({ type: 'GO_BACK', payload: { shouldBypassConfirmation: true } });
     } else if (state.confirmDialogIntent === 'close') {
       handleCloseModal(true);
-    } else if (state.confirmDialogIntent === 'open') {
+    } else if ('documentId' in state.confirmDialogIntent) {
       dispatch({
         type: 'GO_TO_RELATION',
-        payload: { document: relation, shouldBypassConfirmation: true },
+        // TOFIX: not relation
+        payload: { document: state.confirmDialogIntent, shouldBypassConfirmation: true },
       });
     }
   };
@@ -408,14 +425,8 @@ const RelationCardInner = ({ relation }: RelationModalProps) => {
       </RelationEditView>
       <Dialog.Root open={state.confirmDialogIntent != null}>
         <ConfirmDialog
-          onConfirm={() => {
-            handleConfirm();
-            // TODO: fix scope
-            // resetForm();
-          }}
-          onCancel={() => {
-            dispatch({ type: 'CANCEL_CONFIRM_DIALOG' });
-          }}
+          onConfirm={() => handleConfirm()}
+          onCancel={() => dispatch({ type: 'CANCEL_CONFIRM_DIALOG' })}
           variant="danger"
         >
           {formatMessage({
@@ -439,7 +450,7 @@ const ModalTrigger = ({
   const dispatch = useRelationModal('ModalTrigger', (state) => state.dispatch);
 
   return (
-    <CustomTextButton
+    <StyledTextButton
       onClick={() => {
         dispatch({
           type: 'GO_TO_RELATION',
@@ -448,22 +459,27 @@ const ModalTrigger = ({
       }}
     >
       {children}
-    </CustomTextButton>
+    </StyledTextButton>
   );
 };
 
-const RelationCard = React.memo((props: RelationModalProps) => {
+interface RelationModalProps {
+  triggerButtonLabel: string;
+  relation: DocumentMeta;
+}
+
+const RelationModal = React.memo((props: RelationModalProps) => {
   return (
-    <RelationRenderer
+    <RelationModalRenderer
       relation={props.relation}
       trigger={<ModalTrigger relation={props.relation}>{props.triggerButtonLabel}</ModalTrigger>}
     >
-      <RelationCardInner {...props} />
-    </RelationRenderer>
+      <RelationModalBody {...props} />
+    </RelationModalRenderer>
   );
 });
 
-const CustomTextButton = styled(TextButton)`
+const StyledTextButton = styled(TextButton)`
   & > span {
     font-size: ${({ theme }) => theme.fontSizes[2]};
   }
@@ -619,4 +635,4 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export { RelationCard, useRelationModal };
+export { RelationModal, useRelationModal };
