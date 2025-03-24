@@ -124,7 +124,6 @@ describe('useLicenseLimitNotification', () => {
         ...baseLicenseInfo,
         licenseLimitStatus: 'OVER_LIMIT',
         type: 'gold',
-        
       },
     }));
 
