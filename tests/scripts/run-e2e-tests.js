@@ -220,6 +220,7 @@ const config = ${JSON.stringify(config)}
 
 module.exports = config
               `;
+
               await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
               // Store the filesystem state with git so it can be reset between tests
