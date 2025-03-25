@@ -156,6 +156,8 @@ const PreviewPage = () => {
     );
   };
 
+  const hasAdvancedPreview = window.strapi.features.isEnabled('cms-advanced-preview');
+
   return (
     <>
       <Page.Title>
@@ -206,25 +208,27 @@ const PreviewPage = () => {
               <Blocker onProceed={resetForm} />
               <PreviewHeader />
               <Flex flex={1} overflow="auto" alignItems="stretch">
-                <Box
-                  overflow="auto"
-                  width={isSideEditorOpen ? '50%' : 0}
-                  borderWidth="0 1px 0 0"
-                  borderColor="neutral150"
-                  paddingTop={6}
-                  paddingBottom={6}
-                  // Remove horizontal padding when the editor is closed or it won't fully disappear
-                  paddingLeft={isSideEditorOpen ? 6 : 0}
-                  paddingRight={isSideEditorOpen ? 6 : 0}
-                  transition="all 0.2s ease-in-out"
-                >
-                  {/* TODO: add license check */}
-                  <FormLayout
-                    layout={documentLayoutResponse.edit.layout}
-                    document={documentResponse}
-                    hasBackground={false}
-                  />
-                </Box>
+                {hasAdvancedPreview && (
+                  <Box
+                    overflow="auto"
+                    width={isSideEditorOpen ? '50%' : 0}
+                    borderWidth="0 1px 0 0"
+                    borderColor="neutral150"
+                    paddingTop={6}
+                    paddingBottom={6}
+                    // Remove horizontal padding when the editor is closed or it won't fully disappear
+                    paddingLeft={isSideEditorOpen ? 6 : 0}
+                    paddingRight={isSideEditorOpen ? 6 : 0}
+                    transition="all 0.2s ease-in-out"
+                  >
+                    <FormLayout
+                      layout={documentLayoutResponse.edit.layout}
+                      document={documentResponse}
+                      hasBackground={false}
+                    />
+                  </Box>
+                )}
+
                 <Box position="relative" flex={1} height="100%" overflow="hidden">
                   <Box
                     data-testid="preview-iframe"
@@ -247,26 +251,28 @@ const PreviewPage = () => {
                     borderWidth={0}
                     tag="iframe"
                   />
-                  <IconButton
-                    variant="tertiary"
-                    label={formatMessage(
-                      isSideEditorOpen
-                        ? {
-                            id: 'content-manager.preview.content.close-editor',
-                            defaultMessage: 'Close editor',
-                          }
-                        : {
-                            id: 'content-manager.preview.content.open-editor',
-                            defaultMessage: 'Open editor',
-                          }
-                    )}
-                    onClick={() => setIsSideEditorOpen((prev) => !prev)}
-                    position="absolute"
-                    top={2}
-                    left={2}
-                  >
-                    <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
-                  </IconButton>
+                  {hasAdvancedPreview && (
+                    <IconButton
+                      variant="tertiary"
+                      label={formatMessage(
+                        isSideEditorOpen
+                          ? {
+                              id: 'content-manager.preview.content.close-editor',
+                              defaultMessage: 'Close editor',
+                            }
+                          : {
+                              id: 'content-manager.preview.content.open-editor',
+                              defaultMessage: 'Open editor',
+                            }
+                      )}
+                      onClick={() => setIsSideEditorOpen((prev) => !prev)}
+                      position="absolute"
+                      top={2}
+                      left={2}
+                    >
+                      <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
+                    </IconButton>
+                  )}
                 </Box>
               </Flex>
             </Flex>

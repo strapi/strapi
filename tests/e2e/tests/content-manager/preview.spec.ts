@@ -4,6 +4,8 @@ import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
 test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
@@ -110,7 +112,7 @@ test.describe('Preview', () => {
 });
 
 // TODO: add license check in condition
-describeOnCondition(true)('Advanced Preview', () => {
+describeOnCondition(edition === 'EE')('Advanced Preview', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, {
       coreStore: false,
