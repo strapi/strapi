@@ -212,6 +212,7 @@ export declare namespace GetLicenseLimitInformation {
       permittedSeats: number;
       shouldNotify: boolean;
       shouldStopCreate: boolean;
+      type: string;
     };
     error?: errors.ApplicationError;
   }
