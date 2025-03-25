@@ -211,16 +211,17 @@ const RelationModalRenderer = ({
   });
 
   const rootDocument = useDoc();
+  console.log('rootDocument', rootDocument);
 
-  if (!rootDocument.document) {
-    throw new Error('Root document not found');
-  }
+  // if (!rootDocument.document) {
+  //   throw new Error('Root document not found');
+  // }
 
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query ?? {}), [query]);
 
   const rootDocumentMeta: DocumentMeta = {
-    documentId: rootDocument.document.documentId,
+    documentId: rootDocument.document?.documentId || '',
     model: rootDocument.model,
     collectionType: rootDocument.collectionType,
     params,
