@@ -20,7 +20,8 @@ import { styled } from 'styled-components';
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { InjectionZone } from '../../../../../components/InjectionZone';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
@@ -58,9 +59,26 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
+  const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
+  const rootDocumentMeta = useDocumentContext(
+    'DynamicComponent',
+    (state) => state.rootDocumentMeta
+  );
+
   const {
-    edit: { components },
-  } = useDocLayout();
+    edit: { components: rootComponents },
+  } = useDocumentLayout(rootDocumentMeta.model);
+  const {
+    edit: { components: relatedComponents },
+  } = useDocumentLayout(documentMeta.model);
+
+  // Merge the root level components and related components
+  const components = React.useMemo(
+    () => ({ ...rootComponents, ...relatedComponents }),
+    [rootComponents, relatedComponents]
+  );
+
+  const document = useDocumentContext('DynamicComponent', (state) => state.document);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
@@ -274,9 +292,17 @@ const DynamicComponent = ({
                                   alignItems="stretch"
                                 >
                                   {children ? (
-                                    children({ ...fieldWithTranslatedLabel, name: fieldName })
+                                    children({
+                                      ...fieldWithTranslatedLabel,
+                                      document,
+                                      name: fieldName,
+                                    })
                                   ) : (
-                                    <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                                    <InputRenderer
+                                      {...fieldWithTranslatedLabel}
+                                      document={document}
+                                      name={fieldName}
+                                    />
                                   )}
                                 </ResponsiveGridItem>
                               );
