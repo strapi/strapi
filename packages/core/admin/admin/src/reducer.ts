@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import { PermissionMap } from './types/permissions';
+import { getCookieValue, setCookie, deleteCookie } from './utils/cookies';
 
 import type { PayloadAction } from '@reduxjs/toolkit';
 
@@ -21,15 +22,14 @@ interface AppState {
 
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
-  USER: 'userInfo',
+  STATUS: 'isLoggedIn',
 };
 
 const THEME_LOCAL_STORAGE_KEY = 'STRAPI_THEME';
 const LANGUAGE_LOCAL_STORAGE_KEY = 'strapi-admin-language';
 
 export const getStoredToken = (): string | null => {
-  const token =
-    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
+  const token = localStorage.getItem(STORAGE_KEYS.TOKEN) ?? getCookieValue(STORAGE_KEYS.TOKEN);
 
   if (typeof token === 'string') {
     return JSON.parse(token);
@@ -75,19 +75,18 @@ const adminSlice = createSlice({
       const { token, persist } = action.payload;
 
       if (!persist) {
-        window.sessionStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+        setCookie(STORAGE_KEYS.TOKEN, JSON.stringify(token));
       } else {
         window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
       }
-
+      window.localStorage.setItem(STORAGE_KEYS.STATUS, 'true');
       state.token = token;
     },
     logout(state) {
       state.token = null;
+      deleteCookie(STORAGE_KEYS.TOKEN);
       window.localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      window.localStorage.removeItem(STORAGE_KEYS.USER);
-      window.sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
-      window.sessionStorage.removeItem(STORAGE_KEYS.USER);
+      window.localStorage.removeItem(STORAGE_KEYS.STATUS);
     },
   },
 });
