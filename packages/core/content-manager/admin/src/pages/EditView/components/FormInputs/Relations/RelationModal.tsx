@@ -170,26 +170,6 @@ const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
 /**
- * This component does not return UI.
- * It is needed because we need to consume state from the form context in order to lift it up
- * into the modal context. It is not possible otherwise because the modal needs the form state,
- * but it must be a parent of the form.
- */
-const FormWatcher = () => {
-  const modified = useForm('FormWatcher', (state) => state.modified);
-  const isSubmitting = useForm('FormWatcher', (state) => state.isSubmitting);
-
-  const dispatch = useRelationModal('FormWatcher', (state) => state.dispatch);
-  const hasUnsavedChanges = modified && !isSubmitting;
-
-  React.useEffect(() => {
-    dispatch({ type: 'SET_HAS_UNSAVED_CHANGES', payload: { hasUnsavedChanges } });
-  }, [hasUnsavedChanges, dispatch]);
-
-  return null;
-};
-
-/**
  * Component responsible of rendering its children wrapped in a modal and in context if needed
  */
 const RelationModalRenderer = ({
@@ -275,7 +255,6 @@ const RelationModalRenderer = ({
             return yupSchema.validate(values, { abortEarly: false });
           }}
         >
-          <FormWatcher />
           {trigger}
           <StyledModalContent>
             <Modal.Header gap={2}>
@@ -343,6 +322,19 @@ const RelationModalBody = () => {
     (state) => state.currentDocumentMeta
   );
 
+  /**
+   * One-way sync the modified state from the form to the modal state.
+   * It is needed because we need to consume state from the form context in order to lift it up
+   * into the modal context. It is not possible otherwise because the modal needs the form state,
+   * but it must be a parent of the form.
+   */
+  const modified = useForm('FormWatcher', (state) => state.modified);
+  const isSubmitting = useForm('FormWatcher', (state) => state.isSubmitting);
+  const hasUnsavedChanges = modified && !isSubmitting;
+  React.useEffect(() => {
+    dispatch({ type: 'SET_HAS_UNSAVED_CHANGES', payload: { hasUnsavedChanges } });
+  }, [hasUnsavedChanges, dispatch]);
+
   const handleCloseModal = (shouldBypassConfirmation: boolean) => {
     dispatch({ type: 'CLOSE_MODAL', payload: { shouldBypassConfirmation } });
 
@@ -391,7 +383,6 @@ const RelationModalBody = () => {
     } else if ('documentId' in state.confirmDialogIntent) {
       dispatch({
         type: 'GO_TO_RELATION',
-        // TOFIX: not relation
         payload: { document: state.confirmDialogIntent, shouldBypassConfirmation: true },
       });
     }
@@ -496,7 +487,6 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
     (state) => state.currentDocumentMeta
   );
   const currentDocument = useRelationModal('RelationModalBody', (state) => state.currentDocument);
-  const onPreview = usePreviewContext('RelationEditView', (state) => state.onPreview, false);
   const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
@@ -559,9 +549,6 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
     documentId: currentDocumentMeta.documentId,
     document: currentDocument.document,
     meta: currentDocument.meta,
-    onPreview,
-    fromRelationModal: true,
-    fromPreview: onPreview !== undefined,
   } satisfies DocumentActionProps;
 
   return (

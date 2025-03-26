@@ -30,6 +30,7 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
+import { usePreviewContext } from '../../../preview/pages/Preview';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
@@ -517,7 +518,6 @@ const PublishAction: DocumentActionComponent = ({
   collectionType,
   meta,
   document,
-  onPreview,
 }) => {
   const {
     currentDocument: { schema },
@@ -532,6 +532,7 @@ const PublishAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { publish, isLoading } = useDocumentActions();
+  const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
   const [
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
@@ -773,7 +774,6 @@ const UpdateAction: DocumentActionComponent = ({
   documentId,
   model,
   collectionType,
-  onPreview,
 }) => {
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
@@ -783,6 +783,7 @@ const UpdateAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const { create, update, clone, isLoading } = useDocumentActions();
   const [{ rawQuery }] = useQueryParams();
+  const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
