@@ -1,18 +1,11 @@
 import * as React from 'react';
-import {
-  Flex,
-  Menu,
-  ButtonProps,
-  VisuallyHidden,
-  Avatar,
-  Typography,
-  Badge,
-} from '@strapi/design-system';
+
+import { Flex, Menu, VisuallyHidden, Avatar, Typography, Badge } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+
 import { useAuth } from '../../features/Auth';
-import { getDisplayName } from '../../utils/users';
 
 const MenuTrigger = styled(Menu.Trigger)`
   height: ${({ theme }) => theme.spaces[7]};
@@ -61,11 +54,12 @@ const MenuItemDanger = styled(MenuItem)`
   }
 `;
 
-export interface NavUserProps extends ButtonProps {
+export interface NavUserProps {
   initials: string;
+  children: React.ReactNode;
 }
 
-export const NavUser = ({ initials, ...props }: NavUserProps) => {
+export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const user = useAuth('User', (state) => state.user);
@@ -92,13 +86,13 @@ export const NavUser = ({ initials, ...props }: NavUserProps) => {
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Avatar.Item delayMs={0} fallback={initials} />
-          <VisuallyHidden tag="span"> {getDisplayName(user)}</VisuallyHidden>
+          <VisuallyHidden tag="span">{children}</VisuallyHidden>
         </MenuTrigger>
 
         <MenuContent popoverPlacement="top-start" zIndex={3}>
           <UserInfo direction="column" gap={0} alignItems="flex-start">
             <Typography variant="omega" fontWeight="bold" textTransform="none">
-              {getDisplayName(user)}
+              {children}
             </Typography>
             <StyledTypography variant="pi" textColor="neutral600">
               {user?.email}
@@ -128,5 +122,3 @@ export const NavUser = ({ initials, ...props }: NavUserProps) => {
     </Flex>
   );
 };
-
-export default NavUser;
