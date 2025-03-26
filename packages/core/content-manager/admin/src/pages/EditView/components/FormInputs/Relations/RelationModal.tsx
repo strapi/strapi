@@ -145,6 +145,7 @@ function reducer(state: State, action: Action): State {
         ...state,
         documentHistory: [],
         confirmDialogIntent: null,
+        hasUnsavedChanges: false,
         isModalOpen: false,
       };
     case 'SET_HAS_UNSAVED_CHANGES':
