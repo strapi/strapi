@@ -41,8 +41,6 @@ const AuthResponse = () => {
           })
         );
 
-        deleteCookie('jwtToken');
-
         navigate('/auth/login');
       } else {
         redirectToOops();
