@@ -15,33 +15,6 @@ jest.mock('../../../InputRenderer', () => ({
   InputRenderer: () => 'INPUTS',
 }));
 
-jest.mock('@strapi/admin/strapi-admin', () => {
-  const actual = jest.requireActual('@strapi/admin/strapi-admin');
-
-  return {
-    ...actual,
-    useStrapiApp: jest.fn((name, getter) => {
-      const realAppState = {
-        ...actual.useStrapiApp(name, (state: unknown) => state),
-      };
-
-      // Mock getInjectedComponents
-      if (name === 'useInjectionZone') {
-        realAppState.getPlugin = jest.fn(() => ({
-          getInjectedComponents: jest.fn(() => [
-            {
-              name: 'mocked',
-              Component: () => <div>Mocked Injected Component</div>,
-            },
-          ]),
-        }));
-      }
-
-      return getter(realAppState);
-    }),
-  };
-});
-
 describe('DynamicZone', () => {
   afterEach(() => {
     jest.clearAllMocks();
