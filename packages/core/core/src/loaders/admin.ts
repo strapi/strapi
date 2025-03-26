@@ -3,8 +3,6 @@ import type { Core, Struct } from '@strapi/types';
 import { getGlobalId } from '../domain/content-type';
 
 export default async function loadAdmin(strapi: Core.Strapi) {
-  // strapi.admin = require('@strapi/admin/strapi-server');
-
   strapi.get('services').add(`admin::`, strapi.admin?.services);
   strapi.get('controllers').add(`admin::`, strapi.admin?.controllers);
   strapi.get('content-types').add(`admin::`, formatContentTypes(strapi.admin?.contentTypes ?? {}));
