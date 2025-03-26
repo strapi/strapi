@@ -44,6 +44,17 @@ export default [
     },
   },
   {
+    method: 'POST',
+    path: '/api-tokens/:id/retrieve',
+    handler: 'api-token.retrieve',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', config: { actions: ['admin::api-tokens.read'] } },
+      ],
+    },
+  },
+  {
     method: 'PUT',
     path: '/api-tokens/:id',
     handler: 'api-token.update',

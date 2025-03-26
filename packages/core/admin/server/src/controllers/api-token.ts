@@ -16,7 +16,7 @@ export default {
   async create(ctx: Context) {
     const { body } = ctx.request as Create.Request;
     const apiTokenService = getService('api-token');
-
+    const secretsService = getService('secret');
     /**
      * We trim both field to avoid having issues with either:
      * - having a space at the end or start of the value.
@@ -38,6 +38,7 @@ export default {
     }
 
     const apiToken = await apiTokenService.create(attributes);
+    await secretsService.store(`${apiToken.name}${apiToken.id}`, apiToken.accessKey);
     ctx.created({ data: apiToken } satisfies Create.Response);
   },
 
@@ -134,5 +135,18 @@ export default {
     const layout = await apiTokenService.getApiTokenLayout();
 
     ctx.send({ data: layout });
+  },
+
+  async retrieve(ctx: Context) {
+    const { id } = ctx.params;
+    const { name } = ctx.request.body as { name: string };
+    const secretsService = getService('secret');
+
+    const value = await secretsService.retrieve(`${name}${id}`);
+    ctx.send({
+      data: {
+        apiTokenValue: value,
+      },
+    });
   },
 };

@@ -5,6 +5,7 @@ import apiToken from './api-token';
 import apiTokenPermission from './api-token-permission';
 import transferToken from './transfer-token';
 import transferTokenPermission from './transfer-token-permission';
+import strapiSecret from './secret';
 
 export default {
   permission: { schema: Permission },
@@ -14,4 +15,5 @@ export default {
   'api-token-permission': { schema: apiTokenPermission },
   'transfer-token': { schema: transferToken },
   'transfer-token-permission': { schema: transferTokenPermission },
+  secret: { schema: strapiSecret },
 };
