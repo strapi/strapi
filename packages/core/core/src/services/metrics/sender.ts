@@ -71,9 +71,6 @@ export default (strapi: Core.Strapi): Sender => {
   return async (event: string, payload: Payload = {}, opts = {}) => {
     const userId = generateAdminUserHash(strapi);
 
-    // TO REMOVE
-    console.log(`[TELEMETRY INSTANCE] installId: ${installId}, userId: ${userId}`);
-
     const reqParams = {
       method: 'POST',
       body: JSON.stringify({
