@@ -72,10 +72,15 @@ const isFetchError = (error: unknown): error is FetchError => {
   return error instanceof FetchError;
 };
 
-const getToken = () =>
-  JSON.parse(
-    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? getCookieValue(STORAGE_KEYS.TOKEN) ?? '""'
-  );
+const getToken = (): string | null => {
+  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  if (fromLocalStorage) {
+    return JSON.parse(fromLocalStorage);
+  }
+
+  const fromCookie = getCookieValue(STORAGE_KEYS.TOKEN);
+  return fromCookie ?? null;
+};
 
 type FetchClient = {
   get: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
