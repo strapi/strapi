@@ -297,9 +297,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
             const resultsWithDraft: string[] = page.results
               .filter((result: { status: string }) => result.status === 'draft')
-              .map((result: { entryDocumentId: string }) => { 
-                return result.entryDocumentId;
-              });
+              .map((result: { entryDocumentId: string }) => result.entryDocumentId);
 
             await strapi.db.transaction(async () =>
               Promise.all(
