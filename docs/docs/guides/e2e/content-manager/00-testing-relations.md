@@ -117,6 +117,9 @@ Example:
 // Make relation changes
 await connectRelation(page, 'oneToManyRel', 'New Target');
 
+// Verify relations before save
+await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'New Target']);
+
 // Save content
 await saveContent(page);
 
