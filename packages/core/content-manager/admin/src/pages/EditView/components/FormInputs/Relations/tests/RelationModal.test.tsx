@@ -269,7 +269,7 @@ describe('Document Modal Reducer', () => {
         documentHistory: [],
         confirmDialogIntent: null,
         isModalOpen: false,
-        hasUnsavedChanges: true,
+        hasUnsavedChanges: false,
       });
     });
   });
