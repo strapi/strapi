@@ -1,6 +1,12 @@
 import { encryptValue, decryptValue } from '../utils/encryption';
 
 const store = async (key: string, value: string) => {
+  const createProvider = strapi.config.get<any>('admin.secret.createProvider');
+  if (createProvider) {
+    const { store } = createProvider();
+
+    return store(key, value);
+  }
   const encryptionKey = strapi.config.get<string>('admin.secret.encryptionKey');
   if (encryptionKey.length !== 64) {
     throw new Error('encryptionKey must be a 32-byte (64 hex characters) string');
@@ -16,6 +22,12 @@ const store = async (key: string, value: string) => {
 };
 
 const retrieve = async (key: string) => {
+  const createProvider = strapi.config.get<any>('admin.secret.createProvider');
+  if (createProvider) {
+    const { retrieve } = createProvider();
+
+    return retrieve(key);
+  }
   const encryptionKey = strapi.config.get<string>('admin.secret.encryptionKey');
   if (encryptionKey.length !== 64) {
     throw new Error('encryptionKey must be a 32-byte (64 hex characters) string');
