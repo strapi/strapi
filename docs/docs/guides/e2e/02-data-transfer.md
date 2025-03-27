@@ -43,7 +43,7 @@ Leave the development server running, and then run the following command to rese
 STRAPI_LICENSE=<license-with-ee-feature> npx ts-node <PATH_TO_SCRIPT>/dts-import.ts with-admin.tar
 ```
 
-This script will include admin users and all the content-types specificed in `tests/e2e/constants.ts`
+This script will include admin users and all the content-types specified in `tests/e2e/constants.ts`
 
 You should be able to login with the test app instance credentials.
 

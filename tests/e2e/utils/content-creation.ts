@@ -1,13 +1,24 @@
 import { expect, type Page } from '@playwright/test';
 import { typeMap } from './content-types';
 import { clickAndWait, findAndClose, locateSequence, navToHeader } from './shared';
+import { connectRelation, verifyRelation } from './relation-utils';
 
-export type FieldValueValue = string | number | boolean | null | Array<ComponentValue>;
+export type FieldValueValue =
+  | string
+  | number
+  | boolean
+  | null
+  | Array<ComponentValue>
+  | Array<RelationValue>;
 
 export interface ComponentValue {
   category: string; // Category the component belongs to
   name: string; // Name of the component
   fields: FieldValue[]; // Nested fields within the component
+}
+
+export interface RelationValue {
+  label: string; // Label of the relation
 }
 
 export interface FieldValue {
@@ -18,8 +29,8 @@ export interface FieldValue {
 
 export interface CreateContentOptions {
   publish?: boolean;
-  save: boolean;
-  verify: boolean;
+  save?: boolean;
+  verify?: boolean;
 }
 
 /**
@@ -41,7 +52,7 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
     case 'component_repeatable':
     case 'component':
       if (Array.isArray(value)) {
-        for (const component of value) {
+        for (const component of value as ComponentValue[]) {
           const { fields: componentFields, name: componentName } = component;
 
           // Locate the component by its name and click the button to add it
@@ -60,9 +71,20 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
         }
       }
       break;
+
+    case 'relation':
+      if (!Array.isArray(value)) {
+      }
+
+      for (const relation of value as RelationValue[]) {
+        const { label: relationLabel } = relation;
+        await connectRelation(page, name, relationLabel);
+      }
+      break;
+
     case 'dz':
       if (Array.isArray(value)) {
-        for (const component of value) {
+        for (const component of value as ComponentValue[]) {
           const { fields: componentFields } = component;
 
           // Click "Add a component to {name}"
@@ -182,7 +204,13 @@ export const verifyFields = async (page: Page, fields: FieldValue[]): Promise<vo
           }
         }
         break;
-      // TODO: component fields should actually check that they are in the same component
+
+      case 'relation':
+        for (const relation of value as RelationValue[]) {
+          await verifyRelation(page, name, relation.label);
+        }
+        break;
+
       default:
         const fieldValue = await page.getByLabel(name, { exact: true }).inputValue();
         expect(fieldValue).toBe(String(value)); // Verify text/numeric input values
@@ -207,7 +235,7 @@ export const createContent = async (
   page: Page,
   contentType: string,
   fields: FieldValue[],
-  options: CreateContentOptions
+  options: CreateContentOptions = { save: false, publish: false, verify: false }
 ): Promise<void> => {
   await navToHeader(page, ['Content Manager', contentType], contentType);
 
@@ -216,20 +244,46 @@ export const createContent = async (
   await fillFields(page, fields);
 
   if (options.save) {
-    await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-    await findAndClose(page, 'Saved Document', { required: options.verify });
+    await saveContent(page, options);
   }
 
   if (options.publish) {
-    await expect(page.getByRole('button', { name: 'Publish' })).toBeEnabled();
-    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
-    await findAndClose(page, 'Published Document', { required: options.verify });
+    await publishContent(page, options);
   }
 
   if (options.verify) {
-    // validate that data has been created successfully by refreshing page and checking that each field still has the value
-    await page.reload();
-    await verifyFields(page, fields);
+    await verifyContent(page, fields);
   }
+};
+
+/**
+ * Save the current content.
+ */
+export const saveContent = async (
+  page: Page,
+  options: { verify?: boolean } = { verify: false }
+) => {
+  await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
+  await findAndClose(page, 'Saved Document', { required: options.verify });
+};
+
+/**
+ * Publish the current content
+ */
+export const publishContent = async (
+  page: Page,
+  options: { verify?: boolean } = { verify: false }
+) => {
+  await expect(page.getByRole('button', { name: 'Publish' })).toBeEnabled();
+  await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+  await findAndClose(page, 'Published Document', { required: options.verify });
+};
+
+/**
+ * Validate that data has been created successfully by refreshing page and checking that each field still has the value
+ */
+export const verifyContent = async (page: Page, fields: FieldValue[]) => {
+  await page.reload();
+  await verifyFields(page, fields);
 };

@@ -1,0 +1,82 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_sources",
+  "info": {
+    "singularName": "relation-source",
+    "pluralName": "relation-sources",
+    "displayName": "Relation Source",
+    "description": "Content type with all features enabled for relation testing"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "required": true
+    },
+    "oneToOneRel": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-target.relation-target",
+      "inversedBy": "oneToOneInverse"
+    },
+    "oneToManyRel": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-target.relation-target",
+      "mappedBy": "manyToOneRel"
+    },
+    "manyToOneRel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::relation-target.relation-target",
+      "inversedBy": "oneToManyRel"
+    },
+    "manyToManyRel": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-target.relation-target",
+      "inversedBy": "manyToManyInverse"
+    },
+    "oneWayRel": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-target.relation-target"
+    },
+    "selfRel": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-source.relation-source"
+    },
+    "componentWithRel": {
+      "type": "component",
+      "repeatable": false,
+      "component": "relations.relation-component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "dynamicZone": {
+      "type": "dynamiczone",
+      "components": ["relations.relation-component"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}
