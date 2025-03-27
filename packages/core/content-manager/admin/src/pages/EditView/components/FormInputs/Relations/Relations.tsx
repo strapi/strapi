@@ -1059,9 +1059,9 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                 <Drag />
               </IconButton>
             ) : null}
-            <Flex width="100%" minWidth={0} justifyContent="space-between">
-              <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                <RelationModal triggerButtonLabel={label} relation={documentMeta} />
+            <Flex width="100%" minWidth={0} gap={4} justifyContent="space-between">
+              <Box flex={1} minWidth={0} paddingTop={1} paddingBottom={1}>
+                <RelationModal relation={documentMeta}>{label}</RelationModal>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
             </Flex>

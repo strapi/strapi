@@ -34,7 +34,6 @@ import { DocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDoc, useDocument, type UseDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta } from '../../../../../hooks/useDocumentContext';
 import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
-import { usePreviewContext } from '../../../../../preview/pages/Preview';
 import { useLazyGetDocumentQuery } from '../../../../../services/documents';
 import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
@@ -171,7 +170,7 @@ const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
 /**
- * Component responsible of rendering its children wrapped in a modal and in context if needed
+ * Component responsible of rendering its children wrapped in a modal, form and context if needed
  */
 const RelationModalRenderer = ({
   children,
@@ -240,64 +239,66 @@ const RelationModalRenderer = ({
           }
         }}
       >
-        <FormContext
-          method="PUT"
-          initialValues={currentDocument.getInitialFormValues()}
-          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-            const yupSchema = createYupSchema(
-              currentDocument.schema?.attributes,
-              currentDocument.components,
-              {
-                status: currentDocument.document?.status,
-                ...options,
-              }
-            );
-
-            return yupSchema.validate(values, { abortEarly: false });
-          }}
-        >
-          {trigger}
-          <StyledModalContent>
-            <Modal.Header gap={2}>
-              <Flex justifyContent="space-between" alignItems="center" width="100%">
-                <Flex gap={2}>
-                  <IconButton
-                    withTooltip={false}
-                    label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
-                    variant="ghost"
-                    disabled={state.documentHistory.length < 2}
-                    onClick={() => {
-                      dispatch({
-                        type: 'GO_BACK',
-                        payload: { shouldBypassConfirmation: false },
-                      });
-                    }}
-                    marginRight={1}
-                  >
-                    <ArrowLeft />
-                  </IconButton>
-                  <Typography tag="span" fontWeight={600}>
-                    {formatMessage({
-                      id: 'content-manager.components.RelationInputModal.modal-title',
-                      defaultMessage: 'Edit a relation',
-                    })}
-                  </Typography>
-                </Flex>
-              </Flex>
-            </Modal.Header>
-            <Modal.Body>{children}</Modal.Body>
-            <Modal.Footer>
-              <Modal.Close>
-                <Button variant="tertiary">
+        {trigger}
+        <StyledModalContent>
+          <Modal.Header gap={2}>
+            <Flex justifyContent="space-between" alignItems="center" width="100%">
+              <Flex gap={2}>
+                <IconButton
+                  withTooltip={false}
+                  label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
+                  variant="ghost"
+                  disabled={state.documentHistory.length < 2}
+                  onClick={() => {
+                    dispatch({
+                      type: 'GO_BACK',
+                      payload: { shouldBypassConfirmation: false },
+                    });
+                  }}
+                  marginRight={1}
+                >
+                  <ArrowLeft />
+                </IconButton>
+                <Typography tag="span" fontWeight={600}>
                   {formatMessage({
-                    id: 'app.components.Button.cancel',
-                    defaultMessage: 'Cancel',
+                    id: 'content-manager.components.RelationInputModal.modal-title',
+                    defaultMessage: 'Edit a relation',
                   })}
-                </Button>
-              </Modal.Close>
-            </Modal.Footer>
-          </StyledModalContent>
-        </FormContext>
+                </Typography>
+              </Flex>
+            </Flex>
+          </Modal.Header>
+          <Modal.Body>
+            <FormContext
+              method="PUT"
+              initialValues={currentDocument.getInitialFormValues()}
+              validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+                const yupSchema = createYupSchema(
+                  currentDocument.schema?.attributes,
+                  currentDocument.components,
+                  {
+                    status: currentDocument.document?.status,
+                    ...options,
+                  }
+                );
+
+                return yupSchema.validate(values, { abortEarly: false });
+              }}
+            >
+              {children}
+            </FormContext>
+          </Modal.Body>
+          <Modal.Footer>
+            <Modal.Close>
+              <Button variant="tertiary">
+                {formatMessage({
+                  id: 'app.components.Button.cancel',
+                  defaultMessage: 'Cancel',
+                })}
+              </Button>
+            </Modal.Close>
+          </Modal.Footer>
+        </StyledModalContent>
       </Modal.Root>
     </RelationModalProvider>
   );
@@ -451,15 +452,15 @@ const ModalTrigger = ({
 };
 
 interface RelationModalProps {
-  triggerButtonLabel: string;
+  children: React.ReactNode;
   relation: DocumentMeta;
 }
 
-const RelationModal = React.memo((props: RelationModalProps) => {
+const RelationModal = React.memo(({ relation, children }: RelationModalProps) => {
   return (
     <RelationModalRenderer
-      relation={props.relation}
-      trigger={<ModalTrigger relation={props.relation}>{props.triggerButtonLabel}</ModalTrigger>}
+      relation={relation}
+      trigger={<ModalTrigger relation={relation}>{children}</ModalTrigger>}
     >
       <RelationModalBody />
     </RelationModalRenderer>
@@ -467,6 +468,7 @@ const RelationModal = React.memo((props: RelationModalProps) => {
 });
 
 const StyledTextButton = styled(TextButton)`
+  max-width: 100%;
   & > span {
     font-size: ${({ theme }) => theme.fontSizes[2]};
     width: inherit;
