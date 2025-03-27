@@ -103,3 +103,23 @@ await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Targe
 // Reorder: move Target 3 after Target 1
 await reorderRelation(page, 'oneToManyRel', 'Target 3', 'Target 1', 'after');
 ```
+
+### Validation Notes
+
+Always verify relations after:
+
+1. **After UI interaction** - Confirm the UI shows expected changes
+2. **After saving** - Relations must be verified after saving as well, as the backend response may differ from what's displayed in the UI before saving.
+
+Example:
+
+```typescript
+// Make relation changes
+await connectRelation(page, 'oneToManyRel', 'New Target');
+
+// Save content
+await saveContent(page);
+
+// Verify relations after save
+await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'New Target']);
+```
