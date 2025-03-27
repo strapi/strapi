@@ -45,7 +45,6 @@
     "react-intl": "6.6.2"
   },
   "devDependencies": {
-    "@strapi/sdk-plugin": "^5.2.0",
     "@strapi/strapi": "5.12.0",
     "eslint-config-custom": "5.12.0",
     "react": "18.3.1",

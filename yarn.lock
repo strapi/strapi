@@ -9067,7 +9067,6 @@ __metadata:
   dependencies:
     "@strapi/design-system": "npm:2.0.0-rc.18"
     "@strapi/icons": "npm:2.0.0-rc.18"
-    "@strapi/sdk-plugin": "npm:^5.2.0"
     "@strapi/strapi": "npm:5.12.0"
     eslint-config-custom: "npm:5.12.0"
     react: "npm:18.3.1"
@@ -9092,7 +9091,6 @@ __metadata:
   dependencies:
     "@strapi/design-system": "npm:2.0.0-rc.18"
     "@strapi/icons": "npm:2.0.0-rc.18"
-    "@strapi/sdk-plugin": "npm:^5.2.0"
     "@strapi/strapi": "npm:5.12.0"
     "@testing-library/react": "npm:15.0.7"
     "@testing-library/user-event": "npm:14.5.2"
