@@ -295,15 +295,16 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           try {
             strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
             const page = await getService('release-action', { strapi }).findPage(releaseId);
-            console.log({ results: JSON.stringify(page.results) });
 
             const formattedActions = await getFormattedActions(releaseId);
 
             const resultsWithDraft: string[] = page.results
               .filter((result: { status: string }) => result.status === 'draft')
-              .map((result: { documentId: string }) => result.documentId);
+              .map((result: { entryDocumentId: string }) => { 
+                return result.entryDocumentId;
+              });
               
-            console.log({ formattedActions });
+            console.log({ resultsWithDraft });
             await strapi.db.transaction(async () =>
               Promise.all(
 
@@ -315,6 +316,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
                   for (const documentIdWithDraft of resultsWithDraft) {
                     const draftEntry = publish.find((params) => params.documentId === documentIdWithDraft);
                     if (draftEntry) {
+                      console.log({draftEntry})
                       await strapi.documents(contentType).publish(draftEntry);
                     }
                   }
@@ -322,6 +324,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
                   return Promise.all([
                     ...publish.map((params) => { 
                       if (resultsWithDraft.includes(params.documentId)) return;
+                      console.log("without draft", params.documentId)
                       return strapi.documents(contentType).publish(params);
                     }),
                     ...unpublish.map((params) => strapi.documents(contentType).unpublish(params)),
