@@ -41,6 +41,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       },
     })) as ReleaseAction[];
 
+    console.log({actions})
+
     if (actions.length === 0) {
       throw new errors.ValidationError('No entries to publish');
     }
@@ -268,6 +270,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
            * We lock the release in this transaction, so any other process trying to publish it will wait until this transaction is finished
            * In this transaction we don't care about rollback, becasue we want to persist the lock until the end and if it fails we want to change the release status to failed
            */
+          console.log({releaseId})
           const lockedRelease = (await strapi.db
             ?.queryBuilder(RELEASE_MODEL_UID)
             .where({ id: releaseId })
@@ -291,17 +294,36 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
           try {
             strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
+            const page = await getService('release-action', { strapi }).findPage(releaseId);
+            console.log({ results: JSON.stringify(page.results) });
 
             const formattedActions = await getFormattedActions(releaseId);
 
+            const resultsWithDraft: string[] = page.results
+              .filter((result: { status: string }) => result.status === 'draft')
+              .map((result: { documentId: string }) => result.documentId);
+              
+            console.log({ formattedActions });
             await strapi.db.transaction(async () =>
               Promise.all(
+
                 Object.keys(formattedActions).map(async (contentTypeUid) => {
                   const contentType = contentTypeUid as UID.ContentType;
+                  
                   const { publish, unpublish } = formattedActions[contentType];
 
+                  for (const documentIdWithDraft of resultsWithDraft) {
+                    const draftEntry = publish.find((params) => params.documentId === documentIdWithDraft);
+                    if (draftEntry) {
+                      await strapi.documents(contentType).publish(draftEntry);
+                    }
+                  }
+
                   return Promise.all([
-                    ...publish.map((params) => strapi.documents(contentType).publish(params)),
+                    ...publish.map((params) => { 
+                      if (resultsWithDraft.includes(params.documentId)) return;
+                      return strapi.documents(contentType).publish(params);
+                    }),
                     ...unpublish.map((params) => strapi.documents(contentType).unpublish(params)),
                   ]);
                 })
@@ -318,6 +340,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               },
             });
 
+            console.log({release})
             dispatchWebhook(ALLOWED_WEBHOOK_EVENTS.RELEASES_PUBLISH, {
               isPublished: true,
               release,
