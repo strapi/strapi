@@ -55,7 +55,7 @@
     "grant-koa": "5.4.8",
     "immer": "9.0.19",
     "jsonwebtoken": "9.0.0",
-    "jwk-to-pem": "2.0.5",
+    "jwk-to-pem": "2.0.7",
     "koa": "2.15.4",
     "koa2-ratelimit": "^1.1.2",
     "lodash": "4.17.21",
