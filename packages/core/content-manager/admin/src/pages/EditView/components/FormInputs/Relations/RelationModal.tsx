@@ -128,6 +128,9 @@ function reducer(state: State, action: Action): State {
 
       return {
         ...state,
+        documentHistory: [],
+        hasUnsavedChanges: false,
+        isModalOpen: false,
         confirmDialogIntent: null,
       };
     case 'CANCEL_CONFIRM_DIALOG':

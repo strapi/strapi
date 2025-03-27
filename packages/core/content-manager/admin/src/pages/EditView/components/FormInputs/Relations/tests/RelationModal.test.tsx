@@ -180,10 +180,7 @@ describe('Document Modal Reducer', () => {
 
       const result = reducer(stateWithHistory, action);
 
-      expect(result).toEqual({
-        ...stateWithHistory,
-        confirmDialogIntent: null,
-      });
+      expect(result).toEqual(initialState);
     });
 
     it('should show navigate confirmation dialog when unsaved changes exist', () => {
