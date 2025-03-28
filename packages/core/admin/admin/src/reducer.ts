@@ -29,13 +29,13 @@ const THEME_LOCAL_STORAGE_KEY = 'STRAPI_THEME';
 const LANGUAGE_LOCAL_STORAGE_KEY = 'strapi-admin-language';
 
 export const getStoredToken = (): string | null => {
-  const token = localStorage.getItem(STORAGE_KEYS.TOKEN) ?? getCookieValue(STORAGE_KEYS.TOKEN);
-
-  if (typeof token === 'string') {
-    return JSON.parse(token);
+  const fromLocalStorage = localStorage.getItem(STORAGE_KEYS.TOKEN);
+  if (fromLocalStorage) {
+    return JSON.parse(fromLocalStorage);
   }
 
-  return null;
+  const fromCookie = getCookieValue(STORAGE_KEYS.TOKEN);
+  return fromCookie ?? null;
 };
 
 const adminSlice = createSlice({
@@ -75,7 +75,7 @@ const adminSlice = createSlice({
       const { token, persist } = action.payload;
 
       if (!persist) {
-        setCookie(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+        setCookie(STORAGE_KEYS.TOKEN, token);
       } else {
         window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
       }
