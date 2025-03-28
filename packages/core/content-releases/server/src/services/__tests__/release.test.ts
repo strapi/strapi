@@ -285,6 +285,28 @@ describe('Release service', () => {
       mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
       const findOne = jest.fn();
       const findMany = jest.fn();
+      const documentsMock = jest.fn().mockImplementation(() => {
+        return       {
+          findOne: jest.fn().mockImplementation((params) => {
+            if (params.documentId === 1) {
+              return {
+                ...params,
+                publishedAt: null
+              };
+            }
+            return {
+              ...params,
+              publishedAt: 1743011553020
+             };
+          }
+          ),
+          findFirst: jest.fn(),
+          publish: mockPublish,
+          unpublish: mockUnpublish,
+        };
+      });
+
+
 
       const strapiMock = {
         ...baseStrapiMock,
@@ -296,21 +318,25 @@ describe('Release service', () => {
                 contentType: 'collectionType',
                 type: 'publish',
                 entry: { id: 1 },
+                entryDocumentId: 1
               },
               {
                 contentType: 'collectionType',
                 type: 'unpublish',
                 entry: { id: 2 },
+                entryDocumentId: 2
               },
               {
                 contentType: 'singleType',
                 type: 'publish',
                 entry: { id: 3 },
+                entryDocumentId: 3
               },
               {
                 contentType: 'singleType',
                 type: 'unpublish',
                 entry: { id: 4 },
+                entryDocumentId: 4
               },
             ]),
             update: jest.fn(),
@@ -329,6 +355,7 @@ describe('Release service', () => {
             kind: 'singleType',
           },
         },
+        documents: documentsMock,
       };
 
       // @ts-expect-error Ignore missing properties
