@@ -32,6 +32,18 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
    * Given a release id, it returns the actions formatted ready to be used to publish them.
    * We split them by contentType and type (publish/unpublish) and extract only the documentIds and locales.
    */
+
+  type ActionEntry = {
+    documentId: ReleaseAction['entryDocumentId'];
+    status?: 'draft' | 'published';
+    locale?: string;
+    contentType: UID.ContentType;
+  };
+  type Action = {
+    publish: ActionEntry[];
+    unpublish: ActionEntry[];
+  };
+
   const getFormattedActions = async (releaseId: Release['id']) => {
     const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
       where: {
@@ -49,21 +61,17 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
      * We separate publish and unpublish actions, grouping them by entry status ( published | draft ) and extracting only their documentIds, contentType and locales.
      */
     const formattedActions: {
-      [key: string]: {
-        publish: {
-          documentId: ReleaseAction['entryDocumentId'];
-          status?: 'draft' | 'published';
-          locale?: string;
-          contentType: UID.ContentType;
-        }[];
-        unpublish: {
-          documentId: ReleaseAction['entryDocumentId'];
-          status?: 'draft' | 'published';
-          locale?: string;
-          contentType: UID.ContentType;
-        }[];
-      };
-    } = {};
+      draft: Pick<Action, 'publish'>;
+      published: Action;
+    } = {
+      draft: {
+        publish: [],
+      },
+      published: {
+        publish: [],
+        unpublish: [],
+      },
+    };
 
     for (const action of actions) {
       const contentTypeUid: UID.ContentType = action.contentType;
@@ -79,22 +87,20 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         { strapi }
       );
 
+      console.log('entry :', entry);
       const entryStatus = entry ? await getEntryStatus(action.contentType, entry) : 'draft';
 
       const normalizedStatus = entryStatus === 'draft' ? 'draft' : 'published';
 
-      if (!formattedActions[normalizedStatus]) {
-        formattedActions[normalizedStatus] = {
-          publish: [],
-          unpublish: [],
-        };
-      }
+      const targetArray = normalizedStatus === 'draft'
+      ? formattedActions.draft.publish
+      : formattedActions.published[action.type];
 
-      formattedActions[normalizedStatus][action.type].push({
-        documentId: action.entryDocumentId,
-        locale: action.locale,
-        contentType: contentTypeUid,
-      });
+    targetArray.push({
+      documentId: action.entryDocumentId,
+      locale: action.locale,
+      contentType: contentTypeUid,
+    });
     }
 
     return formattedActions;
@@ -322,7 +328,9 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
               const { publish: draftsToPublish } = formattedActions.draft;
 
               await Promise.all([
-                ...draftsToPublish.map((params) => strapi.documents(params.contentType).publish(params)),
+                ...draftsToPublish.map((params) =>
+                  strapi.documents(params.contentType).publish(params)
+                ),
               ]);
 
               const { publish, unpublish } = formattedActions.published;
