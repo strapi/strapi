@@ -1,5 +1,5 @@
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
-import { render as renderRTL, waitFor, server } from '@tests/utils';
+import { act, render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
@@ -40,6 +40,7 @@ describe('AssigneeSelect', () => {
     await waitFor(() => expect(queryByText('John Doe')).not.toBeInTheDocument());
 
     await user.click(getByRole('combobox'));
+
     await waitFor(() => expect(queryByText('Loading content...')).not.toBeInTheDocument());
 
     await findByText('John Doe');
@@ -133,9 +134,15 @@ describe('AssigneeSelect', () => {
 
     const { getByRole, getByText, queryByText, user, findByText } = render();
 
-    await user.click(getByRole('combobox'));
+    await act(async () => {
+      await user.click(getByRole('combobox'));
+    });
+
     await waitFor(() => expect(queryByText('Loading content...')).not.toBeInTheDocument());
-    await user.click(getByText('John Doe'));
+
+    await act(async () => {
+      await user.click(getByText('John Doe'));
+    });
 
     await findByText('Server side error message');
 
