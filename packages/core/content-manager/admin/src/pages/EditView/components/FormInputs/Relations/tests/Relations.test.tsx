@@ -2,7 +2,16 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { RenderOptions, fireEvent, render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
+import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
+
+const relationContext = {
+  initialDocument: {
+    documentId: '12345',
+    model: 'api::address.address',
+    collectionType: 'collection-types',
+  },
+};
 
 const render = ({
   initialEntries,
@@ -32,17 +41,7 @@ const render = ({
             <Route
               path="/content-manager/:collectionType/:slug/:id"
               element={
-                <Form
-                  method="PUT"
-                  initialValues={{
-                    relations: {
-                      connect: [],
-                      disconnect: [],
-                    },
-                  }}
-                >
-                  {children}
-                </Form>
+                <DocumentContextProvider {...relationContext}>{children}</DocumentContextProvider>
               }
             />
           </Routes>
@@ -70,7 +69,7 @@ describe('Relations', () => {
     expect(await screen.findAllByRole('option')).toHaveLength(3);
   });
 
-  it('should by render the relations list when there is data from the API', async () => {
+  it('should render the relations list when there is data from the API', async () => {
     render();
 
     expect(screen.getByLabelText('relations')).toBe(screen.getByRole('combobox'));
@@ -78,9 +77,9 @@ describe('Relations', () => {
 
     expect(screen.getByLabelText('relations (3)')).toBe(screen.getByRole('combobox'));
 
-    expect(screen.getByRole('link', { name: 'Relation entity 1' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Relation entity 2' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Relation entity 3' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Relation entity 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Relation entity 2' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Relation entity 3' })).toBeInTheDocument();
   });
 
   it('should be disabled when the prop is passed', async () => {
