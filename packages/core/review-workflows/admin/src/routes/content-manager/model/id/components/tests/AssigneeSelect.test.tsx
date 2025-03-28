@@ -61,13 +61,9 @@ describe('AssigneeSelect', () => {
 
     const combobox = getByRole('combobox');
 
-    // Add more robust waiting and checking
-    await waitFor(
-      () => {
-        expect(combobox).toHaveValue('John Doe');
-      },
-      { timeout: 2000 }
-    );
+    expect(combobox).toBeInTheDocument();
+
+    await waitFor(() => expect(expect(combobox).toHaveValue('John Doe')));
   });
 
   it('renders a disabled select when there are no users to select', async () => {
