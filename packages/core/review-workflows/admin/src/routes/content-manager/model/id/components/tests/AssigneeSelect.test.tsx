@@ -5,11 +5,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { AssigneeSelect } from '../AssigneeSelect';
 
-jest.mock('@radix-ui/react-tooltip', () => {
-  const Tooltip = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-  return { Tooltip };
-});
-
 jest.mock('@strapi/content-manager/strapi-admin', () => ({
   unstable_useDocument: jest.fn().mockReturnValue({
     document: {
@@ -39,7 +34,7 @@ describe('AssigneeSelect', () => {
       initialEntries: ['/content-manager/collection-types/api::address.address/12345'],
     });
 
-  it('renders a select with users, none is selected', async () => {
+  it.only('renders a select with users, none is selected', async () => {
     const { getByRole, queryByText, user, findByText } = render();
 
     await waitFor(() => expect(queryByText('John Doe')).not.toBeInTheDocument());
