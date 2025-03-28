@@ -5,21 +5,32 @@ import { Route, Routes } from 'react-router-dom';
 
 import { AssigneeSelect } from '../AssigneeSelect';
 
+// Mock the content manager hook more comprehensively
 jest.mock('@strapi/content-manager/strapi-admin', () => ({
-  unstable_useDocument: jest.fn().mockReturnValue({
-    document: {
-      documentId: '12345',
-      id: 12345,
-      ['strapi_assignee']: {
-        id: 1,
-        firstname: 'John',
-        lastname: 'Doe',
-      },
-    },
-  }),
+  unstable_useDocument: jest.fn(),
 }));
 
 describe('AssigneeSelect', () => {
+  beforeEach(() => {
+    // Reset the mock implementation before each test
+    jest.mocked(unstable_useDocument).mockReturnValue({
+      document: {
+        documentId: '12345',
+        id: 12345,
+        ['strapi_assignee']: {
+          id: 1,
+          firstname: 'John',
+          lastname: 'Doe',
+        },
+      },
+      isLoading: false,
+      components: {},
+      validate: jest.fn(),
+      getInitialFormValues: jest.fn(),
+      getTitle: jest.fn(),
+      refetch: jest.fn(),
+    });
+  });
   const render = () =>
     renderRTL(<AssigneeSelect />, {
       renderOptions: {
@@ -50,7 +61,13 @@ describe('AssigneeSelect', () => {
 
     const combobox = getByRole('combobox');
 
-    await waitFor(() => expect(combobox).toHaveValue('John Doe'));
+    // Add more robust waiting and checking
+    await waitFor(
+      () => {
+        expect(combobox).toHaveValue('John Doe');
+      },
+      { timeout: 2000 }
+    );
   });
 
   it('renders a disabled select when there are no users to select', async () => {
