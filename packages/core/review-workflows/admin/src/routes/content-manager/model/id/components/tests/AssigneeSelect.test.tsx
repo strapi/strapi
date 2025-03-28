@@ -1,9 +1,14 @@
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
-import { act, render as renderRTL, waitFor, server } from '@tests/utils';
+import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { AssigneeSelect } from '../AssigneeSelect';
+
+jest.mock('@radix-ui/react-tooltip', () => {
+  const Tooltip = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+  return { Tooltip };
+});
 
 jest.mock('@strapi/content-manager/strapi-admin', () => ({
   unstable_useDocument: jest.fn().mockReturnValue({
@@ -40,7 +45,6 @@ describe('AssigneeSelect', () => {
     await waitFor(() => expect(queryByText('John Doe')).not.toBeInTheDocument());
 
     await user.click(getByRole('combobox'));
-
     await waitFor(() => expect(queryByText('Loading content...')).not.toBeInTheDocument());
 
     await findByText('John Doe');
@@ -134,15 +138,9 @@ describe('AssigneeSelect', () => {
 
     const { getByRole, getByText, queryByText, user, findByText } = render();
 
-    await act(async () => {
-      await user.click(getByRole('combobox'));
-    });
-
+    await user.click(getByRole('combobox'));
     await waitFor(() => expect(queryByText('Loading content...')).not.toBeInTheDocument());
-
-    await act(async () => {
-      await user.click(getByText('John Doe'));
-    });
+    await user.click(getByText('John Doe'));
 
     await findByText('Server side error message');
 
