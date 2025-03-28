@@ -131,7 +131,7 @@ export const findAndClose = async (page: Page, text: string, options: FindAndClo
   const elements = page.locator(`:has-text("${text}")[role="${role}"]`);
 
   if (required) {
-    await expect(elements.first()).toBeVisible(); // expect at least one element
+    await expect(elements).toBeVisible(); // expect at least one element
   }
 
   // Find all 'Close' buttons that are siblings of the elements containing the specified text.
