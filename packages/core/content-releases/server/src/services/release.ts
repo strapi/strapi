@@ -87,8 +87,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         { strapi }
       );
 
-      console.log('entry :', entry);
-      const entryStatus = entry ? await getEntryStatus(action.contentType, entry) : 'draft';
+      const entryStatus = entry ? await getEntryStatus(action.contentType, entry, { strapi }) : 'draft';
 
       const normalizedStatus = entryStatus === 'draft' ? 'draft' : 'published';
 

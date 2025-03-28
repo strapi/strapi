@@ -98,7 +98,11 @@ export const getEntry = async (
   return strapi.documents(contentType).findFirst({ locale, populate, status });
 };
 
-export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.ContentType) => {
+export const getEntryStatus = async (
+  contentType: UID.ContentType,
+  entry: Data.ContentType,
+  { strapi }: { strapi: Core.Strapi }
+) => {
   if (entry.publishedAt) {
     return 'published';
   }
