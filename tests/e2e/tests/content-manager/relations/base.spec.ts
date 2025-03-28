@@ -101,7 +101,7 @@ test.describe('Relations - EditView', () => {
     await login({ page });
   });
 
-  test('Create a RelationSource entry with a one-to-many relation', async ({ page }) => {
+  test.only('Create a RelationSource entry with a one-to-many relation', async ({ page }) => {
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
   });
@@ -157,7 +157,38 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
 
-  test('Update a relation and reorder it in the same operation', async ({ page }) => {});
+  test('Update a relation and reorder it in the same operation', async ({ page }) => {
+    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
+    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
+    // Add a new relation
+    await connectRelation(page, 'oneToManyRel', 'Target 3');
 
-  test('Delete a relation and reorder the remaining relations', async ({ page }) => {});
+    // Validate the three relations are there
+    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Target 3']);
+
+    // Move Target 3 after Target 1
+    await reorderRelation(page, 'oneToManyRel', 'Target 3', 'Target 1', 'after');
+    // Verify new order before save
+    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
+
+    // Save changes
+    await saveContent(page);
+    // Verify order is maintained after saving
+    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
+  });
+
+  test('Delete a relation and reorder the remaining relations', async ({ page }) => {
+    // Prefill entry with two relations
+    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
+    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
+
+    // Remove one relation
+    await disconnectRelation(page, 'oneToManyRel', 'Target 1');
+
+    // Save content
+    await saveContent(page);
+
+    // Validate only one relation is left
+    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
+  });
 });
