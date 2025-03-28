@@ -425,37 +425,37 @@ const WysiwygNav = ({
           onChange={(value) => handleActionClick(value, editorRef)}
           size="S"
         >
-          <SingleSelectOption value="h1" startIcon={<HeadingOne fill="neutral600" />}>
+          <SingleSelectOption value="h1" startIcon={<HeadingOne fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H1',
               defaultMessage: 'Heading 1',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h2" startIcon={<HeadingTwo fill="neutral600" />}>
+          <SingleSelectOption value="h2" startIcon={<HeadingTwo fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H2',
               defaultMessage: 'Heading 2',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h3" startIcon={<HeadingThree fill="neutral600" />}>
+          <SingleSelectOption value="h3" startIcon={<HeadingThree fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H3',
               defaultMessage: 'Heading 3',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h4" startIcon={<HeadingFour fill="neutral600" />}>
+          <SingleSelectOption value="h4" startIcon={<HeadingFour fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H4',
               defaultMessage: 'Heading 4',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h5" startIcon={<HeadingFive fill="neutral600" />}>
+          <SingleSelectOption value="h5" startIcon={<HeadingFive fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H5',
               defaultMessage: 'Heading 5',
             })}
           </SingleSelectOption>
-          <SingleSelectOption value="h6" startIcon={<HeadingSix fill="neutral600" />}>
+          <SingleSelectOption value="h6" startIcon={<HeadingSix fill="neutral500" />}>
             {formatMessage({
               id: 'components.Wysiwyg.selectOptions.H6',
               defaultMessage: 'Heading 6',
