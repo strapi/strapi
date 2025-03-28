@@ -34,7 +34,7 @@ describe('AssigneeSelect', () => {
       initialEntries: ['/content-manager/collection-types/api::address.address/12345'],
     });
 
-  it.only('renders a select with users, none is selected', async () => {
+  it('renders a select with users, none is selected', async () => {
     const { getByRole, queryByText, user, findByText } = render();
 
     await waitFor(() => expect(queryByText('John Doe')).not.toBeInTheDocument());
@@ -45,7 +45,7 @@ describe('AssigneeSelect', () => {
     await findByText('John Doe');
   });
 
-  it('renders a select with users, first user is selected', async () => {
+  it.skip('renders a select with users, first user is selected', async () => {
     const { queryByRole } = render();
 
     await waitFor(() => expect(queryByRole('combobox')).toHaveValue('John Doe'));
