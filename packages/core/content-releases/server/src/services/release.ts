@@ -14,7 +14,7 @@ import type {
 } from '../../../shared/contracts/releases';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
-import { getEntry, getEntryStatus, getService } from '../utils';
+import { getEntry, getService } from '../utils';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -76,22 +76,21 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     for (const action of actions) {
       const contentTypeUid: UID.ContentType = action.contentType;
 
-      const entry = await getEntry(
+      const publishedEntry = await getEntry(
         {
           contentType: action.contentType,
           documentId: action.entryDocumentId,
           locale: action.locale,
           populate: '*',
-          status: action.type === 'publish' ? 'draft' : 'published',
+          status: 'published',
+          skipDraftFetching: true,
         },
         { strapi }
       );
 
-      const entryStatus = entry ? await getEntryStatus(action.contentType, entry, { strapi }) : 'draft';
+      const entryStatus = publishedEntry ? 'published' : 'draft';
 
-      const normalizedStatus = entryStatus === 'draft' ? 'draft' : 'published';
-
-      const targetArray = normalizedStatus === 'draft'
+      const targetArray = entryStatus === 'draft'
       ? formattedActions.draft.publish
       : formattedActions.published[action.type];
 
