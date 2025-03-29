@@ -43,6 +43,7 @@ import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { usePersistentState } from '../../../hooks/usePersistentState';
 import { useSelectionState } from '../../../hooks/useSelectionState';
+import { useSettings } from '../../../hooks/useSettings';
 import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../../utils';
 
 import { BulkActions } from './components/BulkActions';
@@ -127,6 +128,8 @@ export const MediaLibrary = () => {
     navigate(pathname);
   }
 
+  const { data: settings, isLoading: settingsLoading } = useSettings();
+
   const folders =
     foldersData?.map((folder) => ({
       ...folder,
@@ -144,7 +147,12 @@ export const MediaLibrary = () => {
   const assetCount = assets?.length ?? 0;
   const totalAssetCount = assetsData?.pagination?.total;
 
-  const isLoading = isCurrentFolderLoading || foldersLoading || permissionsLoading || assetsLoading;
+  const isLoading =
+    isCurrentFolderLoading ||
+    foldersLoading ||
+    permissionsLoading ||
+    assetsLoading ||
+    settingsLoading;
   const [showUploadAssetDialog, setShowUploadAssetDialog] = React.useState(false);
   const [showEditFolderDialog, setShowEditFolderDialog] = React.useState(false);
   const [assetToEdit, setAssetToEdit] = React.useState<Asset | undefined>(undefined);
@@ -524,6 +532,7 @@ export const MediaLibrary = () => {
           open={showUploadAssetDialog}
           onClose={toggleUploadAssetDialog}
           trackedLocation="upload"
+          limitConcurrentUploads={settings?.limitConcurrentUploads || false}
           folderId={query?.folder as string | number | null | undefined}
         />
       )}

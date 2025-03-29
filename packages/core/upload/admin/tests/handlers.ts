@@ -159,6 +159,7 @@ const handlers = [
           sizeOptimization: true,
           responsiveDimensions: true,
           autoOrientation: true,
+          limitConcurrentUploads: false,
         },
       })
     );
