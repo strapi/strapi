@@ -128,9 +128,6 @@ async function run(args: string[]): Promise<void> {
   const uuid = (process.env.STRAPI_UUID_PREFIX || '') + randomUUID;
   const installId = installID(uuid);
 
-  // TO REMOVE
-  console.log(`[CLI] installId: ${installId}`);
-
   const scope: Scope = {
     rootPath,
     name: basename(rootPath),
