@@ -101,7 +101,7 @@ test.describe('Relations - EditView', () => {
     await login({ page });
   });
 
-  test.only('Create a RelationSource entry with a one-to-many relation', async ({ page }) => {
+  test('Create a RelationSource entry with a one-to-many relation', async ({ page }) => {
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
   });
