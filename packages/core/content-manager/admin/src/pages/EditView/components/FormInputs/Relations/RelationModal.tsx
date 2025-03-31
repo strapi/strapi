@@ -172,6 +172,15 @@ interface RelationModalContextValue {
 const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
+const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
+  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
+  const queryParams = currentDocumentMeta.params?.locale
+    ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
+    : '';
+
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
+};
+
 /**
  * Component responsible of rendering its children wrapped in a modal, form and context if needed
  */
@@ -185,6 +194,7 @@ const RelationModalRenderer = ({
   relation: DocumentMeta;
 }) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
 
   const [state, dispatch] = React.useReducer(reducer, {
     documentHistory: [],
@@ -269,6 +279,23 @@ const RelationModalRenderer = ({
                   })}
                 </Typography>
               </Flex>
+              <IconButton
+                onClick={() => {
+                  dispatch({
+                    type: 'GO_FULL_PAGE',
+                  });
+                  if (!state.hasUnsavedChanges) {
+                    navigate(getFullPageUrl(currentDocumentMeta));
+                  }
+                }}
+                variant="tertiary"
+                label={formatMessage({
+                  id: 'content-manager.components.RelationInputModal.button-fullpage',
+                  defaultMessage: 'Go to entry',
+                })}
+              >
+                <ArrowsOut />
+              </IconButton>
             </Flex>
           </Modal.Header>
           <Modal.Body>
@@ -291,16 +318,6 @@ const RelationModalRenderer = ({
               {children}
             </FormContext>
           </Modal.Body>
-          <Modal.Footer>
-            <Modal.Close>
-              <Button variant="tertiary">
-                {formatMessage({
-                  id: 'app.components.Button.cancel',
-                  defaultMessage: 'Cancel',
-                })}
-              </Button>
-            </Modal.Close>
-          </Modal.Footer>
         </StyledModalContent>
       </Modal.Root>
     </RelationModalProvider>
@@ -355,23 +372,15 @@ const RelationModalBody = () => {
     }
   };
 
-  const getFullPageLink = (): string => {
-    const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
-    const queryParams = currentDocumentMeta.params?.locale
-      ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
-      : '';
-
-    return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
-  };
-
   const handleRedirection = () => {
     const editViewUrl = `${pathname}${search}`;
-    const isRootDocumentUrl = editViewUrl.includes(getFullPageLink());
+    const fullPageUrl = getFullPageUrl(currentDocumentMeta);
+    const isRootDocumentUrl = editViewUrl.includes(fullPageUrl);
 
     if (isRootDocumentUrl) {
       handleCloseModal(true);
     } else {
-      navigate(getFullPageLink());
+      navigate(fullPageUrl);
     }
   };
 
@@ -395,25 +404,7 @@ const RelationModalBody = () => {
 
   return (
     <>
-      <RelationEditView>
-        <IconButton
-          onClick={() => {
-            dispatch({
-              type: 'GO_FULL_PAGE',
-            });
-            if (!state.hasUnsavedChanges) {
-              navigate(getFullPageLink());
-            }
-          }}
-          variant="tertiary"
-          label={formatMessage({
-            id: 'content-manager.components.RelationInputModal.button-fullpage',
-            defaultMessage: 'Go to entry',
-          })}
-        >
-          <ArrowsOut />
-        </IconButton>
-      </RelationEditView>
+      <RelationEditView />
       <Dialog.Root open={state.confirmDialogIntent != null}>
         <ConfirmDialog
           onConfirm={() => handleConfirm()}
@@ -485,7 +476,7 @@ const StyledTextButton = styled(TextButton)`
  * The mini edit view for a relation that is displayed inside a modal.
  * It's complete with its header, document actions and form layout.
  */
-const RelationEditView = ({ children }: { children: React.ReactNode }) => {
+const RelationEditView = () => {
   const { formatMessage } = useIntl();
 
   const currentDocumentMeta = useRelationModal(
@@ -565,7 +556,6 @@ const RelationEditView = ({ children }: { children: React.ReactNode }) => {
             {documentTitle}
           </Typography>
           <Flex gap={2}>
-            {children}
             <DescriptionComponentRenderer
               props={props}
               descriptions={(
