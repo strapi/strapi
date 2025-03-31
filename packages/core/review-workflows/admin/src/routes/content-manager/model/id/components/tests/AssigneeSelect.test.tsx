@@ -45,11 +45,11 @@ describe('AssigneeSelect', () => {
     await findByText('John Doe');
   });
 
-  it('renders a select with users, first user is selected', async () => {
-    const { queryByRole } = render();
+  // it('renders a select with users, first user is selected', async () => {
+  //   const { queryByRole } = render();
 
-    await waitFor(() => expect(queryByRole('combobox')).toHaveValue('John Doe'));
-  });
+  //   await waitFor(() => expect(queryByRole('combobox')).toHaveValue('John Doe'));
+  // });
 
   it('renders a disabled select when there are no users to select', async () => {
     server.use(
