@@ -615,7 +615,7 @@ const RelationsInput = ({
       <Combobox
         ref={fieldRef}
         name={name}
-        autocomplete={{ type: 'list', filter: 'contains' }}
+        autocomplete="list"
         placeholder={
           placeholder ||
           formatMessage({
