@@ -6,7 +6,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import { Page } from '../../../../admin/src/components/PageHelpers';
 import { useTypedDispatch } from '../../../../admin/src/core/store/hooks';
 import { login } from '../../../../admin/src/reducer';
-import { getCookieValue, deleteCookie } from '../../../../admin/src/utils/cookies';
+import { getCookieValue } from '../../../../admin/src/utils/cookies';
 
 const AuthResponse = () => {
   const match = useMatch('/auth/login/:authResponse');
@@ -40,8 +40,6 @@ const AuthResponse = () => {
             token: jwtToken,
           })
         );
-
-        deleteCookie('jwtToken');
 
         navigate('/auth/login');
       } else {
