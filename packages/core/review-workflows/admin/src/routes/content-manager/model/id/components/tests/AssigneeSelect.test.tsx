@@ -57,12 +57,29 @@ describe('AssigneeSelect', () => {
   });
 
   it('renders a select with users, first user is selected', async () => {
+    jest.mocked(unstable_useDocument).mockReturnValue({
+      document: {
+        documentId: '12345',
+        id: 12345,
+        ['strapi_assignee']: {
+          id: 1,
+          firstname: 'John',
+          lastname: 'Doe',
+        },
+      },
+      isLoading: false,
+      components: {},
+      validate: jest.fn(),
+      getInitialFormValues: jest.fn(),
+      getTitle: jest.fn(),
+      refetch: jest.fn(),
+    });
+
     render();
 
     await waitFor(() => {
       const combobox = screen.getByRole('combobox');
-
-      expect(expect(combobox).toHaveValue('John Doe'));
+      expect(combobox).toHaveValue('John Doe');
     });
   });
 
