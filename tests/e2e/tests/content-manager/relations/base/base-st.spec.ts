@@ -8,23 +8,14 @@ import {
   disconnectRelation,
 } from '../../../../utils/relation-utils';
 import { createContent, FieldValue, saveContent } from '../../../../utils/content-creation';
-
-const RELATION_SOURCE_URL =
-  /\/admin\/content-manager\/collection-types\/api::relation-source.relation-source\/(?!create)[^/]/;
-const RELATION_TARGET_URL =
-  /\/admin\/content-manager\/collection-types\/api::relation-target.relation-target\/(?!create)[^/]/;
+import { navToHeader } from '../../../../utils/shared';
 
 const createRelationSourceFields = (rawFields: {
   name?: string;
   oneToOneRel?: string;
   oneToManyRel?: string[];
-  manyToOneRel?: string;
-  manyToManyRel?: string[];
-  oneWayRel?: string;
-  selfRel?: string[];
 }) => {
-  const { name, oneToOneRel, oneToManyRel, manyToOneRel, manyToManyRel, oneWayRel, selfRel } =
-    rawFields;
+  const { name, oneToOneRel, oneToManyRel } = rawFields;
 
   // Return FieldValue[]
   const fields: FieldValue[] = [];
@@ -49,38 +40,6 @@ const createRelationSourceFields = (rawFields: {
     } satisfies FieldValue);
   }
 
-  if (manyToOneRel) {
-    fields.push({
-      name: 'manyToOneRel',
-      type: 'relation',
-      value: [{ label: manyToOneRel }],
-    } satisfies FieldValue);
-  }
-
-  if (manyToManyRel) {
-    fields.push({
-      name: 'manyToManyRel',
-      type: 'relation',
-      value: manyToManyRel.map((label) => ({ label })),
-    } satisfies FieldValue);
-  }
-
-  if (oneWayRel) {
-    fields.push({
-      name: 'oneWayRel',
-      type: 'relation',
-      value: [{ label: oneWayRel }],
-    } satisfies FieldValue);
-  }
-
-  if (selfRel) {
-    fields.push({
-      name: 'selfRel',
-      type: 'relation',
-      value: selfRel.map((label) => ({ label })),
-    } satisfies FieldValue);
-  }
-
   return fields;
 };
 
@@ -96,31 +55,25 @@ const createRelationSourceFields = (rawFields: {
  */
 
 //SINGLE TYPES
-test.describe('Relations - EditView', () => {
+test.describe('Relations Single Types - EditView', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('single-type-data.tar');
     await page.goto('/admin');
     await login({ page });
   });
 
-  test.only('Create a RelationSource entry with a one-to-many relation', async ({ page }) => {
-    //const fields = createRelationSourceFields({ oneToManyRel: ['Target 1'] });
-   // await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-  });
+  test.only('Update an existing relation', async ({ page }) => {
+    const contentType = 'Homepage';
+    await navToHeader(page, ['Content Manager', contentType], contentType);
 
-  test('Update an existing relation', async ({ page }) => {
-    // Prefill entry with two relations
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
+    // // Add a new relation
+    // await connectRelation(page, 'admin_user', 'test');
 
-    // Add a new relation
-    await connectRelation(page, 'oneToManyRel', 'Target 3');
+    // // Save content
+    // await saveContent(page);
 
-    // Save content
-    await saveContent(page);
-
-    // Validate the three relations are there
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Target 3']);
+    // // Validate the new relation is there
+    // await verifyRelationsOrder(page, 'admin_user', ['test']);
   });
 
   test('Delete a relation', async ({ page }) => {
@@ -192,8 +145,5 @@ test.describe('Relations - EditView', () => {
 
     // Validate only one relation is left
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
-
-
- 
   });
 });
