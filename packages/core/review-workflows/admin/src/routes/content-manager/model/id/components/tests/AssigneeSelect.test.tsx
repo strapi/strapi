@@ -59,11 +59,11 @@ describe('AssigneeSelect', () => {
   it('renders a select with users, first user is selected', async () => {
     const { getByRole } = render();
 
-    const combobox = getByRole('combobox');
+    await waitFor(() => {
+      const combobox = getByRole('combobox');
 
-    expect(combobox).toBeInTheDocument();
-
-    await waitFor(() => expect(expect(combobox).toHaveValue('John Doe')));
+      expect(expect(combobox).toHaveValue('John Doe'));
+    });
   });
 
   it('renders a disabled select when there are no users to select', async () => {
