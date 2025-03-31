@@ -25,7 +25,7 @@ export async function promptLogin(ctx: CLIContext) {
 }
 
 export default async function loginAction(ctx: CLIContext): Promise<boolean> {
-  const { logger } = ctx;
+  const { logger, isMatrixExperiment } = ctx;
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
   const cloudApiService = await cloudApiFactory(ctx, existingToken || undefined);
@@ -62,7 +62,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
     logger.debug(e);
     return false;
   }
-  await trackEvent(ctx, cloudApiService, 'willLoginAttempt', {});
+  await trackEvent(ctx, cloudApiService, 'willLoginAttempt', { isMatrixExperiment });
 
   logger.debug('🔐 Creating device authentication request...', {
     client_id: cliConfig.clientId,
@@ -155,7 +155,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
             'There seems to be a problem with your login information. Please try logging in again.'
           );
           spinnerFail();
-          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli', isMatrixExperiment });
           return false;
         }
         if (
@@ -164,7 +164,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
         ) {
           logger.debug(e);
           spinnerFail();
-          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli', isMatrixExperiment });
           return false;
         }
         // Await interval before retrying
@@ -179,7 +179,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
       'To access your dashboard, please copy and paste the following URL into your web browser:'
     );
     logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
-    await trackEvent(ctx, cloudApiService, 'didLogin', { loginMethod: 'cli' });
+    await trackEvent(ctx, cloudApiService, 'didLogin', { loginMethod: 'cli', isMatrixExperiment });
   };
 
   await authenticate();
