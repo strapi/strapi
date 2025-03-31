@@ -3,7 +3,7 @@ import { join, resolve } from 'path';
 import crypto from 'crypto';
 import type { Core } from '@strapi/types';
 
-import { installID } from '@strapi/utils';
+import { generateInstallId } from '@strapi/utils';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';
@@ -96,7 +96,7 @@ const fetchLicense = async (
       body: JSON.stringify({
         key,
         projectId,
-        deviceId: installID(projectId, installIdFromPackageJson),
+        deviceId: generateInstallId(projectId, installIdFromPackageJson),
       }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwError);

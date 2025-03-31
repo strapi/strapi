@@ -4,7 +4,7 @@ import _ from 'lodash';
 import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
 import tsUtils from '@strapi/typescript-utils';
-import { env, installID } from '@strapi/utils';
+import { env, generateInstallId } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 import { generateAdminUserHash } from './admin-user-hash';
 
@@ -42,7 +42,7 @@ const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi:
 export default (strapi: Core.Strapi): Sender => {
   const { uuid, installId: installIdFromPackageJson } = strapi.config;
 
-  const installId = installID(uuid, installIdFromPackageJson);
+  const installId = generateInstallId(uuid, installIdFromPackageJson);
 
   const serverRootPath = strapi.dirs.app.root;
   const adminRootPath = path.join(strapi.dirs.app.root, 'src', 'admin');

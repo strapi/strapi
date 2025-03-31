@@ -1,4 +1,4 @@
-import { installID } from '@strapi/utils';
+import { generateInstallId } from '@strapi/utils';
 
 export const sendEvent = async (event: string, uuid: string, installId?: any) => {
   try {
@@ -6,7 +6,7 @@ export const sendEvent = async (event: string, uuid: string, installId?: any) =>
       method: 'POST',
       body: JSON.stringify({
         event,
-        deviceId: installID(uuid, installId),
+        deviceId: generateInstallId(uuid, installId),
         groupProperties: { projectId: uuid },
       }),
       headers: {

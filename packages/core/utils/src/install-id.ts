@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { machineIdSync } from 'node-machine-id';
 
-export default (projectId: string, installId: string) => {
+export const generateInstallId = (projectId: string, installId: string) => {
   if (installId) return installId;
   try {
     const machineId = machineIdSync();
