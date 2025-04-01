@@ -54,6 +54,10 @@ inputs:
     description: 'Enable corepack'
     required: false
     default: 'true'
+  cache-only:
+    description: 'Skip the install step'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -111,6 +115,7 @@ runs:
         key: yarn-install-state-cache-${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.yarn-config.outputs.CURRENT_NODE_VERSION }}-${{ steps.yarn-config.outputs.CURRENT_BRANCH }}-${{ hashFiles(format('{0}/yarn.lock', inputs.cwd), format('{0}/.yarnrc.yml', inputs.cwd)) }}
 
     - name: 📥 Install dependencies
+      if: inputs.cache-only == 'false'
       shell: bash
       working-directory: ${{ inputs.cwd }}
       run: yarn install --immutable --inline-builds
