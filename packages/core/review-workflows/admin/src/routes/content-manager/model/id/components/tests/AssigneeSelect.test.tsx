@@ -57,7 +57,10 @@ describe('AssigneeSelect', () => {
   });
 
   it('renders a select with users, first user is selected', async () => {
-    render();
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      render();
+    });
 
     await waitFor(() => {
       const combobox = screen.getByRole('combobox');
