@@ -2,9 +2,19 @@ import { Form } from '@strapi/admin/strapi-admin';
 import { act, render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
+import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { DynamicZone, DynamicZoneProps } from '../Field';
 
 const TEST_NAME = 'DynamicZoneComponent';
+
+const relationContext = {
+  initialDocument: {
+    documentId: 'abcdefg',
+    model: 'api::address.address',
+    collectionType: 'collection-types',
+  },
+  setCurrentDocument: jest.fn(),
+};
 
 /**
  * We _could_ unmock this and use it, but it requires more
@@ -44,7 +54,7 @@ describe('DynamicZone', () => {
               path="/content-manager/:collectionType/:slug/:id"
               element={
                 <Form initialValues={initialFormValues} method="POST" onSubmit={jest.fn()}>
-                  {children}
+                  <DocumentContextProvider {...relationContext}>{children}</DocumentContextProvider>
                 </Form>
               }
             />

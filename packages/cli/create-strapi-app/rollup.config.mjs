@@ -1,3 +1,6 @@
 import { baseConfig } from '../../../rollup.utils.mjs';
 
-export default baseConfig(import.meta.dirname);
+export default baseConfig({
+  input: './src/index.ts',
+  rootDir: './dist',
+});
