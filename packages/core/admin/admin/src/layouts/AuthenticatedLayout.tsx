@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { DndContext } from '@dnd-kit/core';
 import packageInfo from '@strapi/admin/package.json';
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';

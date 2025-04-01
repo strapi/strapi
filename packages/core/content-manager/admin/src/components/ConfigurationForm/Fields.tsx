@@ -1,5 +1,9 @@
 import * as React from 'react';
 
+import { DndContext, DragOverlay, UniqueIdentifier } from '@dnd-kit/core';
+import { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
+import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useField, useForm } from '@strapi/admin/strapi-admin';
 import {
   Modal,
@@ -9,19 +13,16 @@ import {
   IconButton,
   IconButtonComponent,
   Typography,
-  useComposedRefs,
   Link,
   Menu,
 } from '@strapi/design-system';
 import { Cog, Cross, Drag, Pencil, Plus } from '@strapi/icons';
 import { generateNKeysBetween as generateNKeysBetweenImpl } from 'fractional-indexing';
-import { getEmptyImage } from 'react-dnd-html5-backend';
+import { createPortal } from 'react-dom';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { ItemTypes } from '../../constants/dragAndDrop';
-import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { getTranslation } from '../../utils/translations';
 import { ComponentIcon } from '../ComponentIcon';
 
@@ -32,6 +33,63 @@ import type { EditLayout } from '../../hooks/useDocumentLayout';
 
 type FormField = ConfigurationFormData['layout'][number]['children'][number];
 type Field = Omit<ConfigurationFormData['layout'][number]['children'][number], '__temp_key__'>;
+
+/* -------------------------------------------------------------------------------------------------
+ * Drag and Drop
+ * -----------------------------------------------------------------------------------------------*/
+
+const DroppableContainer = ({
+  items,
+  id,
+  children,
+}: {
+  items: (Field & { id: UniqueIdentifier })[];
+  id: string;
+  children: React.ReactNode;
+}) => {
+  const {
+    setNodeRef: setDropRef,
+    transition,
+    transform,
+  } = useSortable({
+    id,
+    data: {
+      type: 'container',
+      items,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <SortableContext items={items} strategy={rectSortingStrategy} id={id}>
+      <div ref={setDropRef} style={style}>
+        {children}
+      </div>
+    </SortableContext>
+  );
+};
+
+const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const { attributes, setNodeRef, transform, transition } = useSortable({
+    id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    height: '100%',
+  };
+
+  return (
+    <div ref={setNodeRef} {...attributes} style={style}>
+      {children}
+    </div>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Fields
@@ -47,16 +105,20 @@ interface FieldsProps extends Pick<EditLayout, 'metadatas'>, Pick<FieldProps, 'c
 
 const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
   const { formatMessage } = useIntl();
+  const [activeField, setActiveField] = React.useState<Field | null>(null);
 
   const layout = useForm<ConfigurationFormData['layout']>(
     'Fields',
     (state) => state.values.layout ?? []
   );
+  const containers = layout.reduce(
+    (acc, row, index) => ({ ...acc, [`container-${index}`]: row }),
+    {} as Record<string, ConfigurationFormData['layout'][number]>
+  );
+  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
   const onChange = useForm('Fields', (state) => state.onChange);
   const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
   const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
-
-  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
 
   /**
    * Get the fields that are not already in the layout
@@ -81,9 +143,9 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     return acc;
   }, []);
 
-  const handleMoveField: FieldProps['onMoveField'] = (
-    [newRowIndex, newFieldIndex],
-    [currentRowIndex, currentFieldIndex]
+  const handleMoveField = (
+    [newRowIndex, newFieldIndex]: number[],
+    [currentRowIndex, currentFieldIndex]: number[]
   ) => {
     /**
      * Because this view has the constraint that the sum of field sizes cannot be greater
@@ -198,63 +260,145 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   };
 
   return (
-    <Flex paddingTop={6} direction="column" alignItems="stretch" gap={4}>
-      <Flex alignItems="flex-start" direction="column" justifyContent="space-between">
-        <Typography fontWeight="bold">
-          {formatMessage({
-            id: getTranslation('containers.list.displayedFields'),
-            defaultMessage: 'Displayed fields',
-          })}
-        </Typography>
-        <Typography variant="pi" textColor="neutral600">
-          {formatMessage({
-            id: 'containers.SettingPage.editSettings.description',
-            defaultMessage: 'Drag & drop the fields to build the layout',
-          })}
-        </Typography>
-      </Flex>
-      <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
-        <Flex direction="column" alignItems="stretch" gap={2}>
-          {layout.map((row, rowIndex) => (
-            <Grid.Root gap={2} key={row.__temp_key__}>
-              {row.children.map(({ size, ...field }, fieldIndex) => (
-                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
-                  <Field
-                    attribute={attributes[field.name]}
-                    components={components}
-                    index={[rowIndex, fieldIndex]}
-                    name={`layout.${rowIndex}.children.${fieldIndex}`}
-                    onMoveField={handleMoveField}
-                    onRemoveField={handleRemoveField(rowIndex, fieldIndex)}
-                  />
-                </Grid.Item>
-              ))}
-            </Grid.Root>
-          ))}
-          <Menu.Root>
-            <Menu.Trigger
-              startIcon={<Plus />}
-              endIcon={null}
-              disabled={remainingFields.length === 0}
-              fullWidth
-              variant="secondary"
-            >
-              {formatMessage({
-                id: getTranslation('containers.SettingPage.add.field'),
-                defaultMessage: 'Insert another field',
-              })}
-            </Menu.Trigger>
-            <Menu.Content>
-              {remainingFields.map((field) => (
-                <Menu.Item key={field.name} onSelect={handleAddField(field)}>
-                  {field.label}
-                </Menu.Item>
-              ))}
-            </Menu.Content>
-          </Menu.Root>
+    <DndContext
+      onDragStart={({ active }) => {
+        const index: number = active.data?.current?.sortable.index;
+        const field = containers[active.data?.current?.sortable.containerId].children[index];
+
+        setActiveField(field);
+      }}
+      onDragEnd={({ active, over }) => {
+        const activeContainer = active.data?.current?.sortable;
+        const overContainer = over?.data?.current?.sortable;
+        const containerIds = Object.keys(containers);
+        const containerItems = Object.values(containers);
+
+        // The index of the row the field was dragged from
+        const activeContainerIndex = containerIds.indexOf(activeContainer.containerId);
+
+        // Handle a drop causing the entire container to be moved
+        if (over?.data?.current?.type === 'container') {
+          const overContainerIndex = containerIds.indexOf(over.id as string);
+          const newValues = arrayMove(containerItems, activeContainerIndex, overContainerIndex);
+
+          onChange('layout', newValues);
+        } else {
+          // The index of the row the field was dragged to
+          const overContainerIndex = containerIds.indexOf(overContainer.containerId);
+          // The index (within a container) the field was dragged from
+          const activeChildIndex = activeContainer.index;
+          // The index (within a container) the field was dragged to
+          const overChildIndex = overContainer.index;
+          /**
+           * Handle a field being moved inside its container along the x axis
+           * or to another container along the y axis
+           */
+          handleMoveField(
+            [overContainerIndex, overChildIndex],
+            [activeContainerIndex, activeChildIndex]
+          );
+        }
+      }}
+    >
+      <Flex paddingTop={6} direction="column" alignItems="stretch" gap={4}>
+        <Flex alignItems="flex-start" direction="column" justifyContent="space-between">
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTranslation('containers.list.displayedFields'),
+              defaultMessage: 'Displayed fields',
+            })}
+          </Typography>
+          <Typography variant="pi" textColor="neutral600">
+            {formatMessage({
+              id: 'containers.SettingPage.editSettings.description',
+              defaultMessage: 'Drag & drop the fields to build the layout',
+            })}
+          </Typography>
         </Flex>
-      </Box>
-    </Flex>
+        <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
+          <Flex direction="column" alignItems="stretch" gap={2}>
+            {activeField &&
+              createPortal(
+                <DragOverlay>
+                  <Flex
+                    grow={1}
+                    height="100%"
+                    borderColor="neutral150"
+                    background="neutral100"
+                    gap={3}
+                    hasRadius
+                  >
+                    <DragButton
+                      withTooltip={false}
+                      label={formatMessage(
+                        {
+                          id: getTranslation('components.DraggableCard.move.field'),
+                          defaultMessage: 'Move {item}',
+                        },
+                        { item: activeField.label }
+                      )}
+                    >
+                      <Drag />
+                    </DragButton>
+                    <Typography ellipsis fontWeight="bold">
+                      {activeField.label}
+                    </Typography>
+                  </Flex>
+                </DragOverlay>,
+                document.body
+              )}
+
+            {Object.entries(containers).map(([containerId, row], rowIndex) => {
+              const sortableItems = row.children.map((field) => ({
+                id: `container-${rowIndex}::field-${field.name}`,
+                ...field,
+              }));
+
+              return (
+                <DroppableContainer key={rowIndex} items={sortableItems} id={containerId}>
+                  <Grid.Root gap={2} key={rowIndex}>
+                    {sortableItems.map(({ size, ...field }, fieldIndex) => (
+                      <Grid.Item key={field.id} col={size} direction="column" alignItems="stretch">
+                        <SortableItem id={field.id}>
+                          <Field
+                            attribute={attributes[field.name]}
+                            components={components}
+                            id={field.id}
+                            name={`layout.${rowIndex}.children.${fieldIndex}`}
+                            onRemoveField={handleRemoveField(rowIndex, fieldIndex)}
+                          />
+                        </SortableItem>
+                      </Grid.Item>
+                    ))}
+                  </Grid.Root>
+                </DroppableContainer>
+              );
+            })}
+            <Menu.Root>
+              <Menu.Trigger
+                startIcon={<Plus />}
+                endIcon={null}
+                disabled={remainingFields.length === 0}
+                fullWidth
+                variant="secondary"
+              >
+                {formatMessage({
+                  id: getTranslation('containers.SettingPage.add.field'),
+                  defaultMessage: 'Insert another field',
+                })}
+              </Menu.Trigger>
+              <Menu.Content>
+                {remainingFields.map((field) => (
+                  <Menu.Item key={field.name} onSelect={handleAddField(field)}>
+                    {field.label}
+                  </Menu.Item>
+                ))}
+              </Menu.Content>
+            </Menu.Root>
+          </Flex>
+        </Box>
+      </Flex>
+    </DndContext>
   );
 };
 
@@ -309,8 +453,7 @@ const chunkArray = (array: FormField[]) => {
 
 interface FieldProps extends Pick<EditFieldFormProps, 'name' | 'attribute'> {
   components: EditLayout['components'];
-  index: [row: number, index: number];
-  onMoveField: UseDragAndDropOptions<number[]>['onMoveItem'];
+  id: string;
   onRemoveField: React.MouseEventHandler<HTMLButtonElement>;
 }
 
@@ -320,27 +463,12 @@ const TEMP_FIELD_NAME = '_TEMP_';
  * Displays a field in the layout with drag options, also
  * opens a modal  to edit the details of said field.
  */
-const Field = ({ attribute, components, name, index, onMoveField, onRemoveField }: FieldProps) => {
+const Field = ({ attribute, components, name, id, onRemoveField }: FieldProps) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
 
   const { value } = useField<FormField>(name);
-
-  const [{ isDragging }, objectRef, dropRef, dragRef, dragPreviewRef] = useDragAndDrop<
-    Array<number>
-  >(true, {
-    dropSensitivity: 'immediate',
-    type: ItemTypes.EDIT_FIELD,
-    item: { index, label: value?.label, name },
-    index,
-    onMoveItem: onMoveField,
-  });
-
-  React.useEffect(() => {
-    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
-
-  const composedRefs = useComposedRefs<HTMLSpanElement>(dragRef, objectRef);
+  const { setActivatorNodeRef, listeners } = useSortable({ id });
 
   const handleRemoveField: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
@@ -354,14 +482,12 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
     setIsModalOpen(true);
   };
 
-  const tempRefs = useComposedRefs<HTMLSpanElement>(dropRef, objectRef);
-
   if (!value) {
     return null;
   }
 
   if (value.name === TEMP_FIELD_NAME) {
-    return <Flex tag="span" height="100%" style={{ opacity: 0 }} ref={tempRefs} />;
+    return <Flex tag="span" height="100%" style={{ opacity: 0 }} />;
   }
 
   return (
@@ -370,8 +496,6 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
         borderColor="neutral150"
         background="neutral100"
         hasRadius
-        style={{ opacity: isDragging ? 0.5 : 1 }}
-        ref={dropRef}
         gap={3}
         cursor="pointer"
         onClick={() => {
@@ -379,6 +503,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
         }}
       >
         <DragButton
+          ref={setActivatorNodeRef}
           tag="span"
           withTooltip={false}
           label={formatMessage(
@@ -389,7 +514,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
             { item: value.label }
           )}
           onClick={(e) => e.stopPropagation()}
-          ref={composedRefs}
+          {...listeners}
         >
           <Drag />
         </DragButton>
@@ -464,6 +589,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                   ))
                 )}
               </Grid.Root>
+
               <Link
                 // used to stop the edit form from appearing when we click here.
                 onClick={(e) => e.stopPropagation()}
@@ -505,6 +631,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
           ) : null}
         </Flex>
       </Flex>
+
       {value.name !== TEMP_FIELD_NAME && (
         <EditFieldForm attribute={attribute} name={name} onClose={() => setIsModalOpen(false)} />
       )}
