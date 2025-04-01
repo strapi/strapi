@@ -1,22 +1,7 @@
 import inquirer from 'inquirer';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
-
-const matrixPrompt = {
-  introText: `
-Before you dive in, choose your path:
-
-The {red}✦ Red ✦{/red} pill:
-Create a free Strapi Cloud account — deploy in minutes, get built-in hosting, scaling, and a dashboard made for Strapi.
-
-{bold}No credit card.{/bold} 14-day free trial.
-
-The {blueBright}✦ Blue ✦{/blueBright} pill:
-Spin up your project locally — you’re on your own.
-`,
-  choices: [parseToChalk(`Take the {red}✦ Red ✦{/red} pill (Login/Sign up)`), parseToChalk(`Take the {blueBright}✦ Blue ✦{/blueBright} pill (Skip)`)],
-  message: "Remember, all we're offering is the truth, nothing more."
-};
+import { experimentPrompt } from './experiment/prompt';
 
 interface CloudError {
   response: {
@@ -41,14 +26,16 @@ export async function handleCloudLogin(): Promise<void> {
   const defaultErrorMessage =
     'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
 
-  // const defaultPrompt = { introText: '', choices: ['Login/Sign up', 'Skip for now'], message: 'Please log in or sign up.' };
-  // const useExperiment = Math.random() < 0.5;
-  const useExperiment = 1;
+  const defaultPrompt = {
+    introText: '',
+    choices: ['Login/Sign up', 'Skip for now'],
+    message: 'Please log in or sign up.',
+    reference: null,
+  };
+  const useExperiment = Math.random() < 0.5;
 
-  const promptToUse = useExperiment
-    ? matrixPrompt
-    : matrixPrompt;
-    
+  const promptToUse = useExperiment ? experimentPrompt : defaultPrompt;
+
   try {
     const { data: config } = await cloudApiService.config();
 
@@ -71,12 +58,11 @@ export async function handleCloudLogin(): Promise<void> {
     },
   ]);
 
-
   if (!userChoice.includes('Skip')) {
     const cliContext = {
       logger,
       cwd: process.cwd(),
-      ...(userChoice.includes('pill') && { isMatrixExperiment: true })
+      ...(promptToUse?.reference && { promptExperiment: promptToUse?.reference }),
     };
 
     try {

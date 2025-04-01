@@ -34,7 +34,7 @@ export type CloudCliConfig = {
 export interface CLIContext {
   cwd: string;
   logger: Logger;
-  isMatrixExperiment?: boolean;
+  promptExperiment?: string;
 }
 
 export type StrapiCloudCommand = (params: {
