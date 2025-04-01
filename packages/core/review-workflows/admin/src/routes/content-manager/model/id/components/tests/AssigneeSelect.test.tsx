@@ -32,7 +32,7 @@ describe('AssigneeSelect', () => {
     });
   });
   const render = () =>
-    renderRTL(<AssigneeSelect />, {
+    renderRTL(<AssigneeSelect isCompact={false} />, {
       renderOptions: {
         wrapper: ({ children }) => {
           return (
