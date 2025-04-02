@@ -647,6 +647,9 @@ export const createComponent = async (page: Page, options: CreateComponentOption
   await fillCreateComponent(page, options);
 
   await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add new field' }).first());
+
   await addAttributes(page, options.attributes, { contentTypeName: options.name });
 
   await saveAndVerifyContent(page, options);
@@ -666,7 +669,7 @@ const createContentType = async (
   await page.getByRole('button', { name: buttonName }).click();
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
-  const displayName = page.getByLabel('Name');
+  const displayName = page.getByLabel('Display name');
   await displayName.fill(name);
 
   const singularIdField = page.getByLabel('API ID (Singular)');
@@ -755,6 +758,7 @@ export const deleteComponent = async (page: Page, componentName: string) => {
   // need to accept the browser modal
   page.on('dialog', (dialog) => dialog.accept());
   await clickAndWait(page, page.getByRole('button', { name: 'Delete', exact: true }));
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 
   await waitForRestart(page);
 };

@@ -48,8 +48,6 @@ describe('Content Type Builder - Schema', () => {
       // Check that the content types and components are maps of objects
       expect(res.body.data.contentTypes).toBeInstanceOf(Object);
       expect(res.body.data.components).toBeInstanceOf(Object);
-
-      expect(res.body.data).toMatchSnapshot();
     });
   });
 

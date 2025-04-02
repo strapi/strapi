@@ -6,6 +6,19 @@ import { login } from '../../utils/login';
 import { clickAndWait, findAndClose } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 
+interface ValidationType {
+  field: string;
+  initialValue: string;
+  expectedError: string;
+  ctbParams: {
+    key: string;
+    operation: {
+      type: 'click' | 'fill';
+      value?: string;
+    };
+  };
+}
+
 test.describe('Edit view', () => {
   // TODO: split this into multiple tests
   // give additional time because this test file is so large
@@ -52,7 +65,7 @@ test.describe('Edit view', () => {
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText(
       'Spanish (es)'
     );
-    await expect(page.getByRole('row', { name: 'No content found' })).toBeVisible();
+    await expect(page.getByText('No content found')).toBeVisible();
 
     /**
      * So now we're going to create a document.
@@ -554,19 +567,6 @@ test.describe('Edit view', () => {
     ).toBeDisabled();
   });
 
-  interface ValidationType {
-    field: string;
-    initialValue: string;
-    expectedError: string;
-    ctbParams: {
-      key: string;
-      operation: {
-        type: 'click' | 'fill';
-        value?: string;
-      };
-    };
-  }
-
   const typesOfValidation: Record<string, ValidationType> = {
     required: {
       field: 'title',
@@ -665,7 +665,7 @@ test.describe('Edit view', () => {
        * validation constraints to the field
        */
       await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-      await page.getByRole('button', { name: 'Close' }).click(); // TODO improve this
+      await page.getByRole('button', { name: 'skip the tour' }).click(); // TODO improve this
 
       /**
        * Edit the field and apply the validation constraint
