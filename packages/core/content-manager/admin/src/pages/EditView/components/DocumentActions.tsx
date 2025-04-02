@@ -551,6 +551,8 @@ const PublishAction: DocumentActionComponent = ({
 
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
 
+  const idToPublish = currentDocumentMeta.documentId || id;
+
   React.useEffect(() => {
     if (isErrorDraftRelations) {
       toggleNotification({
@@ -650,7 +652,6 @@ const PublishAction: DocumentActionComponent = ({
       const { errors } = await validate(true, {
         status: 'published',
       });
-
       if (errors) {
         toggleNotification({
           type: 'danger',
@@ -660,10 +661,8 @@ const PublishAction: DocumentActionComponent = ({
               'There are validation errors in your document. Please fix them before saving.',
           }),
         });
-
         return;
       }
-
       const res = await publish(
         {
           collectionType,
@@ -673,12 +672,11 @@ const PublishAction: DocumentActionComponent = ({
         },
         transformData(formValues)
       );
-
       if ('data' in res && collectionType !== SINGLE_TYPES) {
         /**
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
-        if (id === 'create') {
+        if (idToPublish === 'create') {
           navigate({
             pathname: `../${collectionType}/${model}/${res.data.documentId}`,
             search: rawQuery,
@@ -693,7 +691,6 @@ const PublishAction: DocumentActionComponent = ({
       }
     } finally {
       setSubmitting(false);
-
       if (onPreview) {
         onPreview();
       }
