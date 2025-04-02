@@ -551,6 +551,8 @@ const PublishAction: DocumentActionComponent = ({
 
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
 
+  const idToPublish = currentDocumentMeta.documentId || id;
+
   React.useEffect(() => {
     if (isErrorDraftRelations) {
       toggleNotification({
@@ -674,7 +676,7 @@ const PublishAction: DocumentActionComponent = ({
         /**
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
-        if (id === 'create' && !currentDocumentMeta.documentId) {
+        if (idToPublish === 'create') {
           navigate({
             pathname: `../${collectionType}/${model}/${res.data.documentId}`,
             search: rawQuery,
