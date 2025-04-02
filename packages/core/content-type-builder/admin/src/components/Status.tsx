@@ -6,7 +6,7 @@ export const Status = ({ status }: { status: string }) => {
       return null;
     case 'CHANGED':
       return (
-        <Typography fontWeight="semiBold" textColor="warning500">
+        <Typography fontWeight="semiBold" textColor="alternative500">
           M
         </Typography>
       );
@@ -31,9 +31,9 @@ export const StatusBadge = ({ status }: { status: string }) => {
       return (
         <Badge
           fontWeight="bold"
-          textColor="warning600"
-          backgroundColor="warning100"
-          borderColor="warning200"
+          textColor="alternative600"
+          backgroundColor="alternative100"
+          borderColor="alternative200"
         >
           Modified
         </Badge>

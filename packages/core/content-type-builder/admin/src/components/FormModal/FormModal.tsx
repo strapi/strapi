@@ -5,6 +5,7 @@ import { Button, Divider, Flex, Modal, Tabs } from '@strapi/design-system';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
 import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
@@ -229,14 +230,16 @@ export const FormModal = () => {
               actions.setCustomFieldDataSchema({
                 isEditing: true,
                 modifiedDataToSetForEditing: attributeToEdit,
+                uid: type.uid,
               })
             );
           } else {
             dispatch(
               actions.setCustomFieldDataSchema({
-                customField: customField!,
+                customField: pick(customField, ['type', 'options']),
                 isEditing: false,
                 modifiedDataToSetForEditing: attributeToEdit,
+                uid: type.uid,
               })
             );
           }
@@ -249,7 +252,7 @@ export const FormModal = () => {
               isEditing: actionType === 'edit',
               modifiedDataToSetForEditing: attributeToEdit,
               step,
-              // forTarget,
+              uid: type.uid,
             })
           );
         }
@@ -641,7 +644,11 @@ export const FormModal = () => {
           // This way we don't have to add some logic to re-run the useEffect
           // The first step is either needed to create a component or just to navigate
           // To the modal for adding a "common field"
-          dispatch(actions.resetPropsAndSetFormForAddingAnExistingCompo({}));
+          dispatch(
+            actions.resetPropsAndSetFormForAddingAnExistingCompo({
+              uid: type.uid,
+            })
+          );
 
           // We don't want all the props to be reset
           return;
@@ -691,7 +698,11 @@ export const FormModal = () => {
 
           // Here we clear the reducer state but we also keep the created component
           // If we were to create the component before
-          dispatch(actions.resetPropsAndSaveCurrentData({}));
+          dispatch(
+            actions.resetPropsAndSaveCurrentData({
+              uid: type.uid,
+            })
+          );
 
           onNavigateToCreateComponentStep2();
 

@@ -10,7 +10,7 @@ import { createComponentUid } from './utils/createUid';
 import { customFieldDefaultOptionsReducer } from './utils/customFieldDefaultOptionsReducer';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
 
-import type { Schema } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 export type State = {
   formErrors: Record<string, any>;
@@ -50,10 +50,12 @@ type OnChangeRelationTypePayload = {
 };
 
 type ResetPropsAndSetFormForAddingAnExistingCompoPayload = {
+  uid: UID.Schema;
   options?: Record<string, any>;
 };
 
 type ResetPropsAndSaveCurrentDataPayload = {
+  uid: UID.Schema;
   options?: Record<string, any>;
 };
 
@@ -65,27 +67,31 @@ type SetAttributeDataSchemaPayload =
   | {
       isEditing: true;
       modifiedDataToSetForEditing: Record<string, any>;
+      uid: UID.Schema;
     }
   | {
-      isEditing?: false;
+      isEditing: false;
       modifiedDataToSetForEditing: Record<string, any>;
       attributeType: string;
       nameToSetForRelation: string;
       targetUid: string;
       step: string | null;
       options?: Record<string, any>;
+      uid: UID.Schema;
     };
 
 type SetCustomFieldDataSchemaPayload =
   | {
       isEditing: true;
       modifiedDataToSetForEditing: Record<string, any>;
+      uid: UID.Schema;
     }
   | {
-      isEditing?: false;
+      isEditing: false;
       modifiedDataToSetForEditing: Record<string, any>;
       customField: Record<string, any>;
       options?: Record<string, any>;
+      uid: UID.Schema;
     };
 
 type SetDynamicZoneDataSchemaPayload = {
@@ -303,7 +309,7 @@ const slice = createSlice({
     setAttributeDataSchema: (state, action: PayloadAction<SetAttributeDataSchemaPayload>) => {
       const { isEditing } = action.payload;
 
-      if (isEditing) {
+      if (isEditing === true) {
         const { modifiedDataToSetForEditing } = action.payload;
         state.modifiedData = modifiedDataToSetForEditing;
         state.initialData = modifiedDataToSetForEditing;
@@ -363,9 +369,9 @@ const slice = createSlice({
       state.modifiedData = dataToSet;
     },
     setCustomFieldDataSchema: (state, action: PayloadAction<SetCustomFieldDataSchemaPayload>) => {
-      const { isEditing } = action.payload;
+      const { payload } = action;
 
-      if (isEditing) {
+      if (payload.isEditing === true) {
         const { modifiedDataToSetForEditing } = action.payload;
         state.modifiedData = modifiedDataToSetForEditing;
         state.initialData = modifiedDataToSetForEditing;
@@ -373,7 +379,7 @@ const slice = createSlice({
         return;
       }
 
-      const { customField, options = {} } = action.payload;
+      const { customField, options = {} } = payload;
 
       state.modifiedData = { ...options, type: customField.type };
 
