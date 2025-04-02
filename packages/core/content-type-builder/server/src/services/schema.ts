@@ -43,26 +43,6 @@ const removeEmptyDefaultsOnUpdates = (schema: CTBSchema) => {
 };
 
 const removeDeletedUIDTargetFieldsOnUpdates = (schema: CTBSchema) => {
-  schema.components.forEach((component) => {
-    if (component.action === 'delete') {
-      return;
-    }
-
-    component.attributes.forEach((attribute) => {
-      if (attribute.action === 'update') {
-        const { properties } = attribute;
-
-        if (
-          properties.type === 'uid' &&
-          properties.targetField &&
-          !component.attributes.find((attr) => attr.name === properties.targetField)
-        ) {
-          properties.targetField = undefined;
-        }
-      }
-    });
-  });
-
   schema.contentTypes.forEach((contentType) => {
     if (contentType.action === 'delete') {
       return;

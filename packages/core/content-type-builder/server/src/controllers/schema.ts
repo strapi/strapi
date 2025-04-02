@@ -25,7 +25,7 @@ export default () => {
         const { data } = await validateUpdateSchema(ctx.request.body);
 
         if (isEmpty(data.components) && isEmpty(data.contentTypes)) {
-          ctx.status = 204;
+          ctx.body = {};
           return;
         }
 
@@ -40,7 +40,7 @@ export default () => {
           strapi.reload();
         });
 
-        ctx.status = 204;
+        ctx.body = {};
       } catch (error) {
         internals.isUpdating = false;
         return ctx.send({ error }, 400);

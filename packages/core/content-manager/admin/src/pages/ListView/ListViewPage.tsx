@@ -243,13 +243,46 @@ const ListViewPage = () => {
           title={contentTypeTitle}
           navigationAction={<BackButton />}
         />
+        <Layouts.Action
+          endActions={
+            <>
+              <InjectionZone area="listView.actions" />
+              <ViewSettingsMenu
+                setHeaders={handleSetHeaders}
+                resetHeaders={() => setDisplayedHeaders(list.layout)}
+                headers={displayedHeaders.map((header) => header.name)}
+              />
+            </>
+          }
+          startActions={
+            <>
+              {list.settings.searchable && (
+                <SearchInput
+                  disabled={results.length === 0}
+                  label={formatMessage(
+                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                    { target: contentTypeTitle }
+                  )}
+                  placeholder={formatMessage({
+                    id: 'global.search',
+                    defaultMessage: 'Search',
+                  })}
+                  trackedEvent="didSearch"
+                />
+              )}
+              {list.settings.filterable && schema ? (
+                <Filters disabled={results.length === 0} schema={schema} />
+              ) : null}
+            </>
+          }
+        />
         <Layouts.Content>
           <Box background="neutral0" shadow="filterShadow" hasRadius>
             <EmptyStateLayout
               action={canCreate ? <CreateButton variant="secondary" /> : null}
               content={formatMessage({
-                id: getTranslation('pages.ListView.empty-state.content'),
-                defaultMessage: 'No entries found',
+                id: 'app.components.EmptyStateLayout.content-document',
+                defaultMessage: 'No content found',
               })}
               hasRadius
               icon={<EmptyDocuments width="16rem" />}

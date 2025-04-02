@@ -35,6 +35,7 @@ const uniqueAttributeName: z.SuperRefinement<{ name: string }[]> = (attributes, 
 
 const verifyUidTargetField: z.SuperRefinement<
   {
+    action: 'create' | 'update' | 'delete';
     name: string;
     properties?: {
       type: unknown;
@@ -47,16 +48,19 @@ const verifyUidTargetField: z.SuperRefinement<
       return;
     }
 
-    const { properties } = attribute;
+    const { properties, action } = attribute;
 
     if (properties.type === 'uid' && properties.targetField) {
       const targetAttr = attributes.find((attr) => snakeCase(attr.name) === properties.targetField);
 
       if (!targetAttr) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Target does not exist',
-        });
+        // NOTE: on update we are setting it to undefined later in the process instead to handle renames
+        if (action === 'create') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Target does not exist',
+          });
+        }
       } else if (
         !VALID_UID_TARGETS.some((validUIdTarget) => validUIdTarget === targetAttr.properties?.type)
       ) {
@@ -91,7 +95,7 @@ const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unknown>> 
     isNumber(value.maxLength) &&
     isNumber(value.minLength)
   ) {
-    if (value.maxLength >= value.minLength) {
+    if (value.maxLength <= value.minLength) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'maxLength must be greater or equal to minLength',
@@ -103,11 +107,11 @@ const maxLengthGreaterThanMinLength: z.SuperRefinement<Record<string, unknown>> 
 
 const maxGreaterThanMin: z.SuperRefinement<Record<string, unknown>> = (value, ctx) => {
   if (!isNil(value.max) && !isNil(value.min) && isNumber(value.max) && isNumber(value.min)) {
-    if (value.max >= value.min) {
+    if (value.max <= value.min) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'maxLength must be greater or equal to minLength',
-        path: ['maxLength'],
+        message: 'max must be greater or equal to min',
+        path: ['max'],
       });
     }
   }
@@ -600,7 +604,7 @@ const componentUIDSchema = z.custom<UID.Component>((value) => {
   return typeof value === 'string' && value.length > 0;
 });
 
-const categorySchema = z.string().toLowerCase().trim().min(1).regex(CATEGORY_NAME_REGEX);
+const categorySchema = z.string().min(1).regex(CATEGORY_NAME_REGEX);
 
 const baseComponentSchema = z.object({
   uid: componentUIDSchema,
