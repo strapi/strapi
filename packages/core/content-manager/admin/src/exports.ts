@@ -13,6 +13,8 @@ export {
 } from './hooks/useDocument';
 export { useDocumentActions as unstable_useDocumentActions } from './hooks/useDocumentActions';
 export { useDocumentLayout as unstable_useDocumentLayout } from './hooks/useDocumentLayout';
+export { useDocumentContext } from './hooks/useDocumentContext';
+export type { DocumentMeta } from './hooks/useDocumentContext';
 export type {
   EditFieldLayout,
   EditLayout,
