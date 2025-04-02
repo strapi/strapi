@@ -547,6 +547,7 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+  const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
   const rootDocumentMeta = useDocumentContext('PublishAction', (state) => state.rootDocumentMeta);
   const currentDocumentMeta = useDocumentContext('PublishAction', (state) => state.meta);
@@ -666,6 +667,11 @@ const PublishAction: DocumentActionComponent = ({
         },
         transformData(formValues)
       );
+
+      // Reset form if successful
+      if ('data' in res) {
+        resetForm();
+      }
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
         /**
