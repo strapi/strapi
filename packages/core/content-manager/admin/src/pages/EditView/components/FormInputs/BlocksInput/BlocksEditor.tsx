@@ -9,6 +9,7 @@ import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
 
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { getTranslation } from '../../../../../utils/translations';
 
 import { codeBlocks } from './Blocks/Code';
@@ -178,6 +179,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
     const [isExpandedMode, setIsExpandedMode] = React.useState(false);
+    const { isInModal } = useDocumentContext('BlocksInput');
 
     const handleToggleExpand = () => {
       setIsExpandedMode((prev) => !prev);
@@ -252,7 +254,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               <BlocksToolbar />
               <EditorDivider width="100%" />
               <BlocksContent {...contentProps} />
-              {!isExpandedMode && (
+              {!isExpandedMode && !isInModal && (
                 <ExpandIconButton
                   label={formatMessage({
                     id: getTranslation('components.Blocks.expand'),
