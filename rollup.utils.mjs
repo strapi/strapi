@@ -10,6 +10,8 @@ import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
 import html from 'rollup-plugin-html';
 
+const isExernal = (id) => !path.isAbsolute(id) && !id.startsWith('.');
+
 const basePlugins = () => [
   image(),
   html(),
@@ -40,32 +42,86 @@ const basePlugins = () => [
   dynamicImportVars({}),
 ];
 
-const baseConfig = (baseDir) => {
-  const outDir = path.resolve(baseDir, 'dist');
+const isInput = (id, input) => {
+  if (typeof input === 'string') {
+    return id.includes(path.resolve(input));
+  }
+
+  return Object.values(input).some((i) => id.includes(path.resolve(i)));
+};
+
+const baseConfig = (opts = {}) => {
+  const { rootDir, outDir = './dist', input = './src/index.ts', ...rest } = opts;
 
   return defineConfig({
-    input: path.resolve(baseDir, 'src/index.ts'),
-    external: (id) => !path.isAbsolute(id) && !id.startsWith('.'),
-    output: [
-      {
-        dir: outDir,
-        entryFileNames: '[name].js',
-        chunkFileNames: 'chunks/[name]-[hash].js',
-        exports: 'auto',
-        format: 'cjs',
-        sourcemap: true,
-      },
-      {
-        dir: outDir,
-        entryFileNames: '[name].mjs',
-        chunkFileNames: 'chunks/[name]-[hash].mjs',
-        exports: 'auto',
-        format: 'esm',
-        sourcemap: true,
-      },
-    ],
-    plugins: basePlugins(baseDir),
+    input,
+    external: isExernal,
+    output: baseOutput({ outDir, rootDir }),
+    plugins: basePlugins(),
+    onwarn(warning, warn) {
+      if (warning.code === 'MIXED_EXPORTS') {
+        // json files are always mixed exports
+        if (warning?.id?.endsWith('.json')) {
+          return;
+        }
+
+        // we only care about mixed exports in our input files
+        if (warning.id && !isInput(warning.id, input)) {
+          return;
+        }
+      }
+
+      if (warning.code === 'UNUSED_EXTERNAL_IMPORT' && warning.exporter === 'react') {
+        return;
+      }
+
+      warn(warning);
+    },
+    ...rest,
   });
 };
 
-export { baseConfig, basePlugins };
+const baseOutput = ({ outDir, rootDir }) => {
+  return [
+    {
+      dir: outDir,
+      entryFileNames: '[name].js',
+      chunkFileNames: '[name]-[hash].js',
+      exports: 'auto',
+      format: 'cjs',
+      sourcemap: true,
+      preserveModules: true,
+      ...(rootDir ? { preserveModulesRoot: rootDir } : {}),
+    },
+    {
+      dir: outDir,
+      entryFileNames: '[name].mjs',
+      chunkFileNames: '[name]-[hash].mjs',
+      format: 'esm',
+      sourcemap: true,
+      preserveModules: true,
+      ...(rootDir ? { preserveModulesRoot: rootDir } : {}),
+    },
+  ];
+};
+
+const basePluginConfig = () => {
+  return defineConfig([
+    baseConfig({
+      input: {
+        index: './server/src/index.ts',
+      },
+      rootDir: './server/src',
+      outDir: './dist/server',
+    }),
+    baseConfig({
+      input: {
+        index: './admin/src/index.ts',
+      },
+      rootDir: './admin/src',
+      outDir: './dist/admin',
+    }),
+  ]);
+};
+
+export { baseConfig, basePluginConfig };
