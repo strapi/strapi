@@ -29,6 +29,7 @@ type FetchResponse<TData = any> = {
 };
 
 type FetchOptions = {
+  raw?: boolean;
   params?: any;
   signal?: AbortSignal;
   headers?: Record<string, string>;
@@ -134,20 +135,23 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   // Check if the url has a prepending slash, if not add a slash
   const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
-  // Add a response interceptor to return the response
+  /**
+   * Add a response interceptor to return the response
+   */
   const responseInterceptor = async <TData = any>(
     response: Response,
-    validateStatus?: FetchOptions['validateStatus']
+    validateStatus?: FetchOptions['validateStatus'],
+    rawResponse: FetchOptions['raw'] = false
   ): Promise<FetchResponse<TData>> => {
     try {
-      const result = await response.json();
+      const result = !rawResponse ? await response.json() : response;
 
       /**
        * validateStatus allows us to customize when a response should throw an error
        * In native Fetch API, a response is considered "not ok"
        * when the status code falls in the 200 to 299 (inclusive) range
        */
-      if (!response.ok && result.error && !validateStatus?.(response.status)) {
+      if (!rawResponse && !response.ok && result.error && !validateStatus?.(response.status)) {
         throw new FetchError(result.error.message, { data: result });
       }
 
@@ -199,7 +203,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const headers = new Headers({
-        ...defaultHeader,
+        ...(options?.raw ? { Authorization: defaultHeader.Authorization } : defaultHeader),
         ...options?.headers,
       });
       /**
@@ -215,7 +219,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         headers,
       });
 
-      return responseInterceptor<TData>(response, options?.validateStatus);
+      return responseInterceptor<TData>(response, options?.validateStatus, options?.raw);
     },
     post: async <TData, TSend = any>(
       url: string,
