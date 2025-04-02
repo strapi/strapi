@@ -12,7 +12,6 @@ import {
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
-  Button,
   Dialog,
   EmptyStateLayout,
   Flex,
