@@ -61,8 +61,8 @@
   },
   "dependencies": {
     "@mux/mux-player-react": "3.1.0",
-    "@strapi/design-system": "2.0.0-rc.18",
-    "@strapi/icons": "2.0.0-rc.18",
+    "@strapi/design-system": "2.0.0-rc.21",
+    "@strapi/icons": "2.0.0-rc.21",
     "@strapi/provider-upload-local": "5.12.1",
     "@strapi/utils": "5.12.1",
     "byte-size": "8.1.1",
