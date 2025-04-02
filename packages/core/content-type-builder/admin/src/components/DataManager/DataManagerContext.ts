@@ -118,7 +118,7 @@ export interface DataManagerContextValue {
     attributes: string[];
   };
   allComponentsCategories: any[];
-  saveSchema(): void;
+  saveSchema(): Promise<void>;
   isModified: boolean;
   isSaving: boolean;
   applyChange: (opts: {

@@ -131,7 +131,7 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox').nth(2).click();
       await page
         .getByRole('textbox')
-        .nth(1)
+        .nth(2)
         .fill(
           "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
         );
@@ -203,7 +203,7 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox').nth(2).click();
       await page
         .getByRole('textbox')
-        .nth(1)
+        .nth(2)
         .fill(
           "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
         );

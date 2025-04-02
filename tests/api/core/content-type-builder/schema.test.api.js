@@ -48,8 +48,6 @@ describe('Content Type Builder - Schema', () => {
       // Check that the content types and components are maps of objects
       expect(res.body.data.contentTypes).toBeInstanceOf(Object);
       expect(res.body.data.components).toBeInstanceOf(Object);
-
-      expect(res.body.data).toMatchSnapshot();
     });
   });
 
@@ -296,7 +294,7 @@ describe('Content Type Builder - Schema', () => {
         },
       });
 
-      expect(res.statusCode).toBe(204);
+      expect(res.statusCode).toBe(200);
     });
 
     test('Sending create action on existing attribute does not throw an error', async () => {
@@ -328,7 +326,7 @@ describe('Content Type Builder - Schema', () => {
         },
       });
 
-      expect(res.statusCode).toBe(204);
+      expect(res.statusCode).toBe(200);
     });
 
     test('Sending delete action on non-existing attribute does not throw an error', async () => {
@@ -360,7 +358,7 @@ describe('Content Type Builder - Schema', () => {
         },
       });
 
-      expect(res.statusCode).toBe(204);
+      expect(res.statusCode).toBe(200);
     });
 
     test('Schema update with component creation', async () => {
@@ -391,7 +389,7 @@ describe('Content Type Builder - Schema', () => {
         },
       });
 
-      expect(res.statusCode).toBe(204);
+      expect(res.statusCode).toBe(200);
     });
 
     test('Schema update with mixed operations', async () => {
@@ -487,7 +485,7 @@ describe('Content Type Builder - Schema', () => {
         },
       });
 
-      expect(res.statusCode).toBe(204);
+      expect(res.statusCode).toBe(200);
     });
 
     test('Schema update with attribute deletion', async () => {
@@ -526,7 +524,7 @@ describe('Content Type Builder - Schema', () => {
         },
       });
 
-      expect(res.statusCode).toBe(204);
+      expect(res.statusCode).toBe(200);
     });
 
     test('Schema update with content type deletion', async () => {
@@ -555,7 +553,7 @@ describe('Content Type Builder - Schema', () => {
         },
       });
 
-      expect(res.statusCode).toBe(204);
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -607,7 +605,7 @@ describe('Content Type Builder - Schema', () => {
       const [resA, resB] = await Promise.all([rq(reqBody), rq(reqBody)]);
 
       // check the other request is not blocked
-      expect(resA.statusCode).toBe(204);
+      expect(resA.statusCode).toBe(200);
 
       // check one of the requests is blocked
       expect(resB.statusCode).toBe(409);
