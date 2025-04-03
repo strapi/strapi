@@ -534,7 +534,12 @@ const LinkButton = ({
 
   if (location === 'menu') {
     return (
-      <StyledMenuItem startIcon={<Link />} onSelect={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
+      <StyledMenuItem
+        startIcon={<Link />}
+        onSelect={addLink}
+        isActive={isLinkActive()}
+        disabled={isLinkDisabled()}
+      >
         {formatMessage(label)}
       </StyledMenuItem>
     );
@@ -734,8 +739,8 @@ const BlocksToolbar = () => {
     {
       // List buttons can only be rendered together when in the toolbar
       toolbar: (
-        <Flex direction="row" >
-          <ToolbarSeparator style={{ marginLeft: "0.4rem" }} />
+        <Flex direction="row">
+          <ToolbarSeparator style={{ marginLeft: '0.4rem' }} />
           <Toolbar.ToggleGroup type="single" asChild>
             <Flex gap={1}>
               <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
