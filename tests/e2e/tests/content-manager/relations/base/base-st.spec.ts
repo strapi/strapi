@@ -64,16 +64,17 @@ test.describe('Relations Single Types - EditView', () => {
 
   test.only('Update an existing relation', async ({ page }) => {
     const contentType = 'Homepage';
-    await navToHeader(page, ['Content Manager', contentType], contentType);
+    const headerTitle = 'Welcome to Rufus homepage';
+    await navToHeader(page, ['Content Manager', contentType], headerTitle);
 
-    // // Add a new relation
-    // await connectRelation(page, 'admin_user', 'test');
+    // Add a new relation
+    await connectRelation(page, 'admin_user', 'test');
 
-    // // Save content
-    // await saveContent(page);
+    // Save content
+    await saveContent(page);
 
-    // // Validate the new relation is there
-    // await verifyRelationsOrder(page, 'admin_user', ['test']);
+    // Validate the new relation is there
+    await verifyRelationsOrder(page, 'admin_user', ['test']);
   });
 
   test('Delete a relation', async ({ page }) => {
