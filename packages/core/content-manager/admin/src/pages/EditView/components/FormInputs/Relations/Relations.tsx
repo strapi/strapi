@@ -121,7 +121,7 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
     locale?: RelationResult['locale'];
     position: RelationPosition;
     // Added this property to prevent call useDocument with a not temporary relation (one already saved in the database)
-    temporary?: boolean;
+    isTemporary?: boolean;
   };
 }
 
@@ -309,7 +309,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           id: relation.id,
           documentId: relation.documentId,
           locale: relation.locale,
-          temporary: true,
+          isTemporary: true,
         },
         status: relation.status,
         /**
@@ -792,7 +792,7 @@ const RelationsList = ({
                 id: relation.id,
                 documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
                 locale: relation.locale || relation.apiData?.locale,
-                temporary: relation.apiData?.temporary,
+                isTemporary: relation.apiData?.isTemporary,
                 position,
               },
             },
@@ -998,6 +998,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   } = relations[index];
 
   const collectionType = getCollectionType(href)!;
+  const isTemporary = apiData?.isTemporary ?? false;
   const { document } = useDocument(
     {
       collectionType,
@@ -1005,10 +1006,12 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       documentId: documentId ?? apiData?.documentId,
       params: currentDocumentMeta.params,
     },
-    { skip: !apiData?.temporary }
+    { skip: !isTemporary }
   );
-  const label = document != null ? getRelationLabel(document, mainField) : originalLabel;
-  const status = document !== null ? document?.status : originalStatus;
+  const label = isTemporary
+    ? getRelationLabel(document as RelationResult, mainField)
+    : originalLabel;
+  const status = isTemporary ? document?.status : originalStatus;
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
