@@ -1,4 +1,4 @@
-import { ReactNode, memo } from 'react';
+import * as React from 'react';
 
 import {
   useStrapiApp,
@@ -9,16 +9,17 @@ import {
 import { useIntl } from 'react-intl';
 
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
-import { useDocLayout } from '../../../hooks/useDocumentLayout';
+import { useDoc, UseDocument } from '../../../hooks/useDocument';
+import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
-import { RelationsInput, UnstableRelationsInput } from './FormInputs/Relations';
+import { RelationsInput } from './FormInputs/Relations/Relations';
 import { UIDInput } from './FormInputs/UID';
 import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
@@ -26,7 +27,10 @@ import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
+  document: ReturnType<UseDocument>;
+};
+
 /**
  * @internal
  *
@@ -35,20 +39,34 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
-  const { id, document, collectionType } = useDoc();
-  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
+const InputRenderer = ({ visible, hint: providedHint, document, ...props }: InputRendererProps) => {
+  const { model: rootModel } = useDoc();
+  const rootDocumentMeta = useDocumentContext(
+    'DynamicComponent',
+    (state) => state.rootDocumentMeta
+  );
+  const {
+    edit: { components: rootComponents },
+  } = useDocumentLayout(rootDocumentMeta.model);
+  const {
+    edit: { components: relatedComponents },
+  } = useDocumentLayout(document.schema?.uid ?? rootModel);
+  const components = { ...rootComponents, ...relatedComponents };
+
+  const collectionType =
+    document.schema?.kind === 'collectionType' ? 'collection-types' : 'single-types';
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
 
+  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
   const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
 
-  let idToCheck = id;
+  let idToCheck = document.document?.documentId;
   if (collectionType === SINGLE_TYPES) {
-    idToCheck = document?.documentId;
+    idToCheck = document?.document?.documentId;
   }
 
   const editableFields = idToCheck ? canUpdateFields : canCreateFields;
@@ -67,9 +85,6 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
-  const {
-    edit: { components },
-  } = useDocLayout();
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
@@ -142,9 +157,6 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
-      if (window.strapi.future.isEnabled('unstableRelationsOnTheFly')) {
-        return <UnstableRelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
-      }
       return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'richtext':
       return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
@@ -184,7 +196,10 @@ const attributeHasCustomFieldProperty = (
 ): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
   'customField' in attribute && typeof attribute.customField === 'string';
 
-const useFieldHint = (hint: ReactNode = undefined, attribute: Schema.Attribute.AnyAttribute) => {
+const useFieldHint = (
+  hint: React.ReactNode = undefined,
+  attribute: Schema.Attribute.AnyAttribute
+) => {
   const { formatMessage } = useIntl();
 
   const { maximum, minimum } = getMinMax(attribute);
@@ -244,7 +259,7 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
   }
 };
 
-const MemoizedInputRenderer = memo(InputRenderer);
+const MemoizedInputRenderer = React.memo(InputRenderer);
 
 export type { InputRendererProps };
 export { MemoizedInputRenderer as InputRenderer, useFieldHint };
