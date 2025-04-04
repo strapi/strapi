@@ -32,6 +32,7 @@ interface DocumentMeta {
 interface DocumentContextValue {
   currentDocumentMeta: DocumentMeta;
   currentDocument: ReturnType<UseDocument>;
+  isInModal: boolean;
 }
 
 function useDocumentContext(consumerName: string): DocumentContextValue {
@@ -64,6 +65,7 @@ function useDocumentContext(consumerName: string): DocumentContextValue {
   return {
     currentDocumentMeta: currentRelationDocumentMeta ?? urlDocumentMeta,
     currentDocument: currentRelationDocument ?? urlDocument,
+    isInModal: Boolean(currentRelationDocumentMeta),
   };
 }
 

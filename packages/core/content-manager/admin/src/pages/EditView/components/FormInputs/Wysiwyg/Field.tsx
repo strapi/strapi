@@ -4,6 +4,7 @@ import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-ad
 import { Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
@@ -30,6 +31,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
     const components = useStrapiApp('ImageDialog', (state) => state.components);
+    const { isInModal } = useDocumentContext('BlocksInput');
 
     const MediaLibraryDialog = components['media-library'];
 
@@ -84,7 +86,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
               ref={forwardedRef}
             />
 
-            {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
+            {!isExpandMode && !isInModal && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
           </EditorLayout>
           <Field.Hint />
           <Field.Error />
