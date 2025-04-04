@@ -103,7 +103,7 @@
     "semver": "7.5.4",
     "statuses": "2.0.1",
     "typescript": "5.4.4",
-    "undici": "6.21.1",
+    "undici": "6.21.2",
     "yup": "0.32.9"
   },
   "devDependencies": {
