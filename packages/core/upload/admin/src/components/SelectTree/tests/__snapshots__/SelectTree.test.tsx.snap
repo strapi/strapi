@@ -47,7 +47,7 @@ exports[`SelectTree renders 1`] = `
 <body>
     <div>
       <div
-        class=" css-1iyvlxg-container"
+        class="css-1iyvlxg-container"
       >
         <span
           class="css-1f43avz-a11yText-A11yText"
@@ -61,13 +61,13 @@ exports[`SelectTree renders 1`] = `
           role="log"
         />
         <div
-          class=" css-oe0cnm-control"
+          class="css-oe0cnm-control"
         >
           <div
-            class=" css-onz4xi-ValueContainer"
+            class="css-1cn2vbd"
           >
             <div
-              class=" css-1ryi7up-singleValue"
+              class="css-1ryi7up-singleValue"
             />
             <input
               aria-activedescendant=""
@@ -76,7 +76,7 @@ exports[`SelectTree renders 1`] = `
               aria-haspopup="true"
               aria-invalid="false"
               aria-readonly="true"
-              class="css-mohuvp-dummyInput-DummyInput"
+              class="css-1czm0f-dummyInput-DummyInput"
               id="react-select-2-input"
               inputmode="none"
               role="combobox"
@@ -85,7 +85,7 @@ exports[`SelectTree renders 1`] = `
             />
           </div>
           <div
-            class=" css-1hm8yhz-IndicatorsContainer"
+            class="css-oihegu"
           >
             <div
               aria-hidden="true"
@@ -173,7 +173,7 @@ exports[`SelectTree renders 1`] = `
 
 <div>
     <div
-      class=" css-1iyvlxg-container"
+      class="css-1iyvlxg-container"
     >
       <span
         class="css-1f43avz-a11yText-A11yText"
@@ -187,13 +187,13 @@ exports[`SelectTree renders 1`] = `
         role="log"
       />
       <div
-        class=" css-oe0cnm-control"
+        class="css-oe0cnm-control"
       >
         <div
-          class=" css-onz4xi-ValueContainer"
+          class="css-1cn2vbd"
         >
           <div
-            class=" css-1ryi7up-singleValue"
+            class="css-1ryi7up-singleValue"
           />
           <input
             aria-activedescendant=""
@@ -202,7 +202,7 @@ exports[`SelectTree renders 1`] = `
             aria-haspopup="true"
             aria-invalid="false"
             aria-readonly="true"
-            class="css-mohuvp-dummyInput-DummyInput"
+            class="css-1czm0f-dummyInput-DummyInput"
             id="react-select-2-input"
             inputmode="none"
             role="combobox"
@@ -211,7 +211,7 @@ exports[`SelectTree renders 1`] = `
           />
         </div>
         <div
-          class=" css-1hm8yhz-IndicatorsContainer"
+          class="css-oihegu"
         >
           <div
             aria-hidden="true"
