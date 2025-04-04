@@ -224,18 +224,13 @@ test.describe('Adding content', () => {
         { name: 'opponent*', type: 'text', value: 'West Ham' },
       ],
       expectedError: 'The value does not match the regex',
-      locator: (page) =>
-        page
-          .locator('[data-strapi-field-error="true"]')
-          .filter({ hasText: 'The value does not match the regex' })
-          .first(),
     },
   ] satisfies { description: string; fields: FieldValue[]; expectedError: string }[];
 
   for (const { description, fields, expectedError } of testCases) {
     test(`when I publish ${description} I see an error`, async ({ page }) => {
       await createContent(page, 'Match', fields, { save: false, publish: true, verify: false });
-      expect(page.getByText(expectedError).first()).toBeVisible({ timeout: 20000 });
+      expect(page.getByText(expectedError).first()).toBeVisible();
     });
   }
 });
