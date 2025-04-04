@@ -997,6 +997,11 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     locale,
   } = relations[index];
 
+  /**
+   * The code above attempts to retrieve the updated value of a relation that has not yet been saved.
+   * This is necessary when a relation modal is opened, and the mainField or its status is updated.
+   * These changes need to be reflected in the initial relation field.
+   */
   const collectionType = getCollectionType(href)!;
   const isTemporary = apiData?.isTemporary ?? false;
   const { document } = useDocument(
