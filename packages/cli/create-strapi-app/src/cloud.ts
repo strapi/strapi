@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
-import { experimentPrompt } from './experiment/prompt';
+import { dunePrompt } from './experiment/prompt';
 
 interface CloudError {
   response: {
@@ -34,7 +34,7 @@ export async function handleCloudLogin(): Promise<void> {
   };
   const useExperiment = Math.random() < 0.5;
 
-  const promptToUse = useExperiment ? experimentPrompt : defaultPrompt;
+  const promptToUse = useExperiment ? dunePrompt : defaultPrompt;
 
   try {
     const { data: config } = await cloudApiService.config();
