@@ -1008,10 +1008,8 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     },
     { skip: !isTemporary }
   );
-  const label = isTemporary
-    ? getRelationLabel(document as RelationResult, mainField)
-    : originalLabel;
-  const status = isTemporary ? document?.status : originalStatus;
+  const label = isTemporary && document ? getRelationLabel(document, mainField) : originalLabel;
+  const status = isTemporary && document ? document?.status : originalStatus;
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
