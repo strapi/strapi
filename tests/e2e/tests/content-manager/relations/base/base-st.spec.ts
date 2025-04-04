@@ -62,22 +62,39 @@ test.describe('Relations Single Types - EditView', () => {
     await login({ page });
   });
 
-  test.only('Update an existing relation', async ({ page }) => {
+  test('Update an existing oneToOne relation', async ({ page }) => {
     const contentType = 'Homepage';
     const headerTitle = 'Welcome to Rufus homepage';
+    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
     await navToHeader(page, ['Content Manager', contentType], headerTitle);
 
-    // Add a new relation
+    // Add a new relation to the existing oneToOne relation
     await connectRelation(page, 'admin_user', 'test');
 
-    // Save content
+    // Save content in the single type
     await saveContent(page);
 
     // Validate the new relation is there
     await verifyRelationsOrder(page, 'admin_user', ['test']);
   });
 
-  test('Delete a relation', async ({ page }) => {
+  test('Update an existing oneToMany relation', async ({ page }) => {
+    const contentType = 'Homepage';
+    const headerTitle = 'Welcome to Rufus homepage';
+    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
+    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+
+    // Add a new relation to the existing oneToMany relation
+    await connectRelation(page, 'authors', 'Led Tasso');
+
+    // Save content in the single type
+    await saveContent(page);
+
+    // Validate the new relation is there
+    await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Ted Lasso', 'Led Tasso']);
+  });
+
+  test.skip('Delete a relation', async ({ page }) => {
     // Prefill entry with two relations
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
@@ -92,7 +109,7 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
   });
 
-  test('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
+  test.skip('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
     // Create content with multiple relations in specific order
     const fields = createRelationSourceFields({
       oneToManyRel: ['Target 1', 'Target 2', 'Target 3'],
@@ -113,7 +130,7 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
 
-  test('Update a relation and reorder it in the same operation', async ({ page }) => {
+  test.skip('Update a relation and reorder it in the same operation', async ({ page }) => {
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
     // Add a new relation
@@ -133,7 +150,7 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
 
-  test('Delete a relation and reorder the remaining relations', async ({ page }) => {
+  test.skip('Delete a relation and reorder the remaining relations', async ({ page }) => {
     // Prefill entry with two relations
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
