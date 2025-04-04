@@ -110,6 +110,22 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'admin_user', []);
   });
 
+  test('Delete a one to many relation', async ({ page }) => {
+    const contentType = 'Homepage';
+    const headerTitle = 'Welcome to Rufus homepage';
+    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
+    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+
+    // Remove a one-to-many relation entry
+    await disconnectRelation(page, 'authors', 'Coach Beard');
+
+    // Save content
+    await saveContent(page);
+
+    // Validate there's no relation left
+    await verifyRelationsOrder(page, 'authors', ['Ted Lasso']);
+  });
+
   test.skip('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
     // Create content with multiple relations in specific order
     const fields = createRelationSourceFields({
