@@ -22,7 +22,6 @@ Spin up your project locally. Full control, full setup, no help from Chewie.
   reference: 'starWars',
 };
 
-
 export const dunePrompt = {
   introText: `
 You’re at the edge of the desert.
