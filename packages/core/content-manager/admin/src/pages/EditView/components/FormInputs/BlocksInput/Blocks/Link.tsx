@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BaseLink, Button, Field, Flex, Popover, useComposedRefs } from '@strapi/design-system';
+import { Box, Button, Field, Flex, Popover, useComposedRefs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
@@ -10,7 +10,7 @@ import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
 import { isLinkNode, type Block } from '../utils/types';
 
-const StyledBaseLink = styled(BaseLink)`
+const StyledLink = styled(Box)`
   text-decoration: none;
 `;
 
@@ -90,15 +90,16 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     return (
       <Popover.Root open={popoverOpen}>
         <Popover.Trigger>
-          <StyledBaseLink
+          <StyledLink
             {...attributes}
             ref={forwardedRef}
+            tag="a"
             href={link.url}
             onClick={() => setPopoverOpen(true)}
             color="primary600"
           >
             {children}
-          </StyledBaseLink>
+          </StyledLink>
         </Popover.Trigger>
         <Popover.Content onPointerDownOutside={handleClose}>
           <Flex padding={4} direction="column" gap={4}>
@@ -157,13 +158,13 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
               <Flex gap={2}>
                 <Button variant="tertiary" onClick={handleClose}>
                   {formatMessage({
-                    id: 'components.Blocks.popover.cancel',
+                    id: 'global.cancel',
                     defaultMessage: 'Cancel',
                   })}
                 </Button>
                 <Button disabled={Boolean(inputNotDirty) || isSaveDisabled} onClick={handleSave}>
                   {formatMessage({
-                    id: 'components.Blocks.popover.save',
+                    id: 'global.save',
                     defaultMessage: 'Save',
                   })}
                 </Button>

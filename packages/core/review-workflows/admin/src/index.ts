@@ -1,5 +1,7 @@
 import { PLUGIN_ID, FEATURE_ID } from './constants';
-import { Panel } from './routes/content-manager/[model]/[id]/components/Panel';
+import { Header } from './routes/content-manager/model/id/components/Header';
+import { Panel } from './routes/content-manager/model/id/components/Panel';
+import { StageSelect } from './routes/content-manager/model/id/components/StageSelect';
 import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
@@ -47,6 +49,14 @@ const admin: Plugin.Config.AdminInput = {
           const { PurchaseReviewWorkflows } = await import('./routes/purchase-review-workflows');
           return { default: PurchaseReviewWorkflows };
         },
+      });
+    }
+  },
+  bootstrap(app: StrapiApp) {
+    if (window.strapi.features.isEnabled(FEATURE_ID)) {
+      app.getPlugin('content-manager').injectComponent('preview', 'actions', {
+        name: 'review-workflows-assignee',
+        Component: Header,
       });
     }
   },

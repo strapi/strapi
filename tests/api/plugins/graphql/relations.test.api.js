@@ -533,6 +533,53 @@ describe('Test Graphql Relations API End to End', () => {
       });
     });
 
+    test('Relation filtering', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            articles_connection {
+              data {
+                documentId
+                attributes {
+                  name
+                  labels_connection(filters: { name: { endsWith: "Color" } }) {
+                    data {
+                      documentId
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body.data?.articles_connection?.data).toBeInstanceOf(Array);
+
+      body.data.articles_connection.data.forEach((article) => {
+        const { data: labels } = article.attributes.labels_connection;
+        expect(labels).toBeInstanceOf(Array);
+
+        for (const label of labels) {
+          expect(label.attributes).toMatchObject(
+            expect.objectContaining({ name: expect.stringMatching(/.*Color$/) })
+          );
+        }
+      });
+    });
+
     test('Update Article relations removes correctly a relation', async () => {
       const article = data.articles[0];
       const labels = [data.labels[0]];
@@ -699,7 +746,6 @@ describe('Test Graphql Relations API End to End', () => {
     test('Create person', async () => {
       const person = {
         name: 'Chuck Norris',
-        privateName: 'Jean-Eude',
       };
 
       const res = await graphqlQuery({
@@ -841,7 +887,7 @@ describe('Test Graphql Relations API End to End', () => {
       });
     });
 
-    test('Edit person/cars relations removes correctly a car', async () => {
+    test(`Can't edit a private relation `, async () => {
       const newPerson = {
         name: 'Check Norris Junior',
         privateCars: [],
@@ -863,7 +909,10 @@ describe('Test Graphql Relations API End to End', () => {
         },
       });
 
-      expect(mutationRes.statusCode).toBe(200);
+      expect(mutationRes.statusCode).toBe(400);
+      expect(mutationRes.body.errors[0].message).toBe(
+        `Variable "$data" got invalid value { name: "Check Norris Junior", privateCars: [] }; Field "privateCars" is not defined by type "PersonInput".`
+      );
 
       const queryRes = await graphqlQuery({
         query: /* GraphQL */ `
@@ -892,7 +941,7 @@ describe('Test Graphql Relations API End to End', () => {
           car: {
             data: {
               attributes: {
-                person: null,
+                person: { data: { documentId: data.people[0].documentId } },
               },
             },
           },

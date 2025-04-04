@@ -1,28 +1,22 @@
-import { test, expect } from '@playwright/test';
-import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
-import { waitForRestart } from '../../../utils/restart';
+import { test } from '@playwright/test';
 import { resetFiles } from '../../../utils/file-reset';
+import { createCollectionType, type AddAttribute } from '../../../utils/content-types';
+import { sharedSetup } from '../../../utils/setup';
 import { clickAndWait } from '../../../utils/shared';
 
-test.describe('Create collection type', () => {
+test.describe('Create collection type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
   test.describe.configure({ timeout: 300000 });
 
   test.beforeEach(async ({ page }) => {
-    await resetFiles();
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
-    await login({ page });
+    await sharedSetup('ctb-edit-ct', page, {
+      login: true,
+      skipTour: true,
+      resetFiles: true,
+      importData: 'with-admin.tar',
+    });
 
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
-
-    // close the tutorial modal if it's visible
-    const modal = page.getByRole('button', { name: 'Close' });
-    if (modal.isVisible()) {
-      await modal.click();
-      await expect(modal).not.toBeVisible();
-    }
   });
 
   // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
@@ -31,33 +25,212 @@ test.describe('Create collection type', () => {
     await resetFiles();
   });
 
-  test('Can create a collection type', async ({ page, browserName }) => {
-    await clickAndWait(page, page.getByRole('button', { name: 'Create new collection type' }));
+  const advancedRequired = { required: true };
+  const advancedRegex = { required: true, regexp: '^(?!.*fail).*' };
 
-    await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
+  test('Can create a collection type with all field types', async ({ page }) => {
+    const attributes: AddAttribute[] = [
+      { type: 'text', name: 'testtext', advanced: advancedRegex },
+      { type: 'boolean', name: 'testboolean', advanced: advancedRequired },
+      { type: 'blocks', name: 'testblocks', advanced: advancedRequired },
+      { type: 'json', name: 'testjson', advanced: advancedRequired },
+      {
+        type: 'number',
+        name: 'testinteger',
+        number: { format: 'integer' },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'number',
+        name: 'testbiginteger',
+        number: { format: 'big integer' },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'number',
+        name: 'testdecimal',
+        number: { format: 'decimal' },
+        advanced: advancedRequired,
+      },
+      { type: 'email', name: 'testemail', advanced: advancedRequired },
+      {
+        type: 'date',
+        name: 'testdateonlydate',
+        date: { format: 'date' },
+        advanced: advancedRequired,
+      },
+      { type: 'date', name: 'testdatetime', date: { format: 'time' }, advanced: advancedRequired },
+      {
+        type: 'date',
+        name: 'testdatedatetime',
+        date: { format: 'datetime' },
+        advanced: advancedRequired,
+      },
+      { type: 'password', name: 'testpassword', advanced: advancedRequired },
+      {
+        type: 'media',
+        name: 'testmediasingle',
+        media: { multiple: false },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'media',
+        name: 'testmediamultiple',
+        media: { multiple: true },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testonewayrelation',
+        relation: {
+          type: 'oneWay',
+          target: { select: 'Article', name: 'testonewayrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testonetoonerelation',
+        relation: {
+          type: 'oneToOne',
+          target: { select: 'Article', name: 'testonetoonerelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testonetomanyrelation',
+        relation: {
+          type: 'oneToMany',
+          target: { select: 'Article', name: 'testonetomanyrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testmanytoonerelation',
+        relation: {
+          type: 'manyToOne',
+          target: { select: 'Article', name: 'testmanytoonerelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testmanytomanyrelation',
+        relation: {
+          type: 'manyToMany',
+          target: { select: 'Article', name: 'testmanytomanyrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testmanywayrelation',
+        relation: {
+          type: 'manyWay',
+          target: { select: 'Article', name: 'testmanywayrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'enumeration',
+        name: 'testenumeration',
+        enumeration: { values: ['first', 'second', 'third'] },
+        advanced: advancedRequired,
+      },
+      { type: 'markdown', name: 'testmarkdown', advanced: advancedRequired },
+      // New single component with a new category
+      {
+        type: 'component',
+        name: 'testnewcomponentnewcategory',
+        component: {
+          options: {
+            repeatable: false,
+            name: 'testnewcomponentnewcategory',
+            icon: 'alien',
+            categoryCreate: 'testcategory',
+            attributes: [
+              {
+                type: 'text',
+                name: 'testnewcompotext',
+                advanced: advancedRegex,
+              },
+            ],
+          },
+        },
+      },
+      // New repeatable component with existing category
+      {
+        type: 'component',
+        name: 'testnewcomponentexistingcategory',
+        component: {
+          options: {
+            repeatable: true,
+            name: 'testnewcomponentrepeatable',
+            icon: 'moon',
+            categorySelect: 'testcategory',
+            attributes: [
+              {
+                type: 'text',
+                name: 'testexistingcompotext',
+                advanced: advancedRegex,
+              },
+            ],
+          },
+        },
+      },
+      // Existing component with existing category
+      {
+        type: 'component',
+        name: 'testexistingcomponentexistingcategory',
+        component: {
+          useExisting: 'testnewcomponentnewcategory',
+          options: {
+            repeatable: false,
+            name: 'testexistingcomponent',
+            icon: 'globe',
+            categorySelect: 'testcategory',
+          },
+        },
+      },
+      // Dynamic zone
+      {
+        type: 'dz',
+        name: 'testdynamiczone',
+        dz: {
+          components: [
+            {
+              type: 'component',
+              name: 'testdznewcomponentnewcategory',
+              component: {
+                options: {
+                  repeatable: false,
+                  name: 'testnewcomponentnewcategory',
+                  icon: 'paint',
+                  categoryCreate: 'testcategory',
+                  attributes: [
+                    {
+                      type: 'text',
+                      name: 'testdzcompotext',
+                      advanced: advancedRegex,
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    ];
 
-    const displayName = page.getByLabel('Display name');
-    await displayName.fill('Secret Document');
+    const options = {
+      name: 'Secret Document',
+      singularId: 'secret-document',
+      pluralId: 'secret-documents',
+      attributes,
+    };
 
-    const singularId = page.getByLabel('API ID (Singular)');
-    await expect(singularId).toHaveValue('secret-document');
-
-    const pluralId = page.getByLabel('API ID (Plural)');
-    await expect(pluralId).toHaveValue('secret-documents');
-
-    // TODO: refactor using the utilities for adding attributes
-    await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-
-    await expect(page.getByText('Select a field for your collection type')).toBeVisible();
-
-    await clickAndWait(page, page.getByText('Small or long text'));
-
-    await page.getByLabel('Name', { exact: true }).fill('myattribute');
-    await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
-    await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
-
-    await waitForRestart(page);
-
-    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await createCollectionType(page, options);
   });
 });

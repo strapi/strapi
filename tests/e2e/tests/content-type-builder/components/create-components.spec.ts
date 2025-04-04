@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { resetFiles } from '../../../utils/file-reset';
 import { sharedSetup } from '../../../utils/setup';
 import { createComponent, type AddAttribute } from '../../../utils/content-types';
@@ -37,30 +37,85 @@ test.describe('Create a new component', () => {
     await createComponent(page, options);
   });
 
-  test('Can create a component with every attribute type permutation (except relations)', async ({
-    page,
-  }) => {
-    const attributes = [
-      { type: 'text', name: 'testtext' },
-      { type: 'boolean', name: 'testboolean' },
-      { type: 'blocks', name: 'testblocks' },
-      { type: 'json', name: 'testjson' },
-      { type: 'number', name: 'testinteger', number: { format: 'integer' } },
-      { type: 'number', name: 'testbiginteger', number: { format: 'big integer' } },
-      { type: 'number', name: 'testdecimal', number: { format: 'decimal' } },
-      { type: 'email', name: 'testemail' },
-      { type: 'date', name: 'testdateonlydate', date: { format: 'date' } },
-      { type: 'date', name: 'testdatetime', date: { format: 'time' } },
-      { type: 'date', name: 'testdatedatetime', date: { format: 'datetime' } },
-      { type: 'password', name: 'testpassword' },
-      { type: 'media', name: 'testmediasingle', media: { multiple: false } },
-      { type: 'media', name: 'testmediamultiple', media: { multiple: true } },
+  const advancedRequired = { required: true };
+  const advancedRegex = { required: true, regexp: '^(?!.*fail).*' };
+
+  test('Can create a component with all field types', async ({ page }) => {
+    const attributes: AddAttribute[] = [
+      { type: 'text', name: 'testtext', advanced: advancedRegex },
+      { type: 'boolean', name: 'testboolean', advanced: advancedRequired },
+      { type: 'blocks', name: 'testblocks', advanced: advancedRequired },
+      { type: 'json', name: 'testjson', advanced: advancedRequired },
+      {
+        type: 'number',
+        name: 'testinteger',
+        number: { format: 'integer' },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'number',
+        name: 'testbiginteger',
+        number: { format: 'big integer' },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'number',
+        name: 'testdecimal',
+        number: { format: 'decimal' },
+        advanced: advancedRequired,
+      },
+      { type: 'email', name: 'testemail', advanced: advancedRequired },
+      {
+        type: 'date',
+        name: 'testdateonlydate',
+        date: { format: 'date' },
+        advanced: advancedRequired,
+      },
+      { type: 'date', name: 'testdatetime', date: { format: 'time' }, advanced: advancedRequired },
+      {
+        type: 'date',
+        name: 'testdatedatetime',
+        date: { format: 'datetime' },
+        advanced: advancedRequired,
+      },
+      { type: 'password', name: 'testpassword', advanced: advancedRequired },
+      {
+        type: 'media',
+        name: 'testmediasingle',
+        media: { multiple: false },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'media',
+        name: 'testmediamultiple',
+        media: { multiple: true },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'comptestonewayrelation',
+        relation: {
+          type: 'oneWay',
+          target: { select: 'Article', name: 'comptestonewayrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'comptestmanywayrelation',
+        relation: {
+          type: 'manyWay',
+          target: { select: 'Article', name: 'comptestmanywayrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
       {
         type: 'enumeration',
         name: 'testenumeration',
         enumeration: { values: ['first', 'second', 'third'] },
+        advanced: advancedRequired,
       },
-      { type: 'markdown', name: 'testmarkdown' },
+      { type: 'markdown', name: 'testmarkdown', advanced: advancedRequired },
       // new single component with new category
       {
         type: 'component',
@@ -71,7 +126,7 @@ test.describe('Create a new component', () => {
             name: 'testnewcomponent2',
             icon: 'alien',
             categoryCreate: 'testcategory',
-            attributes: [{ type: 'text', name: 'testcompotext' }],
+            attributes: [{ type: 'text', name: 'testnewcompotext' }],
           },
         },
       },
@@ -83,9 +138,9 @@ test.describe('Create a new component', () => {
           options: {
             repeatable: true,
             name: 'testnewcomponent3',
-            icon: 'alien',
+            icon: 'moon',
             categorySelect: 'testcategory',
-            attributes: [{ type: 'text', name: 'testcompotext' }],
+            attributes: [{ type: 'text', name: 'testexistingcompotext' }],
           },
         },
       },
@@ -98,18 +153,16 @@ test.describe('Create a new component', () => {
           options: {
             repeatable: false,
             name: 'testexistingcomponentexistingcategory',
-            icon: 'alien',
+            icon: 'globe',
             categorySelect: 'testcategory',
           },
         },
       },
-      // TODO: test relations
-      // { type: 'relation', name: 'testrelation' },
-    ] satisfies AddAttribute[];
+    ];
 
     const options = {
       name: 'ArticlesComponent',
-      categorySelect: 'BlogPosts', // this time we select the previously created category
+      categorySelect: 'product', // use a category we know exists in the test data
       icon: 'paint',
       attributes,
     };

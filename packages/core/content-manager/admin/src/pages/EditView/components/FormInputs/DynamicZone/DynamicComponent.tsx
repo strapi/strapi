@@ -7,7 +7,6 @@ import {
   Flex,
   Grid,
   IconButton,
-  VisuallyHidden,
   useComposedRefs,
   Menu,
   MenuItem,
@@ -20,11 +19,13 @@ import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
+import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
-import { InputRenderer } from '../../InputRenderer';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
+import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
 
 import type { ComponentPickerProps } from './ComponentPicker';
 
@@ -38,6 +39,7 @@ interface DynamicComponentProps
   onAddComponent: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
+  children?: (props: InputRendererProps) => React.ReactNode;
 }
 
 const DynamicComponent = ({
@@ -52,12 +54,30 @@ const DynamicComponent = ({
   onCancel,
   dynamicComponentsByCategory = {},
   onAddComponent,
+  children,
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
+  const documentMeta = useDocumentContext('DynamicComponent', (state) => state.meta);
+  const rootDocumentMeta = useDocumentContext(
+    'DynamicComponent',
+    (state) => state.rootDocumentMeta
+  );
+
   const {
-    edit: { components },
-  } = useDocLayout();
+    edit: { components: rootComponents },
+  } = useDocumentLayout(rootDocumentMeta.model);
+  const {
+    edit: { components: relatedComponents },
+  } = useDocumentLayout(documentMeta.model);
+
+  // Merge the root level components and related components
+  const components = React.useMemo(
+    () => ({ ...rootComponents, ...relatedComponents }),
+    [rootComponents, relatedComponents]
+  );
+
+  const document = useDocumentContext('DynamicComponent', (state) => state.document);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
@@ -147,14 +167,17 @@ const DynamicComponent = ({
         <Drag />
       </IconButton>
       <Menu.Root>
-        <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
-          <More aria-hidden focusable={false} />
-          <VisuallyHidden tag="span">
-            {formatMessage({
+        <Menu.Trigger size="S" endIcon={null} paddingLeft={0} paddingRight={0}>
+          <IconButton
+            variant="ghost"
+            label={formatMessage({
               id: getTranslation('components.DynamicZone.more-actions'),
               defaultMessage: 'More actions',
             })}
-          </VisuallyHidden>
+            tag="span"
+          >
+            <More aria-hidden focusable={false} />
+          </IconButton>
         </Menu.Trigger>
         <Menu.Content>
           <Menu.SubRoot>
@@ -240,7 +263,7 @@ const DynamicComponent = ({
                           direction="column"
                           alignItems="stretch"
                         >
-                          <Grid.Root gap={4}>
+                          <ResponsiveGridRoot gap={4}>
                             {row.map(({ size, ...field }) => {
                               const fieldName = `${name}.${index}.${field.name}`;
 
@@ -253,7 +276,7 @@ const DynamicComponent = ({
                               };
 
                               return (
-                                <Grid.Item
+                                <ResponsiveGridItem
                                   col={size}
                                   key={fieldName}
                                   s={12}
@@ -261,11 +284,23 @@ const DynamicComponent = ({
                                   direction="column"
                                   alignItems="stretch"
                                 >
-                                  <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
-                                </Grid.Item>
+                                  {children ? (
+                                    children({
+                                      ...fieldWithTranslatedLabel,
+                                      document,
+                                      name: fieldName,
+                                    })
+                                  ) : (
+                                    <InputRenderer
+                                      {...fieldWithTranslatedLabel}
+                                      document={document}
+                                      name={fieldName}
+                                    />
+                                  )}
+                                </ResponsiveGridItem>
                               );
                             })}
-                          </Grid.Root>
+                          </ResponsiveGridRoot>
                         </Grid.Item>
                       ))}
                     </Grid.Root>

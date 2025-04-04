@@ -1,12 +1,12 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose, skipCtbTour } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-describeOnCondition(edition === 'EE')('Preview', () => {
+test.describe('Preview', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
     await resetFiles();
@@ -34,7 +34,18 @@ describeOnCondition(edition === 'EE')('Preview', () => {
 
     // Should go back to the edit view on close
     await clickAndWait(page, page.getByRole('link', { name: /close preview/i }));
-    await expect(page.getByRole('textbox', { name: /title/i })).toBeVisible();
+    const titleInput = page.getByRole('textbox', { name: /title/i });
+    await expect(titleInput).toBeVisible();
+
+    // Preview link should be disabled when there are unsaved changes
+    await titleInput.fill('New title');
+    const previewLink = page.getByRole('link', { name: /open preview/i });
+    await expect(previewLink).toBeDisabled();
+    // Can't hover the link directly because of pointer-events:none, so hover the div parent
+    await previewLink.locator('..').hover();
+    await expect(
+      page.getByRole('tooltip', { name: /please save to open the preview/i })
+    ).toBeVisible();
   });
 
   test('Preview button should not appear for content types without preview config', async ({
@@ -83,20 +94,90 @@ describeOnCondition(edition === 'EE')('Preview', () => {
     await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
 
     // Check if the iframe is present
-    const iframe = await page.getByTitle('Preview');
+    const iframe = page.getByTitle('Preview');
     expect(iframe).not.toBeNull();
 
     // Check if the iframe is loading the correct URL
-    const src = await iframe.getAttribute('src');
-    expect(src).toContain('/preview/api::article.article/');
-    expect(src).toContain('/en/draft');
+    await expect(iframe).toHaveAttribute('src', /\/preview\/api::article\.article\/.+\/en\/draft$/);
 
     // Navigate to the published tab
     await clickAndWait(page, page.getByRole('tab', { name: /^Published$/ }));
 
-    const updatedIframe = await page.getByTitle('Preview');
-    const srcPublished = await updatedIframe.getAttribute('src');
-    expect(srcPublished).toContain('/preview/api::article.article/');
-    expect(srcPublished).toContain('/en/published');
+    const updatedIframe = page.getByTitle('Preview');
+    await expect(updatedIframe).toHaveAttribute(
+      'src',
+      /\/preview\/api::article\.article\/.+\/en\/published$/
+    );
+  });
+});
+
+// TODO: add license check in condition
+describeOnCondition(edition === 'EE')('Advanced Preview', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, {
+      coreStore: false,
+    });
+    await resetFiles();
+    await page.goto('/admin');
+    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
+    await login({ page });
+    await page.waitForURL('/admin');
+  });
+
+  test('I can edit the form to save the document as draft, modified, or published', async ({
+    page,
+  }) => {
+    // Open an edit view for a content type that has preview
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: /west ham post match/i }));
+
+    // Open the preview page
+    await clickAndWait(page, page.getByRole('link', { name: /open preview/i }));
+
+    const titleBox = page.getByRole('textbox', { name: 'title' });
+    const saveButton = page.getByRole('button', { name: /save/i });
+    const publishButton = page.getByRole('button', { name: /publish/i });
+    const draftTab = page.getByRole('tab', { name: /^Draft$/ });
+    const publishedTab = page.getByRole('tab', { name: /^Published$/ });
+
+    // Confirm initial state
+    await expect(titleBox).toHaveValue(/west ham post match/i);
+    await expect(page.getByRole('status', { name: /draft/i }).first()).toBeVisible();
+    await expect(draftTab).toHaveAttribute('aria-selected', 'true');
+    await expect(draftTab).toBeEnabled();
+    await expect(publishedTab).toHaveAttribute('aria-selected', 'false');
+    await expect(publishedTab).toBeDisabled();
+
+    // Update and save
+    await titleBox.fill('West Ham pre match pep talk');
+    await expect(saveButton).toBeEnabled();
+    await clickAndWait(page, saveButton);
+    await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
+    await expect(page.getByRole('status', { name: /draft/i }).first()).toBeVisible();
+
+    // Publish
+    await expect(publishButton).toBeEnabled();
+    await clickAndWait(page, publishButton);
+    await expect(titleBox).toHaveValue(/west ham pre match pep talk/i);
+    await expect(page.getByRole('status', { name: /published/i }).first()).toBeVisible();
+    await expect(publishedTab).toBeEnabled();
+    await clickAndWait(page, publishedTab);
+    await expect(titleBox).toBeDisabled();
+
+    // Modify
+    await clickAndWait(page, draftTab);
+    titleBox.fill('West Ham pre match jokes');
+    await expect(saveButton).toBeEnabled();
+    await clickAndWait(page, saveButton);
+    await expect(titleBox).toHaveValue(/west ham pre match jokes/i);
+    await expect(page.getByRole('status', { name: /modified/i }).first()).toBeVisible();
+
+    // Edit form again and try switching tab without saving
+    await titleBox.fill('West Ham pre match jokes and banter');
+    await clickAndWait(page, publishedTab);
+    const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
+    await expect(confirmationDialog).toBeVisible();
+    await confirmationDialog.getByRole('button', { name: /cancel/i }).click();
   });
 });

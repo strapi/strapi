@@ -3,6 +3,7 @@ import { INJECTION_ZONES } from './components/InjectionZone';
 import { PLUGIN_ID } from './constants/plugin';
 import {
   DEFAULT_ACTIONS,
+  type DocumentActionPosition,
   type DocumentActionDescription,
 } from './pages/EditView/components/DocumentActions';
 import {
@@ -79,7 +80,11 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
   type?: 'actions' | 'releases';
 }
 
-interface DocumentActionProps extends EditViewContext {}
+interface DocumentActionProps extends EditViewContext {
+  onPreview?: () => void;
+  fromPreview?: boolean;
+  fromRelationModal?: boolean;
+}
 
 interface DocumentActionComponent
   extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
@@ -94,6 +99,7 @@ interface DocumentActionComponent
     | 'publish'
     | 'unpublish'
     | 'update';
+  position?: DocumentActionDescription['position'];
 }
 
 interface HeaderActionProps extends EditViewContext {}
@@ -209,7 +215,22 @@ class ContentManagerPlugin {
         addDocumentHeaderAction: this.addDocumentHeaderAction.bind(this),
         addEditViewSidePanel: this.addEditViewSidePanel.bind(this),
         getBulkActions: () => this.bulkActions,
-        getDocumentActions: () => this.documentActions,
+        getDocumentActions: (position?: DocumentActionPosition) => {
+          /**
+           * When possible, pre-filter the actions by the components static position property.
+           * This avoids rendering the actions in multiple places where they weren't displayed,
+           * which wasn't visible but created issues with useEffect for instance.
+           * The response should still be filtered by the position, as the static property is new
+           * and not mandatory to avoid a breaking change.
+           */
+          if (position) {
+            return this.documentActions.filter((action) => {
+              return action.position == undefined || [action.position].flat().includes(position);
+            });
+          }
+
+          return this.documentActions;
+        },
         getEditViewSidePanels: () => this.editViewSidePanels,
         getHeaderActions: () => this.headerActions,
       },

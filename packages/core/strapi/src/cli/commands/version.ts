@@ -1,5 +1,6 @@
 import { createCommand } from 'commander';
 import type { StrapiCommand } from '../types';
+import { version } from '../../../package.json';
 
 /**
  * `$ strapi version`
@@ -10,9 +11,6 @@ const command: StrapiCommand = () => {
   return createCommand('version')
     .description('Output the version of Strapi')
     .action(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { version } = require('../../../package.json');
-
       process.stdout.write(`${version}\n`);
       process.exit(0);
     });

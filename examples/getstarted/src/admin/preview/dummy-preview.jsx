@@ -1,17 +1,42 @@
-import React from 'react';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
 
 // @ts-ignore
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
-import { Grid, Flex, Typography } from '@strapi/design-system';
+import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
+import { Grid, Flex, Typography, JSONInput } from '@strapi/design-system';
 
 const PreviewComponent = () => {
-  const { uid, documentId, locale, status } = useParams();
+  const { uid: model, documentId, locale, status, collectionType } = useParams();
+  const { document, refetch } = useDocument({
+    model,
+    documentId,
+    params: {
+      locale,
+      status,
+      populate: '*',
+    },
+    collectionType,
+  });
+
+  React.useEffect(() => {
+    const handleStrapiUpdate = (event) => {
+      if (event.data?.type === 'strapiUpdate') {
+        refetch();
+      }
+    };
+
+    window.addEventListener('message', handleStrapiUpdate);
+
+    return () => {
+      window.removeEventListener('message', handleStrapiUpdate);
+    };
+  }, []);
 
   return (
     <Layouts.Root>
       <Page.Main>
-        <Page.Title>{`Previewing ${uid}`}</Page.Title>
+        <Page.Title>{`Previewing ${model}`}</Page.Title>
         <Layouts.Header title="Static Preview" subtitle="Dummy preview for getstarted app" />
         <Layouts.Content>
           <Flex
@@ -36,7 +61,7 @@ const PreviewComponent = () => {
                   Content Type
                 </Typography>
                 <Flex gap={3} direction="column" alignItems="start" tag="dd">
-                  <Typography>{uid}</Typography>
+                  <Typography>{model}</Typography>
                 </Flex>
               </Grid.Item>
               <Grid.Item col={6} s={12} direction="column" alignItems="start">
@@ -62,6 +87,7 @@ const PreviewComponent = () => {
                 <Typography tag="dd">{locale}</Typography>
               </Grid.Item>
             </Grid.Root>
+            {document && <JSONInput value={JSON.stringify(document, null, 2)} disabled />}
           </Flex>
         </Layouts.Content>
       </Page.Main>

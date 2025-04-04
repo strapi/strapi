@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 
 import { useDataManager } from '../../../hooks/useDataManager';
 import { getTrad } from '../../../utils/getTrad';
-import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
+import { actions } from '../../FormModal/reducer';
 
 import { IconWrapper, InfosWrapper, Wrapper } from './Components';
 
@@ -96,20 +96,23 @@ export const RelationNaturePicker = ({
                     key={relation}
                     onClick={() => {
                       if (isEnabled) {
-                        dispatch({
-                          type: ON_CHANGE_RELATION_TYPE,
-                          target: {
-                            oneThatIsCreatingARelationWithAnother,
-                            targetContentType: target,
-                            value: relation,
-                          },
-                        });
+                        dispatch(
+                          actions.onChangeRelationType({
+                            target: {
+                              oneThatIsCreatingARelationWithAnother,
+                              value: relation,
+                            },
+                          })
+                        );
                       }
                     }}
                     padding={2}
                     type="button"
+                    aria-label={formatMessage({ id: getTrad(`relation.${relation}`) })}
+                    aria-pressed={relationType === relation}
+                    data-relation-type={relation}
                   >
-                    <Asset key={relation} />
+                    <Asset key={relation} aria-hidden="true" />
                   </IconWrapper>
                 );
               })}

@@ -26,6 +26,7 @@ import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
+import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
@@ -34,13 +35,13 @@ import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 
-import type { RelationsFormValue } from './FormInputs/Relations';
+import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
 
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
-type DocumentActionPosition = 'panel' | 'header' | 'table-row';
+type DocumentActionPosition = 'panel' | 'header' | 'table-row' | 'preview' | 'relation-modal';
 
 interface DocumentActionDescription {
   label: string;
@@ -60,6 +61,7 @@ interface DocumentActionDescription {
    * @default 'secondary'
    */
   variant?: ButtonProps['variant'];
+  loading?: ButtonProps['loading'];
 }
 
 interface DialogOptions {
@@ -193,6 +195,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
         variant={action.variant || 'default'}
         paddingTop="7px"
         paddingBottom="7px"
+        loading={action.loading}
       >
         {action.label}
       </Button>
@@ -388,6 +391,7 @@ const convertActionVariantToIconColor = (
 interface DocumentActionConfirmDialogProps extends DialogOptions, Pick<Action, 'variant'> {
   onClose: () => void;
   isOpen: Dialog.Props['open'];
+  loading?: ButtonProps['loading'];
 }
 
 const DocumentActionConfirmDialog = ({
@@ -398,6 +402,7 @@ const DocumentActionConfirmDialog = ({
   content,
   isOpen,
   variant = 'secondary',
+  loading,
 }: DocumentActionConfirmDialogProps) => {
   const { formatMessage } = useIntl();
 
@@ -431,7 +436,7 @@ const DocumentActionConfirmDialog = ({
               })}
             </Button>
           </Dialog.Cancel>
-          <Button onClick={handleConfirm} variant={variant} fullWidth>
+          <Button onClick={handleConfirm} variant={variant} fullWidth loading={loading}>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',
@@ -512,8 +517,11 @@ const PublishAction: DocumentActionComponent = ({
   collectionType,
   meta,
   document,
+  onPreview,
+  fromPreview = false,
+  fromRelationModal = false,
 }) => {
-  const { schema } = useDoc();
+  const schema = useDocumentContext('PublishAction', (state) => state.document.schema);
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -522,7 +530,7 @@ const PublishAction: DocumentActionComponent = ({
   const { id } = useParams();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
-  const { publish } = useDocumentActions();
+  const { publish, isLoading } = useDocumentActions(fromPreview, fromRelationModal);
   const [
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
@@ -539,6 +547,10 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+  const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
+
+  const rootDocumentMeta = useDocumentContext('PublishAction', (state) => state.rootDocumentMeta);
+  const currentDocumentMeta = useDocumentContext('PublishAction', (state) => state.meta);
 
   React.useEffect(() => {
     if (isErrorDraftRelations) {
@@ -645,15 +657,21 @@ const PublishAction: DocumentActionComponent = ({
         return;
       }
 
+      const isPublishingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
       const res = await publish(
         {
           collectionType,
           model,
           documentId,
-          params,
+          params: isPublishingRelation ? currentDocumentMeta.params : params,
         },
         transformData(formValues)
       );
+
+      // Reset form if successful
+      if ('data' in res) {
+        resetForm();
+      }
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
         /**
@@ -674,6 +692,10 @@ const PublishAction: DocumentActionComponent = ({
       }
     } finally {
       setSubmitting(false);
+
+      if (onPreview) {
+        onPreview();
+      }
     }
   };
 
@@ -684,6 +706,8 @@ const PublishAction: DocumentActionComponent = ({
   const hasDraftRelations = enableDraftRelationsCount && totalDraftRelations > 0;
 
   return {
+    loading: isLoading,
+    position: ['panel', 'preview', 'relation-modal'],
     /**
      * Disabled when:
      *  - currently if you're cloning a document we don't support publish & clone at the same time.
@@ -742,12 +766,16 @@ const PublishAction: DocumentActionComponent = ({
 };
 
 PublishAction.type = 'publish';
+PublishAction.position = ['panel', 'preview', 'relation-modal'];
 
 const UpdateAction: DocumentActionComponent = ({
   activeTab,
   documentId,
   model,
   collectionType,
+  onPreview,
+  fromPreview = false,
+  fromRelationModal = false,
 }) => {
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
@@ -755,7 +783,7 @@ const UpdateAction: DocumentActionComponent = ({
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { create, update, clone } = useDocumentActions();
+  const { create, update, clone, isLoading } = useDocumentActions(fromPreview, fromRelationModal);
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
@@ -767,7 +795,153 @@ const UpdateAction: DocumentActionComponent = ({
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
+  const rootDocumentMeta = useDocumentContext('UpdateAction', (state) => state.rootDocumentMeta);
+  const currentDocumentMeta = useDocumentContext('UpdateAction', (state) => state.meta);
+
+  const handleUpdate = React.useCallback(async () => {
+    setSubmitting(true);
+
+    try {
+      if (!modified) {
+        return;
+      }
+
+      const { errors } = await validate(true, {
+        status: 'draft',
+      });
+
+      if (errors) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: 'content-manager.validation.error',
+            defaultMessage:
+              'There are validation errors in your document. Please fix them before saving.',
+          }),
+        });
+
+        return;
+      }
+
+      if (isCloning) {
+        const res = await clone(
+          {
+            model,
+            documentId: cloneMatch.params.origin!,
+            params,
+          },
+          transformData(document)
+        );
+
+        if ('data' in res) {
+          navigate(
+            {
+              pathname: `../${res.data.documentId}`,
+              search: rawQuery,
+            },
+            { relative: 'path' }
+          );
+        } else if (
+          'error' in res &&
+          isBaseQueryError(res.error) &&
+          res.error.name === 'ValidationError'
+        ) {
+          setErrors(formatValidationErrors(res.error));
+        }
+      } else if (documentId || collectionType === SINGLE_TYPES) {
+        const isEditingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
+
+        const res = await update(
+          {
+            collectionType,
+            model,
+            documentId,
+            params: isEditingRelation ? currentDocumentMeta.params : params,
+          },
+          transformData(document)
+        );
+
+        if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          setErrors(formatValidationErrors(res.error));
+        } else {
+          resetForm();
+        }
+      } else {
+        const res = await create(
+          {
+            model,
+            params,
+          },
+          transformData(document)
+        );
+
+        if ('data' in res && collectionType !== SINGLE_TYPES) {
+          navigate(
+            {
+              pathname: `../${res.data.documentId}`,
+              search: rawQuery,
+            },
+            { replace: true, relative: 'path' }
+          );
+        } else if (
+          'error' in res &&
+          isBaseQueryError(res.error) &&
+          res.error.name === 'ValidationError'
+        ) {
+          setErrors(formatValidationErrors(res.error));
+        }
+      }
+    } finally {
+      setSubmitting(false);
+      if (onPreview) {
+        onPreview();
+      }
+    }
+  }, [
+    clone,
+    cloneMatch?.params.origin,
+    collectionType,
+    create,
+    currentDocumentMeta.documentId,
+    currentDocumentMeta.params,
+    document,
+    documentId,
+    formatMessage,
+    formatValidationErrors,
+    isCloning,
+    model,
+    modified,
+    navigate,
+    onPreview,
+    params,
+    rawQuery,
+    resetForm,
+    rootDocumentMeta.documentId,
+    setErrors,
+    setSubmitting,
+    toggleNotification,
+    update,
+    validate,
+  ]);
+
+  // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleUpdate();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleUpdate]);
+
   return {
+    loading: isLoading,
     /**
      * Disabled when:
      * - the form is submitting
@@ -779,105 +953,13 @@ const UpdateAction: DocumentActionComponent = ({
       id: 'global.save',
       defaultMessage: 'Save',
     }),
-    onClick: async () => {
-      setSubmitting(true);
-
-      try {
-        const { errors } = await validate(true, {
-          status: 'draft',
-        });
-
-        if (errors) {
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: 'content-manager.validation.error',
-              defaultMessage:
-                'There are validation errors in your document. Please fix them before saving.',
-            }),
-          });
-
-          return;
-        }
-
-        if (isCloning) {
-          const res = await clone(
-            {
-              model,
-              documentId: cloneMatch.params.origin!,
-              params,
-            },
-            transformData(document)
-          );
-
-          if ('data' in res) {
-            navigate(
-              {
-                pathname: `../${res.data.documentId}`,
-                search: rawQuery,
-              },
-              { relative: 'path' }
-            );
-          } else if (
-            'error' in res &&
-            isBaseQueryError(res.error) &&
-            res.error.name === 'ValidationError'
-          ) {
-            setErrors(formatValidationErrors(res.error));
-          }
-        } else if (documentId || collectionType === SINGLE_TYPES) {
-          const res = await update(
-            {
-              collectionType,
-              model,
-              documentId,
-              params,
-            },
-            transformData(document)
-          );
-
-          if (
-            'error' in res &&
-            isBaseQueryError(res.error) &&
-            res.error.name === 'ValidationError'
-          ) {
-            setErrors(formatValidationErrors(res.error));
-          } else {
-            resetForm();
-          }
-        } else {
-          const res = await create(
-            {
-              model,
-              params,
-            },
-            transformData(document)
-          );
-
-          if ('data' in res && collectionType !== SINGLE_TYPES) {
-            navigate(
-              {
-                pathname: `../${res.data.documentId}`,
-                search: rawQuery,
-              },
-              { replace: true, relative: 'path' }
-            );
-          } else if (
-            'error' in res &&
-            isBaseQueryError(res.error) &&
-            res.error.name === 'ValidationError'
-          ) {
-            setErrors(formatValidationErrors(res.error));
-          }
-        }
-      } finally {
-        setSubmitting(false);
-      }
-    },
+    onClick: handleUpdate,
+    position: ['panel', 'preview', 'relation-modal'],
   };
 };
 
 UpdateAction.type = 'update';
+UpdateAction.position = ['panel', 'preview', 'relation-modal'];
 
 const UNPUBLISH_DRAFT_OPTIONS = {
   KEEP: 'keep',
@@ -1028,6 +1110,7 @@ const UnpublishAction: DocumentActionComponent = ({
 };
 
 UnpublishAction.type = 'unpublish';
+UnpublishAction.position = 'panel';
 
 const DiscardAction: DocumentActionComponent = ({
   activeTab,
@@ -1039,7 +1122,7 @@ const DiscardAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const { schema } = useDoc();
   const canUpdate = useDocumentRBAC('DiscardAction', ({ canUpdate }) => canUpdate);
-  const { discard } = useDocumentActions();
+  const { discard, isLoading } = useDocumentActions();
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
 
@@ -1073,6 +1156,7 @@ const DiscardAction: DocumentActionComponent = ({
           </Typography>
         </Flex>
       ),
+      loading: isLoading,
       onConfirm: async () => {
         await discard({
           collectionType,
@@ -1086,8 +1170,15 @@ const DiscardAction: DocumentActionComponent = ({
 };
 
 DiscardAction.type = 'discard';
+DiscardAction.position = 'panel';
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
 export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
-export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };
+export type {
+  DocumentActionDescription,
+  DocumentActionPosition,
+  DialogOptions,
+  NotificationOptions,
+  ModalOptions,
+};

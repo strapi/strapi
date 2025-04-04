@@ -16,7 +16,6 @@ import {
   Modal,
   Field,
 } from '@strapi/design-system';
-import { UID } from '@strapi/types';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 
@@ -33,6 +32,7 @@ import {
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
 import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';
+import type { UID } from '@strapi/types';
 
 const getContentPermissions = (subject: string) => {
   const permissions = {

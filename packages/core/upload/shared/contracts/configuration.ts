@@ -4,7 +4,7 @@
  */
 
 import { errors } from '@strapi/utils';
-import { Utils } from '@strapi/types';
+import type { Utils } from '@strapi/types';
 
 type SortOrder = 'ASC' | 'DESC';
 

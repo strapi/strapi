@@ -1,16 +1,48 @@
 import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
-import { useDoc } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
 
-interface FormLayoutProps extends Pick<EditLayout, 'layout'> {}
+import type { UseDocument } from '../../../hooks/useDocument';
 
-const FormLayout = ({ layout }: FormLayoutProps) => {
+export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
+  sm: '27.5rem', // 440px
+};
+
+export const ResponsiveGridRoot = styled(Grid.Root)`
+  container-type: inline-size;
+`;
+
+export const ResponsiveGridItem =
+  /**
+   * TODO:
+   * JSDOM cannot handle container queries.
+   * This is a temporary workaround so that tests do not fail in the CI when jestdom throws an error
+   * for failing to parse the stylesheet.
+   */
+  process.env.NODE_ENV !== 'test'
+    ? styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+        @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+          ${({ col }) => col && `grid-column: span ${col};`}
+        }
+      `
+    : styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+      `;
+
+interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
+  hasBackground?: boolean;
+  model?: string;
+  document: ReturnType<UseDocument>;
+}
+
+const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { model } = useDoc();
+  const model = document.schema?.modelName;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -30,7 +62,7 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                <InputRenderer {...fieldWithTranslatedLabel} />
+                <InputRenderer {...fieldWithTranslatedLabel} document={document} />
               </Grid.Item>
             </Grid.Root>
           );
@@ -39,18 +71,17 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
         return (
           <Box
             key={index}
-            hasRadius
-            background="neutral0"
-            shadow="tableShadow"
-            paddingLeft={6}
-            paddingRight={6}
-            paddingTop={6}
-            paddingBottom={6}
-            borderColor="neutral150"
+            {...(hasBackground && {
+              padding: 6,
+              borderColor: 'neutral150',
+              background: 'neutral0',
+              hasRadius: true,
+              shadow: 'tableShadow',
+            })}
           >
             <Flex direction="column" alignItems="stretch" gap={6}>
               {panel.map((row, gridRowIndex) => (
-                <Grid.Root key={gridRowIndex} gap={4}>
+                <ResponsiveGridRoot key={gridRowIndex} gap={4}>
                   {row.map(({ size, ...field }) => {
                     const fieldWithTranslatedLabel = {
                       ...field,
@@ -60,7 +91,7 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
                       }),
                     };
                     return (
-                      <Grid.Item
+                      <ResponsiveGridItem
                         col={size}
                         key={field.name}
                         s={12}
@@ -68,11 +99,11 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
                         direction="column"
                         alignItems="stretch"
                       >
-                        <InputRenderer {...fieldWithTranslatedLabel} />
-                      </Grid.Item>
+                        <InputRenderer {...fieldWithTranslatedLabel} document={document} />
+                      </ResponsiveGridItem>
                     );
                   })}
-                </Grid.Root>
+                </ResponsiveGridRoot>
               ))}
             </Flex>
           </Box>

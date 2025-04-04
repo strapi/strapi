@@ -1,8 +1,8 @@
 import { omit, assoc, merge, curry } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils, validate } from '@strapi/utils';
+import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
 
-import { UID } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
@@ -16,6 +16,7 @@ import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
+import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
 
 const { validators } = validate;
@@ -47,6 +48,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
     await validators.validateSort(ctx, params.sort, sortValidations);
     await validators.validateFields(ctx, params.fields, fieldValidations);
     await validators.validatePopulate(ctx, params.populate, populateValidations);
+
+    // Strip lookup from params, it's only used internally
+    if (params.lookup) {
+      throw new errors.ValidationError("Invalid params: 'lookup'");
+    }
 
     // TODO: add validate status, locale, pagination
 
@@ -300,6 +306,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldPublishedVersions,
     });
 
+    const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
+      newVersions: draftsToPublish,
+      oldVersions: oldPublishedVersions,
+    });
+
     // Delete old published versions
     await async.map(oldPublishedVersions, (entry: any) => entries.delete(entry.id));
 
@@ -313,6 +324,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       [...oldPublishedVersions, ...draftsToPublish],
       publishedEntries,
       relationsToSync
+    );
+
+    await bidirectionalRelations.sync(
+      [...oldPublishedVersions, ...draftsToPublish],
+      publishedEntries,
+      bidirectionalRelationsToSync
     );
 
     publishedEntries.forEach(emitEvent('entry.publish'));
@@ -374,6 +391,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       oldVersions: oldDrafts,
     });
 
+    const bidirectionalRelationsToSync = await bidirectionalRelations.load(uid, {
+      newVersions: versionsToDraft,
+      oldVersions: oldDrafts,
+    });
+
     // Delete old drafts
     await async.map(oldDrafts, (entry: any) => entries.delete(entry.id));
 
@@ -387,6 +409,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       [...oldDrafts, ...versionsToDraft],
       draftEntries,
       relationsToSync
+    );
+
+    await bidirectionalRelations.sync(
+      [...oldDrafts, ...versionsToDraft],
+      draftEntries,
+      bidirectionalRelationsToSync
     );
 
     draftEntries.forEach(emitEvent('entry.draft-discard'));

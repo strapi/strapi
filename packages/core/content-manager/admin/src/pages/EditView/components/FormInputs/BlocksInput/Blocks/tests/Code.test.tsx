@@ -15,6 +15,7 @@ describe('Code', () => {
         element: {
           type: 'code',
           children: [{ type: 'text', text: 'Some code' }],
+          language: 'javascript',
         },
         attributes: {
           'data-slate-node': 'element',
@@ -44,6 +45,7 @@ describe('Code', () => {
             text: 'Some code',
           },
         ],
+        language: 'javascript',
       },
     ];
 
@@ -64,6 +66,7 @@ describe('Code', () => {
             text: 'Some code\n',
           },
         ],
+        language: 'javascript',
       },
     ]);
 
@@ -84,6 +87,7 @@ describe('Code', () => {
             text: 'Some code',
           },
         ],
+        language: 'javascript',
       },
       {
         type: 'paragraph',

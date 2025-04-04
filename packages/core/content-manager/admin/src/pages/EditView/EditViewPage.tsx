@@ -15,8 +15,9 @@ import { styled } from 'styled-components';
 
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
+import { DocumentContextProvider } from '../../features/DocumentContext';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { type UseDocument, useDoc } from '../../hooks/useDocument';
+import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
@@ -26,8 +27,6 @@ import { createYupSchema } from '../../utils/validation';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
-import { transformDocument } from './utils/data';
-import { createDefaultForm } from './utils/forms';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -46,6 +45,7 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
 
+  const doc = useDoc();
   const {
     document,
     meta,
@@ -56,7 +56,9 @@ const EditViewPage = () => {
     id,
     model,
     hasError,
-  } = useDoc();
+    getTitle,
+    getInitialFormValues,
+  } = doc;
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
@@ -98,38 +100,13 @@ const EditViewPage = () => {
 
   const isLoading = isLoadingActionsRBAC || isLoadingDocument || isLoadingLayout || isLazyLoading;
 
-  /**
-   * Here we prepare the form for editing, we need to:
-   * - remove prohibited fields from the document (passwords | ADD YOURS WHEN THERES A NEW ONE)
-   * - swap out count objects on relations for empty arrays
-   * - set __temp_key__ on array objects for drag & drop
-   *
-   * We also prepare the form for new documents, so we need to:
-   * - set default values on fields
-   */
-  const initialValues = React.useMemo(() => {
-    if ((!document && !isCreatingDocument && !isSingleType) || !schema) {
-      return undefined;
-    }
-
-    /**
-     * Check that we have an ID so we know the
-     * document has been created in some way.
-     */
-    const form = document?.id ? document : createDefaultForm(schema, components);
-
-    return transformDocument(schema, components)(form);
-  }, [document, isCreatingDocument, isSingleType, schema, components]);
-
-  if (hasError) {
-    return <Page.Error />;
-  }
+  const initialValues = getInitialFormValues(isCreatingDocument);
 
   if (isLoading && !document?.documentId) {
     return <Page.Loading />;
   }
 
-  if (!initialValues) {
+  if (!initialValues || hasError) {
     return <Page.Error />;
   }
 
@@ -138,19 +115,6 @@ const EditViewPage = () => {
       setQuery({ status }, 'push', true);
     }
   };
-
-  /**
-   * We look to see what the mainField is from the configuration, if it's an id
-   * we don't use it because it's a uuid format and not very user friendly.
-   * Instead, we display the schema name for single-type documents
-   * or "Untitled".
-   */
-  let documentTitle = 'Untitled';
-  if (mainField !== 'id' && document?.[mainField]) {
-    documentTitle = document[mainField];
-  } else if (isSingleType && schema?.info.displayName) {
-    documentTitle = schema.info.displayName;
-  }
 
   const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
     const yupSchema = createYupSchema(schema?.attributes, components, {
@@ -163,76 +127,84 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Page.Title>{documentTitle}</Page.Title>
-      <Form
-        disabled={hasDraftAndPublished && status === 'published'}
-        initialValues={initialValues}
-        method={isCreatingDocument ? 'POST' : 'PUT'}
-        validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-          const yupSchema = createYupSchema(schema?.attributes, components, {
-            status,
-            ...options,
-          });
-
-          return yupSchema.validate(values, { abortEarly: false });
+      <Page.Title>{getTitle(mainField)}</Page.Title>
+      <DocumentContextProvider
+        initialDocument={{
+          documentId: id!,
+          model,
+          collectionType,
         }}
-        initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
-        {({ resetForm }) => (
-          <>
-            <Header
-              isCreating={isCreatingDocument}
-              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-              title={documentTitle}
-            />
-            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-              <Tabs.List
-                aria-label={formatMessage({
-                  id: getTranslation('containers.edit.tabs.label'),
-                  defaultMessage: 'Document status',
-                })}
-              >
-                {hasDraftAndPublished ? (
-                  <>
-                    <StatusTab value="draft">
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.draft'),
-                        defaultMessage: 'draft',
-                      })}
-                    </StatusTab>
-                    <StatusTab
-                      disabled={!meta || meta.availableStatus.length === 0}
-                      value="published"
-                    >
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.published'),
-                        defaultMessage: 'published',
-                      })}
-                    </StatusTab>
-                  </>
-                ) : null}
-              </Tabs.List>
-              <Grid.Root paddingTop={8} gap={4}>
-                <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
-                  <Tabs.Content value="draft">
-                    <FormLayout layout={layout} />
-                  </Tabs.Content>
-                  <Tabs.Content value="published">
-                    <FormLayout layout={layout} />
-                  </Tabs.Content>
-                </Grid.Item>
-                <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
-                  <Panels />
-                </Grid.Item>
-              </Grid.Root>
-            </Tabs.Root>
-            <Blocker
-              // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-              onProceed={resetForm}
-            />
-          </>
-        )}
-      </Form>
+        <Form
+          disabled={hasDraftAndPublished && status === 'published'}
+          initialValues={initialValues}
+          method={isCreatingDocument ? 'POST' : 'PUT'}
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            const yupSchema = createYupSchema(schema?.attributes, components, {
+              status,
+              ...options,
+            });
+
+            return yupSchema.validate(values, { abortEarly: false });
+          }}
+          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+        >
+          {({ resetForm }) => (
+            <>
+              <Header
+                isCreating={isCreatingDocument}
+                status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+                title={getTitle(mainField)}
+              />
+              <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+                <Tabs.List
+                  aria-label={formatMessage({
+                    id: getTranslation('containers.edit.tabs.label'),
+                    defaultMessage: 'Document status',
+                  })}
+                >
+                  {hasDraftAndPublished ? (
+                    <>
+                      <StatusTab value="draft">
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.draft'),
+                          defaultMessage: 'draft',
+                        })}
+                      </StatusTab>
+                      <StatusTab
+                        disabled={!meta || meta.availableStatus.length === 0}
+                        value="published"
+                      >
+                        {formatMessage({
+                          id: getTranslation('containers.edit.tabs.published'),
+                          defaultMessage: 'published',
+                        })}
+                      </StatusTab>
+                    </>
+                  ) : null}
+                </Tabs.List>
+                <Grid.Root paddingTop={8} gap={4}>
+                  <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
+                    <Tabs.Content value="draft">
+                      <FormLayout layout={layout} document={doc} />
+                    </Tabs.Content>
+                    <Tabs.Content value="published">
+                      <FormLayout layout={layout} document={doc} />
+                    </Tabs.Content>
+                  </Grid.Item>
+                  <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
+                    <Panels />
+                  </Grid.Item>
+                </Grid.Root>
+              </Tabs.Root>
+              <Blocker
+                // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
+                onProceed={resetForm}
+              />
+            </>
+          )}
+        </Form>
+      </DocumentContextProvider>
     </Main>
   );
 };

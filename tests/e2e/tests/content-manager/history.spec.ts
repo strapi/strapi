@@ -28,11 +28,9 @@ const goToHistoryPage = async (page: Page) => {
   await moreActionsButton.click();
   const historyButton = page.getByRole('menuitem', { name: /content history/i });
 
-  // TODO find out why the history button sometimes doesn't appear. Reloading shouldn't be necessary
   if (await historyButton.isVisible()) {
     await clickAndWait(page, historyButton);
   } else {
-    await page.reload();
     await goToHistoryPage(page);
   }
 };
@@ -219,13 +217,18 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByText('Will Kitman').click();
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Coach Beard').click();
+      // Make sure the relation was added before proceeding to save, otherwise we risk saving too quickly without the relation
+      await expect(page.getByRole('button', { name: 'Coach Beard' })).toBeVisible();
       await page.getByRole('button', { name: 'Save' }).click();
-      await page.waitForURL(ARTICLE_EDIT_URL);
+      // Confirm the save was succesful before proceeding, otherwise we may end up on the related page before the relation is established
+      await findAndClose(page, 'Saved Document');
 
       // Delete one of the authors, leaving only Coach Beard
-      await clickAndWait(page, page.getByRole('link', { name: 'Will Kitman' }));
-      await page.waitForURL(AUTHOR_EDIT_URL);
-      await page.getByRole('button', { name: /more actions/i }).click();
+      // open the Relation modal
+      await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
+      // Click to go to the related document
+      await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
+      await page.getByRole('button', { name: 'More actions' }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
 
@@ -449,8 +452,10 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Save' }).click();
 
       // Delete one of the authors, leaving only Coach Beard
-      await clickAndWait(page, page.getByRole('link', { name: 'Will Kitman' }));
-      await page.waitForURL(AUTHOR_EDIT_URL);
+      // Open the relation modal
+      await clickAndWait(page, page.getByRole('button', { name: 'Will Kitman' }));
+      // Click to go to the related document
+      await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
       await page.getByRole('button', { name: /more actions/i }).click();
       await page.getByRole('menuitem', { name: /delete entry/i }).click();
       await page.getByRole('button', { name: /confirm/i }).click();
