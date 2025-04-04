@@ -9,7 +9,7 @@ import {
   useAutoReloadOverlayBlocker,
 } from '../AutoReloadOverlayBlocker';
 
-const MAX_ELAPSED_TIME = 30 * 1000;
+const MAX_ELAPSED_TIME = 300 * 1000;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <DesignSystemProvider locale="en">

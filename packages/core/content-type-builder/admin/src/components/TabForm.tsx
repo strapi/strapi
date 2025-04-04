@@ -102,6 +102,7 @@ export const TabForm = ({
                       error={errorId}
                       onChange={onChange}
                       value={value}
+                      autoFocus={i === 0}
                     />
                   </Grid.Item>
                 );

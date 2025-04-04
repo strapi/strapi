@@ -71,7 +71,6 @@ export const mockData = [
       {
         name: 'basic',
         title: 'basic',
-        isEditable: true,
         links: [
           {
             name: 'basic.simple',
@@ -83,7 +82,6 @@ export const mockData = [
       {
         name: 'default',
         title: 'default',
-        isEditable: true,
         links: [
           {
             name: 'default.closingperiod',
