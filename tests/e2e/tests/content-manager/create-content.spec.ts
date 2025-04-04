@@ -230,7 +230,7 @@ test.describe('Adding content', () => {
   for (const { description, fields, expectedError } of testCases) {
     test(`when I publish ${description} I see an error`, async ({ page }) => {
       await createContent(page, 'Match', fields, { save: false, publish: true, verify: false });
-      expect(page.getByText(expectedError)).toBeVisible();
+      expect(page.getByText(expectedError).first()).toBeVisible();
     });
   }
 });

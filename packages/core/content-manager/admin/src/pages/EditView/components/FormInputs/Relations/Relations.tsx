@@ -34,6 +34,7 @@ import { RelationDragPreviewProps } from '../../../../../components/DragPreviews
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDebounce } from '../../../../../hooks/useDebounce';
+import { useDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import {
@@ -46,6 +47,7 @@ import {
   useLazySearchRelationsQuery,
   RelationResult,
 } from '../../../../../services/relations';
+import { type MainField } from '../../../../../utils/attributes';
 import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
@@ -118,6 +120,8 @@ interface Relation extends Pick<RelationResult, 'documentId' | 'id' | 'locale' |
     id: RelationResult['id'];
     locale?: RelationResult['locale'];
     position: RelationPosition;
+    // Added this property to prevent call useDocument with a not temporary relation (one already saved in the database)
+    isTemporary?: boolean;
   };
 }
 
@@ -305,6 +309,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           id: relation.id,
           documentId: relation.documentId,
           locale: relation.locale,
+          isTemporary: true,
         },
         status: relation.status,
         /**
@@ -376,6 +381,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
           relationType={props.attribute.relation}
           // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
           targetModel={props.attribute.targetModel}
+          mainField={props.mainField}
         />
       </Flex>
     );
@@ -447,7 +453,6 @@ const addLabelAndHref =
 /* -------------------------------------------------------------------------------------------------
  * RelationsInput
  * -----------------------------------------------------------------------------------------------*/
-
 interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
   id?: string;
   model: string;
@@ -664,6 +669,7 @@ interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'nam
    */
   serverData: RelationResult[];
   targetModel: string;
+  mainField?: MainField;
 }
 
 const RelationsList = ({
@@ -674,6 +680,7 @@ const RelationsList = ({
   isLoading,
   relationType,
   targetModel,
+  mainField,
 }: RelationsListProps) => {
   const ariaDescriptionId = React.useId();
   const { formatMessage } = useIntl();
@@ -785,6 +792,7 @@ const RelationsList = ({
                 id: relation.id,
                 documentId: relation.documentId ?? relation.apiData?.documentId ?? '',
                 locale: relation.locale || relation.apiData?.locale,
+                isTemporary: relation.apiData?.isTemporary,
                 position,
               },
             },
@@ -892,6 +900,7 @@ const RelationsList = ({
           handleDisconnect,
           relations: data,
           targetModel,
+          mainField,
         }}
         itemKey={(index) => data[index].id}
         innerElementType="ol"
@@ -955,6 +964,7 @@ interface ListItemProps extends Pick<ListChildComponentProps, 'style' | 'index'>
     name: string;
     relations: Relation[];
     targetModel: string;
+    mainField?: MainField;
   };
 }
 
@@ -971,11 +981,40 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     name,
     relations,
     targetModel,
+    mainField,
   } = data;
+  const { currentDocumentMeta } = useDocumentContext('RelationsField');
 
   const { formatMessage } = useIntl();
 
-  const { href, id, label, status, documentId, apiData, locale } = relations[index];
+  const {
+    href,
+    id,
+    label: originalLabel,
+    status: originalStatus,
+    documentId,
+    apiData,
+    locale,
+  } = relations[index];
+
+  /**
+   * The code above attempts to retrieve the updated value of a relation that has not yet been saved.
+   * This is necessary when a relation modal is opened, and the mainField or its status is updated.
+   * These changes need to be reflected in the initial relation field.
+   */
+  const collectionType = getCollectionType(href)!;
+  const isTemporary = apiData?.isTemporary ?? false;
+  const { document } = useDocument(
+    {
+      collectionType,
+      model: targetModel,
+      documentId: documentId ?? apiData?.documentId,
+      params: currentDocumentMeta.params,
+    },
+    { skip: !isTemporary }
+  );
+  const label = isTemporary && document ? getRelationLabel(document, mainField) : originalLabel;
+  const status = isTemporary && document ? document?.status : originalStatus;
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
