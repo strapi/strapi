@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { version as strapiVersion } from '@strapi/admin/package.json';
+import packageInfo from '@strapi/admin/package.json';
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -24,6 +24,8 @@ import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
+
+const { version: strapiVersion } = packageInfo;
 
 const AdminLayout = () => {
   const setGuidedTourVisibility = useGuidedTour(
