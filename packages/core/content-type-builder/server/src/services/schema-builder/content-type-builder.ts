@@ -110,6 +110,7 @@ export default function createComponentBuilder() {
         .set('options', {
           ...(infos.options ?? {}),
           draftAndPublish: infos.draftAndPublish,
+          firstPublishedAtField: true,
         })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
