@@ -1,6 +1,6 @@
 /* eslint-disable testing-library/no-node-access */
 
-import { screen, within, fireEvent } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
 
 import { useAppInfo } from '../../../features/AppInfo';

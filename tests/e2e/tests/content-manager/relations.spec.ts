@@ -6,7 +6,7 @@ import { clickAndWait } from '../../utils/shared';
 const AUTHOR_EDIT_URL =
   /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
 
-test.describe('Unstable Relations on the fly', () => {
+test.describe('Relations on the fly', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -207,5 +207,36 @@ test.describe('Unstable Relations on the fly', () => {
     await expect(
       page.getByRole('heading', { name: 'Nike Mens 23/24 Away Stadium Jersey' })
     ).toBeVisible();
+  });
+
+  test('I want to add a new relation in the edit view, open the relation and change its name, change is status and close the modal and see the changes reflected in the Edit view', async ({
+    page,
+  }) => {
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    // Step 1. Got to Article collection-type and open one article
+    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
+
+    // Step 2. Add a new relation in the authors field
+    await clickAndWait(page, page.getByRole('combobox', { name: 'authors' }));
+    await clickAndWait(page, page.getByLabel('Led Tasso'));
+    const newAuthor = page.getByRole('button', { name: 'Led Tasso' });
+    await expect(newAuthor).toBeVisible();
+    await expect(page.getByText('Led TassoDraft')).toBeVisible();
+
+    // Step 3. Open the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Led Tasso' }));
+
+    // Step 4. Change the name of the author and Publish
+    const name = page.getByRole('textbox', { name: 'name' });
+    await name.fill('Mr. Led Tasso');
+    await clickAndWait(page, page.getByRole('button', { name: 'Publish' }));
+    await expect(name).toHaveValue('Mr. Led Tasso');
+    await expect(page.getByRole('status', { name: 'Published' }).first()).toBeVisible();
+
+    // Step 5. Close the modal and check the changes are reflected in the Edit view
+    await page.getByRole('button', { name: 'Close modal' }).click();
+    await expect(page.getByRole('button', { name: 'Mr. Led Tasso' })).toBeVisible();
+    await expect(page.getByText('Mr. Led TassoPublished')).toBeVisible();
   });
 });

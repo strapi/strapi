@@ -23,15 +23,22 @@ function createContext<ContextValueType extends object | null>(
     return <Context.Provider value={value}>{children}</Context.Provider>;
   };
 
-  function useContext<Selected>(
+  function useContext<Selected, ShouldThrow extends boolean = true>(
     consumerName: string,
-    selector: (value: ContextValueType) => Selected
-  ): Selected {
+    selector: (value: ContextValueType) => Selected,
+    shouldThrowOnMissingContext?: ShouldThrow
+  ) {
     return ContextSelector.useContextSelector(Context, (ctx) => {
+      // The context is available, return the selected value
       if (ctx) return selector(ctx);
-      // it's a required context.
-      throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
-    });
+
+      // The context is not available, either return undefined or throw an error
+      if (shouldThrowOnMissingContext) {
+        throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
+      }
+
+      return undefined;
+    }) as ShouldThrow extends true ? Selected : Selected | undefined;
   }
 
   Provider.displayName = rootComponentName + 'Provider';
