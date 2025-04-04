@@ -7,15 +7,19 @@ import {
   verifyRelationsOrder,
   disconnectRelation,
 } from '../../../../utils/relation-utils';
-import { createContent, FieldValue, saveContent } from '../../../../utils/content-creation';
+import {
+  createContentSingleTypes,
+  FieldValue,
+  saveContent,
+} from '../../../../utils/content-creation';
 import { navToHeader } from '../../../../utils/shared';
 
-const createRelationSourceFields = (rawFields: {
+const createHomepageFields = (rawFields: {
   name?: string;
-  oneToOneRel?: string;
-  oneToManyRel?: string[];
+  adminUserRel?: string;
+  authorsRel?: string[];
 }) => {
-  const { name, oneToOneRel, oneToManyRel } = rawFields;
+  const { name, adminUserRel, authorsRel } = rawFields;
 
   // Return FieldValue[]
   const fields: FieldValue[] = [];
@@ -24,19 +28,19 @@ const createRelationSourceFields = (rawFields: {
     fields.push({ name: 'name', type: 'text', value: name } satisfies FieldValue);
   }
 
-  if (oneToOneRel) {
+  if (adminUserRel) {
     fields.push({
-      name: 'oneToOneRel',
+      name: 'admin_user',
       type: 'relation',
-      value: [{ label: oneToOneRel }],
+      value: [{ label: adminUserRel }],
     } satisfies FieldValue);
   }
 
-  if (oneToManyRel) {
+  if (authorsRel) {
     fields.push({
-      name: 'oneToManyRel',
+      name: 'authors',
       type: 'relation',
-      value: oneToManyRel.map((label) => ({ label })),
+      value: authorsRel.map((label) => ({ label })),
     } satisfies FieldValue);
   }
 
@@ -62,11 +66,29 @@ test.describe('Relations Single Types - EditView', () => {
     await login({ page });
   });
 
+  test('Create a Homepage entry with a one-to-one relation', async ({ page }) => {
+    const fields = createHomepageFields({ adminUserRel: 'editor' });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
+  });
+
+  test('Create a Homepage entry with a one-to-many relation', async ({ page }) => {
+    const fields = createHomepageFields({ authorsRel: ['Coach Beard', 'Ted Lasso'] });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
+  });
+
   test('Update an existing oneToOne relation', async ({ page }) => {
-    const contentType = 'Homepage';
-    const headerTitle = 'Welcome to Rufus homepage';
-    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
-    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+    // Prefill entry with one relation
+    const fields = createHomepageFields({ adminUserRel: 'editor' });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
 
     // Add a new relation to the existing oneToOne relation
     await connectRelation(page, 'admin_user', 'test');
@@ -79,10 +101,12 @@ test.describe('Relations Single Types - EditView', () => {
   });
 
   test('Update an existing oneToMany relation', async ({ page }) => {
-    const contentType = 'Homepage';
-    const headerTitle = 'Welcome to Rufus homepage';
-    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
-    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+    // Prefill entry with one relation
+    const fields = createHomepageFields({ authorsRel: ['Coach Beard', 'Ted Lasso'] });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
 
     // Add a new relation to the existing oneToMany relation
     await connectRelation(page, 'authors', 'Led Tasso');
@@ -95,10 +119,12 @@ test.describe('Relations Single Types - EditView', () => {
   });
 
   test('Delete a one to one relation', async ({ page }) => {
-    const contentType = 'Homepage';
-    const headerTitle = 'Welcome to Rufus homepage';
-    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
-    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+    // Prefill entry with one relation
+    const fields = createHomepageFields({ adminUserRel: 'editor' });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
 
     // Remove a one-to-one relation entry
     await disconnectRelation(page, 'admin_user', 'editor');
@@ -111,10 +137,12 @@ test.describe('Relations Single Types - EditView', () => {
   });
 
   test('Delete a one to many relation', async ({ page }) => {
-    const contentType = 'Homepage';
-    const headerTitle = 'Welcome to Rufus homepage';
-    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
-    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+    // Prefill entry with one relation
+    const fields = createHomepageFields({ authorsRel: ['Coach Beard', 'Ted Lasso'] });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
 
     // Remove a one-to-many relation entry
     await disconnectRelation(page, 'authors', 'Coach Beard');
@@ -126,17 +154,40 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'authors', ['Ted Lasso']);
   });
 
+  test('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
+    // Create content with multiple relations in specific order
+    const fields = createHomepageFields({ authorsRel: ['Coach Beard', 'Ted Lasso', 'Led Tasso'] });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
+
+    // Move Led Tasso to first position
+    await reorderRelation(page, 'authors', 'Led Tasso', 'Coach Beard', 'after');
+
+    // Verify new order before save
+    await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Led Tasso', 'Ted Lasso']);
+
+    // Save changes
+    await saveContent(page);
+
+    // Verify order is maintained after saving
+    await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Led Tasso', 'Ted Lasso']);
+  });
+
   test('Update a relation and reorder it in the same operation', async ({ page }) => {
-    const contentType = 'Homepage';
-    const headerTitle = 'Welcome to Rufus homepage';
-    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
-    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+    // Prefill entry with one relation
+    const fields = createHomepageFields({ authorsRel: ['Coach Beard', 'Ted Lasso'] });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
 
     // Add a new relation to the existing oneToMany relation (authors)
     await connectRelation(page, 'authors', 'Led Tasso');
 
     // Verify new order is correct
-    await verifyRelationsOrder(page, 'authors', ['Coach Beard','Ted Lasso', 'Led Tasso']);
+    await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Ted Lasso', 'Led Tasso']);
 
     // Move Led Tasso to first position
     await reorderRelation(page, 'authors', 'Led Tasso', 'Coach Beard', 'after');
@@ -152,16 +203,18 @@ test.describe('Relations Single Types - EditView', () => {
   });
 
   test('Delete a relation and reorder the remaining relations', async ({ page }) => {
-    const contentType = 'Homepage';
-    const headerTitle = 'Welcome to Rufus homepage';
-    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
-    await navToHeader(page, ['Content Manager', contentType], headerTitle);
+    // Prefill entry with one relation
+    const fields = createHomepageFields({ authorsRel: ['Coach Beard', 'Ted Lasso'] });
+    await createContentSingleTypes(page, 'Homepage', 'Welcome to Rufus homepage', fields, {
+      save: true,
+      verify: true,
+    });
 
     // Add a new relation to the existing oneToMany relation (authors)
     await connectRelation(page, 'authors', 'Led Tasso');
 
     // Verify new order is correct
-    await verifyRelationsOrder(page, 'authors', ['Coach Beard','Ted Lasso', 'Led Tasso']);
+    await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Ted Lasso', 'Led Tasso']);
 
     // Remove one relation
     await disconnectRelation(page, 'authors', 'Ted Lasso');

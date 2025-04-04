@@ -257,6 +257,33 @@ export const createContent = async (
 };
 
 /**
+ * Main function to create content for single type relations by filling fields and optionally publishing it.
+ */
+export const createContentSingleTypes = async (
+  page: Page,
+  contentType: string,
+  headerText: string,
+  fields: FieldValue[],
+  options: CreateContentOptions = { save: false, publish: false, verify: false }
+): Promise<void> => {
+  await navToHeader(page, ['Content Manager', contentType], headerText);
+
+  await fillFields(page, fields);
+
+  if (options.save) {
+    await saveContent(page, options);
+  }
+
+  if (options.publish) {
+    await publishContent(page, options);
+  }
+
+  if (options.verify) {
+    await verifyContent(page, fields);
+  }
+};
+
+/**
  * Save the current content.
  */
 export const saveContent = async (
