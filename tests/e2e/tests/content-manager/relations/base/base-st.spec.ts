@@ -126,7 +126,7 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'authors', ['Ted Lasso']);
   });
 
-  test('Add a new entry on one-to-many relations field and reorder them using drag and drop', async ({ page }) => {
+  test('Update a relation and reorder it in the same operation', async ({ page }) => {
     const contentType = 'Homepage';
     const headerTitle = 'Welcome to Rufus homepage';
     // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
@@ -151,38 +151,25 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Led Tasso', 'Ted Lasso']);
   });
 
-  test.skip('Update a relation and reorder it in the same operation', async ({ page }) => {
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-    // Add a new relation
-    await connectRelation(page, 'oneToManyRel', 'Target 3');
+  test('Delete a relation and reorder the remaining relations', async ({ page }) => {
+    const contentType = 'Homepage';
+    const headerTitle = 'Welcome to Rufus homepage';
+    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
+    await navToHeader(page, ['Content Manager', contentType], headerTitle);
 
-    // Validate the three relations are there
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Target 3']);
+    // Add a new relation to the existing oneToMany relation (authors)
+    await connectRelation(page, 'authors', 'Led Tasso');
 
-    // Move Target 3 after Target 1
-    await reorderRelation(page, 'oneToManyRel', 'Target 3', 'Target 1', 'after');
-    // Verify new order before save
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
-
-    // Save changes
-    await saveContent(page);
-    // Verify order is maintained after saving
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
-  });
-
-  test.skip('Delete a relation and reorder the remaining relations', async ({ page }) => {
-    // Prefill entry with two relations
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
+    // Verify new order is correct
+    await verifyRelationsOrder(page, 'authors', ['Coach Beard','Ted Lasso', 'Led Tasso']);
 
     // Remove one relation
-    await disconnectRelation(page, 'oneToManyRel', 'Target 1');
+    await disconnectRelation(page, 'authors', 'Ted Lasso');
 
     // Save content
     await saveContent(page);
 
-    // Validate only one relation is left
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
+    // Validate new order after saving
+    await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Led Tasso']);
   });
 });
