@@ -94,19 +94,20 @@ test.describe('Relations Single Types - EditView', () => {
     await verifyRelationsOrder(page, 'authors', ['Coach Beard', 'Ted Lasso', 'Led Tasso']);
   });
 
-  test.skip('Delete a relation', async ({ page }) => {
-    // Prefill entry with two relations
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
+  test('Delete a one to one relation', async ({ page }) => {
+    const contentType = 'Homepage';
+    const headerTitle = 'Welcome to Rufus homepage';
+    // Navigate to the content type Homepage single type and verify the header title is Welcome to Rufus homepage
+    await navToHeader(page, ['Content Manager', contentType], headerTitle);
 
-    // Remove one relation
-    await disconnectRelation(page, 'oneToManyRel', 'Target 1');
+    // Remove a one-to-one relation entry
+    await disconnectRelation(page, 'admin_user', 'editor');
 
     // Save content
     await saveContent(page);
 
-    // Validate only one relation is left
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
+    // Validate there's no relation left
+    await verifyRelationsOrder(page, 'admin_user', []);
   });
 
   test.skip('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
