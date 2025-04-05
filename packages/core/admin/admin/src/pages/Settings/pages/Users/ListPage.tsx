@@ -288,15 +288,7 @@ const TABLE_HEADERS: Array<
     cellFormatter({ isActive }) {
       return (
         <Flex>
-          <Status
-            size="S"
-            borderWidth={0}
-            background="transparent"
-            color="neutral800"
-            variant={isActive ? 'success' : 'danger'}
-          >
-            <Typography>{isActive ? 'Active' : 'Inactive'}</Typography>
-          </Status>
+          <Typography>{isActive ? 'Active' : 'Inactive'}</Typography>
         </Flex>
       );
     },
