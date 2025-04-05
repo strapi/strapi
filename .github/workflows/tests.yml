@@ -244,7 +244,7 @@ jobs:
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@main
         with:
-          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
@@ -296,7 +296,7 @@ jobs:
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@main
         with:
-          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
