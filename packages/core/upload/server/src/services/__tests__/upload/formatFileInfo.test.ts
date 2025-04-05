@@ -1,6 +1,18 @@
+import _ from 'lodash';
 import createUploadService from '../../upload';
 
-const uploadService = createUploadService({} as any);
+const defaultConfig = {
+  'plugin::upload': {},
+};
+
+const uploadService = (config = defaultConfig) =>
+  createUploadService({
+    strapi: {
+      config: {
+        get: (path: any, defaultValue: any) => _.get(config, path, defaultValue),
+      },
+    },
+  } as any);
 
 describe('Upload service', () => {
   beforeAll(() => {
@@ -25,13 +37,37 @@ describe('Upload service', () => {
         size: 1000 * 1000,
       };
 
-      expect(await uploadService.formatFileInfo(fileData)).toMatchObject({
+      expect(await uploadService().formatFileInfo(fileData)).toMatchObject({
         name: 'File Name.png',
         hash: expect.stringContaining('File_Name'),
         ext: '.png',
         mime: 'image/png',
         size: 1000,
       });
+    });
+
+    test('Has hash without suffix when config.randomSuffix is false', async () => {
+      const fileData = {
+        filename: 'File Name.png',
+        type: 'image/png',
+        size: 1000 * 1000,
+      };
+
+      const randomSuffixDefaultConfig = {
+        'plugin::upload': {
+          randomSuffix: false,
+        },
+      };
+
+      expect(await uploadService(randomSuffixDefaultConfig).formatFileInfo(fileData)).toMatchObject(
+        {
+          name: 'File Name.png',
+          hash: 'File_Name',
+          ext: '.png',
+          mime: 'image/png',
+          size: 1000,
+        }
+      );
     });
 
     test('Replaces reserved and unsafe characters for URLs and files in hash', async () => {
@@ -41,7 +77,7 @@ describe('Upload service', () => {
         size: 1000 * 1000,
       };
 
-      expect(await uploadService.formatFileInfo(fileData)).toMatchObject({
+      expect(await uploadService().formatFileInfo(fileData)).toMatchObject({
         name: 'File%&Näme.png',
         hash: expect.stringContaining('File_and_Naeme'),
         ext: '.png',
@@ -57,7 +93,7 @@ describe('Upload service', () => {
         size: 1000 * 1000,
       };
 
-      expect(uploadService.formatFileInfo(fileData)).rejects.toThrowError(
+      expect(uploadService().formatFileInfo(fileData)).rejects.toThrowError(
         'File name contains invalid characters'
       );
     });
@@ -73,7 +109,7 @@ describe('Upload service', () => {
         name: 'Custom File Name.png',
       };
 
-      expect(await uploadService.formatFileInfo(fileData, fileInfo)).toMatchObject({
+      expect(await uploadService().formatFileInfo(fileData, fileInfo)).toMatchObject({
         name: fileInfo.name,
         hash: expect.stringContaining('Custom_File_Name'),
         ext: '.png',
@@ -94,7 +130,7 @@ describe('Upload service', () => {
         caption: 'caption this',
       };
 
-      expect(await uploadService.formatFileInfo(fileData, fileInfo)).toMatchObject({
+      expect(await uploadService().formatFileInfo(fileData, fileInfo)).toMatchObject({
         name: 'File Name.png',
         caption: fileInfo.caption,
         alternativeText: fileInfo.alternativeText,
@@ -116,7 +152,7 @@ describe('Upload service', () => {
         path: 'folder',
       };
 
-      expect(await uploadService.formatFileInfo(fileData, {}, fileMetas)).toMatchObject({
+      expect(await uploadService().formatFileInfo(fileData, {}, fileMetas)).toMatchObject({
         name: 'File Name.png',
         ext: '.png',
         mime: 'image/png',
