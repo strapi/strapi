@@ -1,20 +1,31 @@
-import { Tooltip, Typography } from '@strapi/design-system';
+import { Link, Tooltip, Typography } from '@strapi/design-system';
 import isEmpty from 'lodash/isEmpty';
+import { useHref } from 'react-router-dom';
 
 import { CellValue } from './CellValue';
-import { SingleComponent, RepeatableComponent } from './Components';
-import { MediaSingle, MediaMultiple } from './Media';
+import { RepeatableComponent, SingleComponent } from './Components';
+import { MediaMultiple, MediaSingle } from './Media';
 import { RelationMultiple, RelationSingle } from './Relations';
 
 import type { ListFieldLayout } from '../../../../hooks/useDocumentLayout';
-import type { Schema, Data } from '@strapi/types';
+import type { Data, Schema } from '@strapi/types';
 
 interface CellContentProps extends Omit<ListFieldLayout, 'cellFormatter'> {
   content: Schema.Attribute.Value<Schema.Attribute.AnyAttribute>;
   rowId: Data.ID;
+  linkSearch?: string | undefined;
 }
 
-const CellContent = ({ content, mainField, attribute, rowId, name }: CellContentProps) => {
+const CellContent = ({
+  content,
+  mainField,
+  attribute,
+  rowId,
+  name,
+  linkSearch,
+}: CellContentProps) => {
+  const href = useHref({ pathname: rowId.toString(), search: linkSearch });
+
   if (!hasContent(content, mainField, attribute)) {
     return (
       <Typography
@@ -51,11 +62,14 @@ const CellContent = ({ content, mainField, attribute, rowId, name }: CellContent
       return <SingleComponent mainField={mainField} content={content} />;
 
     case 'string':
+      // Use a regular link to prevent conflicts between NavLink and handleRowClick() in ListViewPage
       return (
         <Tooltip description={content}>
-          <Typography maxWidth="30rem" ellipsis textColor="neutral800">
-            <CellValue type={attribute.type} value={content} />
-          </Typography>
+          <Link tag="a" href={href}>
+            <Typography maxWidth="30rem" ellipsis textColor="neutral800">
+              <CellValue type={attribute.type} value={content} />
+            </Typography>
+          </Link>
         </Tooltip>
       );
 
