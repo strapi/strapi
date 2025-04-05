@@ -239,7 +239,7 @@ const DynamicComponent = ({
           <Accordion.Root value={collapseToOpen} onValueChange={setCollapseToOpen}>
             <Accordion.Item value={accordionValue}>
               <Accordion.Header>
-                <Accordion.Trigger
+                <StyledAccordionTrigger
                   icon={
                     icon && COMPONENT_ICONS[icon]
                       ? COMPONENT_ICONS[icon]
@@ -247,7 +247,7 @@ const DynamicComponent = ({
                   }
                 >
                   {accordionTitle}
-                </Accordion.Trigger>
+                </StyledAccordionTrigger>
                 <Accordion.Actions>{accordionActions}</Accordion.Actions>
               </Accordion.Header>
               <Accordion.Content>
@@ -344,6 +344,20 @@ const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   list-style: none;
   padding: 0;
   margin: 0;
+`;
+
+const StyledAccordionTrigger = styled(Accordion.Trigger)`
+  overflow: hidden;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  > span > span {
+    display: block;
+    overflow: hidden;
+  }
 `;
 
 export { DynamicComponent };
