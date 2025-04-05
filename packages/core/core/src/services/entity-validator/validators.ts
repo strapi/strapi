@@ -443,6 +443,10 @@ export const uidValidator = (
     return schema;
   }
 
+  if (metas.attr.regex) {
+    return schema.matches(new RegExp(metas.attr.regex));
+  }
+
   return schema.matches(/^[A-Za-z0-9-_.~]*$/);
 };
 
