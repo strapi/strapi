@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { DndContext, DragOverlay, UniqueIdentifier } from '@dnd-kit/core';
-import { arrayMove, rectSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
+import { rectSortingStrategy, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useField, useForm } from '@strapi/admin/strapi-admin';
 import {
@@ -106,10 +106,14 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   const { formatMessage } = useIntl();
   const [activeField, setActiveField] = React.useState<DragAndDropField | null>(null);
 
+  const onChange = useForm('Fields', (state) => state.onChange);
+  const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
+  const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
   const layout = useForm<ConfigurationFormData['layout']>(
     'Fields',
     (state) => state.values.layout ?? []
   );
+  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
   const containers = layout.reduce(
     (acc, row, index) => ({
       ...acc,
@@ -117,10 +121,6 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     }),
     {} as Record<string, ConfigurationFormData['layout'][number]>
   );
-  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
-  const onChange = useForm('Fields', (state) => state.onChange);
-  const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
-  const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
 
   /**
    * Get the fields that are not already in the layout
@@ -261,6 +261,13 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     addFieldRow('layout', { children: [field] });
   };
 
+  const parseContainerId = (id: string) => id.split('::')[0];
+
+  const getIndex = (index: number | undefined) => {
+    if (!index) return 0;
+    return index === -1 ? 0 : index;
+  };
+
   return (
     <DndContext
       onDragStart={({ active }) => {
@@ -275,37 +282,26 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           formName: `layout.${containerIndex}.children.${childIndex}`,
         });
       }}
-      onDragEnd={({ active, over }) => {
-        const activeContainer = active.data?.current?.sortable;
-        const overContainer = over?.data?.current?.sortable;
+      onDragEnd={({ over, active }) => {
+        const activeSortableContainer = active.data?.current?.sortable;
+        const overSortableContainer = over?.data?.current?.sortable;
         const containerIds = Object.keys(containers);
-        const containerItems = Object.values(containers);
 
+        const activeContainerId = parseContainerId(active?.id as string);
+        const overContainerId = parseContainerId(over?.id as string);
         // The index of the row the field was dragged from
-        const activeContainerIndex = containerIds.indexOf(activeContainer.containerId);
+        const activeContainerIndex = containerIds.indexOf(activeContainerId);
+        // The index of the row the field was dragged to
+        const overContainerIndex = containerIds.indexOf(overContainerId);
+        // The index (within a container) the field was dragged from
+        const activeChildIndex = getIndex(activeSortableContainer?.index);
+        // The index (within a container) the field was dragged to
+        const overChildIndex = getIndex(overSortableContainer?.index);
 
-        // Handle a drop causing the entire container to be moved
-        if (over?.data?.current?.type === 'container') {
-          const overContainerIndex = containerIds.indexOf(over.id as string);
-          const newValues = arrayMove(containerItems, activeContainerIndex, overContainerIndex);
-
-          onChange('layout', newValues);
-        } else {
-          // The index of the row the field was dragged to
-          const overContainerIndex = containerIds.indexOf(overContainer.containerId);
-          // The index (within a container) the field was dragged from
-          const activeChildIndex = activeContainer.index;
-          // The index (within a container) the field was dragged to
-          const overChildIndex = overContainer.index;
-          /**
-           * Handle a field being moved inside its container along the x axis
-           * or to another container along the y axis
-           */
-          handleMoveField(
-            [overContainerIndex, overChildIndex],
-            [activeContainerIndex, activeChildIndex]
-          );
-        }
+        handleMoveField(
+          [overContainerIndex, overChildIndex],
+          [activeContainerIndex, activeChildIndex]
+        );
       }}
     >
       <Flex paddingTop={6} direction="column" alignItems="stretch" gap={4}>
