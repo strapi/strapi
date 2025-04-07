@@ -1,17 +1,7 @@
-import { Form } from '@strapi/admin/strapi-admin';
 import { RenderOptions, fireEvent, render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { DocumentContextProvider } from '../../../../../../features/DocumentContext';
 import { RelationsInput, RelationsFieldProps } from '../Relations';
-
-const relationContext = {
-  initialDocument: {
-    documentId: '12345',
-    model: 'api::address.address',
-    collectionType: 'collection-types',
-  },
-};
 
 const render = ({
   initialEntries,
@@ -38,12 +28,7 @@ const render = ({
       renderOptions: {
         wrapper: ({ children }) => (
           <Routes>
-            <Route
-              path="/content-manager/:collectionType/:slug/:id"
-              element={
-                <DocumentContextProvider {...relationContext}>{children}</DocumentContextProvider>
-              }
-            />
+            <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
           </Routes>
         ),
       },
