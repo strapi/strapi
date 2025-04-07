@@ -1,12 +1,31 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Typography,
+  TypographyProps,
+  useCallbackRef,
+  IconButton,
+} from '@strapi/design-system';
+import { Question } from '@strapi/icons';
+import { useIntl } from 'react-intl';
+import { useLocation, Link } from 'react-router-dom';
 
+import { useTracking } from '../../features/Tracking';
 import { useElementOnScreen } from '../../hooks/useElementOnScreen';
+
+import { getMatchingDocLink } from './utils/getMatchingDocLink';
 
 /* -------------------------------------------------------------------------------------------------
  * BaseHeaderLayout
  * -----------------------------------------------------------------------------------------------*/
+
+interface DocLink {
+  link: string;
+  title: string;
+  pathname: string;
+}
 
 interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   navigationAction?: React.ReactNode;
@@ -15,14 +34,48 @@ interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   subtitle?: React.ReactNode;
   sticky?: boolean;
   width?: number;
+  docLink: DocLink | null;
 }
 
 const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>(
   (
-    { navigationAction, primaryAction, secondaryAction, subtitle, title, sticky, width, ...props },
+    {
+      navigationAction,
+      primaryAction,
+      secondaryAction,
+      subtitle,
+      title,
+      sticky,
+      width,
+      docLink,
+      ...props
+    },
     ref
   ) => {
     const isSubtitleString = typeof subtitle === 'string';
+
+    const { formatMessage } = useIntl();
+    const { trackUsage } = useTracking();
+
+    const docLinkButton = docLink ? (
+      <Flex paddingLeft={2}>
+        <IconButton
+          onClick={() =>
+            trackUsage('didClickOnDocLink', { from: docLink.pathname, to: docLink.link })
+          }
+          size="S"
+          label={formatMessage({
+            id: 'app.HeaderLayout.docLink.label',
+            defaultMessage: 'Learn more on our documentation',
+          })}
+          to={docLink.link}
+          tag={Link}
+          target="_blank"
+        >
+          <Question />
+        </IconButton>
+      </Flex>
+    ) : null;
 
     if (sticky) {
       return (
@@ -56,6 +109,8 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
                 )}
               </Box>
               {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
+              {/* Experiment */}
+              {docLinkButton}
             </Flex>
             <Flex>{primaryAction ? <Box paddingLeft={2}>{primaryAction}</Box> : undefined}</Flex>
           </Flex>
@@ -80,6 +135,8 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
               {title}
             </Typography>
             {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
+            {/* Experiment */}
+            {docLinkButton}
           </Flex>
           {primaryAction}
         </Flex>
@@ -105,6 +162,13 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = React.useState(true);
+  const [docLink, setDocLink] = React.useState<{
+    link: string;
+    title: string;
+    pathname: string;
+  } | null>(null);
+
+  const { pathname } = useLocation();
 
   const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
@@ -124,13 +188,24 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
     }
   }, [baseHeaderLayoutRef]);
 
+  React.useEffect(() => {
+    const fetchDocLink = async () => {
+      const result = await getMatchingDocLink(pathname);
+      setDocLink(result);
+    };
+
+    fetchDocLink();
+  }, [pathname]);
+
   return (
     <>
       <div style={{ height: headerSize?.height }} ref={containerRef}>
-        {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} />}
+        {isVisible && <BaseHeaderLayout ref={baseHeaderLayoutRef} {...props} docLink={docLink} />}
       </div>
 
-      {!isVisible && <BaseHeaderLayout {...props} sticky width={headerSize?.width} />}
+      {!isVisible && (
+        <BaseHeaderLayout {...props} sticky width={headerSize?.width} docLink={docLink} />
+      )}
     </>
   );
 };
