@@ -200,7 +200,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
 
 .c14 {
   min-width: 100%;
-  padding-inline: 4px;
 }
 
 .c3 {
