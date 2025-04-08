@@ -1,0 +1,11 @@
+{
+  "settings.page.title": "Робочі процеси перегляду",
+  "settings.page.subtitle": "{count, plural, one {# етап} other {# етапів}}",
+  "settings.page.isLoading": "Завантаження робочого процесу",
+  "settings.page.delete.confirm.body": "Усі записи, призначені для видалених етапів, будуть переміщені на попередній етап. Ви впевнені, що хочете зберегти?",
+  "settings.stage.name.label": "Назва етапу",
+  "settings.not-available": "Робочі процеси перегляду доступні лише в рамках Enterprise Edition. Оновіть план, щоб створювати та керувати робочими процесами.",
+  "settings.review-workflows.workflow.stageRequiredToPublish.label": "Необхідний етап для публікації",
+  "settings.review-workflows.workflow.stageRequiredToPublish.any": "Будь-який етап",
+  "settings.review-workflows.workflow.stageRequiredToPublish.hint": "Запобігає публікації записів, якщо вони не знаходяться на необхідному етапі."
+}

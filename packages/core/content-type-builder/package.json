@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-type-builder",
-  "version": "5.10.3",
+  "version": "5.12.3",
   "description": "Create and manage content types",
   "repository": {
     "type": "git",
@@ -62,10 +62,10 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-rc.16",
-    "@strapi/generators": "5.10.3",
-    "@strapi/icons": "2.0.0-rc.16",
-    "@strapi/utils": "5.10.3",
+    "@strapi/design-system": "2.0.0-rc.21",
+    "@strapi/generators": "5.12.3",
+    "@strapi/icons": "2.0.0-rc.21",
+    "@strapi/utils": "5.12.3",
     "date-fns": "2.30.0",
     "fs-extra": "11.2.0",
     "immer": "9.0.21",
@@ -77,14 +77,14 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.10.3",
-    "@strapi/types": "5.10.3",
+    "@strapi/admin": "5.12.3",
+    "@strapi/types": "5.12.3",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "@types/fs-extra": "11.0.4",
     "@types/pluralize": "0.0.30",
-    "koa": "2.15.2",
+    "koa": "2.15.4",
     "koa-body": "6.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
