@@ -11,7 +11,7 @@ interface DocumentMeta {
    * The equivalent of the ":id" url param value
    * i.e. gus5a67jcboa3o2zjnz39mb1
    */
-  documentId: string;
+  documentId?: string;
   /**
    * The equivalent of the url ":slug" param value
    * i.e. api::articles.article
@@ -27,6 +27,10 @@ interface DocumentMeta {
    * i.e. { locale: 'fr' }
    */
   params?: Record<string, string | string[] | null>;
+  /**
+   * Field to connect, is the field name to add the newly created relation
+   */
+  fieldToConnect?: string;
 }
 
 interface DocumentContextValue {
