@@ -34,7 +34,7 @@ interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   subtitle?: React.ReactNode;
   sticky?: boolean;
   width?: number;
-  docLink: DocLink | null;
+  docLink?: DocLink | null;
 }
 
 const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>(
@@ -109,10 +109,15 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
                 )}
               </Box>
               {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
-              {/* Experiment */}
-              {docLinkButton}
             </Flex>
-            <Flex>{primaryAction ? <Box paddingLeft={2}>{primaryAction}</Box> : undefined}</Flex>
+            <Flex>
+              {primaryAction ? (
+                <Flex gap={2}>
+                  {docLinkButton}
+                  {primaryAction}
+                </Flex>
+              ) : undefined}
+            </Flex>
           </Flex>
         </Box>
       );
@@ -135,10 +140,12 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
               {title}
             </Typography>
             {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
-            {/* Experiment */}
-            {docLinkButton}
           </Flex>
-          {primaryAction}
+          {/* Experiment */}
+          <Flex gap={2}>
+            {docLinkButton}
+            {primaryAction}
+          </Flex>
         </Flex>
         {isSubtitleString ? (
           <Typography variant="epsilon" textColor="neutral600" tag="p">
