@@ -1,5 +1,4 @@
-import { Fragment } from 'react';
-
+import * as React from 'react';
 import {
   Box,
   TextButton,
@@ -17,10 +16,14 @@ import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils/getTrad';
-
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
-
+import usePreventScroll from '../../hooks/usePreventScroll';
 const SubNavLinkCustom = styled(SubNavLink)`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
+  display: block; 
   div {
     width: inherit;
     span:nth-child(2) {
@@ -32,9 +35,16 @@ const SubNavLinkCustom = styled(SubNavLink)`
   }
 `;
 
+const SubNavLinkSectionCustom = styled(SubNavLinkSection)`
+  overflow: hidden;
+  max-width: 100%;
+`;
+
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  usePreventScroll(sidebarRef);
 
   const pluginName = formatMessage({
     id: getTrad('plugin.name'),
@@ -42,8 +52,8 @@ export const ContentTypeBuilderNav = () => {
   });
 
   return (
-    <SubNav aria-label={pluginName}>
-      <SubNavHeader
+    <SubNav  ref={sidebarRef} aria-label={pluginName}> 
+      <SubNavHeader 
         searchable
         value={search.value}
         onClear={() => search.clear()}
@@ -56,7 +66,7 @@ export const ContentTypeBuilderNav = () => {
       />
       <SubNavSections>
         {menu.map((section) => (
-          <Fragment key={section.name}>
+          <React.Fragment key={section.name}>
             <SubNavSection
               label={formatMessage({
                 id: section.title.id,
@@ -68,21 +78,21 @@ export const ContentTypeBuilderNav = () => {
               {section.links.map((link) => {
                 if (link.links) {
                   return (
-                    <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
-                      {link.links.map((subLink: any) => (
-                        <SubNavLink
-                          tag={NavLink}
-                          to={subLink.to}
-                          active={subLink.active}
-                          key={subLink.name}
-                          isSubSectionChild
-                        >
-                          {upperFirst(
-                            formatMessage({ id: subLink.name, defaultMessage: subLink.title })
-                          )}
-                        </SubNavLink>
-                      ))}
-                    </SubNavLinkSection>
+                    <SubNavLinkSectionCustom key={link.name} label={upperFirst(link.title)}>
+                    {link.links.map((subLink: any) => (
+                      <SubNavLinkCustom
+                        tag={NavLink}
+                        to={subLink.to}
+                        active={subLink.active}
+                        key={subLink.name}
+                        isSubSectionChild
+                      >
+                        {upperFirst(
+                          formatMessage({ id: subLink.name, defaultMessage: subLink.title })
+                        )}
+                      </SubNavLinkCustom>
+                    ))}
+                  </SubNavLinkSectionCustom>                  
                   );
                 }
 
@@ -114,7 +124,7 @@ export const ContentTypeBuilderNav = () => {
                 </TextButton>
               </Box>
             )}
-          </Fragment>
+          </React.Fragment>
         ))}
       </SubNavSections>
     </SubNav>
