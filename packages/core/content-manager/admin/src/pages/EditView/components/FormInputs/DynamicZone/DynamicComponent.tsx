@@ -177,7 +177,7 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index)}>
+                    <MenuItem key={uid} onSelect={() => onAddComponent(uid, index)}>
                       {displayName}
                     </MenuItem>
                   ))}
@@ -197,7 +197,7 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
+                    <MenuItem key={uid} onSelect={() => onAddComponent(uid, index + 1)}>
                       {displayName}
                     </MenuItem>
                   ))}
