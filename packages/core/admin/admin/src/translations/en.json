@@ -709,6 +709,7 @@
   "global.enabled": "Enabled",
   "global.error": "Something went wrong",
   "global.finish": "Finish",
+  "global.localeToggle.label": "Select interface language",
   "global.marketplace": "Marketplace",
   "global.more": "More",
   "global.name": "Name",
