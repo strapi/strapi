@@ -9,6 +9,7 @@ import {
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
+  Button,
   Combobox,
   ComboboxOption,
   Flex,
@@ -898,6 +899,16 @@ const RelationsList = ({
       >
         {ListItem}
       </FixedSizeList>
+      <RelationModal
+        relation={{
+          documentId: undefined,
+          collectionType: COLLECTION_TYPES,
+          model: targetModel,
+          fieldToConnect: name,
+        }}
+      >
+        <Button variant="ghost">Create new Relation</Button>
+      </RelationModal>
     </ShadowBox>
   );
 };
