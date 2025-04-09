@@ -76,18 +76,6 @@ jobs:
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Install docs dependencies
