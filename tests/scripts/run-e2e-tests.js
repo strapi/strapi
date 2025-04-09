@@ -245,6 +245,59 @@ module.exports = config
                 cwd: testAppPath,
               });
 
+              // We need to generate the typescript and documentation files to avoid re-generating after each file reset
+
+              // Start Strapi and wait for it to be ready
+              console.log(`Starting Strapi for domain '${domain}' to generate files...`);
+              const strapiProcess = execa('npm', ['run', 'develop', '--', '--no-watch-admin'], {
+                cwd: testAppPath,
+                env: {
+                  PORT: port,
+                  STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
+                },
+              });
+
+              // Wait for Strapi to be ready by monitoring its output
+              await new Promise((resolve, reject) => {
+                let isReady = false;
+                strapiProcess.stdout.on('data', (data) => {
+                  const output = data.toString();
+                  console.log(`[Strapi ${domain}] ${output.trim()}`);
+                  if (output.includes('Strapi started successfully')) {
+                    isReady = true;
+                    strapiProcess.kill('SIGINT');
+                  }
+                });
+
+                strapiProcess.stderr.on('data', (data) => {
+                  console.error(`[Strapi ${domain} ERROR] ${data.toString().trim()}`);
+                });
+
+                strapiProcess.on('exit', (code) => {
+                  if (isReady) {
+                    resolve();
+                  } else {
+                    reject(new Error(`Strapi failed to start properly (exit code: ${code})`));
+                  }
+                });
+
+                strapiProcess.on('error', (err) => {
+                  console.error(`[Strapi ${domain} ERROR] Process error:`, err);
+                  reject(err);
+                });
+              });
+
+              // Commit the generated files
+              await execa('git', [...gitUser, 'add', '-A', '.'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
+              await execa('git', [...gitUser, 'commit', '-m', 'commit generated files'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
               console.log(`Running ${chalk.blue(domain)} e2e tests`);
 
               await execa(
