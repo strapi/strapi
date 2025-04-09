@@ -23,8 +23,6 @@ test.describe('Create single type with all field types', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
   test.afterAll(async () => {
     await resetFiles();
   });

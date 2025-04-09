@@ -23,9 +23,7 @@ test.describe('Edit single type', () => {
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterEach(async () => {
+  test.afterAll(async () => {
     await resetFiles();
   });
 
