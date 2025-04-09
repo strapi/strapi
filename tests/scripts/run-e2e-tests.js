@@ -267,7 +267,13 @@ module.exports = config
                   try {
                     const response = await fetch(`http://127.0.0.1:${port}/_health`);
                     if (response.ok) {
+                      // Kill the process and wait for it to exit
                       strapiProcess.kill('SIGINT');
+                      await new Promise((resolveKill) => {
+                        strapiProcess.on('exit', () => {
+                          resolveKill();
+                        });
+                      });
                       resolve();
                       return;
                     }
@@ -277,6 +283,11 @@ module.exports = config
 
                   if (Date.now() - startTime > timeout) {
                     strapiProcess.kill('SIGINT');
+                    await new Promise((resolveKill) => {
+                      strapiProcess.on('exit', () => {
+                        resolveKill();
+                      });
+                    });
                     reject(new Error('Strapi failed to start within timeout period'));
                     return;
                   }
@@ -300,6 +311,21 @@ module.exports = config
                   console.error(`[Strapi ERROR] Process error:`, err);
                   reject(err);
                 });
+              });
+
+              // Double check the port is actually free
+              await new Promise((resolve) => {
+                const checkPort = async () => {
+                  try {
+                    await fetch(`http://127.0.0.1:${port}/_health`);
+                    // If we can connect, port is still in use
+                    setTimeout(checkPort, 1000);
+                  } catch (err) {
+                    // Port is free
+                    resolve();
+                  }
+                };
+                checkPort();
               });
 
               // Commit the generated files
