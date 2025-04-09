@@ -23,6 +23,6 @@ runs:
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        npx playwright install --with-deps
+        yarn playwright install --with-deps
         mkdir -p ~/.cache/ms-playwright
         chmod -R 777 ~/.cache/ms-playwright
