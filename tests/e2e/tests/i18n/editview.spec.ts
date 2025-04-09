@@ -280,7 +280,7 @@ test.describe('Edit view', () => {
      * Logout and login as editor
      */
     await page.getByRole('button', { name: 'tt test testing' }).click();
-    await page.getByRole('menuitem', { name: 'Log out' }).click();
+    await page.getByRole('menuitem', { name: 'Logout' }).click();
 
     await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
 
