@@ -255,6 +255,7 @@ module.exports = config
                   PORT: port,
                   STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
                 },
+                detached: true, // This is important for CI
               });
 
               // Wait for Strapi to be ready by checking HTTP endpoint
@@ -267,13 +268,13 @@ module.exports = config
                   try {
                     const response = await fetch(`http://127.0.0.1:${port}/_health`);
                     if (response.ok) {
-                      // Kill the process and wait for it to exit
-                      strapiProcess.kill('SIGINT');
-                      await new Promise((resolveKill) => {
-                        strapiProcess.on('exit', () => {
-                          resolveKill();
-                        });
-                      });
+                      console.log('Strapi is ready, shutting down...');
+                      // In CI, we need to kill the entire process group
+                      if (process.env.CI) {
+                        process.kill(-strapiProcess.pid, 'SIGINT');
+                      } else {
+                        strapiProcess.kill('SIGINT');
+                      }
                       resolve();
                       return;
                     }
@@ -282,12 +283,12 @@ module.exports = config
                   }
 
                   if (Date.now() - startTime > timeout) {
-                    strapiProcess.kill('SIGINT');
-                    await new Promise((resolveKill) => {
-                      strapiProcess.on('exit', () => {
-                        resolveKill();
-                      });
-                    });
+                    console.log('Timeout reached, forcing shutdown...');
+                    if (process.env.CI) {
+                      process.kill(-strapiProcess.pid, 'SIGKILL');
+                    } else {
+                      strapiProcess.kill('SIGKILL');
+                    }
                     reject(new Error('Strapi failed to start within timeout period'));
                     return;
                   }
@@ -310,6 +311,10 @@ module.exports = config
                 strapiProcess.on('error', (err) => {
                   console.error(`[Strapi ERROR] Process error:`, err);
                   reject(err);
+                });
+
+                strapiProcess.on('exit', (code) => {
+                  console.log(`Strapi process exited with code ${code}`);
                 });
               });
 
