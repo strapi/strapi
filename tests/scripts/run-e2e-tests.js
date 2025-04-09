@@ -257,28 +257,43 @@ module.exports = config
                 },
               });
 
-              // Wait for Strapi to be ready by monitoring its output
+              // Wait for Strapi to be ready by checking HTTP endpoint
               await new Promise((resolve, reject) => {
-                let isReady = false;
-                strapiProcess.stdout.on('data', (data) => {
-                  const output = data.toString();
-                  console.log(`[stdout] ${output.trim()}`);
-                  if (output.includes('Strapi started successfully')) {
-                    isReady = true;
-                    strapiProcess.kill('SIGINT');
+                const startTime = Date.now();
+                const timeout = 160 * 1000; // 160 seconds, matching Playwright's timeout
+                const checkInterval = 1000; // Check every second
+
+                const checkServer = async () => {
+                  try {
+                    const response = await fetch(`http://127.0.0.1:${port}/_health`);
+                    if (response.ok) {
+                      strapiProcess.kill('SIGINT');
+                      resolve();
+                      return;
+                    }
+                  } catch (err) {
+                    // Server not ready yet, continue checking
                   }
+
+                  if (Date.now() - startTime > timeout) {
+                    strapiProcess.kill('SIGINT');
+                    reject(new Error('Strapi failed to start within timeout period'));
+                    return;
+                  }
+
+                  setTimeout(checkServer, checkInterval);
+                };
+
+                // Start checking
+                checkServer();
+
+                // Log stdout and stderr for debugging
+                strapiProcess.stdout.on('data', (data) => {
+                  console.log(`[stdout] ${data.toString().trim()}`);
                 });
 
                 strapiProcess.stderr.on('data', (data) => {
                   console.error(`[stderr] ${data.toString().trim()}`);
-                });
-
-                strapiProcess.on('exit', (code) => {
-                  if (isReady) {
-                    resolve();
-                  } else {
-                    reject(new Error(`Strapi failed to start properly (exit code: ${code})`));
-                  }
                 });
 
                 strapiProcess.on('error', (err) => {
