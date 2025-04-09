@@ -75,7 +75,7 @@ jobs:
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Install Playwright
-        uses: ./.github/actions/playwright-install
+        uses: ./.github/actions/playwright-setup
 
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
@@ -236,8 +236,13 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
-      - name: Restore Playwright browsers
-        uses: ./.github/actions/playwright-install
+      - name: Restore Playwright browser downloads
+        uses: ./.github/actions/playwright-setup
+      - name: Install Playwright browsers
+        shell: bash
+        run: |
+          # Install browsers from cached packages
+          PLAYWRIGHT_DOWNLOAD_HOST=file://~/.cache/ms-playwright-downloads npx playwright install --with-deps
       - name: Run [CE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
@@ -283,8 +288,13 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
-      - name: Restore Playwright browsers
-        uses: ./.github/actions/playwright-install
+      - name: Restore Playwright browser downloads
+        uses: ./.github/actions/playwright-setup
+      - name: Install Playwright browsers
+        shell: bash
+        run: |
+          # Install browsers from cached packages
+          PLAYWRIGHT_DOWNLOAD_HOST=file://~/.cache/ms-playwright-downloads npx playwright install --with-deps
       - name: Run [EE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:

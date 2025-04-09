@@ -1,0 +1,30 @@
+name: 'Install Playwright Browsers'
+description: 'Download and cache Playwright browser packages'
+inputs:
+  cache-prefix:
+    description: 'Add a specific cache-prefix'
+    required: false
+    default: 'default'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: ♻️ Restore Playwright downloads cache
+      id: playwright-downloads-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright-downloads
+        key: playwright-downloads-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          playwright-downloads-${{ runner.os }}
+
+    - name: 📥 Download Playwright Browsers
+      if: steps.playwright-downloads-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        mkdir -p ~/.cache/ms-playwright-downloads
+        # Download but don't install
+        PLAYWRIGHT_DOWNLOAD_HOST=https://playwright.azureedge.net npx playwright install --with-deps --dry-run
+        # Move downloaded packages to cache
+        mv ~/.cache/ms-playwright/*.zip ~/.cache/ms-playwright-downloads/ || true
