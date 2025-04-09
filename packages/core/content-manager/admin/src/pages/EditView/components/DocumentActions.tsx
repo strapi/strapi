@@ -26,10 +26,11 @@ import { DefaultTheme, styled } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
-import { useDocumentContext } from '../../../features/DocumentContext';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
+import { useDocumentContext } from '../../../hooks/useDocumentContext';
+import { usePreviewContext } from '../../../preview/pages/Preview';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
 import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
@@ -517,11 +518,11 @@ const PublishAction: DocumentActionComponent = ({
   collectionType,
   meta,
   document,
-  onPreview,
-  fromPreview = false,
-  fromRelationModal = false,
 }) => {
-  const schema = useDocumentContext('PublishAction', (state) => state.document.schema);
+  const {
+    currentDocument: { schema },
+  } = useDocumentContext('PublishAction');
+
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
@@ -530,7 +531,8 @@ const PublishAction: DocumentActionComponent = ({
   const { id } = useParams();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
-  const { publish, isLoading } = useDocumentActions(fromPreview, fromRelationModal);
+  const { publish, isLoading } = useDocumentActions();
+  const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
   const [
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
@@ -538,8 +540,7 @@ const PublishAction: DocumentActionComponent = ({
   const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
   const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
 
-  const [{ query, rawQuery }] = useQueryParams();
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const [{ rawQuery }] = useQueryParams();
 
   const modified = useForm('PublishAction', ({ modified }) => modified);
   const setSubmitting = useForm('PublishAction', ({ setSubmitting }) => setSubmitting);
@@ -547,9 +548,11 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+  const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
-  const rootDocumentMeta = useDocumentContext('PublishAction', (state) => state.rootDocumentMeta);
-  const currentDocumentMeta = useDocumentContext('PublishAction', (state) => state.meta);
+  const { currentDocumentMeta } = useDocumentContext('PublishAction');
+
+  const idToPublish = currentDocumentMeta.documentId || id;
 
   React.useEffect(() => {
     if (isErrorDraftRelations) {
@@ -611,7 +614,7 @@ const PublishAction: DocumentActionComponent = ({
         collectionType,
         model,
         documentId,
-        params,
+        params: currentDocumentMeta.params,
       });
 
       if (error) {
@@ -624,7 +627,15 @@ const PublishAction: DocumentActionComponent = ({
     };
 
     fetchDraftRelationsCount();
-  }, [isListView, document, documentId, countDraftRelations, collectionType, model, params]);
+  }, [
+    isListView,
+    document,
+    documentId,
+    countDraftRelations,
+    collectionType,
+    model,
+    currentDocumentMeta.params,
+  ]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -642,7 +653,6 @@ const PublishAction: DocumentActionComponent = ({
       const { errors } = await validate(true, {
         status: 'published',
       });
-
       if (errors) {
         toggleNotification({
           type: 'danger',
@@ -652,26 +662,28 @@ const PublishAction: DocumentActionComponent = ({
               'There are validation errors in your document. Please fix them before saving.',
           }),
         });
-
         return;
       }
-
-      const isPublishingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
       const res = await publish(
         {
           collectionType,
           model,
           documentId,
-          params: isPublishingRelation ? currentDocumentMeta.params : params,
+          params: currentDocumentMeta.params,
         },
         transformData(formValues)
       );
+
+      // Reset form if successful
+      if ('data' in res) {
+        resetForm();
+      }
 
       if ('data' in res && collectionType !== SINGLE_TYPES) {
         /**
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
-        if (id === 'create') {
+        if (idToPublish === 'create') {
           navigate({
             pathname: `../${collectionType}/${model}/${res.data.documentId}`,
             search: rawQuery,
@@ -686,7 +698,6 @@ const PublishAction: DocumentActionComponent = ({
       }
     } finally {
       setSubmitting(false);
-
       if (onPreview) {
         onPreview();
       }
@@ -767,9 +778,6 @@ const UpdateAction: DocumentActionComponent = ({
   documentId,
   model,
   collectionType,
-  onPreview,
-  fromPreview = false,
-  fromRelationModal = false,
 }) => {
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
@@ -777,9 +785,9 @@ const UpdateAction: DocumentActionComponent = ({
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { create, update, clone, isLoading } = useDocumentActions(fromPreview, fromRelationModal);
-  const [{ query, rawQuery }] = useQueryParams();
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const { create, update, clone, isLoading } = useDocumentActions();
+  const [{ rawQuery }] = useQueryParams();
+  const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -789,8 +797,7 @@ const UpdateAction: DocumentActionComponent = ({
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
-  const rootDocumentMeta = useDocumentContext('UpdateAction', (state) => state.rootDocumentMeta);
-  const currentDocumentMeta = useDocumentContext('UpdateAction', (state) => state.meta);
+  const { currentDocumentMeta } = useDocumentContext('UpdateAction');
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -822,7 +829,7 @@ const UpdateAction: DocumentActionComponent = ({
           {
             model,
             documentId: cloneMatch.params.origin!,
-            params,
+            params: currentDocumentMeta.params,
           },
           transformData(document)
         );
@@ -843,14 +850,12 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const isEditingRelation = rootDocumentMeta.documentId !== currentDocumentMeta.documentId;
-
         const res = await update(
           {
             collectionType,
             model,
             documentId,
-            params: isEditingRelation ? currentDocumentMeta.params : params,
+            params: currentDocumentMeta.params,
           },
           transformData(document)
         );
@@ -864,7 +869,7 @@ const UpdateAction: DocumentActionComponent = ({
         const res = await create(
           {
             model,
-            params,
+            params: currentDocumentMeta.params,
           },
           transformData(document)
         );
@@ -896,7 +901,6 @@ const UpdateAction: DocumentActionComponent = ({
     cloneMatch?.params.origin,
     collectionType,
     create,
-    currentDocumentMeta.documentId,
     currentDocumentMeta.params,
     document,
     documentId,
@@ -906,16 +910,14 @@ const UpdateAction: DocumentActionComponent = ({
     model,
     modified,
     navigate,
-    onPreview,
-    params,
     rawQuery,
     resetForm,
-    rootDocumentMeta.documentId,
     setErrors,
     setSubmitting,
     toggleNotification,
     update,
     validate,
+    onPreview,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux

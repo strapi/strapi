@@ -212,6 +212,7 @@ yargs
                 testDir: path.join(testDomainRoot, domain),
                 port,
                 appDir: testAppPath,
+                reportFileName: `playwright-${domain}-${port}.xml`,
               });
 
               const configFileTemplate = `
