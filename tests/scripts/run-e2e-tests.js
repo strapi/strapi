@@ -318,7 +318,7 @@ module.exports = config
                 });
               });
 
-              // Double check the port is actually free
+              // Double check that Strapi has shut down
               await new Promise((resolve) => {
                 const checkPort = async () => {
                   try {
