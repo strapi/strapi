@@ -60,6 +60,32 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
+  playwright_install:
+    name: 'Install Playwright Browsers'
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            playwright-${{ runner.os }}
+      - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: |
+          npx playwright install --with-deps
+          mkdir -p ~/.cache/ms-playwright
+          chmod -R 777 ~/.cache/ms-playwright
+
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
@@ -202,7 +228,7 @@ jobs:
   e2e_ce:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditions, build]
+    needs: [conditions, build, playwright_install]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
@@ -212,30 +238,13 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ matrix.project }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-${{ matrix.project }}-
-
-      - name: Install Playwright Browser
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps ${{ matrix.project }}
-
       - name: Monorepo build
         uses: ./.github/actions/run-build
-
       - name: Run [CE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
@@ -249,7 +258,7 @@ jobs:
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
-        # Add the Trunk Analytics Uploader step
+      # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@main
@@ -262,7 +271,7 @@ jobs:
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditions, build]
+    needs: [conditions, build, playwright_install]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
@@ -274,30 +283,13 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ matrix.project }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-${{ matrix.project }}-
-
-      - name: Install Playwright Browser
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps ${{ matrix.project }}
-
       - name: Monorepo build
         uses: ./.github/actions/run-build
-
       - name: Run [EE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
