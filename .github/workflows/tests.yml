@@ -236,6 +236,8 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
+      - name: Restore Playwright browsers
+        uses: ./.github/actions/playwright-install
       - name: Run [CE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
@@ -281,6 +283,8 @@ jobs:
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
+      - name: Restore Playwright browsers
+        uses: ./.github/actions/playwright-install
       - name: Run [EE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
