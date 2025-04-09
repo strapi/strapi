@@ -262,7 +262,7 @@ module.exports = config
                 let isReady = false;
                 strapiProcess.stdout.on('data', (data) => {
                   const output = data.toString();
-                  console.log(`[Strapi ${domain}] ${output.trim()}`);
+                  console.log(`[stdout] ${output.trim()}`);
                   if (output.includes('Strapi started successfully')) {
                     isReady = true;
                     strapiProcess.kill('SIGINT');
@@ -270,7 +270,7 @@ module.exports = config
                 });
 
                 strapiProcess.stderr.on('data', (data) => {
-                  console.error(`[Strapi ${domain} ERROR] ${data.toString().trim()}`);
+                  console.error(`[stderr] ${data.toString().trim()}`);
                 });
 
                 strapiProcess.on('exit', (code) => {
@@ -282,7 +282,7 @@ module.exports = config
                 });
 
                 strapiProcess.on('error', (err) => {
-                  console.error(`[Strapi ${domain} ERROR] Process error:`, err);
+                  console.error(`[Strapi ERROR] Process error:`, err);
                   reject(err);
                 });
               });
