@@ -23,10 +23,11 @@ const DEFAULT_FEATURES = {
     { name: 'review-workflows' },
     { name: 'cms-content-releases' },
     { name: 'cms-content-history', options: { retentionDays: 99999 } },
+    { name: 'cms-advanced-preview' },
   ],
 };
 
-const publicKey = fs.readFileSync(resolve(__dirname, '../resources/key.pub'));
+const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
 class LicenseCheckError extends Error {
   shouldFallback = false;

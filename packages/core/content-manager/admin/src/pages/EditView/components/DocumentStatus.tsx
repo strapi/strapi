@@ -23,14 +23,8 @@ const DocumentStatus = ({ status = 'draft', size = 'S', ...restProps }: Document
   const { formatMessage } = useIntl();
 
   return (
-    <Status
-      {...restProps}
-      size={size}
-      variant={statusVariant}
-      role="status"
-      aria-labelledby="document-status"
-    >
-      <Typography tag="span" variant="omega" fontWeight="bold" id="document-status">
+    <Status {...restProps} size={size} variant={statusVariant} role="status" aria-label={status}>
+      <Typography tag="span" variant="omega" fontWeight="bold">
         {formatMessage({
           id: `content-manager.containers.List.${status}`,
           defaultMessage: capitalise(status),
