@@ -60,23 +60,6 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
-  # Install Playwright Browsers before running tests so they can be cached
-  # In the future, we could also move the initial project build and init here
-  playwright_setup:
-    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
-    name: 'Install Playwright Browsers'
-    runs-on: ubuntu-latest
-    needs: [conditions]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
-      - name: Install Playwright
-        uses: ./.github/actions/playwright-setup
-
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
     runs-on: ubuntu-latest
@@ -93,6 +76,18 @@ jobs:
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Install docs dependencies
@@ -219,7 +214,7 @@ jobs:
   e2e_ce:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditions, build, playwright_setup]
+    needs: [conditions, build]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
@@ -234,15 +229,11 @@ jobs:
           node-version: 20
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
       - name: Monorepo build
         uses: ./.github/actions/run-build
-      - name: Restore Playwright browser downloads
-        uses: ./.github/actions/playwright-setup
-      - name: Install Playwright browsers
-        shell: bash
-        run: |
-          # Install browsers from cached packages
-          PLAYWRIGHT_DOWNLOAD_HOST=file://~/.cache/ms-playwright-downloads npx playwright install --with-deps
+
       - name: Run [CE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
@@ -256,7 +247,7 @@ jobs:
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
-      # Add the Trunk Analytics Uploader step
+        # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
         uses: trunk-io/analytics-uploader@main
@@ -269,7 +260,7 @@ jobs:
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditions, build, playwright_setup]
+    needs: [conditions, build]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
@@ -281,20 +272,19 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Monorepo build
         uses: ./.github/actions/run-build
-      - name: Restore Playwright browser downloads
-        uses: ./.github/actions/playwright-setup
-      - name: Install Playwright browsers
-        shell: bash
-        run: |
-          # Install browsers from cached packages
-          PLAYWRIGHT_DOWNLOAD_HOST=file://~/.cache/ms-playwright-downloads npx playwright install --with-deps
       - name: Run [EE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
