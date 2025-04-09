@@ -439,7 +439,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/4, 2/4, 3/4, 4/4]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
         image: postgres
@@ -482,7 +482,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/4, 2/4, 3/4, 4/4]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
         image: bitnami/mysql:latest
