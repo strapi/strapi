@@ -82,7 +82,7 @@ const getAbsoluteUrl =
 
     const isLocalhost =
       config.environment === 'development' &&
-      ['127.0.0.1', '0.0.0.0', '::1'].includes(serverConfig.host);
+      ['127.0.0.1', '0.0.0.0', '::1', '::'].includes(serverConfig.host);
 
     if (isLocalhost) {
       return `http://localhost:${serverConfig.port}${url}`;
