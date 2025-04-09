@@ -1,0 +1,28 @@
+name: 'Install Playwright Browsers'
+description: 'Install and cache Playwright browsers'
+inputs:
+  cache-prefix:
+    description: 'Add a specific cache-prefix'
+    required: false
+    default: 'default'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: ♻️ Restore Playwright cache
+      id: playwright-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ inputs.cache-prefix }}-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          playwright-${{ inputs.cache-prefix }}-${{ runner.os }}
+
+    - name: 📥 Install Playwright Browsers
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        npx playwright install --with-deps
+        mkdir -p ~/.cache/ms-playwright
+        chmod -R 777 ~/.cache/ms-playwright
