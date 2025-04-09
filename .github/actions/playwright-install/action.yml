@@ -22,7 +22,4 @@ runs:
     - name: 📥 Install Playwright Browsers
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       shell: bash
-      run: |
-        yarn playwright install --with-deps
-        mkdir -p ~/.cache/ms-playwright
-        chmod -R 777 ~/.cache/ms-playwright
+      run: npx playwright install --with-deps
