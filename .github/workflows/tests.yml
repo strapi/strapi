@@ -60,10 +60,13 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
-  playwright_install:
+  # Install Playwright Browsers before running tests so they can be cached
+  # In the future, we could also move the initial project build and init here
+  playwright_setup:
+    if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     name: 'Install Playwright Browsers'
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [conditions, build]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -71,20 +74,8 @@ jobs:
           node-version: 20
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            playwright-${{ runner.os }}
-      - name: Install Playwright Browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: |
-          npx playwright install --with-deps
-          mkdir -p ~/.cache/ms-playwright
-          chmod -R 777 ~/.cache/ms-playwright
+      - name: Install Playwright
+        uses: ./.github/actions/playwright-install
 
   docs_build:
     name: 'docs build (node: ${{ matrix.node }})'
@@ -228,7 +219,7 @@ jobs:
   e2e_ce:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditions, build]
+    needs: [conditions, build, playwright_setup]
     name: '[CE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     strategy:
@@ -243,10 +234,6 @@ jobs:
           node-version: 20
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Install Playwright
-        uses: ./.github/actions/playwright-install
-        with:
-          cache-prefix: 'e2e'
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run [CE] E2E tests
@@ -275,7 +262,7 @@ jobs:
   e2e_ee:
     if: needs.conditions.outputs.global == 'true' || needs.conditions.outputs.backend == 'true' || needs.conditions.outputs.frontend == 'true' || needs.conditions.outputs.e2e == 'true'
     timeout-minutes: 60
-    needs: [conditions, build]
+    needs: [conditions, build, playwright_setup]
     name: '[EE] e2e (browser: ${{ matrix.project }}) (shard: ${{ matrix.shard }})'
     runs-on: ubuntu-latest
     env:
@@ -292,10 +279,6 @@ jobs:
           node-version: 20
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-      - name: Install Playwright
-        uses: ./.github/actions/playwright-install
-        with:
-          cache-prefix: 'e2e'
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run [EE] E2E tests
