@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
+import { dunePrompt } from './experiment/prompt';
 
 interface CloudError {
   response: {
@@ -25,9 +26,24 @@ export async function handleCloudLogin(): Promise<void> {
   const defaultErrorMessage =
     'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
 
+  const defaultPrompt = {
+    introText: '',
+    choices: ['Login/Sign up', 'Skip for now'],
+    message: 'Please log in or sign up.',
+    reference: null,
+  };
+  const useExperiment = Math.random() < 0.5;
+
+  const promptToUse = useExperiment ? dunePrompt : defaultPrompt;
+
   try {
     const { data: config } = await cloudApiService.config();
-    logger.log(parseToChalk(config.projectCreation.introText));
+
+    if (!useExperiment) {
+      promptToUse.introText = config.projectCreation.introText;
+    }
+
+    logger.log(parseToChalk(promptToUse.introText));
   } catch (e: unknown) {
     logger.debug(e);
     logger.error(defaultErrorMessage);
@@ -37,15 +53,16 @@ export async function handleCloudLogin(): Promise<void> {
     {
       type: 'list',
       name: 'userChoice',
-      message: `Please log in or sign up.`,
-      choices: ['Login/Sign up', 'Skip'],
+      message: promptToUse.message,
+      choices: promptToUse.choices,
     },
   ]);
 
-  if (userChoice !== 'Skip') {
+  if (!userChoice.includes('Skip')) {
     const cliContext = {
       logger,
       cwd: process.cwd(),
+      ...(promptToUse?.reference && { promptExperiment: promptToUse?.reference }),
     };
 
     try {
