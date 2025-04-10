@@ -45,7 +45,6 @@ describe('Migration - first published at', () => {
     await builder.addContentType(dogModel).addFixtures(dogModel.singularName, dogs).build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
 
     data.dogs = await builder.sanitizedFixturesFor(dogModel.singularName, strapi);
   });
