@@ -10,7 +10,7 @@ import { clickAndWait } from '../../../utils/shared';
 
 test.describe('Create single type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {

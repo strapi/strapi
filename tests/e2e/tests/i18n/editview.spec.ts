@@ -9,7 +9,7 @@ import { waitForRestart } from '../../utils/restart';
 test.describe('Edit view', () => {
   // TODO: split this into multiple tests
   // give additional time because this test file is so large
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
