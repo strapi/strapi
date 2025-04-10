@@ -5,11 +5,16 @@ import { To } from 'react-router-dom';
 
 import { Permission } from '../../../../shared/contracts/shared';
 
+import type { Internal, Utils } from '@strapi/types';
 import type { MessageDescriptor } from 'react-intl';
 
-type WidgetUID = `plugin::${string}.${string}` | `global::${string}`;
+type WidgetUID = Utils.String.Suffix<
+  | Internal.Namespace.WithSeparator<Internal.Namespace.Plugin>
+  | Internal.Namespace.WithSeparator<Internal.Namespace.Global>,
+  string
+>;
 
-interface WidgetArgs {
+type WidgetArgs = {
   icon: React.ComponentType;
   title: MessageDescriptor;
   link?: {
@@ -20,10 +25,12 @@ interface WidgetArgs {
   pluginId?: string;
   id: string;
   permissions?: Permission[];
-}
+};
+
+type Widget = Omit<WidgetArgs, 'id' | 'pluginId'>;
 
 class Widgets {
-  widgets: Record<string, WidgetArgs>;
+  widgets: Record<string, Widget>;
 
   constructor() {
     this.widgets = {};
@@ -44,12 +51,19 @@ class Widgets {
 
       const uid: WidgetUID = pluginId ? `plugin::${pluginId}.${id}` : `global::${id}`;
 
-      this.widgets[uid] = widget;
+      // Omit properites we don't want to store
+      const { id: _id, pluginId: _pluginId, ...widgetToStore } = widget;
+      this.widgets[uid] = widgetToStore;
     }
   };
 
   getAll = () => {
-    return this.widgets;
+    return Object.entries(this.widgets).map(([uid, widget]) => {
+      return {
+        ...widget,
+        uid,
+      };
+    });
   };
 }
 

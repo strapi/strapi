@@ -122,7 +122,7 @@ class StrapiApp {
   reducers: ReducersMapObject = {};
   store: Store | null = null;
   customFields = new CustomFields();
-  widgets: Widgets | null = null;
+  widgets = new Widgets();
 
   constructor({ config, appPlugins }: StrapiAppConstructorArgs = {}) {
     this.appPlugins = appPlugins || {};
@@ -135,15 +135,6 @@ class StrapiApp {
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
 
     this.router = new Router(getInitialRoutes());
-
-    if (window.strapi.future.isEnabled('unstableWidgetsApi')) {
-      /**
-       * TODO:
-       * Instantiate this above with the other properties
-       * whe removing the future flag
-       */
-      this.widgets = new Widgets();
-    }
   }
 
   addComponents = (components: Component | Component[]) => {
