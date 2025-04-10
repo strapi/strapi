@@ -1,7 +1,7 @@
 import { Cog } from '@strapi/icons';
 import { render, screen } from '@tests/utils';
 
-import { Widget } from '../Widget';
+import { Widget } from '../../../../components/WidgetHelpers';
 
 describe('Homepage Widget component', () => {
   it('should render the widget with info from props', () => {
