@@ -26,6 +26,7 @@ export type CreateContentTypeInput = {
   description: Struct.ContentTypeSchemaInfo['description'];
   options?: Struct.SchemaOptions;
   draftAndPublish?: Struct.SchemaOptions['draftAndPublish'];
+  firstPublishedAtField?: Struct.SchemaOptions['firstPublishedAtField'];
   pluginOptions?: Struct.ContentTypeSchema['pluginOptions'];
   config?: object;
 };

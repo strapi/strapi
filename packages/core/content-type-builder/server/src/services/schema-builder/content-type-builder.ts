@@ -110,7 +110,8 @@ export default function createComponentBuilder() {
         .set('options', {
           ...(infos.options ?? {}),
           draftAndPublish: infos.draftAndPublish,
-          firstPublishedAtField: true,
+          firstPublishedAtField:
+            infos.firstPublishedAtField == undefined ? true : infos.firstPublishedAtField, // keep it true by default unless specifically mentioned as false
         })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
