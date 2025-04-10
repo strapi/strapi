@@ -27,7 +27,7 @@ type WidgetArgs = {
   permissions?: Permission[];
 };
 
-type Widget = Omit<WidgetArgs, 'id' | 'pluginId'>;
+type Widget = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };
 
 class Widgets {
   widgets: Record<string, Widget>;
@@ -42,28 +42,21 @@ class Widgets {
         this.register(newWidget);
       });
     } else {
-      const { id, pluginId, component, title, icon } = widget;
+      invariant(widget.id, 'An id must be provided');
+      invariant(widget.component, 'A component must be provided');
+      invariant(widget.title, 'A title must be provided');
+      invariant(widget.icon, 'An icon must be provided');
 
-      invariant(id, 'An id must be provided');
-      invariant(component, 'A component must be provided');
-      invariant(title, 'A title must be provided');
-      invariant(icon, 'An icon must be provided');
-
+      // Replace id and pluginId with computed uid
+      const { id, pluginId, ...widgetToStore } = widget;
       const uid: WidgetUID = pluginId ? `plugin::${pluginId}.${id}` : `global::${id}`;
 
-      // Omit properites we don't want to store
-      const { id: _id, pluginId: _pluginId, ...widgetToStore } = widget;
-      this.widgets[uid] = widgetToStore;
+      this.widgets[uid] = { ...widgetToStore, uid };
     }
   };
 
   getAll = () => {
-    return Object.entries(this.widgets).map(([uid, widget]) => {
-      return {
-        ...widget,
-        uid,
-      };
-    });
+    return Object.values(this.widgets);
   };
 }
 

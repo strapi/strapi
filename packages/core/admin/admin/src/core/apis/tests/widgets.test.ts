@@ -18,16 +18,28 @@ describe('Widgets', () => {
     test('registers a single widget correctly', () => {
       widgets.register(mockWidget);
       const registeredWidgets = widgets.getAll();
-      expect(registeredWidgets[`global::${mockWidget.id}`]).toBe(mockWidget);
+
+      expect(registeredWidgets).toHaveLength(1);
+      expect(registeredWidgets[0]).toEqual({
+        component: mockWidget.component,
+        title: mockWidget.title,
+        icon: mockWidget.icon,
+        uid: `global::${mockWidget.id}`,
+      });
     });
 
     test('registers a plugin widget correctly', () => {
       const pluginWidget = { ...mockWidget, pluginId: 'test-plugin' };
       widgets.register(pluginWidget);
       const registeredWidgets = widgets.getAll();
-      expect(registeredWidgets[`plugin::${pluginWidget.pluginId}.${pluginWidget.id}`]).toBe(
-        pluginWidget
-      );
+
+      expect(registeredWidgets).toHaveLength(1);
+      expect(registeredWidgets[0]).toEqual({
+        component: pluginWidget.component,
+        title: pluginWidget.title,
+        icon: pluginWidget.icon,
+        uid: `plugin::${pluginWidget.pluginId}.${pluginWidget.id}`,
+      });
     });
 
     test('registers multiple widgets', () => {
@@ -37,8 +49,14 @@ describe('Widgets', () => {
       };
       widgets.register([mockWidget, secondWidget]);
       const registeredWidgets = widgets.getAll();
-      expect(registeredWidgets[`global::${mockWidget.id}`]).toBe(mockWidget);
-      expect(registeredWidgets[`global::${secondWidget.id}`]).toBe(secondWidget);
+
+      expect(registeredWidgets).toHaveLength(2);
+      expect(registeredWidgets).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ uid: `global::${mockWidget.id}` }),
+          expect.objectContaining({ uid: `global::${secondWidget.id}` }),
+        ])
+      );
     });
 
     test('throws when id is missing', () => {
@@ -63,15 +81,22 @@ describe('Widgets', () => {
   });
 
   describe('getAll', () => {
-    test('returns empty object when no widgets registered', () => {
-      expect(widgets.getAll()).toEqual({});
+    test('returns empty array when no widgets registered', () => {
+      expect(widgets.getAll()).toEqual([]);
     });
 
-    test('returns all registered widgets', () => {
+    test('returns all registered widgets as an array', () => {
       widgets.register(mockWidget);
       const registeredWidgets = widgets.getAll();
-      expect(Object.keys(registeredWidgets)).toHaveLength(1);
-      expect(registeredWidgets[`global::${mockWidget.id}`]).toBe(mockWidget);
+
+      expect(Array.isArray(registeredWidgets)).toBe(true);
+      expect(registeredWidgets).toHaveLength(1);
+      expect(registeredWidgets[0]).toEqual({
+        component: mockWidget.component,
+        title: mockWidget.title,
+        icon: mockWidget.icon,
+        uid: `global::${mockWidget.id}`,
+      });
     });
   });
 });
