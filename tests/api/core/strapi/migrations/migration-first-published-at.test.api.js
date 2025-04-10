@@ -7,7 +7,6 @@ const modelsUtils = require('api-tests/models');
 
 const builder = createTestBuilder();
 let strapi;
-let rq;
 const data = {
   dogs: [],
 };
@@ -39,7 +38,6 @@ const dogs = [
 const restart = async () => {
   await strapi.destroy();
   strapi = await createStrapiInstance();
-  rq = await createAuthRequest({ strapi });
 };
 
 describe('Migration - first published at', () => {

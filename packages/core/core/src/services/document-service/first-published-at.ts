@@ -1,6 +1,6 @@
-import { Modules } from '@strapi/types';
-import { contentTypes } from '@strapi/utils';
-import { Model } from '@strapi/utils/dist/types';
+import type { Modules } from '@strapi/types';
+
+import { contentTypes, types } from '@strapi/utils';
 import _, { curry } from 'lodash';
 import { assoc } from 'lodash/fp';
 
@@ -8,7 +8,7 @@ import { assoc } from 'lodash/fp';
 const addFirstPublishedAt = async (
   uid: string,
   documentId: string,
-  contentType: Model,
+  contentType: types.Model,
   params: Modules.Documents.Params.All
 ) => {
   if (!contentTypes.hasFirstPublishedAtField(contentType)) {
