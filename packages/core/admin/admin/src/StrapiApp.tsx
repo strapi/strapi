@@ -16,6 +16,7 @@ import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
+import { Widgets } from './core/apis/Widgets';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -121,6 +122,7 @@ class StrapiApp {
   reducers: ReducersMapObject = {};
   store: Store | null = null;
   customFields = new CustomFields();
+  widgets: Widgets | null = null;
 
   constructor({ config, appPlugins }: StrapiAppConstructorArgs = {}) {
     this.appPlugins = appPlugins || {};
@@ -133,6 +135,15 @@ class StrapiApp {
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
 
     this.router = new Router(getInitialRoutes());
+
+    if (window.strapi.future.isEnabled('unstableWidgetsApi')) {
+      /**
+       * TODO:
+       * Instantiate this above with the other properties
+       * whe removing the future flag
+       */
+      this.widgets = new Widgets();
+    }
   }
 
   addComponents = (components: Component | Component[]) => {
