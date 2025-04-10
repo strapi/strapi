@@ -283,36 +283,60 @@ describe('Release service', () => {
 
     it('calls publish for each collectionType with the right actions', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
+      const mockedActions = [
+        {
+          contentType: 'collectionType',
+          type: 'publish',
+          entry: { id: 1 },
+          entryDocumentId: 1
+        },
+        {
+          contentType: 'collectionType',
+          type: 'unpublish',
+          entry: { id: 2 },
+          entryDocumentId: 2
+        },
+        {
+          contentType: 'singleType',
+          type: 'publish',
+          entry: { id: 3 },
+          entryDocumentId: 3
+        },
+        {
+          contentType: 'singleType',
+          type: 'unpublish',
+          entry: { id: 4 },
+          entryDocumentId: 4
+        },
+      ];
+
+      const mockedEntries = mockedActions.map((action) => ({
+        documentId: action.entryDocumentId,
+        publishedAt: action.entryDocumentId === 3  ? null : 1743011553020,
+      }));
+
       const findOne = jest.fn();
       const findMany = jest.fn();
+      const documentsMock = jest.fn().mockImplementation(() => {
+        return {
+          findOne: jest.fn().mockImplementation((params) => {
+            const entry = mockedEntries.find(
+              (entry) => entry.documentId === params.documentId
+            );
+            return params.status === 'published' && entry?.publishedAt && entry;
+          }),
+          findFirst: jest.fn(),
+          publish: mockPublish,
+          unpublish: mockUnpublish,
+        };
+      });
 
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
-            findMany: jest.fn().mockReturnValue([
-              {
-                contentType: 'collectionType',
-                type: 'publish',
-                entry: { id: 1 },
-              },
-              {
-                contentType: 'collectionType',
-                type: 'unpublish',
-                entry: { id: 2 },
-              },
-              {
-                contentType: 'singleType',
-                type: 'publish',
-                entry: { id: 3 },
-              },
-              {
-                contentType: 'singleType',
-                type: 'unpublish',
-                entry: { id: 4 },
-              },
-            ]),
+            findMany: jest.fn().mockReturnValue(mockedActions),
             update: jest.fn(),
           }),
         },
@@ -329,6 +353,7 @@ describe('Release service', () => {
             kind: 'singleType',
           },
         },
+        documents: documentsMock,
       };
 
       // @ts-expect-error Ignore missing properties
@@ -357,6 +382,12 @@ describe('Release service', () => {
 
       await releaseService.publish(1);
 
+      // The third action is the only one that is publishing a draft, so It needs to be executed before the modified ones
+      expect(mockPublish).toHaveBeenNthCalledWith(1, {
+        contentType: 'singleType',
+        documentId: 3,
+        locale: undefined,
+      });
       expect(mockPublish).toHaveBeenCalledTimes(2);
       expect(mockUnpublish).toHaveBeenCalledTimes(2);
     });
