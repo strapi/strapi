@@ -94,10 +94,6 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       },
     },
     appType: 'custom',
-    optimizeDeps: {
-      ...baseConfig.optimizeDeps,
-      force: false,
-    },
   };
 };
 
