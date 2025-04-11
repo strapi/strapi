@@ -1,14 +1,15 @@
 import { Cog } from '@strapi/icons';
 import { render, screen } from '@tests/utils';
 
-import { Widget } from '../../../../components/WidgetHelpers';
+import { WidgetRoot } from '../../pages/Home/HomePage';
+import { Widget } from '../WidgetHelpers';
 
 describe('Homepage Widget component', () => {
   it('should render the widget with info from props', () => {
     render(
-      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }} icon={Cog}>
+      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }} icon={Cog}>
         actual widget content
-      </Widget.Root>
+      </WidgetRoot>
     );
 
     expect(screen.queryByText(/loading widget/i)).not.toBeInTheDocument();
@@ -18,9 +19,9 @@ describe('Homepage Widget component', () => {
 
   it('should render a spinner while a widget is loading', () => {
     render(
-      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
         <Widget.Loading />
-      </Widget.Root>
+      </WidgetRoot>
     );
 
     expect(screen.getByText(/loading widget/i)).toBeInTheDocument();
@@ -29,9 +30,9 @@ describe('Homepage Widget component', () => {
 
   it('should render an error message when a widget fails to load', () => {
     render(
-      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
         <Widget.Error />
-      </Widget.Root>
+      </WidgetRoot>
     );
 
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
@@ -40,9 +41,9 @@ describe('Homepage Widget component', () => {
 
   it('should render a custom error message when provided', () => {
     render(
-      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
         <Widget.Error>Custom error message</Widget.Error>
-      </Widget.Root>
+      </WidgetRoot>
     );
 
     expect(screen.getByText(/custom error message/i)).toBeInTheDocument();
@@ -51,9 +52,9 @@ describe('Homepage Widget component', () => {
 
   it('should render a no data message when a widget has no data', () => {
     render(
-      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
         <Widget.NoData />
-      </Widget.Root>
+      </WidgetRoot>
     );
 
     expect(screen.getByText(/no content found/i)).toBeInTheDocument();
@@ -61,9 +62,9 @@ describe('Homepage Widget component', () => {
 
   it('should render a custom no data message when provided', () => {
     render(
-      <Widget.Root title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
+      <WidgetRoot title={{ defaultMessage: 'Cool widget title', id: 'notarealid' }}>
         <Widget.NoData>Custom no data message</Widget.NoData>
-      </Widget.Root>
+      </WidgetRoot>
     );
 
     expect(screen.getByText(/custom no data message/i)).toBeInTheDocument();

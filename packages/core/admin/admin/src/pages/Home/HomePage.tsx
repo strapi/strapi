@@ -21,7 +21,8 @@ interface RootProps {
   icon?: typeof import('@strapi/icons').PuzzlePiece;
   children: React.ReactNode;
 }
-const WidgetRoot = ({ title, icon = PuzzlePiece, children }: RootProps) => {
+
+export const WidgetRoot = ({ title, icon = PuzzlePiece, children }: RootProps) => {
   const { formatMessage } = useIntl();
   const id = React.useId();
   const Icon = icon;
