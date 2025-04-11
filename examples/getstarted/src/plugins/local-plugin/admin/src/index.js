@@ -3,6 +3,7 @@ import { PuzzlePiece } from '@strapi/icons';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
+import { DuplicateButton } from './components/CloneComponent';
 
 const name = pluginPkg.strapi.name;
 
@@ -65,7 +66,16 @@ export default {
       app.customFields.register(customField);
     });
   },
-  bootstrap() {},
+  bootstrap(app) {
+    app.getPlugin('content-manager').injectComponent('editView', 'dynamic-zone-actions', {
+      name: 'duplicate-dynamic-zone',
+      Component: DuplicateButton,
+    });
+    app.getPlugin('content-manager').injectComponent('editView', 'repeatable-component-actions', {
+      name: 'repeatable-component',
+      Component: DuplicateButton,
+    });
+  },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
