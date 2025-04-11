@@ -16,8 +16,16 @@ describe('File (json)', () => {
   beforeEach(() => {
     vol.reset();
 
-    jest.spyOn(fse, 'readFile');
-    jest.spyOn(fse, 'writeFile');
+    // Mock readFile to return a Buffer with the JSON content
+    jest.spyOn(fse, 'readFile').mockImplementation(async (filepath) => {
+      const content = vol.readFileSync(filepath);
+      return Buffer.isBuffer(content) ? content : Buffer.from(content.toString());
+    });
+
+    // Mock writeFile to just store the content in memory
+    jest.spyOn(fse, 'writeFile').mockImplementation(async (filepath, content) => {
+      vol.writeFileSync(filepath, content);
+    });
   });
 
   afterEach(() => {
