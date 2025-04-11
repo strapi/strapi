@@ -249,7 +249,7 @@ module.exports = config
 
               // Start Strapi and wait for it to be ready
               console.log(`Starting Strapi for domain '${domain}' to generate files...`);
-              const strapiProcess = execa('npm', ['run', 'develop', '--', '--no-watch-admin'], {
+              const strapiProcess = execa('npm', ['run', 'develop'], {
                 cwd: testAppPath,
                 env: {
                   PORT: port,
