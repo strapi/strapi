@@ -99,12 +99,6 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       ...baseConfig.optimizeDeps,
       force: false,
     },
-    build: {
-      ...baseConfig.build,
-      emptyOutDir: false,
-      outDir: ctx.distDir,
-      target: baseConfig.build?.target,
-    },
   };
 };
 
