@@ -77,7 +77,6 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
   return {
     ...baseConfig,
     mode: 'development',
-    logLevel: 'info',
     resolve: {
       ...baseConfig.resolve,
       alias: {
