@@ -2406,5 +2406,73 @@
   {
     "code": "zu-ZA",
     "name": "Zulu (South Africa) (zu-ZA)"
+  },
+  {
+    "code": "fj",
+    "name": "Fijian (fj)"
+  },
+  {
+    "code": "ht",
+    "name": "Haitian Creole (ht)"
+  },
+  {
+    "code": "jv",
+    "name": "Javanese (jv)"
+  },
+  {
+    "code": "ku",
+    "name": "Kurdish (Central) (ku)"
+  },
+  {
+    "code": "lb",
+    "name": "Luxembourgish (lb)"
+  },
+  {
+    "code": "lo",
+    "name": "Lao (lo)"
+  },
+  {
+    "code": "lzh",
+    "name": "Chinese (Literary) (lzh)"
+  },
+  {
+    "code": "mww",
+    "name": "Hmong Daw (mww)"
+  },
+  {
+    "code": "otq",
+    "name": "Querétaro Otomi (otq)"
+  },
+  {
+    "code": "prs",
+    "name": "Dari (prs)"
+  },
+  {
+    "code": "sm",
+    "name": "Samoan (sm)"
+  },
+  {
+    "code": "su",
+    "name": "Sundanese (su)"
+  },
+  {
+    "code": "tt",
+    "name": "Tatar (tt)"
+  },
+  {
+    "code": "ty",
+    "name": "Tahitian (ty)"
+  },
+  {
+    "code": "yi",
+    "name": "Yiddish (yi)"
+  },
+  {
+    "code": "yua",
+    "name": "Yucatec Maya (yua)"
+  },
+  {
+    "code": "yue",
+    "name": "Cantonese (Traditional) (yue)"
   }
 ]
