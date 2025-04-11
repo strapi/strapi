@@ -201,7 +201,7 @@ describeOnCondition(edition === 'EE')('History', () => {
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create new author
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Author' }).first());
       await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
@@ -273,7 +273,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
       await waitForRestart(page);
-      await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
+      await expect(page.getByLabel('titleRename')).toBeVisible();
 
       /**
        * Update the existing entry to create another version
@@ -431,11 +431,11 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
       await waitForRestart(page);
-      await expect(page.getByRole('cell', { name: 'authors', exact: true })).toBeVisible();
+      await expect(page.getByLabel('authors')).toBeVisible();
 
       // Create new author
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Author' }).first());
       await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
@@ -499,7 +499,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
       await waitForRestart(page);
-      await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
+      await expect(page.getByLabel('titleRename')).toBeVisible();
 
       /**
        * Update the existing entry to create another version
