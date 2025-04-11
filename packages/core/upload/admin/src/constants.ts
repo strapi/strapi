@@ -1,12 +1,5 @@
 import { getTrad } from './utils';
 
-export enum AssetType {
-  Video = 'video',
-  Image = 'image',
-  Document = 'doc',
-  Audio = 'audio',
-}
-
 export enum AssetSource {
   Url = 'url',
   Computer = 'computer',
