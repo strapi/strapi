@@ -1,15 +1,13 @@
 import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
+
 import type { GetRecentDocuments, RecentDocument } from '../../../shared/contracts/homepage';
 
-/**
- * TODO: Remove this service when the future flag for the widget api is removed
- */
 const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
 
   const metadataService = strapi.plugin('content-manager').service('document-metadata');
-  const permissionService = strapi.admin.services.permission as typeof import('./permission');
+  const permissionService = strapi.admin.services.permission;
 
   type ContentTypeConfiguration = {
     uid: RecentDocument['contentTypeUid'];
@@ -39,7 +37,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const getPermittedContentTypes = async () => {
-    const readPermissions = await permissionService.findMany({
+    const readPermissions: Modules.Permissions.PermissionRule[] = await permissionService.findMany({
       where: {
         role: { users: { id: strapi.requestContext.get()?.state?.user.id } },
         action: 'plugin::content-manager.explorer.read',

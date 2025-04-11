@@ -1,4 +1,4 @@
-import { Feather } from '@strapi/icons';
+import { CheckCircle, Feather, Pencil } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
@@ -44,6 +44,38 @@ export default {
     });
 
     app.registerPlugin(cm.config);
+
+    // Register homepage widgets
+    app.widgets.register([
+      {
+        icon: Pencil,
+        title: {
+          id: `${PLUGIN_ID}.widget.last-edited.title`,
+          defaultMessage: 'Last edited entries',
+        },
+        component: async () => {
+          const { LastEditedWidget } = await import('./components/Widgets');
+          return LastEditedWidget;
+        },
+        pluginId: PLUGIN_ID,
+        id: 'last-edited-entries',
+        permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+      },
+      {
+        icon: CheckCircle,
+        title: {
+          id: `${PLUGIN_ID}.widget.last-published.title`,
+          defaultMessage: 'Last published entries',
+        },
+        component: async () => {
+          const { LastPublishedWidget } = await import('./components/Widgets');
+          return LastPublishedWidget;
+        },
+        pluginId: PLUGIN_ID,
+        id: 'last-published-entries',
+        permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+      },
+    ]);
   },
   bootstrap(app: any) {
     if (typeof historyAdmin.bootstrap === 'function') {

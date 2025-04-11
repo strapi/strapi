@@ -9,7 +9,7 @@ describe('Widgets', () => {
 
   const mockWidget: WidgetArgs = {
     id: 'test-widget',
-    component: () => Promise.resolve({ default: () => null }),
+    component: () => Promise.resolve(() => null),
     title: { id: 'test.title', defaultMessage: 'Test Title' },
     icon: () => null,
   };
