@@ -26,7 +26,6 @@ const DOCUMENT_META_FIELDS = [
 const ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD = [
   'dynamiczone',
   'json',
-  'text',
   'relation',
   'component',
   'boolean',
