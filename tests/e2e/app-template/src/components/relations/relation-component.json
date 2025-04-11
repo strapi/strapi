@@ -1,0 +1,23 @@
+{
+  "collectionName": "relation-component",
+  "info": {
+    "displayName": "Relation Component",
+    "description": "Component with relation fields"
+  },
+  "options": {},
+  "attributes": {
+    "componentName": {
+      "type": "string"
+    },
+    "componentOneWayRel": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-target.relation-target"
+    },
+    "componentTwoWayRel": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-target.relation-target"
+    }
+  }
+}
