@@ -1,47 +1,11 @@
-import * as React from 'react';
+import { Flex, Loader, Typography } from '@strapi/design-system';
+import { WarningCircle } from '@strapi/icons';
+import { EmptyDocuments, EmptyPermissions } from '@strapi/icons/symbols';
+import { useIntl } from 'react-intl';
 
-import { Box, Flex, type FlexProps, Loader, Typography } from '@strapi/design-system';
-import { PuzzlePiece, WarningCircle } from '@strapi/icons';
-import { EmptyDocuments } from '@strapi/icons/symbols';
-import { type MessageDescriptor, useIntl } from 'react-intl';
-
-interface RootProps {
-  title: MessageDescriptor;
-  icon?: typeof import('@strapi/icons').PuzzlePiece;
-  children: React.ReactNode;
-}
-
-const Root = ({ title, icon = PuzzlePiece, children }: RootProps) => {
-  const { formatMessage } = useIntl();
-  const id = React.useId();
-  const Icon = icon;
-
-  return (
-    <Flex
-      width="100%"
-      hasRadius
-      direction="column"
-      alignItems="flex-start"
-      background="neutral0"
-      borderColor="neutral150"
-      shadow="tableShadow"
-      tag="section"
-      gap={4}
-      padding={6}
-      aria-labelledby={id}
-    >
-      <Flex direction="row" alignItems="center" gap={2} tag="header">
-        <Icon fill="neutral500" aria-hidden />
-        <Typography textColor="neutral500" variant="sigma" tag="h2" id={id}>
-          {formatMessage(title)}
-        </Typography>
-      </Flex>
-      <Box width="100%" height="261px" overflow="auto" tag="main">
-        {children}
-      </Box>
-    </Flex>
-  );
-};
+/* -------------------------------------------------------------------------------------------------
+ * Loading
+ * -----------------------------------------------------------------------------------------------*/
 
 interface LoadingProps {
   children?: string;
@@ -62,6 +26,10 @@ const Loading = ({ children }: LoadingProps) => {
     </Flex>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * Error
+ * -----------------------------------------------------------------------------------------------*/
 
 interface ErrorProps {
   children?: string;
@@ -90,6 +58,10 @@ const Error = ({ children }: ErrorProps) => {
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * NoData
+ * -----------------------------------------------------------------------------------------------*/
+
 interface NoDataProps {
   children?: string;
 }
@@ -111,11 +83,36 @@ const NoData = ({ children }: NoDataProps) => {
   );
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * NoPermissions
+ * -----------------------------------------------------------------------------------------------*/
+
+interface NoPermissionsProps {
+  children?: string;
+}
+
+const NoPermissions = ({ children }: NoPermissionsProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Flex height="100%" direction="column" justifyContent="center" alignItems="center" gap={6}>
+      <EmptyPermissions width="16rem" height="8.8rem" />
+      <Typography textColor="neutral600">
+        {children ??
+          formatMessage({
+            id: 'HomePage.widget.no-permissions',
+            defaultMessage: 'You don’t have the permission to see this widget',
+          })}
+      </Typography>
+    </Flex>
+  );
+};
+
 const Widget = {
-  Root,
   Loading,
   Error,
   NoData,
+  NoPermissions,
 };
 
 export { Widget };

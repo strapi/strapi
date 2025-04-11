@@ -1,15 +1,16 @@
+import React from 'react';
+
 import { Box, IconButton, Status, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
-import { CheckCircle, Pencil } from '@strapi/icons';
+import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { RelativeTime } from '../../../components/RelativeTime';
+import { Widget } from '../../../components/WidgetHelpers';
 import { useTracking } from '../../../features/Tracking';
 import { useGetRecentDocumentsQuery } from '../../../services/homepage';
 import { capitalise } from '../../../utils/strings';
-
-import { Widget } from './Widget';
 
 import type { RecentDocument } from '../../../../../shared/contracts/homepage';
 
@@ -127,7 +128,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
  * LastEditedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastEditedWidgetContent = () => {
+const LastEditedWidget = () => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'update' });
 
@@ -153,25 +154,11 @@ const LastEditedWidgetContent = () => {
   return <RecentDocumentsTable documents={data} />;
 };
 
-const LastEditedWidget = () => {
-  return (
-    <Widget.Root
-      title={{
-        id: 'content-manager.widget.last-edited.title',
-        defaultMessage: 'Last edited entries',
-      }}
-      icon={Pencil}
-    >
-      <LastEditedWidgetContent />
-    </Widget.Root>
-  );
-};
-
 /* -------------------------------------------------------------------------------------------------
  * LastPublishedWidget
  * -----------------------------------------------------------------------------------------------*/
 
-const LastPublishedWidgetContent = () => {
+const LastPublishedWidget = () => {
   const { formatMessage } = useIntl();
   const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'publish' });
 
@@ -195,20 +182,6 @@ const LastPublishedWidgetContent = () => {
   }
 
   return <RecentDocumentsTable documents={data} />;
-};
-
-const LastPublishedWidget = () => {
-  return (
-    <Widget.Root
-      title={{
-        id: 'content-manager.widget.last-published.title',
-        defaultMessage: 'Last published entries',
-      }}
-      icon={CheckCircle}
-    >
-      <LastPublishedWidgetContent />
-    </Widget.Root>
-  );
 };
 
 export { LastEditedWidget, LastPublishedWidget };
