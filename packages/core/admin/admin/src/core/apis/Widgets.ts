@@ -15,13 +15,13 @@ type WidgetUID = Utils.String.Suffix<
 >;
 
 type WidgetArgs = {
-  icon: React.ComponentType;
+  icon: React.ComponentType<{ fill: string; 'aria-hidden': boolean }>;
   title: MessageDescriptor;
   link?: {
     label: MessageDescriptor;
     href: To;
   };
-  component: () => Promise<{ default: React.ComponentType }>;
+  component: () => Promise<React.ComponentType>;
   pluginId?: string;
   id: string;
   permissions?: Permission[];

@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useStrapiApp, Widget } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Grid, Main, Typography } from '@strapi/design-system';
 import { CheckCircle, Pencil, PuzzlePiece } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -11,14 +12,15 @@ import { useAuth } from '../../features/Auth';
 
 import { LastEditedWidget, LastPublishedWidget } from './components/ContentManagerWidgets';
 import { GuidedTour } from './components/GuidedTour';
-
 /* -------------------------------------------------------------------------------------------------
  * Root
  * -----------------------------------------------------------------------------------------------*/
 
 interface RootProps {
   title: MessageDescriptor;
-  icon?: typeof import('@strapi/icons').PuzzlePiece;
+  icon?:
+    | typeof import('@strapi/icons').PuzzlePiece
+    | React.ComponentType<{ fill: string; 'aria-hidden': boolean }>;
   children: React.ReactNode;
 }
 
@@ -55,13 +57,87 @@ export const WidgetRoot = ({ title, icon = PuzzlePiece, children }: RootProps) =
 };
 
 /* -------------------------------------------------------------------------------------------------
- * HomePageCE
+ * UnstableHomePageCe
  * -----------------------------------------------------------------------------------------------*/
+
+const UnstableHomePageCe = () => {
+  const { formatMessage } = useIntl();
+  const user = useAuth('HomePageCE', (state) => state.user);
+  const displayName = user?.firstname ?? user?.username ?? user?.email;
+  const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
+
+  const [loadedWidgets, setLoadedWidgets] = React.useState<
+    (Omit<ReturnType<typeof getAllWidgets>[number], 'component'> & {
+      component: React.ComponentType;
+    })[]
+  >([]);
+
+  React.useEffect(() => {
+    const loadComponents = async () => {
+      const widgets = getAllWidgets();
+
+      const loaded = await Promise.all(
+        widgets.map(async (widget) => {
+          const LazyComponent = await widget.component();
+
+          return {
+            ...widget,
+            component: LazyComponent,
+          };
+        })
+      );
+
+      setLoadedWidgets(loaded);
+    };
+
+    loadComponents();
+  }, [getAllWidgets]);
+
+  return (
+    <Main>
+      <Page.Title>
+        {formatMessage({ id: 'HomePage.head.title', defaultMessage: 'Homepage' })}
+      </Page.Title>
+      <Layouts.Header
+        title={formatMessage(
+          { id: 'HomePage.header.title', defaultMessage: 'Hello {name}' },
+          { name: displayName }
+        )}
+        subtitle={formatMessage({
+          id: 'HomePage.header.subtitle',
+          defaultMessage: 'Welcome to your administration panel',
+        })}
+      />
+      <Layouts.Content>
+        <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
+          <GuidedTour />
+          <Grid.Root gap={5}>
+            {loadedWidgets.map((widget) => {
+              const Component = widget.component;
+
+              return (
+                <Grid.Item col={6} s={12} key={widget.uid}>
+                  <WidgetRoot title={widget.title} icon={widget.icon}>
+                    {Component ? <Component /> : <Widget.Loading />}
+                  </WidgetRoot>
+                </Grid.Item>
+              );
+            })}
+          </Grid.Root>
+        </Flex>
+      </Layouts.Content>
+    </Main>
+  );
+};
 
 const HomePageCE = () => {
   const { formatMessage } = useIntl();
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
+
+  if (window.strapi.future.isEnabled('unstableWidgetsApi')) {
+    return <UnstableHomePageCe />;
+  }
 
   return (
     <Main>
