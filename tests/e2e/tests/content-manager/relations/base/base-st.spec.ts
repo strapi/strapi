@@ -12,7 +12,6 @@ import {
   FieldValue,
   saveContent,
 } from '../../../../utils/content-creation';
-import { navToHeader } from '../../../../utils/shared';
 
 const createHomepageFields = (rawFields: {
   name?: string;
@@ -61,7 +60,7 @@ const createHomepageFields = (rawFields: {
 //SINGLE TYPES
 test.describe('Relations Single Types - EditView', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('i18n-data.tar');
+    await resetDatabaseAndImportDataFromPath('single-type-data.tar');
     await page.goto('/admin');
     await login({ page });
   });
