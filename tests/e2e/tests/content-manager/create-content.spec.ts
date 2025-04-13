@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait, dragElementAbove, findAndClose, isElementBefore } from '../../utils/shared';
+import {
+  clickAndWait,
+  dragElementAbove,
+  findAndClose,
+  isElementBefore,
+  navToHeader,
+} from '../../utils/shared';
 import { createContent, FieldValue, verifyFields } from '../../utils/content-creation';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
@@ -10,8 +16,7 @@ test.describe('Adding content', () => {
     await page.goto('/admin');
     await login({ page });
 
-    // Navigate to Content Manager
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await navToHeader(page, ['Content Manager'], 'Content Manager');
   });
 
   test('I want to be able to save and publish content', async ({ page }) => {
@@ -230,7 +235,7 @@ test.describe('Adding content', () => {
   for (const { description, fields, expectedError } of testCases) {
     test(`when I publish ${description} I see an error`, async ({ page }) => {
       await createContent(page, 'Match', fields, { save: false, publish: true, verify: false });
-      expect(page.getByText(expectedError)).toBeVisible();
+      expect(page.getByText(expectedError).first()).toBeVisible();
     });
   }
 });
