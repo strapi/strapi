@@ -337,7 +337,7 @@ This collection type is designed specifically for testing relation fields and ha
     "manyToOneRel": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "api::relation-target.relation-target", 
+      "target": "api::relation-target.relation-target",
       "inversedBy": "oneToManyRel"
     },
     "manyToManyRel": {
@@ -347,7 +347,7 @@ This collection type is designed specifically for testing relation fields and ha
       "inversedBy": "manyToManyInverse"
     },
     "oneWayRel": {
-      "type": "relation", 
+      "type": "relation",
       "relation": "oneToOne",
       "target": "api::relation-target.relation-target"
     },

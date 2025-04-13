@@ -192,8 +192,5 @@ test.describe('Relations - EditView', () => {
 
     // Validate only one relation is left
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
-
-
- 
   });
 });
