@@ -13,8 +13,9 @@ import { useStrapiApp } from '../../features/StrapiApp';
 
 import { LastEditedWidget, LastPublishedWidget } from './components/ContentManagerWidgets';
 import { GuidedTour } from './components/GuidedTour';
+
 /* -------------------------------------------------------------------------------------------------
- * Root
+ * WidgetRoot
  * -----------------------------------------------------------------------------------------------*/
 
 interface RootProps {
@@ -59,33 +60,33 @@ export const WidgetRoot = ({ title, icon = PuzzlePiece, children }: RootProps) =
  * UnstableHomePageCe
  * -----------------------------------------------------------------------------------------------*/
 
+const WidgetComponent = ({ component }: { component: () => Promise<React.ComponentType> }) => {
+  const [loadedComponent, setLoadedComponent] = React.useState<React.ComponentType | null>(null);
+
+  React.useEffect(() => {
+    const loadComponent = async () => {
+      const resolvedComponent = await component();
+
+      setLoadedComponent(() => resolvedComponent);
+    };
+
+    loadComponent();
+  }, [component]);
+
+  const Component = loadedComponent;
+
+  if (!Component) {
+    return <Widget.Loading />;
+  }
+
+  return <Component />;
+};
+
 const UnstableHomePageCe = () => {
   const { formatMessage } = useIntl();
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
-  const [loadedComponents, setLoadedComponents] = React.useState<{
-    [key: string]: React.ComponentType;
-  }>({});
-  const widgets = getAllWidgets();
-
-  React.useEffect(() => {
-    const loadComponents = async () => {
-      const resolvedComponents = await Promise.all(widgets.map((widget) => widget.component()));
-      const componentWidgetMap = resolvedComponents.reduce(
-        (acc, component, index) => {
-          // Safe to use index since promises are resolved in the order passed
-          acc[widgets[index].uid] = component;
-          return acc;
-        },
-        {} as { [key: string]: React.ComponentType }
-      );
-
-      setLoadedComponents(componentWidgetMap);
-    };
-
-    loadComponents();
-  }, [widgets]);
 
   return (
     <Main>
@@ -106,13 +107,11 @@ const UnstableHomePageCe = () => {
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTour />
           <Grid.Root gap={5}>
-            {widgets.map((widget) => {
-              const WidgetComponent = loadedComponents[widget.uid];
-
+            {getAllWidgets().map((widget) => {
               return (
                 <Grid.Item col={6} s={12} key={widget.uid}>
                   <WidgetRoot title={widget.title} icon={widget.icon}>
-                    {WidgetComponent ? <WidgetComponent /> : <Widget.Loading />}
+                    <WidgetComponent component={widget.component} />
                   </WidgetRoot>
                 </Grid.Item>
               );
@@ -123,6 +122,10 @@ const UnstableHomePageCe = () => {
     </Main>
   );
 };
+
+/* -------------------------------------------------------------------------------------------------
+ * HomePageCE
+ * -----------------------------------------------------------------------------------------------*/
 
 const HomePageCE = () => {
   const { formatMessage } = useIntl();
