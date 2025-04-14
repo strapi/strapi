@@ -23,11 +23,14 @@ export interface OpenAPIGeneratorConfig {
 export class OpenAPIGenerator {
   // Config
   private readonly _assemblers: Assembler.Document[];
+
   private readonly _preProcessors: PreProcessor[];
+
   private readonly _postProcessors: PostProcessor[];
 
   // Dependencies
   private readonly _strapi: Core.Strapi;
+
   private readonly _routeCollector: RouteCollector;
 
   // Factories

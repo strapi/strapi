@@ -1,6 +1,8 @@
 export class Timer {
   private _startTime: number | null;
+
   private _endTime: number | null;
+
   private _elapsedTime: number | null;
 
   constructor() {

@@ -7,12 +7,13 @@ import { createDebugger } from '../../../../../utils';
 
 import type { PathItemContext } from '../../../../../types';
 
-import type { Assembler } from '../../../../types';
+import type { Assembler } from '../../../..';
 
 const debug = createDebugger('assembler:operation');
 
 export class OperationAssembler implements Assembler.PathItem {
   private readonly _assemblers: Assembler.Operation[];
+
   private readonly _contextFactory: OperationContextFactory;
 
   constructor(

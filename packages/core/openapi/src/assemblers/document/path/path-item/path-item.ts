@@ -1,17 +1,17 @@
 import type { Core } from '@strapi/types';
-import { OpenAPIV3 } from 'openapi-types';
 import { type PartialContext, PathItemContextFactory } from '../../../../context';
 
 import type { PathContext, PathItemContext, PathItemContextData } from '../../../../types';
 
 import { createDebugger } from '../../../../utils';
 
-import type { Assembler } from '../../../types';
+import type { Assembler } from '../../..';
 
 const debug = createDebugger('assembler:path-item');
 
 export class PathItemAssembler implements Assembler.Path {
   private readonly _assemblers: Assembler.PathItem[];
+
   private readonly _contextFactory: PathItemContextFactory;
 
   constructor(assemblers: Assembler.PathItem[], contextFactory: PathItemContextFactory) {
@@ -30,8 +30,7 @@ export class PathItemAssembler implements Assembler.Path {
       routes.length
     );
 
-    for (const path in routesByPath) {
-      const routes = routesByPath[path];
+    for (const [path, routes] of Object.entries(routesByPath)) {
       const openAPIPath = this._formatPath(path);
 
       debug(

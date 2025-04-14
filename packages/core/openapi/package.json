@@ -57,11 +57,11 @@
   },
   "dependencies": {
     "debug": "4.3.4",
-    "path-to-regexp": "8.2.0"
+    "path-to-regexp": "8.2.0",
+    "openapi-types": "12.1.3"
   },
   "devDependencies": {
     "@strapi/types": "5.11.2",
-    "@types/debug": "^4",
-    "openapi-types": "12.1.3"
+    "@types/debug": "^4"
   }
 }

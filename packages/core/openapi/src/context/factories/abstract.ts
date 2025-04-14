@@ -5,6 +5,7 @@ import type { Context, ContextFactory, ContextOutput, PartialContext } from '../
 
 export abstract class AbstractContextFactory<T> implements ContextFactory<T> {
   private readonly _registriesFactory: RegistriesFactory;
+
   private readonly _timerFactory: TimerFactory;
 
   protected constructor(registriesFactory: RegistriesFactory, timerFactory: TimerFactory) {

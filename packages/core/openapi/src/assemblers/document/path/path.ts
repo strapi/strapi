@@ -4,12 +4,13 @@ import type { DocumentContext } from '../../../types';
 
 import { createDebugger } from '../../../utils';
 
-import type { Assembler } from '../../types';
+import type { Assembler } from '../..';
 
 const debug = createDebugger('assembler:paths');
 
 export class DocumentPathsAssembler implements Assembler.Assembler {
   private readonly _assemblers: Assembler.Path[];
+
   private readonly _contextFactory: PathContextFactory;
 
   constructor(assemblers: Assembler.Path[], _contextFactory: PathContextFactory) {

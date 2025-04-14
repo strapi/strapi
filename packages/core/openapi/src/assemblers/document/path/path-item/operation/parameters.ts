@@ -5,7 +5,7 @@ import { REGEX_STRAPI_PATH_PARAMS } from '../../../../../constants';
 
 import type { OperationContext } from '../../../../../types';
 import { createDebugger } from '../../../../../utils';
-import type { Assembler } from '../../../../types';
+import type { Assembler } from '../../../..';
 
 const debug = createDebugger('assembler:parameters');
 
@@ -16,7 +16,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
     const pathParameters = this._getPathParameters(context, route);
     debug('found %o path parameters', pathParameters.length);
 
-    const queryParameters = this._getQueryParameters(context, route);
+    const queryParameters = this._getQueryParameters();
     debug('found %o query parameters', queryParameters.length);
 
     const parameters = [...pathParameters, ...queryParameters];
@@ -39,10 +39,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
     }));
   }
 
-  private _getQueryParameters(
-    _context: OperationContext,
-    _route: Core.Route
-  ): (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject)[] {
+  private _getQueryParameters(): (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject)[] {
     // Not implemented yet, need to wait for better route config
     // Contains stuff like the filters, sort, and populate
     return [];
