@@ -56,7 +56,7 @@
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
     "test:api:clean": "rimraf ./coverage",
-    "test:clean": "yarn test:api:clean ; yarn test:e2e:clean ; yarn test:cli:clean",
+    "test:clean": "run-s -c test:api:clean test:e2e:clean test:cli:clean",
     "test:cli": "node tests/scripts/run-cli-tests.js",
     "test:cli:clean": "node tests/scripts/run-cli-tests.js clean",
     "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
