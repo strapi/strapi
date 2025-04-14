@@ -1,12 +1,12 @@
 import { Widget, useTracking } from '@strapi/admin/strapi-admin';
-import { Box, IconButton, Status, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
 import { useGetRecentDocumentsQuery } from '../services/homepage';
-import { capitalise } from '../utils/strings';
 
 import { RelativeTime } from './RelativeTime';
 
@@ -18,35 +18,12 @@ const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 
   white-space: nowrap;
 `;
 
-interface DocumentStatusProps {
-  status: RecentDocument['status'];
-}
-
-const DocumentStatus = ({ status = 'draft' }: DocumentStatusProps) => {
-  const statusVariant =
-    status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
-
-  const { formatMessage } = useIntl();
-
-  return (
-    <Status variant={statusVariant} size="XS">
-      <Typography tag="span" variant="omega" fontWeight="bold">
-        {formatMessage({
-          id: `content-manager.containers.List.${status}`,
-          defaultMessage: capitalise(status),
-        })}
-      </Typography>
-    </Status>
-  );
-};
-
 const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
 
   const getEditViewLink = (document: RecentDocument): string => {
-    // TODO: import the constants for this once the code is moved to the CM package
     const isSingleType = document.kind === 'singleType';
     const kindPath = isSingleType ? 'single-types' : 'collection-types';
     const queryParams = document.locale ? `?plugins[i18n][locale]=${document.locale}` : '';

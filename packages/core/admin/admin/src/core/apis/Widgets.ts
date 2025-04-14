@@ -15,7 +15,7 @@ type WidgetUID = Utils.String.Suffix<
 >;
 
 type WidgetArgs = {
-  icon: React.ComponentType<{ fill: string; 'aria-hidden': boolean }>;
+  icon?: typeof import('@strapi/icons').PuzzlePiece;
   title: MessageDescriptor;
   link?: {
     label: MessageDescriptor;

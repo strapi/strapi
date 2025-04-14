@@ -1,14 +1,15 @@
 import * as React from 'react';
 
-import { useStrapiApp, Widget } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Grid, Main, Typography } from '@strapi/design-system';
 import { CheckCircle, Pencil, PuzzlePiece } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
+import { Widget } from '../../components/WidgetHelpers';
 import { useEnterprise } from '../../ee';
 import { useAuth } from '../../features/Auth';
+import { useStrapiApp } from '../../features/StrapiApp';
 
 import { LastEditedWidget, LastPublishedWidget } from './components/ContentManagerWidgets';
 import { GuidedTour } from './components/GuidedTour';
@@ -18,9 +19,7 @@ import { GuidedTour } from './components/GuidedTour';
 
 interface RootProps {
   title: MessageDescriptor;
-  icon?:
-    | typeof import('@strapi/icons').PuzzlePiece
-    | React.ComponentType<{ fill: string; 'aria-hidden': boolean }>;
+  icon?: typeof import('@strapi/icons').PuzzlePiece;
   children: React.ReactNode;
 }
 
@@ -65,33 +64,28 @@ const UnstableHomePageCe = () => {
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
-
-  const [loadedWidgets, setLoadedWidgets] = React.useState<
-    (Omit<ReturnType<typeof getAllWidgets>[number], 'component'> & {
-      component: React.ComponentType;
-    })[]
-  >([]);
+  const [loadedComponents, setLoadedComponents] = React.useState<{
+    [key: string]: React.ComponentType;
+  }>({});
+  const widgets = getAllWidgets();
 
   React.useEffect(() => {
     const loadComponents = async () => {
-      const widgets = getAllWidgets();
-
-      const loaded = await Promise.all(
-        widgets.map(async (widget) => {
-          const LazyComponent = await widget.component();
-
-          return {
-            ...widget,
-            component: LazyComponent,
-          };
-        })
+      const resolvedComponents = await Promise.all(widgets.map((widget) => widget.component()));
+      const componentWidgetMap = resolvedComponents.reduce(
+        (acc, component, index) => {
+          // Safe to use index since promises are resolved in the order passed
+          acc[widgets[index].uid as string] = component;
+          return acc;
+        },
+        {} as { [key: string]: React.ComponentType }
       );
 
-      setLoadedWidgets(loaded);
+      setLoadedComponents(componentWidgetMap);
     };
 
     loadComponents();
-  }, [getAllWidgets]);
+  }, [widgets]);
 
   return (
     <Main>
@@ -112,13 +106,13 @@ const UnstableHomePageCe = () => {
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTour />
           <Grid.Root gap={5}>
-            {loadedWidgets.map((widget) => {
-              const Component = widget.component;
+            {widgets.map((widget) => {
+              const WidgetComponent = loadedComponents[widget.uid];
 
               return (
                 <Grid.Item col={6} s={12} key={widget.uid}>
                   <WidgetRoot title={widget.title} icon={widget.icon}>
-                    {Component ? <Component /> : <Widget.Loading />}
+                    {WidgetComponent ? <WidgetComponent /> : <Widget.Loading />}
                   </WidgetRoot>
                 </Grid.Item>
               );
