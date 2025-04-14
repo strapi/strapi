@@ -75,7 +75,7 @@ const UnstableHomePageCe = () => {
       const componentWidgetMap = resolvedComponents.reduce(
         (acc, component, index) => {
           // Safe to use index since promises are resolved in the order passed
-          acc[widgets[index].uid as string] = component;
+          acc[widgets[index].uid] = component;
           return acc;
         },
         {} as { [key: string]: React.ComponentType }
