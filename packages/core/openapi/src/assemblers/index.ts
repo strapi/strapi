@@ -2,4 +2,4 @@
 export * from './document';
 
 // Types
-export type * from './types';
+export type * as Assembler from './types';

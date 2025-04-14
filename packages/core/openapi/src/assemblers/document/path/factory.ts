@@ -1,6 +1,6 @@
 import { PathItemContextFactory } from '../../../context';
 
-import type { Assembler } from '../../types';
+import type { Assembler } from '../..';
 
 import { PathItemAssembler, PathItemAssemblerFactory } from './path-item';
 

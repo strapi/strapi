@@ -4,7 +4,7 @@ import { REGEX_STRAPI_PATH_PARAMS } from '../../../../../constants';
 
 import type { OperationContext } from '../../../../../types';
 import { createDebugger } from '../../../../../utils';
-import type { Assembler } from '../../../../types';
+import type { Assembler } from '../../../..';
 
 const debug = createDebugger('assembler:operation-id');
 
@@ -46,7 +46,7 @@ export class OperationIDAssembler implements Assembler.Operation {
       // Make sure to add a trailing slash after the method name
       let appendix = '/';
 
-      const formatPart = (str: string) => (/[_\/]$/.test(appendix) ? str : `_${str}`);
+      const formatPart = (str: string) => (/[_/]$/.test(appendix) ? str : `_${str}`);
 
       pathParts.forEach((part) => {
         const match = REGEX_STRAPI_PATH_PARAMS.exec(part);

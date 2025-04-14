@@ -1,10 +1,8 @@
-import type { Core } from '@strapi/types';
-
 import type { OperationContext } from '../../../../../types';
-import type { Assembler } from '../../../../types';
+import type { Assembler } from '../../../..';
 
 export class OperationResponsesAssembler implements Assembler.Operation {
-  assemble(context: OperationContext, route: Core.Route): void {
+  assemble(context: OperationContext): void {
     context.output.data.responses = {
       200: { description: 'OK' },
       201: { description: 'Created' },

@@ -1,4 +1,4 @@
-import type { Assembler } from '../../../../types';
+import type { Assembler } from '../../../..';
 
 import { OperationIDAssembler } from './operation-id';
 import { OperationParametersAssembler } from './parameters';

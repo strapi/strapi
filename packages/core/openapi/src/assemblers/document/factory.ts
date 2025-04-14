@@ -1,6 +1,6 @@
 import { PathContextFactory } from '../../context';
 
-import type { Assembler } from '../types';
+import type { Assembler } from '..';
 
 import { DocumentInfoAssembler } from './info';
 import { DocumentMetadataAssembler } from './metadata';

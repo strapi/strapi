@@ -2,7 +2,7 @@ import type { DocumentContext } from '../../types';
 
 import { createDebugger } from '../../utils';
 
-import type { Assembler } from '../types';
+import type { Assembler } from '..';
 
 const debug = createDebugger('assembler:metadata');
 
