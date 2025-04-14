@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "@strapi/types": "5.11.2",
-    "@types/debug": "^4"
+    "@types/debug": "^4",
+    "openapi-types": "12.1.3"
   }
 }

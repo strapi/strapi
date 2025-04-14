@@ -1,9 +1,9 @@
 import { type Core } from '@strapi/types';
-import { createDebugger } from '../../debug';
+import { createDebugger } from '../../utils';
 
 import { AbstractRoutesProvider } from './abstract';
 
-const debug = createDebugger();
+const debug = createDebugger('routes:provider:plugins');
 
 /**
  * Class providing routes from Strapi plugins.
