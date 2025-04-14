@@ -1,8 +1,8 @@
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { DocumentAssemblerFactory } from './assemblers';
 import { DocumentContextFactory } from './context';
 import { OpenAPIGenerator } from './generator';
-import type { OpenAPIGeneratorConfig } from './generator/generator';
 import { PostProcessorsFactory } from './post-processor';
 import { PreProcessorFactory } from './pre-processor';
 import {
@@ -14,17 +14,19 @@ import {
   rules,
 } from './routes';
 
+import type { GeneratorOutput } from './generator';
+
 export interface GenerationOptions {
   type: 'admin' | 'content-api';
 }
 
-export const createGenerator = (
-  strapi: Core.Strapi,
-  options?: GenerationOptions
-): OpenAPIGenerator => {
+/**
+ * @experimental
+ */
+export const generate = (strapi: Core.Strapi, options?: GenerationOptions): GeneratorOutput => {
   const { type = 'content-api' } = options ?? {};
 
-  const config: OpenAPIGeneratorConfig = {
+  const config = {
     preProcessors: new PreProcessorFactory().createAll(),
     assemblers: new DocumentAssemblerFactory().createAll(),
     postProcessors: new PostProcessorsFactory().createAll(),
@@ -45,5 +47,7 @@ export const createGenerator = (
 
   const contextFactory = new DocumentContextFactory();
 
-  return new OpenAPIGenerator(config, strapi, routeCollector, contextFactory);
+  const generator = new OpenAPIGenerator(config, strapi, routeCollector, contextFactory);
+
+  return generator.generate();
 };
