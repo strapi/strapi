@@ -28,8 +28,6 @@ test.describe('Edit view', () => {
     await login({ page });
   });
 
-<<<<<<< HEAD
-=======
   test('As a user I want to create a brand new document in the non-default locale', async ({
     page,
   }) => {
@@ -382,7 +380,6 @@ test.describe('Edit view', () => {
     await findAndClose(page, 'Success:Deleted');
   });
 
->>>>>>> 931410e9ec (chore: i18n defaults)
   test('As a user I want to publish multiple locales of my document', async ({ page, browser }) => {
     /**
      * Navigate to our articles list-view where there will be one document already made in the `en` locale
