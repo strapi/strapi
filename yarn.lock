@@ -8946,7 +8946,7 @@ __metadata:
     supertest: "npm:6.3.3"
     tsconfig: "npm:5.12.4"
     typescript: "npm:5.4.4"
-    undici: "npm:6.21.1"
+    undici: "npm:6.21.2"
     yup: "npm:0.32.9"
   languageName: unknown
   linkType: soft
@@ -9726,7 +9726,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:1.1.0"
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.4"
-    undici: "npm:6.21.1"
+    undici: "npm:6.21.2"
   languageName: unknown
   linkType: soft
 
@@ -30799,10 +30799,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.21.1":
-  version: 6.21.1
-  resolution: "undici@npm:6.21.1"
-  checksum: 10c0/d604080e4f8db89b35a63b483b5f96a5f8b19ec9f716e934639345449405809d2997e1dd7212d67048f210e54534143384d712bd9075e4394f0788895ef9ca8e
+"undici@npm:6.21.2":
+  version: 6.21.2
+  resolution: "undici@npm:6.21.2"
+  checksum: 10c0/799bbc02b77dda9b6b12d56d2620a3a4d4cf087908d6a548acc3ce32f21b5c27467f75c2c4b30fab281daf341210be3d685e8fe99854288de541715ae5735027
   languageName: node
   linkType: hard
 
