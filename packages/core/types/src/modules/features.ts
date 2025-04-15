@@ -1,6 +1,6 @@
 export interface FeaturesConfig {
   future?: {
-    unstablePreviewSideEditor?: boolean;
+    unstableWidgetsApi?: boolean;
   };
 }
 
