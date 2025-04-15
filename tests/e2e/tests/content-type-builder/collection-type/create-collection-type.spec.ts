@@ -6,7 +6,7 @@ import { clickAndWait } from '../../../utils/shared';
 
 test.describe('Create collection type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-ct', page, {
@@ -19,8 +19,6 @@ test.describe('Create collection type with all field types', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
   test.afterAll(async () => {
     await resetFiles();
   });

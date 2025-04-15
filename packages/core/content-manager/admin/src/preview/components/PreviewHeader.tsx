@@ -8,7 +8,7 @@ import {
   useQueryParams,
   useStrapiApp,
 } from '@strapi/admin/strapi-admin';
-import { IconButton, Tabs, Typography, Grid, Flex } from '@strapi/design-system';
+import { IconButton, Tabs, Typography, Flex } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -150,13 +150,13 @@ const PreviewTabs = () => {
  * PreviewHeader
  * -----------------------------------------------------------------------------------------------*/
 
-const UnstablePreviewHeader = () => {
+const PreviewHeader = () => {
   const title = usePreviewContext('PreviewHeader', (state) => state.title);
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
   const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const onPreview = usePreviewContext('PreviewHeader', (state) => state.onPreview);
   const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
-  const iframeRef = usePreviewContext('PreviewHeader', (state) => state.iframeRef);
 
   const [{ query }] = useQueryParams<{
     status?: 'draft' | 'published';
@@ -184,13 +184,6 @@ const UnstablePreviewHeader = () => {
     documentId: document.documentId,
     document,
     meta,
-    onPreview: () => {
-      iframeRef?.current?.contentWindow?.postMessage(
-        { type: 'strapiUpdate' },
-        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
-        new URL(iframeRef.current.src).origin
-      );
-    },
   } satisfies DocumentActionProps;
 
   return (
@@ -281,64 +274,6 @@ const UnstablePreviewHeader = () => {
   );
 };
 
-const PreviewHeader = () => {
-  // Get the document title
-  const title = usePreviewContext('PreviewHeader', (state) => state.title);
-
-  const { formatMessage } = useIntl();
-  const { toggleNotification } = useNotification();
-  const { copy } = useClipboard();
-
-  const handleCopyLink = () => {
-    copy(window.location.href);
-    toggleNotification({
-      message: formatMessage({
-        id: 'content-manager.preview.copy.success',
-        defaultMessage: 'Copied preview link',
-      }),
-      type: 'success',
-    });
-  };
-
-  return (
-    <Grid.Root
-      gap={3}
-      gridCols={3}
-      paddingLeft={2}
-      paddingRight={2}
-      background="neutral0"
-      borderColor="neutral150"
-      tag="header"
-    >
-      {/* Title and status */}
-      <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
-        <ClosePreviewButton />
-        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={title}>
-          {title}
-        </PreviewTitle>
-        <Status />
-      </Grid.Item>
-      {/* Tabs */}
-      <Grid.Item xs={1} marginBottom="-1px" alignItems="end" margin="auto">
-        <PreviewTabs />
-      </Grid.Item>
-      {/* Copy link */}
-      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2}>
-        <IconButton
-          type="button"
-          label={formatMessage({
-            id: 'preview.copy.label',
-            defaultMessage: 'Copy preview link',
-          })}
-          onClick={handleCopyLink}
-        >
-          <LinkIcon />
-        </IconButton>
-      </Grid.Item>
-    </Grid.Root>
-  );
-};
-
 const PreviewTitle = styled(Typography)`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -353,4 +288,4 @@ const TitleContainer = styled(Flex)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-export { PreviewHeader, UnstablePreviewHeader };
+export { PreviewHeader };
