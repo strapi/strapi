@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { strings } from '@strapi/utils';
+import { isIP } from 'node:net';
 
 interface ServerConfig {
   url: string;
@@ -78,12 +79,20 @@ const getAbsoluteUrl =
     }
 
     const serverConfig = config.server as ServerConfig;
-    const hostname =
-      config.environment === 'development' && ['127.0.0.1', '0.0.0.0'].includes(serverConfig.host)
-        ? 'localhost'
-        : serverConfig.host;
 
-    return `http://${hostname}:${serverConfig.port}${url}`;
+    const isLocalhost =
+      config.environment === 'development' &&
+      ['127.0.0.1', '0.0.0.0', '::1', '::'].includes(serverConfig.host);
+
+    if (isLocalhost) {
+      return `http://localhost:${serverConfig.port}${url}`;
+    }
+
+    if (isIP(serverConfig.host) === 6) {
+      return `http://[${serverConfig.host}]:${serverConfig.port}${url}`;
+    }
+
+    return `http://${serverConfig.host}:${serverConfig.port}${url}`;
   };
 
 export const getAbsoluteAdminUrl = getAbsoluteUrl('admin');
