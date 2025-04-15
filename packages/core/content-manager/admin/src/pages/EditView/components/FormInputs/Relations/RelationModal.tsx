@@ -141,6 +141,7 @@ function reducer(state: State, action: Action): State {
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
         return { ...state, confirmDialogIntent: 'close' };
       }
+      console.log('closing!');
 
       return {
         ...state,
@@ -187,10 +188,12 @@ const RelationModalRenderer = ({
   children,
   trigger,
   relation,
+  isOpen,
 }: {
   children: React.ReactNode;
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
   relation: DocumentMeta;
+  isOpen: boolean;
 }) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -207,7 +210,7 @@ const RelationModalRenderer = ({
   const params = React.useMemo(() => buildValidParams(query ?? {}), [query]);
 
   const rootDocumentMeta: DocumentMeta = {
-    documentId: rootDocument.document?.documentId || '',
+    documentId: rootDocument.document?.documentId,
     model: rootDocument.model,
     collectionType: rootDocument.collectionType,
     params,
@@ -223,6 +226,7 @@ const RelationModalRenderer = ({
     return trigger;
   }
 
+  console.log({ isOpen, relation });
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
    * pieces that will be used by potential child relations: the context, header, form, and footer.
@@ -236,8 +240,9 @@ const RelationModalRenderer = ({
       currentDocument={currentDocument}
     >
       <Modal.Root
-        open={state.isModalOpen}
+        open={isOpen}
         onOpenChange={(open) => {
+          console.log({ open, relation });
           if (open) {
             dispatch({
               type: 'GO_TO_RELATION',
@@ -251,7 +256,7 @@ const RelationModalRenderer = ({
           }
         }}
       >
-        {trigger}
+        {trigger || null}
         <StyledModalContent>
           <Modal.Header gap={2}>
             <Flex justifyContent="space-between" alignItems="center" width="100%">
@@ -445,15 +450,17 @@ const ModalTrigger = ({
 };
 
 interface RelationModalProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   relation: DocumentMeta;
+  isOpen: boolean;
 }
 
-const RelationModal = React.memo(({ relation, children }: RelationModalProps) => {
+const RelationModal = React.memo(({ relation, children, isOpen }: RelationModalProps) => {
   return (
     <RelationModalRenderer
       relation={relation}
-      trigger={<ModalTrigger relation={relation}>{children}</ModalTrigger>}
+      trigger={children ? <ModalTrigger relation={relation}>{children}</ModalTrigger> : null}
+      isOpen={isOpen}
     >
       <RelationModalBody />
     </RelationModalRenderer>

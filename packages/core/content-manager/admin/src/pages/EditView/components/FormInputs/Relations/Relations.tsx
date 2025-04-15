@@ -484,6 +484,7 @@ const RelationsInput = ({
   isRelatedToCurrentDocument,
   ...props
 }: RelationsInputProps) => {
+  const [isCreateRelationModalOpen, setIsCreateRelationModalOpen] = React.useState(false);
   const [textValue, setTextValue] = React.useState<string | undefined>('');
   const [searchParams, setSearchParams] = React.useState({
     _q: '',
@@ -599,6 +600,11 @@ const RelationsInput = ({
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
       <Field.Label action={labelAction}>{label}</Field.Label>
       <Combobox
+        creatable="visible"
+        createMessage={() => 'Create a Relation'}
+        onCreateOption={() => {
+          setIsCreateRelationModalOpen(true);
+        }}
         ref={fieldRef}
         name={name}
         autocomplete="list"
@@ -647,6 +653,16 @@ const RelationsInput = ({
             </ComboboxOption>
           );
         })}
+
+        <RelationModal
+          relation={{
+            documentId: undefined,
+            model: props.attribute.targetModel,
+            collectionType: 'collection-types',
+            isCreating: true,
+          }}
+          isOpen={isCreateRelationModalOpen}
+        />
       </Combobox>
       <Field.Error />
       <Field.Hint />

@@ -11,7 +11,7 @@ interface DocumentMeta {
    * The equivalent of the ":id" url param value
    * i.e. gus5a67jcboa3o2zjnz39mb1
    */
-  documentId: string;
+  documentId?: string;
   /**
    * The equivalent of the url ":slug" param value
    * i.e. api::articles.article
@@ -53,7 +53,12 @@ function useDocumentContext(consumerName: string): DocumentContextValue {
 
   // TODO: look into why we never seem to pass any params
   const params = React.useMemo(() => buildValidParams(query ?? {}), [query]);
-  const urlDocumentMeta: DocumentMeta = { collectionType, model, documentId: documentId!, params };
+  const urlDocumentMeta: DocumentMeta = {
+    collectionType,
+    model,
+    documentId: documentId,
+    params,
+  };
   const urlDocument = useDocument(urlDocumentMeta);
 
   /**
