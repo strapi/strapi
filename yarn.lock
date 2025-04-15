@@ -9195,7 +9195,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/openapi@workspace:packages/core/openapi"
   dependencies:
-    "@strapi/types": "npm:5.11.2"
+    "@strapi/types": "npm:5.12.4"
+    "@strapi/utils": "npm:5.12.4"
     "@types/debug": "npm:^4"
     debug: "npm:4.3.4"
     openapi-types: "npm:12.1.3"
