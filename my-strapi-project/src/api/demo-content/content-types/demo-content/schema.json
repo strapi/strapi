@@ -1,0 +1,23 @@
+{
+  "kind": "collectionType",
+  "collectionName": "demo_contents",
+  "info": {
+    "singularName": "demo-content",
+    "pluralName": "demo-contents",
+    "displayName": "demo content"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "text": {
+      "type": "string"
+    },
+    "Boolean": {
+      "type": "boolean"
+    },
+    "number": {
+      "type": "integer"
+    }
+  }
+}
