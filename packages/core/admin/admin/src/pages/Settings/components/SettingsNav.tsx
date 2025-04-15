@@ -9,9 +9,10 @@ import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
-
+import * as React from 'react';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
+import usePreventScroll from '../../../hooks/usePreventScroll';
 
 const CustomIcon = styled(Lightning)`
   right: 15px;
@@ -22,6 +23,12 @@ const CustomIcon = styled(Lightning)`
   path {
     fill: ${({ theme }) => theme.colors.warning500};
   }
+`;
+
+const SubNavStyled = styled(SubNav)`
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100vh;
 `;
 
 const Link = styled(SubNavLink)`
@@ -38,6 +45,9 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
+
+  const settingsSidebarRef = React.useRef<HTMLDivElement>(null);
+  usePreventScroll(settingsSidebarRef);
 
   const filteredMenu = menu.filter(
     (section) => !section.links.every((link) => link.isDisplayed === false)
@@ -66,8 +76,10 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
+
+
   return (
-    <SubNav aria-label={label}>
+    <SubNavStyled ref={settingsSidebarRef} aria-label={label}>
       <SubNavHeader label={label} />
       <SubNavSections>
         {sections.map((section) => (
@@ -90,7 +102,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
           </SubNavSection>
         ))}
       </SubNavSections>
-    </SubNav>
+    </SubNavStyled>
   );
 };
 

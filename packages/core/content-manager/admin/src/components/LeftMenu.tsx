@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 import { useQueryParams } from '@strapi/admin/strapi-admin';
 import {
   useCollator,
@@ -18,8 +17,9 @@ import { styled } from 'styled-components';
 import { useContentTypeSchema } from '../hooks/useContentTypeSchema';
 import { useTypedSelector } from '../modules/hooks';
 import { getTranslation } from '../utils/translations';
-
+import usePreventScroll from '../hooks/usePreventScroll';
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
+
 
 const SubNavLinkCustom = styled(SubNavLink)`
   div {
@@ -37,6 +37,8 @@ const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
   const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  usePreventScroll(sidebarRef);
 
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
@@ -133,7 +135,7 @@ const LeftMenu = () => {
   };
 
   return (
-    <SubNav aria-label={label}>
+    <SubNav ref={sidebarRef} aria-label={label}>
       <SubNavHeader
         label={label}
         searchable
