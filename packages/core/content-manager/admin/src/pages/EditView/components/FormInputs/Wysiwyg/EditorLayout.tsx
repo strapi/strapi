@@ -27,7 +27,7 @@ const EditorLayout = ({
   if (isExpandMode) {
     return (
       <Modal.Root open={isExpandMode} onOpenChange={onCollapse}>
-        <Modal.Content style={{ maxWidth: 'unset' }}>
+        <Modal.Content style={{ maxWidth: 'unset', width: 'unset' }}>
           <Flex height="90vh" width="90vw" alignItems="flex-start">
             <BoxWithBorder flex="1" height="100%">
               {children}
