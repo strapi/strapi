@@ -27,16 +27,6 @@ const EditorLayout = ({
   const { formatMessage } = useIntl();
   const { isExpandedMode } = useBlocksEditorContext('editorLayout');
 
-  React.useEffect(() => {
-    if (isExpandedMode) {
-      document.body.classList.add('lock-body-scroll');
-    }
-
-    return () => {
-      document.body.classList.remove('lock-body-scroll');
-    };
-  }, [isExpandedMode]);
-
   return (
     <>
       {isExpandedMode && (
