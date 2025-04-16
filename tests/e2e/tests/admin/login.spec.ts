@@ -5,8 +5,9 @@ import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '..
 import { login } from '../../utils/login';
 
 test.describe('Login', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await context.clearCookies();
     await page.goto('/admin');
   });
 
@@ -20,7 +21,7 @@ test.describe('Login', () => {
       await expect(page).toHaveTitle(TITLE_HOME);
 
       await page.close();
-
+      await context.clearCookies();
       page = await context.newPage();
       await page.goto('/admin');
       await expect(page).toHaveTitle(TITLE_LOGIN);
@@ -30,7 +31,7 @@ test.describe('Login', () => {
       await expect(page).toHaveTitle(TITLE_HOME);
 
       await page.close();
-
+      await context.clearCookies();
       page = await context.newPage();
       await page.goto('/admin');
       await expect(page).toHaveTitle(TITLE_HOME);
