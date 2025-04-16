@@ -67,6 +67,7 @@
   "HomePage.widget.loading": "Loading widget content",
   "HomePage.widget.error": "Couldn't load widget content.",
   "HomePage.widget.no-data": "No content found.",
+  "HomePage.widget.no-permissions": "You don’t have the permission to see this widget",
   "Media Library": "Media Library",
   "New entry": "New entry",
   "Password": "Password",
