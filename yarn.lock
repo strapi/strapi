@@ -2787,12 +2787,12 @@ __metadata:
   linkType: hard
 
 "@babel/runtime-corejs3@npm:^7.9.2":
-  version: 7.25.7
-  resolution: "@babel/runtime-corejs3@npm:7.25.7"
+  version: 7.27.0
+  resolution: "@babel/runtime-corejs3@npm:7.27.0"
   dependencies:
     core-js-pure: "npm:^3.30.2"
     regenerator-runtime: "npm:^0.14.0"
-  checksum: 10c0/37217edf5f02c0e7ccb78af380b26b06dadc9b031a1bcec22a9cfb540d85470b61ebe1e5cd7e32689a6c0f786015c2ee1a73a16852574c3a46341105e457a87c
+  checksum: 10c0/eff7ad45e9edca218fe1c43341b1493b84f1d5682dc3e300cae8392b2f80a5601d4d4a25da2d8236df4fec669d168ff87e71672d2f306a1b4da7d46680977367
   languageName: node
   linkType: hard
 
@@ -8639,7 +8639,7 @@ __metadata:
     invariant: "npm:^2.2.4"
     is-localhost-ip: "npm:2.0.0"
     jsonwebtoken: "npm:9.0.0"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     koa-compose: "npm:4.1.0"
     koa-passport: "npm:6.0.0"
@@ -8673,7 +8673,7 @@ __metadata:
     styled-components: "npm:6.1.8"
     typescript: "npm:5.4.4"
     use-context-selector: "npm:1.4.1"
-    vite: "npm:5.4.17"
+    vite: "npm:5.4.18"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
@@ -8742,7 +8742,7 @@ __metadata:
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
     markdown-it: "npm:^13.0.2"
@@ -8804,7 +8804,7 @@ __metadata:
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
     formik: "npm:2.4.5"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     node-schedule: "npm:2.1.1"
@@ -8848,7 +8848,7 @@ __metadata:
     date-fns: "npm:2.30.0"
     fs-extra: "npm:11.2.0"
     immer: "npm:9.0.21"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
     pluralize: "npm:8.0.0"
@@ -8923,7 +8923,7 @@ __metadata:
     http-errors: "npm:2.0.0"
     inquirer: "npm:8.2.5"
     is-docker: "npm:2.2.1"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     koa-compose: "npm:4.1.0"
     koa-compress: "npm:5.1.1"
@@ -8946,7 +8946,7 @@ __metadata:
     supertest: "npm:6.3.3"
     tsconfig: "npm:5.12.5"
     typescript: "npm:5.4.4"
-    undici: "npm:6.21.2"
+    undici: "npm:7.2.3"
     yup: "npm:0.32.9"
   languageName: unknown
   linkType: soft
@@ -8976,7 +8976,7 @@ __metadata:
     fs-extra: "npm:11.2.0"
     inquirer: "npm:8.2.5"
     knex: "npm:3.0.1"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
     resolve-cwd: "npm:3.0.0"
@@ -9062,7 +9062,7 @@ __metadata:
     "@testing-library/react": "npm:15.0.7"
     "@types/koa": "npm:2.13.4"
     "@types/lodash": "npm:^4.14.191"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
@@ -9309,7 +9309,7 @@ __metadata:
     formik: "npm:2.4.5"
     fs-extra: "npm:11.2.0"
     immer: "npm:9.0.21"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     koa-session: "npm:6.4.0"
     koa-static: "npm:^5.0.0"
@@ -9357,7 +9357,7 @@ __metadata:
     graphql-depth-limit: "npm:^1.1.0"
     graphql-playground-middleware-koa: "npm:^1.6.21"
     graphql-scalars: "npm:1.22.2"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-bodyparser: "npm:4.4.1"
     koa-compose: "npm:^4.1.0"
     lodash: "npm:4.17.21"
@@ -9416,7 +9416,7 @@ __metadata:
     immer: "npm:9.0.21"
     jsonwebtoken: "npm:9.0.0"
     jwk-to-pem: "npm:2.0.5"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
@@ -9672,7 +9672,7 @@ __metadata:
     style-loader: "npm:3.3.4"
     tsconfig: "npm:5.12.5"
     typescript: "npm:5.4.4"
-    vite: "npm:5.4.17"
+    vite: "npm:5.4.18"
     webpack: "npm:^5.90.3"
     webpack-bundle-analyzer: "npm:^4.10.1"
     webpack-dev-middleware: "npm:6.1.2"
@@ -9717,7 +9717,7 @@ __metadata:
     "@types/node-schedule": "npm:2.1.7"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:5.12.5"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
     node-schedule: "npm:2.1.1"
@@ -9726,7 +9726,7 @@ __metadata:
     typedoc-github-wiki-theme: "npm:1.1.0"
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.4"
-    undici: "npm:6.21.2"
+    undici: "npm:7.2.3"
   languageName: unknown
   linkType: soft
 
@@ -9829,7 +9829,7 @@ __metadata:
     formik: "npm:2.4.5"
     fs-extra: "npm:11.2.0"
     immer: "npm:9.0.21"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     koa-range: "npm:0.3.0"
     koa-static: "npm:5.0.0"
@@ -9870,7 +9870,7 @@ __metadata:
     eslint-config-custom: "npm:5.12.5"
     execa: "npm:5.1.1"
     http-errors: "npm:2.0.0"
-    koa: "npm:2.15.4"
+    koa: "npm:2.16.1"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
     node-machine-id: "npm:1.1.12"
@@ -16248,7 +16248,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"elliptic@npm:^6.5.4":
+"elliptic@npm:^6.5.4, elliptic@npm:^6.5.7":
   version: 6.6.1
   resolution: "elliptic@npm:6.6.1"
   dependencies:
@@ -16260,21 +16260,6 @@ __metadata:
     minimalistic-assert: "npm:^1.0.1"
     minimalistic-crypto-utils: "npm:^1.0.1"
   checksum: 10c0/8b24ef782eec8b472053793ea1e91ae6bee41afffdfcb78a81c0a53b191e715cbe1292aa07165958a9bbe675bd0955142560b1a007ffce7d6c765bcaf951a867
-  languageName: node
-  linkType: hard
-
-"elliptic@npm:^6.5.7":
-  version: 6.5.7
-  resolution: "elliptic@npm:6.5.7"
-  dependencies:
-    bn.js: "npm:^4.11.9"
-    brorand: "npm:^1.1.0"
-    hash.js: "npm:^1.0.0"
-    hmac-drbg: "npm:^1.0.1"
-    inherits: "npm:^2.0.4"
-    minimalistic-assert: "npm:^1.0.1"
-    minimalistic-crypto-utils: "npm:^1.0.1"
-  checksum: 10c0/799959b6c54ea3564e8961f35abdf8c77e37617f3051614b05ab1fb6a04ddb65bd1caa75ed1bae375b15dda312a0f79fed26ebe76ecf05c5a7af244152a601b8
   languageName: node
   linkType: hard
 
@@ -17807,7 +17792,7 @@ __metadata:
     react-dom: "npm:rc"
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
-    vite: "npm:5.4.17"
+    vite: "npm:5.4.18"
   languageName: unknown
   linkType: soft
 
@@ -22359,9 +22344,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"koa@npm:2.15.4":
-  version: 2.15.4
-  resolution: "koa@npm:2.15.4"
+"koa@npm:2.16.1":
+  version: 2.16.1
+  resolution: "koa@npm:2.16.1"
   dependencies:
     accepts: "npm:^1.3.5"
     cache-content-type: "npm:^1.0.0"
@@ -22386,7 +22371,7 @@ __metadata:
     statuses: "npm:^1.5.0"
     type-is: "npm:^1.6.16"
     vary: "npm:^1.1.2"
-  checksum: 10c0/fd2171b4dba706d35244fe60403a61671717a167453349813757999dad280049ddd0dcdba23cda197a5a3538f4c034cf0fd1f9caeb849be1ca1eecaa78db2f99
+  checksum: 10c0/66beb2e4d7968e1081341ea9a9c1f7f3fad4aaa0475c813f1be79ed84c345d9d45de9e34eeee3cdd790fc81ee5efbde2223d49fd5da571e29b0b3bed6baafb8e
   languageName: node
   linkType: hard
 
@@ -29801,14 +29786,14 @@ __metadata:
   linkType: hard
 
 "tar-fs@npm:^2.0.0":
-  version: 2.1.1
-  resolution: "tar-fs@npm:2.1.1"
+  version: 2.1.2
+  resolution: "tar-fs@npm:2.1.2"
   dependencies:
     chownr: "npm:^1.1.1"
     mkdirp-classic: "npm:^0.5.2"
     pump: "npm:^3.0.0"
     tar-stream: "npm:^2.1.4"
-  checksum: 10c0/871d26a934bfb7beeae4c4d8a09689f530b565f79bd0cf489823ff0efa3705da01278160da10bb006d1a793fa0425cf316cec029b32a9159eacbeaff4965fb6d
+  checksum: 10c0/9c704bd4a53be7565caf34ed001d1428532457fe3546d8fc1233f0f0882c3d2403f8602e8046e0b0adeb31fe95336572a69fb28851a391523126b697537670fc
   languageName: node
   linkType: hard
 
@@ -30799,10 +30784,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:6.21.2":
-  version: 6.21.2
-  resolution: "undici@npm:6.21.2"
-  checksum: 10c0/799bbc02b77dda9b6b12d56d2620a3a4d4cf087908d6a548acc3ce32f21b5c27467f75c2c4b30fab281daf341210be3d685e8fe99854288de541715ae5735027
+"undici@npm:7.2.3":
+  version: 7.2.3
+  resolution: "undici@npm:7.2.3"
+  checksum: 10c0/1bc8f7799a9c69047d1e057a2c3b0f3d551fd8ced22327686d0eeadf883cb773a69532a42a68883aaa5674370ee00973c73c8b9f37715d63481fe14b7cbdc7ad
   languageName: node
   linkType: hard
 
@@ -31273,9 +31258,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:5.4.17":
-  version: 5.4.17
-  resolution: "vite@npm:5.4.17"
+"vite@npm:5.4.18":
+  version: 5.4.18
+  resolution: "vite@npm:5.4.18"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -31312,7 +31297,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/3322bd6d8da30cbc87b1b24cd14fdbca75abb36de81217d1062c8b4c574a1a0d28d11dfe23a3eed08b3d179d2bdc1510e0d7b9f3e1b722a45bd7631c7cec72eb
+  checksum: 10c0/a8cbbec6bdf399e62c386d70b8485e4f2f1b427beb19bc7c5d52b402a0c3750b7ff469fc20a8333755ea13bc1b0af5df3f22c8fd37d1739ee51d709b7a4740b6
   languageName: node
   linkType: hard
 

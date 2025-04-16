@@ -57,7 +57,7 @@
     "immer": "9.0.21",
     "jsonwebtoken": "9.0.0",
     "jwk-to-pem": "2.0.5",
-    "koa": "2.15.4",
+    "koa": "2.16.1",
     "koa2-ratelimit": "^1.1.3",
     "lodash": "4.17.21",
     "prop-types": "^15.8.1",
