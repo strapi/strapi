@@ -608,7 +608,12 @@ const RelationsInput = ({
           <Combobox
             ref={fieldRef}
             creatable="visible"
-            createMessage={() => 'Create a Relation'}
+            createMessage={() =>
+              formatMessage({
+                id: getTranslation('relation.create'),
+                defaultMessage: 'Create a Relation',
+              })
+            }
             onCreateOption={() => {
               dispatch({
                 type: 'GO_TO_RELATION',

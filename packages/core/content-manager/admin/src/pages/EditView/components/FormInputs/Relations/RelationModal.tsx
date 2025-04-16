@@ -166,6 +166,7 @@ interface RelationModalContextValue {
   currentDocumentMeta: DocumentMeta;
   currentDocument: ReturnType<UseDocument>;
   onPreview?: () => void;
+  isCreating: boolean;
 }
 
 const [RelationModalProvider, useRelationModal] =
@@ -227,6 +228,7 @@ const RelationModalRenderer = ({ children, relation, isCreating }: RelationModal
         rootDocumentMeta={rootDocumentMeta}
         currentDocumentMeta={currentDocumentMeta}
         currentDocument={currentDocument}
+        isCreating={true}
       >
         <RelationModal>{children({ dispatch })}</RelationModal>
       </RelationModalProvider>
@@ -249,6 +251,7 @@ const RelationModalRenderer = ({ children, relation, isCreating }: RelationModal
       rootDocumentMeta={rootDocumentMeta}
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
+      isCreating={false}
     >
       <RelationModal>
         <RelationModalTrigger relation={relation}>{children}</RelationModalTrigger>
@@ -271,6 +274,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
     (state) => state.currentDocumentMeta
   );
   const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
+  const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
 
   return (
     <Modal.Root
@@ -305,10 +309,15 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                 <ArrowLeft />
               </IconButton>
               <Typography tag="span" fontWeight={600}>
-                {formatMessage({
-                  id: 'content-manager.components.RelationInputModal.modal-title',
-                  defaultMessage: 'Edit a relation',
-                })}
+                {isCreating
+                  ? formatMessage({
+                      id: 'content-manager.relation.create',
+                      defaultMessage: 'Create a relation',
+                    })
+                  : formatMessage({
+                      id: 'content-manager.components.RelationInputModal.modal-title',
+                      defaultMessage: 'Edit a relation',
+                    })}
               </Typography>
             </Flex>
             <IconButton
@@ -497,13 +506,12 @@ const RelationModalForm = () => {
     'RelationModalForm',
     (state) => state.currentDocumentMeta
   );
-  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
-  const isCreatingDocument = !currentDocumentMeta.documentId && !isSingleType;
+  const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
   const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
   const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
   const plugins = useStrapiApp('RelationModalForm', (state) => state.plugins);
 
-  const initialValues = currentDocument.getInitialFormValues(isCreatingDocument);
+  const initialValues = currentDocument.getInitialFormValues(isCreating);
 
   const {
     permissions = [],
@@ -534,8 +542,8 @@ const RelationModalForm = () => {
     error ||
     !currentDocumentMeta.model ||
     documentLayoutResponse.error ||
-    (!isCreatingDocument && !currentDocument.document) ||
-    (!isCreatingDocument && !currentDocument.meta) ||
+    (!isCreating && !currentDocument.document) ||
+    (!isCreating && !currentDocument.meta) ||
     !currentDocument.schema ||
     !initialValues
   ) {
