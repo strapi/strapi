@@ -9191,7 +9191,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/openapi@workspace:packages/core/openapi":
+"@strapi/openapi@npm:5.12.4, @strapi/openapi@workspace:packages/core/openapi":
   version: 0.0.0-use.local
   resolution: "@strapi/openapi@workspace:packages/core/openapi"
   dependencies:
@@ -9629,6 +9629,7 @@ __metadata:
     "@strapi/generators": "npm:5.12.4"
     "@strapi/i18n": "npm:5.12.4"
     "@strapi/logger": "npm:5.12.4"
+    "@strapi/openapi": "npm:5.12.4"
     "@strapi/permissions": "npm:5.12.4"
     "@strapi/review-workflows": "npm:5.12.4"
     "@strapi/ts-zen": "npm:^0.2.0"
