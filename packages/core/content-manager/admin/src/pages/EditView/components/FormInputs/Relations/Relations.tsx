@@ -22,7 +22,7 @@ import {
   FlexComponent,
   BoxComponent,
 } from '@strapi/design-system';
-import { Cross, Drag, ArrowClockwise } from '@strapi/icons';
+import { Cross, Drag, ArrowClockwise, Link as LinkIcon } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -664,7 +664,10 @@ const RelationsInput = ({
               return (
                 <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
                   <Flex gap={2} justifyContent="space-between">
-                    <Typography ellipsis>{textValue}</Typography>
+                    <Flex gap={2}>
+                      <LinkIcon fill="neutral500" />
+                      <Typography ellipsis>{textValue}</Typography>
+                    </Flex>
                     {opt.status ? <DocumentStatus status={opt.status} /> : null}
                   </Flex>
                 </ComboboxOption>
