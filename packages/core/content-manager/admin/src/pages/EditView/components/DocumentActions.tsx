@@ -36,6 +36,8 @@ import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 
+import { useRelationModal } from './FormInputs/Relations/RelationModal';
+
 import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
 
@@ -550,6 +552,12 @@ const PublishAction: DocumentActionComponent = ({
   const formValues = useForm('PublishAction', ({ values }) => values);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
+  // need to discriminate if the publish is coming from a relation modal or in the edit view
+  const relationContext = useRelationModal('PublishAction', () => true, false);
+  const fromRelationModal = relationContext != undefined;
+
+  const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
+
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
 
   const idToPublish = currentDocumentMeta.documentId || id;
@@ -683,10 +691,24 @@ const PublishAction: DocumentActionComponent = ({
         /**
          * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
          */
-        if (idToPublish === 'create') {
+        if (idToPublish === 'create' && !fromRelationModal) {
           navigate({
             pathname: `../${collectionType}/${model}/${res.data.documentId}`,
             search: rawQuery,
+          });
+        } else if (fromRelationModal) {
+          const newRelation = {
+            documentId: res.data.documentId,
+            collectionType,
+            model,
+            params: currentDocumentMeta.params,
+          };
+
+          dispatch({ type: 'GO_BACK', payload: { shouldBypassConfirmation: true } });
+
+          dispatch({
+            type: 'GO_TO_RELATION',
+            payload: { document: newRelation, shouldBypassConfirmation: true },
           });
         }
       } else if (
@@ -795,7 +817,13 @@ const UpdateAction: DocumentActionComponent = ({
   const document = useForm('UpdateAction', ({ values }) => values);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
-  const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
+  const resetForm = useForm('UpdateAction', ({ resetForm }) => resetForm);
+
+  const dispatch = useRelationModal('UpdateAction', (state) => state.dispatch);
+
+  // need to discriminate if the update is coming from a relation modal or in the edit view
+  const relationContext = useRelationModal('UpdateAction', () => true, false);
+  const fromRelationModal = relationContext != undefined;
 
   const { currentDocumentMeta } = useDocumentContext('UpdateAction');
 
@@ -875,13 +903,29 @@ const UpdateAction: DocumentActionComponent = ({
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
-          navigate(
-            {
-              pathname: `../${res.data.documentId}`,
-              search: rawQuery,
-            },
-            { replace: true, relative: 'path' }
-          );
+          if (fromRelationModal) {
+            const createdRelation = {
+              documentId: res.data.documentId,
+              collectionType,
+              model,
+              params: currentDocumentMeta.params,
+            };
+
+            dispatch({ type: 'GO_BACK', payload: { shouldBypassConfirmation: true } });
+
+            dispatch({
+              type: 'GO_TO_RELATION',
+              payload: { document: createdRelation, shouldBypassConfirmation: true },
+            });
+          } else {
+            navigate(
+              {
+                pathname: `../${res.data.documentId}`,
+                search: rawQuery,
+              },
+              { replace: true, relative: 'path' }
+            );
+          }
         } else if (
           'error' in res &&
           isBaseQueryError(res.error) &&

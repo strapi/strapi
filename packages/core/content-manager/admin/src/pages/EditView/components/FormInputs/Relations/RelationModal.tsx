@@ -104,9 +104,15 @@ function reducer(state: State, action: Action): State {
         return { ...state, confirmDialogIntent: action.payload.document };
       }
 
+      const lastItemDocumentHistory = state.documentHistory.at(-1);
+      const hasToResetDocumentHistory =
+        lastItemDocumentHistory && !lastItemDocumentHistory.documentId;
       return {
         ...state,
-        documentHistory: [...state.documentHistory, action.payload.document],
+        // Reset document history if the last item has documentId undefined
+        documentHistory: hasToResetDocumentHistory
+          ? [action.payload.document]
+          : [...state.documentHistory, action.payload.document],
         confirmDialogIntent: null,
         isModalOpen: true,
       };
@@ -166,6 +172,7 @@ interface RelationModalContextValue {
   currentDocumentMeta: DocumentMeta;
   currentDocument: ReturnType<UseDocument>;
   onPreview?: () => void;
+  isCreatingDocument: boolean;
 }
 
 const [RelationModalProvider, useRelationModal] =
@@ -223,6 +230,9 @@ const RelationModalRenderer = ({
     return trigger;
   }
 
+  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
+  const isCreatingDocument = !currentDocumentMeta.documentId && !isSingleType;
+
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
    * pieces that will be used by potential child relations: the context, header, form, and footer.
@@ -234,6 +244,7 @@ const RelationModalRenderer = ({
       rootDocumentMeta={rootDocumentMeta}
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
+      isCreatingDocument={isCreatingDocument}
     >
       <Modal.Root
         open={state.isModalOpen}
@@ -272,10 +283,15 @@ const RelationModalRenderer = ({
                   <ArrowLeft />
                 </IconButton>
                 <Typography tag="span" fontWeight={600}>
-                  {formatMessage({
-                    id: 'content-manager.components.RelationInputModal.modal-title',
-                    defaultMessage: 'Edit a relation',
-                  })}
+                  {isCreatingDocument
+                    ? formatMessage({
+                        id: 'content-manager.components.RelationInputModal.modal-create-title',
+                        defaultMessage: 'Create a relation',
+                      })
+                    : formatMessage({
+                        id: 'content-manager.components.RelationInputModal.modal-edit-title',
+                        defaultMessage: 'Edit a relation',
+                      })}
                 </Typography>
               </Flex>
               <IconButton
@@ -284,7 +300,13 @@ const RelationModalRenderer = ({
                     type: 'GO_FULL_PAGE',
                   });
                   if (!state.hasUnsavedChanges) {
-                    navigate(getFullPageUrl(currentDocumentMeta));
+                    if (isCreatingDocument) {
+                      navigate(
+                        `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create?plugins[i18n][locale]=${currentDocumentMeta.params?.locale}`
+                      );
+                    } else {
+                      navigate(getFullPageUrl(currentDocumentMeta));
+                    }
                   }
                 }}
                 variant="tertiary"
@@ -299,8 +321,12 @@ const RelationModalRenderer = ({
           </Modal.Header>
           <Modal.Body>
             <FormContext
-              method="PUT"
-              initialValues={currentDocument.getInitialFormValues()}
+              method={isCreatingDocument ? 'POST' : 'PUT'}
+              initialValues={
+                isCreatingDocument
+                  ? currentDocument.getInitialFormValues(isCreatingDocument)
+                  : currentDocument.getInitialFormValues()
+              }
               validate={(values: Record<string, unknown>, options: Record<string, string>) => {
                 const yupSchema = createYupSchema(
                   currentDocument.schema?.attributes,
@@ -342,6 +368,10 @@ const RelationModalBody = () => {
     'RelationModalForm',
     (state) => state.currentDocumentMeta
   );
+  const isCreatingDocument = useRelationModal(
+    'RelationModalForm',
+    (state) => state.isCreatingDocument
+  );
 
   /**
    * One-way sync the modified state from the form to the modal state.
@@ -379,7 +409,13 @@ const RelationModalBody = () => {
     if (isRootDocumentUrl) {
       handleCloseModal(true);
     } else {
-      navigate(fullPageUrl);
+      if (isCreatingDocument) {
+        navigate(
+          `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create?plugins[i18n][locale]=${currentDocumentMeta.params?.locale}`
+        );
+      } else {
+        navigate(fullPageUrl);
+      }
     }
   };
 
@@ -433,9 +469,17 @@ const ModalTrigger = ({
   return (
     <StyledTextButton
       onClick={() => {
+        // TODO: code to remove, added to simulate a create relation modal with documentId undefined
+        const newRelation =
+          relation.model === 'api::category.category'
+            ? {
+                ...relation,
+                documentId: undefined,
+              }
+            : relation;
         dispatch({
           type: 'GO_TO_RELATION',
-          payload: { document: relation, shouldBypassConfirmation: false },
+          payload: { document: newRelation, shouldBypassConfirmation: false },
         });
       }}
     >
@@ -483,10 +527,16 @@ const RelationEditView = () => {
     (state) => state.currentDocumentMeta
   );
   const currentDocument = useRelationModal('RelationModalBody', (state) => state.currentDocument);
+  const isCreatingDocument = useRelationModal(
+    'RelationModalBody',
+    (state) => state.isCreatingDocument
+  );
   const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
   const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
 
-  const initialValues = currentDocument.getInitialFormValues();
+  const initialValues = isCreatingDocument
+    ? currentDocument.getInitialFormValues(isCreatingDocument)
+    : currentDocument.getInitialFormValues();
 
   const {
     permissions = [],
@@ -517,8 +567,8 @@ const RelationEditView = () => {
     error ||
     !currentDocumentMeta.model ||
     documentLayoutResponse.error ||
-    !currentDocument.document ||
-    !currentDocument.meta ||
+    (!isCreatingDocument && !currentDocument.document) ||
+    (!isCreatingDocument && !currentDocument.meta) ||
     !currentDocument.schema ||
     !initialValues
   ) {

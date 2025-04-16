@@ -602,8 +602,12 @@ const useDocumentActions: UseDocumentActions = () => {
 
           return { error: res.error };
         }
-
-        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+        });
 
         toggleNotification({
           type: 'success',
