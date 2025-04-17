@@ -49,7 +49,9 @@ describe('content-manager', () => {
           "id": "content-manager",
           "injectionZones": {
             "editView": {
+              "dynamic-zone-actions": [],
               "informations": [],
+              "repeatable-component-actions": [],
               "right-links": [],
             },
             "listView": {
