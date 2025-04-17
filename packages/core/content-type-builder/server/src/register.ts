@@ -44,8 +44,6 @@ const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) =>
     return _currentMiddleware;
   });
 
-  console.log(middlewares, JSON.stringify(configuredMiddlewares, null, 2));
-
   strapi.config.set('middlewares', configuredMiddlewares);
 };
 

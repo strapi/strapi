@@ -142,10 +142,6 @@ export const INVALID_REQUEST_ERROR = 'Invalid request';
  */
 export const createAIFetchHook = <T extends keyof AIEndpoints>(endpoint: T) => {
   return () => {
-    if (!STRAPI_AI_TOKEN) {
-      throw new Error('STRAPI_ADMIN_AI_LICENSE env has to be defined to use  ');
-    }
-
     const strapiVersion = useAppInfo('useAIFetch', (state) => state.strapiVersion);
     const userId = useAppInfo('useAIFetch-user', (state) => state.userId);
 
