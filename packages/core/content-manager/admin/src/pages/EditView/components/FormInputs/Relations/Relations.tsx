@@ -611,7 +611,7 @@ const RelationsInput = ({
             createMessage={() =>
               formatMessage({
                 id: getTranslation('relation.create'),
-                defaultMessage: 'Create a Relation',
+                defaultMessage: 'Create a relation',
               })
             }
             onCreateOption={() => {

@@ -188,14 +188,14 @@ type RelationModalRendererProps =
     }
   | {
       isCreating: true;
-      relation?: DocumentMeta;
       children: (props: { dispatch: (action: Action) => void }) => React.ReactNode;
     };
 
 /**
  * Component responsible for rendering its children wrapped in a modal, form and context if needed
  */
-const RelationModalRenderer = ({ children, relation, isCreating }: RelationModalRendererProps) => {
+const RelationModalRenderer = (props: RelationModalRendererProps) => {
+  const { isCreating, children } = props;
   const [state, dispatch] = React.useReducer(reducer, {
     documentHistory: [],
     confirmDialogIntent: null,
@@ -234,6 +234,8 @@ const RelationModalRenderer = ({ children, relation, isCreating }: RelationModal
       </RelationModalProvider>
     );
   }
+
+  const { relation } = props;
 
   // A parent relation is already rendering a modal. In this case simply render the trigger
   if (parentContextValue) {
@@ -365,7 +367,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
 };
 /**
  * All the main content (not header and footer) of the relation modal, plus the confirmation dialog.
- * Will be wrapped in a Modal.Body by the RelationModalRoot component.
+ * Will be wrapped in a Modal.Body by the RelationModal component.
  * Cannot be moved directly inside RelationModal because it needs access to the context via hooks.
  */
 const RelationModalBody = () => {
