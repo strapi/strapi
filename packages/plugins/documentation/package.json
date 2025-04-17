@@ -60,8 +60,8 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/admin": "5.12.5",
-    "@strapi/design-system": "2.0.0-rc.21",
-    "@strapi/icons": "2.0.0-rc.21",
+    "@strapi/design-system": "2.0.0-rc.23",
+    "@strapi/icons": "2.0.0-rc.23",
     "@strapi/utils": "5.12.5",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0",

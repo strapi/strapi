@@ -233,6 +233,10 @@ exports[`DocAssetCard snapshots the component 1`] = `
   align-items: center;
 }
 
+.c8[data-disabled] {
+  cursor: not-allowed;
+}
+
 .c21 {
   word-break: break-all;
 }
