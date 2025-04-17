@@ -35,6 +35,8 @@ interface UploadingAssetCardProps {
   onCancel: (rawFile: RawFile) => void;
   onStatusChange: (status: string) => void;
   addUploadedFiles: (files: File[]) => void;
+  setCurrentAssetUpload: React.Dispatch<React.SetStateAction<number>>;
+  performUpload: boolean;
   folderId?: string | number | null;
   asset: Asset;
   id?: string;
@@ -51,6 +53,8 @@ export const UploadingAssetCard = ({
   onCancel,
   onStatusChange,
   addUploadedFiles,
+  setCurrentAssetUpload,
+  performUpload,
   folderId = null,
 }: UploadingAssetCardProps) => {
   const { upload, cancel, error, progress, status } = useUpload();
@@ -87,9 +91,18 @@ export const UploadingAssetCard = ({
       }
     };
 
+    if (!performUpload) return;
+
     uploadFile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [performUpload]);
+
+  React.useEffect(() => {
+    if (error) {
+      setCurrentAssetUpload((index: number) => index + 1);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   React.useEffect(() => {
     onStatusChange(status);
