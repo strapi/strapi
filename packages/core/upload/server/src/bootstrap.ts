@@ -2,6 +2,7 @@ import type { Core } from '@strapi/types';
 
 import { getService } from './utils';
 import { ALLOWED_SORT_STRINGS, ALLOWED_WEBHOOK_EVENTS } from './constants';
+import type { Config } from './types';
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const defaultConfig = {
@@ -43,6 +44,14 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   getService('metrics').sendUploadPluginMetrics();
 
   getService('extensions').signFileUrlsOnDocumentService();
+
+  const config = strapi.config.get<Config>('plugin::upload');
+
+  if (config.randomSuffix === false) {
+    strapi.log.warn(
+      'randomSuffix is set to false in the upload plugin. This can lead to data loss. Images will not get a random suffix assigned and duplicate filenames can override existing ones. Please handle with care.'
+    );
+  }
 }
 
 const registerWebhookEvents = async () =>
