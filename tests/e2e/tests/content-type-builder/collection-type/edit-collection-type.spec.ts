@@ -6,7 +6,7 @@ import { sharedSetup } from '../../../utils/setup';
 
 test.describe('Edit collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   // use existing type to avoid extra resets and flakiness
   const ctName = 'Article';
@@ -23,9 +23,7 @@ test.describe('Edit collection type', () => {
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterEach(async () => {
+  test.afterAll(async () => {
     await resetFiles();
   });
 

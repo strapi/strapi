@@ -2,6 +2,9 @@ import type { Core, Modules, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import type { GetRecentDocuments, RecentDocument } from '../../../shared/contracts/homepage';
 
+/**
+ * TODO: Remove this service when the future flag for the widget api is removed
+ */
 const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   const MAX_DOCUMENTS = 4;
 
