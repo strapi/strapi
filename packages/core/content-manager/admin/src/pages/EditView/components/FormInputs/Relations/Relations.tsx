@@ -603,7 +603,7 @@ const RelationsInput = ({
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
       <Field.Label action={labelAction}>{label}</Field.Label>
-      <RelationModalRenderer isCreating>
+      <RelationModalRenderer>
         {({ dispatch }) => (
           <Combobox
             ref={fieldRef}
