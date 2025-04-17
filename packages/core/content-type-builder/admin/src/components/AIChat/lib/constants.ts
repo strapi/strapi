@@ -10,7 +10,7 @@ export const STRAPI_AI_TOKEN = process.env.STRAPI_ADMIN_AI_LICENSE;
 /* -------------------------------------------------------------------------------------------------
  * APIs
  * -----------------------------------------------------------------------------------------------*/
-export const STRAPI_AI_URL = process.env.STRAPI_ADMIN_AI_URL?.replace(/\/+$/, '');
+export const STRAPI_AI_URL = 'https://strapi-ai.apps.staging.strapi.team/'?.replace(/\/+$/, '');
 export const STRAPI_AI_CHAT_URL = `${STRAPI_AI_URL}/schemas/chat`;
 export const STRAPI_AI_TITLE_URL = `/schemas/chat/generate-title` as const;
 export const STRAPI_AI_FEEDBACK_URL = `/schemas/chat/feedback` as const;

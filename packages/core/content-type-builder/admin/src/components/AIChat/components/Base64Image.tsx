@@ -50,6 +50,17 @@ export const Base64Img: React.FC<Base64ImgProps> = ({
       }
 
       try {
+        // TODO: Find a better way of doing this
+        // If url is from strapi-ai-staging.s3.us-east-1.amazonaws.com or strapi-ai-production.s3.us-east-1.amazonaws.com, use it directly
+        if (
+          src.includes('strapi-ai-staging.s3.us-east-1.amazonaws.com') ||
+          src.includes('strapi-ai-production.s3.us-east-1.amazonaws.com')
+        ) {
+          setBase64Src(src);
+          setIsLoading(false);
+          return;
+        }
+
         // Only fetch if it's a URL and not already a base64 string
         const response = await fetch(src);
         if (!response.ok) {
@@ -92,7 +103,7 @@ export const Base64Img: React.FC<Base64ImgProps> = ({
   if (hasError) {
     return (
       <Flex direction="column" gap={2} alignItems="center" width="100%">
-        <CrossCircle width={34} height={34} fill="danger600" />
+        <CrossCircle width={24} height={24} fill="danger600" />
       </Flex>
     );
   }
