@@ -1,46 +1,22 @@
-import React from 'react';
-
-import { Box, IconButton, Status, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { Widget, useTracking } from '@strapi/admin/strapi-admin';
+import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { RelativeTime } from '../../../components/RelativeTime';
-import { Widget } from '../../../components/WidgetHelpers';
-import { useTracking } from '../../../features/Tracking';
-import { useGetRecentDocumentsQuery } from '../../../services/homepage';
-import { capitalise } from '../../../utils/strings';
+import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
+import { useGetRecentDocumentsQuery } from '../services/homepage';
 
-import type { RecentDocument } from '../../../../../shared/contracts/homepage';
+import { RelativeTime } from './RelativeTime';
+
+import type { RecentDocument } from '../../../shared/contracts/homepage';
 
 const CellTypography = styled(Typography).attrs({ maxWidth: '14.4rem', display: 'block' })`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
-
-interface DocumentStatusProps {
-  status: RecentDocument['status'];
-}
-
-const DocumentStatus = ({ status = 'draft' }: DocumentStatusProps) => {
-  const statusVariant =
-    status === 'draft' ? 'secondary' : status === 'published' ? 'success' : 'alternative';
-
-  const { formatMessage } = useIntl();
-
-  return (
-    <Status variant={statusVariant} size="XS">
-      <Typography tag="span" variant="omega" fontWeight="bold">
-        {formatMessage({
-          id: `content-manager.containers.List.${status}`,
-          defaultMessage: capitalise(status),
-        })}
-      </Typography>
-    </Status>
-  );
-};
 
 const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) => {
   const { formatMessage } = useIntl();

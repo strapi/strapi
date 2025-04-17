@@ -34,6 +34,9 @@ const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }
   &:disabled {
     cursor: not-allowed;
   }
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const InfosWrapper = styled<FlexComponent>(Flex)`
