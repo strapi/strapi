@@ -1,5 +1,7 @@
 export interface FeaturesConfig {
-  future?: object;
+  future?: {
+    unstableWidgetsApi?: boolean;
+  };
 }
 
 export interface FeaturesService {
