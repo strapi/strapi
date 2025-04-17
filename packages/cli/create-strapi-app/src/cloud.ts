@@ -16,6 +16,7 @@ function assertCloudError(e: unknown): asserts e is CloudError {
 }
 
 export async function handleCloudLogin(): Promise<void> {
+  let cloudApiConfig;
   const logger = cloudServices.createLogger({
     silent: false,
     debug: process.argv.includes('--debug'),
@@ -27,13 +28,14 @@ export async function handleCloudLogin(): Promise<void> {
 
   try {
     const { data: config } = await cloudApiService.config();
+    cloudApiConfig = config;
     logger.log(parseToChalk(config.projectCreation.introText));
   } catch (e: unknown) {
     logger.debug(e);
     logger.error(defaultErrorMessage);
     return;
   }
-  const { userChoice } = await inquirer.prompt<{ userChoice: string }>([
+  const { userChoice } = await inquirer.prompt<{ userChoice: string }>(cloudApiConfig.projectCreation?.userChoice || [
     {
       type: 'list',
       name: 'userChoice',
@@ -42,10 +44,11 @@ export async function handleCloudLogin(): Promise<void> {
     },
   ]);
 
-  if (userChoice !== 'Skip') {
+  if (!userChoice.includes('Skip')) {
     const cliContext = {
       logger,
       cwd: process.cwd(),
+      ...(cloudApiConfig.projectCreation?.reference && { promptExperiment: cloudApiConfig.projectCreation?.reference }),
     };
 
     try {
