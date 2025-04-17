@@ -9199,6 +9199,7 @@ __metadata:
     "@strapi/utils": "npm:5.12.4"
     "@types/debug": "npm:^4"
     debug: "npm:4.3.4"
+    openapi-types: "npm:12.1.3"
     path-to-regexp: "npm:8.2.0"
   languageName: unknown
   linkType: soft
