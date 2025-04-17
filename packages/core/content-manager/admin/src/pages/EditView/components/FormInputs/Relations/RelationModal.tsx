@@ -54,8 +54,17 @@ const StyledModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
+const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
+  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
+  const queryParams = currentDocumentMeta.params?.locale
+    ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
+    : '';
+
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
+};
+
 /* -------------------------------------------------------------------------------------------------
- * RelationContextWrapper
+ * RelationModalRenderer
  * -----------------------------------------------------------------------------------------------*/
 
 interface State {
@@ -172,17 +181,9 @@ interface RelationModalContextValue {
 const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
-const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
-  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
-  const queryParams = currentDocumentMeta.params?.locale
-    ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
-    : '';
-
-  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
-};
 type RelationModalRendererProps =
   | {
-      isCreating?: false;
+      isCreating: false;
       relation: DocumentMeta;
       children: React.ReactNode;
     }
@@ -191,11 +192,9 @@ type RelationModalRendererProps =
       children: (props: { dispatch: (action: Action) => void }) => React.ReactNode;
     };
 
-/**
- * Component responsible for rendering its children wrapped in a modal, form and context if needed
- */
-const RelationModalRenderer = (props: RelationModalRendererProps) => {
-  const { isCreating, children } = props;
+const RootRelationRenderer = (props: RelationModalRendererProps) => {
+  const { children, isCreating } = props;
+
   const [state, dispatch] = React.useReducer(reducer, {
     documentHistory: [],
     confirmDialogIntent: null,
@@ -216,31 +215,9 @@ const RelationModalRenderer = (props: RelationModalRendererProps) => {
 
   const currentDocumentMeta = state.documentHistory.at(-1) ?? rootDocumentMeta;
   const currentDocument = useDocument(currentDocumentMeta);
-
-  const parentContextValue = useRelationModal('RelationContextWrapper', (state) => state, false);
-
-  if (isCreating) {
-    // When creating a relation render children with dispatch as a prop
-    return (
-      <RelationModalProvider
-        state={state}
-        dispatch={dispatch}
-        rootDocumentMeta={rootDocumentMeta}
-        currentDocumentMeta={currentDocumentMeta}
-        currentDocument={currentDocument}
-        isCreating={true}
-      >
-        <RelationModal>{children({ dispatch })}</RelationModal>
-      </RelationModalProvider>
-    );
-  }
-
-  const { relation } = props;
-
-  // A parent relation is already rendering a modal. In this case simply render the trigger
-  if (parentContextValue) {
-    return <RelationModalTrigger relation={relation}>{children}</RelationModalTrigger>;
-  }
+  // TODO: check if we can remove the single type check
+  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
+  const isCreatingDocument = !currentDocumentMeta.documentId && !isSingleType;
 
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
@@ -253,13 +230,40 @@ const RelationModalRenderer = (props: RelationModalRendererProps) => {
       rootDocumentMeta={rootDocumentMeta}
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
-      isCreating={false}
+      isCreating={isCreatingDocument}
     >
       <RelationModal>
-        <RelationModalTrigger relation={relation}>{children}</RelationModalTrigger>
+        {
+          isCreating ? (
+            children({ dispatch })
+          ) : (
+            <RelationModalTrigger relation={props.relation}>{children}</RelationModalTrigger>
+          ) /* This is the trigger that will be rendered in the parent relation */
+        }
       </RelationModal>
     </RelationModalProvider>
   );
+};
+
+const NestedRelationRenderer = (props: RelationModalRendererProps) => {
+  const { isCreating, children } = props;
+  const dispatch = useRelationModal('NestedRelation', (state) => state.dispatch);
+
+  return isCreating ? (
+    children({ dispatch })
+  ) : (
+    <RelationModalTrigger relation={props.relation}>{children}</RelationModalTrigger>
+  );
+};
+
+/**
+ * Component responsible for rendering its children wrapped in a modal, form and context if needed
+ */
+const RelationModalRenderer = (props: RelationModalRendererProps) => {
+  // We're in a nested relation if the relation modal context is not undefined
+  const isNested = useRelationModal('RelationContextWrapper', (state) => state != undefined, false);
+
+  return isNested ? <NestedRelationRenderer {...props} /> : <RootRelationRenderer {...props} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
