@@ -16,7 +16,7 @@ import type { FetchError } from '@strapi/admin/strapi-admin';
 type InitialFormData = {
   destination:
     | {
-        value: string | number;
+        value: string | number | null;
         label: string;
       }
     | string;
@@ -91,10 +91,9 @@ export const BulkMoveDialog = ({ onClose, selected = [], currentFolder }: BulkMo
       </Modal.Content>
     );
   }
-
   const initialFormData: InitialFormData = {
     destination: {
-      value: currentFolder?.id || '',
+      value: currentFolder?.id || '' || null,
       label: currentFolder?.name || folderStructure[0].label,
     },
   };

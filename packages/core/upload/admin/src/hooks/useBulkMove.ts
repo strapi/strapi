@@ -16,7 +16,7 @@ export interface FileWithType extends File {
 }
 
 interface BulkMoveParams {
-  destinationFolderId: number | string;
+  destinationFolderId: number | string | null;
   filesAndFolders: Array<FolderWithType | FileWithType>;
 }
 
@@ -79,7 +79,7 @@ export const useBulkMove = () => {
   });
 
   const move = (
-    destinationFolderId: number | string,
+    destinationFolderId: number | string | null,
     filesAndFolders: Array<FolderWithType | FileWithType>
   ) => mutation.mutateAsync({ destinationFolderId, filesAndFolders });
 
