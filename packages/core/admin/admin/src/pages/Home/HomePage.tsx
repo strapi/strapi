@@ -14,6 +14,8 @@ import { useStrapiApp } from '../../features/StrapiApp';
 import { LastEditedWidget, LastPublishedWidget } from './components/ContentManagerWidgets';
 import { GuidedTour } from './components/GuidedTour';
 
+import type { Widget as WidgetType } from 'src/core/apis/Widgets';
+
 /* -------------------------------------------------------------------------------------------------
  * WidgetRoot
  * -----------------------------------------------------------------------------------------------*/
@@ -86,7 +88,38 @@ const UnstableHomePageCe = () => {
   const { formatMessage } = useIntl();
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
+
+  const checkUserHasPermissions = useAuth('HomePageCE', (state) => state.checkUserHasPermissions);
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
+  const [allowedWidgets, setAllowedWidgets] = React.useState<WidgetType[]>([]);
+
+  React.useEffect(() => {
+    (async () => {
+      const results = await Promise.all(
+        getAllWidgets().map(async (widget) => {
+          if (!widget.permissions || widget.permissions.length === 0) {
+            return {
+              widget,
+              hasPermission: true,
+            };
+          }
+
+          // Check if the user has all the permissions required by the widget
+          const permissions = await checkUserHasPermissions(widget.permissions);
+          return {
+            widget,
+            hasPermission: permissions.length >= widget.permissions.length,
+          };
+        })
+      );
+
+      const filteredWidgets = results
+        .filter(({ hasPermission }) => hasPermission)
+        .map(({ widget }) => widget);
+
+      setAllowedWidgets(filteredWidgets);
+    })();
+  }, [checkUserHasPermissions, getAllWidgets]);
 
   return (
     <Main>
@@ -107,7 +140,7 @@ const UnstableHomePageCe = () => {
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTour />
           <Grid.Root gap={5}>
-            {getAllWidgets().map((widget) => {
+            {allowedWidgets.map((widget) => {
               return (
                 <Grid.Item col={6} s={12} key={widget.uid}>
                   <WidgetRoot title={widget.title} icon={widget.icon}>
