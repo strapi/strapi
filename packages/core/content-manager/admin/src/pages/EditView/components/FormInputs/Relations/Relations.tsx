@@ -598,7 +598,10 @@ const RelationsInput = ({
     // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
     model: props.attribute.targetModel,
     documentId: '',
-  };
+    params: currentDocumentMeta.params,
+  } as DocumentMeta;
+
+  console.log('fieldToConnect', name);
 
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
@@ -620,6 +623,7 @@ const RelationsInput = ({
                 payload: {
                   document: relation,
                   shouldBypassConfirmation: false,
+                  fieldToConnect: name,
                 },
               });
             }}

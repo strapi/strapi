@@ -32,7 +32,10 @@ import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { usePreviewContext } from '../../../preview/pages/Preview';
 import { CLONE_PATH, LIST_PATH } from '../../../router';
-import { useGetDraftRelationCountQuery } from '../../../services/documents';
+import {
+  useGetDraftRelationCountQuery,
+  useUpdateDocumentMutation,
+} from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 
@@ -40,7 +43,6 @@ import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
 import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
-
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -557,8 +559,21 @@ const PublishAction: DocumentActionComponent = ({
   const fromRelationModal = relationContext != undefined;
 
   const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
+  const fieldToConnect = useRelationModal(
+    'PublishAction',
+    (state) => state.state.fieldToConnect,
+    false
+  );
+  const documentHistory = useRelationModal(
+    'PublishAction',
+    (state) => state.state.documentHistory,
+    false
+  );
+  const rootDocumentMeta = useRelationModal('PublishAction', (state) => state.rootDocumentMeta);
 
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
+  const [updateDocumentMutation] = useUpdateDocumentMutation();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const idToPublish = currentDocumentMeta.documentId || id;
 
@@ -704,10 +719,49 @@ const PublishAction: DocumentActionComponent = ({
             params: currentDocumentMeta.params,
           };
 
-          dispatch({ type: 'GO_BACK', payload: { shouldBypassConfirmation: true } });
+          // Update, if needed, the parent relation with the newly published document
+          // check if in history we have the parent relation otherwise use the rootDocument
+          if (fieldToConnect && documentHistory) {
+            const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
+
+            try {
+              const updateRes = await updateDocumentMutation({
+                collectionType: metaDocumentToUpdate.collectionType,
+                model: metaDocumentToUpdate.model,
+                documentId: metaDocumentToUpdate.documentId,
+                params: metaDocumentToUpdate.params,
+                data: {
+                  [fieldToConnect]: {
+                    connect: [
+                      {
+                        id: res.data.documentId,
+                        documentId: res.data.documentId,
+                        locale: res.data.locale,
+                      },
+                    ],
+                  },
+                },
+              });
+
+              if ('error' in updateRes) {
+                toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
+                return;
+              }
+            } catch (err) {
+              toggleNotification({
+                type: 'danger',
+                message: formatMessage({
+                  id: 'notification.error',
+                  defaultMessage: 'An error occurred',
+                }),
+              });
+
+              throw err;
+            }
+          }
 
           dispatch({
-            type: 'GO_TO_RELATION',
+            type: 'GO_TO_CREATED_RELATION',
             payload: { document: newRelation, shouldBypassConfirmation: true },
           });
         }
@@ -823,9 +877,22 @@ const UpdateAction: DocumentActionComponent = ({
 
   // need to discriminate if the update is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('UpdateAction', () => true, false);
+  const fieldToConnect = useRelationModal(
+    'UpdateAction',
+    (state) => state.state.fieldToConnect,
+    false
+  );
+  const documentHistory = useRelationModal(
+    'UpdateAction',
+    (state) => state.state.documentHistory,
+    false
+  );
+  const rootDocumentMeta = useRelationModal('UpdateAction', (state) => state.rootDocumentMeta);
   const fromRelationModal = relationContext != undefined;
 
   const { currentDocumentMeta } = useDocumentContext('UpdateAction');
+  const [updateDocumentMutation] = useUpdateDocumentMutation();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -910,11 +977,48 @@ const UpdateAction: DocumentActionComponent = ({
               model,
               params: currentDocumentMeta.params,
             };
+            // Update, if needed, the parent relation with the newly published document
+            // check if in history we have the parent relation otherwise use the rootDocument
+            if (fieldToConnect && documentHistory) {
+              const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            dispatch({ type: 'GO_BACK', payload: { shouldBypassConfirmation: true } });
+              try {
+                const updateRes = await updateDocumentMutation({
+                  collectionType: metaDocumentToUpdate.collectionType,
+                  model: metaDocumentToUpdate.model,
+                  documentId: metaDocumentToUpdate.documentId,
+                  params: metaDocumentToUpdate.params,
+                  data: {
+                    [fieldToConnect]: {
+                      connect: [
+                        {
+                          id: res.data.documentId,
+                          documentId: res.data.documentId,
+                          locale: res.data.locale,
+                        },
+                      ],
+                    },
+                  },
+                });
+                if ('error' in updateRes) {
+                  toggleNotification({ type: 'danger', message: formatAPIError(updateRes.error) });
+                  return;
+                }
+              } catch (err) {
+                toggleNotification({
+                  type: 'danger',
+                  message: formatMessage({
+                    id: 'notification.error',
+                    defaultMessage: 'An error occurred',
+                  }),
+                });
+
+                throw err;
+              }
+            }
 
             dispatch({
-              type: 'GO_TO_RELATION',
+              type: 'GO_TO_CREATED_RELATION',
               payload: { document: createdRelation, shouldBypassConfirmation: true },
             });
           } else {
@@ -941,26 +1045,33 @@ const UpdateAction: DocumentActionComponent = ({
       }
     }
   }, [
-    clone,
-    cloneMatch?.params.origin,
+    setSubmitting,
+    modified,
+    validate,
+    isCloning,
+    documentId,
     collectionType,
-    create,
+    toggleNotification,
+    formatMessage,
+    clone,
+    model,
+    cloneMatch?.params.origin,
     currentDocumentMeta.params,
     document,
-    documentId,
-    formatMessage,
-    formatValidationErrors,
-    isCloning,
-    model,
-    modified,
     navigate,
     rawQuery,
-    resetForm,
     setErrors,
-    setSubmitting,
-    toggleNotification,
+    formatValidationErrors,
     update,
-    validate,
+    resetForm,
+    create,
+    fromRelationModal,
+    fieldToConnect,
+    documentHistory,
+    dispatch,
+    rootDocumentMeta,
+    updateDocumentMutation,
+    formatAPIError,
     onPreview,
   ]);
 

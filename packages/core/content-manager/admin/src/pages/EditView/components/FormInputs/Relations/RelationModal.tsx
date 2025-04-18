@@ -77,6 +77,7 @@ interface State {
     | DocumentMeta; // Open a specific document in the modal
   isModalOpen: boolean;
   hasUnsavedChanges: boolean;
+  fieldToConnect?: string;
 }
 
 type Action =
@@ -85,6 +86,7 @@ type Action =
       payload: {
         document: DocumentMeta;
         shouldBypassConfirmation: boolean;
+        fieldToConnect?: string;
       };
     }
   | {
@@ -93,6 +95,14 @@ type Action =
     }
   | {
       type: 'GO_FULL_PAGE';
+    }
+  | {
+      type: 'GO_TO_CREATED_RELATION';
+      payload: {
+        document: DocumentMeta;
+        shouldBypassConfirmation: boolean;
+        fieldToConnect?: string;
+      };
     }
   | {
       type: 'CANCEL_CONFIRM_DIALOG';
@@ -110,7 +120,11 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'GO_TO_RELATION':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
-        return { ...state, confirmDialogIntent: action.payload.document };
+        return {
+          ...state,
+          confirmDialogIntent: action.payload.document,
+          fieldToConnect: action.payload.fieldToConnect,
+        };
       }
 
       const lastItemDocumentHistory = state.documentHistory.at(-1);
@@ -124,6 +138,7 @@ function reducer(state: State, action: Action): State {
           : [...state.documentHistory, action.payload.document],
         confirmDialogIntent: null,
         isModalOpen: true,
+        fieldToConnect: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnect,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -146,6 +161,17 @@ function reducer(state: State, action: Action): State {
         hasUnsavedChanges: false,
         isModalOpen: false,
         confirmDialogIntent: null,
+      };
+    case 'GO_TO_CREATED_RELATION':
+      return {
+        ...state,
+        // Reset document history if the last item has documentId undefined
+        documentHistory: state.documentHistory
+          ? [...state.documentHistory.slice(0, -1), action.payload.document]
+          : [action.payload.document],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+        fieldToConnect: undefined,
       };
     case 'CANCEL_CONFIRM_DIALOG':
       return {
@@ -213,6 +239,7 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
     confirmDialogIntent: null,
     isModalOpen: false,
     hasUnsavedChanges: false,
+    fieldToConnect: undefined,
   });
 
   const rootDocument = useDoc();
@@ -231,7 +258,6 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
   // TODO: check if we can remove the single type check
   const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
   const isCreating = !currentDocumentMeta.documentId && !isSingleType;
-
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
    * pieces that will be used by potential child relations: the context, header, form, and footer.
@@ -345,7 +371,11 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                 if (!state.hasUnsavedChanges) {
                   if (isCreating) {
                     navigate(
-                      `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create?plugins[i18n][locale]=${currentDocumentMeta.params?.locale}`
+                      `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
+                        currentDocumentMeta.params?.locale
+                          ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
+                          : ''
+                      }`
                     );
                   } else {
                     navigate(getFullPageUrl(currentDocumentMeta));
@@ -449,7 +479,11 @@ const RelationModalBody = () => {
     } else {
       if (isCreating) {
         navigate(
-          `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create?plugins[i18n][locale]=${currentDocumentMeta.params?.locale}`
+          `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
+            currentDocumentMeta.params?.locale
+              ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
+              : ''
+          }`
         );
       } else {
         navigate(fullPageUrl);
