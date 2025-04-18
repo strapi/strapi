@@ -36,6 +36,8 @@ import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 
+import { useRelationModal } from './FormInputs/Relations/RelationModal';
+
 import type { RelationsFormValue } from './FormInputs/Relations/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
 
@@ -531,7 +533,7 @@ const PublishAction: DocumentActionComponent = ({
   const { id } = useParams();
   const { formatMessage } = useIntl();
   const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
-  const { publish, isLoading } = useDocumentActions();
+  const { update, publish, isLoading } = useDocumentActions();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
   const [
     countDraftRelations,
@@ -548,6 +550,11 @@ const PublishAction: DocumentActionComponent = ({
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+  const relationContext = useRelationModal('PublishAction', () => true, false);
+  const documentHistory = useRelationModal('PublishAction', (state) => state.state.documentHistory);
+  const rootDocumentMeta = useRelationModal('PublishAction', (state) => state.rootDocumentMeta);
+  const dispatch = useRelationModal('PublishAction', (state) => state.dispatch);
+  const fromRelationModal = relationContext != undefined;
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
   const { currentDocumentMeta } = useDocumentContext('PublishAction');
@@ -688,6 +695,48 @@ const PublishAction: DocumentActionComponent = ({
             pathname: `../${collectionType}/${model}/${res.data.documentId}`,
             search: rawQuery,
           });
+        } else if (fromRelationModal) {
+          // change document with actions in the modal
+          const newRelation = {
+            documentId: res.data.documentId,
+            collectionType,
+            model,
+            params: currentDocumentMeta.params,
+          };
+
+          dispatch({
+            type: 'REMOVE_CREATE_FROM_HISTORY',
+          });
+
+          dispatch({
+            type: 'GO_TO_RELATION',
+            payload: { document: newRelation, shouldBypassConfirmation: true },
+          });
+
+          // update the parent document with the new relation
+          const metaDocumentToUpdate =
+            documentHistory.length > 1 &&
+            documentHistory[documentHistory.length - 1].documentId === undefined
+              ? documentHistory[documentHistory.length - 2]
+              : rootDocumentMeta;
+          await update(
+            {
+              collectionType: metaDocumentToUpdate.collectionType,
+              model: metaDocumentToUpdate.model,
+              documentId: metaDocumentToUpdate.documentId,
+            },
+            transformData({
+              [currentDocumentMeta.fieldToConnect!]: {
+                connect: [
+                  {
+                    id: res.data.id,
+                    documentId: res.data.documentId,
+                    locale: res.data.locale,
+                  },
+                ],
+              },
+            })
+          );
         }
       } else if (
         'error' in res &&
@@ -795,9 +844,14 @@ const UpdateAction: DocumentActionComponent = ({
   const document = useForm('UpdateAction', ({ values }) => values);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
-  const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
+  const resetForm = useForm('UpdateAction', ({ resetForm }) => resetForm);
 
   const { currentDocumentMeta } = useDocumentContext('UpdateAction');
+  const relationContext = useRelationModal('UpdateAction', () => true, false);
+  const documentHistory = useRelationModal('UpdateAction', (state) => state.state.documentHistory);
+  const rootDocumentMeta = useRelationModal('UpdateAction', (state) => state.rootDocumentMeta);
+  const dispatch = useRelationModal('UpdateAction', (state) => state.dispatch);
+  const fromRelationModal = relationContext != undefined;
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -875,13 +929,57 @@ const UpdateAction: DocumentActionComponent = ({
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
-          navigate(
-            {
-              pathname: `../${res.data.documentId}`,
-              search: rawQuery,
-            },
-            { replace: true, relative: 'path' }
-          );
+          if (!fromRelationModal) {
+            navigate(
+              {
+                pathname: `../${res.data.documentId}`,
+                search: rawQuery,
+              },
+              { replace: true, relative: 'path' }
+            );
+          } else {
+            // change document with actions in the modal
+            const newRelation = {
+              documentId: res.data.documentId,
+              collectionType,
+              model,
+              params: currentDocumentMeta.params,
+            };
+
+            dispatch({
+              type: 'REMOVE_CREATE_FROM_HISTORY',
+            });
+
+            dispatch({
+              type: 'GO_TO_RELATION',
+              payload: { document: newRelation, shouldBypassConfirmation: true },
+            });
+
+            // update the parent document with the new relation
+            const metaDocumentToUpdate =
+              documentHistory.length > 1 &&
+              documentHistory[documentHistory.length - 1].documentId === undefined
+                ? documentHistory[documentHistory.length - 2]
+                : rootDocumentMeta;
+            await update(
+              {
+                collectionType: metaDocumentToUpdate.collectionType,
+                model: metaDocumentToUpdate.model,
+                documentId: metaDocumentToUpdate.documentId,
+              },
+              transformData({
+                [currentDocumentMeta.fieldToConnect!]: {
+                  connect: [
+                    {
+                      id: res.data.id,
+                      documentId: res.data.documentId,
+                      locale: res.data.locale,
+                    },
+                  ],
+                },
+              })
+            );
+          }
         } else if (
           'error' in res &&
           isBaseQueryError(res.error) &&
@@ -897,26 +995,30 @@ const UpdateAction: DocumentActionComponent = ({
       }
     }
   }, [
-    clone,
-    cloneMatch?.params.origin,
-    collectionType,
-    create,
-    currentDocumentMeta.params,
-    document,
-    documentId,
-    formatMessage,
-    formatValidationErrors,
-    isCloning,
-    model,
+    setSubmitting,
     modified,
+    validate,
+    isCloning,
+    documentId,
+    collectionType,
+    toggleNotification,
+    formatMessage,
+    clone,
+    model,
+    cloneMatch?.params.origin,
+    currentDocumentMeta,
+    document,
     navigate,
     rawQuery,
-    resetForm,
     setErrors,
-    setSubmitting,
-    toggleNotification,
+    formatValidationErrors,
     update,
-    validate,
+    resetForm,
+    create,
+    fromRelationModal,
+    dispatch,
+    documentHistory,
+    rootDocumentMeta,
     onPreview,
   ]);
 
