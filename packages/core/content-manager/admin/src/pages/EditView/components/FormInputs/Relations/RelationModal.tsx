@@ -54,8 +54,17 @@ const StyledModalContent = styled(Modal.Content)`
   max-height: 100%;
 `;
 
+const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
+  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
+  const queryParams = currentDocumentMeta.params?.locale
+    ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
+    : '';
+
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
+};
+
 /* -------------------------------------------------------------------------------------------------
- * RelationContextWrapper
+ * RelationModalRenderer
  * -----------------------------------------------------------------------------------------------*/
 
 interface State {
@@ -166,34 +175,32 @@ interface RelationModalContextValue {
   currentDocumentMeta: DocumentMeta;
   currentDocument: ReturnType<UseDocument>;
   onPreview?: () => void;
+  isCreating: boolean;
 }
 
 const [RelationModalProvider, useRelationModal] =
   createContext<RelationModalContextValue>('RelationModal');
 
-const getFullPageUrl = (currentDocumentMeta: DocumentMeta): string => {
-  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
-  const queryParams = currentDocumentMeta.params?.locale
-    ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
-    : '';
+function isRenderProp(
+  children: RelationModalRendererProps['children']
+): children is (props: { dispatch: (action: Action) => void }) => React.ReactNode {
+  return typeof children === 'function';
+}
 
-  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}${isSingleType ? '' : '/' + currentDocumentMeta.documentId}${queryParams}`;
-};
+type RelationModalRendererProps =
+  // Is editing
+  | {
+      relation: DocumentMeta;
+      children: React.ReactNode;
+    }
+  // Is creating
+  | {
+      relation?: never;
+      children: (props: { dispatch: (action: Action) => void }) => React.ReactNode;
+    };
 
-/**
- * Component responsible of rendering its children wrapped in a modal, form and context if needed
- */
-const RelationModalRenderer = ({
-  children,
-  trigger,
-  relation,
-}: {
-  children: React.ReactNode;
-  trigger: React.ReactNode;
-  relation: DocumentMeta;
-}) => {
-  const { formatMessage } = useIntl();
-  const navigate = useNavigate();
+const RootRelationRenderer = (props: RelationModalRendererProps) => {
+  const { children } = props;
 
   const [state, dispatch] = React.useReducer(reducer, {
     documentHistory: [],
@@ -215,13 +222,9 @@ const RelationModalRenderer = ({
 
   const currentDocumentMeta = state.documentHistory.at(-1) ?? rootDocumentMeta;
   const currentDocument = useDocument(currentDocumentMeta);
-
-  const parentContextValue = useRelationModal('RelationContextWrapper', (state) => state, false);
-
-  // A parent relation is already rendering a modal. In this case simply render the trigger
-  if (parentContextValue) {
-    return trigger;
-  }
+  // TODO: check if we can remove the single type check
+  const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
+  const isCreating = !currentDocumentMeta.documentId && !isSingleType;
 
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
@@ -234,98 +237,146 @@ const RelationModalRenderer = ({
       rootDocumentMeta={rootDocumentMeta}
       currentDocumentMeta={currentDocumentMeta}
       currentDocument={currentDocument}
+      isCreating={isCreating}
     >
-      <Modal.Root
-        open={state.isModalOpen}
-        onOpenChange={(open) => {
-          if (open) {
-            dispatch({
-              type: 'GO_TO_RELATION',
-              payload: { document: relation, shouldBypassConfirmation: false },
-            });
-          } else {
-            dispatch({
-              type: 'CLOSE_MODAL',
-              payload: { shouldBypassConfirmation: false },
-            });
-          }
-        }}
-      >
-        {trigger}
-        <StyledModalContent>
-          <Modal.Header gap={2}>
-            <Flex justifyContent="space-between" alignItems="center" width="100%">
-              <Flex gap={2}>
-                <IconButton
-                  withTooltip={false}
-                  label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
-                  variant="ghost"
-                  disabled={state.documentHistory.length < 2}
-                  onClick={() => {
-                    dispatch({
-                      type: 'GO_BACK',
-                      payload: { shouldBypassConfirmation: false },
-                    });
-                  }}
-                  marginRight={1}
-                >
-                  <ArrowLeft />
-                </IconButton>
-                <Typography tag="span" fontWeight={600}>
-                  {formatMessage({
-                    id: 'content-manager.components.RelationInputModal.modal-title',
-                    defaultMessage: 'Edit a relation',
-                  })}
-                </Typography>
-              </Flex>
-              <IconButton
-                onClick={() => {
-                  dispatch({
-                    type: 'GO_FULL_PAGE',
-                  });
-                  if (!state.hasUnsavedChanges) {
-                    navigate(getFullPageUrl(currentDocumentMeta));
-                  }
-                }}
-                variant="tertiary"
-                label={formatMessage({
-                  id: 'content-manager.components.RelationInputModal.button-fullpage',
-                  defaultMessage: 'Go to entry',
-                })}
-              >
-                <ArrowsOut />
-              </IconButton>
-            </Flex>
-          </Modal.Header>
-          <Modal.Body>
-            <FormContext
-              method="PUT"
-              initialValues={currentDocument.getInitialFormValues()}
-              validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-                const yupSchema = createYupSchema(
-                  currentDocument.schema?.attributes,
-                  currentDocument.components,
-                  {
-                    status: currentDocument.document?.status,
-                    ...options,
-                  }
-                );
-
-                return yupSchema.validate(values, { abortEarly: false });
-              }}
-            >
-              {children}
-            </FormContext>
-          </Modal.Body>
-        </StyledModalContent>
-      </Modal.Root>
+      <RelationModal>
+        {isRenderProp(children)
+          ? children({ dispatch })
+          : props.relation && (
+              <RelationModalTrigger relation={props.relation}>{children}</RelationModalTrigger>
+            )}
+      </RelationModal>
     </RelationModalProvider>
   );
 };
 
+const NestedRelationRenderer = (props: RelationModalRendererProps) => {
+  const { children } = props;
+  const dispatch = useRelationModal('NestedRelation', (state) => state.dispatch);
+
+  return isRenderProp(children)
+    ? children({ dispatch })
+    : props.relation && (
+        <RelationModalTrigger relation={props.relation}>{children}</RelationModalTrigger>
+      ); /* This is the trigger that will be rendered in the parent relation */
+};
+
+/**
+ * Component responsible for rendering its children wrapped in a modal, form and context if needed
+ */
+const RelationModalRenderer = (props: RelationModalRendererProps) => {
+  // We're in a nested relation if the relation modal context is not undefined
+  const isNested = useRelationModal('RelationContextWrapper', (state) => state != undefined, false);
+
+  return isNested ? <NestedRelationRenderer {...props} /> : <RootRelationRenderer {...props} />;
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * RelationModal
+ * -----------------------------------------------------------------------------------------------*/
+
+const RelationModal = ({ children }: { children: React.ReactNode }) => {
+  const { formatMessage } = useIntl();
+  const navigate = useNavigate();
+  const state = useRelationModal('RelationModalForm', (state) => state.state);
+  const dispatch = useRelationModal('RelationModalForm', (state) => state.dispatch);
+  const currentDocumentMeta = useRelationModal(
+    'RelationModalForm',
+    (state) => state.currentDocumentMeta
+  );
+  const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
+  const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
+
+  return (
+    <Modal.Root
+      open={state.isModalOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          dispatch({
+            type: 'CLOSE_MODAL',
+            payload: { shouldBypassConfirmation: false },
+          });
+        }
+      }}
+    >
+      {children}
+      <StyledModalContent>
+        <Modal.Header gap={2}>
+          <Flex justifyContent="space-between" alignItems="center" width="100%">
+            <Flex gap={2}>
+              <IconButton
+                withTooltip={false}
+                label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
+                variant="ghost"
+                disabled={state.documentHistory.length < 2}
+                onClick={() => {
+                  dispatch({
+                    type: 'GO_BACK',
+                    payload: { shouldBypassConfirmation: false },
+                  });
+                }}
+                marginRight={1}
+              >
+                <ArrowLeft />
+              </IconButton>
+              <Typography tag="span" fontWeight={600}>
+                {isCreating
+                  ? formatMessage({
+                      id: 'content-manager.relation.create',
+                      defaultMessage: 'Create a relation',
+                    })
+                  : formatMessage({
+                      id: 'content-manager.components.RelationInputModal.modal-title',
+                      defaultMessage: 'Edit a relation',
+                    })}
+              </Typography>
+            </Flex>
+            <IconButton
+              onClick={() => {
+                dispatch({
+                  type: 'GO_FULL_PAGE',
+                });
+                if (!state.hasUnsavedChanges) {
+                  navigate(getFullPageUrl(currentDocumentMeta));
+                }
+              }}
+              variant="tertiary"
+              label={formatMessage({
+                id: 'content-manager.components.RelationInputModal.button-fullpage',
+                defaultMessage: 'Go to entry',
+              })}
+            >
+              <ArrowsOut />
+            </IconButton>
+          </Flex>
+        </Modal.Header>
+        <Modal.Body>
+          <FormContext
+            method="PUT"
+            initialValues={currentDocument.getInitialFormValues()}
+            validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+              const yupSchema = createYupSchema(
+                currentDocument.schema?.attributes,
+                currentDocument.components,
+                {
+                  status: currentDocument.document?.status,
+                  ...options,
+                }
+              );
+
+              return yupSchema.validate(values, { abortEarly: false });
+            }}
+          >
+            <RelationModalBody />
+          </FormContext>
+        </Modal.Body>
+      </StyledModalContent>
+    </Modal.Root>
+  );
+};
 /**
  * All the main content (not header and footer) of the relation modal, plus the confirmation dialog.
- * Will be wrapped in a Modal.Body by the RelationModalRenderer.
+ * Will be wrapped in a Modal.Body by the RelationModal component.
  * Cannot be moved directly inside RelationModal because it needs access to the context via hooks.
  */
 const RelationModalBody = () => {
@@ -403,7 +454,7 @@ const RelationModalBody = () => {
 
   return (
     <>
-      <RelationEditView />
+      <RelationModalForm />
       <Dialog.Root open={state.confirmDialogIntent != null}>
         <ConfirmDialog
           onConfirm={() => handleConfirm()}
@@ -421,7 +472,7 @@ const RelationModalBody = () => {
   );
 };
 
-const ModalTrigger = ({
+const RelationModalTrigger = ({
   children,
   relation,
 }: {
@@ -444,22 +495,6 @@ const ModalTrigger = ({
   );
 };
 
-interface RelationModalProps {
-  children: React.ReactNode;
-  relation: DocumentMeta;
-}
-
-const RelationModal = React.memo(({ relation, children }: RelationModalProps) => {
-  return (
-    <RelationModalRenderer
-      relation={relation}
-      trigger={<ModalTrigger relation={relation}>{children}</ModalTrigger>}
-    >
-      <RelationModalBody />
-    </RelationModalRenderer>
-  );
-});
-
 const StyledTextButton = styled(TextButton)`
   max-width: 100%;
   & > span {
@@ -475,18 +510,19 @@ const StyledTextButton = styled(TextButton)`
  * The mini edit view for a relation that is displayed inside a modal.
  * It's complete with its header, document actions and form layout.
  */
-const RelationEditView = () => {
+const RelationModalForm = () => {
   const { formatMessage } = useIntl();
 
   const currentDocumentMeta = useRelationModal(
-    'RelationModalBody',
+    'RelationModalForm',
     (state) => state.currentDocumentMeta
   );
-  const currentDocument = useRelationModal('RelationModalBody', (state) => state.currentDocument);
+  const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
+  const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
   const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
-  const plugins = useStrapiApp('RelationModalBody', (state) => state.plugins);
+  const plugins = useStrapiApp('RelationModalForm', (state) => state.plugins);
 
-  const initialValues = currentDocument.getInitialFormValues();
+  const initialValues = currentDocument.getInitialFormValues(isCreating);
 
   const {
     permissions = [],
@@ -517,8 +553,8 @@ const RelationEditView = () => {
     error ||
     !currentDocumentMeta.model ||
     documentLayoutResponse.error ||
-    !currentDocument.document ||
-    !currentDocument.meta ||
+    (!isCreating && !currentDocument.document) ||
+    (!isCreating && !currentDocument.meta) ||
     !currentDocument.schema ||
     !initialValues
   ) {
@@ -618,5 +654,5 @@ const RelationEditView = () => {
   );
 };
 
-export { RelationModal, reducer, useRelationModal };
+export { reducer, RelationModalRenderer, useRelationModal };
 export type { State, Action };
