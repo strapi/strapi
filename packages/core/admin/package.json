@@ -80,6 +80,7 @@
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
+    "@dnd-kit/core": "6.3.1",
     "@internationalized/date": "3.5.4",
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
