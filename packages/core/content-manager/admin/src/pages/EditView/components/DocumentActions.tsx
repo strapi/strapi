@@ -27,7 +27,7 @@ import { DefaultTheme, styled } from 'styled-components';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
-import { useDoc } from '../../../hooks/useDocument';
+import { useDoc, useDocument } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { useDocumentContext } from '../../../hooks/useDocumentContext';
 import { usePreviewContext } from '../../../preview/pages/Preview';
@@ -37,7 +37,7 @@ import {
   useUpdateDocumentMutation,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
-import { stringToObject } from '../../../utils/stringToObject';
+import { stringToObject, deepMerge } from '../../../utils/mergeObject';
 import { getTranslation } from '../../../utils/translations';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
@@ -660,6 +660,16 @@ const PublishAction: DocumentActionComponent = ({
     model,
     currentDocumentMeta.params,
   ]);
+  const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
+  const parentDocumentData = useDocument(
+    {
+      documentId: parentDocumentMetaToUpdate?.documentId,
+      model: parentDocumentMetaToUpdate?.model,
+      collectionType: parentDocumentMetaToUpdate?.collectionType,
+      params: parentDocumentMetaToUpdate?.params,
+    },
+    { skip: !parentDocumentMetaToUpdate }
+  );
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -723,6 +733,7 @@ const PublishAction: DocumentActionComponent = ({
           // Update, if needed, the parent relation with the newly published document
           // check if in history we have the parent relation otherwise use the rootDocument
           if (fieldToConnect && documentHistory) {
+            const parentDataToUpdate = parentDocumentData.getInitialFormValues();
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
             const objectToConnect = stringToObject(fieldToConnect, {
@@ -734,6 +745,7 @@ const PublishAction: DocumentActionComponent = ({
                 },
               ],
             });
+            const dataToUpdate = deepMerge(parentDataToUpdate, objectToConnect);
 
             try {
               const updateRes = await updateDocumentMutation({
@@ -742,7 +754,7 @@ const PublishAction: DocumentActionComponent = ({
                 documentId: metaDocumentToUpdate.documentId,
                 params: metaDocumentToUpdate.params,
                 data: {
-                  ...objectToConnect,
+                  ...dataToUpdate,
                 },
               });
 
@@ -896,6 +908,16 @@ const UpdateAction: DocumentActionComponent = ({
   const { currentDocumentMeta } = useDocumentContext('UpdateAction');
   const [updateDocumentMutation] = useUpdateDocumentMutation();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const parentDocumentMetaToUpdate = documentHistory?.at(-2) ?? rootDocumentMeta;
+  const parentDocumentData = useDocument(
+    {
+      documentId: parentDocumentMetaToUpdate?.documentId,
+      model: parentDocumentMetaToUpdate?.model,
+      collectionType: parentDocumentMetaToUpdate?.collectionType,
+      params: parentDocumentMetaToUpdate?.params,
+    },
+    { skip: !parentDocumentMetaToUpdate }
+  );
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -983,7 +1005,7 @@ const UpdateAction: DocumentActionComponent = ({
             // Update, if needed, the parent relation with the newly published document
             // check if in history we have the parent relation otherwise use the rootDocument
             if (fieldToConnect && documentHistory) {
-              const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
+              const parentDataToUpdate = parentDocumentData.getInitialFormValues();
               const objectToConnect = stringToObject(fieldToConnect, {
                 connect: [
                   {
@@ -993,15 +1015,16 @@ const UpdateAction: DocumentActionComponent = ({
                   },
                 ],
               });
+              const dataToUpdate = deepMerge(parentDataToUpdate, objectToConnect);
 
               try {
                 const updateRes = await updateDocumentMutation({
-                  collectionType: metaDocumentToUpdate.collectionType,
-                  model: metaDocumentToUpdate.model,
-                  documentId: metaDocumentToUpdate.documentId,
-                  params: metaDocumentToUpdate.params,
+                  collectionType: parentDocumentMetaToUpdate.collectionType,
+                  model: parentDocumentMetaToUpdate.model,
+                  documentId: parentDocumentMetaToUpdate.documentId,
+                  params: parentDocumentMetaToUpdate.params,
                   data: {
-                    ...objectToConnect,
+                    ...dataToUpdate,
                   },
                 });
                 if ('error' in updateRes) {
@@ -1073,8 +1096,12 @@ const UpdateAction: DocumentActionComponent = ({
     fieldToConnect,
     documentHistory,
     dispatch,
-    rootDocumentMeta,
+    parentDocumentData,
     updateDocumentMutation,
+    parentDocumentMetaToUpdate?.collectionType,
+    parentDocumentMetaToUpdate?.model,
+    parentDocumentMetaToUpdate?.documentId,
+    parentDocumentMetaToUpdate?.params,
     formatAPIError,
     onPreview,
   ]);
