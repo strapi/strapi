@@ -1,8 +1,17 @@
-export function stringToObject(path, object) {
-  const parts = path.split('.');
-  const result = {};
+/* eslint-disable @typescript-eslint/no-explicit-any */
+interface StringToObjectInput {
+  [key: string]: any;
+}
 
-  let current = result;
+interface StringToObjectResult {
+  [key: string]: any;
+}
+
+export function stringToObject(path: string, object: StringToObjectInput): StringToObjectResult {
+  const parts = path.split('.');
+  const result: StringToObjectResult = {};
+
+  let current: StringToObjectResult = result;
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
 
