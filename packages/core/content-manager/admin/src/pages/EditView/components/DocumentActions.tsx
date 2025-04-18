@@ -1005,9 +1005,6 @@ const UpdateAction: DocumentActionComponent = ({
             // Update, if needed, the parent relation with the newly published document
             // check if in history we have the parent relation otherwise use the rootDocument
             if (fieldToConnect && documentHistory && parentDocumentMetaToUpdate.documentId) {
-              console.log('fieldToConnect', fieldToConnect);
-              console.log('documentHistory', documentHistory);
-              console.log('parentDocumentMetaToUpdate', parentDocumentMetaToUpdate);
               const parentDataToUpdate = parentDocumentData.getInitialFormValues();
               const objectToConnect = stringToObject(fieldToConnect, {
                 connect: [
