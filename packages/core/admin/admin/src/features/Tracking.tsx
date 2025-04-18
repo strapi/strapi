@@ -318,6 +318,8 @@ interface CreateEntryEvents {
     documentId?: string;
     status?: string;
     error?: unknown;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 

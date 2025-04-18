@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { clickAndWait } from '../../../utils/shared';
 
 const AUTHOR_EDIT_URL =
   /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
 
-test.describe('Relations on the fly', () => {
+test.describe('Relations on the fly - Edit a Relation', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -252,26 +252,5 @@ test.describe('Relations on the fly', () => {
     await page.getByRole('button', { name: 'Close modal' }).click();
     await expect(page.getByRole('button', { name: 'Mr. Led Tasso' })).toBeVisible();
     await expect(page.getByText('Mr. Led TassoPublished')).toBeVisible();
-  });
-
-  test('I want to crete a new relation', async ({ page }) => {
-    // Step 1. Got to Article collection-type and open one article
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
-    await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
-
-    // Step 2. Open the relation modal
-    await page.getByRole('combobox', { name: 'authors' }).click();
-    await page.getByRole('option', { name: 'Create a relation' }).click();
-
-    // Step 3. Edit the form
-    await expect(page.getByRole('banner').getByText('Create a relation')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
-    const name = page.getByRole('textbox', { name: 'name' });
-    await expect(name).toHaveValue('');
-    await name.fill('Mr. Plop');
-    await expect(name).toHaveValue('Mr. Plop');
-
-    // TODO: save/publish
   });
 });
