@@ -37,6 +37,7 @@ import {
   useUpdateDocumentMutation,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
+import { stringToObject } from '../../../utils/stringToObject';
 import { getTranslation } from '../../../utils/translations';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
@@ -724,6 +725,16 @@ const PublishAction: DocumentActionComponent = ({
           if (fieldToConnect && documentHistory) {
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
+            const objectToConnect = stringToObject(fieldToConnect, {
+              connect: [
+                {
+                  id: res.data.documentId,
+                  documentId: res.data.documentId,
+                  locale: res.data.locale,
+                },
+              ],
+            });
+
             try {
               const updateRes = await updateDocumentMutation({
                 collectionType: metaDocumentToUpdate.collectionType,
@@ -731,15 +742,7 @@ const PublishAction: DocumentActionComponent = ({
                 documentId: metaDocumentToUpdate.documentId,
                 params: metaDocumentToUpdate.params,
                 data: {
-                  [fieldToConnect]: {
-                    connect: [
-                      {
-                        id: res.data.documentId,
-                        documentId: res.data.documentId,
-                        locale: res.data.locale,
-                      },
-                    ],
-                  },
+                  ...objectToConnect,
                 },
               });
 
@@ -981,6 +984,15 @@ const UpdateAction: DocumentActionComponent = ({
             // check if in history we have the parent relation otherwise use the rootDocument
             if (fieldToConnect && documentHistory) {
               const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
+              const objectToConnect = stringToObject(fieldToConnect, {
+                connect: [
+                  {
+                    id: res.data.documentId,
+                    documentId: res.data.documentId,
+                    locale: res.data.locale,
+                  },
+                ],
+              });
 
               try {
                 const updateRes = await updateDocumentMutation({
@@ -989,15 +1001,7 @@ const UpdateAction: DocumentActionComponent = ({
                   documentId: metaDocumentToUpdate.documentId,
                   params: metaDocumentToUpdate.params,
                   data: {
-                    [fieldToConnect]: {
-                      connect: [
-                        {
-                          id: res.data.documentId,
-                          documentId: res.data.documentId,
-                          locale: res.data.locale,
-                        },
-                      ],
-                    },
+                    ...objectToConnect,
                   },
                 });
                 if ('error' in updateRes) {

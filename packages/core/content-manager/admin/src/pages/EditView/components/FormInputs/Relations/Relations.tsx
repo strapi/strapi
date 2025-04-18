@@ -601,8 +601,6 @@ const RelationsInput = ({
     params: currentDocumentMeta.params,
   } as DocumentMeta;
 
-  console.log('fieldToConnect', name);
-
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
       <Field.Label action={labelAction}>{label}</Field.Label>
