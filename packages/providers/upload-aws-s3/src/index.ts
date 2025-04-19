@@ -117,11 +117,16 @@ export default {
 
       const upload = (await uploadObj.done()) as UploadCommandOutput;
 
-      if (assertUrlProtocol(upload.Location)) {
-        file.url = baseUrl ? `${baseUrl}/${fileKey}` : upload.Location;
+      if (baseUrl) {
+        file.url = `${baseUrl}/${fileKey}`;
       } else {
-        // Default protocol to https protocol
-        file.url = `https://${upload.Location}`;
+        // No baseUrl provided, use upload.Location
+        if (assertUrlProtocol(upload.Location)) {
+          file.url = upload.Location;
+        } else {
+          // Default protocol to https protocol
+          file.url = `https://${upload.Location}`;
+        }
       }
     };
 
