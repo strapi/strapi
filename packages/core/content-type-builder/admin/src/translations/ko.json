@@ -196,7 +196,6 @@
   "table.button.no-fields": "새 필드 추가",
   "table.content.create-first-content-type.title": "콘텐츠 타입 없음",
   "table.content.create-first-content-type.description": "Collection Types, Single Types 및 컴포넌트를 생성하여 스키마를 구축하세요.",
-  "table.content.create-first-content-type.import-code": "Next.js 애플리케이션 가져오기",
   "table.content.create-first-content-type.start-with-prompt": "프롬프트로 시작하기",
   "table.content.no-fields.collection-type": "Collection Type에 첫 필드를 추가해보세요.",
   "table.content.no-fields.component": "컴포넌트에 첫 필드를 추가해보세요.",

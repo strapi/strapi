@@ -1,11 +1,13 @@
 import { Button, Flex, Typography } from '@strapi/design-system';
-import { Sparkle, Folder } from '@strapi/icons';
+import { Sparkle, Paperclip } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { FigmaIcon } from '../../components/AIChat/components/icons/FigmaIcon';
 import { useStrapiChat } from '../../components/AIChat/providers/ChatProvider';
 import { useUploadProjectToChat } from '../../components/AIChat/UploadCodeModal';
+import { useUploadFigmaToChat } from '../../components/AIChat/UploadFigmaModal';
 import { getTrad } from '../../utils/getTrad';
 
 // Styled container that implements responsive behavior
@@ -28,6 +30,7 @@ export const EmptyState = () => {
 
   const { isChatEnabled, openChat } = useStrapiChat();
   const { openCodeUpload } = useUploadProjectToChat();
+  const { openFigmaUpload } = useUploadFigmaToChat();
 
   return (
     <ResponsiveContainer
@@ -57,10 +60,20 @@ export const EmptyState = () => {
       {/* Chat is not available on small screens either way */}
       {isChatEnabled && (
         <Flex gap={2} direction="column" className="hide-on-small">
-          <Button startIcon={<Folder />} variant="tertiary" onClick={() => openCodeUpload(true)}>
+          <Button startIcon={<Paperclip />} variant="tertiary" onClick={() => openCodeUpload(true)}>
             {formatMessage({
               id: getTrad('table.content.create-first-content-type.import-code'),
-              defaultMessage: 'Import code',
+              defaultMessage: 'Import from computer',
+            })}
+          </Button>
+          <Button
+            startIcon={<FigmaIcon />}
+            variant="tertiary"
+            onClick={() => openFigmaUpload(true)}
+          >
+            {formatMessage({
+              id: getTrad('table.content.create-first-content-type.import-figma'),
+              defaultMessage: 'Import from Figma',
             })}
           </Button>
           <Button startIcon={<Sparkle />} variant="tertiary" onClick={openChat}>

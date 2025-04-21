@@ -3,32 +3,26 @@ interface FigmaIconProps extends React.SVGProps<SVGSVGElement> {}
 export const FigmaIcon = (props: FigmaIconProps) => {
   return (
     <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
+      width={props.width || 16}
+      height={props.height || 16}
+      viewBox="0 0 200 300"
       xmlns="http://www.w3.org/2000/svg"
+      aria-label="Figma logo"
+      style={{ display: 'block', margin: '0 auto', ...props.style }}
       {...props}
     >
+      <title>Figma.logo</title>
+      <desc>Created using Figma</desc>
       <path
-        d="M5.33333 16C6.4381 16 7.33333 15.1048 7.33333 14V12H5.33333C4.22857 12 3.33333 12.8952 3.33333 14C3.33333 15.1048 4.22857 16 5.33333 16Z"
-        fill="#0ACF83"
+        d="M50 300c27.6 0 50-22.4 50-50v-50H50c-27.6 0-50 22.4-50 50s22.4 50 50 50z"
+        fill="#0acf83"
       />
+      <path d="M0 150c0-27.6 22.4-50 50-50h50v100H50c-27.6 0-50 22.4-50 50z" fill="#a259ff" />
+      <path d="M0 50C0 22.4 22.4 0 50 0h50v100H50C22.4 100 0 77.6 0 50z" fill="#f24e1e" />
+      <path d="M100 0h50c27.6 0 50 22.4 50 50s-22.4 50-50 50h-50V0z" fill="#ff7262" />
       <path
-        d="M3.33333 10C3.33333 8.89524 4.22857 8 5.33333 8H7.33333V12H5.33333C4.22857 12 3.33333 11.1048 3.33333 10Z"
-        fill="#A259FF"
-      />
-      <path
-        d="M3.33333 6C3.33333 4.89524 4.22857 4 5.33333 4H7.33333V8H5.33333C4.22857 8 3.33333 7.10476 3.33333 6Z"
-        fill="#F24E1E"
-      />
-      <path
-        d="M7.33333 4H9.33333C10.4381 4 11.3333 4.89524 11.3333 6C11.3333 7.10476 10.4381 8 9.33333 8H7.33333V4Z"
-        fill="#FF7262"
-      />
-      <path
-        d="M11.3333 10C11.3333 11.1048 10.4381 12 9.33333 12C8.22857 12 7.33333 11.1048 7.33333 10C7.33333 8.89524 8.22857 8 9.33333 8C10.4381 8 11.3333 8.89524 11.3333 10Z"
-        fill="#1ABCFE"
+        d="M200 150c0 27.6-22.4 50-50 50s-50-22.4-50-50 22.4-50 50-50 50 22.4 50 50z"
+        fill="#1abcfe"
       />
     </svg>
   );

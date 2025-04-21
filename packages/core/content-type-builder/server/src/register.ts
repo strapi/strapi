@@ -7,11 +7,11 @@ import { mergeWith } from 'lodash/fp';
 const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) => {
   const middlewares = strapi.config.get('middlewares') as (string | object)[];
 
-  const configuredMiddlewares = middlewares.map((currentMiddleware) => {
-    let _currentMiddleware = currentMiddleware as any;
+  const configuredMiddlewares = middlewares.map((m) => {
+    let currentMiddleware = m as any;
     if (currentMiddleware === middleware.name) {
       // Use the new config object if the middleware has no config property yet
-      _currentMiddleware = {
+      currentMiddleware = {
         name: 'strapi::security',
         config: {
           useDefaults: true,
@@ -26,7 +26,7 @@ const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) =>
       };
     }
 
-    if (_currentMiddleware.name === middleware.name) {
+    if (currentMiddleware.name === middleware.name) {
       // Deep merge (+ concat arrays) the new config with the current middleware config
       return mergeWith(
         (objValue, srcValue) => {
@@ -36,12 +36,12 @@ const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) =>
 
           return undefined;
         },
-        _currentMiddleware,
+        currentMiddleware,
         middleware
       );
     }
 
-    return _currentMiddleware;
+    return currentMiddleware;
   });
 
   strapi.config.set('middlewares', configuredMiddlewares);

@@ -160,7 +160,6 @@
   "table.button.no-fields": "Добавить новое поле",
   "table.content.create-first-content-type.title": "Нет типов контента",
   "table.content.create-first-content-type.description": "Создавайте типы коллекций, единичные типы и компоненты для построения вашей схемы.",
-  "table.content.create-first-content-type.import-code": "Импортировать приложение Next.js",
   "table.content.create-first-content-type.start-with-prompt": "Начать с подсказки",
   "table.content.no-fields.collection-type": "Добавьте первое поле в этот тип коллекции",
   "table.content.no-fields.component": "Добавьте первое поле в этот компонент",

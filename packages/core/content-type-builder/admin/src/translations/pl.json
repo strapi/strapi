@@ -196,7 +196,6 @@
   "table.button.no-fields": "Dodaj nowe pole",
   "table.content.create-first-content-type.title": "Brak typów treści",
   "table.content.create-first-content-type.description": "Twórz kolekcje, pojedyncze typy i komponenty, aby zbudować swój schemat.",
-  "table.content.create-first-content-type.import-code": "Importuj aplikację Next.js",
   "table.content.create-first-content-type.start-with-prompt": "Zacznij od promptu",
   "table.content.no-fields.collection-type": "Dodaj pierwsze pole do tego typu treści",
   "table.content.no-fields.component": "Dodaj pierwsze pole do tego komponentu",

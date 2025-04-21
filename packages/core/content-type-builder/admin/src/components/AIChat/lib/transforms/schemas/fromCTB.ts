@@ -5,7 +5,8 @@ import type { ContentType, Component, AnyAttribute } from '../../../../../types'
 const transformAttributesFromCTBToChat = (attributes: AnyAttribute[]) => {
   return attributes.reduce(
     (acc, attribute) => {
-      const { name, status, ...rest } = attribute;
+      // @ts-expect-error - injected from previous ai messages
+      const { name, status, action, ...rest } = attribute;
 
       return {
         ...acc,

@@ -196,7 +196,6 @@
   "table.button.no-fields": "إضافة حقل جديد",
   "table.content.create-first-content-type.title": "لا توجد أنواع محتوى",
   "table.content.create-first-content-type.description": "قم بإنشاء أنواع المجموعات والأنواع الفردية والمكونات من أجل بناء المخطط الخاص بك.",
-  "table.content.create-first-content-type.import-code": "استيراد تطبيق Next.js",
   "table.content.create-first-content-type.start-with-prompt": "ابدأ بمطالبة",
   "table.content.no-fields.collection-type": "أضف حقلك الأول إلى Collection Type هذا",
   "table.content.no-fields.component": "أضف حقلك الأول إلى هذا المكون",

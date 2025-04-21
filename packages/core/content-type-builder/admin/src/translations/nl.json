@@ -196,7 +196,6 @@
   "table.button.no-fields": "Voeg een nieuw veld toe",
   "table.content.create-first-content-type.title": "Geen content types",
   "table.content.create-first-content-type.description": "Maak collectie types, enkel types en componenten om je schema te bouwen.",
-  "table.content.create-first-content-type.import-code": "Importeer Next.js app",
   "table.content.create-first-content-type.start-with-prompt": "Begin met een prompt",
   "table.content.no-fields.collection-type": "Voeg het eerste veld toe aan dit collectie type",
   "table.content.no-fields.component": "Voeg het eerste veld toe aan dit component",

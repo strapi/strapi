@@ -156,7 +156,6 @@
   "relation.oneToMany": "patrí viacerým",
   "relation.oneToOne": "má jeden a patrí jednému",
   "relation.oneWay": "má jeden",
-  "table.content.create-first-content-type.import-code": "Importovať Next.js aplikáciu",
   "table.content.create-first-content-type.start-with-prompt": "Začať s výzvou",
   "chat.tooltips.close-chat": "Zatvoriť chat",
   "chat.tooltips.create-chat": "Nová konverzácia",

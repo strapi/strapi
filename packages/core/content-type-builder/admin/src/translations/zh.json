@@ -188,7 +188,6 @@
   "relation.oneWay": "有一個",
   "table.button.no-fields": "新增欄位",
   "table.content.create-first-content-type": "建立您的首個集合型別",
-  "table.content.create-first-content-type.import-code": "导入 Next.js 应用",
   "table.content.create-first-content-type.start-with-prompt": "从提示开始",
   "table.content.no-fields.collection-type": "向此集合型別新增首個欄位",
   "table.content.no-fields.component": "向此元件新增首個欄位",

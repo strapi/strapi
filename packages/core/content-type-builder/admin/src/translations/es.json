@@ -172,7 +172,7 @@
   "table.content.create-first-content-type.description": "Cree tipos de colección, tipos únicos y componentes para construir su esquema.",
   "table.content.no-fields.collection-type": "Agrega tu primer campo a este Collection Type",
   "table.content.no-fields.component": "Añade tu primer campo a este componente",
-  "table.content.create-first-content-type.import-code": "Importar aplicación Next.js",
+  "table.content.create-first-content-type.import-code": "Importar código",
   "table.content.create-first-content-type.start-with-prompt": "Comenzar con un prompt",
   "chat.tooltips.close-chat": "Cerrar chat",
   "chat.tooltips.create-chat": "Nueva conversación",

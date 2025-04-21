@@ -7,6 +7,7 @@ import { useDataManager } from '../../DataManager/useDataManager';
 import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
+import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
 import { STRAPI_AI_TOKEN } from '../lib/constants';
 import { transformMessages } from '../lib/transforms/messages';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
@@ -57,11 +58,15 @@ export const BaseChatProvider = ({
   // DataManager
   const { components, contentTypes } = useDataManager();
 
+  // Last user seen schemas
+  const { lastSeenSchemas } = useLastSeenSchemas();
+
   // Schemas to be sent to the chat
   const schemas = useMemo(() => {
     return [
       ...Object.values(contentTypes)
         .filter((schema) => schema.status !== 'REMOVED')
+        // Probably we should still keep this one, not sure
         .filter((schema) => schema.uid !== 'plugin::users-permissions.user')
         .filter((schema) => schema.visible)
         .map(transformCTBToChat as any),
@@ -77,12 +82,15 @@ export const BaseChatProvider = ({
     experimental_throttle: 100,
     body: {
       schemas,
+      metadata: {
+        lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
+      },
     },
   });
 
-  /**================================================================================
+  /* -------------------------------------------------------------------------------------------------
    * AI SDK chat overrides
-   *================================================================================*/
+   * -----------------------------------------------------------------------------------------------*/
 
   // Messages are transformed into an easier to use format
   // TODO: Make this more efficient only computing new streamed parts
@@ -102,14 +110,19 @@ export const BaseChatProvider = ({
           contentType: attachment.contentType,
         })),
       allowEmptySubmit: true,
-      body: { schemas },
+      body: {
+        schemas,
+        metadata: {
+          lastSeenSchemas: lastSeenSchemas.map((schema) => schema.uid),
+        },
+      },
     });
     setAttachments([]);
   };
 
-  /**=================================================================================
+  /* -------------------------------------------------------------------------------------------------
    * Chat title
-   * =================================================================================*/
+   * -----------------------------------------------------------------------------------------------*/
   const { title, generateTitle, resetTitle } = useChatTitle({ chatId: chat.id, messages });
 
   // Automatically generate title when we have at least 1 message (user query)

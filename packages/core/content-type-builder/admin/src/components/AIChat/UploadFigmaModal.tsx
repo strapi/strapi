@@ -275,7 +275,8 @@ export const UploadFigmaModal = () => {
   const { t } = useTranslations();
 
   const { addAttachments } = useAttachments();
-  const { isFigmaUploadOpen, closeFigmaUpload } = useUploadFigmaToChat();
+  const { isFigmaUploadOpen, closeFigmaUpload, submitOnFinish } = useUploadFigmaToChat();
+  const { input, setInput, setMessages, reload } = useStrapiChat();
   const { processFigmaUrl, isLoading, error } = useFigmaUpload({
     onSuccess: (images) => {
       setFigmaImages(images);
@@ -307,7 +308,36 @@ export const UploadFigmaModal = () => {
   const handleComplete = () => {
     // Only attach the selected images
     const selectedFigmaImages = figmaImages.filter((img) => selectedImages.includes(img.id));
-    addAttachments(selectedFigmaImages);
+    if (selectedFigmaImages.length === 0) {
+      closeFigmaUpload();
+      return;
+    }
+    if (submitOnFinish) {
+      // Autosubmit a message to chat with attachments
+      setMessages(() => [
+        {
+          role: 'user',
+          content: 'Create schemas from the attached images',
+          id: 'first-message',
+          experimental_attachments: selectedFigmaImages,
+          parts: [
+            {
+              type: 'text',
+              text: 'Create schemas from the attached images',
+            },
+          ],
+        },
+      ]);
+      reload();
+      closeFigmaUpload();
+    } else {
+      // If input is empty, set a predefined message
+      if (!input) {
+        setInput('Create schemas from the attached images');
+      }
+      addAttachments(selectedFigmaImages);
+      closeFigmaUpload();
+    }
   };
 
   return (

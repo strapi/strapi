@@ -42,7 +42,6 @@ export const SchemaChatProvider = ({ children }: { children: ReactNode }) => {
       const oldSchema =
         contentTypes[change.schema.uid as any] || components[change.schema.uid as any];
       const newSchema = transformChatToCTB(change.schema, oldSchema);
-
       applyChange({
         action: TYPE_TO_ACTION[change.type]!,
         schema: newSchema,

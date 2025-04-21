@@ -21,9 +21,9 @@ const createAttributeWithStatus = (
   status: AnyAttribute['status']
 ): AnyAttribute =>
   ({
+    ...attributeData,
     name,
     status,
-    ...attributeData,
   }) as AnyAttribute;
 
 /**
@@ -31,9 +31,15 @@ const createAttributeWithStatus = (
  */
 const determineAttributeStatus = (
   newAttr: Record<string, any>,
-  oldAttr?: AnyAttribute
+  oldAttr?: AnyAttribute,
+  oldSchema?: ContentType | Component
 ): AnyAttribute['status'] => {
   if (!oldAttr) {
+    return 'NEW';
+  }
+
+  // If the schema was already new, don't mark attributes as changed, keep them as new.
+  if (oldSchema?.status === 'NEW') {
     return 'NEW';
   }
 
@@ -53,7 +59,7 @@ const determineAttributeStatus = (
  * Transform attributes from Chat format to CTB format
  * Also performs a diff to determine the status of each attribute
  */
-const transformAttributesFromChatToCTB = (
+export const transformAttributesFromChatToCTB = (
   { action, attributes }: Schema,
   oldSchema?: ContentType | Component
 ): AnyAttribute[] => {
@@ -73,10 +79,16 @@ const transformAttributesFromChatToCTB = (
   // Process current attributes (new and changed)
   const processedAttributes = Object.entries(attributes).map(([name, attr]) => {
     const oldAttr = oldAttributesMap[name];
-    const status = determineAttributeStatus({ ...attr, name }, oldAttr);
+    const status = determineAttributeStatus({ ...attr, name }, oldAttr, oldSchema);
 
     return createAttributeWithStatus(name, attr, status);
   });
+
+  // No need to mark removed attributes if the old schema is new, just remove it from the list
+  // TODO: Else a validation error occurs on the backend side.
+  if (oldSchema?.status === 'NEW') {
+    return processedAttributes;
+  }
 
   // Find removed attributes (exist in old but not in new)
   const removedAttributes = Object.entries(oldAttributesMap)
@@ -116,12 +128,10 @@ export const transformChatToCTB = (
       modelType: schema.modelType,
       uid: schema.uid as any,
       collectionName: pluralName,
-      // isTemporary: true,
       status: schema.action ? ACTION_TO_STATUS[schema.action] : 'NEW',
       globalId: singularName,
     } satisfies Component;
   }
-
   return {
     uid: schema.uid as any,
     modelType: schema.modelType,
@@ -143,7 +153,6 @@ export const transformChatToCTB = (
       },
     },
     visible: true,
-    // isTemporary: true,
     status: schema.action ? ACTION_TO_STATUS[schema.action] : 'NEW',
     globalId: singularName,
     restrictRelationsTo: null, // TODO: not sure what this is about

@@ -15,7 +15,6 @@ import { styled } from 'styled-components';
 import { ANIMATIONS } from './animations';
 import { Base64Img } from './Base64Image';
 import { FullScreenImage } from './FullScreenImage';
-import { FigmaIcon } from './icons/FigmaIcon';
 
 interface Base64ImageProps {
   imageUrl: string;
@@ -85,9 +84,7 @@ export const ImagePreview = ({
 
         <CardBody>
           <CardContent>
-            <CardTitle>
-              <FigmaIcon /> {imageName}
-            </CardTitle>
+            <CardTitle>{imageName}</CardTitle>
           </CardContent>
         </CardBody>
       </CardContainer>

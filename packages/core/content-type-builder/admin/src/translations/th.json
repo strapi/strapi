@@ -153,7 +153,6 @@
   "relation.oneToMany": "เป็นของหลาย",
   "relation.oneToOne": "มีและเป็นของหนึ่ง",
   "relation.oneWay": "มีหนึ่ง",
-  "table.content.create-first-content-type.import-code": "นำเข้าแอป Next.js",
   "table.content.create-first-content-type.start-with-prompt": "เริ่มต้นด้วยข้อความแจ้ง",
   "chat.tooltips.close-chat": "ปิดแชท",
   "chat.tooltips.create-chat": "การสนทนาใหม่",

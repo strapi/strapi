@@ -768,12 +768,24 @@ const slice = createUndoRedoSlice(
             break;
           case 'delete': {
             const uid = schema.uid;
-
-            if (schema.modelType === 'component') {
-              state.components[uid].status = 'REMOVED';
+            const isComponent = schema.modelType === 'component';
+            // It's a component that has yet not been added
+            if (isComponent) {
+              const isUnsaved = state.components[uid]?.status === 'NEW';
+              if (isUnsaved) {
+                delete state.components[uid];
+              } else {
+                state.components[uid].status = 'REMOVED';
+              }
             } else {
-              state.contentTypes[uid].status = 'REMOVED';
+              const isUnsaved = state.contentTypes[uid]?.status === 'NEW';
+              if (isUnsaved) {
+                delete state.contentTypes[uid];
+              } else {
+                state.contentTypes[uid].status = 'REMOVED';
+              }
             }
+
             break;
           }
         }

@@ -194,7 +194,6 @@
   "relation.oneToMany": "належить до багатьох",
   "relation.oneToOne": "містить і належить до однієї",
   "relation.oneWay": "містить одне",
-  "table.content.create-first-content-type.import-code": "Імпортувати додаток Next.js",
   "table.content.create-first-content-type.start-with-prompt": "Почати з підказки",
   "chat.tooltips.close-chat": "Закрити чат",
   "chat.tooltips.create-chat": "Нова розмова",

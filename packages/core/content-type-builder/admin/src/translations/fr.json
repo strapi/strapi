@@ -196,7 +196,7 @@
   "table.button.no-fields": "Ajouter un champ",
   "table.content.create-first-content-type.title": "Aucun type de contenu",
   "table.content.create-first-content-type.description": "Créez des types de collection, des types uniques et des composants pour construire votre schéma.",
-  "table.content.create-first-content-type.import-code": "Importer une application Next.js",
+  "": "Importer une application Next.js",
   "table.content.create-first-content-type.start-with-prompt": "Commencer avec une invite",
   "table.content.no-fields.collection-type": "Ajoutez votre premier champ à ce type de collection",
   "table.content.no-fields.component": "Ajoutez votre premier champ à ce composant",

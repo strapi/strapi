@@ -196,7 +196,6 @@
   "table.button.no-fields": "Tambah ruang baru",
   "table.content.create-first-content-type.title": "Tiada jenis kandungan",
   "table.content.create-first-content-type.description": "Buat jenis koleksi, jenis tunggal dan komponen untuk membina skema anda.",
-  "table.content.create-first-content-type.import-code": "Import aplikasi Next.js",
   "table.content.create-first-content-type.start-with-prompt": "Mulakan dengan prompt",
   "table.content.no-fields.collection-type": "Tambah ruang pertama ke jenis koleksi ini",
   "table.content.no-fields.component": "Tambah ruang pertama ke komponen ini",

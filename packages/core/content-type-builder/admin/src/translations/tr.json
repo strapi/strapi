@@ -165,7 +165,6 @@
   "relation.oneWay": "tek yönlü",
   "table.button.no-fields": "Yeni alan ekle",
   "table.content.create-first-content-type": "İlk Koleksiyon-Tipini oluştur",
-  "table.content.create-first-content-type.import-code": "Next.js uygulamasını içe aktar",
   "table.content.create-first-content-type.start-with-prompt": "Bir istem ile başla",
   "table.content.no-fields.collection-type": "Bu Koleksiyon-Tipine ile alanını ekle",
   "table.content.no-fields.component": "Bu bileşene ilk alanını ekle",

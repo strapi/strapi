@@ -24,10 +24,16 @@ function transformToolCall(
   }
 
   if (toolName === 'schemaGenerationTool') {
-    const schemaChanges =
-      (annotations as any)
-        ?.filter((a: ToolAnnotation) => a.type === 'schema-change')
-        .flatMap((a: SchemaChangeAnnotation) => a.changes || []) || [];
+    let schemaChanges = [];
+    if (toolCall.state === 'result' && toolCall.result && Array.isArray(toolCall.result.schemas)) {
+      // Prefer schemas from toolInvocation result
+      schemaChanges = toolCall.result.schemas.map((schema: any) => ({
+        // revisionId is not present in result, so use uid or name as fallback
+        revisionId: `${toolCall.toolCallId}-${schema.uid || schema.name}`,
+        schema,
+        type: schema.action || 'update',
+      }));
+    }
 
     const numSchemas = schemaChanges.length;
 
@@ -41,7 +47,7 @@ function transformToolCall(
       steps: schemaChanges.map((change: SchemaChange) => {
         return {
           id: change.revisionId,
-          description: change.schema.name,
+          description: change.schema.name?.charAt(0).toUpperCase() + change.schema.name.slice(1),
           status: change.type,
           link:
             change.schema.modelType === 'component'

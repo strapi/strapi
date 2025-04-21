@@ -196,7 +196,6 @@
   "table.button.no-fields": "新增欄位",
   "table.content.create-first-content-type.title": "沒有內容類型",
   "table.content.create-first-content-type.description": "創建集合類型、單一類型和元件以構建您的 schema。",
-  "table.content.create-first-content-type.import-code": "導入 Next.js 應用",
   "table.content.create-first-content-type.start-with-prompt": "從提示開始",
   "table.content.no-fields.collection-type": "向此集合型別新增首個欄位",
   "table.content.no-fields.component": "向此元件新增首個欄位",

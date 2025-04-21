@@ -295,6 +295,7 @@ export const UploadCodeModal = () => {
   const { t } = useTranslations();
 
   // Attach files to the chat
+  const { input, setInput } = useStrapiChat();
   const { addAttachments } = useAttachments();
 
   const { processZipFile, processFolder, isLoading, error } = useCodeUpload({
@@ -329,6 +330,10 @@ export const UploadCodeModal = () => {
 
       reload();
     } else if (projectAttachment) {
+      // If input is empty, set a predefined message
+      if (!input) {
+        setInput('Create schemas from my uploaded project');
+      }
       // Attach files to the chat input
       addAttachments([projectAttachment]);
     }

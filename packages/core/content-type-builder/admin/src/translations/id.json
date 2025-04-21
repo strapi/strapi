@@ -196,7 +196,6 @@
   "table.button.no-fields": "Tambahkan bidang baru",
   "table.content.create-first-content-type.title": "Tidak ada tipe konten",
   "table.content.create-first-content-type.description": "Buat Jenis Koleksi, Tipe Tunggal, dan komponen untuk membangun schema Anda.",
-  "table.content.create-first-content-type.import-code": "Impor aplikasi Next.js",
   "table.content.create-first-content-type.start-with-prompt": "Mulai dengan prompt",
   "table.content.no-fields.collection-type": "Tambahkan bidang pertama Anda ke Jenis Koleksi ini",
   "table.content.no-fields.component": "Tambahkan bidang pertama Anda ke komponen ini",

@@ -216,8 +216,6 @@ export function useFigmaUpload({ onSuccess, onError }: UseFigmaUploadOptions = {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { toggleNotification } = useNotification();
-
   /**
    * Main method to process a Figma URL
    * @param figmaUrl - Figma URL to process

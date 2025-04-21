@@ -196,7 +196,6 @@
   "table.button.no-fields": "フィールドを追加",
   "table.content.create-first-content-type.title": "コンテンツタイプがありません",
   "table.content.create-first-content-type.description": "スキーマを構築するためにコレクションタイプ、シングルタイプ、コンポーネントを作成します。",
-  "table.content.create-first-content-type.import-code": "Next.jsアプリをインポート",
   "table.content.create-first-content-type.start-with-prompt": "プロンプトから始める",
   "table.content.no-fields.collection-type": "このコレクションタイプに最初のフィールドを追加する",
   "table.content.no-fields.component": "このコンポーネントに最初のフィールドを追加する",
