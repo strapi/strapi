@@ -70,14 +70,14 @@ function deepMerge(target: any, source: { [x: string]: any }) {
       ) {
         // Create a map to quickly find matching objects
         const targetMap: { [key: string]: any } = {};
-        result[key].forEach((item) => {
+        result[key].forEach((item: any) => {
           if (item.__temp_key__) {
             targetMap[item.__temp_key__] = item;
           }
         });
 
         // Go through each source item
-        source[key].forEach((sourceItem, index) => {
+        source[key].forEach((sourceItem: any, index: number) => {
           if (sourceItem.__temp_key__ && targetMap[sourceItem.__temp_key__]) {
             // If we have a matching item in target, deep merge them
             result[key][
@@ -96,7 +96,7 @@ function deepMerge(target: any, source: { [x: string]: any }) {
       } else {
         // Simple array merge for arrays without __temp_key__
         result[key] = [...result[key]];
-        source[key].forEach((item, index) => {
+        source[key].forEach((item: any, index: number) => {
           if (index < result[key].length) {
             result[key][index] = deepMerge(result[key][index], item);
           } else {
