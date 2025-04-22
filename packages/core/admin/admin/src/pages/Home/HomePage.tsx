@@ -23,13 +23,37 @@ import type { Widget as WidgetType } from 'src/core/apis/Widgets';
 interface RootProps {
   title: MessageDescriptor;
   icon?: typeof import('@strapi/icons').PuzzlePiece;
+  permissions?: WidgetType['permissions'];
   children: React.ReactNode;
 }
 
-export const WidgetRoot = ({ title, icon = PuzzlePiece, children }: RootProps) => {
+export const WidgetRoot = ({
+  title,
+  icon = PuzzlePiece,
+  permissions = [],
+  children,
+}: RootProps) => {
   const { formatMessage } = useIntl();
   const id = React.useId();
   const Icon = icon;
+
+  const [permissionStatus, setPermissionStatus] = React.useState<
+    'loading' | 'granted' | 'forbidden'
+  >('loading');
+  const checkUserHasPermissions = useAuth('WidgetRoot', (state) => state.checkUserHasPermissions);
+  React.useEffect(() => {
+    const checkPermissions = async () => {
+      const matchingPermissions = await checkUserHasPermissions(permissions);
+      const shouldGrant = matchingPermissions.length >= permissions.length;
+      setPermissionStatus(shouldGrant ? 'granted' : 'forbidden');
+    };
+
+    if (!permissions || permissions.length === 0) {
+      setPermissionStatus('granted');
+    } else {
+      checkPermissions();
+    }
+  }, [checkUserHasPermissions, permissions]);
 
   return (
     <Flex
@@ -52,7 +76,9 @@ export const WidgetRoot = ({ title, icon = PuzzlePiece, children }: RootProps) =
         </Typography>
       </Flex>
       <Box width="100%" height="261px" overflow="auto" tag="main">
-        {children}
+        {permissionStatus === 'loading' && <Widget.Loading />}
+        {permissionStatus === 'forbidden' && <Widget.NoPermissions />}
+        {permissionStatus === 'granted' && children}
       </Box>
     </Flex>
   );
@@ -89,37 +115,7 @@ const UnstableHomePageCe = () => {
   const user = useAuth('HomePageCE', (state) => state.user);
   const displayName = user?.firstname ?? user?.username ?? user?.email;
 
-  const checkUserHasPermissions = useAuth('HomePageCE', (state) => state.checkUserHasPermissions);
   const getAllWidgets = useStrapiApp('UnstableHomepageCe', (state) => state.widgets.getAll);
-  const [allowedWidgets, setAllowedWidgets] = React.useState<WidgetType[]>([]);
-
-  React.useEffect(() => {
-    (async () => {
-      const results = await Promise.all(
-        getAllWidgets().map(async (widget) => {
-          if (!widget.permissions || widget.permissions.length === 0) {
-            return {
-              widget,
-              hasPermission: true,
-            };
-          }
-
-          // Check if the user has all the permissions required by the widget
-          const permissions = await checkUserHasPermissions(widget.permissions);
-          return {
-            widget,
-            hasPermission: permissions.length >= widget.permissions.length,
-          };
-        })
-      );
-
-      const filteredWidgets = results
-        .filter(({ hasPermission }) => hasPermission)
-        .map(({ widget }) => widget);
-
-      setAllowedWidgets(filteredWidgets);
-    })();
-  }, [checkUserHasPermissions, getAllWidgets]);
 
   return (
     <Main>
@@ -140,10 +136,14 @@ const UnstableHomePageCe = () => {
         <Flex direction="column" alignItems="stretch" gap={8} paddingBottom={10}>
           <GuidedTour />
           <Grid.Root gap={5}>
-            {allowedWidgets.map((widget) => {
+            {getAllWidgets().map((widget) => {
               return (
                 <Grid.Item col={6} s={12} key={widget.uid}>
-                  <WidgetRoot title={widget.title} icon={widget.icon}>
+                  <WidgetRoot
+                    title={widget.title}
+                    icon={widget.icon}
+                    permissions={widget.permissions}
+                  >
                     <WidgetComponent component={widget.component} />
                   </WidgetRoot>
                 </Grid.Item>
