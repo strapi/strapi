@@ -158,13 +158,15 @@ const uidRefinement: z.SuperRefinement<{
     });
   }
 };
+
 const enumRefinement: z.SuperRefinement<{
   type: string;
   default?: unknown;
   enum?: string[];
 }> = (value, ctx) => {
   if (value.type === 'enumeration' && !isNil(value.default) && !isNil(value.enum)) {
-    if (value.default === '' || value.enum.some((v) => v === value.default)) {
+
+    if (value.default === '' || !value.enum.some((v) => v === value.default)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'Default value must be one of the enum values',
