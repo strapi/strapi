@@ -37,8 +37,9 @@ import {
   useUpdateDocumentMutation,
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
-import { stringToObject, deepMerge } from '../../../utils/mergeObject';
 import { getTranslation } from '../../../utils/translations';
+import { deepMerge } from '../utils/deepMergeObjects';
+import { stringToObject } from '../utils/stringToObject';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
