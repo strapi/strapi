@@ -96,7 +96,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
 
   const [isOpen, setIsOpen] = useState<boolean>(true);
 
-  const isTypeDeleted = item.status === 'REMOVED';
+  const isTypeDeleted = type.status === 'REMOVED';
 
   const { contentTypes, removeAttribute, isInDevelopmentMode } = useDataManager();
   const { onOpenModalEditField, onOpenModalEditCustomField } = useFormModalNavigation();
