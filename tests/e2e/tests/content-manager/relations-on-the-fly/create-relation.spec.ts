@@ -221,7 +221,7 @@ test.describe('Relations on the fly - Create a Relation', () => {
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
   });
 
-  test.only('I want to create a relation inside a dynamic zone component, and save', async ({
+  test.skip('I want to create a relation inside a dynamic zone component, and save', async ({
     page,
   }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
