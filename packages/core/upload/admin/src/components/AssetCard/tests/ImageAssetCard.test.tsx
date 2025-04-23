@@ -1,6 +1,5 @@
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
 import en from '../../../translations/en.json';
 import { ImageAssetCard } from '../ImageAssetCard';
@@ -50,7 +49,7 @@ describe('ImageAssetCard', () => {
     expect(screen.getByText('Image')).toBeInTheDocument();
 
     // Check for the image element
-    const image = document.querySelector('img');
+    const image = screen.getByAltText('Alternative text');
     expect(image).toHaveAttribute('src', 'http://somewhere.com/hello.png');
     expect(image).toHaveAttribute('alt', 'Alternative text');
   });
@@ -72,7 +71,7 @@ describe('ImageAssetCard', () => {
     );
 
     // Check that the URL is used directly without modification when signed
-    const image = document.querySelector('img');
+    const image = screen.getByAltText('Alternative text');
     expect(image).toHaveAttribute('src', 'http://somewhere.com/hello.png?token=xyz');
   });
 

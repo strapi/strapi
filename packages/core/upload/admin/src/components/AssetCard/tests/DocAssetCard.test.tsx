@@ -17,7 +17,7 @@ jest.mock('react-intl', () => ({
 
 describe('DocAssetCard', () => {
   it('renders a document asset card with correct structure', () => {
-    const { getByText, getByRole } = renderTL(
+    const { getByText } = renderTL(
       <DesignSystemProvider>
         <DocAssetCard
           name="hello.png"
