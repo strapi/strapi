@@ -192,16 +192,16 @@ const setStatus = (type: ContentType | Component, status: Status) => {
   }
 };
 
-const setAttributeStatus = (attribute: Record<string, any>, status: Status) => {
-  switch (attribute.status) {
-    case 'NEW':
-    case 'REMOVED': {
-      break;
-    }
-    default: {
-      attribute.status = status;
-    }
+const getNewStatus = (oldStatus: Status | undefined, newStatus: Status) => {
+  if (oldStatus === 'NEW' || oldStatus === 'REMOVED') {
+    return oldStatus;
   }
+
+  return newStatus;
+};
+
+const setAttributeStatus = (attribute: Record<string, any>, status: Status) => {
+  attribute.status = getNewStatus(attribute.status, status);
 };
 
 const createAttribute = (properties: Record<string, any>): AnyAttribute => {
@@ -212,7 +212,15 @@ const createAttribute = (properties: Record<string, any>): AnyAttribute => {
 };
 
 const setAttributeAt = (type: ContentType | Component, index: number, attribute: AnyAttribute) => {
-  type.attributes[index] = attribute;
+  const previousAttribute = type.attributes[index];
+
+  const newStatus = getNewStatus(previousAttribute.status, 'CHANGED');
+
+  type.attributes[index] = {
+    ...attribute,
+    status: newStatus,
+  };
+
   setStatus(type, 'CHANGED');
 };
 
@@ -423,15 +431,13 @@ const slice = createUndoRedoSlice(
 
         const previousAttribute = type.attributes[initialAttributeIndex];
 
-        const attribute = { ...attributeToSet, status: 'CHANGED' } as AnyAttribute;
+        setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
 
-        setAttributeAt(type, initialAttributeIndex, attribute);
-
-        if (previousAttribute.type !== attribute.type) {
+        if (previousAttribute.type !== attributeToSet.type) {
           return;
         }
 
-        if (previousAttribute.type !== 'relation' || attribute.type !== 'relation') {
+        if (previousAttribute.type !== 'relation' || attributeToSet.type !== 'relation') {
           return;
         }
 
@@ -441,7 +447,7 @@ const slice = createUndoRedoSlice(
         });
         const newTarget = getType(state, {
           forTarget: 'contentType',
-          targetUid: attribute.target,
+          targetUid: attributeToSet.target,
         });
 
         const previousTargetAttributeIndex = findAttributeIndex(
@@ -454,18 +460,21 @@ const slice = createUndoRedoSlice(
           removeAttributeByName(previousTarget, previousAttribute.targetAttribute);
         }
 
-        const newRelationType = getRelationType(attribute.relation, attribute.targetAttribute);
+        const newRelationType = getRelationType(
+          attributeToSet.relation,
+          attributeToSet.targetAttribute
+        );
         const isBidirectionnal = !ONE_SIDE_RELATIONS.includes(newRelationType);
 
         if (isBidirectionnal) {
           const newTargetAttribute = {
-            name: attribute.targetAttribute,
+            name: attributeToSet.targetAttribute,
             type: 'relation',
-            relation: getOppositeRelation(attribute.relation),
-            targetAttribute: attribute.name,
+            relation: getOppositeRelation(attributeToSet.relation),
+            targetAttribute: attributeToSet.name,
             target: type.uid,
-            private: previousAttribute.private ?? attribute.private,
-            pluginOptions: previousAttribute.pluginOptions ?? attribute.pluginOptions,
+            private: previousAttribute.private ?? attributeToSet.private,
+            pluginOptions: previousAttribute.pluginOptions ?? attributeToSet.pluginOptions,
             status: 'CHANGED',
           } as AnyAttribute;
 
@@ -489,9 +498,7 @@ const slice = createUndoRedoSlice(
 
         const initialAttributeIndex = findAttributeIndex(type, initialAttributeName);
 
-        const attribute = { ...attributeToSet, status: 'CHANGED' };
-
-        setAttributeAt(type, initialAttributeIndex, attribute as AnyAttribute);
+        setAttributeAt(type, initialAttributeIndex, attributeToSet as AnyAttribute);
       },
       reloadPlugin: () => {
         return initialState;
