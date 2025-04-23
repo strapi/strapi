@@ -14,6 +14,7 @@ import {
   validateUpdateProjectSettingsImagesDimensions,
 } from '../validation/project-settings';
 import { getService } from '../utils';
+import { loadUserInfo as loadCloudCliUserInfo } from '../services/cloud-cli-auth';
 
 import type {
   Init,
@@ -176,5 +177,22 @@ export default {
       }));
 
     ctx.send({ plugins }) satisfies Plugins.Response;
+  },
+
+  async getCloudAuthInfo(ctx: Context) {
+    try {
+      const userInfo = await loadCloudCliUserInfo();
+      if (userInfo) {
+        ctx.body = {
+          email: userInfo.email,
+          firstname: userInfo.firstname,
+          lastname: userInfo.lastname,
+        };
+      } else {
+        ctx.body = null;
+      }
+    } catch (error) {
+      ctx.body = null;
+    }
   },
 };

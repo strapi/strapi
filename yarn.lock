@@ -8586,6 +8586,7 @@ __metadata:
     "@radix-ui/react-toolbar": "npm:1.0.4"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin-test-utils": "npm:5.12.5"
+    "@strapi/cloud-cli": "npm:5.12.5"
     "@strapi/data-transfer": "npm:5.12.5"
     "@strapi/design-system": "npm:2.0.0-rc.23"
     "@strapi/icons": "npm:2.0.0-rc.23"
@@ -8666,6 +8667,7 @@ __metadata:
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.4.17"
     vite-plugin-dts: "npm:^4.3.0"
+    xdg-app-paths: "npm:8.3.0"
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
   peerDependencies:

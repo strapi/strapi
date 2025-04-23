@@ -66,4 +66,10 @@ export default [
       ],
     },
   },
+  {
+    method: 'GET',
+    path: '/cloud-user-info',
+    handler: 'admin.getCloudAuthInfo',
+    config: { auth: false },
+  },
 ];
