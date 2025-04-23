@@ -165,7 +165,6 @@ const enumRefinement: z.SuperRefinement<{
   enum?: string[];
 }> = (value, ctx) => {
   if (value.type === 'enumeration' && !isNil(value.default) && !isNil(value.enum)) {
-
     if (value.default === '' || !value.enum.some((v) => v === value.default)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

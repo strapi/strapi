@@ -60,7 +60,8 @@ const SortableRow = (props: AttributeRowProps) => {
     transition,
     setActivatorNodeRef,
   } = useSortable({
-    disabled: !isInDevelopmentMode || props.item.status === 'REMOVED' || props.type.status === 'REMOVED',
+    disabled:
+      !isInDevelopmentMode || props.item.status === 'REMOVED' || props.type.status === 'REMOVED',
     id: props.item.id,
     data: { index: props.item.index },
   });
