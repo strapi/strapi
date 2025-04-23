@@ -671,6 +671,7 @@ const PublishAction: DocumentActionComponent = ({
     },
     { skip: !parentDocumentMetaToUpdate }
   );
+  const { getInitialFormValues } = useDoc();
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -734,7 +735,10 @@ const PublishAction: DocumentActionComponent = ({
           // Update, if needed, the parent relation with the newly published document
           // check if in history we have the parent relation otherwise use the rootDocument
           if (fieldToConnect && documentHistory && parentDocumentMetaToUpdate.documentId) {
-            const parentDataToUpdate = parentDocumentData.getInitialFormValues();
+            const parentDataToUpdate =
+              parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
+                ? getInitialFormValues()
+                : parentDocumentData.getInitialFormValues();
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
             const objectToConnect = set({}, fieldToConnect, {
@@ -752,7 +756,10 @@ const PublishAction: DocumentActionComponent = ({
               const updateRes = await updateDocumentMutation({
                 collectionType: metaDocumentToUpdate.collectionType,
                 model: metaDocumentToUpdate.model,
-                documentId: metaDocumentToUpdate.documentId,
+                documentId:
+                  metaDocumentToUpdate.collectionType !== SINGLE_TYPES
+                    ? metaDocumentToUpdate.documentId
+                    : undefined,
                 params: metaDocumentToUpdate.params,
                 data: {
                   ...dataToUpdate,
@@ -880,6 +887,7 @@ const UpdateAction: DocumentActionComponent = ({
   const { create, update, clone, isLoading } = useDocumentActions();
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
+  const { getInitialFormValues } = useDoc();
 
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
@@ -1006,7 +1014,10 @@ const UpdateAction: DocumentActionComponent = ({
             // Update, if needed, the parent relation with the newly published document
             // check if in history we have the parent relation otherwise use the rootDocument
             if (fieldToConnect && documentHistory && parentDocumentMetaToUpdate.documentId) {
-              const parentDataToUpdate = parentDocumentData.getInitialFormValues();
+              const parentDataToUpdate =
+                parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
+                  ? getInitialFormValues()
+                  : parentDocumentData.getInitialFormValues();
               const objectToConnect = set({}, fieldToConnect, {
                 connect: [
                   {
@@ -1022,7 +1033,10 @@ const UpdateAction: DocumentActionComponent = ({
                 const updateRes = await updateDocumentMutation({
                   collectionType: parentDocumentMetaToUpdate.collectionType,
                   model: parentDocumentMetaToUpdate.model,
-                  documentId: parentDocumentMetaToUpdate.documentId,
+                  documentId:
+                    parentDocumentMetaToUpdate.collectionType !== SINGLE_TYPES
+                      ? parentDocumentMetaToUpdate.documentId
+                      : undefined,
                   params: parentDocumentMetaToUpdate.params,
                   data: {
                     ...dataToUpdate,

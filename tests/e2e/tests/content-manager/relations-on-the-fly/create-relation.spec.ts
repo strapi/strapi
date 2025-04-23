@@ -221,7 +221,7 @@ test.describe('Relations on the fly - Create a Relation', () => {
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
   });
 
-  test.skip('I want to create a relation inside a component, and save', async ({ page }) => {
+  test('I want to create a relation inside a component, and save', async ({ page }) => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     // Step 1. Got to Shop single-type
     await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
@@ -245,5 +245,6 @@ test.describe('Relations on the fly - Create a Relation', () => {
 
     // Step 5. Close the relation modal to see the updated relation on the root document
     await page.getByRole('button', { name: 'Close modal' }).click();
+    await expect(page.getByRole('button', { name: 'Nike Zoom Kd Iv Gold C800' })).toBeVisible();
   });
 });
