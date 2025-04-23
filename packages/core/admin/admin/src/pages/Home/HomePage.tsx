@@ -48,7 +48,12 @@ export const WidgetRoot = ({
       setPermissionStatus(shouldGrant ? 'granted' : 'forbidden');
     };
 
-    if (!permissions || permissions.length === 0) {
+    if (
+      // TODO: remove unstable check once widgets API is stable
+      !window.strapi.future.isEnabled('unstableWidgetsApi') ||
+      !permissions ||
+      permissions.length === 0
+    ) {
       setPermissionStatus('granted');
     } else {
       checkPermissions();
