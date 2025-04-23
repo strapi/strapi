@@ -20,7 +20,7 @@ const CustomIcon = styled(Lightning)`
   transform: translateY(50%);
 
   path {
-    fill: ${({ theme }) => theme.colors.warning500};
+    fill: ${({ theme }) => theme.colors.primary600};
   }
 `;
 

@@ -7,6 +7,7 @@ import { generateInstallId } from '@strapi/utils';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';
+  isTrial: boolean;
   expireAt?: string;
   seats?: number;
   features?: Array<{ name: string; options?: Record<string, unknown> }>;
@@ -73,6 +74,10 @@ const verifyLicense = (license: string) => {
 
   if (!licenseInfo.features) {
     licenseInfo.features = DEFAULT_FEATURES[licenseInfo.type];
+  }
+
+  if (!licenseInfo.isTrial) {
+    licenseInfo.isTrial = false;
   }
 
   Object.freeze(licenseInfo.features);

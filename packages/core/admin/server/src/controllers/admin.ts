@@ -177,4 +177,10 @@ export default {
 
     ctx.send({ plugins }) satisfies Plugins.Response;
   },
+
+  async licenseTrialTimeLeft() {
+    const data = await strapi.ee.trialDaysLeft();
+
+    return data;
+  },
 };
