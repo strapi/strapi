@@ -20,6 +20,7 @@ import {
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
+import merge from 'lodash/merge';
 import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
@@ -39,8 +40,6 @@ import {
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
-import { deepMerge } from '../utils/deepMergeObjects';
-import { stringToObject } from '../utils/stringToObject';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
@@ -747,7 +746,7 @@ const PublishAction: DocumentActionComponent = ({
                 },
               ],
             });
-            const dataToUpdate = deepMerge(parentDataToUpdate, objectToConnect);
+            const dataToUpdate = merge(parentDataToUpdate, objectToConnect);
 
             try {
               const updateRes = await updateDocumentMutation({
@@ -1017,7 +1016,7 @@ const UpdateAction: DocumentActionComponent = ({
                   },
                 ],
               });
-              const dataToUpdate = deepMerge(parentDataToUpdate, objectToConnect);
+              const dataToUpdate = merge(parentDataToUpdate, objectToConnect);
 
               try {
                 const updateRes = await updateDocumentMutation({
