@@ -234,7 +234,7 @@ const AuthProvider = ({
             (perm) =>
               perm.action === permission.action &&
               // Only check the subject if it's provided
-              (perm.subject == undefined || permission.subject === permission.subject)
+              (perm.subject == undefined || perm.subject === permission.subject)
           ) >= 0
       );
 
