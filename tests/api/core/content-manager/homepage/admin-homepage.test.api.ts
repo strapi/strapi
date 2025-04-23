@@ -237,7 +237,7 @@ describe('Homepage API', () => {
     await strapi.documents(authorUid).update({
       documentId: author.documentId,
       data: {
-        name: `John Lennon`,
+        name: 'John Lennon',
       },
     });
 
