@@ -22,7 +22,7 @@ import {
   FlexComponent,
   BoxComponent,
 } from '@strapi/design-system';
-import { Cross, Drag, ArrowClockwise, Link as LinkIcon } from '@strapi/icons';
+import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -625,6 +625,7 @@ const RelationsInput = ({
                 },
               });
             }}
+            creatableStartIcon={<Plus fill="neutral500" />}
             name={name}
             autocomplete="list"
             placeholder={
