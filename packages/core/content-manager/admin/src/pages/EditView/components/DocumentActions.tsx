@@ -20,6 +20,7 @@ import {
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
+import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 import { DefaultTheme, styled } from 'styled-components';
@@ -737,7 +738,7 @@ const PublishAction: DocumentActionComponent = ({
             const parentDataToUpdate = parentDocumentData.getInitialFormValues();
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            const objectToConnect = stringToObject(fieldToConnect, {
+            const objectToConnect = set({}, fieldToConnect, {
               connect: [
                 {
                   id: res.data.documentId,
@@ -1007,7 +1008,7 @@ const UpdateAction: DocumentActionComponent = ({
             // check if in history we have the parent relation otherwise use the rootDocument
             if (fieldToConnect && documentHistory && parentDocumentMetaToUpdate.documentId) {
               const parentDataToUpdate = parentDocumentData.getInitialFormValues();
-              const objectToConnect = stringToObject(fieldToConnect, {
+              const objectToConnect = set({}, fieldToConnect, {
                 connect: [
                   {
                     id: res.data.documentId,
