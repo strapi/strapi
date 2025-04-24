@@ -68,6 +68,7 @@ export type {
   Entity,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
+export type { Widget as WidgetType } from './core/apis/Widgets';
 
 /**
  * Utils
