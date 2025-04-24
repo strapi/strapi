@@ -19,7 +19,12 @@ const createMiddleware = ({ sendEvent }: { sendEvent: Sender }) => {
   const middleware: Core.MiddlewareHandler = async (ctx, next) => {
     const { url, method } = ctx.request;
 
-    if (!url.includes('.') && url.includes('/api') && ['GET', 'PUT', 'POST', 'DELETE'].includes(method)) {      if (Date.now() > state.expires) {
+    if (
+      !url.includes('.') &&
+      url.includes('/api') &&
+      ['GET', 'PUT', 'POST', 'DELETE'].includes(method)
+    ) {
+      if (Date.now() > state.expires) {
         state.expires = nextResetDate();
         state.counter = 0;
       }
