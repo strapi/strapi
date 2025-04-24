@@ -734,7 +734,12 @@ const PublishAction: DocumentActionComponent = ({
 
           // Update, if needed, the parent relation with the newly published document
           // check if in history we have the parent relation otherwise use the rootDocument
-          if (fieldToConnect && documentHistory && parentDocumentMetaToUpdate.documentId) {
+          if (
+            fieldToConnect &&
+            documentHistory &&
+            (parentDocumentMetaToUpdate.documentId ||
+              parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
+          ) {
             const parentDataToUpdate =
               parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                 ? getInitialFormValues()
@@ -1013,7 +1018,12 @@ const UpdateAction: DocumentActionComponent = ({
             };
             // Update, if needed, the parent relation with the newly published document
             // check if in history we have the parent relation otherwise use the rootDocument
-            if (fieldToConnect && documentHistory && parentDocumentMetaToUpdate.documentId) {
+            if (
+              fieldToConnect &&
+              documentHistory &&
+              (parentDocumentMetaToUpdate.documentId ||
+                parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES)
+            ) {
               const parentDataToUpdate =
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                   ? getInitialFormValues()
@@ -1110,8 +1120,12 @@ const UpdateAction: DocumentActionComponent = ({
     fromRelationModal,
     fieldToConnect,
     documentHistory,
-    parentDocumentMetaToUpdate,
+    parentDocumentMetaToUpdate?.documentId,
+    parentDocumentMetaToUpdate?.collectionType,
+    parentDocumentMetaToUpdate?.model,
+    parentDocumentMetaToUpdate?.params,
     dispatch,
+    getInitialFormValues,
     parentDocumentData,
     updateDocumentMutation,
     formatAPIError,
