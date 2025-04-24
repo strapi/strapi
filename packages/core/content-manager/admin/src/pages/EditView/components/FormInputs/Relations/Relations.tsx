@@ -601,6 +601,10 @@ const RelationsInput = ({
     params: currentDocumentMeta.params,
   } as DocumentMeta;
 
+  const { componentUID } = useComponent('RelationsField', ({ uid }) => ({
+    componentUID: uid,
+  }));
+
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
       <Field.Label action={labelAction}>{label}</Field.Label>
@@ -622,6 +626,7 @@ const RelationsInput = ({
                   document: relation,
                   shouldBypassConfirmation: false,
                   fieldToConnect: name,
+                  fieldToConnectUID: componentUID,
                 },
               });
             }}

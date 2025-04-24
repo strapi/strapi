@@ -20,6 +20,7 @@ import {
 } from '@strapi/design-system';
 import { Cross, More, WarningCircle } from '@strapi/icons';
 import mapValues from 'lodash/fp/mapValues';
+import get from 'lodash/get';
 import merge from 'lodash/merge';
 import set from 'lodash/set';
 import { useIntl } from 'react-intl';
@@ -566,6 +567,11 @@ const PublishAction: DocumentActionComponent = ({
     (state) => state.state.fieldToConnect,
     false
   );
+  const fieldToConnectUID = useRelationModal(
+    'PublishAction',
+    (state) => state.state.fieldToConnectUID,
+    false
+  );
   const documentHistory = useRelationModal(
     'PublishAction',
     (state) => state.state.documentHistory,
@@ -732,8 +738,11 @@ const PublishAction: DocumentActionComponent = ({
             params: currentDocumentMeta.params,
           };
 
-          // Update, if needed, the parent relation with the newly published document
-          // check if in history we have the parent relation otherwise use the rootDocument
+          /*
+           * Update, if needed, the parent relation with the newly published document.
+           * Check if in history we have the parent relation otherwise use the
+           * rootDocument
+           */
           if (
             fieldToConnect &&
             documentHistory &&
@@ -746,15 +755,41 @@ const PublishAction: DocumentActionComponent = ({
                 : parentDocumentData.getInitialFormValues();
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            const objectToConnect = set({}, fieldToConnect, {
-              connect: [
-                {
-                  id: res.data.documentId,
-                  documentId: res.data.documentId,
-                  locale: res.data.locale,
-                },
-              ],
-            });
+            /*
+             * Check if the fieldToConnect is already present in the parentDataToUpdate.
+             * This happens in particular when in the parentDocument you have created
+             * a new component without saving.
+             */
+            const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
+            const fieldToConnectPath = isFieldPresent
+              ? fieldToConnect
+              : // Compute the path to the parent object
+                fieldToConnect.split('.').slice(0, -1).join('.');
+            const fieldToConnectValue = isFieldPresent
+              ? {
+                  connect: [
+                    {
+                      id: res.data.documentId,
+                      documentId: res.data.documentId,
+                      locale: res.data.locale,
+                    },
+                  ],
+                }
+              : {
+                  [fieldToConnect.split('.').pop()!]: {
+                    connect: [
+                      {
+                        id: res.data.documentId,
+                        documentId: res.data.documentId,
+                        locale: res.data.locale,
+                      },
+                    ],
+                    disconnect: [],
+                  },
+                  __component: fieldToConnectUID,
+                };
+            // In case the object was not present you need to pass the componentUID of the parent document
+            const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
             const dataToUpdate = merge(parentDataToUpdate, objectToConnect);
 
             try {
@@ -911,6 +946,11 @@ const UpdateAction: DocumentActionComponent = ({
     (state) => state.state.fieldToConnect,
     false
   );
+  const fieldToConnectUID = useRelationModal(
+    'PublishAction',
+    (state) => state.state.fieldToConnectUID,
+    false
+  );
   const documentHistory = useRelationModal(
     'UpdateAction',
     (state) => state.state.documentHistory,
@@ -1016,8 +1056,11 @@ const UpdateAction: DocumentActionComponent = ({
               model,
               params: currentDocumentMeta.params,
             };
-            // Update, if needed, the parent relation with the newly published document
-            // check if in history we have the parent relation otherwise use the rootDocument
+            /*
+             * Update, if needed, the parent relation with the newly published document.
+             * Check if in history we have the parent relation otherwise use the
+             * rootDocument
+             */
             if (
               fieldToConnect &&
               documentHistory &&
@@ -1028,15 +1071,42 @@ const UpdateAction: DocumentActionComponent = ({
                 parentDocumentMetaToUpdate.collectionType === SINGLE_TYPES
                   ? getInitialFormValues()
                   : parentDocumentData.getInitialFormValues();
-              const objectToConnect = set({}, fieldToConnect, {
-                connect: [
-                  {
-                    id: res.data.documentId,
-                    documentId: res.data.documentId,
-                    locale: res.data.locale,
-                  },
-                ],
-              });
+
+              /*
+               * Check if the fieldToConnect is already present in the parentDataToUpdate.
+               * This happens in particular when in the parentDocument you have created
+               * a new component without saving.
+               */
+              const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
+              const fieldToConnectPath = isFieldPresent
+                ? fieldToConnect
+                : // Compute the path to the parent object
+                  fieldToConnect.split('.').slice(0, -1).join('.');
+              const fieldToConnectValue = isFieldPresent
+                ? {
+                    connect: [
+                      {
+                        id: res.data.documentId,
+                        documentId: res.data.documentId,
+                        locale: res.data.locale,
+                      },
+                    ],
+                  }
+                : {
+                    [fieldToConnect.split('.').pop()!]: {
+                      connect: [
+                        {
+                          id: res.data.documentId,
+                          documentId: res.data.documentId,
+                          locale: res.data.locale,
+                        },
+                      ],
+                      disconnect: [],
+                    },
+                    __component: fieldToConnectUID,
+                  };
+              // In case the object was not present you need to pass the componentUID of the parent document
+              const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
               const dataToUpdate = merge(parentDataToUpdate, objectToConnect);
 
               try {
@@ -1120,13 +1190,11 @@ const UpdateAction: DocumentActionComponent = ({
     fromRelationModal,
     fieldToConnect,
     documentHistory,
-    parentDocumentMetaToUpdate?.documentId,
-    parentDocumentMetaToUpdate?.collectionType,
-    parentDocumentMetaToUpdate?.model,
-    parentDocumentMetaToUpdate?.params,
+    parentDocumentMetaToUpdate,
     dispatch,
     getInitialFormValues,
     parentDocumentData,
+    fieldToConnectUID,
     updateDocumentMutation,
     formatAPIError,
     onPreview,

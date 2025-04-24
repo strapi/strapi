@@ -78,6 +78,7 @@ interface State {
   isModalOpen: boolean;
   hasUnsavedChanges: boolean;
   fieldToConnect?: string;
+  fieldToConnectUID?: string;
 }
 
 type Action =
@@ -87,6 +88,7 @@ type Action =
         document: DocumentMeta;
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
+        fieldToConnectUID?: string;
       };
     }
   | {
@@ -102,6 +104,7 @@ type Action =
         document: DocumentMeta;
         shouldBypassConfirmation: boolean;
         fieldToConnect?: string;
+        fieldToConnectUID?: string;
       };
     }
   | {
@@ -124,6 +127,7 @@ function reducer(state: State, action: Action): State {
           ...state,
           confirmDialogIntent: action.payload.document,
           fieldToConnect: action.payload.fieldToConnect,
+          fieldToConnectUID: action.payload.fieldToConnectUID,
         };
       }
 
@@ -139,6 +143,7 @@ function reducer(state: State, action: Action): State {
         confirmDialogIntent: null,
         isModalOpen: true,
         fieldToConnect: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnect,
+        fieldToConnectUID: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnectUID,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -172,6 +177,7 @@ function reducer(state: State, action: Action): State {
         confirmDialogIntent: null,
         isModalOpen: true,
         fieldToConnect: undefined,
+        fieldToConnectUID: undefined,
       };
     case 'CANCEL_CONFIRM_DIALOG':
       return {
@@ -395,11 +401,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
         <Modal.Body>
           <FormContext
             method={isCreating ? 'POST' : 'PUT'}
-            initialValues={
-              isCreating
-                ? currentDocument.getInitialFormValues(isCreating)
-                : currentDocument.getInitialFormValues()
-            }
+            initialValues={currentDocument.getInitialFormValues(isCreating)}
             validate={(values: Record<string, unknown>, options: Record<string, string>) => {
               const yupSchema = createYupSchema(
                 currentDocument.schema?.attributes,
