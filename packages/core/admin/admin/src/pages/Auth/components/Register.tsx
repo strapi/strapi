@@ -189,42 +189,19 @@ interface RegisterFormValues {
   news: boolean;
 }
 
-// Helper to fetch cloud CLI auth info
-const useCloudCliAuthInfo = () => {
-  const [cloudUserInfo, setCloudUserInfo] = React.useState<{
+const useInitialUserInfo = () => {
+  const [initialUserInfo, setInitialUserInfo] = React.useState<{
     email?: string;
-    firstname?: string;
-    lastname?: string;
   } | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const fetchCloudAuthInfo = async () => {
-      try {
-        // Try to get the auth information from the cloud CLI
-        const response = await fetch('/admin/cloud-cli/user-info', {
-          method: 'GET',
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setCloudUserInfo(data);
-        } else {
-          // If no cloud auth info is available, just continue with empty values
-          setCloudUserInfo(null);
-        }
-      } catch (error) {
-        console.error('Failed to fetch cloud CLI auth info:', error);
-        setCloudUserInfo(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCloudAuthInfo();
+    const strapiInitialUserInfo = window.strapi.initialUserInfo;
+    if (strapiInitialUserInfo) {
+      setInitialUserInfo(strapiInitialUserInfo);
+    }
   }, []);
 
-  return { cloudUserInfo, isLoading };
+  return { initialUserInfo };
 };
 
 const Register = ({ hasAdmin }: RegisterProps) => {
@@ -243,7 +220,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
   const { setNpsSurveySettings } = useNpsSurveySettings();
-  const { cloudUserInfo } = useCloudCliAuthInfo();
+  const { initialUserInfo } = useInitialUserInfo();
 
   const registrationToken = query.get('registrationToken');
 
@@ -390,9 +367,9 @@ const Register = ({ hasAdmin }: RegisterProps) => {
           method="POST"
           initialValues={
             {
-              firstname: userInfo?.firstname || cloudUserInfo?.firstname || '',
-              lastname: userInfo?.lastname || cloudUserInfo?.lastname || '',
-              email: userInfo?.email || cloudUserInfo?.email || '',
+              firstname: userInfo?.firstname || '',
+              lastname: userInfo?.lastname || '',
+              email: userInfo?.email || initialUserInfo?.email || '',
               password: '',
               confirmPassword: '',
               registrationToken: registrationToken || undefined,

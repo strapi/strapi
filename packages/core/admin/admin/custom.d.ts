@@ -27,6 +27,9 @@ interface BrowserStrapi {
   };
   projectType: 'Community' | 'Enterprise';
   telemetryDisabled: boolean;
+  initialUserInfo?: {
+    email?: string;
+  };
 }
 
 declare global {

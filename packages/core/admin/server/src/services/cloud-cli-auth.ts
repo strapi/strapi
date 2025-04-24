@@ -1,18 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 
-// TODO: These packages are listed in the package.json dependencies
-// ESLint in monorepo setups can sometimes have issues with dependency checking
-// across package boundaries ??
-// eslint-disable-next-line import/no-extraneous-dependencies
 import XDGAppPaths from 'xdg-app-paths';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { services as cloudCliServices } from '@strapi/cloud-cli';
 
 interface CloudUserInfo {
   email?: string;
-  firstname?: string;
-  lastname?: string;
 }
 
 /**
@@ -22,7 +15,6 @@ interface CloudUserInfo {
  */
 export async function loadUserInfo(): Promise<CloudUserInfo | null> {
   try {
-    // We need to use optional peer dependencies to avoid hard dependencies
     let token = null;
 
     // The cloud CLI stores its config in 'com.strapi.cli' directory
@@ -32,7 +24,6 @@ export async function loadUserInfo(): Promise<CloudUserInfo | null> {
     // Get possible config directories (following XDG specification)
     const configDirs = XDGAppPaths(APP_FOLDER_NAME).configDirs();
 
-    // Find first existing config directory
     let configPath = null;
     for (const dir of configDirs) {
       try {
@@ -43,34 +34,31 @@ export async function loadUserInfo(): Promise<CloudUserInfo | null> {
         }
       } catch (error) {
         // Directory doesn't exist, try next one
+
         // eslint-disable-next-line no-continue
         continue;
       }
     }
 
-    // If no config directory found, return null
     if (!configPath) {
+      // If no config directory found, return null
       return null;
     }
 
-    // Path to the config file
     const configFilePath = path.join(configPath, CONFIG_FILENAME);
 
-    // Check if config file exists
     if (!fs.existsSync(configFilePath)) {
       return null;
     }
 
     try {
-      // Read the config file
       const configContent = fs.readFileSync(configFilePath, 'utf8');
       const config = JSON.parse(configContent);
 
-      // Extract the token
       token = config?.token;
 
-      // If no token, return null
       if (!token) {
+        // If no token, return null
         return null;
       }
     } catch (error) {
@@ -96,8 +84,6 @@ export async function loadUserInfo(): Promise<CloudUserInfo | null> {
       if (userInfo) {
         return {
           ...(userInfo.email ? { email: userInfo.email } : {}),
-          ...(userInfo.firstname ? { firstname: userInfo.firstname } : {}),
-          ...(userInfo.lastname ? { lastname: userInfo.lastname } : {}),
         };
       }
     } catch (error) {

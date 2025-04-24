@@ -4,6 +4,7 @@ import { async } from '@strapi/utils';
 import { getService } from './utils';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
+import { loadUserInfo as loadCloudCliUserInfo } from './services/cloud-cli-auth';
 
 const defaultAdminAuthSettings = {
   providers: {
@@ -137,4 +138,23 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   tokenService.checkSecretIsDefined();
 
   await createDefaultAPITokensIfNeeded();
+
+  try {
+    const hasAdmin = await userService.exists();
+    if (!hasAdmin) {
+      const cloudCliUserInfo = await loadCloudCliUserInfo();
+      if (cloudCliUserInfo) {
+        // Add cloud user info to features so it's passed to the admin frontend
+        const currentFeatures = strapi.config.get('features') || {};
+        strapi.config.set('features', {
+          ...currentFeatures,
+          initialUserInfo: {
+            email: cloudCliUserInfo.email,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    // Silent fail, there may not be cloud CLI auth info and that's fine
+  }
 };
