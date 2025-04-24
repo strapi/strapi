@@ -77,6 +77,8 @@ interface State {
     | DocumentMeta; // Open a specific document in the modal
   isModalOpen: boolean;
   hasUnsavedChanges: boolean;
+  fieldToConnect?: string;
+  fieldToConnectUID?: string;
 }
 
 type Action =
@@ -85,6 +87,8 @@ type Action =
       payload: {
         document: DocumentMeta;
         shouldBypassConfirmation: boolean;
+        fieldToConnect?: string;
+        fieldToConnectUID?: string;
       };
     }
   | {
@@ -93,6 +97,15 @@ type Action =
     }
   | {
       type: 'GO_FULL_PAGE';
+    }
+  | {
+      type: 'GO_TO_CREATED_RELATION';
+      payload: {
+        document: DocumentMeta;
+        shouldBypassConfirmation: boolean;
+        fieldToConnect?: string;
+        fieldToConnectUID?: string;
+      };
     }
   | {
       type: 'CANCEL_CONFIRM_DIALOG';
@@ -110,14 +123,27 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'GO_TO_RELATION':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
-        return { ...state, confirmDialogIntent: action.payload.document };
+        return {
+          ...state,
+          confirmDialogIntent: action.payload.document,
+          fieldToConnect: action.payload.fieldToConnect,
+          fieldToConnectUID: action.payload.fieldToConnectUID,
+        };
       }
 
+      const lastItemDocumentHistory = state.documentHistory.at(-1);
+      const hasToResetDocumentHistory =
+        lastItemDocumentHistory && !lastItemDocumentHistory.documentId;
       return {
         ...state,
-        documentHistory: [...state.documentHistory, action.payload.document],
+        // Reset document history if the last item has documentId undefined
+        documentHistory: hasToResetDocumentHistory
+          ? [action.payload.document]
+          : [...state.documentHistory, action.payload.document],
         confirmDialogIntent: null,
         isModalOpen: true,
+        fieldToConnect: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnect,
+        fieldToConnectUID: hasToResetDocumentHistory ? undefined : action.payload.fieldToConnectUID,
       };
     case 'GO_BACK':
       if (state.hasUnsavedChanges && !action.payload.shouldBypassConfirmation) {
@@ -140,6 +166,18 @@ function reducer(state: State, action: Action): State {
         hasUnsavedChanges: false,
         isModalOpen: false,
         confirmDialogIntent: null,
+      };
+    case 'GO_TO_CREATED_RELATION':
+      return {
+        ...state,
+        // Reset document history if the last item has documentId undefined
+        documentHistory: state.documentHistory
+          ? [...state.documentHistory.slice(0, -1), action.payload.document]
+          : [action.payload.document],
+        confirmDialogIntent: null,
+        isModalOpen: true,
+        fieldToConnect: undefined,
+        fieldToConnectUID: undefined,
       };
     case 'CANCEL_CONFIRM_DIALOG':
       return {
@@ -207,6 +245,7 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
     confirmDialogIntent: null,
     isModalOpen: false,
     hasUnsavedChanges: false,
+    fieldToConnect: undefined,
   });
 
   const rootDocument = useDoc();
@@ -225,7 +264,6 @@ const RootRelationRenderer = (props: RelationModalRendererProps) => {
   // TODO: check if we can remove the single type check
   const isSingleType = currentDocumentMeta.collectionType === SINGLE_TYPES;
   const isCreating = !currentDocumentMeta.documentId && !isSingleType;
-
   /**
    * There is no parent relation, so the relation modal doesn't exist. Create it and set up all the
    * pieces that will be used by potential child relations: the context, header, form, and footer.
@@ -274,6 +312,13 @@ const RelationModalRenderer = (props: RelationModalRendererProps) => {
 /* -------------------------------------------------------------------------------------------------
  * RelationModal
  * -----------------------------------------------------------------------------------------------*/
+const generateCreateUrl = (currentDocumentMeta: DocumentMeta) => {
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
+    currentDocumentMeta.params?.locale
+      ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
+      : ''
+  }`;
+};
 
 const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const { formatMessage } = useIntl();
@@ -337,7 +382,11 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                   type: 'GO_FULL_PAGE',
                 });
                 if (!state.hasUnsavedChanges) {
-                  navigate(getFullPageUrl(currentDocumentMeta));
+                  if (isCreating) {
+                    navigate(generateCreateUrl(currentDocumentMeta));
+                  } else {
+                    navigate(getFullPageUrl(currentDocumentMeta));
+                  }
                 }
               }}
               variant="tertiary"
@@ -352,8 +401,8 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
         </Modal.Header>
         <Modal.Body>
           <FormContext
-            method="PUT"
-            initialValues={currentDocument.getInitialFormValues()}
+            method={isCreating ? 'POST' : 'PUT'}
+            initialValues={currentDocument.getInitialFormValues(isCreating)}
             validate={(values: Record<string, unknown>, options: Record<string, string>) => {
               const yupSchema = createYupSchema(
                 currentDocument.schema?.attributes,
@@ -393,6 +442,7 @@ const RelationModalBody = () => {
     'RelationModalForm',
     (state) => state.currentDocumentMeta
   );
+  const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
 
   /**
    * One-way sync the modified state from the form to the modal state.
@@ -430,7 +480,11 @@ const RelationModalBody = () => {
     if (isRootDocumentUrl) {
       handleCloseModal(true);
     } else {
-      navigate(fullPageUrl);
+      if (isCreating) {
+        navigate(generateCreateUrl(currentDocumentMeta));
+      } else {
+        navigate(fullPageUrl);
+      }
     }
   };
 
@@ -522,7 +576,9 @@ const RelationModalForm = () => {
   const documentLayoutResponse = useDocumentLayout(currentDocumentMeta.model);
   const plugins = useStrapiApp('RelationModalForm', (state) => state.plugins);
 
-  const initialValues = currentDocument.getInitialFormValues(isCreating);
+  const initialValues = isCreating
+    ? currentDocument.getInitialFormValues(isCreating)
+    : currentDocument.getInitialFormValues();
 
   const {
     permissions = [],

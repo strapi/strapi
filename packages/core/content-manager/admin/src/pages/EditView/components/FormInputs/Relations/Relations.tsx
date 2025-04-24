@@ -22,7 +22,7 @@ import {
   FlexComponent,
   BoxComponent,
 } from '@strapi/design-system';
-import { Cross, Drag, ArrowClockwise, Link as LinkIcon } from '@strapi/icons';
+import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -598,7 +598,12 @@ const RelationsInput = ({
     // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
     model: props.attribute.targetModel,
     documentId: '',
-  };
+    params: currentDocumentMeta.params,
+  } as DocumentMeta;
+
+  const { componentUID } = useComponent('RelationsField', ({ uid }) => ({
+    componentUID: uid,
+  }));
 
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
@@ -620,9 +625,12 @@ const RelationsInput = ({
                 payload: {
                   document: relation,
                   shouldBypassConfirmation: false,
+                  fieldToConnect: name,
+                  fieldToConnectUID: componentUID,
                 },
               });
             }}
+            creatableStartIcon={<Plus fill="neutral500" />}
             name={name}
             autocomplete="list"
             placeholder={
