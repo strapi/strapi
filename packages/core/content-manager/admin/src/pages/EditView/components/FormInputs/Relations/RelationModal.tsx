@@ -312,6 +312,13 @@ const RelationModalRenderer = (props: RelationModalRendererProps) => {
 /* -------------------------------------------------------------------------------------------------
  * RelationModal
  * -----------------------------------------------------------------------------------------------*/
+const generateCreateUrl = (currentDocumentMeta: DocumentMeta) => {
+  return `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
+    currentDocumentMeta.params?.locale
+      ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
+      : ''
+  }`;
+};
 
 const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const { formatMessage } = useIntl();
@@ -376,13 +383,7 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
                 });
                 if (!state.hasUnsavedChanges) {
                   if (isCreating) {
-                    navigate(
-                      `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
-                        currentDocumentMeta.params?.locale
-                          ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
-                          : ''
-                      }`
-                    );
+                    navigate(generateCreateUrl(currentDocumentMeta));
                   } else {
                     navigate(getFullPageUrl(currentDocumentMeta));
                   }
@@ -480,13 +481,7 @@ const RelationModalBody = () => {
       handleCloseModal(true);
     } else {
       if (isCreating) {
-        navigate(
-          `/content-manager/${currentDocumentMeta.collectionType}/${currentDocumentMeta.model}/create${
-            currentDocumentMeta.params?.locale
-              ? `?plugins[i18n][locale]=${currentDocumentMeta.params.locale}`
-              : ''
-          }`
-        );
+        navigate(generateCreateUrl(currentDocumentMeta));
       } else {
         navigate(fullPageUrl);
       }

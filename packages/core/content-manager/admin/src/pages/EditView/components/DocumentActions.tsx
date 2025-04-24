@@ -27,6 +27,7 @@ import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
 import { DefaultTheme, styled } from 'styled-components';
 
+import { Create, Publish } from '../../../../../shared/contracts/collection-types';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
@@ -41,6 +42,7 @@ import {
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
+import { AnyData } from '../utils/data';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
@@ -114,6 +116,50 @@ interface Action extends DocumentActionDescription {
 interface DocumentActionsProps {
   actions: Action[];
 }
+
+const connectRelationToParent = (
+  parentDataToUpdate: AnyData | undefined,
+  fieldToConnect: string,
+  data: Create.Response['data'] | Publish.Response['data'],
+  fieldToConnectUID?: string
+) => {
+  /*
+   * Check if the fieldToConnect is already present in the parentDataToUpdate.
+   * This happens in particular when in the parentDocument you have created
+   * a new component without saving.
+   */
+  const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
+  const fieldToConnectPath = isFieldPresent
+    ? fieldToConnect
+    : // Compute the path to the parent object
+      fieldToConnect.split('.').slice(0, -1).join('.');
+  const fieldToConnectValue = isFieldPresent
+    ? {
+        connect: [
+          {
+            id: data.documentId,
+            documentId: data.documentId,
+            locale: data.locale,
+          },
+        ],
+      }
+    : {
+        [fieldToConnect.split('.').pop()!]: {
+          connect: [
+            {
+              id: data.documentId,
+              documentId: data.documentId,
+              locale: data.locale,
+            },
+          ],
+          disconnect: [],
+        },
+        // In case the object was not present you need to pass the componentUID of the parent document
+        __component: fieldToConnectUID,
+      };
+  const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
+  return merge(parentDataToUpdate, objectToConnect);
+};
 
 const DocumentActions = ({ actions }: DocumentActionsProps) => {
   const { formatMessage } = useIntl();
@@ -755,42 +801,12 @@ const PublishAction: DocumentActionComponent = ({
                 : parentDocumentData.getInitialFormValues();
             const metaDocumentToUpdate = documentHistory.at(-2) ?? rootDocumentMeta;
 
-            /*
-             * Check if the fieldToConnect is already present in the parentDataToUpdate.
-             * This happens in particular when in the parentDocument you have created
-             * a new component without saving.
-             */
-            const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
-            const fieldToConnectPath = isFieldPresent
-              ? fieldToConnect
-              : // Compute the path to the parent object
-                fieldToConnect.split('.').slice(0, -1).join('.');
-            const fieldToConnectValue = isFieldPresent
-              ? {
-                  connect: [
-                    {
-                      id: res.data.documentId,
-                      documentId: res.data.documentId,
-                      locale: res.data.locale,
-                    },
-                  ],
-                }
-              : {
-                  [fieldToConnect.split('.').pop()!]: {
-                    connect: [
-                      {
-                        id: res.data.documentId,
-                        documentId: res.data.documentId,
-                        locale: res.data.locale,
-                      },
-                    ],
-                    disconnect: [],
-                  },
-                  __component: fieldToConnectUID,
-                };
-            // In case the object was not present you need to pass the componentUID of the parent document
-            const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
-            const dataToUpdate = merge(parentDataToUpdate, objectToConnect);
+            const dataToUpdate = connectRelationToParent(
+              parentDataToUpdate,
+              fieldToConnect,
+              res.data,
+              fieldToConnectUID
+            );
 
             try {
               const updateRes = await updateDocumentMutation({
@@ -801,9 +817,7 @@ const PublishAction: DocumentActionComponent = ({
                     ? metaDocumentToUpdate.documentId
                     : undefined,
                 params: metaDocumentToUpdate.params,
-                data: {
-                  ...dataToUpdate,
-                },
+                data: dataToUpdate,
               });
 
               if ('error' in updateRes) {
@@ -1072,42 +1086,12 @@ const UpdateAction: DocumentActionComponent = ({
                   ? getInitialFormValues()
                   : parentDocumentData.getInitialFormValues();
 
-              /*
-               * Check if the fieldToConnect is already present in the parentDataToUpdate.
-               * This happens in particular when in the parentDocument you have created
-               * a new component without saving.
-               */
-              const isFieldPresent = !!get(parentDataToUpdate, fieldToConnect);
-              const fieldToConnectPath = isFieldPresent
-                ? fieldToConnect
-                : // Compute the path to the parent object
-                  fieldToConnect.split('.').slice(0, -1).join('.');
-              const fieldToConnectValue = isFieldPresent
-                ? {
-                    connect: [
-                      {
-                        id: res.data.documentId,
-                        documentId: res.data.documentId,
-                        locale: res.data.locale,
-                      },
-                    ],
-                  }
-                : {
-                    [fieldToConnect.split('.').pop()!]: {
-                      connect: [
-                        {
-                          id: res.data.documentId,
-                          documentId: res.data.documentId,
-                          locale: res.data.locale,
-                        },
-                      ],
-                      disconnect: [],
-                    },
-                    __component: fieldToConnectUID,
-                  };
-              // In case the object was not present you need to pass the componentUID of the parent document
-              const objectToConnect = set({}, fieldToConnectPath, fieldToConnectValue);
-              const dataToUpdate = merge(parentDataToUpdate, objectToConnect);
+              const dataToUpdate = connectRelationToParent(
+                parentDataToUpdate,
+                fieldToConnect,
+                res.data,
+                fieldToConnectUID
+              );
 
               try {
                 const updateRes = await updateDocumentMutation({
