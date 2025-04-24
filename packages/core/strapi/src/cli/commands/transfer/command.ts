@@ -94,7 +94,7 @@ const command = () => {
                   name: 'remoteUrl',
                   message: 'Enter the URL of the remote Strapi instance to get data from:',
                   default: process.env.STRAPI_TRANSFER_URL,
-                  validate: (input) => {
+                  validate(input) {
                     try {
                       const url = new URL(input);
                       if (!['http:', 'https:'].includes(url.protocol)) {
@@ -111,7 +111,7 @@ const command = () => {
                   name: 'token',
                   message: 'Enter your transfer token for the remote Strapi source:',
                   default: process.env.STRAPI_TRANSFER_TOKEN,
-                  validate: (input) => {
+                  validate(input) {
                     if (!input?.length) {
                       return 'Transfer token is required';
                     }
@@ -128,7 +128,7 @@ const command = () => {
                   name: 'remoteUrl',
                   message: 'Enter the URL of the remote Strapi instance to send data to:',
                   default: process.env.STRAPI_TRANSFER_URL,
-                  validate: (input) => {
+                  validate(input) {
                     try {
                       const url = new URL(input);
                       if (!['http:', 'https:'].includes(url.protocol)) {
@@ -145,7 +145,7 @@ const command = () => {
                   name: 'token',
                   message: 'Enter your transfer token for the remote Strapi destination:',
                   default: process.env.STRAPI_TRANSFER_TOKEN,
-                  validate: (input) => {
+                  validate(input) {
                     if (!input?.length) {
                       return 'Transfer token is required';
                     }
