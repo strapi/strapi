@@ -52,7 +52,7 @@ describe('Metrics middleware', () => {
         {
           request: {
             method: 'GET',
-            url: '/some-api',
+            url: '/api',
           },
         } as any,
         jest.fn()
@@ -73,7 +73,7 @@ describe('Metrics middleware', () => {
         {
           request: {
             method: 'GET',
-            url: '/some-api',
+            url: '/api',
           },
         } as any,
         jest.fn()
@@ -86,7 +86,7 @@ describe('Metrics middleware', () => {
       {
         request: {
           method: 'GET',
-          url: '/some-api',
+          url: '/api',
         },
       } as any,
       jest.fn()
