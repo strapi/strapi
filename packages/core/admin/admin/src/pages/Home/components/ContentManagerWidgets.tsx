@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box, IconButton, Status, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';

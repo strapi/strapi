@@ -2,7 +2,8 @@ import * as React from 'react';
 
 import { Box, Flex, Grid, Main, Typography } from '@strapi/design-system';
 import { CheckCircle, Pencil, PuzzlePiece } from '@strapi/icons';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
+import { Link as ReactRouterLink } from 'react-router-dom';
 
 import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
@@ -14,16 +15,13 @@ import { useStrapiApp } from '../../features/StrapiApp';
 import { LastEditedWidget, LastPublishedWidget } from './components/ContentManagerWidgets';
 import { GuidedTour } from './components/GuidedTour';
 
-import type { Widget as WidgetType } from 'src/core/apis/Widgets';
+import type { WidgetType } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
  * WidgetRoot
  * -----------------------------------------------------------------------------------------------*/
 
-interface RootProps {
-  title: MessageDescriptor;
-  icon?: typeof import('@strapi/icons').PuzzlePiece;
-  permissions?: WidgetType['permissions'];
+interface WidgetRootProps extends Pick<WidgetType, 'title' | 'icon' | 'permissions' | 'link'> {
   children: React.ReactNode;
 }
 
@@ -32,7 +30,8 @@ export const WidgetRoot = ({
   icon = PuzzlePiece,
   permissions = [],
   children,
-}: RootProps) => {
+  link,
+}: WidgetRootProps) => {
   const { formatMessage } = useIntl();
   const id = React.useId();
   const Icon = icon;
@@ -74,11 +73,24 @@ export const WidgetRoot = ({
       padding={6}
       aria-labelledby={id}
     >
-      <Flex direction="row" alignItems="center" gap={2} tag="header">
-        <Icon fill="neutral500" aria-hidden />
-        <Typography textColor="neutral500" variant="sigma" tag="h2" id={id}>
-          {formatMessage(title)}
-        </Typography>
+      <Flex direction="row" gap={2} justifyContent="space-between" width="100%" tag="header">
+        <Flex gap={2}>
+          <Icon fill="neutral500" aria-hidden />
+          <Typography textColor="neutral500" variant="sigma" tag="h2" id={id}>
+            {formatMessage(title)}
+          </Typography>
+        </Flex>
+        {link && (
+          <Typography
+            tag={ReactRouterLink}
+            variant="omega"
+            textColor="primary600"
+            style={{ textDecoration: 'none' }}
+            to={link.href}
+          >
+            {formatMessage(link.label)}
+          </Typography>
+        )}
       </Flex>
       <Box width="100%" height="261px" overflow="auto" tag="main">
         {permissionStatus === 'loading' && <Widget.Loading />}
@@ -148,6 +160,7 @@ const UnstableHomePageCe = () => {
                     title={widget.title}
                     icon={widget.icon}
                     permissions={widget.permissions}
+                    link={widget.link}
                   >
                     <WidgetComponent component={widget.component} />
                   </WidgetRoot>
