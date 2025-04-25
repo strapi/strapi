@@ -439,6 +439,7 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
+                disabled={disabled}
                 variant="ghost"
                 onClick={onDeleteComponent}
                 label={formatMessage({
