@@ -439,6 +439,7 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
+                disabled={disabled}
                 variant="ghost"
                 onClick={onDeleteComponent}
                 label={formatMessage({
@@ -449,6 +450,7 @@ const Component = ({
                 <Trash />
               </IconButton>
               <IconButton
+                disabled={disabled}
                 ref={composedAccordionRefs}
                 variant="ghost"
                 onClick={(e) => e.stopPropagation()}
