@@ -1,11 +1,11 @@
 import type { Core } from '@strapi/types';
 
-import { createDebugger } from '../debug';
+import { createDebugger } from '../utils';
 import { RouteMatcher } from './matcher';
 
 import type { RoutesProvider } from './providers';
 
-const debug = createDebugger();
+const debug = createDebugger('routes:collector');
 
 /**
  * Class responsible for collecting and filtering routes from multiple providers.
@@ -34,10 +34,11 @@ export class RouteCollector {
     const sanitizedRoutes = this.filter(routes);
 
     debug(
-      'collected %o valid routes from %o providers (%o before filtering)',
+      'collected %o/%o routes from %o providers %o',
       sanitizedRoutes.length,
+      routes.length,
       this._providers.length,
-      routes.length
+      this._providers.map((provider) => provider.constructor.name)
     );
 
     return sanitizedRoutes;
