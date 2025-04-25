@@ -438,30 +438,33 @@ const Component = ({
           <Accordion.Header>
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
-              <IconButton
-                disabled={disabled}
-                variant="ghost"
-                onClick={onDeleteComponent}
-                label={formatMessage({
-                  id: getTranslation('containers.Edit.delete'),
-                  defaultMessage: 'Delete',
-                })}
-              >
-                <Trash />
-              </IconButton>
-              <IconButton
-                ref={composedAccordionRefs}
-                variant="ghost"
-                onClick={(e) => e.stopPropagation()}
-                data-handler-id={handlerId}
-                label={formatMessage({
-                  id: getTranslation('components.DragHandle-label'),
-                  defaultMessage: 'Drag',
-                })}
-                onKeyDown={handleKeyDown}
-              >
-                <Drag />
-              </IconButton>
+              <Flex direction="row" gap={disabled ? 4 : 0}>
+                <IconButton
+                  disabled={disabled}
+                  variant="ghost"
+                  onClick={onDeleteComponent}
+                  label={formatMessage({
+                    id: getTranslation('containers.Edit.delete'),
+                    defaultMessage: 'Delete',
+                  })}
+                >
+                  <Trash />
+                </IconButton>
+                <IconButton
+                  disabled={disabled}
+                  ref={composedAccordionRefs}
+                  variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
+                  data-handler-id={handlerId}
+                  label={formatMessage({
+                    id: getTranslation('components.DragHandle-label'),
+                    defaultMessage: 'Drag',
+                  })}
+                  onKeyDown={handleKeyDown}
+                >
+                  <Drag />
+                </IconButton>
+              </Flex>
             </Accordion.Actions>
           </Accordion.Header>
           <Accordion.Content>
