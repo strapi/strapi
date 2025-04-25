@@ -16,7 +16,6 @@ const DEFAULT_OUTPUT = path.join(process.cwd(), 'specification.json');
 
 interface CommandOptions {
   output?: string;
-  summary: boolean;
 }
 
 interface StrapiInfoConfig {
