@@ -136,18 +136,25 @@ const ChatContent: React.FC<{
 
   // Scroll to the bottom of the chat when new messages arrive
   useEffect(() => {
-    if (status === 'ready' || status === 'error') return;
-    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Add a small delay to ensure all message content is fully rendered
+    // including conditionally rendered elements like feedback buttons
+    const scrollTimeout = setTimeout(() => {
+      messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 20);
+
+    return () => clearTimeout(scrollTimeout);
   }, [messages, status]);
 
   return (
-    <Flex direction="column" gap={5}>
-      {messages.map((message) => (
-        <ChatMessage key={message.id} message={message} />
-      ))}
-      {status === 'error' && <ChatError />}
+    <>
+      <Flex direction="column" gap={5}>
+        {messages.map((message) => (
+          <ChatMessage key={message.id} message={message} />
+        ))}
+        {status === 'error' && <ChatError />}
+      </Flex>
       <div ref={messageEndRef} />
-    </Flex>
+    </>
   );
 };
 
@@ -237,7 +244,7 @@ const LoadingDots = ({ children }: { children: string }) => {
     const interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % dotStates.length;
       setDots(dotStates[currentIndex]);
-    }, 400); // Change every 400ms for a nice rhythm
+    }, 400); // Change every 400ms
 
     return () => clearInterval(interval);
   }, []);

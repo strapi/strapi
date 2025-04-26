@@ -93,12 +93,88 @@ const DropZone = ({ importType, onAddFiles, error }: DropZoneProps) => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  /**
+   * Recursively reads a directory and its contents
+   */
+  const readDirectory = async (entry: any): Promise<File[]> => {
+    const reader = entry.createReader();
+    const getEntries = (): Promise<any[]> => {
+      return new Promise((resolve, reject) => {
+        reader.readEntries(resolve, reject);
+      });
+    };
+
+    const files: File[] = [];
+    let entries: any[] = [];
+
+    // Read entries in batches until no more entries are left
+    do {
+      entries = await getEntries();
+      for (const entry of entries) {
+        if (entry.isFile) {
+          const file = await new Promise<File>((resolve, reject) => {
+            entry.file(resolve, reject);
+          });
+
+          // Store the full path including the directory structure
+          Object.defineProperty(file, 'webkitRelativePath', {
+            writable: true,
+            value: entry.fullPath.substring(1), // Remove leading slash
+          });
+
+          files.push(file);
+        } else if (entry.isDirectory) {
+          // Recursively process subdirectories
+          const subFiles = await readDirectory(entry);
+          files.push(...subFiles);
+        }
+      }
+    } while (entries.length > 0);
+
+    return files;
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (e?.dataTransfer?.files) {
-      onAddFiles(Array.from(e.dataTransfer.files));
-    }
     setDragOver(false);
+
+    if (!e.dataTransfer?.items) {
+      return;
+    }
+
+    // For folder upload, process directories recursively
+    if (importType === 'folder') {
+      const items = e.dataTransfer.items;
+      const allFiles: File[] = [];
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        // Use webkitGetAsEntry to access the file system entry
+        const entry = item.webkitGetAsEntry?.();
+
+        if (entry) {
+          if (entry.isDirectory) {
+            const files = await readDirectory(entry);
+            allFiles.push(...files);
+          } else if (entry.isFile) {
+            const file = await new Promise<File>((resolve, reject) => {
+              // @ts-expect-error - fix
+              entry.file(resolve, reject);
+            });
+            allFiles.push(file);
+          }
+        }
+      }
+
+      if (allFiles.length > 0) {
+        onAddFiles(allFiles);
+      }
+    } else {
+      // For zip files, just import them regularly
+      if (e.dataTransfer.files) {
+        onAddFiles(Array.from(e.dataTransfer.files));
+      }
+    }
   };
 
   return (

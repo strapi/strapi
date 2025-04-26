@@ -14,7 +14,8 @@ export interface ProjectFile {
   content: string;
 }
 
-const ALLOWED_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.md'];
+const ALLOWED_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.md', '.json'];
+const MAX_LINES_PER_FILE = 5000; // Maximum number of lines per file
 
 // Common patterns to ignore
 const DEFAULT_IGNORE_PATTERNS = [
@@ -39,6 +40,21 @@ const isAllowedFile = (filename: string, ignorePatterns: string[] = []) => {
 
   // Check if file has allowed extension
   return ALLOWED_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(ext));
+};
+
+/**
+ * Prunes file content if it exceeds MAX_LINES
+ */
+const pruneFileContent = (content: string): string => {
+  const lines = content.split('\n');
+
+  if (lines.length <= MAX_LINES_PER_FILE) {
+    return content;
+  }
+
+  const truncated = lines.slice(0, MAX_LINES_PER_FILE).join('\n');
+
+  return `${truncated}\n\n// ... [${lines.length - MAX_LINES_PER_FILE} lines truncated, file too long] ...\n\n`;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -76,7 +92,7 @@ export async function openZipFile(
         const content = await zipEntry.async('string');
         processedFiles.push({
           path: filename,
-          content,
+          content: pruneFileContent(content),
         });
       } catch (err) {
         console.warn(`Failed to read file ${filename}:`, err);
@@ -123,7 +139,7 @@ export async function processFolder(
         processedFiles.push({
           // Remove the root folder name from the path
           path: filePath.includes('/') ? filePath.substring(filePath.indexOf('/') + 1) : filePath,
-          content,
+          content: pruneFileContent(content),
         });
       } catch (err) {
         console.warn(`Failed to read file ${filePath}:`, err);
@@ -165,9 +181,10 @@ interface UseCodeUploadOptions {
 
 export function useCodeUpload({ onSuccess, onError }: UseCodeUploadOptions = {}) {
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const {
     fetch: fetchUploadProject,
-    isPending: isLoading,
+    isPending: isFetching,
     error: fetchError,
   } = useFetchUploadProject();
   const { id: chatId } = useStrapiChat();
@@ -196,6 +213,7 @@ export function useCodeUpload({ onSuccess, onError }: UseCodeUploadOptions = {})
   const handleZipFile = async (file: File) => {
     try {
       setError(null);
+      setIsProcessing(true);
 
       const { files: processedFiles, projectName } = await processZipFile(file, {
         ignorePatterns: ['**/node_modules/**'],
@@ -210,12 +228,15 @@ export function useCodeUpload({ onSuccess, onError }: UseCodeUploadOptions = {})
       onError?.('Failed to process zip file');
       console.error('Error processing zip:', err);
       throw err;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleFolder = async (files: FileList | File[]) => {
     try {
       setError(null);
+      setIsProcessing(true);
 
       const { files: processedFiles, projectName } = await processFolder(files, {
         ignorePatterns: ['**/node_modules/**'],
@@ -230,13 +251,15 @@ export function useCodeUpload({ onSuccess, onError }: UseCodeUploadOptions = {})
       onError?.('Failed to process folder');
       console.error('Error processing folder:', err);
       throw err;
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   return {
     processZipFile: handleZipFile,
     processFolder: handleFolder,
-    isLoading,
+    isLoading: isProcessing || isFetching,
     error: fetchError || error,
   };
 }

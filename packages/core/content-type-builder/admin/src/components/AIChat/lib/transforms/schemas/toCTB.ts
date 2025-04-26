@@ -111,8 +111,8 @@ export const transformChatToCTB = (
   schema: Schema,
   oldSchema?: ContentType | Component
 ): ContentType | Component => {
-  const singularName = pluralize.singular(schema.name).toLowerCase().replace(' ', '-');
-  const pluralName = pluralize.plural(schema.name).toLowerCase().replace(' ', '-');
+  const singularName = pluralize.singular(schema.name).toLowerCase().replace(/ /g, '-');
+  const pluralName = pluralize.plural(schema.name).toLowerCase().replace(/ /g, '-');
 
   if (schema.modelType === 'component') {
     return {

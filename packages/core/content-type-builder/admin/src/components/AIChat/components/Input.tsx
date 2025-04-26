@@ -56,7 +56,15 @@ interface HeaderProps extends React.ComponentPropsWithoutRef<typeof Box> {
 
 const Header = ({ children, ...props }: HeaderProps) => {
   return (
-    <Box position="absolute" bottom={'101%'} left={0} right={0} background="neutral0" {...props}>
+    <Box
+      position="absolute"
+      bottom={'101%'}
+      left={0}
+      right={0}
+      background="neutral0"
+      width="fit-content"
+      {...props}
+    >
       {children}
     </Box>
   );

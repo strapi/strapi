@@ -121,7 +121,7 @@ const UserMessage = ({ message }: { message: UserMessageType }) => {
       maxWidth="80%"
     >
       {hasText ? (
-        <Box background="neutral150" borderStyle="none" padding={3} hasRadius>
+        <Box background="neutral150" borderStyle="none" padding={['10px', '16px']} hasRadius>
           {message.contents.map((content, index) => {
             if (content.type !== 'text') return null;
             return <Typography key={index}>{content.text}</Typography>;
@@ -147,10 +147,10 @@ const AssistantMessage = ({ message }: { message: AssistantMessageType }) => {
         <MessageContent key={index} content={content} />
       ))}
       {message.status !== 'loading' ? (
-        <Flex>
+        <Flex gap={1}>
           <IconButton
             label="Upvote"
-            size="S"
+            size="XS"
             variant="ghost"
             onClick={() => upvoteMessage(message.id)}
           >
@@ -158,7 +158,7 @@ const AssistantMessage = ({ message }: { message: AssistantMessageType }) => {
           </IconButton>
           <IconButton
             label="Downvote"
-            size="S"
+            size="XS"
             variant="ghost"
             // For downvoting, user must provide specific feedback
             onClick={() => openFeedbackModal(message.id)}
