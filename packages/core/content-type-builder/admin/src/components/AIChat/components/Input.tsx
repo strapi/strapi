@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { styled } from 'styled-components';
+import { css, styled, DefaultTheme, IStyledComponent } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * Input Context
@@ -58,7 +58,7 @@ const Header = ({ children, ...props }: HeaderProps) => {
   return (
     <Box
       position="absolute"
-      bottom={'101%'}
+      bottom={'102%'}
       left={0}
       right={0}
       background="neutral0"
@@ -93,22 +93,37 @@ const Attachments = ({ children, gap = 2, ...props }: InputAttachmentsProps) => 
  * Input Content
  * -----------------------------------------------------------------------------------------------*/
 
-const InputContainer = styled(Box)``;
+const InputContainer = styled(Box)`
+  outline: none;
+  box-shadow: none;
+  transition-property: border-color, box-shadow, fill;
+  transition-duration: 0.2s;
+
+  &:focus-within {
+    border: 1px solid
+      ${({ theme, $hasError }) => ($hasError ? theme.colors.danger600 : theme.colors.primary600)};
+    box-shadow: ${({ theme, $hasError }) =>
+        $hasError ? theme.colors.danger600 : theme.colors.primary600}
+      0px 0px 0px 2px;
+  }
+`;
 
 interface ContentProps extends React.ComponentPropsWithoutRef<typeof Box> {
   children: React.ReactNode;
   disclaimer?: string;
+  error?: boolean;
 }
 
-const Content = ({ children, disclaimer, ...props }: ContentProps) => {
+const Content = ({ children, disclaimer, error = false, ...props }: ContentProps) => {
   return (
     <InputContainer
       background="neutral0"
       hasRadius
-      borderColor="neutral200"
+      borderColor={error ? 'danger600' : 'neutral200'}
       borderWidth="1px"
       borderStyle="solid"
       width="100%"
+      $hasError={error}
       {...props}
     >
       <Box padding={3}>{children}</Box>
