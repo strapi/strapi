@@ -124,7 +124,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     }
 
     console.log(primaryAction ? true : false);
-    
+
     return (
       <Box
         ref={ref}
