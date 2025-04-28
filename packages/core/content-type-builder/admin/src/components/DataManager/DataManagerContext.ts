@@ -96,6 +96,10 @@ export interface DataManagerContextValue {
     };
     componentUID: Internal.UID.Component;
   }) => void;
+  updateComponentUid: (opts: {
+    newComponentUID: Internal.UID.Component;
+    componentUID: Internal.UID.Component;
+  }) => void;
   updateSchema: (opts: {
     data: {
       displayName: string;
