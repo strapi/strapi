@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Button, Dialog, Flex } from '@strapi/design-system';
-import { Check, ArrowClockwise } from '@strapi/icons';
+import { Check, ArrowClockwise, Eye } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
@@ -117,7 +117,9 @@ interface FormHeadProps<TToken extends Token | null> {
   token: TToken;
   canEditInputs: boolean;
   canRegenerate: boolean;
+  canShowToken: boolean;
   setToken: (token: TToken) => void;
+  setShowToken: (showToken: boolean) => void;
   isSubmitting: boolean;
   regenerateUrl: string;
 }
@@ -126,6 +128,8 @@ export const FormHead = <TToken extends Token | null>({
   title,
   token,
   setToken,
+  setShowToken,
+  canShowToken,
   canEditInputs,
   canRegenerate,
   isSubmitting,
@@ -150,6 +154,19 @@ export const FormHead = <TToken extends Token | null>({
                 onRegenerate={handleRegenerate}
                 url={`${regenerateUrl}${token?.id ?? ''}`}
               />
+            )}
+            {canShowToken && token?.id && (
+              <Button
+                type="button"
+                startIcon={<Eye />}
+                variant="secondary"
+                onClick={() => setShowToken(true)}
+              >
+                {formatMessage({
+                  id: 'Settings.apiTokens.viewToken',
+                  defaultMessage: 'View token',
+                })}
+              </Button>
             )}
             <Button
               disabled={isSubmitting}

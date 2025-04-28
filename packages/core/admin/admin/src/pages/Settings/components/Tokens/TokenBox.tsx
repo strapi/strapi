@@ -66,7 +66,7 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
         token
           ? formatMessage({
               id: 'Settings.tokens.copy.lastWarning',
-              defaultMessage: 'Make sure to copy this token, you won’t be able to see it again!',
+              defaultMessage: 'Make sure to copy this token.',
             })
           : formatMessage({
               id: 'Settings.tokens.copy.editMessage',

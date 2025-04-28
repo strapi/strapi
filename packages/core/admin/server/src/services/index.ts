@@ -4,6 +4,7 @@ import user from './user';
 import role from './role';
 import passport from './passport';
 import metrics from './metrics';
+import encryption from './encryption';
 import * as token from './token';
 import * as permission from './permission';
 import * as contentType from './content-type';
@@ -32,4 +33,5 @@ export default {
   transfer,
   'project-settings': projectSettings,
   homepage: createHomepageService,
+  encryption,
 };

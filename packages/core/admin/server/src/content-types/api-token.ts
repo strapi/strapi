@@ -47,6 +47,13 @@ export default {
       required: true,
       searchable: false,
     },
+    encryptedKey: {
+      type: 'string',
+      minLength: 1,
+      configurable: false,
+      required: true,
+      searchable: true,
+    },
     lastUsedAt: {
       type: 'datetime',
       configurable: false,

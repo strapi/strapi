@@ -3,6 +3,7 @@ import role from '../services/role';
 import user from '../services/user';
 import passport from '../services/passport';
 import metrics from '../services/metrics';
+import encryption from '../services/encryption';
 import * as permission from '../services/permission';
 import * as contentType from '../services/content-type';
 import * as token from '../services/token';
@@ -24,6 +25,7 @@ type S = {
   'project-settings': typeof projectSettings;
   transfer: typeof transfer;
   homepage: ReturnType<typeof createHomepageService>;
+  encryption: typeof encryption;
 };
 
 type Resolve<T> = T extends (...args: unknown[]) => unknown ? T : { [K in keyof T]: T[K] };
