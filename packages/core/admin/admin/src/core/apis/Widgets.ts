@@ -61,4 +61,4 @@ class Widgets {
 }
 
 export { Widgets };
-export type { WidgetArgs };
+export type { WidgetArgs, Widget };

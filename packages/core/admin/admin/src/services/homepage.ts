@@ -15,7 +15,7 @@ const homepageService = adminApi
         Homepage.GetRecentDocuments.Response['data'],
         Homepage.GetRecentDocuments.Request['query']
       >({
-        query: (params) => `/admin/homepage/recent-documents?action=${params.action}`,
+        query: (params) => `/content-manager/homepage/recent-documents?action=${params.action}`,
         transformResponse: (response: Homepage.GetRecentDocuments.Response) => response.data,
         providesTags: (res, _err, { action }) => [
           { type: 'RecentDocumentList' as const, id: action },
