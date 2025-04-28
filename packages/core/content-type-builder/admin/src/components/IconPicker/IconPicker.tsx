@@ -55,14 +55,16 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
             aria-checked={isSelected}
           />
         </VisuallyHidden>
-        <Flex
-          padding={2}
-          cursor="pointer"
-          hasRadius
-          background={isSelected ? 'primary200' : undefined}
-        >
-          <Icon fill={isSelected ? 'primary600' : 'neutral300'} />
-        </Flex>
+        <Tooltip label={iconKey}>
+          <Flex
+            padding={2}
+            cursor="pointer"
+            hasRadius
+            background={isSelected ? 'primary200' : undefined}
+          >
+            <Icon width={'2rem'} height={'2rem'} fill={isSelected ? 'primary600' : 'neutral300'} />
+          </Flex>
+        </Tooltip>
       </Field.Label>
     </Field.Root>
   );

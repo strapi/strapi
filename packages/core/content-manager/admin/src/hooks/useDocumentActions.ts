@@ -11,6 +11,8 @@ import {
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
+import { usePreviewContext } from '../preview/pages/Preview';
 import {
   useAutoCloneDocumentMutation,
   useCloneDocumentMutation,
@@ -58,12 +60,16 @@ type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
   | Pick<TResponse, 'data'>
   | { error: BaseQueryError | SerializedError };
 
-type UseDocumentActions = () => {
+type UseDocumentActions = (
+  fromPreview?: boolean,
+  fromRelationModal?: boolean
+) => {
   /**
    * @description Attempts to clone a document based on the provided sourceId.
    * This will return a list of the fields as an error if it's unable to clone.
    * You most likely want to use the `clone` action instead.
    */
+  isLoading: boolean;
   autoClone: (args: {
     model: string;
     sourceId: string;
@@ -196,7 +202,13 @@ const useDocumentActions: UseDocumentActions = () => {
   const navigate = useNavigate();
   const setCurrentStep = useGuidedTour('useDocumentActions', (state) => state.setCurrentStep);
 
-  const [deleteDocument] = useDeleteDocumentMutation();
+  // Get metadata from context providers for tracking purposes
+  const previewContext = usePreviewContext('useDocumentActions', () => true, false);
+  const relationContext = useRelationModal('useDocumentActions', () => true, false);
+  const fromPreview = previewContext != undefined;
+  const fromRelationModal = relationContext != undefined;
+
+  const [deleteDocument, { isLoading: isDeleting }] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, trackerProperty) => {
       try {
@@ -243,7 +255,7 @@ const useDocumentActions: UseDocumentActions = () => {
     [trackUsage, deleteDocument, toggleNotification, formatMessage, formatAPIError]
   );
 
-  const [deleteManyDocuments] = useDeleteManyDocumentsMutation();
+  const [deleteManyDocuments, { isLoading: isDeletingMany }] = useDeleteManyDocumentsMutation();
 
   const deleteMany: IUseDocumentActs['deleteMany'] = React.useCallback(
     async ({ model, documentIds, params }) => {
@@ -291,7 +303,7 @@ const useDocumentActions: UseDocumentActions = () => {
     [trackUsage, deleteManyDocuments, toggleNotification, formatMessage, formatAPIError]
   );
 
-  const [discardDocument] = useDiscardDocumentMutation();
+  const [discardDocument, { isLoading: isDiscardingDocument }] = useDiscardDocumentMutation();
   const discard: IUseDocumentActs['discard'] = React.useCallback(
     async ({ collectionType, model, documentId, params }) => {
       try {
@@ -332,11 +344,11 @@ const useDocumentActions: UseDocumentActions = () => {
     [discardDocument, formatAPIError, formatMessage, toggleNotification]
   );
 
-  const [publishDocument] = usePublishDocumentMutation();
+  const [publishDocument, { isLoading: isPublishing }] = usePublishDocumentMutation();
   const publish: IUseDocumentActs['publish'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, data) => {
       try {
-        trackUsage('willPublishEntry');
+        trackUsage('willPublishEntry', { documentId });
 
         const res = await publishDocument({
           collectionType,
@@ -351,7 +363,7 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didPublishEntry');
+        trackUsage('didPublishEntry', { documentId, fromPreview, fromRelationModal });
 
         toggleNotification({
           type: 'success',
@@ -371,10 +383,18 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [trackUsage, publishDocument, toggleNotification, formatMessage, formatAPIError]
+    [
+      trackUsage,
+      publishDocument,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
-  const [publishManyDocuments] = usePublishManyDocumentsMutation();
+  const [publishManyDocuments, { isLoading: isPublishingMany }] = usePublishManyDocumentsMutation();
   const publishMany: IUseDocumentActs['publishMany'] = React.useCallback(
     async ({ model, documentIds, params }) => {
       try {
@@ -416,7 +436,7 @@ const useDocumentActions: UseDocumentActions = () => {
     ]
   );
 
-  const [updateDocument] = useUpdateDocumentMutation();
+  const [updateDocument, { isLoading: isUpdating }] = useUpdateDocumentMutation();
   const update: IUseDocumentActs['update'] = React.useCallback(
     async ({ collectionType, model, documentId, params }, data, trackerProperty) => {
       try {
@@ -438,7 +458,12 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didEditEntry', trackerProperty);
+        trackUsage('didEditEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+        });
         toggleNotification({
           type: 'success',
           message: formatMessage({
@@ -459,7 +484,15 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [trackUsage, updateDocument, toggleNotification, formatMessage, formatAPIError]
+    [
+      trackUsage,
+      updateDocument,
+      fromPreview,
+      fromRelationModal,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [unpublishDocument] = useUnpublishDocumentMutation();
@@ -507,7 +540,8 @@ const useDocumentActions: UseDocumentActions = () => {
     [trackUsage, unpublishDocument, toggleNotification, formatMessage, formatAPIError]
   );
 
-  const [unpublishManyDocuments] = useUnpublishManyDocumentsMutation();
+  const [unpublishManyDocuments, { isLoading: isUnpublishingMany }] =
+    useUnpublishManyDocumentsMutation();
   const unpublishMany: IUseDocumentActs['unpublishMany'] = React.useCallback(
     async ({ model, documentIds, params }) => {
       try {
@@ -569,7 +603,7 @@ const useDocumentActions: UseDocumentActions = () => {
           return { error: res.error };
         }
 
-        trackUsage('didCreateEntry', trackerProperty);
+        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
 
         toggleNotification({
           type: 'success',
@@ -593,7 +627,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, toggleNotification, trackUsage]
+    [createDocument, formatAPIError, formatMessage, setCurrentStep, toggleNotification, trackUsage]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
@@ -694,6 +728,14 @@ const useDocumentActions: UseDocumentActions = () => {
   );
 
   return {
+    isLoading:
+      isPublishing ||
+      isUpdating ||
+      isDiscardingDocument ||
+      isDeleting ||
+      isDeletingMany ||
+      isUnpublishingMany ||
+      isPublishingMany,
     autoClone,
     clone,
     create,

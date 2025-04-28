@@ -29,7 +29,7 @@ import {
   Dialog,
   type StatusVariant,
 } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash, Download, Cross, Plus } from '@strapi/icons';
+import { WarningCircle, ListPlus, Trash, Earth, Cross, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -292,7 +292,7 @@ const FillFromAnotherLocaleAction = ({
 
   return {
     type: 'icon',
-    icon: <Download />,
+    icon: <Earth />,
     disabled: availableLocales.length === 0,
     label: formatMessage({
       id: getTranslation('CMEditViewCopyLocale.copy-text'),
@@ -376,7 +376,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
-  const { delete: deleteAction } = useDocumentActions();
+  const { delete: deleteAction, isLoading } = useDocumentActions();
   const { hasI18n, canDelete } = useI18n();
 
   // Get the current locale object, using the URL instead of document so it works while creating
@@ -419,6 +419,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
           </Typography>
         </Flex>
       ),
+      loading: isLoading,
       onConfirm: async () => {
         const unableToDelete =
           // We are unable to delete a collection type without a document ID
