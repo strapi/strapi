@@ -336,6 +336,15 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       );
     },
 
+    updateComponentUid({ componentUID, newComponentUID }) {
+      dispatch(
+        actions.updateComponentUid({
+          uid: componentUID,
+          newComponentUID,
+        })
+      );
+    },
+
     updateSchema(args) {
       dispatch(actions.updateSchema(args));
     },

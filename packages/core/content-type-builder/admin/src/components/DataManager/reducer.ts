@@ -16,7 +16,9 @@ import type {
   Status,
   AnyAttribute,
 } from '../../types';
-import type { Internal, Schema, Struct } from '@strapi/types';
+import { createComponentUid } from '../FormModal/utils/createUid';
+
+import type { Internal, Schema, Struct, UID } from '@strapi/types';
 
 export interface DataManagerStateType {
   components: Components;
@@ -146,7 +148,12 @@ type UpdateComponentSchemaPayload = {
     icon: string;
     displayName: string;
   };
-  uid: string;
+  uid: Internal.UID.Component;
+};
+
+type UpdateComponentUIDPayload = {
+  uid: Internal.UID.Component;
+  newComponentUID: Internal.UID.Component;
 };
 
 type UpdateSchemaPayload = {
@@ -571,6 +578,56 @@ const slice = createUndoRedoSlice(
             icon: data.icon,
           },
         });
+      },
+      updateComponentUid: (state, action: PayloadAction<UpdateComponentUIDPayload>) => {
+        const { newComponentUID, uid } = action.payload;
+
+        const type = state.components[uid];
+        if (!type || type.status !== 'NEW') {
+          return;
+        }
+
+        if (newComponentUID !== uid) {
+          const newType = { ...type, uid: newComponentUID };
+          state.components[newComponentUID] = newType;
+          delete state.components[uid];
+
+          // update the uid in the content types
+          Object.keys(state.contentTypes).forEach((contentTypeUid) => {
+            const contentType = state.contentTypes[contentTypeUid];
+
+            contentType.attributes.forEach((attribute) => {
+              if (attribute.type === 'dynamiczone') {
+                const newComponents = attribute.components.map((component: UID.Component) => {
+                  if (component === uid) {
+                    return newComponentUID;
+                  }
+
+                  return component;
+                });
+
+                attribute.components = newComponents;
+              }
+            });
+
+            contentType.attributes.forEach((attribute) => {
+              if (attribute.type === 'component' && attribute.component === uid) {
+                attribute.component = newComponentUID;
+              }
+            });
+          });
+
+          // update the uid in the other components
+          Object.keys(state.components).forEach((componentUid) => {
+            const component = state.components[componentUid];
+
+            component.attributes.forEach((attribute) => {
+              if (attribute.type === 'component' && attribute.component === uid) {
+                attribute.component = newComponentUID;
+              }
+            });
+          });
+        }
       },
       updateSchema: (state, action: PayloadAction<UpdateSchemaPayload>) => {
         const { data, uid } = action.payload;

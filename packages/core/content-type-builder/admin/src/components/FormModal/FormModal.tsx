@@ -115,6 +115,7 @@ export const FormModal = () => {
     nestedComponents,
     sortedContentTypesList,
     updateComponentSchema,
+    updateComponentUid,
     reservedNames,
   } = useDataManager();
 
@@ -532,6 +533,8 @@ export const FormModal = () => {
           });
 
           onCloseModal();
+
+          return;
         } else {
           updateComponentSchema({
             data: {
@@ -540,6 +543,22 @@ export const FormModal = () => {
             },
             componentUID: targetUid,
           });
+
+          if (type.status === 'NEW') {
+            const componentUid = createComponentUid(
+              modifiedData.displayName,
+              modifiedData.category
+            );
+
+            updateComponentUid({
+              componentUID: targetUid,
+              newComponentUID: componentUid,
+            });
+
+            navigate({
+              pathname: `/plugins/${pluginId}/component-categories/${modifiedData.category}/${componentUid}`,
+            });
+          }
 
           // Close the modal
           onCloseModal();
