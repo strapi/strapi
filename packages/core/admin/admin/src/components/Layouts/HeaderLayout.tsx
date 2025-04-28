@@ -58,7 +58,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
     const { trackUsage } = useTracking();
 
     const docLinkButton = docLink ? (
-      <Flex paddingLeft={2}>
+      <Flex>
         <IconButton
           onClick={() =>
             trackUsage('didClickOnDocLink', { from: docLink.pathname, to: docLink.link })
@@ -93,7 +93,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           zIndex={1}
           data-strapi-header-sticky
         >
-          <Flex justifyContent="space-between">
+          <Flex gap={2} justifyContent="space-between">
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
@@ -112,7 +112,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
             </Flex>
             <Flex>
               {primaryAction ? (
-                <Flex gap={2}>
+                <Flex>
                   {docLinkButton}
                   {primaryAction}
                 </Flex>
@@ -123,6 +123,8 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
       );
     }
 
+    console.log(primaryAction ? true : false);
+    
     return (
       <Box
         ref={ref}
@@ -134,7 +136,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         data-strapi-header
       >
         {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
-        <Flex justifyContent="space-between">
+        <Flex gap={2} justifyContent="space-between">
           <Flex minWidth={0}>
             <Typography tag="h1" variant="alpha" {...props}>
               {title}
@@ -142,7 +144,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
             {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
           </Flex>
           {/* Experiment */}
-          <Flex gap={2}>
+          <Flex>
             {docLinkButton}
             {primaryAction}
           </Flex>
@@ -169,13 +171,8 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
   const baseHeaderLayoutRef = React.useRef<HTMLDivElement>(null);
   const [headerSize, setHeaderSize] = React.useState<DOMRect | null>(null);
   const [isVisible, setIsVisible] = React.useState(true);
-  const [docLink, setDocLink] = React.useState<{
-    link: string;
-    title: string;
-    pathname: string;
-  } | null>(null);
-
   const { pathname } = useLocation();
+  const docLink = getMatchingDocLink(pathname);
 
   const containerRef = useElementOnScreen<HTMLDivElement>(setIsVisible, {
     root: null,
@@ -194,15 +191,6 @@ const HeaderLayout = (props: HeaderLayoutProps) => {
       setHeaderSize(baseHeaderLayoutRef.current.getBoundingClientRect());
     }
   }, [baseHeaderLayoutRef]);
-
-  React.useEffect(() => {
-    const fetchDocLink = async () => {
-      const result = await getMatchingDocLink(pathname);
-      setDocLink(result);
-    };
-
-    fetchDocLink();
-  }, [pathname]);
 
   return (
     <>
