@@ -91,13 +91,13 @@ function createCoreRouter<T extends UID.ContentType>(
       if (!routes) {
         const contentType = strapi.contentType(uid);
 
-        const defaultRoutes = createRoutes({ contentType });
+        const defaultRoutes = createRoutes({ contentType, strapi });
         const keys = Object.keys(defaultRoutes) as Array<keyof typeof defaultRoutes>;
 
         keys.forEach((routeName) => {
           const defaultRoute = defaultRoutes[routeName];
 
-          Object.assign(defaultRoute.config, config[routeName] || {});
+          defaultRoute.config = (config[routeName] ?? {}) as Core.RouteConfig;
         });
 
         const selectedRoutes = pipe(
