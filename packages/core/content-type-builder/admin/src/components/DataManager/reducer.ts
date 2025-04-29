@@ -16,8 +16,6 @@ import type {
   Status,
   AnyAttribute,
 } from '../../types';
-import { createComponentUid } from '../FormModal/utils/createUid';
-
 import type { Internal, Schema, Struct, UID } from '@strapi/types';
 
 export interface DataManagerStateType {
