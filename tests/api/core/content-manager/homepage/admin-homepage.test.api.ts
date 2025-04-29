@@ -120,7 +120,7 @@ describe('Homepage API', () => {
   it('requires action param', async () => {
     const response = await rq({
       method: 'GET',
-      url: '/admin/homepage/recent-documents',
+      url: '/content-manager/homepage/recent-documents',
     });
 
     expect(response.statusCode).toBe(400);
@@ -177,7 +177,7 @@ describe('Homepage API', () => {
 
     const response = await rq({
       method: 'GET',
-      url: '/admin/homepage/recent-documents?action=update',
+      url: '/content-manager/homepage/recent-documents?action=update',
     });
 
     // Assert the response
@@ -237,13 +237,13 @@ describe('Homepage API', () => {
     await strapi.documents(authorUid).update({
       documentId: author.documentId,
       data: {
-        name: `John Lennon`,
+        name: 'John Lennon',
       },
     });
 
     const response = await rq({
       method: 'GET',
-      url: '/admin/homepage/recent-documents?action=publish',
+      url: '/content-manager/homepage/recent-documents?action=publish',
     });
 
     expect(response.statusCode).toBe(200);
