@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+
 import type { ComponentRegistry } from '../registries';
 import type { Timer } from '../utils';
 

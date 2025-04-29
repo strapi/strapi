@@ -14,6 +14,7 @@ import {
   rules,
 } from './routes';
 
+import type { GenerationOptions } from './types';
 import type { GeneratorOutput } from './generator';
 
 export interface GenerationOptions {
@@ -51,3 +52,5 @@ export const generate = (strapi: Core.Strapi, options?: GenerationOptions): Gene
 
   return generator.generate();
 };
+
+export { GenerationOptions, GeneratorOutput };
