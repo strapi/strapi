@@ -32,7 +32,7 @@ This domain could potentially be moved to the Strapi core or Strapi utils in the
 This domain contains all the components necessary to generate a valid OpenAPI document from a Strapi application:
 
 | Component         | Path                                       |
-|-------------------|--------------------------------------------|
+| ----------------- | ------------------------------------------ |
 | OpenAPI Generator | `src/generator `                           |
 | Assemblers        | `src/assemblers`                           |
 | Contexts          | `src/context`                              |
@@ -120,11 +120,13 @@ erDiagram
 Generates valid OpenAPI documents from a Strapi application:
 
 - **Processors**
+
   - Lifecycle objects and methods
   - **Pre-processors**: Prepare data and registries before assembly
   - **Post-processors**: Clean up and finalize the output after assembly
 
 - **Assemblers**
+
   - Generate specific parts of the final document
   - Each has a single responsibility
   - **Sub-Assemblers**
