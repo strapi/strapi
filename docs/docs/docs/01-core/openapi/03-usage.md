@@ -23,7 +23,7 @@ By default, it collects content API routes registered in the application, transf
 ### Signature
 
 ```typescript
-function generate(strapi: Core.Strapi, options?: GeneratorOptions): GeneratorOutput
+function generate(strapi: Core.Strapi, options?: GeneratorOptions): GeneratorOutput;
 ```
 
 ### Parameters
@@ -34,5 +34,6 @@ function generate(strapi: Core.Strapi, options?: GeneratorOptions): GeneratorOut
 ### Return Value
 
 A generation output object, containing:
+
 - `document`, the generated OpenAPI specification, as JSON.
 - `stats`, statistics about the generation process
