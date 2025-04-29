@@ -10,7 +10,7 @@ import { clickAndWait } from '../../../utils/shared';
 
 test.describe('Create single type with all field types', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   test.beforeEach(async ({ page }) => {
     await sharedSetup('ctb-edit-st', page, {
@@ -23,34 +23,89 @@ test.describe('Create single type with all field types', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
   test.afterAll(async () => {
     await resetFiles();
   });
 
-  test('Can create a collection type with all field types (except relations)', async ({ page }) => {
+  const advancedRequired = { required: true };
+  const advancedRegex = { required: true, regexp: '^(?!.*fail).*' };
+
+  test('Can create a collection type with all field types', async ({ page }) => {
     const attributes: AddAttribute[] = [
-      { type: 'text', name: 'testtext' },
-      { type: 'boolean', name: 'testboolean' },
-      { type: 'blocks', name: 'testblocks' },
-      { type: 'json', name: 'testjson' },
-      { type: 'number', name: 'testinteger', number: { format: 'integer' } },
-      { type: 'number', name: 'testbiginteger', number: { format: 'big integer' } },
-      { type: 'number', name: 'testdecimal', number: { format: 'decimal' } },
-      { type: 'email', name: 'testemail' },
-      { type: 'date', name: 'testdateonlydate', date: { format: 'date' } },
-      { type: 'date', name: 'testdatetime', date: { format: 'time' } },
-      { type: 'date', name: 'testdatedatetime', date: { format: 'datetime' } },
-      { type: 'password', name: 'testpassword' },
-      { type: 'media', name: 'testmediasingle', media: { multiple: false } },
-      { type: 'media', name: 'testmediamultiple', media: { multiple: true } },
+      { type: 'text', name: 'testtext', advanced: advancedRegex },
+      { type: 'boolean', name: 'testboolean', advanced: advancedRequired },
+      { type: 'blocks', name: 'testblocks', advanced: advancedRequired },
+      { type: 'json', name: 'testjson', advanced: advancedRequired },
+      {
+        type: 'number',
+        name: 'testinteger',
+        number: { format: 'integer' },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'number',
+        name: 'testbiginteger',
+        number: { format: 'big integer' },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'number',
+        name: 'testdecimal',
+        number: { format: 'decimal' },
+        advanced: advancedRequired,
+      },
+      { type: 'email', name: 'testemail', advanced: advancedRequired },
+      {
+        type: 'date',
+        name: 'testdateonlydate',
+        date: { format: 'date' },
+        advanced: advancedRequired,
+      },
+      { type: 'date', name: 'testdatetime', date: { format: 'time' }, advanced: advancedRequired },
+      {
+        type: 'date',
+        name: 'testdatedatetime',
+        date: { format: 'datetime' },
+        advanced: advancedRequired,
+      },
+      { type: 'password', name: 'testpassword', advanced: advancedRequired },
+      {
+        type: 'media',
+        name: 'testmediasingle',
+        media: { multiple: false },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'media',
+        name: 'testmediamultiple',
+        media: { multiple: true },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testonewayrelation',
+        relation: {
+          type: 'oneWay',
+          target: { select: 'Article', name: 'testonewayrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
+      {
+        type: 'relation',
+        name: 'testmanywayrelation',
+        relation: {
+          type: 'manyWay',
+          target: { select: 'Article', name: 'testmanywayrelationtarget' },
+        },
+        advanced: advancedRequired,
+      },
       {
         type: 'enumeration',
         name: 'testenumeration',
         enumeration: { values: ['first', 'second', 'third'] },
+        advanced: advancedRequired,
       },
-      { type: 'markdown', name: 'testmarkdown' },
+      { type: 'markdown', name: 'testmarkdown', advanced: advancedRequired },
       // New single component with a new category
       {
         type: 'component',
@@ -61,7 +116,13 @@ test.describe('Create single type with all field types', () => {
             name: 'testnewcomponentnewcategory',
             icon: 'alien',
             categoryCreate: 'testcategory',
-            attributes: [{ type: 'text', name: 'testnewcompotext' }],
+            attributes: [
+              {
+                type: 'text',
+                name: 'testnewcompotext',
+                advanced: { required: true, regexp: '^(?!.*fail).*' },
+              },
+            ],
           },
         },
       },
@@ -75,7 +136,13 @@ test.describe('Create single type with all field types', () => {
             name: 'testnewcomponentrepeatable',
             icon: 'moon',
             categorySelect: 'testcategory',
-            attributes: [{ type: 'text', name: 'testexistingcompotext' }],
+            attributes: [
+              {
+                type: 'text',
+                name: 'testexistingcompotext',
+                advanced: { required: true, regexp: '^(?!.*fail).*' },
+              },
+            ],
           },
         },
       },
@@ -108,7 +175,13 @@ test.describe('Create single type with all field types', () => {
                   name: 'testnewcomponentnewcategory',
                   icon: 'paint',
                   categoryCreate: 'testcategory',
-                  attributes: [{ type: 'text', name: 'testdzcompotext' }],
+                  attributes: [
+                    {
+                      type: 'text',
+                      name: 'testdzcompotext',
+                      advanced: { required: true, regexp: '^(?!.*fail).*' },
+                    },
+                  ],
                 },
               },
             },

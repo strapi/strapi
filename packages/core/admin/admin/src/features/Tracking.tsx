@@ -6,6 +6,7 @@ import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
 import { useAppInfo } from './AppInfo';
 import { useAuth } from './Auth';
+import { useStrapiApp } from './StrapiApp';
 
 export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
@@ -39,6 +40,7 @@ export interface TrackingProviderProps {
 
 const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const token = useAuth('App', (state) => state.token);
+  const getAllWidgets = useStrapiApp('TrackingProvider', (state) => state.widgets.getAll);
   const { data: initData } = useInitQuery();
   const { uuid } = initData ?? {};
 
@@ -57,7 +59,11 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
             event,
             userId: '',
             eventPropeties: {},
-            groupProperties: { ...data, projectId: uuid },
+            groupProperties: {
+              ...data,
+              projectId: uuid,
+              registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+            },
           }),
           headers: {
             'Content-Type': 'application/json',
@@ -68,7 +74,7 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
         // silence is golden
       }
     }
-  }, [data, uuid]);
+  }, [data, uuid, getAllWidgets]);
 
   const value = React.useMemo(
     () => ({
@@ -325,6 +331,8 @@ interface PublishEntryEvents {
   name: 'willPublishEntry' | 'didPublishEntry';
   properties: {
     documentId?: string;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 
@@ -334,6 +342,8 @@ interface UpdateEntryEvents {
     documentId?: string;
     status?: string;
     error?: unknown;
+    fromPreview?: boolean;
+    fromRelationModal?: boolean;
   };
 }
 
