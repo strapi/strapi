@@ -1,8 +1,12 @@
-import { OpenApiGeneratorV31, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
+import {
+  OpenApiGeneratorV31,
+  OpenAPIRegistry,
+  extendZodWithOpenApi,
+} from '@asteasolutions/zod-to-openapi';
+import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 
 import type { OpenAPIV3 } from 'openapi-types';
-import type { z } from 'zod';
 
 /**
  * Converts a Zod schema to an OpenAPI Schema Object.
@@ -48,4 +52,11 @@ export const zodToOpenAPI = (zodSchema: z.Schema): OpenAPIV3.SchemaObject | unde
   }
 
   return components.schemas?.[uuid] as OpenAPIV3.SchemaObject | undefined;
+};
+
+/**
+ * Registers extensions for Zod to support OpenAPI integration.
+ */
+export const registerZodExtensions = () => {
+  extendZodWithOpenApi(z);
 };

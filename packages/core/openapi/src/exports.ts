@@ -13,13 +13,12 @@ import {
   RouteMatcher,
   rules,
 } from './routes';
+import { registerZodExtensions } from './utils';
 
 import type { GenerationOptions } from './types';
 import type { GeneratorOutput } from './generator';
 
-export interface GenerationOptions {
-  type: 'admin' | 'content-api';
-}
+registerZodExtensions();
 
 /**
  * @experimental
