@@ -56,10 +56,10 @@
     "npm": ">=6.0.0"
   },
   "dependencies": {
-    "@strapi/utils": "5.12.4",
+    "@asteasolutions/zod-to-openapi": "7.3.0",
+    "@strapi/types": "5.12.4",
     "debug": "4.3.4",
-    "openapi-types": "12.1.3",
-    "path-to-regexp": "8.2.0"
+    "openapi-types": "12.1.3"
   },
   "devDependencies": {
     "@strapi/types": "5.12.4",
