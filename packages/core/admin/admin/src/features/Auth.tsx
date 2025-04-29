@@ -238,7 +238,10 @@ const AuthProvider = ({
       const matchingPermissions = actualUserPermissions.filter(
         (permission) =>
           permissions.findIndex(
-            (perm) => perm.action === permission.action && perm.subject === permission.subject
+            (perm) =>
+              perm.action === permission.action &&
+              // Only check the subject if it's provided
+              (perm.subject == undefined || perm.subject === permission.subject)
           ) >= 0
       );
 

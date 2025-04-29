@@ -1,21 +1,81 @@
-'use strict';
+import { prop } from 'lodash/fp';
+import { createTestBuilder } from 'api-tests/builder';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createRequest, createAuthRequest } from 'api-tests/request';
+import { createUtils } from 'api-tests/utils';
 
-const { prop } = require('lodash/fp');
-const { createTestBuilder } = require('api-tests/builder');
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createRequest, createAuthRequest } = require('api-tests/request');
-const { createUtils } = require('api-tests/utils');
+interface Article {
+  singularName: string;
+  pluralName: string;
+  displayName: string;
+  attributes: {
+    title: {
+      type: string;
+    };
+    price: {
+      type: string;
+    };
+  };
+}
+
+interface Entry {
+  name: string;
+  price: number;
+  documentId?: string;
+}
+
+interface Role {
+  id?: number;
+  name: string;
+  description: string;
+  permissions?: Permission[];
+}
+
+interface Permission {
+  action: string;
+  subject: string;
+  fields: null;
+  conditions: string[];
+}
+
+interface User {
+  id?: number;
+  firstname?: string;
+  lastName?: string;
+  lastname?: string;
+  firstName?: string;
+  email: string;
+  password?: string;
+  roles?: number[];
+}
+
+interface TestData {
+  models: {
+    article: Article;
+  };
+  entry: Entry;
+  role: Role;
+  permissions: Permission[];
+  userPassword: string;
+  users: User[];
+}
+
+interface Requests {
+  public: any;
+  admin: any;
+  [key: number]: any;
+}
 
 describe('Admin Permissions - Conditions', () => {
-  let strapi;
-  let utils;
+  let strapi: any;
+  let utils: any;
   const builder = createTestBuilder();
-  const requests = {
+  const requests: Requests = {
     public: null,
     admin: null,
   };
 
-  const localTestData = {
+  const localTestData: TestData = {
     models: {
       article: {
         singularName: 'article',
@@ -67,7 +127,7 @@ describe('Admin Permissions - Conditions', () => {
     ],
   };
 
-  const createFixtures = async () => {
+  const createFixtures = async (): Promise<void> => {
     // Login with admin and init admin tools
     requests.admin = await createAuthRequest({ strapi });
     requests.public = createRequest({ strapi });
@@ -84,7 +144,7 @@ describe('Admin Permissions - Conditions', () => {
     Object.assign(role, { permissions });
 
     // Create users with the new roles & create associated auth requests
-    const users = [];
+    const users: User[] = [];
 
     for (let i = 0; i < localTestData.users.length; i += 1) {
       const userFixture = localTestData.users[i];
@@ -105,10 +165,10 @@ describe('Admin Permissions - Conditions', () => {
     Object.assign(localTestData, { role, permissions, users });
   };
 
-  const getUserRequest = (idx) => requests[localTestData.users[idx].id];
+  const getUserRequest = (idx: number) => requests[localTestData.users[idx].id];
   const getModelName = () => localTestData.models.article.singularName;
 
-  const deleteFixtures = async () => {
+  const deleteFixtures = async (): Promise<void> => {
     // Delete users
     const usersId = localTestData.users.map(prop('id'));
     await utils.deleteUsersById(usersId);
@@ -174,7 +234,7 @@ describe('Admin Permissions - Conditions', () => {
     // The document should also be available in the homepage content manager widgets
     const homepageRecentlyUpdatedRes = await rq({
       method: 'GET',
-      url: '/admin/homepage/recent-documents?action=update',
+      url: '/content-manager/homepage/recent-documents?action=update',
     });
 
     expect(homepageRecentlyUpdatedRes.statusCode).toBe(200);
@@ -198,7 +258,7 @@ describe('Admin Permissions - Conditions', () => {
     // The document should not be available in the homepage content manager widgets
     const homepageRecentlyUpdatedRes = await rq({
       method: 'GET',
-      url: '/admin/homepage/recent-documents?action=update',
+      url: '/content-manager/homepage/recent-documents?action=update',
     });
 
     expect(homepageRecentlyUpdatedRes.statusCode).toBe(200);
