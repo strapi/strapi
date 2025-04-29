@@ -329,6 +329,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@asteasolutions/zod-to-openapi@npm:7.3.0":
+  version: 7.3.0
+  resolution: "@asteasolutions/zod-to-openapi@npm:7.3.0"
+  dependencies:
+    openapi3-ts: "npm:^4.1.2"
+  peerDependencies:
+    zod: ^3.20.2
+  checksum: 10c0/f0a68a89929cdeaa3e21d2027489689f982824d676a9332c680e119f60881dd39b571324b24ad4837fda49bf6fe7c3e2af2199268b281bf1aec923d7a7cbfc40
+  languageName: node
+  linkType: hard
+
 "@aws-crypto/crc32@npm:3.0.0":
   version: 3.0.0
   resolution: "@aws-crypto/crc32@npm:3.0.0"
@@ -9195,12 +9206,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/openapi@workspace:packages/core/openapi"
   dependencies:
+    "@asteasolutions/zod-to-openapi": "npm:7.3.0"
     "@strapi/types": "npm:5.12.4"
-    "@strapi/utils": "npm:5.12.4"
     "@types/debug": "npm:^4"
     debug: "npm:4.3.4"
     openapi-types: "npm:12.1.3"
-    path-to-regexp: "npm:8.2.0"
   languageName: unknown
   linkType: soft
 
@@ -9693,6 +9703,7 @@ __metadata:
     webpack-hot-middleware: "npm:2.26.1"
     yalc: "npm:1.0.0-pre.53"
     yup: "npm:0.32.9"
+    zod: "npm:3.24.3"
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -25116,6 +25127,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"openapi3-ts@npm:^4.1.2":
+  version: 4.4.0
+  resolution: "openapi3-ts@npm:4.4.0"
+  dependencies:
+    yaml: "npm:^2.5.0"
+  checksum: 10c0/900b834279fc8a43c545728ad75ec7c26934ec5344225b60d1e1c0df44d742d7e7379aea18d9034e03031f079d3308ba5a68600682eece3ed41cdbdd10346a9e
+  languageName: node
+  linkType: hard
+
 "opener@npm:^1.5.2":
   version: 1.5.2
   resolution: "opener@npm:1.5.2"
@@ -32116,6 +32136,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"yaml@npm:^2.5.0":
+  version: 2.7.1
+  resolution: "yaml@npm:2.7.1"
+  bin:
+    yaml: bin.mjs
+  checksum: 10c0/ee2126398ab7d1fdde566b4013b68e36930b9e6d8e68b6db356875c99614c10d678b6f45597a145ff6d63814961221fc305bf9242af8bf7450177f8a68537590
+  languageName: node
+  linkType: hard
+
 "yaml@npm:^2.6.0":
   version: 2.7.0
   resolution: "yaml@npm:2.7.0"
@@ -32241,6 +32270,13 @@ __metadata:
   peerDependencies:
     zod: ^3.18.0
   checksum: 10c0/e8e8a0af64092dfb3388d759bf10fb7cf5358bc1bdb365771b8ac1944b1fb014ccbc8e60fbd69627961ea5873c5694e5c3fe730341c9842312fbb91661a1f451
+  languageName: node
+  linkType: hard
+
+"zod@npm:3.24.3":
+  version: 3.24.3
+  resolution: "zod@npm:3.24.3"
+  checksum: 10c0/ab0369810968d0329a1a141e9418e01e5c9c2a4905cbb7cb7f5a131d6e9487596e1400e21eeff24c4a8ee28dacfa5bd6103893765c055b7a98c2006a5a4fc68d
   languageName: node
   linkType: hard
 
