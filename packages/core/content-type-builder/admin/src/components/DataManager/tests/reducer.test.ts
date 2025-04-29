@@ -41,8 +41,8 @@ describe('Content Type Builder | DataManager | reducer', () => {
   describe('init', () => {
     it('should initialize the state with components, content types, and reserved names', () => {
       const components = {
-        'test:component': {
-          uid: 'test:component' as Internal.UID.Component,
+        'test:category.component': {
+          uid: 'test:category.component' as Internal.UID.Component,
           attributes: [],
           category: 'test',
           modelType: 'component',
@@ -83,7 +83,7 @@ describe('Content Type Builder | DataManager | reducer', () => {
   describe('createComponentSchema', () => {
     it('should add a new component schema to the state', () => {
       const action = actions.createComponentSchema({
-        uid: 'test:component',
+        uid: 'test:category.component',
         componentCategory: 'test',
         data: {
           icon: 'test',
@@ -93,9 +93,9 @@ describe('Content Type Builder | DataManager | reducer', () => {
 
       const state = reducer(undefined, action);
 
-      expect(state.current.components['test:component']).toBeDefined();
-      expect(state.current.components['test:component']).toMatchObject({
-        uid: 'test:component',
+      expect(state.current.components['test:category.component']).toBeDefined();
+      expect(state.current.components['test:category.component']).toMatchObject({
+        uid: 'test:category.component',
         category: 'test',
         status: 'NEW',
         info: {
@@ -562,8 +562,8 @@ describe('Content Type Builder | DataManager | reducer', () => {
         undefined,
         actions.init({
           components: {
-            'test:component': {
-              uid: 'test:component' as Internal.UID.Component,
+            'test:category.component': {
+              uid: 'test:category.component' as Internal.UID.Component,
               attributes: [],
               category: 'test',
               modelType: 'component',
@@ -587,16 +587,16 @@ describe('Content Type Builder | DataManager | reducer', () => {
           displayName: 'New Name',
           icon: 'new-icon',
         },
-        uid: 'test:component',
+        uid: 'test:category.component',
       });
 
       const state = reducer(initializedState, action);
 
-      expect(state.current.components['test:component'].info).toEqual({
+      expect(state.current.components['test:category.component'].info).toEqual({
         displayName: 'New Name',
         icon: 'new-icon',
       });
-      expect(state.current.components['test:component'].status).toBe('CHANGED');
+      expect(state.current.components['test:category.component'].status).toBe('CHANGED');
     });
   });
 
@@ -716,7 +716,7 @@ describe('Content Type Builder | DataManager | reducer', () => {
       expect(
         (state.current.contentTypes['api::test.test'].attributes[1] as Schema.Attribute.DynamicZone)
           .components
-      ).not.toContain('test:component2');
+      ).not.toContain('test:category.component2');
     });
   });
 
@@ -727,7 +727,7 @@ describe('Content Type Builder | DataManager | reducer', () => {
         undefined,
         actions.init({
           components: {
-            'test:component': {
+            'test:category.component': {
               uid: 'test.component',
               attributes: [
                 {
@@ -797,7 +797,9 @@ describe('Content Type Builder | DataManager | reducer', () => {
       expect(state1.current.contentTypes['api::related.related'].attributes[0].status).toBe(
         'REMOVED'
       );
-      expect(state1.current.components['test:component'].attributes[0].status).toBe('REMOVED');
+      expect(state1.current.components['test:category.component'].attributes[0].status).toBe(
+        'REMOVED'
+      );
 
       // Delete content type with status NEW
       const action2 = actions.deleteContentType('api::new.new' as Internal.UID.ContentType);
