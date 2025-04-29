@@ -117,9 +117,9 @@ interface FormHeadProps<TToken extends Token | null> {
   token: TToken;
   canEditInputs: boolean;
   canRegenerate: boolean;
-  canShowToken: boolean;
+  canShowToken?: boolean;
   setToken: (token: TToken) => void;
-  setShowToken: (showToken: boolean) => void;
+  setShowToken?: (showToken: boolean) => void;
   isSubmitting: boolean;
   regenerateUrl: string;
 }
@@ -141,6 +141,7 @@ export const FormHead = <TToken extends Token | null>({
       ...token,
       accessKey: newKey,
     });
+    setShowToken?.(true);
   };
 
   return (
@@ -160,7 +161,7 @@ export const FormHead = <TToken extends Token | null>({
                 type="button"
                 startIcon={<Eye />}
                 variant="secondary"
-                onClick={() => setShowToken(true)}
+                onClick={() => setShowToken?.(true)}
               >
                 {formatMessage({
                   id: 'Settings.apiTokens.viewToken',
