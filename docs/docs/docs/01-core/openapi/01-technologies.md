@@ -18,7 +18,7 @@ This section provides an overview of the technologies used in the OpenAPI packag
 The OpenAPI package uses the same tools as the rest of the Strapi monorepo packages:
 
 | Tool     | Purpose         |
-|----------|-----------------|
+| -------- | --------------- |
 | Jest     | Unit testing    |
 | Rollup   | Build           |
 | Prettier | Code formatting |
@@ -41,22 +41,22 @@ It is particularly useful to avoid leaking the OpenAPI domain logic into the Str
 :::
 
 :::warning
-The main pain point of using this library is **not being able to infer, represent, and transform cyclic dependencies between models** (*relations, components, dynamic zones, media*) **in the final schema** without leaking the OpenAPI domain to the Strapi core.
+The main pain point of using this library is **not being able to infer, represent, and transform cyclic dependencies between models** (_relations, components, dynamic zones, media_) **in the final schema** without leaking the OpenAPI domain to the Strapi core.
 
 Luckily, `zod` v4 will [soon go stable](https://v4.zod.dev/v4#wrapping-up) and offer the possibility to transform `zod` schema into JSON object natively **and** with cycles’ support.
 
 It would represent a huge opportunity to migrate away from this dependency and use `zod` only.
 
 For more information, see
+
 - https://v4.zod.dev/
 - https://v4.zod.dev/json-schema
 - https://v4.zod.dev/metadata
-:::
+  :::
 
 ### [Debug](https://github.com/debug-js/debug)
 
 > A tiny JavaScript debugging utility modelled after Node.js core's debugging technique. Works in Node.js and web browsers.
->
 
 Used to provide detailed information about what is happening during the document generation processes.
 
