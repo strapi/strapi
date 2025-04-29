@@ -57,11 +57,10 @@ export { XXXRoutesProvider } from './xxx';
 // ...
 
 import {
-  // ... 
+  // ...
   XXXRoutesProvider,
   // ^  import the newly created provider
 } from './routes';
-
 
 export const generate = (strapi: Core.Strapi, options?: GenerationOptions): GeneratorOutput => {
   // ...
@@ -71,7 +70,7 @@ export const generate = (strapi: Core.Strapi, options?: GenerationOptions): Gene
       // ... other providers
       new XXXRoutesProvider(strapi),
       // ^ instantiate the new provider here
-    ],
+    ]
     // ...
   );
 

@@ -11,7 +11,7 @@ toc_max_heading_level: 4
 
 This section is an overview of the different contributing guides for the OpenAPI package
 
---- 
+---
 
 ## Contributing
 

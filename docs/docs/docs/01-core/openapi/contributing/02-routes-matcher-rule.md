@@ -26,7 +26,7 @@ import type { MatcherRule } from '../types';
 
 export const isMethodIn = (methods: string[]): MatcherRule => {
   return (route) => methods.include(route.method);
-}
+};
 ```
 
 #### 2. Next, export the rule from `src/routes/rules/index.ts`
@@ -47,15 +47,17 @@ export const generate = (strapi: Core.Strapi, options?: GenerationOptions): Gene
   // ...
 
   const routeCollector = new RouteCollector(
-    [/* ... */],
+    [
+      /* ... */
+    ],
 
     new RouteMatcher([
       // ... other rules
-      rules.isMethodIn(['POST', 'PUT'])
+      rules.isMethodIn(['POST', 'PUT']),
       // ^ pass the new rule to the matcher instance
     ])
   );
-  
+
   // ...
 };
 ```
