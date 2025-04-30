@@ -8586,6 +8586,7 @@ __metadata:
     "@radix-ui/react-toolbar": "npm:1.0.4"
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin-test-utils": "npm:5.12.6"
+    "@strapi/cloud-cli": "npm:5.12.5"
     "@strapi/data-transfer": "npm:5.12.6"
     "@strapi/design-system": "npm:2.0.0-rc.23"
     "@strapi/icons": "npm:2.0.0-rc.23"
@@ -8676,6 +8677,36 @@ __metadata:
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
+
+"@strapi/cloud-cli@npm:5.12.5":
+  version: 5.12.5
+  resolution: "@strapi/cloud-cli@npm:5.12.5"
+  dependencies:
+    "@strapi/utils": "npm:5.12.5"
+    axios: "npm:1.8.4"
+    boxen: "npm:5.1.2"
+    chalk: "npm:4.1.2"
+    cli-progress: "npm:3.12.0"
+    commander: "npm:8.3.0"
+    eventsource: "npm:2.0.2"
+    fast-safe-stringify: "npm:2.1.1"
+    fs-extra: "npm:11.2.0"
+    inquirer: "npm:8.2.5"
+    jsonwebtoken: "npm:9.0.0"
+    jwks-rsa: "npm:3.1.0"
+    lodash: "npm:4.17.21"
+    minimatch: "npm:9.0.3"
+    open: "npm:8.4.0"
+    ora: "npm:5.4.1"
+    pkg-up: "npm:3.1.0"
+    tar: "npm:6.2.1"
+    xdg-app-paths: "npm:8.3.0"
+    yup: "npm:0.32.9"
+  bin:
+    cloud-cli: bin/index.js
+  checksum: 10c0/d85bbacbefe0e9b6fc7bceb33a34f6ee76627a07331e2f1f12af3170aee7e76061fb4a2554fbe609a5015514ddd3cfe306c7a21145543ea242c4b8b52bd600cc
+  languageName: node
+  linkType: hard
 
 "@strapi/cloud-cli@npm:5.12.6, @strapi/cloud-cli@workspace:packages/cli/cloud":
   version: 0.0.0-use.local
@@ -9848,6 +9879,24 @@ __metadata:
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
+
+"@strapi/utils@npm:5.12.5":
+  version: 5.12.5
+  resolution: "@strapi/utils@npm:5.12.5"
+  dependencies:
+    "@sindresorhus/slugify": "npm:1.1.0"
+    date-fns: "npm:2.30.0"
+    execa: "npm:5.1.1"
+    http-errors: "npm:2.0.0"
+    lodash: "npm:4.17.21"
+    node-machine-id: "npm:1.1.12"
+    p-map: "npm:4.0.0"
+    preferred-pm: "npm:3.1.2"
+    yup: "npm:0.32.9"
+    zod: "npm:^3.22.4"
+  checksum: 10c0/d5e98994b1e5dbc9525f2058de9ea71bc3af3ebf45b6cd2fe6a5b0203d00e0dc654b1d0578c17fee80598f8e605b0b009e6f94d96a17d5609f59f859d99c629f
+  languageName: node
+  linkType: hard
 
 "@strapi/utils@npm:5.12.6, @strapi/utils@workspace:packages/core/utils":
   version: 0.0.0-use.local

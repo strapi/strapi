@@ -1,4 +1,5 @@
 import { join } from 'node:path';
+import fs from 'fs';
 
 import chalk from 'chalk';
 import execa from 'execa';
@@ -16,10 +17,30 @@ import { logger } from './utils/logger';
 import { gitIgnore } from './utils/gitignore';
 import { getInstallArgs } from './utils/get-package-manager-args';
 
+// Save cloud user info to a file in the project root
+function saveCloudUserInfoToFile(rootPath: string, email: string): void {
+  try {
+    const cloudUserInfoFile = '.strapi-cloud-user-info.json';
+    const filePath = join(rootPath, cloudUserInfoFile);
+
+    // Save user info to file
+    fs.writeFileSync(filePath, JSON.stringify({ email }), 'utf8');
+  } catch (error) {
+    // Silently fail
+    logger.warn('Failed to save cloud user info to file');
+  }
+}
+
 async function createStrapi(scope: Scope) {
   const { rootPath } = scope;
   try {
     await fse.ensureDir(rootPath);
+
+    if (scope.cloudUserEmail) {
+      // If we have a cloud user email, save it to a file in the project root
+      saveCloudUserInfoToFile(rootPath, scope.cloudUserEmail);
+    }
+
     await createApp(scope);
   } catch (error) {
     await fse.remove(rootPath);

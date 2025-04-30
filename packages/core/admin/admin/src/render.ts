@@ -14,7 +14,11 @@ interface RenderAdminArgs {
     config?: StrapiAppConstructorArgs['config'];
   };
   plugins: StrapiAppConstructorArgs['appPlugins'];
-  features?: Modules.Features.FeaturesService['config'];
+  features?: Modules.Features.FeaturesService['config'] & {
+    initialUserInfo?: {
+      email?: string;
+    };
+  };
 }
 
 const renderAdmin = async (
@@ -57,6 +61,11 @@ const renderAdmin = async (
       promoteEE: true,
     },
   };
+
+  // If initialUserInfo is provided in features, add it to window.strapi
+  if (features?.initialUserInfo) {
+    window.strapi.initialUserInfo = features.initialUserInfo;
+  }
 
   const { get } = getFetchClient();
 

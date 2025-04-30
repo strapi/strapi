@@ -15,7 +15,7 @@ function assertCloudError(e: unknown): asserts e is CloudError {
   }
 }
 
-export async function handleCloudLogin(): Promise<void> {
+export async function handleCloudLogin(): Promise<{ email?: string }> {
   const logger = cloudServices.createLogger({
     silent: false,
     debug: process.argv.includes('--debug'),
@@ -31,7 +31,7 @@ export async function handleCloudLogin(): Promise<void> {
   } catch (e: unknown) {
     logger.debug(e);
     logger.error(defaultErrorMessage);
-    return;
+    return {};
   }
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>([
     {
@@ -49,7 +49,30 @@ export async function handleCloudLogin(): Promise<void> {
     };
 
     try {
-      await cloudCli.login.action(cliContext);
+      const loginSuccessful = await cloudCli.login.action(cliContext);
+
+      // If login was successful, try to get the user email
+      if (loginSuccessful) {
+        try {
+          // Get token and user info from API
+          const { getValidToken } = await cloudServices.tokenServiceFactory(cliContext);
+          const token = await getValidToken(cliContext, async () => false);
+
+          if (token) {
+            const api = await cloudServices.cloudApiFactory(cliContext, token);
+            const userInfoResponse = await api.getUserInfo();
+            const email = userInfoResponse?.data?.data?.email;
+
+            if (email) {
+              // Return the email to be saved later in the project root
+              return { email };
+            }
+          }
+        } catch (error) {
+          // Silent fail, this is just a convenience feature
+          logger.debug('Failed to get cloud user info', error);
+        }
+      }
     } catch (e: Error | CloudError | unknown) {
       logger.debug(e);
       try {
@@ -60,7 +83,7 @@ export async function handleCloudLogin(): Promise<void> {
               ? e.response.data
               : 'We are sorry, but we are not able to log you into Strapi Cloud at the moment.';
           logger.warn(message);
-          return;
+          return {};
         }
       } catch (e) {
         /* empty */
@@ -68,4 +91,6 @@ export async function handleCloudLogin(): Promise<void> {
       logger.error(defaultErrorMessage);
     }
   }
+
+  return {};
 }

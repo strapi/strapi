@@ -13,6 +13,7 @@ import * as action from './action';
 import * as apiToken from './api-token';
 import * as transfer from './transfer';
 import * as projectSettings from './project-settings';
+import * as cloudUserInfo from './cloud-user-info';
 
 // TODO: TS - Export services one by one as this export is cjs
 export default {
@@ -30,4 +31,5 @@ export default {
   'api-token': apiToken,
   transfer,
   'project-settings': projectSettings,
+  'cloud-user-info': cloudUserInfo,
 };

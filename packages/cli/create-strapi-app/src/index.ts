@@ -118,8 +118,11 @@ async function run(args: string[]): Promise<void> {
 
   const rootPath = await checkInstallPath(appDirectory);
 
+  // Get cloud user info if not skipped
+  let cloudUserEmail: string | undefined;
   if (!options.skipCloud) {
-    await handleCloudLogin();
+    const cloudUserInfo = await handleCloudLogin();
+    cloudUserEmail = cloudUserInfo.email;
   }
 
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
@@ -148,6 +151,7 @@ async function run(args: string[]): Promise<void> {
     installId,
     tmpPath,
     gitInit: true,
+    cloudUserEmail,
     devDependencies: {},
     dependencies: {
       '@strapi/strapi': version,

@@ -189,6 +189,21 @@ interface RegisterFormValues {
   news: boolean;
 }
 
+const useInitialUserInfo = () => {
+  const [initialUserInfo, setInitialUserInfo] = React.useState<{
+    email?: string;
+  } | null>(null);
+
+  React.useEffect(() => {
+    const strapiInitialUserInfo = window.strapi.initialUserInfo;
+    if (strapiInitialUserInfo) {
+      setInitialUserInfo(strapiInitialUserInfo);
+    }
+  }, []);
+
+  return { initialUserInfo };
+};
+
 const Register = ({ hasAdmin }: RegisterProps) => {
   const { toggleNotification } = useNotification();
   const navigate = useNavigate();
@@ -205,6 +220,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
   const { setNpsSurveySettings } = useNpsSurveySettings();
+  const { initialUserInfo } = useInitialUserInfo();
 
   const registrationToken = query.get('registrationToken');
 
@@ -353,7 +369,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
             {
               firstname: userInfo?.firstname || '',
               lastname: userInfo?.lastname || '',
-              email: userInfo?.email || '',
+              email: userInfo?.email || initialUserInfo?.email || '',
               password: '',
               confirmPassword: '',
               registrationToken: registrationToken || undefined,

@@ -84,6 +84,7 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
+    "@strapi/cloud-cli": "5.12.5",
     "@strapi/design-system": "2.0.0-rc.23",
     "@strapi/icons": "2.0.0-rc.23",
     "@strapi/permissions": "5.12.6",
