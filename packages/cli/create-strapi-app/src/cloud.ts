@@ -1,6 +1,4 @@
 import inquirer from 'inquirer';
-import fs from 'fs';
-import path from 'path';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
 
@@ -17,39 +15,7 @@ function assertCloudError(e: unknown): asserts e is CloudError {
   }
 }
 
-// Save cloud user info to a temporary file for the admin to use during first admin creation
-function saveCloudUserInfoToTempFile(email: string): void {
-  try {
-    // Define the paths
-    const strapiTmpDir = '.strapi';
-    const cloudUserInfoFile = 'cloud-user-info.json';
-
-    // Ensure .strapi directory exists
-    console.log('Cloud Debug saveCloudUserInfoToTempFile strapiTmpDir', strapiTmpDir);
-    const exists = fs.existsSync(strapiTmpDir);
-    console.log('Cloud Debug saveCloudUserInfoToTempFile exists', exists);
-    if (!exists) {
-      try {
-        console.log('Cloud Debug saveCloudUserInfoToTempFile mkdirSync', strapiTmpDir);
-        fs.mkdirSync(strapiTmpDir);
-      } catch (error) {
-        // Ignore errors if directory already exists or cannot be created
-        return;
-      }
-    }
-
-    const filePath = path.join(strapiTmpDir, cloudUserInfoFile);
-
-    // Save user info to file
-    console.log('Cloud Debug saveCloudUserInfoToTempFile filePath', filePath);
-    console.log('Cloud Debug saveCloudUserInfoToTempFile email', email);
-    fs.writeFileSync(filePath, JSON.stringify({ email }), 'utf8');
-  } catch (error) {
-    // Silent fail, this is just a convenience feature
-  }
-}
-
-export async function handleCloudLogin(): Promise<void> {
+export async function handleCloudLogin(): Promise<{ email?: string }> {
   const logger = cloudServices.createLogger({
     silent: false,
     debug: process.argv.includes('--debug'),
@@ -65,7 +31,7 @@ export async function handleCloudLogin(): Promise<void> {
   } catch (e: unknown) {
     logger.debug(e);
     logger.error(defaultErrorMessage);
-    return;
+    return {};
   }
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>([
     {
@@ -85,28 +51,26 @@ export async function handleCloudLogin(): Promise<void> {
     try {
       const loginSuccessful = await cloudCli.login.action(cliContext);
 
-      // If login was successful, try to get and save the user email
+      // If login was successful, try to get the user email
       if (loginSuccessful) {
         try {
           // Get token and user info from API
           const { getValidToken } = await cloudServices.tokenServiceFactory(cliContext);
           const token = await getValidToken(cliContext, async () => false);
-          console.log('Cloud Debug saveCloudUserInfoToTempFile token', token);
 
           if (token) {
             const api = await cloudServices.cloudApiFactory(cliContext, token);
             const userInfoResponse = await api.getUserInfo();
             const email = userInfoResponse?.data?.data?.email;
 
-            console.log('Cloud Debug saveCloudUserInfoToTempFile email', email);
             if (email) {
-              // Save user email to temp file for the admin to use
-              saveCloudUserInfoToTempFile(email);
+              // Return the email to be saved later in the project root
+              return { email };
             }
           }
         } catch (error) {
           // Silent fail, this is just a convenience feature
-          logger.debug('Failed to save cloud user info to temp file', error);
+          logger.debug('Failed to get cloud user info', error);
         }
       }
     } catch (e: Error | CloudError | unknown) {
@@ -119,7 +83,7 @@ export async function handleCloudLogin(): Promise<void> {
               ? e.response.data
               : 'We are sorry, but we are not able to log you into Strapi Cloud at the moment.';
           logger.warn(message);
-          return;
+          return {};
         }
       } catch (e) {
         /* empty */
@@ -127,4 +91,6 @@ export async function handleCloudLogin(): Promise<void> {
       logger.error(defaultErrorMessage);
     }
   }
+
+  return {};
 }

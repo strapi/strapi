@@ -63,6 +63,7 @@ export interface Scope {
   useTypescript?: boolean;
   useExample?: boolean;
   gitInit?: boolean;
+  cloudUserEmail?: string;
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';
