@@ -5,7 +5,7 @@ import { Button } from '@strapi/design-system';
 import { registerPreviewRoute } from './preview';
 
 const config = {
-  locales: ['it', 'es', 'en', 'en-GB', 'ru'],
+  locales: ['it', 'es', 'en', 'en-GB'],
 };
 const bootstrap = (app) => {
   app.getPlugin('content-manager').injectComponent('editView', 'right-links', {
