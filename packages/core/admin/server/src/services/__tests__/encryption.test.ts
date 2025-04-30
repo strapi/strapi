@@ -25,7 +25,7 @@ describe('Encryption Service', () => {
   });
 
   describe('encrypt', () => {
-    test('encrypts and returns a colon-separated string', () => {
+    test('encrypts and returns a three-part colon-separated string (iv, auth, enrypted)', () => {
       const encrypted = encryption.encrypt('super secret');
       expect(encrypted).toMatch(/^[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
       expect(encrypted!.split(':')).toHaveLength(3);
@@ -56,6 +56,21 @@ describe('Encryption Service', () => {
       const result = encryption.decrypt('iv:payload:tag');
       expect(result).toBeNull();
       expect(global.strapi.log.warn).toHaveBeenCalledWith('Encryption key is missing from config');
+    });
+
+    test('returns null and logs warning when decryption fails due to wrong key', () => {
+      const encrypted = encryption.encrypt('cannot decrypt this');
+
+      // Change the key to simulate rotation or mismatch
+      const wrongKey = crypto.randomBytes(32).toString('hex');
+      (global.strapi.config.get as jest.Mock).mockReturnValueOnce(wrongKey);
+
+      const result = encryption.decrypt(encrypted!);
+
+      expect(result).toBeNull();
+      expect(global.strapi.log.warn).toHaveBeenCalledWith(
+        '[decrypt] Unable to decrypt value — encryption key may have changed or data is corrupted.'
+      );
     });
   });
 });

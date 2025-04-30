@@ -52,7 +52,7 @@ export default {
       minLength: 1,
       configurable: false,
       required: true,
-      searchable: true,
+      searchable: false,
     },
     lastUsedAt: {
       type: 'datetime',
