@@ -1,4 +1,6 @@
 import inquirer from 'inquirer';
+import fs from 'fs';
+import path from 'path';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
 
@@ -12,6 +14,32 @@ interface CloudError {
 function assertCloudError(e: unknown): asserts e is CloudError {
   if ((e as CloudError).response === undefined) {
     throw Error('Expected CloudError');
+  }
+}
+
+// Save cloud user info to a temporary file for the admin to use during first admin creation
+function saveCloudUserInfoToTempFile(email: string): void {
+  try {
+    // Define the paths
+    const strapiTmpDir = '.strapi';
+    const cloudUserInfoFile = 'cloud-user-info.json';
+
+    // Ensure .strapi directory exists
+    if (!fs.existsSync(strapiTmpDir)) {
+      try {
+        fs.mkdirSync(strapiTmpDir);
+      } catch (error) {
+        // Ignore errors if directory already exists or cannot be created
+        return;
+      }
+    }
+
+    const filePath = path.join(strapiTmpDir, cloudUserInfoFile);
+
+    // Save user info to file
+    fs.writeFileSync(filePath, JSON.stringify({ email }), 'utf8');
+  } catch (error) {
+    // Silent fail, this is just a convenience feature
   }
 }
 
@@ -49,7 +77,30 @@ export async function handleCloudLogin(): Promise<void> {
     };
 
     try {
-      await cloudCli.login.action(cliContext);
+      const loginSuccessful = await cloudCli.login.action(cliContext);
+
+      // If login was successful, try to get and save the user email
+      if (loginSuccessful) {
+        try {
+          // Get token and user info from API
+          const { getValidToken } = await cloudServices.tokenServiceFactory(cliContext);
+          const token = await getValidToken(cliContext, async () => false);
+
+          if (token) {
+            const api = await cloudServices.cloudApiFactory(cliContext, token);
+            const userInfoResponse = await api.getUserInfo();
+            const email = userInfoResponse?.data?.data?.email;
+
+            if (email) {
+              // Save user email to temp file for the admin to use
+              saveCloudUserInfoToTempFile(email);
+            }
+          }
+        } catch (error) {
+          // Silent fail, this is just a convenience feature
+          logger.debug('Failed to save cloud user info to temp file', error);
+        }
+      }
     } catch (e: Error | CloudError | unknown) {
       logger.debug(e);
       try {

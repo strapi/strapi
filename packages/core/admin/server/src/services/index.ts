@@ -31,3 +31,6 @@ export default {
   transfer,
   'project-settings': projectSettings,
 };
+
+// Export cloud user info functions
+export { saveCloudUserInfo, loadCloudUserInfo, deleteCloudUserInfo } from './cloud-user-info';
