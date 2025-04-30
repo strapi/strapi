@@ -3,7 +3,7 @@ import { join, resolve } from 'path';
 import crypto from 'crypto';
 import type { Core } from '@strapi/types';
 
-import { machineID } from '@strapi/utils';
+import { generateInstallId } from '@strapi/utils';
 
 interface LicenseInfo {
   type: 'bronze' | 'silver' | 'gold';
@@ -88,11 +88,17 @@ const fetchLicense = async (
   key: string,
   projectId: string
 ) => {
+  const { installId: installIdFromPackageJson } = strapi.config;
+
   const response = await strapi
     .fetch(`https://license.strapi.io/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, projectId, deviceId: machineID() }),
+      body: JSON.stringify({
+        key,
+        projectId,
+        deviceId: generateInstallId(projectId, installIdFromPackageJson),
+      }), // NOTE: Doing nothing on the LR with the installId
     })
     .catch(throwError);
 
