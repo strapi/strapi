@@ -5,7 +5,7 @@ jest.mock('fs');
 
 describe('Cloud User Info Service', () => {
   const mockFs = fs as jest.Mocked<typeof fs>;
-  const testFilePath = '.cloud-user-info.json';
+  const testFilePath = '.strapi-cloud-user-info.json';
   const testUserInfo = { email: 'test@example.com' };
   const testFileContent = JSON.stringify(testUserInfo);
 

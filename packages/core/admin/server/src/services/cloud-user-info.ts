@@ -4,7 +4,7 @@ interface CloudUserInfo {
   email?: string;
 }
 
-const CLOUD_USER_INFO_FILE = '.cloud-user-info.json';
+const CLOUD_USER_INFO_FILE = '.strapi-cloud-user-info.json';
 
 /**
  * Saves cloud user info to a temporary file

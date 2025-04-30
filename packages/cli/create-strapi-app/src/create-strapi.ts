@@ -20,7 +20,7 @@ import { getInstallArgs } from './utils/get-package-manager-args';
 // Save cloud user info to a file in the project root
 function saveCloudUserInfoToFile(rootPath: string, email: string): void {
   try {
-    const cloudUserInfoFile = '.cloud-user-info.json';
+    const cloudUserInfoFile = '.strapi-cloud-user-info.json';
     const filePath = join(rootPath, cloudUserInfoFile);
 
     // Save user info to file
