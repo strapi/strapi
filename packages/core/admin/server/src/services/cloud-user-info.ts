@@ -29,7 +29,7 @@ const getCloudUserInfoPath = () => {
 /**
  * Saves cloud user info to a temporary file
  */
-export const saveCloudUserInfo = (userInfo: CloudUserInfo): boolean => {
+const saveCloudUserInfo = (userInfo: CloudUserInfo): boolean => {
   try {
     const filePath = getCloudUserInfoPath();
     if (!filePath) {
@@ -47,7 +47,7 @@ export const saveCloudUserInfo = (userInfo: CloudUserInfo): boolean => {
 /**
  * Loads cloud user info from the temporary file
  */
-export const loadCloudUserInfo = (): CloudUserInfo | null => {
+const loadCloudUserInfo = (): CloudUserInfo | null => {
   try {
     const filePath = getCloudUserInfoPath();
     if (!filePath || !fs.existsSync(filePath)) {
@@ -67,7 +67,7 @@ export const loadCloudUserInfo = (): CloudUserInfo | null => {
  * Deletes the cloud user info file
  * This should be called after the first admin is created
  */
-export const deleteCloudUserInfo = (): boolean => {
+const deleteCloudUserInfo = (): boolean => {
   try {
     const filePath = getCloudUserInfoPath();
     if (!filePath || !fs.existsSync(filePath)) {
@@ -79,4 +79,10 @@ export const deleteCloudUserInfo = (): boolean => {
   } catch (error) {
     return false;
   }
+};
+
+export default {
+  saveCloudUserInfo,
+  loadCloudUserInfo,
+  deleteCloudUserInfo,
 };

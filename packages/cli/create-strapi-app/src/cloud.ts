@@ -25,8 +25,12 @@ function saveCloudUserInfoToTempFile(email: string): void {
     const cloudUserInfoFile = 'cloud-user-info.json';
 
     // Ensure .strapi directory exists
-    if (!fs.existsSync(strapiTmpDir)) {
+    console.log('Cloud Debug saveCloudUserInfoToTempFile strapiTmpDir', strapiTmpDir);
+    const exists = fs.existsSync(strapiTmpDir);
+    console.log('Cloud Debug saveCloudUserInfoToTempFile exists', exists);
+    if (!exists) {
       try {
+        console.log('Cloud Debug saveCloudUserInfoToTempFile mkdirSync', strapiTmpDir);
         fs.mkdirSync(strapiTmpDir);
       } catch (error) {
         // Ignore errors if directory already exists or cannot be created
@@ -37,6 +41,8 @@ function saveCloudUserInfoToTempFile(email: string): void {
     const filePath = path.join(strapiTmpDir, cloudUserInfoFile);
 
     // Save user info to file
+    console.log('Cloud Debug saveCloudUserInfoToTempFile filePath', filePath);
+    console.log('Cloud Debug saveCloudUserInfoToTempFile email', email);
     fs.writeFileSync(filePath, JSON.stringify({ email }), 'utf8');
   } catch (error) {
     // Silent fail, this is just a convenience feature
@@ -85,12 +91,14 @@ export async function handleCloudLogin(): Promise<void> {
           // Get token and user info from API
           const { getValidToken } = await cloudServices.tokenServiceFactory(cliContext);
           const token = await getValidToken(cliContext, async () => false);
+          console.log('Cloud Debug saveCloudUserInfoToTempFile token', token);
 
           if (token) {
             const api = await cloudServices.cloudApiFactory(cliContext, token);
             const userInfoResponse = await api.getUserInfo();
             const email = userInfoResponse?.data?.data?.email;
 
+            console.log('Cloud Debug saveCloudUserInfoToTempFile email', email);
             if (email) {
               // Save user email to temp file for the admin to use
               saveCloudUserInfoToTempFile(email);

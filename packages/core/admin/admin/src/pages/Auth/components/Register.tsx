@@ -196,6 +196,7 @@ const useInitialUserInfo = () => {
 
   React.useEffect(() => {
     const strapiInitialUserInfo = window.strapi.initialUserInfo;
+    console.log('Cloud Debug Register.tsx strapiInitialUserInfo', strapiInitialUserInfo);
     if (strapiInitialUserInfo) {
       setInitialUserInfo(strapiInitialUserInfo);
     }

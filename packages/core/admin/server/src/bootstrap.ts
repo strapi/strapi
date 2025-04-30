@@ -4,7 +4,7 @@ import { async } from '@strapi/utils';
 import { getService } from './utils';
 import adminActions from './config/admin-actions';
 import adminConditions from './config/admin-conditions';
-import { loadCloudUserInfo, deleteCloudUserInfo } from './services/cloud-user-info';
+import services from './services';
 
 const defaultAdminAuthSettings = {
   providers: {
@@ -142,8 +142,12 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   try {
     const hasAdmin = await userService.exists();
     if (!hasAdmin) {
-      // Check for cloud user info from the temporary file instead of the cloud CLI
-      const cloudUserInfo = loadCloudUserInfo();
+      // Check for cloud user info from the temporary file instead of the cloud
+      // CLI
+      const cloudUserInfoService = services['cloud-user-info'];
+      console.log('Cloud Debug bootstrap.ts cloudUserInfoService', cloudUserInfoService);
+      const cloudUserInfo = cloudUserInfoService.default.loadCloudUserInfo();
+      console.log('Cloud Debug bootstrap.ts cloudUserInfo', cloudUserInfo);
       if (cloudUserInfo && cloudUserInfo.email) {
         // Add cloud user info to features so it's passed to the admin frontend
         const currentFeatures = strapi.config.get('features') || {};
@@ -155,7 +159,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         // Delete the temporary file after we've used it to prevent reuse
-        deleteCloudUserInfo();
+        cloudUserInfoService.default.deleteCloudUserInfo();
       }
     }
   } catch (error) {
