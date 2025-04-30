@@ -35,8 +35,8 @@ const cloudCommands = [
 async function initCloudCLIConfig() {
   const localConfig = await getLocalConfig();
 
-  if (!localConfig.deviceId) {
-    localConfig.deviceId = crypto.randomUUID();
+  if (!localConfig.installId) {
+    localConfig.installId = crypto.randomUUID();
   }
 
   await saveLocalConfig(localConfig);
