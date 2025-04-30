@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box, IconButton, Status, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -48,7 +46,6 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
   const navigate = useNavigate();
 
   const getEditViewLink = (document: RecentDocument): string => {
-    // TODO: import the constants for this once the code is moved to the CM package
     const isSingleType = document.kind === 'singleType';
     const kindPath = isSingleType ? 'single-types' : 'collection-types';
     const queryParams = document.locale ? `?plugins[i18n][locale]=${document.locale}` : '';
