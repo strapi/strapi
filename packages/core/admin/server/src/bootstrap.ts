@@ -145,12 +145,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
       // Check for cloud user info from the temporary file instead of the cloud
       // CLI
       const cloudUserInfoService = services['cloud-user-info'].default;
-      console.log('Cloud Debug bootstrap.ts cloudUserInfoService', cloudUserInfoService);
       const cloudUserInfo = cloudUserInfoService.loadCloudUserInfo();
-      console.log('Cloud Debug bootstrap.ts cloudUserInfo', cloudUserInfo);
       if (cloudUserInfo && cloudUserInfo.email) {
         // Add cloud user info to features so it's passed to the admin frontend
         const currentFeatures = strapi.config.get('features') || {};
+
         strapi.config.set('features', {
           ...currentFeatures,
           initialUserInfo: {

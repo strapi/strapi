@@ -63,9 +63,7 @@ const renderAdmin = async (
   };
 
   // If initialUserInfo is provided in features, add it to window.strapi
-  console.log('Cloud Debug render.ts features', features);
   if (features?.initialUserInfo) {
-    console.log('Cloud Debug render.ts features.initialUserInfo', features.initialUserInfo);
     window.strapi.initialUserInfo = features.initialUserInfo;
   }
 
