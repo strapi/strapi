@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Button } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
