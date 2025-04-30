@@ -8667,7 +8667,6 @@ __metadata:
     use-context-selector: "npm:1.4.1"
     vite: "npm:5.4.17"
     vite-plugin-dts: "npm:^4.3.0"
-    xdg-app-paths: "npm:8.3.0"
     yup: "npm:0.32.9"
     zod: "npm:^3.22.4"
   peerDependencies:

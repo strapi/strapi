@@ -4,7 +4,6 @@ interface CloudUserInfo {
   email?: string;
 }
 
-// Define the paths for the temporary file
 const CLOUD_USER_INFO_FILE = 'cloud-user-info.json';
 
 /**
@@ -40,7 +39,7 @@ const loadCloudUserInfo = (): CloudUserInfo | null => {
 
 /**
  * Deletes the cloud user info file
- * This should be called after the first admin is created
+ * NOTE: This should be called after the first admin is created
  */
 const deleteCloudUserInfo = (): boolean => {
   try {

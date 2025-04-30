@@ -26,7 +26,8 @@ function saveCloudUserInfoToFile(rootPath: string, email: string): void {
     // Save user info to file
     fs.writeFileSync(filePath, JSON.stringify({ email }), 'utf8');
   } catch (error) {
-    // Silent fail, this is just a convenience feature
+    // Silently fail
+    logger.warn('Failed to save cloud user info to file');
   }
 }
 
@@ -35,8 +36,8 @@ async function createStrapi(scope: Scope) {
   try {
     await fse.ensureDir(rootPath);
 
-    // If we have a cloud user email, save it to a file in the project root
     if (scope.cloudUserEmail) {
+      // If we have a cloud user email, save it to a file in the project root
       saveCloudUserInfoToFile(rootPath, scope.cloudUserEmail);
     }
 

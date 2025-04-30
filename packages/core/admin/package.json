@@ -140,7 +140,6 @@
     "sift": "16.0.1",
     "typescript": "5.4.4",
     "use-context-selector": "1.4.1",
-    "xdg-app-paths": "8.3.0",
     "yup": "0.32.9",
     "zod": "^3.22.4"
   },
