@@ -57,8 +57,6 @@ module.exports = ({ env }) => ({
   // ...
 });
 ```
-
-
 **Path -** `.env`
 
 ```env
