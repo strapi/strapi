@@ -27,4 +27,12 @@ export const login = async ({
   }
 
   await page.getByRole('button', { name: 'Login' }).click();
+
+  try {
+    const dialog = page.getByRole('dialog', { name: "We're glad to have you on board" });
+    // Ensure the growth trial banner is closed
+    await dialog.getByRole('button', { name: 'Close' }).click();
+  } catch (e) {
+    // No dialog found, safe to continue
+  }
 };

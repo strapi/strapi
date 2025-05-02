@@ -294,6 +294,7 @@
   "app.components.LeftMenu.logout": "Logout",
   "app.components.LeftMenu.navbrand.title": "സ്ട്രാപ്പി ഡാഷ്ബോർഡ്",
   "app.components.LeftMenu.navbrand.workplace": "ജോലിസ്ഥലം",
+  "app.components.LeftMenu.trialCountdown": "നിങ്ങളുടെ പ്രയാസം {date} പ്രായം പ്രാപ്തമാകും.",
   "app.components.LeftMenuFooter.help": "സഹായം",
   "app.components.LeftMenuFooter.poweredBy": "പവർ ചെയ്യുന്നത് ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "ശേഖരണ തരങ്ങൾ",

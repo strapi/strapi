@@ -67,7 +67,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                   endAction={
                     <>
                       {link?.licenseOnly && (
-                        <Lightning fill="warning500" width="1.5rem" height="1.5rem" />
+                        <Lightning fill="primary600" width="1.5rem" height="1.5rem" />
                       )}
                       {link?.hasNotification && (
                         <StyledBadge
