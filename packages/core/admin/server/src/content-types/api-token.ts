@@ -51,7 +51,7 @@ export default {
       type: 'string',
       minLength: 1,
       configurable: false,
-      required: true,
+      required: false,
       searchable: false,
     },
     lastUsedAt: {
