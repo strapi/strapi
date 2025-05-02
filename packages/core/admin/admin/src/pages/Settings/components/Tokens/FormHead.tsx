@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Button, Dialog, Flex } from '@strapi/design-system';
-import { Check, ArrowClockwise, Eye } from '@strapi/icons';
+import { Button, Dialog, Flex, Tooltip } from '@strapi/design-system';
+import { Check, ArrowClockwise, Eye, EyeStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
@@ -119,7 +119,8 @@ interface FormHeadProps<TToken extends Token | null> {
   canRegenerate: boolean;
   canShowToken?: boolean;
   setToken: (token: TToken) => void;
-  setShowToken?: (showToken: boolean) => void;
+  toggleToken?: () => void;
+  showToken?: boolean;
   isSubmitting: boolean;
   regenerateUrl: string;
 }
@@ -128,7 +129,8 @@ export const FormHead = <TToken extends Token | null>({
   title,
   token,
   setToken,
-  setShowToken,
+  toggleToken,
+  showToken,
   canShowToken,
   canEditInputs,
   canRegenerate,
@@ -141,7 +143,7 @@ export const FormHead = <TToken extends Token | null>({
       ...token,
       accessKey: newKey,
     });
-    setShowToken?.(true);
+    toggleToken?.();
   };
 
   return (
@@ -156,18 +158,30 @@ export const FormHead = <TToken extends Token | null>({
                 url={`${regenerateUrl}${token?.id ?? ''}`}
               />
             )}
-            {canShowToken && token?.id && (
-              <Button
-                type="button"
-                startIcon={<Eye />}
-                variant="secondary"
-                onClick={() => setShowToken?.(true)}
+            {token?.id && toggleToken && (
+              <Tooltip
+                label={
+                  !canShowToken &&
+                  formatMessage({
+                    id: 'Settings.tokens.encryptionKeyMissing',
+                    defaultMessage:
+                      'In order to view the token, you need an encryption key in the admin configuration',
+                  })
+                }
               >
-                {formatMessage({
-                  id: 'Settings.apiTokens.viewToken',
-                  defaultMessage: 'View token',
-                })}
-              </Button>
+                <Button
+                  type="button"
+                  startIcon={showToken ? <EyeStriked /> : <Eye />}
+                  variant="secondary"
+                  onClick={() => toggleToken?.()}
+                  disabled={!canShowToken}
+                >
+                  {formatMessage({
+                    id: 'Settings.tokens.viewToken',
+                    defaultMessage: 'View token',
+                  })}
+                </Button>
+              </Tooltip>
             )}
             <Button
               disabled={isSubmitting}

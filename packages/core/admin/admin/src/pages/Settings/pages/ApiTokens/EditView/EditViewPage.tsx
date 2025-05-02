@@ -71,7 +71,6 @@ export const EditView = () => {
 
   const contentAPIPermissionsQuery = useGetPermissionsQuery();
   const contentAPIRoutesQuery = useGetRoutesQuery();
-
   /**
    * Separate effects otherwise we could end
    * up duplicating the same notification.
@@ -323,6 +322,14 @@ export const EditView = () => {
     });
   };
 
+  const toggleToken = () => {
+    setShowToken((prev) => !prev);
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  };
+
   const providerValue = {
     ...state,
     onChange: handleChangeCheckbox,
@@ -372,7 +379,8 @@ export const EditView = () => {
                   }}
                   token={apiToken}
                   setToken={setApiToken}
-                  setShowToken={setShowToken}
+                  toggleToken={toggleToken}
+                  showToken={showToken}
                   canEditInputs={canEditInputs}
                   canRegenerate={canRegenerate}
                   canShowToken={canShowToken}
