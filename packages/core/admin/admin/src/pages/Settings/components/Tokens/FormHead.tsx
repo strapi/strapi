@@ -165,7 +165,7 @@ export const FormHead = <TToken extends Token | null>({
                   formatMessage({
                     id: 'Settings.tokens.encryptionKeyMissing',
                     defaultMessage:
-                      'In order to view the token, you need an encryption key in the admin configuration',
+                      'In order to view the token, you need a valid encryption key in the admin configuration',
                   })
                 }
               >

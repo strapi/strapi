@@ -265,7 +265,7 @@
   "Settings.tokens.RegenerateDialog.title": "Regenerate token",
   "Settings.tokens.copy.editMessage": "For security reasons, you can only see your token once.",
   "Settings.tokens.copy.editTitle": "This token isn’t accessible anymore.",
-  "Settings.tokens.copy.lastWarning": "Make sure to copy this token.",
+  "Settings.tokens.copy.lastWarning": "Make sure to copy this token, you won’t be able to see it again!",
   "Settings.tokens.duration.30-days": "30 days",
   "Settings.tokens.duration.7-days": "7 days",
   "Settings.tokens.duration.90-days": "90 days",

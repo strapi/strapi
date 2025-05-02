@@ -64,10 +64,18 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
       }
       subtitle={
         token
-          ? formatMessage({
-              id: 'Settings.tokens.copy.lastWarning',
-              defaultMessage: 'Make sure to copy this token.',
-            })
+          ? formatMessage(
+              tokenType === 'api-token'
+                ? {
+                    id: 'Settings.tokens.copy.subtitle',
+                    defaultMessage: 'Copy this token for use elsewhere',
+                  }
+                : {
+                    id: 'Settings.tokens.copy.lastWarning',
+                    defaultMessage:
+                      'Make sure to copy this token, you won’t be able to see it again!',
+                  }
+            )
           : formatMessage({
               id: 'Settings.tokens.copy.editMessage',
               defaultMessage: 'For security reasons, you can only see your token once.',
