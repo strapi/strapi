@@ -200,7 +200,7 @@
   "table.button.no-fields": "Add new field",
   "table.content.create-first-content-type.title": "No content types",
   "table.content.create-first-content-type.description": "Create collection types, single types and components in order to build your schema.",
-  "table.content.create-first-content-type.import-code": "Upload from computer",
+  "table.content.create-first-content-type.import-code": "Import from computer",
   "table.content.create-first-content-type.start-with-prompt": "Start with a prompt",
   "table.content.no-fields.collection-type": "Add your first field to this Collection-Type",
   "table.content.no-fields.component": "Add your first field to this component",

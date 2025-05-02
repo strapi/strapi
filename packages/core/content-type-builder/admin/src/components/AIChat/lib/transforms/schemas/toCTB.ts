@@ -56,6 +56,27 @@ const determineAttributeStatus = (
 };
 
 /**
+ * Determines the status of a schema by comparing action and checking if oldSchema exists
+ */
+const transformStatusFromChatToCTB = (
+  schema: Schema,
+  oldSchema?: ContentType | Component
+): ContentType['status'] => {
+  // If schema has an action, use the mapped status
+  if (schema.action) {
+    return ACTION_TO_STATUS[schema.action];
+  }
+
+  // If oldSchema doesn't exist, it's a new schema
+  if (!oldSchema) {
+    return 'NEW';
+  }
+
+  // If no action is specified and oldSchema exists, keep the existing status
+  return oldSchema.status;
+};
+
+/**
  * Transform attributes from Chat format to CTB format
  * Also performs a diff to determine the status of each attribute
  */
@@ -128,7 +149,7 @@ export const transformChatToCTB = (
       modelType: schema.modelType,
       uid: schema.uid as any,
       collectionName: pluralName,
-      status: schema.action ? ACTION_TO_STATUS[schema.action] : 'NEW',
+      status: transformStatusFromChatToCTB(schema, oldSchema),
       globalId: singularName,
     } satisfies Component;
   }
@@ -153,7 +174,7 @@ export const transformChatToCTB = (
       },
     },
     visible: true,
-    status: schema.action ? ACTION_TO_STATUS[schema.action] : 'NEW',
+    status: transformStatusFromChatToCTB(schema, oldSchema),
     globalId: singularName,
     restrictRelationsTo: null, // TODO: not sure what this is about
   } satisfies ContentType;

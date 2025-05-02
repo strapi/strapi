@@ -44,10 +44,7 @@ export const UploadFigmaToChatProvider = ({ children }: { children: React.ReactN
   const [isFigmaUploadOpen, setIsFigmaUploadOpen] = useState(false); // Default to false
   const [submitOnFinish, setSubmitOnFinish] = useState(false);
 
-  const { openChat } = useStrapiChat();
-
   const openFigmaUpload = (submitOnFinishParam?: boolean) => {
-    openChat();
     setIsFigmaUploadOpen(true);
     setSubmitOnFinish(submitOnFinishParam ?? false);
   };
@@ -74,7 +71,7 @@ interface FigmaUrlInputStepProps {
   error: string | null; // Error state from useFigmaUpload
 }
 
-const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl, error }: FigmaUrlInputStepProps) => {
+const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl }: FigmaUrlInputStepProps) => {
   const { t } = useTranslations();
   const { isLoading } = useStepModal();
   const [showingTokenInput, setShowingTokenInput] = useState(!hasFigmaToken());
@@ -102,7 +99,10 @@ const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl, error }: FigmaUrlInputStepPr
               'To access your Figma designs, you need to provide a personal access token. This will be stored securely in your browser.'
             )}
           </Typography>
-          <Link href="https://www.figma.com/developers/api#access-tokens" isExternal>
+          <Link
+            href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens"
+            isExternal
+          >
             {t('chat.figma-upload.token-help', 'How to get a Figma API token')}
           </Link>
         </Flex>
@@ -168,11 +168,11 @@ const FigmaUrlInputStep = ({ figmaUrl, setFigmaUrl, error }: FigmaUrlInputStepPr
         />
       </Box>
 
-      {error && (
+      {/* {error && (
         <Box padding={3} background="danger100" color="danger600" borderRadius="4px" width="100%">
           <Typography variant="pi">{error}</Typography>
         </Box>
-      )}
+      )} */}
     </Flex>
   );
 };
@@ -226,7 +226,7 @@ const FigmaImageDisplayStep = ({
   };
 
   return (
-    <Flex direction="column" gap={4} alignItems="start" width="100%" height="450px">
+    <Flex direction="column" gap={4} alignItems="start" width="100%" height="min(45vh, 400px)">
       <Flex justifyContent="space-between" width="100%" alignItems="center">
         <Typography variant="beta">
           {t('chat.figma-upload.select-images', 'Select Frames to Import')}
@@ -244,7 +244,7 @@ const FigmaImageDisplayStep = ({
         </Flex>
       </Flex>
 
-      <Box paddingRight={4} maxHeight={400} width="100%" style={{ overflowY: 'auto' }}>
+      <Box paddingRight={4} width="100%" style={{ overflowY: 'auto' }}>
         <Grid.Root gap={4}>
           {images.map((frame, index) => {
             const isSelected = selectedImages.includes(frame.id);
@@ -276,7 +276,7 @@ export const UploadFigmaModal = () => {
 
   const { addAttachments } = useAttachments();
   const { isFigmaUploadOpen, closeFigmaUpload, submitOnFinish } = useUploadFigmaToChat();
-  const { input, setInput, setMessages, reload } = useStrapiChat();
+  const { input, setInput, setMessages, reload, openChat } = useStrapiChat();
   const { processFigmaUrl, isLoading, error } = useFigmaUpload({
     onSuccess: (images) => {
       setFigmaImages(images);
@@ -287,14 +287,19 @@ export const UploadFigmaModal = () => {
   });
 
   const handleImportStep = async () => {
-    if (!figmaUrl || isLoading) return false;
+    await processFigmaUrl(figmaUrl);
+    return true;
+  };
 
+  // Validate if the URL is a valid Figma URL
+  const isValidFigmaUrl = (url: string) => {
+    if (!url) return false;
     try {
-      await processFigmaUrl(figmaUrl);
-    } catch (err) {
+      const urlObj = new URL(url);
+      return urlObj.hostname === 'www.figma.com' || urlObj.hostname === 'figma.com';
+    } catch (e) {
       return false;
     }
-    return true;
   };
 
   const handleCancel = () => {
@@ -312,6 +317,10 @@ export const UploadFigmaModal = () => {
       closeFigmaUpload();
       return;
     }
+
+    // Ensure chat is opened
+    openChat();
+
     if (submitOnFinish) {
       // Autosubmit a message to chat with attachments
       setMessages(() => [
@@ -354,7 +363,7 @@ export const UploadFigmaModal = () => {
         title={t('chat.figma-upload.step1-title', 'Enter Figma URL')}
         nextLabel={t('chat.figma-upload.import-button', 'Import')}
         cancelLabel={t('form.button.cancel', 'Cancel')}
-        disableNext={!figmaUrl || isLoading}
+        disableNext={!figmaUrl || isLoading || !isValidFigmaUrl(figmaUrl)}
         onNext={handleImportStep}
       >
         <FigmaUrlInputStep figmaUrl={figmaUrl} setFigmaUrl={setFigmaUrl} error={error} />

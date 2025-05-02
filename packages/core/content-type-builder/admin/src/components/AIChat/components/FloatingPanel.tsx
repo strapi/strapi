@@ -105,7 +105,7 @@ const Root = ({
             $size={size}
             $position={position}
             background="neutral0"
-            shadow="filterShadow"
+            shadow="popupShadow"
             hasRadius
             borderColor="neutral200"
             borderStyle="solid"

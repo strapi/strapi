@@ -60,12 +60,6 @@ export const EmptyState = () => {
       {/* Chat is not available on small screens either way */}
       {isChatEnabled && (
         <Flex gap={2} direction="column" className="hide-on-small">
-          <Button startIcon={<Paperclip />} variant="tertiary" onClick={() => openCodeUpload(true)}>
-            {formatMessage({
-              id: getTrad('table.content.create-first-content-type.import-code'),
-              defaultMessage: 'Import from computer',
-            })}
-          </Button>
           <Button
             startIcon={<FigmaIcon />}
             variant="tertiary"
@@ -74,6 +68,12 @@ export const EmptyState = () => {
             {formatMessage({
               id: getTrad('table.content.create-first-content-type.import-figma'),
               defaultMessage: 'Import from Figma',
+            })}
+          </Button>
+          <Button startIcon={<Paperclip />} variant="tertiary" onClick={() => openCodeUpload(true)}>
+            {formatMessage({
+              id: getTrad('table.content.create-first-content-type.import-code'),
+              defaultMessage: 'Import from computer',
             })}
           </Button>
           <Button startIcon={<Sparkle />} variant="tertiary" onClick={openChat}>

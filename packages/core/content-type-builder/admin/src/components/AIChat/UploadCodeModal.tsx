@@ -39,7 +39,7 @@ export const UploadProjectToChatProvider = ({ children }: { children: React.Reac
   const { openChat } = useStrapiChat();
 
   const openCodeUpload = (submitOnFinish?: boolean) => {
-    openChat();
+    // openChat();
     setIsCodeUploadOpen(true);
     setSubmitOnFinish(submitOnFinish ?? false);
   };
@@ -264,9 +264,7 @@ const CodeUploadStep = ({
   return (
     <Flex direction="column" gap={6} alignItems="start" width="100%">
       <Flex direction="column" gap={2} alignItems="start">
-        <Typography variant="beta">
-          {t('chat.code-upload.title', 'Import a Next.js app')}
-        </Typography>
+        <Typography variant="beta">{t('chat.code-upload.title', 'Import code')}</Typography>
         <Typography variant="omega" textColor="neutral600">
           {t(
             'chat.code-upload.description',
@@ -379,7 +377,7 @@ export const UploadCodeModal = () => {
   });
 
   const { isCodeUploadOpen, closeCodeUpload, submitOnFinish } = useUploadProjectToChat();
-  const { setMessages, reload } = useStrapiChat();
+  const { setMessages, reload, openChat } = useStrapiChat();
 
   const handleCancel = () => {
     setProjectName(null);
@@ -388,6 +386,9 @@ export const UploadCodeModal = () => {
   };
 
   const handleComplete = async () => {
+    // Ensure chat is opened
+    openChat();
+
     if (projectAttachment && submitOnFinish) {
       setMessages(() => [
         {
@@ -427,12 +428,12 @@ export const UploadCodeModal = () => {
       onOpenChange={(isOpen) => {
         if (!isOpen) handleCancel();
       }}
-      title={t('chat.code-upload.header', 'Import a Next.js app')}
+      title={t('chat.code-upload.header', 'Import code')}
       onCancel={handleCancel}
       onComplete={handleComplete}
     >
       <StepModal.Step
-        title={t('chat.code-upload.step1-title', 'Upload Project')}
+        title={t('chat.code-upload.step1-title', 'Import code')}
         nextLabel={t('chat.code-upload.continue-button', 'Continue')}
         cancelLabel={t('common.cancel', 'Cancel')}
         disableNext={!projectAttachment || isLoading}

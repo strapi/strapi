@@ -21,7 +21,7 @@ export const transformCTBToChat = (schema: ContentType | Component): Schema => {
   if (schema.modelType === 'component') {
     return {
       category: schema.category,
-      kind: 'collectionType',
+      // kind: 'component',
       action: 'create',
       modelType: 'component',
       description: schema.info.description,

@@ -59,7 +59,7 @@ const ChatSuggestions = () => {
             <Button
               key={suggestion}
               startIcon={<Sparkle fill="neutral500" />}
-              size="S"
+              size="M"
               variant="tertiary"
               onClick={() =>
                 append({
@@ -68,7 +68,7 @@ const ChatSuggestions = () => {
                 })
               }
             >
-              {suggestion}
+              <Typography fontWeight="regular">{suggestion}</Typography>
             </Button>
           ))}
         </Flex>
@@ -353,7 +353,6 @@ const Chat = () => {
         attachFiles(files);
       }}
     >
-      <UploadFigmaModal />
       <Panel.Root
         size="md"
         position="bottom-right"

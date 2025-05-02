@@ -4,6 +4,7 @@ import omit from 'lodash/omit';
 
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
+import { createComponentUid } from '../FormModal/utils/createUid';
 
 import { createUndoRedoSlice } from './undoRedo';
 
@@ -771,6 +772,11 @@ const slice = createUndoRedoSlice(
             const isComponent = schema.modelType === 'component';
             // It's a component that has yet not been added
             if (isComponent) {
+              const exists = state.components[uid];
+              if (!exists) {
+                return;
+              }
+
               const isUnsaved = state.components[uid]?.status === 'NEW';
               if (isUnsaved) {
                 delete state.components[uid];
@@ -778,6 +784,11 @@ const slice = createUndoRedoSlice(
                 state.components[uid].status = 'REMOVED';
               }
             } else {
+              const exists = state.contentTypes[uid];
+              if (!exists) {
+                return;
+              }
+
               const isUnsaved = state.contentTypes[uid]?.status === 'NEW';
               if (isUnsaved) {
                 delete state.contentTypes[uid];
