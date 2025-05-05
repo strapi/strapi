@@ -55,18 +55,12 @@ const command = () => {
 
             console.info('ℹ️  Data transfer documentation: https://docs.strapi.io/dev-docs/data-management/transfer');
 
-            if (hasUrl && hasToken) {
+            if (hasUrl || hasToken) {
               console.info('ℹ️  Found transfer configuration in your environment:');
-              console.info('   → STRAPI_TRANSFER_URL environment variable value will be used as default URL');
-              console.info('   → STRAPI_TRANSFER_TOKEN environment variable value will be used as default token');
-            } else if (hasUrl || hasToken) {
               if (hasUrl) {
-                console.info('ℹ️  Found partial transfer configuration:');
                 console.info('   → STRAPI_TRANSFER_URL environment variable value will be used as default URL');
-                console.info('   → STRAPI_TRANSFER_TOKEN environment variable not found ');
-              } else {
-                console.info('ℹ️  Found partial transfer configuration:');
-                console.info('   → STRAPI_TRANSFER_URL environment variable not found');
+              }
+              if(hasToken) {
                 console.info('   → STRAPI_TRANSFER_TOKEN environment variable value will be used as default token');
               }
             } else {
