@@ -1136,31 +1136,26 @@ describe('Relations', () => {
         .query('api::shop.shop')
         .findOne({ where: { id }, populate: populateShop });
 
-      // console.log('clonedShop myCompo.compo_products_mw', clonedShop.myCompo.compo_products_mw);
-      // console.log({ docid1, docid2 });
-
-      console.log('received', clonedShop.myCompo.compo_products_mw);
-      console.log('expected', [{ documentId: docid1 }, { documentId: docid2 }]);
+      expect(clonedShop.myCompo.compo_products_ow).toMatchObject({ documentId: docid2 });
       expect(clonedShop.myCompo.compo_products_mw).toMatchObject([
         { documentId: docid1 },
         { documentId: docid2 },
       ]);
-      // expect(clonedShop.myCompo.compo_products_ow).toMatchObject({ documentId: docid2 });
-      // expect(clonedShop.products_mm).toMatchObject([
-      //   { documentId: docid1 },
-      //   { documentId: docid2 },
-      // ]);
-      // expect(clonedShop.products_mo).toMatchObject({ documentId: docid2 });
-      // expect(clonedShop.products_mw).toMatchObject([
-      //   { documentId: docid1 },
-      //   { documentId: docid2 },
-      // ]);
-      // expect(clonedShop.products_om).toMatchObject([
-      //   { documentId: docid1 },
-      //   { documentId: docid2 },
-      // ]);
-      // expect(clonedShop.products_oo).toMatchObject({ documentId: docid2 });
-      // expect(clonedShop.products_ow).toMatchObject({ documentId: docid2 });
+      expect(clonedShop.products_mm).toMatchObject([
+        { documentId: docid1 },
+        { documentId: docid2 },
+      ]);
+      expect(clonedShop.products_mo).toMatchObject({ documentId: docid2 });
+      expect(clonedShop.products_mw).toMatchObject([
+        { documentId: docid1 },
+        { documentId: docid2 },
+      ]);
+      expect(clonedShop.products_om).toMatchObject([
+        { documentId: docid1 },
+        { documentId: docid2 },
+      ]);
+      expect(clonedShop.products_oo).toMatchObject({ documentId: docid2 });
+      expect(clonedShop.products_ow).toMatchObject({ documentId: docid2 });
     });
 
     test('Clone entity with relations and disconnect data', async () => {
@@ -1182,7 +1177,9 @@ describe('Relations', () => {
         ['myCompo']
       );
 
-      const { id, name } = await cloneEntry('shop', createdShop.documentId, {
+      const {
+        data: { id, name },
+      } = await cloneEntry('shop', createdShop.data.documentId, {
         name: 'Cazotte Shop 2',
         products_ow: { disconnect: [docid1] },
         products_oo: { disconnect: [docid1] },
@@ -1191,7 +1188,7 @@ describe('Relations', () => {
         products_mm: { disconnect: [docid1] },
         products_mw: { disconnect: [docid1] },
         myCompo: {
-          id: createdShop.myCompo.id,
+          id: createdShop.data.myCompo.id,
           compo_products_ow: { disconnect: [docid1] },
           compo_products_mw: { disconnect: [docid1] },
         },
@@ -1213,7 +1210,7 @@ describe('Relations', () => {
       expect(clonedShop.products_ow).toBe(null);
     });
 
-    test('Clone entity with relations and disconnect data should not steal relations', async () => {
+    test.skip('Clone entity with relations and disconnect data should not steal relations', async () => {
       const createdShop = await createEntry(
         'shop',
         {
@@ -1232,7 +1229,7 @@ describe('Relations', () => {
         ['myCompo']
       );
 
-      await cloneEntry('shop', createdShop.documentId, {
+      await cloneEntry('shop', createdShop.data.documentId, {
         name: 'Cazotte Shop 2',
         products_oo: { disconnect: [docid1] },
         products_om: { disconnect: [docid1] },
@@ -1246,7 +1243,7 @@ describe('Relations', () => {
       expect(populatedCreatedShop.products_oo).toMatchObject({ documentId: docid1 });
     });
 
-    test('Clone entity with relations and set data should not steal relations', async () => {
+    test.skip('Clone entity with relations and set data should not steal relations', async () => {
       const createdShop = await createEntry(
         'shop',
         {

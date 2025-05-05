@@ -63,7 +63,9 @@ const getRelationIds = curry(
   }
 );
 
-// Should this be moved?
+/**
+ * Ensure set/connect/disconnect syntax for all relations in the data object
+ */
 const standarizeRelations = (data: Record<string, any>, uid: string) => {
   return traverseEntityRelations(
     async ({ key, value, attribute }, { set }) => {

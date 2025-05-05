@@ -73,7 +73,7 @@ const mapRelation = async (
       relation = { ...relation, set: toArray(set) };
     }
 
-    // { disconnect}
+    // { disconnect }
     if (relation.disconnect) {
       const disconnect: any = await mapRelation(callback, relation.disconnect, true);
       relation = { ...relation, disconnect: toArray(disconnect) };

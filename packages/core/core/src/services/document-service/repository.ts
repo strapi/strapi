@@ -1,6 +1,12 @@
-import { omit, assoc, merge, curry } from 'lodash/fp';
+import { omit, assoc, curry, get } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
+import {
+  async,
+  contentTypes as contentTypesUtils,
+  validate,
+  errors,
+  traverseEntity,
+} from '@strapi/utils';
 
 import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
@@ -187,36 +193,60 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
 
-    const clonedEntries = await async.map(
-      entriesToClone,
-      async.pipe(
-        validateParams,
-        omit(['id', 'createdAt', 'updatedAt']),
-        // assign new documentId
-        assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        async (data) =>
-          /**
-           * Merge receives [{ connect: [{ id: 1 }] }] and { connect: [{ documentId }] }]
-           * but it does not merge arrays, so only keeps one of them.
-           * We want to not do connect for everything, but use both connect (for the new one) and
-           * set (for the old one) at the same time. This requires a change at the database level.
-           * Can this be done?
-           */
-          merge(
-            await standarizeRelations(data, uid),
-            await standarizeRelations(queryParams.data, uid)
-          ),
-        async (data) => {
-          console.log('data', await standarizeRelations(data, uid));
-          console.log('queryParams.data', await standarizeRelations(queryParams.data, uid));
-          console.log('merged data', JSON.stringify(data, null, 2));
-          return data;
+    const clonedEntries = await async.map(entriesToClone, async (entryToClone: any) => {
+      // Step 1: Create new entries with standardized original data
+      const newData = await standarizeRelations(
+        {
+          ...omit(['id', 'createdAt', 'updatedAt'], entryToClone),
+          documentId: createDocumentId(),
         },
-        (data) => entries.create({ ...queryParams, data, status: 'draft' })
-      )
-    );
+        uid
+      );
 
+      const newEntry = await entries.create({
+        ...queryParams,
+        data: newData,
+        status: 'draft',
+      });
+
+      // Step 2 (optional): Update with queryParams.data if it exists, after some transformations
+      if (queryParams.data && Object.keys(queryParams.data).length > 0) {
+        const updateData = await async.pipe(
+          async (data) => {
+            /**
+             * If the id of a component of the entry to clone is provided in the data, then we need to
+             * keep an ID to ensure Strapi updates the component in the clone instead of creating a new one.
+             * But we need to replace the component ID with the one from the clone.
+             */
+            return traverseEntity(
+              (options, utils) => {
+                if (
+                  // Only manipulate components when we reach their "id" field
+                  options.schema.modelType === 'component' &&
+                  // Ensure options.path.raw (instead of options.key) to help type narrowing below
+                  options.path.raw?.endsWith('id') &&
+                  // Only manipulate if the id field matches the one for the entry that was cloned
+                  'id' in options.data &&
+                  options.data.id === get(options.path.raw, entryToClone)
+                ) {
+                  utils.set('id', get(options.path.raw, newEntry));
+                }
+              },
+              { schema: contentType, getModel },
+              data
+            );
+          },
+          // Use set/connect/disconnect syntax for relations
+          (data) => standarizeRelations(data, uid)
+        )(queryParams.data);
+
+        return entries.update(newEntry, { ...queryParams, data: updateData });
+      }
+
+      return newEntry;
+    });
+
+    // Only emit a create event, the optional update is an implementation detail
     clonedEntries.forEach(emitEvent('entry.create'));
 
     return { documentId: clonedEntries.at(0)?.documentId, entries: clonedEntries };
