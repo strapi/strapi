@@ -42,117 +42,122 @@ const command = () => {
       .addOption(onlyOption)
       .addOption(throttleOption)
       .hook('preAction', validateExcludeOnly)
-      .hook(
-        'preAction',
-        async (thisCommand) => {
-          const opts = thisCommand.opts();
-          
-          // If neither --from nor --to are provided, prompt for transfer direction
-          if (!(opts.from || opts.to)) {
-            // Log environment variables status
-            const hasUrl = Boolean(process.env.STRAPI_TRANSFER_URL);
-            const hasToken = Boolean(process.env.STRAPI_TRANSFER_TOKEN);
+      .hook('preAction', async (thisCommand) => {
+        const opts = thisCommand.opts();
 
-            console.info('ℹ️  Data transfer documentation: https://docs.strapi.io/dev-docs/data-management/transfer');
+        // If neither --from nor --to are provided, prompt for transfer direction
+        if (!(opts.from || opts.to)) {
+          // Log environment variables status
+          const hasUrl = Boolean(process.env.STRAPI_TRANSFER_URL);
+          const hasToken = Boolean(process.env.STRAPI_TRANSFER_TOKEN);
 
-            if (hasUrl || hasToken) {
-              console.info('ℹ️  Found transfer configuration in your environment:');
-              if (hasUrl) {
-                console.info('   → STRAPI_TRANSFER_URL environment variable value will be used as default URL');
-              }
-              if(hasToken) {
-                console.info('   → STRAPI_TRANSFER_TOKEN environment variable value will be used as default token');
-              }
-            } else {
-              console.info('ℹ️  No transfer configuration found in environment variables');
-              console.info('   → Add STRAPI_TRANSFER_URL and STRAPI_TRANSFER_TOKEN environment variables to make the transfer process faster for future runs');
+          console.info(
+            'ℹ️  Data transfer documentation: https://docs.strapi.io/dev-docs/data-management/transfer'
+          );
+
+          if (hasUrl || hasToken) {
+            console.info('ℹ️  Found transfer configuration in your environment:');
+            if (hasUrl) {
+              console.info(
+                '   → STRAPI_TRANSFER_URL environment variable value will be used as default URL'
+              );
             }
-            console.log(); // Empty line for better readability
+            if (hasToken) {
+              console.info(
+                '   → STRAPI_TRANSFER_TOKEN environment variable value will be used as default token'
+              );
+            }
+          } else {
+            console.info('ℹ️  No transfer configuration found in environment variables');
+            console.info(
+              '   → Add STRAPI_TRANSFER_URL and STRAPI_TRANSFER_TOKEN environment variables to make the transfer process faster for future runs'
+            );
+          }
+          console.log(); // Empty line for better readability
 
-            const { direction } = await inquirer.prompt([
+          const { direction } = await inquirer.prompt([
+            {
+              type: 'list',
+              name: 'direction',
+              message: 'Choose transfer direction:',
+              choices: [
+                { name: 'Pull data from remote Strapi to local', value: 'from' },
+                { name: 'Push local data to remote Strapi', value: 'to' },
+              ],
+            },
+          ]);
+
+          if (direction === 'from') {
+            const { remoteUrl, token } = await inquirer.prompt([
               {
-                type: 'list',
-                name: 'direction',
-                message: 'Choose transfer direction:',
-                choices: [
-                  { name: 'Pull data from remote Strapi to local', value: 'from' },
-                  { name: 'Push local data to remote Strapi', value: 'to' }
-                ]
-              }
+                type: 'input',
+                name: 'remoteUrl',
+                message: 'Enter the URL of the remote Strapi instance to get data from:',
+                default: process.env.STRAPI_TRANSFER_URL,
+                validate(input) {
+                  try {
+                    const url = new URL(input);
+                    if (!['http:', 'https:'].includes(url.protocol)) {
+                      return 'URL must use http: or https: protocol';
+                    }
+                    return true;
+                  } catch (error) {
+                    return 'Please enter a valid URL (e.g., http://localhost:1337/admin or https://example.com/admin)';
+                  }
+                },
+              },
+              {
+                type: 'password',
+                name: 'token',
+                message: 'Enter your transfer token for the remote Strapi source:',
+                default: process.env.STRAPI_TRANSFER_TOKEN,
+                validate(input) {
+                  if (!input?.length) {
+                    return 'Transfer token is required';
+                  }
+                  return true;
+                },
+              },
             ]);
-
-            if (direction === 'from') {
-              const { remoteUrl, token } = await inquirer.prompt([
-                {
-                  type: 'input',
-                  name: 'remoteUrl',
-                  message: 'Enter the URL of the remote Strapi instance to get data from:',
-                  default: process.env.STRAPI_TRANSFER_URL,
-                  validate(input) {
-                    try {
-                      const url = new URL(input);
-                      if (!['http:', 'https:'].includes(url.protocol)) {
-                        return 'URL must use http: or https: protocol';
-                      }
-                      return true;
-                    } catch (error) {
-                      return 'Please enter a valid URL (e.g., http://localhost:1337/admin or https://example.com/admin)';
-                    }
-                  }
-                },
-                {
-                  type: 'password',
-                  name: 'token',
-                  message: 'Enter your transfer token for the remote Strapi source:',
-                  default: process.env.STRAPI_TRANSFER_TOKEN,
-                  validate(input) {
-                    if (!input?.length) {
-                      return 'Transfer token is required';
+            opts.from = new URL(remoteUrl);
+            opts.fromToken = token;
+          } else {
+            const { remoteUrl, token } = await inquirer.prompt([
+              {
+                type: 'input',
+                name: 'remoteUrl',
+                message: 'Enter the URL of the remote Strapi instance to send data to:',
+                default: process.env.STRAPI_TRANSFER_URL,
+                validate(input) {
+                  try {
+                    const url = new URL(input);
+                    if (!['http:', 'https:'].includes(url.protocol)) {
+                      return 'URL must use http: or https: protocol';
                     }
                     return true;
-                  }
-                }
-              ]);
-              opts.from = new URL(remoteUrl);
-              opts.fromToken = token;
-            } else {
-              const { remoteUrl, token } = await inquirer.prompt([
-                {
-                  type: 'input',
-                  name: 'remoteUrl',
-                  message: 'Enter the URL of the remote Strapi instance to send data to:',
-                  default: process.env.STRAPI_TRANSFER_URL,
-                  validate(input) {
-                    try {
-                      const url = new URL(input);
-                      if (!['http:', 'https:'].includes(url.protocol)) {
-                        return 'URL must use http: or https: protocol';
-                      }
-                      return true;
-                    } catch (error) {
-                      return 'Please enter a valid URL (e.g., http://localhost:1337 or https://example.com)';
-                    }
+                  } catch (error) {
+                    return 'Please enter a valid URL (e.g., http://localhost:1337 or https://example.com)';
                   }
                 },
-                {
-                  type: 'password',
-                  name: 'token',
-                  message: 'Enter your transfer token for the remote Strapi destination:',
-                  default: process.env.STRAPI_TRANSFER_TOKEN,
-                  validate(input) {
-                    if (!input?.length) {
-                      return 'Transfer token is required';
-                    }
-                    return true;
+              },
+              {
+                type: 'password',
+                name: 'token',
+                message: 'Enter your transfer token for the remote Strapi destination:',
+                default: process.env.STRAPI_TRANSFER_TOKEN,
+                validate(input) {
+                  if (!input?.length) {
+                    return 'Transfer token is required';
                   }
-                }
-              ]);
-              opts.to = new URL(remoteUrl);
-              opts.toToken = token;
-            }
+                  return true;
+                },
+              },
+            ]);
+            opts.to = new URL(remoteUrl);
+            opts.toToken = token;
           }
         }
-      )
+      })
       .hook(
         'preAction',
         ifOptions(
