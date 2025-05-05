@@ -8,7 +8,7 @@ tags:
 toc_max_heading_level: 4
 ---
 
-# Open API
+# OpenAPI
 
 This section explores the Strapi OpenAPI toolset
 

@@ -7,7 +7,7 @@ tags:
   - dependencies
 ---
 
-# Open API
+# OpenAPI
 
 This section provides an overview of the technologies used in the OpenAPI package
 
@@ -32,9 +32,9 @@ The package focuses on using a limited set of external dependencies to keep a li
 
 ### [Zod to OpenAPI](https://github.com/asteasolutions/zod-to-openapi)
 
-> A library that uses [zod schemas](https://github.com/colinhacks/zod) to generate Open API Swagger documentation.
+> A library that uses [zod schemas](https://github.com/colinhacks/zod) to generate OpenAPI Swagger documentation.
 
-This library is used to transform `zod` schema gotten from Strapi routes objects into valid OpenAPI Schema.
+This library is used to transform `zod` schema obtained from Strapi routes objects into valid OpenAPI Schema.
 
 :::info
 It is particularly useful to avoid leaking the OpenAPI domain logic into the Strapi core logic.

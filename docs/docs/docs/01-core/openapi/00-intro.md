@@ -5,7 +5,7 @@ tags:
   - openapi
 ---
 
-# Open API
+# OpenAPI
 
 This section provides an overview of the OpenAPI package for Strapi.
 
@@ -24,9 +24,9 @@ The Strapi OpenAPI package offers a comprehensive set of utilities for creating 
 
 It features a user-friendly API, a maintainable and extensible codebase, and thorough documentation.
 
-::::info
+:::info
 For more information about OpenAPI, please refer to [the official specification](https://swagger.io/specification/)
-::::
+:::
 
 ## Context
 
