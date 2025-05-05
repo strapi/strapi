@@ -52,7 +52,7 @@ For more information, see
 - https://v4.zod.dev/
 - https://v4.zod.dev/json-schema
 - https://v4.zod.dev/metadata
-  :::
+:::
 
 ### [Debug](https://github.com/debug-js/debug)
 
