@@ -23,9 +23,9 @@ This domain provides objects that extract different sets of routes from a Strapi
 
 You can find related files in `src/routes`.
 
-::::info
+:::info
 This domain could potentially be moved to the Strapi core or Strapi utils in the future since it doesn't have any direct dependencies on OpenAPI itself.
-::::
+:::
 
 ### The OpenAPI Document Generation
 
