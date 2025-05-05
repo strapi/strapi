@@ -73,7 +73,7 @@ const command = () => {
               '   → Add STRAPI_TRANSFER_URL and STRAPI_TRANSFER_TOKEN environment variables to make the transfer process faster for future runs'
             );
           }
-          console.log(); // Empty line for better readability
+          console.info(); // Empty line for better readability
 
           const { direction } = await inquirer.prompt([
             {
