@@ -7,7 +7,7 @@ tags:
   - components
 ---
 
-# Open API
+# OpenAPI
 
 This section explores the overall architecture and main components of the OpenAPI package.
 
