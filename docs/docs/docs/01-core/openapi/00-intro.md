@@ -5,7 +5,7 @@ tags:
   - openapi
 ---
 
-# Open API
+# OpenAPI
 
 This section provides an overview of the OpenAPI package for Strapi.
 
