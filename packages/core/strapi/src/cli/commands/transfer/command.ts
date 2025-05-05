@@ -151,15 +151,18 @@ const command = () => {
               opts.toToken = token;
             }
           }
-          
-          // Validate that exactly one direction is specified
-          if (opts.from && opts.to) {
+        }
+      )
+      .hook(
+        'preAction',
+        ifOptions(
+          (opts) => !(opts.from || opts.to) || (opts.from && opts.to),
+          async () =>
             exitWith(
               1,
               'Exactly one remote source (from) or destination (to) option must be provided'
-            );
-          }
-        }
+            )
+        )
       )
       // If --from is used, validate the URL and token
       .hook(
