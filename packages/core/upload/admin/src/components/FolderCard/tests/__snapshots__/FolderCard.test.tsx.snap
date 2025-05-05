@@ -136,6 +136,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   align-items: center;
 }
 
+.c6[data-disabled] {
+  cursor: not-allowed;
+}
+
 .c1 {
   height: 100%;
   left: 0;
