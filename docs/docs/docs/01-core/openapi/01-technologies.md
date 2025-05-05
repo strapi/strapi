@@ -7,7 +7,7 @@ tags:
   - dependencies
 ---
 
-# Open API
+# OpenAPI
 
 This section provides an overview of the technologies used in the OpenAPI package
 
