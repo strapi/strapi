@@ -19,16 +19,14 @@ describe('useDocument', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.document).toMatchInlineSnapshot(`
-      {
-        "createdAt": "",
-        "documentId": "12345",
-        "id": 1,
-        "name": "Entry 1",
-        "publishedAt": "",
-        "updatedAt": "",
-      }
-    `);
+    expect(result.current.document).toEqual({
+      createdAt: '',
+      documentId: '12345',
+      id: 1,
+      name: 'Entry 1',
+      publishedAt: '',
+      updatedAt: '',
+    });
   });
 
   it('should display an error if there is an error fetching the document', async () => {
@@ -115,11 +113,9 @@ describe('useDocument', () => {
           },
         ],
       })
-    ).toMatchInlineSnapshot(`
-      {
-        "postal_code": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
-      }
-    `);
+    ).toEqual({
+      postal_code: 'postal_code must be a `string` type, but the final value was: `12`.',
+    });
   });
 
   it('should throw the validate function if called before the schema has been loaded', async () => {
@@ -141,8 +137,8 @@ describe('useDocument', () => {
 
     expect(() =>
       result.current.validate({ documentId: '12345', id: 1, postal_code: 'N227SN' })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"There is no validation schema generated, this is likely due to the schema not being loaded yet."`
+    ).toThrowError(
+      'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
     );
   });
 
@@ -157,136 +153,117 @@ describe('useDocument', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.schema).toMatchInlineSnapshot(`
-      {
-        "apiID": "address",
-        "attributes": {
-          "categories": {
-            "inversedBy": "addresses",
-            "relation": "manyToMany",
-            "relationType": "manyToMany",
-            "target": "api::category.category",
-            "targetModel": "api::category.category",
-            "type": "relation",
-          },
-          "city": {
-            "maxLength": 200,
-            "pluginOptions": {},
-            "required": true,
-            "type": "string",
-          },
-          "cover": {
-            "allowedTypes": [
-              "files",
-              "images",
-              "videos",
-              "audios",
-            ],
-            "multiple": false,
-            "pluginOptions": {},
-            "required": false,
-            "type": "media",
-          },
-          "createdAt": {
-            "type": "datetime",
-          },
-          "createdBy": {
-            "configurable": false,
-            "private": true,
-            "relation": "oneToOne",
-            "relationType": "oneToOne",
-            "target": "admin::user",
-            "targetModel": "admin::user",
-            "type": "relation",
-            "useJoinTable": false,
-            "visible": false,
-            "writable": false,
-          },
-          "dz": {
-            "components": [
-              "blog.test-como",
-            ],
-            "type": "dynamiczone",
-          },
-          "id": {
-            "type": "string",
-          },
-          "images": {
-            "allowedTypes": [
-              "images",
-            ],
-            "multiple": true,
-            "pluginOptions": {},
-            "required": false,
-            "type": "media",
-          },
-          "json": {
-            "pluginOptions": {},
-            "type": "json",
-          },
-          "name": {
-            "type": "string",
-          },
-          "notrepeat_req": {
-            "component": "blog.test-como",
-            "pluginOptions": {},
-            "repeatable": false,
-            "required": true,
-            "type": "component",
-          },
-          "postal_code": {
-            "maxLength": 2,
-            "pluginOptions": {},
-            "type": "string",
-          },
-          "repeat_req": {
-            "component": "blog.test-como",
-            "pluginOptions": {},
-            "repeatable": true,
-            "required": true,
-            "type": "component",
-          },
-          "repeat_req_min": {
-            "component": "blog.test-como",
-            "min": 2,
-            "pluginOptions": {},
-            "repeatable": true,
-            "required": false,
-            "type": "component",
-          },
-          "slug": {
-            "type": "uid",
-          },
-          "updatedAt": {
-            "type": "datetime",
-          },
-          "updatedBy": {
-            "configurable": false,
-            "private": true,
-            "relation": "oneToOne",
-            "relationType": "oneToOne",
-            "target": "admin::user",
-            "targetModel": "admin::user",
-            "type": "relation",
-            "useJoinTable": false,
-            "visible": false,
-            "writable": false,
-          },
+    const expectedSchema = {
+      apiID: 'address',
+      uid: 'api::address.address',
+      isDisplayed: true,
+      kind: 'collectionType',
+      options: {},
+      pluginOptions: {},
+      info: {
+        name: 'Address',
+        displayName: 'Address',
+        description: '',
+        singularName: 'address',
+        pluralName: 'addresses',
+      },
+      attributes: {
+        id: { type: 'string' },
+        slug: { type: 'uid' },
+        name: { type: 'string' },
+        city: {
+          type: 'string',
+          required: true,
+          maxLength: 200,
+          pluginOptions: {},
         },
-        "info": {
-          "description": "",
-          "displayName": "Address",
-          "name": "Address",
-          "pluralName": "addresses",
-          "singularName": "address",
+        postal_code: {
+          type: 'string',
+          maxLength: 2,
+          pluginOptions: {},
         },
-        "isDisplayed": true,
-        "kind": "collectionType",
-        "options": {},
-        "pluginOptions": {},
-        "uid": "api::address.address",
-      }
-    `);
+        dz: {
+          type: 'dynamiczone',
+          components: ['blog.test-como'],
+        },
+        notrepeat_req: {
+          type: 'component',
+          component: 'blog.test-como',
+          repeatable: false,
+          required: true,
+          pluginOptions: {},
+        },
+        repeat_req: {
+          type: 'component',
+          component: 'blog.test-como',
+          repeatable: true,
+          required: true,
+          pluginOptions: {},
+        },
+        repeat_req_min: {
+          type: 'component',
+          component: 'blog.test-como',
+          repeatable: true,
+          required: false,
+          min: 2,
+          pluginOptions: {},
+        },
+        categories: {
+          type: 'relation',
+          relation: 'manyToMany',
+          relationType: 'manyToMany',
+          target: 'api::category.category',
+          targetModel: 'api::category.category',
+          inversedBy: 'addresses',
+        },
+        cover: {
+          type: 'media',
+          multiple: false,
+          required: false,
+          allowedTypes: ['files', 'images', 'videos', 'audios'],
+          pluginOptions: {},
+        },
+        images: {
+          type: 'media',
+          multiple: true,
+          required: false,
+          allowedTypes: ['images'],
+          pluginOptions: {},
+        },
+        json: {
+          type: 'json',
+          pluginOptions: {},
+        },
+        createdAt: { type: 'datetime' },
+        updatedAt: { type: 'datetime' },
+        createdBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          relationType: 'oneToOne',
+          target: 'admin::user',
+          targetModel: 'admin::user',
+          configurable: false,
+          private: true,
+          visible: false,
+          writable: false,
+          useJoinTable: false,
+        },
+        updatedBy: {
+          type: 'relation',
+          relation: 'oneToOne',
+          relationType: 'oneToOne',
+          target: 'admin::user',
+          targetModel: 'admin::user',
+          configurable: false,
+          private: true,
+          visible: false,
+          writable: false,
+          useJoinTable: false,
+        },
+      },
+    };
+
+    expect(result.current.schema).toEqual(expectedSchema);
   });
 
   it('should return the components used in that schema', async () => {
@@ -300,31 +277,31 @@ describe('useDocument', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.components).toMatchInlineSnapshot(`
-      {
-        "blog.test-como": {
-          "apiID": "test-como",
-          "attributes": {
-            "id": {
-              "type": "string",
-            },
-            "name": {
-              "default": "toto",
-              "type": "string",
-            },
-          },
-          "category": "blog",
-          "info": {
-            "description": "",
-            "displayName": "test comp",
-            "icon": "air-freshener",
-          },
-          "isDisplayed": true,
-          "options": {},
-          "uid": "blog.test-como",
+    const expectedComponents = {
+      'blog.test-como': {
+        apiID: 'test-como',
+        uid: 'blog.test-como',
+        category: 'blog',
+        isDisplayed: true,
+        options: {},
+        info: {
+          displayName: 'test comp',
+          description: '',
+          icon: 'air-freshener',
         },
-      }
-    `);
+        attributes: {
+          id: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+            default: 'toto',
+          },
+        },
+      },
+    };
+
+    expect(result.current.components).toEqual(expectedComponents);
 
     /**
      * This is returned by the API, but it's not in the content-type schema,
@@ -360,11 +337,9 @@ describe('useDocument', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.getInitialFormValues).toBeInstanceOf(Function);
-    expect(result.current.getInitialFormValues()).toMatchInlineSnapshot(`
-      {
-        "name": "Entry 1",
-      }
-    `);
+    expect(result.current.getInitialFormValues()).toEqual({
+      name: 'Entry 1',
+    });
   });
 });
 
@@ -387,15 +362,13 @@ describe('useDoc', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.document).toMatchInlineSnapshot(`
-      {
-        "createdAt": "",
-        "documentId": "12345",
-        "id": 1,
-        "name": "Entry 1",
-        "publishedAt": "",
-        "updatedAt": "",
-      }
-    `);
+    expect(result.current.document).toEqual({
+      createdAt: '',
+      documentId: '12345',
+      id: 1,
+      name: 'Entry 1',
+      publishedAt: '',
+      updatedAt: '',
+    });
   });
 });
