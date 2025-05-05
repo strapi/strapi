@@ -38,6 +38,7 @@ import { createYupSchema } from '../../../../../utils/validation';
 import { DocumentActionButton } from '../../../components/DocumentActions';
 import { DocumentStatus } from '../../DocumentStatus';
 import { FormLayout } from '../../FormLayout';
+import { ComponentProvider } from '../ComponentContext';
 
 import type { ContentManagerPlugin, DocumentActionProps } from '../../../../../content-manager';
 
@@ -333,94 +334,96 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
 
   return (
-    <Modal.Root
-      open={state.isModalOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          dispatch({
-            type: 'CLOSE_MODAL',
-            payload: { shouldBypassConfirmation: false },
-          });
-        }
-      }}
-    >
-      {children}
-      <StyledModalContent>
-        <Modal.Header gap={2}>
-          <Flex justifyContent="space-between" alignItems="center" width="100%">
-            <Flex gap={2}>
+    <ComponentProvider id={undefined} level={-1} uid={undefined} type={undefined}>
+      <Modal.Root
+        open={state.isModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            dispatch({
+              type: 'CLOSE_MODAL',
+              payload: { shouldBypassConfirmation: false },
+            });
+          }
+        }}
+      >
+        {children}
+        <StyledModalContent>
+          <Modal.Header gap={2}>
+            <Flex justifyContent="space-between" alignItems="center" width="100%">
+              <Flex gap={2}>
+                <IconButton
+                  withTooltip={false}
+                  label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
+                  variant="ghost"
+                  disabled={state.documentHistory.length < 2}
+                  onClick={() => {
+                    dispatch({
+                      type: 'GO_BACK',
+                      payload: { shouldBypassConfirmation: false },
+                    });
+                  }}
+                  marginRight={1}
+                >
+                  <ArrowLeft />
+                </IconButton>
+                <Typography tag="span" fontWeight={600}>
+                  {isCreating
+                    ? formatMessage({
+                        id: 'content-manager.relation.create',
+                        defaultMessage: 'Create a relation',
+                      })
+                    : formatMessage({
+                        id: 'content-manager.components.RelationInputModal.modal-title',
+                        defaultMessage: 'Edit a relation',
+                      })}
+                </Typography>
+              </Flex>
               <IconButton
-                withTooltip={false}
-                label={formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
-                variant="ghost"
-                disabled={state.documentHistory.length < 2}
                 onClick={() => {
                   dispatch({
-                    type: 'GO_BACK',
-                    payload: { shouldBypassConfirmation: false },
+                    type: 'GO_FULL_PAGE',
                   });
-                }}
-                marginRight={1}
-              >
-                <ArrowLeft />
-              </IconButton>
-              <Typography tag="span" fontWeight={600}>
-                {isCreating
-                  ? formatMessage({
-                      id: 'content-manager.relation.create',
-                      defaultMessage: 'Create a relation',
-                    })
-                  : formatMessage({
-                      id: 'content-manager.components.RelationInputModal.modal-title',
-                      defaultMessage: 'Edit a relation',
-                    })}
-              </Typography>
-            </Flex>
-            <IconButton
-              onClick={() => {
-                dispatch({
-                  type: 'GO_FULL_PAGE',
-                });
-                if (!state.hasUnsavedChanges) {
-                  if (isCreating) {
-                    navigate(generateCreateUrl(currentDocumentMeta));
-                  } else {
-                    navigate(getFullPageUrl(currentDocumentMeta));
+                  if (!state.hasUnsavedChanges) {
+                    if (isCreating) {
+                      navigate(generateCreateUrl(currentDocumentMeta));
+                    } else {
+                      navigate(getFullPageUrl(currentDocumentMeta));
+                    }
                   }
-                }
-              }}
-              variant="tertiary"
-              label={formatMessage({
-                id: 'content-manager.components.RelationInputModal.button-fullpage',
-                defaultMessage: 'Go to entry',
-              })}
-            >
-              <ArrowsOut />
-            </IconButton>
-          </Flex>
-        </Modal.Header>
-        <Modal.Body>
-          <FormContext
-            method={isCreating ? 'POST' : 'PUT'}
-            initialValues={currentDocument.getInitialFormValues(isCreating)}
-            validate={(values: Record<string, unknown>, options: Record<string, string>) => {
-              const yupSchema = createYupSchema(
-                currentDocument.schema?.attributes,
-                currentDocument.components,
-                {
-                  status: currentDocument.document?.status,
-                  ...options,
-                }
-              );
+                }}
+                variant="tertiary"
+                label={formatMessage({
+                  id: 'content-manager.components.RelationInputModal.button-fullpage',
+                  defaultMessage: 'Go to entry',
+                })}
+              >
+                <ArrowsOut />
+              </IconButton>
+            </Flex>
+          </Modal.Header>
+          <Modal.Body>
+            <FormContext
+              method={isCreating ? 'POST' : 'PUT'}
+              initialValues={currentDocument.getInitialFormValues(isCreating)}
+              validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+                const yupSchema = createYupSchema(
+                  currentDocument.schema?.attributes,
+                  currentDocument.components,
+                  {
+                    status: currentDocument.document?.status,
+                    ...options,
+                  }
+                );
 
-              return yupSchema.validate(values, { abortEarly: false });
-            }}
-          >
-            <RelationModalBody />
-          </FormContext>
-        </Modal.Body>
-      </StyledModalContent>
-    </Modal.Root>
+                return yupSchema.validate(values, { abortEarly: false });
+              }}
+            >
+              <RelationModalBody />
+            </FormContext>
+          </Modal.Body>
+        </StyledModalContent>
+      </Modal.Root>
+    </ComponentProvider>
   );
 };
 /**
