@@ -96,7 +96,7 @@ const command = () => {
                       }
                       return true;
                     } catch (error) {
-                      return 'Please enter a valid URL (e.g., http://localhost:1337 or https://example.com)';
+                      return 'Please enter a valid URL (e.g., http://localhost:1337/admin or https://example.com/admin)';
                     }
                   }
                 },
