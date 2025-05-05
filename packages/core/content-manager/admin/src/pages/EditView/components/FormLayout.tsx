@@ -36,13 +36,12 @@ export const ResponsiveGridItem =
 
 interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
   hasBackground?: boolean;
-  model?: string;
   document: ReturnType<UseDocument>;
 }
 
 const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const model = document.schema?.modelName;
+  const modelUid = document.schema?.uid;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -54,7 +53,7 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
           const fieldWithTranslatedLabel = {
             ...field,
             label: formatMessage({
-              id: `content-manager.content-types.${model}.${field.name}`,
+              id: `content-manager.content-types.${modelUid}.${field.name}`,
               defaultMessage: field.label,
             }),
           };
@@ -86,7 +85,7 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
                     const fieldWithTranslatedLabel = {
                       ...field,
                       label: formatMessage({
-                        id: `content-manager.content-types.${model}.${field.name}`,
+                        id: `content-manager.content-types.${modelUid}.${field.name}`,
                         defaultMessage: field.label,
                       }),
                     };
