@@ -63,7 +63,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
     return false;
   }
   await trackEvent(ctx, cloudApiService, 'willLoginAttempt', {
-    ...(promptExperiment && { promptExperiment })
+    ...(promptExperiment && { promptExperiment }),
   });
 
   logger.debug('🔐 Creating device authentication request...', {
@@ -158,7 +158,8 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
           );
           spinnerFail();
           await trackEvent(ctx, cloudApiService, 'didNotLogin', {
-            loginMethod: 'cli', ...(promptExperiment && { promptExperiment })
+            loginMethod: 'cli',
+            ...(promptExperiment && { promptExperiment }),
           });
           return false;
         }
@@ -169,7 +170,8 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
           logger.debug(e);
           spinnerFail();
           await trackEvent(ctx, cloudApiService, 'didNotLogin', {
-            loginMethod: 'cli', ...(promptExperiment && { promptExperiment })
+            loginMethod: 'cli',
+            ...(promptExperiment && { promptExperiment }),
           });
           return false;
         }
@@ -186,7 +188,8 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
     );
     logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
     await trackEvent(ctx, cloudApiService, 'didLogin', {
-      loginMethod: 'cli', ...(promptExperiment && { promptExperiment })
+      loginMethod: 'cli',
+      ...(promptExperiment && { promptExperiment }),
     });
   };
 

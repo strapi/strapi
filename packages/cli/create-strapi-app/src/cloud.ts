@@ -35,20 +35,24 @@ export async function handleCloudLogin(): Promise<void> {
     logger.error(defaultErrorMessage);
     return;
   }
-  const { userChoice } = await inquirer.prompt<{ userChoice: string }>(cloudApiConfig.projectCreation?.userChoice || [
-    {
-      type: 'list',
-      name: 'userChoice',
-      message: `Please log in or sign up.`,
-      choices: ['Login/Sign up', 'Skip'],
-    },
-  ]);
+  const { userChoice } = await inquirer.prompt<{ userChoice: string }>(
+    cloudApiConfig.projectCreation?.userChoice || [
+      {
+        type: 'list',
+        name: 'userChoice',
+        message: `Please log in or sign up.`,
+        choices: ['Login/Sign up', 'Skip'],
+      },
+    ]
+  );
 
-  if (!userChoice.toLowerCase().includes("skip")) {
+  if (!userChoice.toLowerCase().includes('skip')) {
     const cliContext = {
       logger,
       cwd: process.cwd(),
-      ...(cloudApiConfig.projectCreation?.reference && { promptExperiment: cloudApiConfig.projectCreation?.reference }),
+      ...(cloudApiConfig.projectCreation?.reference && {
+        promptExperiment: cloudApiConfig.projectCreation?.reference,
+      }),
     };
 
     try {
