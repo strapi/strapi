@@ -33,7 +33,7 @@ This domain contains all the components necessary to generate a valid OpenAPI do
 
 | Component         | Path                                       |
 | ----------------- | ------------------------------------------ |
-| OpenAPI Generator | `src/generator `                           |
+| OpenAPI Generator | `src/generator`                            |
 | Assemblers        | `src/assemblers`                           |
 | Contexts          | `src/context`                              |
 | Registries        | `src/registries`                           |
