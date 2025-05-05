@@ -140,7 +140,7 @@
     "typescript": "5.4.4",
     "use-context-selector": "1.4.1",
     "yup": "0.32.9",
-    "zod": "^3.22.4"
+    "zod": "3.22.4"
   },
   "devDependencies": {
     "@strapi/admin-test-utils": "5.12.4",
