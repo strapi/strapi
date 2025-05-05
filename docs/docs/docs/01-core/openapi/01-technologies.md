@@ -34,7 +34,7 @@ The package focuses on using a limited set of external dependencies to keep a li
 
 > A library that uses [zod schemas](https://github.com/colinhacks/zod) to generate Open API Swagger documentation.
 
-This library is used to transform `zod` schema gotten from Strapi routes objects into valid OpenAPI Schema.
+This library is used to transform `zod` schema obtained from Strapi routes objects into valid OpenAPI Schema.
 
 :::info
 It is particularly useful to avoid leaking the OpenAPI domain logic into the Strapi core logic.
