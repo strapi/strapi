@@ -25,6 +25,11 @@
       "last 1 safari version"
     ]
   },
+  "resolutions": {
+    "@babel/helpers": "7.27.0",
+    "@babel/runtime": "7.26.10",
+    "@babel/runtime-corejs3": "7.26.10"
+  },
   "dependencies": {
     "@cmfcmf/docusaurus-search-local": "1.1.0",
     "@docusaurus/core": "3.7.0",

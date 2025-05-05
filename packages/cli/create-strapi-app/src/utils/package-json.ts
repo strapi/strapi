@@ -22,6 +22,7 @@ export async function createPackageJSON(scope: Scope) {
     strapi: {
       ...(scope.packageJsonStrapi ?? {}),
       uuid: scope.uuid,
+      installId: scope.installId,
     },
     engines,
   };
