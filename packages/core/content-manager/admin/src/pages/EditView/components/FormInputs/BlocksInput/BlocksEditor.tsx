@@ -114,13 +114,6 @@ const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
 
-const ExpandIconButton = styled(IconButton)`
-  position: absolute;
-  bottom: 1.2rem;
-  right: 1.2rem;
-  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
-`;
-
 /**
  * Forces an update of the Slate editor when the value prop changes from outside of Slate.
  * The root cause is that Slate is not a controlled component: https://github.com/ianstormtaylor/slate/issues/4612
@@ -177,11 +170,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
-    const [isExpandedMode, setIsExpandedMode] = React.useState(false);
-
-    const handleToggleExpand = () => {
-      setIsExpandedMode((prev) => !prev);
-    };
+    const [isExpandedMode, handleToggleExpand] = React.useReducer((prev) => !prev, false);
 
     /**
      * Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
@@ -246,14 +235,18 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             <EditorLayout
               error={error}
               disabled={disabled}
-              onCollapse={handleToggleExpand}
+              onToggleExpand={handleToggleExpand}
               ariaDescriptionId={ariaDescriptionId}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
               <BlocksContent {...contentProps} />
               {!isExpandedMode && (
-                <ExpandIconButton
+                <IconButton
+                  position="absolute"
+                  bottom="1.2rem"
+                  right="1.2rem"
+                  shadow="filterShadow"
                   label={formatMessage({
                     id: getTranslation('components.Blocks.expand'),
                     defaultMessage: 'Expand',
@@ -261,7 +254,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
                   onClick={handleToggleExpand}
                 >
                   <Expand />
-                </ExpandIconButton>
+                </IconButton>
               )}
             </EditorLayout>
           </BlocksEditorProvider>

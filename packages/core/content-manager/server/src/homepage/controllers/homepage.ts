@@ -1,11 +1,10 @@
 import type { Core } from '@strapi/types';
 import * as yup from 'yup';
 import { errors } from '@strapi/utils';
-import { getService } from '../utils';
-import type { GetRecentDocuments } from '../../../shared/contracts/homepage';
+import type { GetRecentDocuments } from '../../../../shared/contracts/homepage';
 
 const createHomepageController = () => {
-  const homepageService = getService('homepage');
+  const homepageService = strapi.plugin('content-manager').service('homepage');
 
   const recentDocumentParamsSchema = yup.object().shape({
     action: yup
