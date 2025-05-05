@@ -18,10 +18,10 @@ const createMiddleware = ({ sendEvent }: { sendEvent: Sender }) => {
 
   const middleware: Core.MiddlewareHandler = async (ctx, next) => {
     const { url, method } = ctx.request;
-
+    const apiPrefix = strapi.config.get('api.rest.prefix', '/api');
     if (
       !url.includes('.') &&
-      url.includes('/api') &&
+      url.includes(apiPrefix) &&
       ['GET', 'PUT', 'POST', 'DELETE'].includes(method)
     ) {
       if (Date.now() > state.expires) {
