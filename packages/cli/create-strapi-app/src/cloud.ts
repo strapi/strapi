@@ -44,7 +44,7 @@ export async function handleCloudLogin(): Promise<void> {
     },
   ]);
 
-  if (!userChoice.includes('Skip')) {
+  if (!userChoice.toLowerCase().includes("skip")) {
     const cliContext = {
       logger,
       cwd: process.cwd(),
