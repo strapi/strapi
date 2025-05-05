@@ -76,7 +76,8 @@ export const getEntry = async (
     locale,
     populate,
     status = 'draft',
-  }: Action & { status?: 'draft' | 'published'; populate: any },
+    skipDraftFetching = false,
+  }: Action & { status?: 'draft' | 'published'; populate: any, skipDraftFetching?: boolean },
   { strapi }: { strapi: Core.Strapi }
 ) => {
   if (documentId) {
@@ -84,6 +85,9 @@ export const getEntry = async (
     const entry = await strapi
       .documents(contentType)
       .findOne({ documentId, locale, populate, status });
+
+    if (skipDraftFetching)
+      return entry;
 
     // The document isn't published yet, but the action is to publish it, fetch the draft
     if (status === 'published' && !entry) {
@@ -98,7 +102,11 @@ export const getEntry = async (
   return strapi.documents(contentType).findFirst({ locale, populate, status });
 };
 
-export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.ContentType) => {
+export const getEntryStatus = async (
+  contentType: UID.ContentType,
+  entry: Data.ContentType,
+  { strapi }: { strapi: Core.Strapi }
+) => {
   if (entry.publishedAt) {
     return 'published';
   }
