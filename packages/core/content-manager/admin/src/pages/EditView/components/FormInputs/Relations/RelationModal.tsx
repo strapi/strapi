@@ -333,6 +333,11 @@ const RelationModal = ({ children }: { children: React.ReactNode }) => {
   const currentDocument = useRelationModal('RelationModalForm', (state) => state.currentDocument);
   const isCreating = useRelationModal('RelationModalForm', (state) => state.isCreating);
 
+  /*
+   * We must wrap the modal window with Component Provider with reset values
+   * to avoid inheriting id and uid from the root document and having weird
+   * behaviors with simple relationships..
+   */
   return (
     <ComponentProvider id={undefined} level={-1} uid={undefined} type={undefined}>
       <Modal.Root
