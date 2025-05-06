@@ -316,8 +316,34 @@ class TransferEngine<
     aggregate?: {
       size?(value: unknown): number;
       key?(value: unknown): string;
-    }
+    },
+    perChunk?: boolean
   ) {
+    if (perChunk) {
+      // For assets: emit progress per chunk and at the end of the asset
+      return new PassThrough({
+        objectMode: true,
+        transform: (asset, _encoding, callback) => {
+          if (asset && asset.stream && typeof asset.stream.on === 'function') {
+            asset.stream.on('data', (chunk: Buffer) => {
+              if (!this.progress.data[stage]) {
+                this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
+              }
+              this.progress.data[stage].bytes += chunk.length;
+              this.progress.data[stage].endTime = Date.now();
+              this.#emitStageUpdate('progress', stage);
+            });
+            asset.stream.on('end', () => {
+              this.#updateTransferProgress(stage, asset, aggregate);
+              this.#emitStageUpdate('progress', stage);
+            });
+          }
+          callback(null, asset);
+        },
+      });
+    }
+
+    // Default: emit progress per object
     return new PassThrough({
       objectMode: true,
       transform: (data, _encoding, callback) => {
@@ -916,10 +942,15 @@ class TransferEngine<
     const destination = await this.destinationProvider.createAssetsWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
-    const tracker = this.#progressTracker(stage, {
-      size: (value: IAsset) => value.stats.size,
-      key: (value: IAsset) => extname(value.filename) || 'No extension',
-    });
+    // Use the perChunk tracker for assets
+    const tracker = this.#progressTracker(
+      stage,
+      {
+        size: (value: IAsset) => value.stats.size,
+        key: (value: IAsset) => extname(value.filename) || 'No extension',
+      },
+      true
+    );
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
   }
