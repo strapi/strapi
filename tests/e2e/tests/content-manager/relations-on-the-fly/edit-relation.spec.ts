@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait } from '../../utils/shared';
+import { login } from '../../../utils/login';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
+import { clickAndWait } from '../../../utils/shared';
 
 const AUTHOR_EDIT_URL =
   /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
 
-test.describe('Relations on the fly', () => {
+test.describe('Relations on the fly - Edit a Relation', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -63,6 +63,20 @@ test.describe('Relations on the fly', () => {
     await clickAndWait(page, page.getByRole('button', { name: 'Go to entry' }));
     await page.waitForURL(AUTHOR_EDIT_URL);
     await expect(page.getByRole('heading', { name: 'Coach Beard' })).toBeVisible();
+  });
+
+  test('I want to open a blocks editor modal on top of a relation modal', async ({ page }) => {
+    // Open in a relation modal an entry that has a blocks editor
+    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+    await clickAndWait(page, page.getByRole('gridcell', { name: 'Coach Beard' }));
+    await clickAndWait(page, page.getByRole('button', { name: 'West Ham post match analysis' }));
+    await expect(page.getByText('Edit a relation')).toBeVisible();
+    // Open the blocks editor modal on top of the relation modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Expand' }));
+    await expect(page.getByText('Howdy')).toBeVisible();
+    // If the collapse button is available, it means we're indeed in the blocks editor modal
+    await clickAndWait(page, page.getByRole('button', { name: 'Collapse' }));
   });
 
   test('I want to open some nested relations and click the back button to open the initial relation', async ({

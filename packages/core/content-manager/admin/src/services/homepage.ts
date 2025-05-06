@@ -1,19 +1,23 @@
 import * as Homepage from '../../../shared/contracts/homepage';
 
-import { adminApi } from './api';
+import { contentManagerApi } from './api';
 
-const homepageService = adminApi
+const homepageService = contentManagerApi
   .enhanceEndpoints({
-    // TODO: remove when the CM widgets are moved to the CM package, the type already exists there
     addTagTypes: ['RecentDocumentList'],
   })
   .injectEndpoints({
+    /**
+     * TODO: Remove overrideExisting when we remove the future flag
+     * and delete the old homepage service in the admin
+     */
+    overrideExisting: true,
     endpoints: (builder) => ({
       getRecentDocuments: builder.query<
         Homepage.GetRecentDocuments.Response['data'],
         Homepage.GetRecentDocuments.Request['query']
       >({
-        query: (params) => `/admin/homepage/recent-documents?action=${params.action}`,
+        query: (params) => `/content-manager/homepage/recent-documents?action=${params.action}`,
         transformResponse: (response: Homepage.GetRecentDocuments.Response) => response.data,
         providesTags: (res, _err, { action }) => [
           { type: 'RecentDocumentList' as const, id: action },

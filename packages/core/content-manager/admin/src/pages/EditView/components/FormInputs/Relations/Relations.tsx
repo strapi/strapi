@@ -22,7 +22,7 @@ import {
   FlexComponent,
   BoxComponent,
 } from '@strapi/design-system';
-import { Cross, Drag, ArrowClockwise } from '@strapi/icons';
+import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -52,7 +52,7 @@ import { getRelationLabel } from '../../../../../utils/relations';
 import { getTranslation } from '../../../../../utils/translations';
 import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
-import { RelationModal, getCollectionType } from '../Relations/RelationModal';
+import { RelationModalRenderer, getCollectionType } from '../Relations/RelationModal';
 
 import type { Schema } from '@strapi/types';
 
@@ -302,7 +302,6 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
     const handleConnect: RelationsInputProps['onChange'] = (relation) => {
       const [lastItemInList] = relations.slice(-1);
-
       const item = {
         id: relation.id,
         apiData: {
@@ -492,7 +491,6 @@ const RelationsInput = ({
   });
   const { toggleNotification } = useNotification();
   const { currentDocumentMeta } = useDocumentContext('RelationsInput');
-
   const { formatMessage } = useIntl();
   const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const field = useField<RelationsFormValue>(name);
@@ -596,65 +594,102 @@ const RelationsInput = ({
     setTextValue('');
   }, [field.value]);
 
+  const relation = {
+    collectionType: COLLECTION_TYPES,
+    // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+    model: props.attribute.targetModel,
+    documentId: '',
+    params: currentDocumentMeta.params,
+  } as DocumentMeta;
+
+  const { componentUID } = useComponent('RelationsField', ({ uid }) => ({
+    componentUID: uid,
+  }));
+
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
       <Field.Label action={labelAction}>{label}</Field.Label>
-      <Combobox
-        ref={fieldRef}
-        name={name}
-        autocomplete="list"
-        placeholder={
-          placeholder ||
-          formatMessage({
-            id: getTranslation('relation.add'),
-            defaultMessage: 'Add relation',
-          })
-        }
-        hasMoreItems={hasNextPage}
-        loading={isLoading}
-        onOpenChange={() => {
-          handleSearch(textValue ?? '');
-        }}
-        noOptionsMessage={() =>
-          formatMessage({
-            id: getTranslation('relation.notAvailable'),
-            defaultMessage: 'No relations available',
-          })
-        }
-        loadingMessage={formatMessage({
-          id: getTranslation('relation.isLoading'),
-          defaultMessage: 'Relations are loading',
-        })}
-        onLoadMore={handleLoadMore}
-        textValue={textValue}
-        onChange={handleChange}
-        onTextValueChange={(text) => {
-          setTextValue(text);
-        }}
-        onInputChange={(event) => {
-          handleSearch(event.currentTarget.value);
-        }}
-        data-testid={`relation-combobox-${name}`}
-        {...props}
-      >
-        {options.map((opt) => {
-          const textValue = getRelationLabel(opt, mainField);
+      <RelationModalRenderer>
+        {({ dispatch }) => (
+          <Combobox
+            ref={fieldRef}
+            creatable="visible"
+            createMessage={() =>
+              formatMessage({
+                id: getTranslation('relation.create'),
+                defaultMessage: 'Create a relation',
+              })
+            }
+            onCreateOption={() => {
+              dispatch({
+                type: 'GO_TO_RELATION',
+                payload: {
+                  document: relation,
+                  shouldBypassConfirmation: false,
+                  fieldToConnect: name,
+                  fieldToConnectUID: componentUID,
+                },
+              });
+            }}
+            creatableStartIcon={<Plus fill="neutral500" />}
+            name={name}
+            autocomplete="list"
+            placeholder={
+              placeholder ||
+              formatMessage({
+                id: getTranslation('relation.add'),
+                defaultMessage: 'Add relation',
+              })
+            }
+            hasMoreItems={hasNextPage}
+            loading={isLoading}
+            onOpenChange={() => {
+              handleSearch(textValue ?? '');
+            }}
+            noOptionsMessage={() =>
+              formatMessage({
+                id: getTranslation('relation.notAvailable'),
+                defaultMessage: 'No relations available',
+              })
+            }
+            loadingMessage={formatMessage({
+              id: getTranslation('relation.isLoading'),
+              defaultMessage: 'Relations are loading',
+            })}
+            onLoadMore={handleLoadMore}
+            textValue={textValue}
+            onChange={handleChange}
+            onTextValueChange={(text) => {
+              setTextValue(text);
+            }}
+            onInputChange={(event) => {
+              handleSearch(event.currentTarget.value);
+            }}
+            {...props}
+          >
+            {options.map((opt) => {
+              const textValue = getRelationLabel(opt, mainField);
 
-          return (
-            <ComboboxOption
-              key={opt.id}
-              value={opt.id.toString()}
-              textValue={textValue}
-              data-testid={`relation-option-${name}-${textValue}`}
-            >
-              <Flex gap={2} justifyContent="space-between">
-                <Typography ellipsis>{textValue}</Typography>
-                {opt.status ? <DocumentStatus status={opt.status} /> : null}
-              </Flex>
-            </ComboboxOption>
-          );
-        })}
-      </Combobox>
+              return (
+                <ComboboxOption
+                  key={opt.id}
+                  value={opt.id.toString()}
+                  textValue={textValue}
+                  data-testid={`relation-option-${name}-${textValue}`}
+                >
+                  <Flex gap={2} justifyContent="space-between">
+                    <Flex gap={2}>
+                      <LinkIcon fill="neutral500" />
+                      <Typography ellipsis>{textValue}</Typography>
+                    </Flex>
+                    {opt.status ? <DocumentStatus status={opt.status} /> : null}
+                  </Flex>
+                </ComboboxOption>
+              );
+            })}
+          </Combobox>
+        )}
+      </RelationModalRenderer>
       <Field.Error />
       <Field.Hint />
     </Field.Root>
@@ -1112,7 +1147,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
             ) : null}
             <Flex width="100%" minWidth={0} gap={4} justifyContent="space-between">
               <Box flex={1} minWidth={0} paddingTop={1} paddingBottom={1}>
-                <RelationModal relation={documentMeta}>{label}</RelationModal>
+                <RelationModalRenderer relation={documentMeta}>{label}</RelationModalRenderer>
               </Box>
               {status ? <DocumentStatus status={status} /> : null}
             </Flex>
