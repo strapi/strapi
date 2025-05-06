@@ -17,6 +17,7 @@ export * from './components/Filters';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
+export * from './components/WidgetHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
@@ -67,6 +68,7 @@ export type {
   Entity,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
+export type { Widget as WidgetType } from './core/apis/Widgets';
 
 /**
  * Utils

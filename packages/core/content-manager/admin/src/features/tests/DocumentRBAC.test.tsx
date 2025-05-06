@@ -111,50 +111,44 @@ describe('DocumentRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBeFalsy());
 
-      expect(result.current.canCreateFields).toMatchInlineSnapshot(`
-        [
-          "postal_code",
-          "categories",
-          "cover",
-          "images",
-          "city",
-          "json",
-          "slug",
-          "notrepeat_req.name",
-          "repeat_req.name",
-          "repeat_req_min.name",
-        ]
-      `);
+      expect(result.current.canCreateFields).toEqual([
+        'postal_code',
+        'categories',
+        'cover',
+        'images',
+        'city',
+        'json',
+        'slug',
+        'notrepeat_req.name',
+        'repeat_req.name',
+        'repeat_req_min.name',
+      ]);
 
-      expect(result.current.canReadFields).toMatchInlineSnapshot(`
-        [
-          "postal_code",
-          "categories",
-          "cover",
-          "images",
-          "city",
-          "json",
-          "slug",
-          "notrepeat_req.name",
-          "repeat_req.name",
-          "repeat_req_min.name",
-        ]
-      `);
+      expect(result.current.canReadFields).toEqual([
+        'postal_code',
+        'categories',
+        'cover',
+        'images',
+        'city',
+        'json',
+        'slug',
+        'notrepeat_req.name',
+        'repeat_req.name',
+        'repeat_req_min.name',
+      ]);
 
-      expect(result.current.canUpdateFields).toMatchInlineSnapshot(`
-        [
-          "postal_code",
-          "categories",
-          "cover",
-          "images",
-          "city",
-          "json",
-          "slug",
-          "notrepeat_req.name",
-          "repeat_req.name",
-          "repeat_req_min.name",
-        ]
-      `);
+      expect(result.current.canUpdateFields).toEqual([
+        'postal_code',
+        'categories',
+        'cover',
+        'images',
+        'city',
+        'json',
+        'slug',
+        'notrepeat_req.name',
+        'repeat_req.name',
+        'repeat_req_min.name',
+      ]);
     });
   });
 
@@ -176,11 +170,11 @@ describe('DocumentRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBeFalsy());
 
-      expect(result.current.canCreateFields).toMatchInlineSnapshot(`[]`);
+      expect(result.current.canCreateFields).toEqual([]);
 
-      expect(result.current.canReadFields).toMatchInlineSnapshot(`[]`);
+      expect(result.current.canReadFields).toEqual([]);
 
-      expect(result.current.canUpdateFields).toMatchInlineSnapshot(`[]`);
+      expect(result.current.canUpdateFields).toEqual([]);
     });
   });
 });
