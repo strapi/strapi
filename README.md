@@ -81,7 +81,7 @@ Complete installation requirements can be found in the documentation under <a hr
 **Supported operating systems**:
 
 | OS              | Recommended | Minimum    |
-| --------------- | ----------- | ---------- |
+|-----------------|-------------|------------|
 | Ubuntu          | 24.04       | LTS        |
 | Debian          | 11          | LTS        |
 | RHEL            | 9           | LTS        |
@@ -97,7 +97,8 @@ Complete installation requirements can be found in the documentation under <a hr
 Strapi only supports maintenance and LTS versions of Node.js. Please refer to the <a href="https://nodejs.org/en/about/releases/">Node.js release schedule</a> for more information. NPM versions installed by default with Node.js are supported. Generally it's recommended to use yarn over npm where possible.
 
 | Strapi Version  | Recommended | Minimum |
-| --------------- | ----------- | ------- |
+|-----------------|-------------|---------|
+| 5.13.0 and up   | 22.x        | 20.x    |
 | 5.0.0 and up    | 20.x        | 18.x    |
 | 4.14.5 and up   | 20.x        | 18.x    |
 | 4.11.0 and up   | 18.x        | 16.x    |
@@ -107,10 +108,10 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 **Database:**
 
 | Database   | Recommended | Minimum |
-| ---------- | ----------- | ------- |
-| MySQL      | 8.0         | 8.0     |
-| MariaDB    | 11.2        | 10.3    |
-| PostgreSQL | 16.0        | 14.0    |
+|------------|-------------|---------|
+| MySQL      | 8.4         | 8.0     |
+| MariaDB    | 11.4        | 10.3    |
+| PostgreSQL | 17.0        | 14.0    |
 | SQLite     | 3           | 3       |
 
 **We recommend always using the latest version of Strapi stable to start your new projects**.

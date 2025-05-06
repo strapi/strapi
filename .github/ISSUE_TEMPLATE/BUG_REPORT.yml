@@ -6,7 +6,7 @@ body:
     attributes:
       label: Node Version
       description: The version of Node.js you are using (only LTS versions are supported).
-      placeholder: 20.0.0
+      placeholder: 22.0.0
     validations:
       required: true
 
