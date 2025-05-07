@@ -1,6 +1,10 @@
 import type { Core, Schema } from '@strapi/types';
-import { contentTypes as contentTypeUtils } from '@strapi/utils';
+
+import type { QueryParam } from './validation/content-type';
+
+import { contentTypes, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { z } from 'zod';
+
 import { CoreContentTypeRouteValidator } from './validation';
 
 export const createRoutes = ({
@@ -18,10 +22,13 @@ export const createRoutes = ({
 };
 
 const getSingleTypeRoutes = (
-  { uid, info }: Schema.ContentType,
+  schema: Schema.ContentType,
   strapi: Core.Strapi
 ): Record<string, Partial<Core.Route>> => {
+  const { uid, info } = schema;
+
   const validator = new CoreContentTypeRouteValidator(strapi, uid);
+  const conditionalQueryParams = getConditionalQueryParams(schema);
 
   return {
     find: {
@@ -29,10 +36,10 @@ const getSingleTypeRoutes = (
       path: `/${info.singularName}`,
       handler: `${uid}.find`,
       request: {
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams(['fields', 'populate', 'filters', ...conditionalQueryParams]),
       },
       responses: {
-        200: z.object({ data: validator.document }),
+        200: { 'application/json': z.object({ data: validator.document }) },
       },
       config: {},
     },
@@ -41,10 +48,11 @@ const getSingleTypeRoutes = (
       path: `/${info.singularName}`,
       handler: `${uid}.update`,
       request: {
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
+        body: { 'application/json': validator.partialBody },
       },
       responses: {
-        200: z.object({ data: validator.document }),
+        200: { 'application/json': z.object({ data: validator.document }) },
       },
       config: {},
     },
@@ -53,10 +61,10 @@ const getSingleTypeRoutes = (
       path: `/${info.singularName}`,
       handler: `${uid}.delete`,
       request: {
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
       },
       responses: {
-        200: z.object({ data: validator.document }),
+        200: { 'application/json': z.object({ data: validator.document }) },
       },
       config: {},
     },
@@ -70,6 +78,7 @@ const getCollectionTypeRoutes = (
   const { uid, info } = schema;
 
   const validator = new CoreContentTypeRouteValidator(strapi, uid);
+  const conditionalQueryParams = getConditionalQueryParams(schema);
 
   return {
     find: {
@@ -77,10 +86,18 @@ const getCollectionTypeRoutes = (
       path: `/${info.pluralName}`,
       handler: `${uid}.find`,
       request: {
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams([
+          'fields',
+          'filters',
+          '_q',
+          'pagination',
+          'sort',
+          'populate',
+          ...conditionalQueryParams,
+        ]),
       },
       responses: {
-        200: z.object({ data: validator.documents }),
+        200: { 'application/json': z.object({ data: validator.documents }) },
       },
       config: {},
     },
@@ -90,10 +107,16 @@ const getCollectionTypeRoutes = (
       handler: `${uid}.findOne`,
       request: {
         params: { id: validator.documentID },
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams([
+          'fields',
+          'populate',
+          'filters',
+          'sort',
+          ...conditionalQueryParams,
+        ]),
       },
       responses: {
-        200: z.object({ data: validator.document }),
+        200: { 'application/json': z.object({ data: validator.document }) },
       },
     },
     create: {
@@ -102,10 +125,11 @@ const getCollectionTypeRoutes = (
       handler: `${uid}.create`,
       request: {
         params: { id: validator.documentID },
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
+        body: { 'application/json': validator.body },
       },
       responses: {
-        201: z.object({ data: validator.document }),
+        201: { 'application/json': z.object({ data: validator.document }) },
       },
       config: {},
     },
@@ -114,11 +138,12 @@ const getCollectionTypeRoutes = (
       path: `/${info.pluralName}/:id`,
       handler: `${uid}.update`,
       request: {
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams(['fields', 'populate', ...conditionalQueryParams]),
         params: { id: validator.documentID },
+        body: { 'application/json': validator.partialBody },
       },
       responses: {
-        200: z.object({ data: validator.document }),
+        200: { 'application/json': z.object({ data: validator.document }) },
       },
     },
     delete: {
@@ -126,12 +151,22 @@ const getCollectionTypeRoutes = (
       path: `/${info.pluralName}/:id`,
       handler: `${uid}.delete`,
       request: {
-        query: validator.query(['fields', 'sort', 'populate']),
+        query: validator.queryParams(['fields', 'populate', 'filters', ...conditionalQueryParams]),
         params: { id: validator.documentID },
       },
       responses: {
-        200: z.object({ data: validator.document }),
+        200: { 'application/json': z.object({ data: validator.document }) },
       },
     },
   };
+};
+
+const getConditionalQueryParams = (schema: Schema.ContentType) => {
+  const isLocalized = strapi.plugin('i18n').service('content-types').isLocalizedContentType(schema);
+  const hasDraftAndPublish = contentTypes.hasDraftAndPublish(schema);
+
+  return [
+    ...(isLocalized ? ['locale'] : []),
+    ...(hasDraftAndPublish ? ['status'] : []),
+  ] as QueryParam[];
 };

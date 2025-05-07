@@ -1,7 +1,8 @@
 import type { Core, UID } from '@strapi/types';
 import { z } from 'zod';
 
-import { AbstractCoreRouteValidator, mapAttributeToSchema } from './common';
+import { mapAttributeToSchema } from './attributes';
+import { AbstractCoreRouteValidator } from './common';
 
 /**
  * A component validator for core content-type routes.

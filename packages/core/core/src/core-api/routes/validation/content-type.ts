@@ -1,9 +1,20 @@
-import type { Core, UID } from '@strapi/types';
+import type { Core, Schema, UID } from '@strapi/types';
+
+import { contentTypes } from '@strapi/utils';
 import { z } from 'zod';
 
-import { AbstractCoreRouteValidator, mapAttributeToSchema } from './common';
+import { mapAttributeToInputSchema, mapAttributeToSchema } from './attributes';
+import { AbstractCoreRouteValidator } from './common';
 
-type QueryParam = 'fields' | 'populate' | 'sort';
+export type QueryParam =
+  | 'fields'
+  | 'populate'
+  | 'sort'
+  | 'status'
+  | 'locale'
+  | 'pagination'
+  | 'filters'
+  | '_q';
 
 /**
  * A validator for core content-type routes.
@@ -67,11 +78,15 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
 
     const entries = Object.entries({ ..._scalarFields, ..._populatableFields });
 
-    const attributesSchema = entries.reduce((acc, [attributeName, attribute]) => {
-      return acc.merge(z.object({ [attributeName]: mapAttributeToSchema(attribute) }));
-    }, z.object({}));
+    const attributesSchema = entries
+      // Remove passwords from the attribute list
+      .filter(([, attribute]) => !['password'].includes(attribute.type))
+      // Merge all attributes into a single schema
+      .reduce((acc, [attributeName, attribute]) => {
+        return acc.merge(z.object({ [attributeName]: mapAttributeToSchema(attribute) }));
+      }, z.object({}));
 
-    const defaultSchema = z.object({ documentId: this.documentID });
+    const defaultSchema = z.object({ documentId: this.documentID, id: z.number() });
 
     return defaultSchema.merge(attributesSchema);
   }
@@ -89,31 +104,6 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
    */
   get documents() {
     return z.array(this.document);
-  }
-
-  /**
-   * Creates validation schemas for query parameters
-   *
-   * @param params - Array of query parameters to validate ('fields', 'populate', 'sort', ...)
-   * @returns Object containing validation schemas for requested parameters
-   *
-   * @example
-   * ```ts
-   * const validator = new CoreContentTypeRouteValidator(strapi, uid);
-   * const querySchemas = validator.query(['fields', 'populate']);
-   * ```
-   */
-  query(params: QueryParam[]): Partial<Record<QueryParam, z.Schema>> {
-    const map = {
-      fields: () => this.queryFields,
-      populate: () => this.queryPopulate,
-      sort: () => this.querySort,
-    };
-
-    return params.reduce(
-      (acc, param) => ({ ...acc, [param]: map[param]() }),
-      {} as Partial<Record<QueryParam, z.Schema>>
-    );
   }
 
   /**
@@ -197,7 +187,107 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
         ],
         { description: 'Sort Union' }
       )
-      .optional()
       .describe('Sort the result');
+  }
+
+  get locale() {
+    return z.string().optional().describe('Select a locale');
+  }
+
+  get status() {
+    return z
+      .enum(['draft', 'published'])
+      .describe('Fetch documents based on their status. Default to "published" if not specified.');
+  }
+
+  get pagination() {
+    return z
+      .intersection(
+        z.object({ withCount: z.boolean().optional() }),
+        z.union([
+          z
+            .object({ page: z.number(), pageSize: z.number() })
+            .describe('Specify a page number and the number of entries per page'),
+          z
+            .object({ start: z.number(), limit: z.number() })
+            .describe('Specify how many entries to skip and to return'),
+        ])
+      )
+      .describe('Pagination parameters');
+  }
+
+  get filters() {
+    return z.record(this.scalarFieldsEnum, z.any()).describe('Filters to apply to the query');
+  }
+
+  get data() {
+    const { _scalarFields, _populatableFields, _schema } = this;
+
+    const scalarEntries = Object.entries(_scalarFields);
+    const populatableEntries = Object.entries(_populatableFields);
+
+    const isWritableAttribute = ([attributeName]: [string, Schema.Attribute.AnyAttribute]) => {
+      return contentTypes.isWritableAttribute(_schema, attributeName);
+    };
+
+    const scalarSchema = scalarEntries
+      // Remove non-writable attributes
+      .filter(isWritableAttribute)
+      // Merge all attributes into a single schema
+      .reduce((acc, [attributeName, attribute]) => {
+        return acc.merge(z.object({ [attributeName]: mapAttributeToInputSchema(attribute) }));
+      }, z.object({}));
+
+    const populatableSchema = populatableEntries
+      // Remove non-writable attributes
+      .filter(isWritableAttribute)
+      // Merge all attributes into a single schema
+      .reduce((acc, [attributeName, attribute]) => {
+        return acc.merge(z.object({ [attributeName]: mapAttributeToInputSchema(attribute) }));
+      }, z.object({}));
+
+    return z.object({}).merge(scalarSchema).merge(populatableSchema);
+  }
+
+  get query() {
+    return z.string();
+  }
+
+  get body() {
+    return z.object({ data: this.data });
+  }
+
+  get partialBody() {
+    return z.object({ data: this.data.partial() });
+  }
+
+  /**
+   * Creates validation schemas for query parameters
+   *
+   * @param params - Array of query parameters to validate ('fields', 'populate', 'sort', ...)
+   * @returns Object containing validation schemas for requested parameters
+   *
+   * @example
+   * ```ts
+   * const validator = new CoreContentTypeRouteValidator(strapi, uid);
+   * const querySchemas = validator.query(['fields', 'populate']);
+   * ```
+   */
+  queryParams(params: QueryParam[]): Partial<Record<QueryParam, z.Schema>> {
+    const map: Record<QueryParam, () => z.Schema> = {
+      fields: () => this.queryFields.optional(),
+      populate: () => this.queryPopulate.optional(),
+      sort: () => this.querySort.optional(),
+      filters: () => this.filters.optional(),
+      locale: () => this.locale.optional(),
+      pagination: () => this.pagination.optional(),
+      status: () => this.status.optional(),
+      _q: () => this.query.optional(),
+    } as const;
+
+    return params.reduce(
+      (acc, param) => ({ ...acc, [param]: map[param]() }),
+      {} as Partial<Record<QueryParam, z.Schema>>
+    );
   }
 }
