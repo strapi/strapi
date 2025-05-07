@@ -14,11 +14,7 @@ import type {
   ITransferEngineOptions,
   TransferFilterPreset,
 } from '../../../types';
-import {
-  extendExpectForDataTransferTests,
-  providerStages,
-  sourceStages,
-} from '../../__tests__/test-utils';
+import { extendExpectForDataTransferTests } from '../../__tests__/test-utils';
 import { TransferEngineValidationError } from '../errors';
 
 const getMockSourceStream = (data: Iterable<unknown>) => Readable.from(data);
