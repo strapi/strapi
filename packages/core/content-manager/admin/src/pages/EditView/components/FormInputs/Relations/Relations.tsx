@@ -665,6 +665,7 @@ const RelationsInput = ({
             onInputChange={(event) => {
               handleSearch(event.currentTarget.value);
             }}
+            data-testid={`relation-combobox-${name}`}
             {...props}
           >
             {options.map((opt) => {

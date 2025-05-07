@@ -9,11 +9,6 @@ import {
 } from '../../../../utils/relation-utils';
 import { createContent, FieldValue, saveContent } from '../../../../utils/content-creation';
 
-const RELATION_SOURCE_URL =
-  /\/admin\/content-manager\/collection-types\/api::relation-source.relation-source\/(?!create)[^/]/;
-const RELATION_TARGET_URL =
-  /\/admin\/content-manager\/collection-types\/api::relation-target.relation-target\/(?!create)[^/]/;
-
 const createRelationSourceFields = (rawFields: {
   name?: string;
   oneToOneRel?: string;
@@ -22,9 +17,22 @@ const createRelationSourceFields = (rawFields: {
   manyToManyRel?: string[];
   oneWayRel?: string;
   selfRel?: string[];
+  dynamicZoneComponentName?: string;
+  dynamicZoneComponentOneWayRel?: string;
+  dynamicZoneComponentTwoWayRel?: string[];
 }) => {
-  const { name, oneToOneRel, oneToManyRel, manyToOneRel, manyToManyRel, oneWayRel, selfRel } =
-    rawFields;
+  const {
+    name,
+    oneToOneRel,
+    oneToManyRel,
+    manyToOneRel,
+    manyToManyRel,
+    oneWayRel,
+    selfRel,
+    dynamicZoneComponentName,
+    dynamicZoneComponentOneWayRel,
+    dynamicZoneComponentTwoWayRel,
+  } = rawFields;
 
   // Return FieldValue[]
   const fields: FieldValue[] = [];
@@ -81,6 +89,50 @@ const createRelationSourceFields = (rawFields: {
     } satisfies FieldValue);
   }
 
+  // Handle dynamic zone with relations
+  if (dynamicZoneComponentName) {
+    // Create component fields array
+    const componentFields: FieldValue[] = [];
+
+    // Add component name field
+    componentFields.push({
+      name: 'componentName',
+      type: 'text',
+      value: dynamicZoneComponentName,
+    });
+
+    // Add one-way relation field (if provided)
+    if (dynamicZoneComponentOneWayRel) {
+      componentFields.push({
+        name: 'dynamicZone.0.componentOneWayRel',
+        type: 'relation',
+        value: [{ label: dynamicZoneComponentOneWayRel }],
+      });
+    }
+
+    // Add two-way relation field (if provided)
+    if (dynamicZoneComponentTwoWayRel && dynamicZoneComponentTwoWayRel.length > 0) {
+      componentFields.push({
+        name: 'dynamicZone.0.componentTwoWayRel',
+        type: 'relation',
+        value: dynamicZoneComponentTwoWayRel.map((label) => ({ label })),
+      });
+    }
+
+    // Add the dynamic zone field with the component
+    fields.push({
+      name: 'dynamicZone',
+      type: 'dz',
+      value: [
+        {
+          category: 'component',
+          name: 'Relation Component',
+          fields: componentFields,
+        },
+      ],
+    } satisfies FieldValue);
+  }
+
   return fields;
 };
 
@@ -95,7 +147,7 @@ const createRelationSourceFields = (rawFields: {
  * - CRUD operations for relations
  */
 
-//COLLECTION TYPES
+// COMPONENTS
 test.describe('Relations - EditView', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
@@ -103,94 +155,17 @@ test.describe('Relations - EditView', () => {
     await login({ page });
   });
 
-  test('Create a RelationSource entry with a one-to-many relation', async ({ page }) => {
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-  });
-
-  test('Update an existing relation', async ({ page }) => {
-    // Prefill entry with two relations
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-
-    // Add a new relation
-    await connectRelation(page, 'oneToManyRel', 'Target 3');
-
-    // Save content
-    await saveContent(page);
-
-    // Validate the three relations are there
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Target 3']);
-  });
-
-  test('Delete a relation', async ({ page }) => {
-    // Prefill entry with two relations
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-
-    // Remove one relation
-    await disconnectRelation(page, 'oneToManyRel', 'Target 1');
-
-    // Save content
-    await saveContent(page);
-
-    // Validate only one relation is left
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
-  });
-
-  test('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
-    // Create content with multiple relations in specific order
+  test('Create a RelationSource entry with a dynamic zone containing a component with oneWay and twoWay relations', async ({
+    page,
+  }) => {
     const fields = createRelationSourceFields({
-      oneToManyRel: ['Target 1', 'Target 2', 'Target 3'],
+      name: 'Test Dynamic Zone Relations',
+      oneToManyRel: ['Target 1'],
+      dynamicZoneComponentName: 'dynamicZoneComponent',
+      dynamicZoneComponentOneWayRel: 'Target 1',
+      dynamicZoneComponentTwoWayRel: ['Target 2', 'Target 3'],
     });
-
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-
-    // Move Target 3 after Target 1
-    await reorderRelation(page, 'oneToManyRel', 'Target 3', 'Target 1', 'after');
-
-    // Verify new order before save
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
-
-    // Save changes
-    await saveContent(page);
-
-    // Verify order is maintained after saving
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
-  });
-
-  test('Update a relation and reorder it in the same operation', async ({ page }) => {
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-    // Add a new relation
-    await connectRelation(page, 'oneToManyRel', 'Target 3');
-
-    // Validate the three relations are there
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Target 3']);
-
-    // Move Target 3 after Target 1
-    await reorderRelation(page, 'oneToManyRel', 'Target 3', 'Target 1', 'after');
-    // Verify new order before save
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
-
-    // Save changes
-    await saveContent(page);
-    // Verify order is maintained after saving
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
-  });
-
-  test('Delete a relation and reorder the remaining relations', async ({ page }) => {
-    // Prefill entry with two relations
-    const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
-    await createContent(page, 'Relation Source', fields, { save: true, verify: true });
-
-    // Remove one relation
-    await disconnectRelation(page, 'oneToManyRel', 'Target 1');
-
-    // Save content
-    await saveContent(page);
-
-    // Validate only one relation is left
-    await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
+    // TODO: Add verification for dynamic zone component relations
+    await createContent(page, 'Relation Source', fields, { save: true, verify: false });
   });
 });
