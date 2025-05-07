@@ -2,8 +2,6 @@ import type { Core } from '@strapi/types';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { Assembler } from '../../../..';
 import type { OperationContext } from '../../../../../types';
-
-import { z } from 'zod';
 import { zodToOpenAPI } from '../../../../../utils';
 
 export class OperationResponsesAssembler implements Assembler.Operation {
@@ -17,23 +15,6 @@ export class OperationResponsesAssembler implements Assembler.Operation {
     };
   }
 
-  private _assignCustomResponses(
-    responses: OpenAPIV3.ResponsesObject,
-    customResponses: Core.RouteResponses
-  ) {
-    const entries: [string, Core.HTTPMediaRecord][] = Object.entries(customResponses);
-
-    for (const [statusCode, responsesByMedia] of entries) {
-      const content: Record<string, OpenAPIV3.MediaTypeObject> = {};
-
-      for (const [media, zodSchema] of Object.entries(responsesByMedia)) {
-        content[media] = { schema: zodToOpenAPI(zodSchema) };
-      }
-
-      responses[statusCode] = { description: statusCode, content };
-    }
-  }
-
   assemble(context: OperationContext, route: Core.Route): void {
     const { output } = context;
 
@@ -44,8 +25,11 @@ export class OperationResponsesAssembler implements Assembler.Operation {
       responses[errorCode] = response;
     }
 
-    if (route.responses) {
-      this._assignCustomResponses(responses, route.responses);
+    if (route.response) {
+      responses[200] = {
+        description: 'OK',
+        content: { 'application/json': { schema: zodToOpenAPI(route.response) } },
+      };
     }
 
     output.data.responses = responses;

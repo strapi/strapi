@@ -28,7 +28,7 @@ export interface Route {
   info: RouteInfo;
   config?: RouteConfig;
   request?: RouteRequest;
-  responses?: RouteResponses;
+  response?: RouteResponse;
 }
 
 export interface SchemaReference {
@@ -51,9 +51,7 @@ export interface RouteRequest {
   body?: HTTPMediaRecord;
 }
 
-export interface RouteResponses {
-  [key: number]: HTTPMediaRecord;
-}
+export type RouteResponse = z.Schema;
 
 export type HTTPMediaRecord = Record<HTTPMediaType, z.Schema>;
 

@@ -7,7 +7,7 @@ const formattedComponentSchema = z.any();
 const ctUIDRegexp = /^((strapi|admin)::[\w-]+|(api|plugin)::[\w-]+\.[\w-]+)$/;
 const componentUIDRegexp = /^[\w-]+\.[\w-]+$/;
 
-export default (() => {
+export default (): Core.RouterInput => {
   return {
     type: 'content-api',
     routes: [
@@ -18,9 +18,7 @@ export default (() => {
         request: {
           query: { kind: z.enum(['collectionType', 'singleType']) },
         },
-        responses: {
-          200: { 'application/json': z.object({ data: z.array(formattedContentTypeSchema) }) },
-        },
+        response: z.object({ data: z.array(formattedContentTypeSchema) }),
       },
       {
         method: 'GET',
@@ -36,9 +34,7 @@ export default (() => {
         method: 'GET',
         path: '/components',
         handler: 'components.getComponents',
-        responses: {
-          200: { 'application/json': z.object({ data: z.array(formattedComponentSchema) }) },
-        },
+        response: z.object({ data: z.array(formattedComponentSchema) }),
       },
       {
         method: 'GET',
@@ -49,10 +45,8 @@ export default (() => {
             uid: z.string().regex(componentUIDRegexp),
           },
         },
-        responses: {
-          200: { 'application/json': z.object({ data: formattedComponentSchema }) },
-        },
+        response: z.object({ data: formattedComponentSchema }),
       },
     ],
   };
-}) satisfies Core.RouterConfig;
+};
