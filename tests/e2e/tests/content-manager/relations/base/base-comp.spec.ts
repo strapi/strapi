@@ -160,12 +160,46 @@ test.describe('Relations - EditView', () => {
   }) => {
     const fields = createRelationSourceFields({
       name: 'Test Dynamic Zone Relations',
-      oneToManyRel: ['Target 1'],
       dynamicZoneComponentName: 'dynamicZoneComponent',
       dynamicZoneComponentOneWayRel: 'Target 1',
       dynamicZoneComponentTwoWayRel: ['Target 2', 'Target 3'],
     });
     // TODO: Add verification for dynamic zone component relations
     await createContent(page, 'Relation Source', fields, { save: true, verify: false });
+  });
+
+  test('Update an existing relation in a dynamic zone component', async ({ page }) => {
+    // Prefill entry with two relations
+    const fields = createRelationSourceFields({
+      name: 'Test Dynamic Zone Relations',
+      dynamicZoneComponentName: 'dynamicZoneComponent',
+      dynamicZoneComponentOneWayRel: 'Target 1',
+      dynamicZoneComponentTwoWayRel: ['Target 2', 'Target 3'],
+    });
+    await createContent(page, 'Relation Source', fields, { save: true, verify: false });
+
+    const expandButton = page.getByRole('button', {
+      name: 'Relation Component - dynamicZoneComponent',
+    });
+    if ((await expandButton.getAttribute('data-state')) !== 'open') {
+      await expandButton.click();
+    }
+    // Add a new relation in the one way relation field
+    await connectRelation(page, 'dynamicZone.0.componentOneWayRel', 'Target 4');
+    await saveContent(page);
+
+    // Verify the relation was added
+    await verifyRelationsOrder(page, 'dynamicZone.0.componentOneWayRel', ['Target 4']);
+
+    // Add a new relation in the two way relation field
+    await connectRelation(page, 'dynamicZone.0.componentTwoWayRel', 'Target 1');
+    await saveContent(page);
+
+    // Verify the relation was added
+    await verifyRelationsOrder(page, 'dynamicZone.0.componentTwoWayRel', [
+      'Target 2',
+      'Target 3',
+      'Target 1',
+    ]);
   });
 });
