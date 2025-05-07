@@ -47,9 +47,11 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
+    "@types/json-logic-js": "2.0.8",
     "date-fns": "2.30.0",
     "execa": "5.1.1",
     "http-errors": "2.0.0",
+    "json-logic-js": "2.0.5",
     "lodash": "4.17.21",
     "node-machine-id": "1.1.12",
     "p-map": "4.0.0",
