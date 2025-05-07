@@ -334,7 +334,6 @@ class TransferEngine<
   #progressTrackerChunks(
     stage: TransferStage,
     aggregate?: {
-      size?(value: unknown): number;
       key?(value: unknown): string;
     }
   ) {
@@ -342,6 +341,7 @@ class TransferEngine<
       objectMode: true,
       transform: (asset, _encoding, callback) => {
         if (asset && asset.stream && typeof asset.stream.on === 'function') {
+          const key = aggregate && aggregate.key ? aggregate.key(asset) : undefined;
           asset.stream.on('data', (chunk: Buffer) => {
             if (!this.progress.data[stage]) {
               this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
@@ -349,12 +349,35 @@ class TransferEngine<
             const stageProgress = this.progress.data[stage];
             if (stageProgress) {
               stageProgress.bytes += chunk.length;
-              stageProgress.endTime = Date.now();
+              if (key) {
+                if (!stageProgress.aggregates) {
+                  stageProgress.aggregates = {};
+                }
+                if (!stageProgress.aggregates[key]) {
+                  stageProgress.aggregates[key] = { count: 0, bytes: 0 };
+                }
+                stageProgress.aggregates[key].bytes += chunk.length;
+              }
             }
             this.#emitStageUpdate('progress', stage);
           });
           asset.stream.on('end', () => {
-            this.#updateTransferProgress(stage, asset, aggregate);
+            if (!this.progress.data[stage]) {
+              this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
+            }
+            const stageProgress = this.progress.data[stage];
+            if (stageProgress) {
+              stageProgress.count += 1;
+              if (key) {
+                if (!stageProgress.aggregates) {
+                  stageProgress.aggregates = {};
+                }
+                if (!stageProgress.aggregates[key]) {
+                  stageProgress.aggregates[key] = { count: 0, bytes: 0 };
+                }
+                stageProgress.aggregates[key].count += 1;
+              }
+            }
             this.#emitStageUpdate('progress', stage);
           });
         }
@@ -952,7 +975,6 @@ class TransferEngine<
 
     const transform = this.#createStageTransformStream(stage);
     const tracker = this.#progressTrackerChunks(stage, {
-      size: (value: IAsset) => value.stats.size,
       key: (value: IAsset) => extname(value.filename) || 'No extension',
     });
 
