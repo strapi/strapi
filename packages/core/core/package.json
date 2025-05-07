@@ -1,6 +1,6 @@
 {
   "name": "@strapi/core",
-  "version": "5.12.7",
+  "version": "5.13.0",
   "description": "Core of Strapi",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -56,14 +56,14 @@
     "@koa/cors": "5.0.0",
     "@koa/router": "12.0.2",
     "@paralleldrive/cuid2": "2.2.2",
-    "@strapi/admin": "5.12.7",
-    "@strapi/database": "5.12.7",
-    "@strapi/generators": "5.12.7",
-    "@strapi/logger": "5.12.7",
-    "@strapi/permissions": "5.12.7",
-    "@strapi/types": "5.12.7",
-    "@strapi/typescript-utils": "5.12.7",
-    "@strapi/utils": "5.12.7",
+    "@strapi/admin": "5.13.0",
+    "@strapi/database": "5.13.0",
+    "@strapi/generators": "5.13.0",
+    "@strapi/logger": "5.13.0",
+    "@strapi/permissions": "5.13.0",
+    "@strapi/types": "5.13.0",
+    "@strapi/typescript-utils": "5.13.0",
+    "@strapi/utils": "5.13.0",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "4.1.2",
@@ -126,9 +126,9 @@
     "@types/node": "18.19.24",
     "@types/node-schedule": "2.1.7",
     "@types/statuses": "2.0.1",
-    "eslint-config-custom": "5.12.7",
+    "eslint-config-custom": "5.13.0",
     "supertest": "6.3.3",
-    "tsconfig": "5.12.7"
+    "tsconfig": "5.13.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
