@@ -3,11 +3,11 @@ import { ComponentRegistry } from './components';
 export class RegistriesFactory {
   createAll() {
     return {
-      components: this.createComponentRegistry(),
+      components: this._createComponentRegistry(),
     };
   }
 
-  createComponentRegistry() {
+  private _createComponentRegistry() {
     return new ComponentRegistry();
   }
 }
