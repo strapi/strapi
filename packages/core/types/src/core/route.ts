@@ -1,3 +1,4 @@
+import type { LiteralUnion } from '../utils/string';
 import type { MiddlewareHandler } from './middleware';
 import type { z } from 'zod';
 
@@ -47,10 +48,22 @@ export type SchemaDefinitionOrReference = SchemaDefinition | SchemaReference;
 export interface RouteRequest {
   query?: Record<string, z.Schema>;
   params?: Record<string, z.Schema>;
-  body?: SchemaDefinitionOrReference;
+  body?: HTTPMediaRecord;
 }
 
-// TODO: Change this to allow multiple kind of content (json, html, text, ...)
 export interface RouteResponses {
-  [key: number]: z.Schema;
+  [key: number]: HTTPMediaRecord;
 }
+
+export type HTTPMediaRecord = Record<HTTPMediaType, z.Schema>;
+
+export type HTTPMediaType = LiteralUnion<
+  | 'application/json'
+  | 'application/xml'
+  | 'application/x-www-form-urlencoded'
+  | 'multipart/form-data'
+  | 'text/plain; charset=utf-8'
+  | 'text/html'
+  | 'application/pdf'
+  | 'image/png'
+>;
