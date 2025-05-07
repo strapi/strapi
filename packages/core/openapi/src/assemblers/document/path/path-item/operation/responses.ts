@@ -1,8 +1,9 @@
 import type { Core } from '@strapi/types';
-import type { z } from 'zod';
+import type { OpenAPIV3 } from 'openapi-types';
 import type { Assembler } from '../../../..';
 import type { OperationContext } from '../../../../../types';
 
+import { z } from 'zod';
 import { zodToOpenAPI } from '../../../../../utils';
 
 export class OperationResponsesAssembler implements Assembler.Operation {
@@ -16,30 +17,37 @@ export class OperationResponsesAssembler implements Assembler.Operation {
     };
   }
 
+  private _assignCustomResponses(
+    responses: OpenAPIV3.ResponsesObject,
+    customResponses: Core.RouteResponses
+  ) {
+    const entries: [string, Core.HTTPMediaRecord][] = Object.entries(customResponses);
+
+    for (const [statusCode, responsesByMedia] of entries) {
+      const content: Record<string, OpenAPIV3.MediaTypeObject> = {};
+
+      for (const [media, zodSchema] of Object.entries(responsesByMedia)) {
+        content[media] = { schema: zodToOpenAPI(zodSchema) };
+      }
+
+      responses[statusCode] = { description: statusCode, content };
+    }
+  }
+
   assemble(context: OperationContext, route: Core.Route): void {
     const { output } = context;
 
-    output.data.responses = {};
+    const responses = { ...output.data.responses } satisfies OpenAPIV3.ResponsesObject;
 
     // Register common error responses first to allow manual overrides
     for (const [errorCode, response] of Object.entries(this._errors)) {
-      output.data.responses[errorCode] = response;
+      responses[errorCode] = response;
     }
 
     if (route.responses) {
-      const entries: [string, z.Schema][] = Object.entries(route.responses);
-
-      for (const [statusCode, schema] of entries) {
-        output.data.responses[statusCode] = {
-          description: schema.description ?? `${statusCode}`,
-          content: {
-            // TODO: handle other formats
-            'application/json': {
-              schema: zodToOpenAPI(schema),
-            },
-          },
-        };
-      }
+      this._assignCustomResponses(responses, route.responses);
     }
+
+    output.data.responses = responses;
   }
 }
