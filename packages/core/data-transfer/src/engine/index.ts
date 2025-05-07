@@ -329,8 +329,11 @@ class TransferEngine<
               if (!this.progress.data[stage]) {
                 this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
               }
-              this.progress.data[stage].bytes += chunk.length;
-              this.progress.data[stage].endTime = Date.now();
+              const stageProgress = this.progress.data[stage];
+              if (stageProgress) {
+                stageProgress.bytes += chunk.length;
+                stageProgress.endTime = Date.now();
+              }
               this.#emitStageUpdate('progress', stage);
             });
             asset.stream.on('end', () => {
