@@ -19,7 +19,7 @@ export default (() => {
           query: { kind: z.enum(['collectionType', 'singleType']) },
         },
         responses: {
-          200: z.object({ data: z.array(formattedContentTypeSchema) }),
+          200: { 'application/json': z.object({ data: z.array(formattedContentTypeSchema) }) },
         },
       },
       {
@@ -37,7 +37,7 @@ export default (() => {
         path: '/components',
         handler: 'components.getComponents',
         responses: {
-          200: z.object({ data: z.array(formattedComponentSchema) }),
+          200: { 'application/json': z.object({ data: z.array(formattedComponentSchema) }) },
         },
       },
       {
@@ -50,7 +50,7 @@ export default (() => {
           },
         },
         responses: {
-          200: z.object({ data: formattedComponentSchema }),
+          200: { 'application/json': z.object({ data: formattedComponentSchema }) },
         },
       },
     ],
