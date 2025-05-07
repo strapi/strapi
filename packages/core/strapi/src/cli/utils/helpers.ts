@@ -19,10 +19,37 @@ const readableBytes = (bytes: number, decimals = 1, padStart = 0) => {
     return '0';
   }
   const i = Math.floor(Math.log(bytes) / Math.log(bytesPerKb));
-  const result = `${parseFloat((bytes / bytesPerKb ** i).toFixed(decimals))} ${sizes[i].padStart(
-    2
-  )}`;
+  const result = `${(bytes / bytesPerKb ** i).toFixed(decimals)} ${sizes[i].padStart(2)}`;
 
+  return result.padStart(padStart);
+};
+
+// Helper to floor a number to a given number of decimal places
+function floorToDecimal(value: number, decimals: number) {
+  const factor = 10 ** decimals;
+  return Math.floor(value * factor) / factor;
+}
+
+/**
+ * Convert elapsed time to a human readable formatted string, for example "1024" becomes "1s"
+ */
+const readableTime = (elapsedTime: number, decimals = 1, padStart = 0): string => {
+  let value: number;
+  let unit: string;
+
+  if (elapsedTime >= 60000) {
+    value = elapsedTime / 60000;
+    unit = 'm';
+  } else if (elapsedTime >= 1000) {
+    value = elapsedTime / 1000;
+    unit = 's';
+  } else {
+    value = elapsedTime;
+    unit = 'ms';
+  }
+
+  const floored = floorToDecimal(value, decimals);
+  const result = `${floored.toFixed(decimals)}${unit}`;
   return result.padStart(padStart);
 };
 
@@ -195,6 +222,7 @@ export {
   assertUrlHasProtocol,
   ifOptions,
   readableBytes,
+  readableTime,
   runAction,
   assertCwdContainsStrapiProject,
   notifyExperimentalCommand,
