@@ -307,8 +307,7 @@ class TransferEngine<
   }
 
   /**
-   * Create and return a PassThrough stream.
-   *
+   * Create and return a PassThrough stream for per-object progress tracking.
    * Upon writing data into it, it'll update the Engine's transfer progress data and trigger stage update events.
    */
   #progressTracker(
@@ -316,43 +315,50 @@ class TransferEngine<
     aggregate?: {
       size?(value: unknown): number;
       key?(value: unknown): string;
-    },
-    perChunk?: boolean
-  ) {
-    if (perChunk) {
-      // For assets: emit progress per chunk and at the end of the asset
-      return new PassThrough({
-        objectMode: true,
-        transform: (asset, _encoding, callback) => {
-          if (asset && asset.stream && typeof asset.stream.on === 'function') {
-            asset.stream.on('data', (chunk: Buffer) => {
-              if (!this.progress.data[stage]) {
-                this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
-              }
-              const stageProgress = this.progress.data[stage];
-              if (stageProgress) {
-                stageProgress.bytes += chunk.length;
-                stageProgress.endTime = Date.now();
-              }
-              this.#emitStageUpdate('progress', stage);
-            });
-            asset.stream.on('end', () => {
-              this.#updateTransferProgress(stage, asset, aggregate);
-              this.#emitStageUpdate('progress', stage);
-            });
-          }
-          callback(null, asset);
-        },
-      });
     }
-
-    // Default: emit progress per object
+  ) {
     return new PassThrough({
       objectMode: true,
       transform: (data, _encoding, callback) => {
         this.#updateTransferProgress(stage, data, aggregate);
         this.#emitStageUpdate('progress', stage);
         callback(null, data);
+      },
+    });
+  }
+
+  /**
+   * Create and return a PassThrough stream for per-chunk progress tracking (used for assets).
+   * Upon writing data into it, it'll update the Engine's transfer progress data and trigger stage update events per chunk.
+   */
+  #progressTrackerChunks(
+    stage: TransferStage,
+    aggregate?: {
+      size?(value: unknown): number;
+      key?(value: unknown): string;
+    }
+  ) {
+    return new PassThrough({
+      objectMode: true,
+      transform: (asset, _encoding, callback) => {
+        if (asset && asset.stream && typeof asset.stream.on === 'function') {
+          asset.stream.on('data', (chunk: Buffer) => {
+            if (!this.progress.data[stage]) {
+              this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
+            }
+            const stageProgress = this.progress.data[stage];
+            if (stageProgress) {
+              stageProgress.bytes += chunk.length;
+              stageProgress.endTime = Date.now();
+            }
+            this.#emitStageUpdate('progress', stage);
+          });
+          asset.stream.on('end', () => {
+            this.#updateTransferProgress(stage, asset, aggregate);
+            this.#emitStageUpdate('progress', stage);
+          });
+        }
+        callback(null, asset);
       },
     });
   }
@@ -945,15 +951,10 @@ class TransferEngine<
     const destination = await this.destinationProvider.createAssetsWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
-    // Use the perChunk tracker for assets
-    const tracker = this.#progressTracker(
-      stage,
-      {
-        size: (value: IAsset) => value.stats.size,
-        key: (value: IAsset) => extname(value.filename) || 'No extension',
-      },
-      true
-    );
+    const tracker = this.#progressTrackerChunks(stage, {
+      size: (value: IAsset) => value.stats.size,
+      key: (value: IAsset) => extname(value.filename) || 'No extension',
+    });
 
     await this.#transferStage({ stage, source, destination, transform, tracker });
   }
