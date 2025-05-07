@@ -160,7 +160,14 @@ export const SingleSignOnPage = () => {
                   id: 'Settings.sso.description',
                   defaultMessage: 'Configure the settings for the Single Sign-On feature.',
                 })}
-                secondaryAction={<GradientBadge />}
+                secondaryAction={
+                  <GradientBadge
+                    label={formatMessage({
+                      id: 'components.premiumFeature.title',
+                      defaultMessage: 'Premium feature',
+                    })}
+                  />
+                }
               />
               <Layouts.Content>
                 {isSubmitting || isLoadingData ? (

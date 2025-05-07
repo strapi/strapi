@@ -9,13 +9,14 @@ import {
 } from '@reduxjs/toolkit';
 
 import { reducer as appReducer, AppState, logout } from '../../reducer';
-import { adminApi } from '../../services/api';
+import { licenseRegistryApi, adminApi } from '../../services/api';
 
 /**
  * @description Static reducers are ones we know, they live in the admin package.
  */
 const staticReducers = {
   [adminApi.reducerPath]: adminApi.reducer,
+  [licenseRegistryApi.reducerPath]: licenseRegistryApi.reducer,
   admin_app: appReducer,
 } as const;
 
@@ -77,6 +78,7 @@ const configureStoreImpl = (
       ...getDefaultMiddleware(defaultMiddlewareOptions),
       rtkQueryUnauthorizedMiddleware,
       adminApi.middleware,
+      licenseRegistryApi.middleware,
       ...appMiddlewares.map((m) => m()),
     ],
     enhancers: [injectReducerStoreEnhancer(coreReducers)],

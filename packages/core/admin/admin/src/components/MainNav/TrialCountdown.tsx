@@ -1,132 +1,87 @@
-import { Flex, Menu, Tooltip, StrapiTheme } from '@strapi/design-system';
-import { Lightning } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
-import React, { ReactNode } from 'react';
+import React from 'react';
+
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
+import { Flex, Tooltip } from '@strapi/design-system';
+import { format } from 'date-fns';
+import { useIntl } from 'react-intl';
+import { useTheme } from 'styled-components';
 
-const LightningComponent = styled(Lightning)`
-  fill: linear-gradient(
-    90deg,
-    ${({ theme }) => theme.colors.primary600} 0%,
-    ${({ theme }) => theme.colors.alternative600} 121.48%
-  );
-`;
-
-// CircleProgressBar component
-const CircleBackground = styled.circle`
-  fill: none;
-  stroke: ${({ theme }) => theme.colors.neutral150};
-`;
-
-const CircleProgress = styled.circle<{
-  $dashArray: number;
-  $dashOffset: number;
-  $strokeColor?: keyof StrapiTheme['colors'];
-}>`
-  fill: none;
-  stroke: ${({ theme, $strokeColor }) => theme.colors[$strokeColor || 'neutral800']};
-  stroke-dasharray: ${({ $dashArray }) => $dashArray};
-  stroke-dashoffset: ${({ $dashOffset }) => $dashOffset};
-  stroke-linecap: round;
-  stroke-linejoin: round;
-`;
+import { useGetTrialCountdownQuery } from '../../../src/services/license';
 
 type CircleProgressBarProps = {
   percentage: number;
-  circleWidth: number;
-  children?: ReactNode;
-  strokeWidth?: number;
-  strokeColor?: keyof StrapiTheme['colors'];
 };
 
-const CircleProgressBar: React.FC<CircleProgressBarProps> = ({
-  percentage,
-  circleWidth,
-  children,
-  strokeWidth = 2,
-  strokeColor = 'primary600',
-}) => {
-  const realPercentage = percentage > 100 ? 100 : percentage;
-  const radius = circleWidth / 2 - strokeWidth;
-  const dashArray = radius * Math.PI * 2;
-  const dashOffset = dashArray - (dashArray * realPercentage) / 100;
+const CircleProgressBar: React.FC<CircleProgressBarProps> = ({ percentage }) => {
+  const theme = useTheme();
+
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - percentage / 100);
 
   return (
-    <div>
-      <svg width={circleWidth} height={circleWidth} viewBox={`0 0 ${circleWidth} ${circleWidth}`}>
-        <CircleBackground
-          cx={circleWidth / 2}
-          cy={circleWidth / 2}
-          strokeWidth={`${strokeWidth}px`}
-          r={radius}
+    <svg width="32" height="32" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={theme.colors.primary600} />
+          <stop offset="100%" stopColor={theme.colors.alternative600} />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r={radius} stroke="#ccc" strokeWidth="10" fill="none" />
+      <circle
+        cx="50"
+        cy="50"
+        r={radius}
+        stroke="url(#progressGradient)"
+        strokeWidth="10"
+        fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        transform="rotate(-90 50 50)"
+        strokeLinecap="round"
+      />
+      <svg x="35" y="25" width="50" height="50" viewBox="0 0 32 32">
+        <path
+          fill="url(#progressGradient)"
+          d="m21.731 14.683-14 15a1 1 0 0 1-1.711-.875l1.832-9.167L.65 16.936a1 1 0 0 1-.375-1.625l14-15a1 1 0 0 1 1.71.875l-1.837 9.177 7.204 2.7a1 1 0 0 1 .375 1.62z"
         />
-        <CircleProgress
-          cx={circleWidth / 2}
-          cy={circleWidth / 2}
-          strokeWidth={`${strokeWidth}px`}
-          $strokeColor={strokeColor}
-          r={radius}
-          $dashArray={dashArray}
-          $dashOffset={dashOffset}
-          transform={`rotate(-90, ${circleWidth / 2}, ${circleWidth / 2})`}
-        />
-        <LightningComponent x="10" y="10" />
       </svg>
-    </div>
+    </svg>
   );
 };
 
-// TrialCountdown component
-type TrialCountdownProps = {
-  daysLeftInTrial: number;
-};
-
-const MenuTrigger = styled(Menu.Trigger)`
-  height: ${({ theme }) => theme.spaces[7]};
-  width: ${({ theme }) => theme.spaces[7]};
-  border: 1px solid #fff;
-  border-radius: 50%;
-  padding: 0;
-  overflow: hidden;
-`;
-
-const TrialCountdown = ({ daysLeftInTrial }: TrialCountdownProps) => {
+const TrialCountdown = () => {
   const { formatMessage } = useIntl();
   const { license, isError, isLoading } = useLicenseLimits();
 
-  if (isError || isLoading || !license) {
+  const { data } = useGetTrialCountdownQuery({
+    // TODO: get licenseId dynamically
+    id: '00902332-43ef-442b-91ce-a765d150fb89',
+  });
+
+  if (isError || isLoading || !license?.isTrial || !data) {
     return null;
   }
 
-  const { isTrial } = license;
-
   return (
-    isTrial === true && (
-      <Flex justifyContent="center" padding={3}>
-        <Menu.Root>
-          <Tooltip
-            label={formatMessage(
-              {
-                id: 'app.components.LeftMenu.trialCountdown',
-                defaultMessage: 'Your trial ends on ',
-              },
-              {
-                date: 'April 1, 2025',
-              }
-            )}
-            side="right"
-          >
-            <MenuTrigger endIcon={null} fullWidth justifyContent="center">
-              <CircleProgressBar
-                percentage={((30 - daysLeftInTrial) * 100) / 30}
-                circleWidth={32}
-              />
-            </MenuTrigger>
-          </Tooltip>
-        </Menu.Root>
-      </Flex>
-    )
+    <Flex justifyContent="center" padding={3}>
+      <Tooltip
+        label={formatMessage(
+          {
+            id: 'app.components.LeftMenu.trialCountdown',
+            defaultMessage: 'Your trial ends on {date}',
+          },
+          {
+            date: format(new Date(data.trialEndsAt), 'PPP'),
+          }
+        )}
+        side="right"
+      >
+        <div>
+          <CircleProgressBar percentage={((30 - data.daysLeft) * 100) / 30} />
+        </div>
+      </Tooltip>
+    </Flex>
   );
 };
 

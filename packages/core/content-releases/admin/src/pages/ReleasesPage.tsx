@@ -10,6 +10,7 @@ import {
   useRBAC,
   isFetchError,
   Layouts,
+  GradientBadge,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
@@ -26,7 +27,7 @@ import {
   Typography,
   Link,
 } from '@strapi/design-system';
-import { Lightning, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { format } from 'date-fns';
 import { useIntl } from 'react-intl';
@@ -43,16 +44,6 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
-
-const GradientBadge = styled(Badge)`
-  background: linear-gradient(
-    90deg,
-    ${({ theme }) => theme.colors.primary600} 0%,
-    ${({ theme }) => theme.colors.alternative600} 121.48%
-  );
-  fill: #ffffff !important;
-  padding: 4px 10px;
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
@@ -294,17 +285,12 @@ const ReleasesPage = () => {
           defaultMessage: 'Releases',
         })}
         secondaryAction={
-          <GradientBadge>
-            <Flex gap={1} alignItems="center">
-              <Lightning width={16} height={16} fill="neutral0" />
-              <Typography textColor="#ffffff">
-                {formatMessage({
-                  id: 'components.premiumFeature.title',
-                  defaultMessage: 'Premium feature',
-                })}
-              </Typography>
-            </Flex>
-          </GradientBadge>
+          <GradientBadge
+            label={formatMessage({
+              id: 'components.premiumFeature.title',
+              defaultMessage: 'Premium feature',
+            })}
+          />
         }
         subtitle={formatMessage({
           id: 'content-releases.pages.Releases.header-subtitle',

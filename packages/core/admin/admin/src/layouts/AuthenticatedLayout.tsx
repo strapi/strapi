@@ -123,13 +123,13 @@ const AdminLayout = () => {
             <SkipToContent>
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
-            <UpsellBanner />
             <Flex alignItems="flex-start">
               <LeftMenu
                 generalSectionLinks={generalSectionLinks}
                 pluginsSectionLinks={pluginsSectionLinks}
               />
               <Box flex={1}>
+                <UpsellBanner />
                 <Outlet />
                 <GuidedTourModal />
               </Box>

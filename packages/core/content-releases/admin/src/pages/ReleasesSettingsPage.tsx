@@ -125,7 +125,14 @@ const ReleasesSettingsPage = () => {
                     id: 'content-releases.pages.Settings.releases.title',
                     defaultMessage: 'Releases',
                   })}
-                  secondaryAction={<GradientBadge />}
+                  secondaryAction={
+                    <GradientBadge
+                      label={formatMessage({
+                        id: 'components.premiumFeature.title',
+                        defaultMessage: 'Premium feature',
+                      })}
+                    />
+                  }
                   subtitle={formatMessage({
                     id: 'content-releases.pages.Settings.releases.description',
                     defaultMessage: 'Create and manage content updates',

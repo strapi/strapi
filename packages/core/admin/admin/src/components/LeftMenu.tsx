@@ -129,7 +129,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             })
           : null}
       </NavListWrapper>
-      <TrialCountdown daysLeftInTrial={10} />
+      <TrialCountdown />
       <NavUser initials={initials}>{userDisplayName}</NavUser>
     </MainNav>
   );

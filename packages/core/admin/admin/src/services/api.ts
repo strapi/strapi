@@ -1,4 +1,4 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery as baseFetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import { fetchBaseQuery } from '../utils/baseQuery';
 
@@ -18,4 +18,13 @@ const adminApi = createApi({
   endpoints: () => ({}),
 });
 
-export { adminApi };
+const licenseRegistryApi = createApi({
+  reducerPath: 'licenseRegistryApi',
+  baseQuery: baseFetchBaseQuery({
+    // TODO: use the env variable (STRAPI_LICENSE_REGISTRY_API_URL) for this
+    baseUrl: 'http://localhost:4007/api',
+  }),
+  endpoints: () => ({}),
+});
+
+export { adminApi, licenseRegistryApi };
