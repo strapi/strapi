@@ -1,9 +1,11 @@
-import type { Schema } from '@strapi/types';
+import { UID, type Schema } from '@strapi/types';
 
 import { relations } from '@strapi/utils';
 import { z } from 'zod';
 
 import { BOOLEAN_LITERAL_VALUES } from './constants';
+import { CoreComponentRouteValidator } from './component';
+import { CoreContentTypeRouteValidator } from './content-type';
 
 /**
  * Maps a Strapi attribute definition to a corresponding Zod validation schema.
@@ -78,12 +80,29 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
 
       return schema.describe('A boolean field');
     }
-    // TODO(zodV4): use the component reference type instead of z.any
     case 'component': {
-      const { writable, required, repeatable, min, max } = attribute;
+      // Extract component attribute properties
+      const { writable, required, repeatable, min, max, component: componentUid } = attribute;
 
-      const baseSchema = repeatable ? z.array(z.any()) : z.any();
+      // Create a validator for this specific component type
+      const componentValidator = new CoreComponentRouteValidator(strapi, componentUid);
 
+      // Get the validation schema for this component
+      const componentSchema = componentValidator.entry;
+
+      // Check if this component schema is already registered globally
+      const hasComponentSchema = z.globalRegistry._idmap.has(componentUid);
+
+      // If not registered yet, register it with the component's unique ID
+      if (!hasComponentSchema) {
+        componentSchema.register(z.globalRegistry, {
+          id: componentUid,
+        });
+      }
+
+      // For repeatable components, wrap schema in array
+      // For single components, use component schema directly
+      const baseSchema = repeatable ? z.array(componentSchema) : componentSchema;
       const schema = augmentSchema(baseSchema, [
         (schema) => (min !== undefined && schema instanceof z.ZodArray ? schema.min(min) : schema),
         (schema) => (max !== undefined && schema instanceof z.ZodArray ? schema.max(max) : schema),
@@ -219,14 +238,44 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
 
       return schema.describe('A media field');
     }
-    // TODO(zodV4): use reference for relations types
     // TODO(zodV4): handle polymorphic relations using discriminated unions
     case 'relation': {
+      // Extract writable and required flags from the attribute
       const { writable, required } = attribute;
+      // Get the target content type UID from the attribute, handling potential undefined
+      const targetUid = (attribute as { target?: UID.ContentType })?.target;
 
+      // Check if this is a many-to-many or one-to-many relation
       const isToMany = relations.isAnyToMany(attribute);
-      const baseSchema = isToMany ? z.array(z.any()) : z.any();
 
+      // Handle case where target content type is not set
+      if (!targetUid || targetUid.length === 0) {
+        // TODO will happen with morphTo-xxx ???
+        console.error('Relation target is not set', attribute);
+        // Return array of any for many relations, any for single relations
+        return isToMany ? z.array(z.any()) : z.any();
+      }
+
+      // Create validator for the target content type
+      const contentTypeValidator = new CoreContentTypeRouteValidator(
+        strapi,
+        targetUid as UID.ContentType
+      );
+      // Get the schema for the target content type
+      const contentTypeSchema = contentTypeValidator.data;
+      // Check if schema is already registered to avoid duplicates
+      const hasContentTypeSchema = z.globalRegistry._idmap.has(targetUid);
+
+      // Register the schema if not already registered
+      if (!hasContentTypeSchema) {
+        contentTypeSchema.register(z.globalRegistry, {
+          id: targetUid,
+        });
+      }
+
+      // Create array schema for many relations, single schema for one relations
+      const baseSchema = isToMany ? z.array(contentTypeSchema) : contentTypeSchema;
+      // Add required and readonly constraints based on attribute flags
       const schema = augmentSchema(baseSchema, [maybeRequired(required), maybeReadonly(writable)]);
 
       return schema.describe('A relational field');
@@ -283,7 +332,7 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
       return schema.describe('A UID field');
     }
     default:
-      throw new Error(`Unsupported attribute type: ${attribute['type']}`);
+      throw new Error(`Unsupported attribute type: ${(attribute as any).type}`);
   }
 };
 
@@ -553,7 +602,7 @@ export const mapAttributeToInputSchema = (attribute: Schema.Attribute.AnyAttribu
       return schema.describe('A UID field');
     }
     default:
-      throw new Error(`Unsupported attribute type: ${attribute['type']}`);
+      throw new Error(`Unsupported attribute type: ${(attribute as any).type}`);
   }
 };
 

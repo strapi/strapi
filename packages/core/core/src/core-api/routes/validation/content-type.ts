@@ -178,15 +178,12 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
 
     // TODO: Handle nested sorts but very low priority, very little usage
     return z
-      .union(
-        [
-          this.scalarFieldsEnum, // 'name' | 'title'
-          this.scalarFieldsArray, // ['name', 'title']
-          this.fieldRecord(orderDirection), // { name: 'desc' } | { title: 'asc' }
-          z.array(this.fieldRecord(orderDirection)), // [{ name: 'desc'}, { title: 'asc' }]
-        ],
-        { description: 'Sort Union' }
-      )
+      .union([
+        this.scalarFieldsEnum, // 'name' | 'title'
+        this.scalarFieldsArray, // ['name', 'title']
+        this.fieldRecord(orderDirection), // { name: 'desc' } | { title: 'asc' }
+        z.array(this.fieldRecord(orderDirection)), // [{ name: 'desc'}, { title: 'asc' }]
+      ])
       .describe('Sort the result');
   }
 
