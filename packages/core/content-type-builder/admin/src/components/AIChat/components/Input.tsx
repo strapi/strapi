@@ -62,7 +62,7 @@ const Header = ({ children, ...props }: HeaderProps) => {
       left={0}
       right={0}
       background="neutral0"
-      width="fit-content"
+      width="100%"
       {...props}
     >
       {children}
