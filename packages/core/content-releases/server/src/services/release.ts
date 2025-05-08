@@ -12,9 +12,9 @@ import type {
   Release,
   DeleteRelease,
 } from '../../../shared/contracts/releases';
-import type { ReleaseAction } from '../../../shared/contracts/release-actions';
-import type { UserInfo } from '../../../shared/types';
-import { getEntry, getService } from '../utils';
+import type { Entity, UserInfo } from '../../../shared/types';
+import { getService } from '../utils';
+import { Tree, ReleaseTreeNode, TreeNodeProps, EntriesInRelease } from '../utils/tree';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -26,82 +26,6 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       error,
       release,
     });
-  };
-
-  /**
-   * Given a release id, it returns the actions formatted ready to be used to publish them.
-   * We split them by contentType and type (publish/unpublish) and extract only the documentIds and locales.
-   */
-
-  type ActionEntry = {
-    documentId: ReleaseAction['entryDocumentId'];
-    status?: 'draft' | 'published';
-    locale?: string;
-    contentType: UID.ContentType;
-  };
-  type Action = {
-    publish: ActionEntry[];
-    unpublish: ActionEntry[];
-  };
-
-  const getFormattedActions = async (releaseId: Release['id']) => {
-    const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-      where: {
-        release: {
-          id: releaseId,
-        },
-      },
-    })) as ReleaseAction[];
-
-    if (actions.length === 0) {
-      throw new errors.ValidationError('No entries to publish');
-    }
-
-    /**
-     * We separate publish and unpublish actions, grouping them by entry status ( published | draft ) and extracting only their documentIds, contentType and locales.
-     */
-    const formattedActions: {
-      draft: Pick<Action, 'publish'>;
-      published: Action;
-    } = {
-      draft: {
-        publish: [],
-      },
-      published: {
-        publish: [],
-        unpublish: [],
-      },
-    };
-
-    for (const action of actions) {
-      const contentTypeUid: UID.ContentType = action.contentType;
-
-      const publishedEntry = await getEntry(
-        {
-          contentType: action.contentType,
-          documentId: action.entryDocumentId,
-          locale: action.locale,
-          populate: '*',
-          status: 'published',
-          skipDraftFetching: true,
-        },
-        { strapi }
-      );
-
-      const entryStatus = publishedEntry ? 'published' : 'draft';
-
-      const targetArray = entryStatus === 'draft'
-      ? formattedActions.draft.publish
-      : formattedActions.published[action.type];
-
-    targetArray.push({
-      documentId: action.entryDocumentId,
-      locale: action.locale,
-      contentType: contentTypeUid,
-    });
-    }
-
-    return formattedActions;
   };
 
   return {
@@ -288,7 +212,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       return release;
     },
 
-    async publish(releaseId: PublishRelease.Request['params']['id']) {
+    async publish(releaseId: PublishRelease.Request['params']['id'], tree: ReleaseTreeNode[]) {
       const {
         release,
         error,
@@ -315,30 +239,42 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
             throw new errors.ValidationError('Release already published');
           }
 
+          if (tree.length === 0) {
+            throw new errors.ValidationError('No entries to publish');
+          }
+
           if (lockedRelease.status === 'failed') {
             throw new errors.ValidationError('Release failed to publish');
           }
 
           try {
             strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
-            const formattedActions = await getFormattedActions(releaseId);
+
             await strapi.db.transaction(async () => {
-              const { publish: draftsToPublish } = formattedActions.draft;
-
-              await Promise.all([
-                ...draftsToPublish.map((params) =>
-                  strapi.documents(params.contentType).publish(params)
-                ),
-              ]);
-
-              const { publish, unpublish } = formattedActions.published;
-
-              await Promise.all([
-                ...publish.map((params) => strapi.documents(params.contentType).publish(params)),
-                ...unpublish.map((params) =>
-                  strapi.documents(params.contentType).unpublish(params)
-                ),
-              ]);
+              const releaseTree = structuredClone(tree);
+              for (const node of releaseTree) {
+                switch (node.type) {
+                  case 'publish':
+                    await strapi.documents(node.contentType as UID.ContentType).publish({
+                      documentId: node.documentId,
+                      contentType: node.contentType,
+                      locale: node.locale,
+                    });
+                    break;
+                  case 'unpublish':
+                    await strapi.documents(node.contentType as UID.ContentType).unpublish({
+                      documentId: node.documentId,
+                      contentType: node.contentType,
+                      locale: node.locale,
+                    });
+                    break;
+                  default:
+                    break;
+                }
+                if (node.children) {
+                  releaseTree.push(...node.children);
+                }
+              }
             });
 
             const release = await strapi.db.query(RELEASE_MODEL_UID).update({
@@ -439,6 +375,100 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           status: 'empty',
         },
       });
+    },
+    async buildReleaseTree(
+      entriesInRelease: EntriesInRelease[],
+      contentTypeModelsMap: Record<string, Struct.ContentTypeSchema>
+    ) {
+      const relationFieldsFromContentTypeModelsMap = Object.entries(contentTypeModelsMap).reduce(
+        (acc, [contentType, modelDef]) => {
+          const fields = Object.entries(modelDef.attributes).filter(
+            ([_, attr]) =>
+              attr.type === 'relation' &&
+              !['updatedBy', 'createdBy', 'localizations'].includes(_) &&
+              !_.startsWith('strapi_')
+          ) as [string, Record<string, unknown>][];
+          acc[contentType] = fields;
+          return acc;
+        },
+        {} as Record<string, [string, unknown][]>
+      );
+
+      const documentsInReleaseByModel = new Map<string, Set<string>>();
+      const tree = new Tree();
+
+      for (const { contentType, entry } of entriesInRelease) {
+        const set = documentsInReleaseByModel.get(contentType) ?? new Set<string>();
+        set.add(entry.id.toString());
+        documentsInReleaseByModel.set(contentType, set);
+      }
+
+      for (const { contentType, entry, type } of entriesInRelease) {
+        let localeToUse = entry.locale;
+        const entryId = entry.id.toString();
+
+        const nodeProps: TreeNodeProps = {
+          contentType,
+          id: entryId,
+          documentId: entry.documentId,
+          type,
+          locale: localeToUse,
+        };
+
+        let currentNode = tree.find({ contentType, id: entryId, locale: localeToUse });
+        if (!currentNode) {
+          currentNode = tree.add(nodeProps);
+        }
+
+        const relationFields = relationFieldsFromContentTypeModelsMap[contentType] || [];
+        const parentPropsList: TreeNodeProps[] = [];
+
+        for (const [fieldName, fieldDef] of relationFields as [string, Record<string, unknown>][]) {
+          const raw = entry[fieldName];
+          const targets = Array.isArray(raw) ? raw : [raw];
+          for (const rel of targets as Array<Entity & { locale?: string }>) {
+            // eslint-disable-next-line no-continue
+            if (!rel) continue;
+            const targetModel = fieldDef.target as string;
+            const relId = rel.id.toString();
+            if (
+              documentsInReleaseByModel.get(targetModel)?.has(relId) &&
+              !fieldDef.mappedBy &&
+              !fieldDef.inversedBy
+            ) {
+              if (!localeToUse) {
+                localeToUse = rel.locale;
+              }
+              parentPropsList.push({
+                contentType: targetModel,
+                id: relId,
+                documentId: rel.documentId,
+                type,
+                locale: localeToUse,
+              });
+            }
+          }
+        }
+
+        if (parentPropsList.length) {
+          const parentNodes = parentPropsList.map((parentProps) => {
+            return tree.find(parentProps) ?? tree.add(parentProps);
+          });
+
+          const deepest = parentNodes.reduce(
+            (parent, currentParent) =>
+              currentParent._depth > parent._depth ? currentParent : parent,
+            parentNodes[0]
+          );
+
+          tree.moveToChildOf(
+            { contentType, id: entryId, locale: entry.locale },
+            { contentType: deepest.data.contentType, id: deepest.data.id, locale: localeToUse }
+          );
+        }
+      }
+
+      return tree.toReleaseTree();
     },
   };
 };

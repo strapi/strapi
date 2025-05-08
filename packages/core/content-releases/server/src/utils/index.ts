@@ -3,6 +3,7 @@ import type { UID, Data, Core } from '@strapi/types';
 import type { SettingsService } from '../services/settings';
 import type { ReleaseService } from '../services/release';
 import type { ReleaseActionService } from '../services/release-action';
+import { ReleaseTreeNode } from './tree';
 
 type Services = {
   release: ReleaseService;
@@ -18,6 +19,8 @@ interface Action {
   documentId?: Data.DocumentID;
   locale?: string;
 }
+
+export type TreeNodeProps =  Omit<ReleaseTreeNode, "_depth" | "children">;
 
 export const getService = <TName extends keyof Services>(
   name: TName,
@@ -130,4 +133,20 @@ export const getEntryStatus = async (
   }
 
   return 'published';
+};
+
+export const getReleaseTree = async (releaseId: Data.ID, strapi: Core.Strapi) => {
+  const releaseActionService = getService('release-action', { strapi });
+  const { results } = await releaseActionService.findPage(releaseId, {
+    pageSize: Number.MAX_SAFE_INTEGER,
+  });
+
+  const contentTypes = await releaseActionService.getContentTypeModelsFromActions(results);
+
+  const tree = await strapi
+    .plugin('content-releases')
+    .service('release')
+    .buildReleaseTree(results, contentTypes);
+
+  return tree;
 };
