@@ -153,6 +153,7 @@ export const transformChatToCTB = (
       globalId: singularName,
     } satisfies Component;
   }
+
   return {
     uid: schema.uid as any,
     modelType: schema.modelType,
@@ -160,17 +161,21 @@ export const transformChatToCTB = (
     kind: schema.kind!,
     info: {
       displayName: schema.name.charAt(0).toUpperCase() + schema.name.slice(1),
-      singularName,
-      pluralName,
+      // Always keep the old by default
+      // @ts-expect-error - not in types
+      singularName: oldSchema?.info?.singularName || singularName,
+      // Always keep the old by default
+      // @ts-expect-error - not in types
+      pluralName: oldSchema?.info?.pluralName || pluralName,
     },
     collectionName: pluralName,
     attributes: transformAttributesFromChatToCTB(schema, oldSchema),
     options: {
-      draftAndPublish: schema.options?.draftAndPublish,
+      draftAndPublish: schema.options?.draftAndPublish ?? false,
     },
     pluginOptions: {
       i18n: {
-        localized: schema.options?.localized,
+        localized: schema.options?.localized ?? false,
       },
     },
     visible: true,
