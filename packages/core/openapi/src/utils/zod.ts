@@ -1,10 +1,4 @@
-import {
-  OpenApiGeneratorV31,
-  OpenAPIRegistry,
-  extendZodWithOpenApi,
-} from '@asteasolutions/zod-to-openapi';
-import { z } from 'zod';
-import { randomUUID } from 'node:crypto';
+import * as z from 'zod';
 
 import type { OpenAPIV3 } from 'openapi-types';
 
@@ -37,26 +31,14 @@ import type { OpenAPIV3 } from 'openapi-types';
  * ```
  */
 
-export const zodToOpenAPI = (zodSchema: z.Schema): OpenAPIV3.SchemaObject | undefined => {
-  const uuid = randomUUID();
+export const zodToOpenAPI = (
+  zodSchema: z.ZodType
+): OpenAPIV3.SchemaObject | z.z.core.JSONSchema.BaseSchema | undefined => {
+  const jsonSchema = z.toJSONSchema(zodSchema);
 
-  const registry = new OpenAPIRegistry();
-
-  registry.register(uuid, zodSchema);
-
-  const generator = new OpenApiGeneratorV31(registry.definitions);
-  const { components } = generator.generateComponents();
-
-  if (!components) {
-    throw new Error(`Couldn't generate an OpenAPI schema from the given Zod schema`);
-  }
-
-  return components.schemas?.[uuid] as OpenAPIV3.SchemaObject | undefined;
-};
-
-/**
- * Registers extensions for Zod to support OpenAPI integration.
- */
-export const registerZodExtensions = () => {
-  extendZodWithOpenApi(z);
+  // TODO: without the use of '@asteasolutions/zod-to-openapi' we need a new way
+  // to map this jsonSchema to an OpenAPI compliant Schema Object
+  // The purpose of this POC is to show how zod v4 can be used to handle
+  // references (e.g. relations and components)
+  return jsonSchema;
 };

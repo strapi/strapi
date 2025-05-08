@@ -1,6 +1,6 @@
+import type { z } from 'zod';
 import type { LiteralUnion } from '../utils/string';
 import type { MiddlewareHandler } from './middleware';
-import type { z } from 'zod';
 
 export type RouteInfo = {
   apiName?: string;
@@ -46,14 +46,14 @@ export interface SchemaDefinition {
 export type SchemaDefinitionOrReference = SchemaDefinition | SchemaReference;
 
 export interface RouteRequest {
-  query?: Record<string, z.Schema>;
-  params?: Record<string, z.Schema>;
+  query?: Record<string, z.ZodType>;
+  params?: Record<string, z.ZodType>;
   body?: HTTPMediaRecord;
 }
 
-export type RouteResponse = z.Schema;
+export type RouteResponse = z.ZodType;
 
-export type HTTPMediaRecord = Record<HTTPMediaType, z.Schema>;
+export type HTTPMediaRecord = Record<HTTPMediaType, z.ZodType>;
 
 export type HTTPMediaType = LiteralUnion<
   | 'application/json'

@@ -1,5 +1,7 @@
 import type { OpenAPIV3 } from 'openapi-types';
 
+// TODO maintaining this package only to extend this class
+// Ideally we should remove it
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 
 import type { ComponentType } from './types';

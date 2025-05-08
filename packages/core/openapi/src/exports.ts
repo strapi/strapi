@@ -13,12 +13,9 @@ import {
   RouteMatcher,
   rules,
 } from './routes';
-import { registerZodExtensions } from './utils';
 
 import type { GenerationOptions } from './types';
 import type { GeneratorOutput } from './generator';
-
-registerZodExtensions();
 
 /**
  * @experimental
