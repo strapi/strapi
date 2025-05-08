@@ -2,6 +2,23 @@ import { queryParams } from '@strapi/utils';
 
 import createReleaseService from '../release';
 import releaseCT from '../../content-types/release/schema';
+import { getReleaseTree } from '../../utils';
+
+jest.mock('../../utils', () => {
+  const originalModule = jest.requireActual('../../utils');
+
+  return {
+    ...originalModule,
+
+    getService: jest.fn((...props) => ({
+      findPage: () => [],
+
+      ...originalModule.getService(...props),
+    })),
+  };
+});
+
+
 
 const mockSchedulingSet = jest.fn();
 const mockSchedulingCancel = jest.fn();
@@ -25,6 +42,11 @@ const baseStrapiMock = {
       set: mockSchedulingSet,
       cancel: mockSchedulingCancel,
       countActions: jest.fn(),
+      findPage: () => ({
+        results: []
+      }),
+      getContentTypeModelsFromActions: jest.fn(),
+      buildReleaseTree: () => ([]),
     }),
   }),
   features: {
@@ -250,16 +272,18 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: baseStrapiMock });
 
-      expect(() => releaseService.publish(1)).rejects.toThrow('No release found for id 1');
+      expect(() => releaseService.publish(1, [])).rejects.toThrow('No release found for id 1');
     });
 
-    it('throws an error if the release is already published', () => {
+    it('throws an error if the release is already published', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, releasedAt: new Date() });
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: baseStrapiMock });
 
-      expect(() => releaseService.publish(1)).rejects.toThrow('Release already published');
+      const releaseTree = await getReleaseTree(1, baseStrapiMock as any);
+
+      expect(() => releaseService.publish(1, releaseTree)).rejects.toThrow('Release already published');
     });
 
     it('throws an error if the release have 0 actions', () => {
@@ -278,65 +302,42 @@ describe('Release service', () => {
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
 
-      expect(() => releaseService.publish(1)).rejects.toThrow('No entries to publish');
+      expect(() => releaseService.publish(1, [])).rejects.toThrow('No entries to publish');
     });
 
     it('calls publish for each collectionType with the right actions', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
-      const mockedActions = [
-        {
-          contentType: 'collectionType',
-          type: 'publish',
-          entry: { id: 1 },
-          entryDocumentId: 1
-        },
-        {
-          contentType: 'collectionType',
-          type: 'unpublish',
-          entry: { id: 2 },
-          entryDocumentId: 2
-        },
-        {
-          contentType: 'singleType',
-          type: 'publish',
-          entry: { id: 3 },
-          entryDocumentId: 3
-        },
-        {
-          contentType: 'singleType',
-          type: 'unpublish',
-          entry: { id: 4 },
-          entryDocumentId: 4
-        },
-      ];
-
-      const mockedEntries = mockedActions.map((action) => ({
-        documentId: action.entryDocumentId,
-        publishedAt: action.entryDocumentId === 3  ? null : 1743011553020,
-      }));
 
       const findOne = jest.fn();
       const findMany = jest.fn();
-      const documentsMock = jest.fn().mockImplementation(() => {
-        return {
-          findOne: jest.fn().mockImplementation((params) => {
-            const entry = mockedEntries.find(
-              (entry) => entry.documentId === params.documentId
-            );
-            return params.status === 'published' && entry?.publishedAt && entry;
-          }),
-          findFirst: jest.fn(),
-          publish: mockPublish,
-          unpublish: mockUnpublish,
-        };
-      });
 
       const strapiMock = {
         ...baseStrapiMock,
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
-            findMany: jest.fn().mockReturnValue(mockedActions),
+            findMany: jest.fn().mockReturnValue([
+              {
+                contentType: 'collectionType',
+                type: 'publish',
+                entry: { id: 1 },
+              },
+              {
+                contentType: 'collectionType',
+                type: 'unpublish',
+                entry: { id: 2 },
+              },
+              {
+                contentType: 'singleType',
+                type: 'publish',
+                entry: { id: 3 },
+              },
+              {
+                contentType: 'singleType',
+                type: 'unpublish',
+                entry: { id: 4 },
+              },
+            ]),
             update: jest.fn(),
           }),
         },
@@ -352,8 +353,7 @@ describe('Release service', () => {
           singleType: {
             kind: 'singleType',
           },
-        },
-        documents: documentsMock,
+        }
       };
 
       // @ts-expect-error Ignore missing properties
@@ -380,14 +380,46 @@ describe('Release service', () => {
         },
       ]);
 
-      await releaseService.publish(1);
+      await releaseService.publish(1, [
+        {
+          contentType: 'singleType',
+          documentId: '3',
+          locale: undefined,
+          type: 'publish',
+          _depth: 0,
+          id: '3',
+          children: [
+            {
+              contentType: 'related',
+              documentId: '4',
+              locale: undefined,
+              type: 'publish',
+              children: [],
+              _depth: 1,
+              id: '4',
+            },
+          ],
+        },
+        {
+          contentType: 'singleType',
+          documentId: '5',
+          locale: undefined,
+          type: 'unpublish',
+          children: [],
+          _depth: 0,
+          id: '5',
+        },
+        {
+          contentType: 'singleType',
+          documentId: '6',
+          locale: undefined,
+          type: 'unpublish',
+          children: [],
+          _depth: 0,
+          id: '6',
+        },
+      ]);
 
-      // The third action is the only one that is publishing a draft, so It needs to be executed before the modified ones
-      expect(mockPublish).toHaveBeenNthCalledWith(1, {
-        contentType: 'singleType',
-        documentId: 3,
-        locale: undefined,
-      });
       expect(mockPublish).toHaveBeenCalledTimes(2);
       expect(mockUnpublish).toHaveBeenCalledTimes(2);
     });
