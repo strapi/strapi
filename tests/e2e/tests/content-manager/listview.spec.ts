@@ -177,7 +177,7 @@ test.describe('List View', () => {
         .getByRole('button', { name: 'Confirm' });
       await confirmDeleteButton.click();
 
-      await page.waitForSelector('text=No content found');
+      await expect(page.getByText('No content found')).toBeVisible();
     });
   });
 });
