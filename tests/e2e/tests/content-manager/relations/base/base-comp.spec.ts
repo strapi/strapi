@@ -4,6 +4,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../../../utils/dts-import
 import {
   connectRelation,
   reorderRelation,
+  verifyRelation,
   verifyRelationsOrder,
   disconnectRelation,
 } from '../../../../utils/relation-utils';
@@ -181,19 +182,33 @@ test.describe('Relations - EditView', () => {
     const expandButton = page.getByRole('button', {
       name: 'Relation Component - dynamicZoneComponent',
     });
+
     if ((await expandButton.getAttribute('data-state')) !== 'open') {
       await expandButton.click();
     }
+
     // Add a new relation in the one way relation field
     await connectRelation(page, 'dynamicZone.0.componentOneWayRel', 'Target 4');
+
+    // Save content
     await saveContent(page);
+
+    // Check the relation is there
+    await verifyRelation(page, 'dynamicZone.0.componentOneWayRel', 'Target 4');
 
     // Verify the relation was added
     await verifyRelationsOrder(page, 'dynamicZone.0.componentOneWayRel', ['Target 4']);
 
     // Add a new relation in the two way relation field
     await connectRelation(page, 'dynamicZone.0.componentTwoWayRel', 'Target 1');
+
+    // Save content
     await saveContent(page);
+
+    // Check all the relations are there
+    for (const target of ['Target 2', 'Target 3', 'Target 1']) {
+      await verifyRelation(page, 'dynamicZone.0.componentTwoWayRel', target);
+    }
 
     // Verify the relation was added
     await verifyRelationsOrder(page, 'dynamicZone.0.componentTwoWayRel', [
