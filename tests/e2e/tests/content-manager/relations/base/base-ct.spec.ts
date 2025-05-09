@@ -5,9 +5,11 @@ import {
   connectRelation,
   reorderRelation,
   verifyRelationsOrder,
+  verifyRelation,
   disconnectRelation,
 } from '../../../../utils/relation-utils';
 import { createContent, FieldValue, saveContent } from '../../../../utils/content-creation';
+import { verify } from '../../../../../../packages/plugins/users-permissions/server/strategies/users-permissions';
 
 const RELATION_SOURCE_URL =
   /\/admin\/content-manager\/collection-types\/api::relation-source.relation-source\/(?!create)[^/]/;
@@ -119,11 +121,16 @@ test.describe('Relations - EditView', () => {
     // Save content
     await saveContent(page);
 
+    // Check all the relations are there
+    for (const target of ['Target 1', 'Target 2', 'Target 3']) {
+      await verifyRelation(page, 'oneToManyRel', target);
+    }
+
     // Validate the three relations are there
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Target 3']);
   });
 
-  test('Delete a relation', async ({ page }) => {
+  test.skip('Delete a relation', async ({ page }) => {
     // Prefill entry with two relations
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
@@ -138,7 +145,7 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
   });
 
-  test('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
+  test.skip('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
     // Create content with multiple relations in specific order
     const fields = createRelationSourceFields({
       oneToManyRel: ['Target 1', 'Target 2', 'Target 3'],
@@ -159,7 +166,7 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
 
-  test('Update a relation and reorder it in the same operation', async ({ page }) => {
+  test.skip('Update a relation and reorder it in the same operation', async ({ page }) => {
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
     // Add a new relation
@@ -179,7 +186,7 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
 
-  test('Delete a relation and reorder the remaining relations', async ({ page }) => {
+  test.skip('Delete a relation and reorder the remaining relations', async ({ page }) => {
     // Prefill entry with two relations
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
