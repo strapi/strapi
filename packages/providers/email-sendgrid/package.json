@@ -1,6 +1,6 @@
 {
   "name": "@strapi/provider-email-sendgrid",
-  "version": "5.12.7",
+  "version": "5.13.0",
   "description": "Sendgrid provider for strapi email",
   "keywords": [
     "email",
@@ -45,11 +45,11 @@
   },
   "dependencies": {
     "@sendgrid/mail": "8.1.3",
-    "@strapi/utils": "5.12.7"
+    "@strapi/utils": "5.13.0"
   },
   "devDependencies": {
-    "eslint-config-custom": "5.12.7",
-    "tsconfig": "5.12.7"
+    "eslint-config-custom": "5.13.0",
+    "tsconfig": "5.13.0"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
