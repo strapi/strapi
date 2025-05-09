@@ -307,8 +307,7 @@ class TransferEngine<
   }
 
   /**
-   * Create and return a PassThrough stream.
-   *
+   * Create and return a PassThrough stream for per-object progress tracking.
    * Upon writing data into it, it'll update the Engine's transfer progress data and trigger stage update events.
    */
   #progressTracker(
@@ -324,6 +323,65 @@ class TransferEngine<
         this.#updateTransferProgress(stage, data, aggregate);
         this.#emitStageUpdate('progress', stage);
         callback(null, data);
+      },
+    });
+  }
+
+  /**
+   * Create and return a PassThrough stream for per-chunk progress tracking (used for assets).
+   * Upon writing data into it, it'll update the Engine's transfer progress data and trigger stage update events per chunk.
+   */
+  #progressTrackerChunks(
+    stage: TransferStage,
+    aggregate?: {
+      key?(value: unknown): string;
+    }
+  ) {
+    return new PassThrough({
+      objectMode: true,
+      transform: (asset, _encoding, callback) => {
+        if (asset && asset.stream && typeof asset.stream.on === 'function') {
+          const key = aggregate && aggregate.key ? aggregate.key(asset) : undefined;
+          asset.stream.on('data', (chunk: Buffer) => {
+            if (!this.progress.data[stage]) {
+              this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
+            }
+            const stageProgress = this.progress.data[stage];
+            if (stageProgress) {
+              stageProgress.bytes += chunk.length;
+              if (key) {
+                if (!stageProgress.aggregates) {
+                  stageProgress.aggregates = {};
+                }
+                if (!stageProgress.aggregates[key]) {
+                  stageProgress.aggregates[key] = { count: 0, bytes: 0 };
+                }
+                stageProgress.aggregates[key].bytes += chunk.length;
+              }
+            }
+            this.#emitStageUpdate('progress', stage);
+          });
+          asset.stream.on('end', () => {
+            if (!this.progress.data[stage]) {
+              this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
+            }
+            const stageProgress = this.progress.data[stage];
+            if (stageProgress) {
+              stageProgress.count += 1;
+              if (key) {
+                if (!stageProgress.aggregates) {
+                  stageProgress.aggregates = {};
+                }
+                if (!stageProgress.aggregates[key]) {
+                  stageProgress.aggregates[key] = { count: 0, bytes: 0 };
+                }
+                stageProgress.aggregates[key].count += 1;
+              }
+            }
+            this.#emitStageUpdate('progress', stage);
+          });
+        }
+        callback(null, asset);
       },
     });
   }
@@ -916,8 +974,7 @@ class TransferEngine<
     const destination = await this.destinationProvider.createAssetsWriteStream?.();
 
     const transform = this.#createStageTransformStream(stage);
-    const tracker = this.#progressTracker(stage, {
-      size: (value: IAsset) => value.stats.size,
+    const tracker = this.#progressTrackerChunks(stage, {
       key: (value: IAsset) => extname(value.filename) || 'No extension',
     });
 
