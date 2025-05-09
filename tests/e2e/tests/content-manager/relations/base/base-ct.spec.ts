@@ -164,7 +164,7 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
 
-  test.skip('Update a relation and reorder it in the same operation', async ({ page }) => {
+  test('Update a relation and reorder it in the same operation', async ({ page }) => {
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
     // Add a new relation
@@ -180,6 +180,12 @@ test.describe('Relations - EditView', () => {
 
     // Save changes
     await saveContent(page);
+
+    // Check all the relations are there
+    for (const target of ['Target 1', 'Target 2', 'Target 3']) {
+      await verifyRelation(page, 'oneToManyRel', target);
+    }
+
     // Verify order is maintained after saving
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
