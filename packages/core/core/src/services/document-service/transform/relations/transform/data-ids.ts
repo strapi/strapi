@@ -64,6 +64,24 @@ const getRelationIds = curry(
 );
 
 /**
+ * Ensure set/connect/disconnect syntax for all relations in the data object
+ */
+const standarizeRelations = (data: Record<string, any>, uid: string) => {
+  return traverseEntityRelations(
+    async ({ key, value, attribute }, { set }) => {
+      if (!attribute) return;
+
+      // Transform the relation to use set/connect/disconnect
+      const newRelation = await mapRelation((relation) => relation, value as any);
+
+      set(key, newRelation as any);
+    },
+    { schema: strapi.getModel(uid as any), getModel: strapi.getModel.bind(strapi) },
+    data
+  );
+};
+
+/**
  * Iterate over all relations of a data object and transform all relational document ids to entity ids.
  */
 const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source: Options) => {
@@ -130,4 +148,4 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
   );
 };
 
-export { transformDataIdsVisitor };
+export { transformDataIdsVisitor, standarizeRelations };

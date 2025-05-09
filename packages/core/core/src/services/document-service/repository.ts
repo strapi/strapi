@@ -1,6 +1,12 @@
-import { omit, assoc, merge, curry } from 'lodash/fp';
+import { omit, assoc, curry, get } from 'lodash/fp';
 
-import { async, contentTypes as contentTypesUtils, validate, errors } from '@strapi/utils';
+import {
+  async,
+  contentTypes as contentTypesUtils,
+  validate,
+  errors,
+  traverseEntity,
+} from '@strapi/utils';
 
 import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
@@ -18,6 +24,7 @@ import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
+import { standarizeRelations } from './transform/relations/transform/data-ids';
 
 const { validators } = validate;
 
@@ -186,19 +193,60 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
       populate: getDeepPopulate(uid, { relationalFields: ['id'] }),
     });
 
-    const clonedEntries = await async.map(
-      entriesToClone,
-      async.pipe(
-        validateParams,
-        omit(['id', 'createdAt', 'updatedAt']),
-        // assign new documentId
-        assoc('documentId', createDocumentId()),
-        // Merge new data into it
-        (data) => merge(data, queryParams.data),
-        (data) => entries.create({ ...queryParams, data, status: 'draft' })
-      )
-    );
+    const clonedEntries = await async.map(entriesToClone, async (entryToClone: any) => {
+      // Step 1: Create new entries with standardized original data
+      const newData = await standarizeRelations(
+        {
+          ...omit(['id', 'createdAt', 'updatedAt'], entryToClone),
+          documentId: createDocumentId(),
+        },
+        uid
+      );
 
+      const newEntry = await entries.create({
+        ...queryParams,
+        data: newData,
+        status: 'draft',
+      });
+
+      // Step 2 (optional): Update with queryParams.data if it exists, after some transformations
+      if (queryParams.data && Object.keys(queryParams.data).length > 0) {
+        const updateData = await async.pipe(
+          async (data) => {
+            /**
+             * If the id of a component of the entry to clone is provided in the data, then we need to
+             * keep an ID to ensure Strapi updates the component in the clone instead of creating a new one.
+             * But we need to replace the component ID with the one from the clone.
+             */
+            return traverseEntity(
+              (options, utils) => {
+                if (
+                  // Only manipulate components when we reach their "id" field
+                  options.schema.modelType === 'component' &&
+                  // Ensure options.path.raw (instead of options.key) to help type narrowing below
+                  options.path.raw?.endsWith('id') &&
+                  // Only manipulate if the id field matches the one for the entry that was cloned
+                  'id' in options.data &&
+                  options.data.id === get(options.path.raw, entryToClone)
+                ) {
+                  utils.set('id', get(options.path.raw, newEntry));
+                }
+              },
+              { schema: contentType, getModel },
+              data
+            );
+          },
+          // Use set/connect/disconnect syntax for relations
+          (data) => standarizeRelations(data, uid)
+        )(queryParams.data);
+
+        return entries.update(newEntry, { ...queryParams, data: updateData });
+      }
+
+      return newEntry;
+    });
+
+    // Only emit a create event, the optional update is an implementation detail
     clonedEntries.forEach(emitEvent('entry.create'));
 
     return { documentId: clonedEntries.at(0)?.documentId, entries: clonedEntries };

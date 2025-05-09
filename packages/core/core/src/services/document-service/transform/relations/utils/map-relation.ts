@@ -26,14 +26,6 @@ const toArray = (value: any) => {
  *
  * For consistency and ease of use, the response will always be an object with the following shape:
  * { set: [{...}], connect: [{...}], disconnect: [{...}] }
- *
- * @example
- * transformRelationData({
- *  onLongHand: (relation) => {
- *    // Change the id of the relation
- *    return { id: 'other' };
- *  },
- * }, relation)
  */
 const mapRelation = async (
   callback: (relation: any) => any,
@@ -54,7 +46,6 @@ const mapRelation = async (
   if (isNil(relation)) {
     return callback(relation);
   }
-
   // LongHand[] | ShortHand[]
   if (Array.isArray(relation)) {
     return async
@@ -82,7 +73,7 @@ const mapRelation = async (
       relation = { ...relation, set: toArray(set) };
     }
 
-    // { disconnect}
+    // { disconnect }
     if (relation.disconnect) {
       const disconnect: any = await mapRelation(callback, relation.disconnect, true);
       relation = { ...relation, disconnect: toArray(disconnect) };
