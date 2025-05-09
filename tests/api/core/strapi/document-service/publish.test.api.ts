@@ -193,5 +193,53 @@ describe('Document Service', () => {
         expect(['en', 'it']).toContain(article.locale);
       });
     });
+
+    testInTransaction(
+      'Publishing first time populates firstPublishedAt field which is equal to publishedAt field',
+      async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+        await publishArticle({ documentId: articleDb.documentId });
+
+        const publishedArticle = await findArticleDb({
+          documentId: articleDb.documentId,
+          locale: 'en',
+          publishedAt: { $notNull: true },
+        });
+
+        expect(publishedArticle).not.toBeNull();
+        expect(publishedArticle.firstPublishedAt).toBeDefined();
+        expect(publishedArticle.publishedAt).toEqual(publishedArticle.firstPublishedAt);
+      }
+    );
+
+    testInTransaction(
+      'Publishing second time does not change the firstPublishedAt date',
+      async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+        await publishArticle({ documentId: articleDb.documentId });
+
+        const publishedArticle = await findArticleDb({
+          documentId: articleDb.documentId,
+          locale: 'en',
+          publishedAt: { $notNull: true },
+        });
+
+        const firstPublishedAt = publishedArticle.firstPublishedAt;
+
+        await publishArticle({ documentId: articleDb.documentId });
+
+        const publishedArticle2 = await findArticleDb({
+          documentId: articleDb.documentId,
+          locale: 'en',
+          publishedAt: { $notNull: true },
+        });
+
+        expect(publishedArticle).not.toBeNull();
+        expect(publishedArticle.firstPublishedAt).toBeDefined();
+        expect(publishedArticle2.publishedAt).not.toBe(firstPublishedAt);
+      }
+    );
   });
 });

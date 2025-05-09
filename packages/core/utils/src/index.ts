@@ -26,5 +26,6 @@ export * as relations from './relations';
 export * as hooks from './hooks';
 export * as rulesEngine from './rules-engine';
 export * from './zod';
+export * as types from './types';
 
 export * from './primitives';
