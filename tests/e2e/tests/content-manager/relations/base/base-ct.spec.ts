@@ -7,14 +7,9 @@ import {
   verifyRelationsOrder,
   verifyRelation,
   disconnectRelation,
+  verifyRelationNotConnected,
 } from '../../../../utils/relation-utils';
 import { createContent, FieldValue, saveContent } from '../../../../utils/content-creation';
-import { verify } from '../../../../../../packages/plugins/users-permissions/server/strategies/users-permissions';
-
-const RELATION_SOURCE_URL =
-  /\/admin\/content-manager\/collection-types\/api::relation-source.relation-source\/(?!create)[^/]/;
-const RELATION_TARGET_URL =
-  /\/admin\/content-manager\/collection-types\/api::relation-target.relation-target\/(?!create)[^/]/;
 
 const createRelationSourceFields = (rawFields: {
   name?: string;
@@ -130,7 +125,7 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 2', 'Target 3']);
   });
 
-  test.skip('Delete a relation', async ({ page }) => {
+  test('Delete a relation', async ({ page }) => {
     // Prefill entry with two relations
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
@@ -140,6 +135,9 @@ test.describe('Relations - EditView', () => {
 
     // Save content
     await saveContent(page);
+
+    // Check the relation is gone
+    await verifyRelationNotConnected(page, 'oneToManyRel', 'Target 1');
 
     // Validate only one relation is left
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
