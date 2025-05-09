@@ -219,8 +219,8 @@ describe('Marketplace page - providers tab', () => {
     if (removeButton && removeButton.tagName === 'BUTTON') {
       await user.click(removeButton);
       await waitForReload();
-      expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-        `"?npmPackageType=provider&sort=name:asc&page=1"`
+      expect(screen.getByTestId('location')).toHaveTextContent(
+        '?npmPackageType=provider&sort=name:asc&page=1'
       );
     }
   });
@@ -278,8 +278,8 @@ describe('Marketplace page - providers tab', () => {
 
     await waitForReload();
 
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?npmPackageType=provider&sort=submissionDate:desc&page=1"`
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '?npmPackageType=provider&sort=submissionDate:desc&page=1'
     );
   });
 
@@ -322,22 +322,22 @@ describe('Marketplace page - providers tab', () => {
     // Can go to next page
     await user.click(getByText(/go to next page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?pageSize=24&page=2&npmPackageType=provider&sort=name%3Aasc"`
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '?pageSize=24&page=2&npmPackageType=provider&sort=name%3Aasc'
     );
 
     // Can go to previous page
     await user.click(getByText(/go to previous page/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?pageSize=24&page=1&npmPackageType=provider&sort=name%3Aasc"`
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '?pageSize=24&page=1&npmPackageType=provider&sort=name%3Aasc'
     );
 
     // Can go to specific page
     await user.click(getByText(/go to page 3/i).closest('a')!);
     await waitForReload();
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(
-      `"?pageSize=24&page=3&npmPackageType=provider&sort=name%3Aasc"`
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '?pageSize=24&page=3&npmPackageType=provider&sort=name%3Aasc'
     );
   });
 });

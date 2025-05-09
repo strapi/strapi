@@ -113,7 +113,7 @@ describe('ADMIN | new StrapiApp', () => {
       app.createSettingSection(section, links);
 
       expect(app.router.settings.foo).toBeDefined();
-      expect(app.router.settings.foo.links).toMatchInlineSnapshot(`[]`);
+      expect(app.router.settings.foo.links).toEqual([]);
     });
 
     it('should add a link correctly to the global section', () => {
@@ -129,17 +129,15 @@ describe('ADMIN | new StrapiApp', () => {
       app.addSettingsLink('global', link);
 
       expect(app.router.settings.global.links).toHaveLength(1);
-      expect(app.router.settings.global.links[0]).toMatchInlineSnapshot(`
-        {
-          "id": "bar",
-          "intlLabel": {
-            "defaultMessage": "bar",
-            "id": "bar",
-          },
-          "permissions": [],
-          "to": "bar",
-        }
-      `);
+      expect(app.router.settings.global.links[0]).toEqual({
+        id: 'bar',
+        intlLabel: {
+          defaultMessage: 'bar',
+          id: 'bar',
+        },
+        permissions: [],
+        to: 'bar',
+      });
     });
 
     it('should add an array of links correctly to the global section', () => {
@@ -157,19 +155,17 @@ describe('ADMIN | new StrapiApp', () => {
       app.addSettingsLinks('global', links);
 
       expect(app.router.settings.global.links).toHaveLength(1);
-      expect(app.router.settings.global.links).toMatchInlineSnapshot(`
-        [
-          {
-            "id": "bar",
-            "intlLabel": {
-              "defaultMessage": "bar",
-              "id": "bar",
-            },
-            "permissions": [],
-            "to": "bar",
+      expect(app.router.settings.global.links).toEqual([
+        {
+          id: 'bar',
+          intlLabel: {
+            defaultMessage: 'bar',
+            id: 'bar',
           },
-        ]
-      `);
+          permissions: [],
+          to: 'bar',
+        },
+      ]);
     });
 
     it('should warn if a user supplies an absolute link', () => {
@@ -191,11 +187,10 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addSettingsLinks('global', links);
 
-      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
-        [
-          "[bar]: the \`to\` property of your settings link is an absolute path. It should be relative to \`/settings\`. This has been corrected for you but will be removed in a future version of Strapi.",
-        ]
-      `);
+      expect(consoleSpy.mock.calls).toHaveLength(1);
+      expect(consoleSpy.mock.calls[0][0]).toBe(
+        '[bar]: the `to` property of your settings link is an absolute path. It should be relative to `/settings`. This has been corrected for you but will be removed in a future version of Strapi.'
+      );
 
       console.warn = originalWarn;
     });
@@ -219,11 +214,10 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addSettingsLinks('global', links);
 
-      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
-        [
-          "[bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.",
-        ]
-      `);
+      expect(consoleSpy.mock.calls).toHaveLength(1);
+      expect(consoleSpy.mock.calls[0][0]).toBe(
+        '[bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: `Component: () => import(path)` ensuring you return a default export instead.'
+      );
 
       console.warn = originalWarn;
     });
@@ -460,17 +454,17 @@ describe('ADMIN | new StrapiApp', () => {
       app.addMenuLink(link);
 
       expect(app.router.menu[0]).toBeDefined();
-      expect(app.router.menu[0]).toMatchInlineSnapshot(`
-        {
-          "icon": [Function],
-          "intlLabel": {
-            "defaultMessage": "bar",
-            "id": "bar",
-          },
-          "permissions": [],
-          "to": "plugins/bar",
-        }
-      `);
+      expect(app.router.menu[0]).toEqual({
+        icon: expect.any(Function),
+        intlLabel: {
+          defaultMessage: 'bar',
+          id: 'bar',
+        },
+        permissions: [],
+        to: 'plugins/bar',
+      });
+      // Verify the icon function exists
+      expect(typeof app.router.menu[0].icon).toBe('function');
     });
 
     it('should warn if a user supplies an absolute link', () => {
@@ -491,11 +485,10 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addMenuLink(link);
 
-      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
-        [
-          "[bar]: the \`to\` property of your menu link is an absolute path, it should be relative to the root of the application. This has been corrected for you but will be removed in a future version of Strapi.",
-        ]
-      `);
+      expect(consoleSpy.mock.calls).toHaveLength(1);
+      expect(consoleSpy.mock.calls[0][0]).toBe(
+        '[bar]: the `to` property of your menu link is an absolute path, it should be relative to the root of the application. This has been corrected for you but will be removed in a future version of Strapi.'
+      );
 
       console.warn = originalWarn;
     });
@@ -518,11 +511,10 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addMenuLink(link);
 
-      expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
-        [
-          "[bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.",
-        ]
-      `);
+      expect(consoleSpy.mock.calls).toHaveLength(1);
+      expect(consoleSpy.mock.calls[0][0]).toBe(
+        '[bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: `Component: () => import(path)` ensuring you return a default export instead.'
+      );
 
       console.warn = originalWarn;
     });

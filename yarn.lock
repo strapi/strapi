@@ -9922,12 +9922,14 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@types/http-errors": "npm:2.0.4"
+    "@types/json-logic-js": "npm:2.0.8"
     "@types/koa": "npm:2.13.4"
     "@types/node": "npm:18.19.24"
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.13.0-beta.1"
     execa: "npm:5.1.1"
     http-errors: "npm:2.0.0"
+    json-logic-js: "npm:2.0.5"
     koa: "npm:2.15.4"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
@@ -10952,6 +10954,13 @@ __metadata:
   version: 3.0.0
   resolution: "@types/json-buffer@npm:3.0.0"
   checksum: 10c0/84d992d7b272cff80936706017e6f24f4e1cfd27f4d0fb815cfb407d582bfe5247dca8c05b300040405866b3418e0f8f03a674f10cd20bc45ad91ab623447a3e
+  languageName: node
+  linkType: hard
+
+"@types/json-logic-js@npm:2.0.8":
+  version: 2.0.8
+  resolution: "@types/json-logic-js@npm:2.0.8"
+  checksum: 10c0/b1fc0b39242b8f1f939c86f47bfda213e1eb57686ee4dfbe11057df88fad0dbe0abc3582b72429975e8fb07b0267959d98341e5079ba945345931973538d2f43
   languageName: node
   linkType: hard
 
@@ -21866,6 +21875,13 @@ __metadata:
     json-pointer-test: bin/json-pointer-test.js
     json-unpack: bin/json-unpack.js
   checksum: 10c0/e147eceae446a84521d60c36326c1528268aafbaaedfc0a79a25207ace9da23dc1b599be4b5a90ca84ff1d01eda1b29b037abc0f970fef7cff4ab1e9db20ba6b
+  languageName: node
+  linkType: hard
+
+"json-logic-js@npm:2.0.5":
+  version: 2.0.5
+  resolution: "json-logic-js@npm:2.0.5"
+  checksum: 10c0/c80d96a9f704dac2f4488c7119d9c94cbf67adbd93cb47eaa5b7eadc4947f18ed6d62fd5555f245cc2f87525f9e8d7bd5f70bd9e7fba2c70366e63bd68010f23
   languageName: node
   linkType: hard
 
