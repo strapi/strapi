@@ -51,7 +51,7 @@ const verifyUidTargetField: z.SuperRefinement<
     const { properties, action } = attribute;
 
     if (properties.type === 'uid' && properties.targetField) {
-      const targetAttr = attributes.find((attr) => snakeCase(attr.name) === properties.targetField);
+      const targetAttr = attributes.find((attr) => attr.name === properties.targetField);
 
       if (!targetAttr) {
         // NOTE: on update we are setting it to undefined later in the process instead to handle renames
