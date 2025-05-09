@@ -97,35 +97,49 @@ export async function reorderRelation(
   const dragHandle = page.getByTestId(`relation-drag-handle-${fieldName}-${relationToMove}`);
   await dragHandle.scrollIntoViewIfNeeded();
 
-  // Get the target element
+  // Get the source and target items (not just the handle)
+  const sourceItem = page.getByTestId(`relation-item-${fieldName}-${relationToMove}`);
   const targetItem = page.getByTestId(`relation-item-${fieldName}-${targetRelation}`);
   await targetItem.scrollIntoViewIfNeeded();
 
   // Get positions
-  const sourceBox = await dragHandle.boundingBox();
+  const sourceBox = await sourceItem.boundingBox();
   const targetBox = await targetItem.boundingBox();
+  const handleBox = await dragHandle.boundingBox();
 
-  if (!sourceBox || !targetBox) {
+  if (!sourceBox || !targetBox || !handleBox) {
     throw new Error('Could not determine element positions for drag and drop');
   }
 
-  // Calculate drag target position based on whether we want before or after
-  const margin = 10;
-  const yOffset =
-    position === 'before'
-      ? targetBox.y - sourceBox.y + margin // Move to top of target
-      : targetBox.y + targetBox.height - sourceBox.y; // Move to bottom of target
+  // Calculate start position (center of drag handle)
+  const startX = handleBox.x + handleBox.width / 2;
+  const startY = handleBox.y + handleBox.height / 2;
 
-  // Perform the drag operation
-  await dragHandle.hover();
+  // Calculate target position
+  const targetY =
+    position === 'before'
+      ? targetBox.y + 5 // 5px into the target item from the top
+      : targetBox.y + targetBox.height - 5; // 5px from the bottom of target item
+
+  // Perform the drag operation with proper timing
+  await page.mouse.move(startX, startY);
   await page.mouse.down();
-  await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + yOffset);
+  await page.waitForTimeout(100); // Short pause after mouse down
+
+  // Move in small steps for more reliable dragging
+  const steps = 10;
+  const diffY = targetY - startY;
+
+  for (let i = 1; i <= steps; i++) {
+    await page.mouse.move(startX, startY + (diffY * i) / steps);
+    await page.waitForTimeout(20);
+  }
+
+  await page.waitForTimeout(10); // Short pause before releasing
   await page.mouse.up();
 
-  // Wait a moment for the UI to update
-  await page.waitForTimeout(20);
-
-  // No explicit verification here as the order is typically verified after saving
+  // Wait for any animations or state updates to complete
+  await page.waitForTimeout(300);
 }
 
 /**

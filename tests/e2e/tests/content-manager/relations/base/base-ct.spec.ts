@@ -143,7 +143,7 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
   });
 
-  test.skip('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
+  test('Create multiple relations and reorder them using drag and drop', async ({ page }) => {
     // Create content with multiple relations in specific order
     const fields = createRelationSourceFields({
       oneToManyRel: ['Target 1', 'Target 2', 'Target 3'],
