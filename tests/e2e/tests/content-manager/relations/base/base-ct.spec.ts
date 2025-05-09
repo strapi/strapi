@@ -190,7 +190,7 @@ test.describe('Relations - EditView', () => {
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 1', 'Target 3', 'Target 2']);
   });
 
-  test.skip('Delete a relation and reorder the remaining relations', async ({ page }) => {
+  test('Delete a relation and reorder the remaining relations', async ({ page }) => {
     // Prefill entry with two relations
     const fields = createRelationSourceFields({ oneToManyRel: ['Target 1', 'Target 2'] });
     await createContent(page, 'Relation Source', fields, { save: true, verify: true });
@@ -200,6 +200,9 @@ test.describe('Relations - EditView', () => {
 
     // Save content
     await saveContent(page);
+
+    // Check the relation is gone
+    await verifyRelationNotConnected(page, 'oneToManyRel', 'Target 1');
 
     // Validate only one relation is left
     await verifyRelationsOrder(page, 'oneToManyRel', ['Target 2']);
