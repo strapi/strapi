@@ -207,6 +207,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     currentFile.filepath = file.filepath;
     currentFile.getStream = () => fs.createReadStream(file.filepath);
 
+    await getService('provider').checkFileSize(currentFile);
+
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
       .plugin('upload')
       .service('image-manipulation');
@@ -523,6 +525,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function getSettings() {
     const res = await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).get({});
+
+    const { limitConcurrentUploads } = strapi.config.get<Config>('plugin::upload', {
+      limitConcurrentUploads: false,
+    } as Config);
+
+    _.assign(res, { limitConcurrentUploads });
 
     return res as Settings | null;
   }
