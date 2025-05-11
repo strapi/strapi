@@ -1,11 +1,17 @@
+import { OpenAPIV3 } from 'openapi-types';
+import { z } from 'zod';
 import type { DocumentContext } from '../types';
+import { toComponentsPath } from '../utils/zod';
 import type { PostProcessor } from './types';
 
 export class ComponentsWriter implements PostProcessor {
   postProcess(context: DocumentContext): void {
-    const { output, registries } = context;
+    const { output } = context;
 
-    // TODO: not sure what's going on with components
-    output.data.components = registries.components.definitions;
+    const { schemas } = z.toJSONSchema(z.globalRegistry, {
+      uri: toComponentsPath,
+    }) as OpenAPIV3.ComponentsObject;
+
+    output.data.components = { schemas };
   }
 }

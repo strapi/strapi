@@ -87,8 +87,9 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
       }, z.object({}));
 
     const defaultSchema = z.object({ documentId: this.documentID, id: z.number() });
+    const schema = defaultSchema.merge(attributesSchema);
 
-    return defaultSchema.merge(attributesSchema);
+    return schema;
   }
 
   /**

@@ -19,7 +19,7 @@ export class BodyAssembler implements Assembler.Operation {
     const content: Record<string, OpenAPIV3.MediaTypeObject> = {};
 
     for (const [media, zodSchema] of Object.entries(body)) {
-      content[media] = { schema: zodToOpenAPI(zodSchema) };
+      content[media] = { schema: zodToOpenAPI(zodSchema) as any };
     }
 
     output.data.requestBody = { content };

@@ -25093,34 +25093,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openapi-simple@workspace:examples/openapi-simple":
-  version: 0.0.0-use.local
-  resolution: "openapi-simple@workspace:examples/openapi-simple"
-  dependencies:
-    "@strapi/icons": "npm:2.0.0-rc.23"
-    "@strapi/plugin-color-picker": "workspace:*"
-    "@strapi/plugin-documentation": "workspace:*"
-    "@strapi/plugin-graphql": "workspace:*"
-    "@strapi/plugin-sentry": "workspace:*"
-    "@strapi/plugin-users-permissions": "workspace:*"
-    "@strapi/provider-email-mailgun": "workspace:*"
-    "@strapi/provider-upload-aws-s3": "workspace:*"
-    "@strapi/provider-upload-cloudinary": "workspace:*"
-    "@strapi/strapi": "workspace:*"
-    better-sqlite3: "npm:11.3.0"
-    lodash: "npm:4.17.21"
-    mysql2: "npm:3.9.8"
-    passport-google-oauth2: "npm:0.2.0"
-    pg: "npm:8.11.1"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.1"
-    react-intl: "npm:6.6.2"
-    react-router-dom: "npm:6.22.3"
-    strapi-plugin-workspace-plugin: "workspace:*"
-    styled-components: "npm:6.1.8"
-  languageName: unknown
-  linkType: soft
-
 "openapi-types@npm:12.1.3":
   version: 12.1.3
   resolution: "openapi-types@npm:12.1.3"

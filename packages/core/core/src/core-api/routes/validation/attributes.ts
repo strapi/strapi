@@ -55,9 +55,9 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'biginteger': {
       const { writable, required, min, max, default: defaultValue } = attribute;
 
-      const schema = augmentSchema(z.bigint(), [
-        (schema) => (min !== undefined ? schema.min(min as unknown as bigint) : schema),
-        (schema) => (max !== undefined ? schema.max(max as unknown as bigint) : schema),
+      const schema = augmentSchema(z.string(), [
+        (schema) => (min !== undefined ? schema.min(min as unknown as number) : schema),
+        (schema) => (max !== undefined ? schema.max(max as unknown as number) : schema),
         maybeRequired(required),
         maybeWithDefault(defaultValue),
         maybeReadonly(writable),
@@ -81,28 +81,42 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
       return schema.describe('A boolean field');
     }
     case 'component': {
-      // Extract component attribute properties
-      const { writable, required, repeatable, min, max, component: componentUid } = attribute;
-
-      // Create a validator for this specific component type
-      const componentValidator = new CoreComponentRouteValidator(strapi, componentUid);
-
-      // Get the validation schema for this component
-      const componentSchema = componentValidator.entry;
-
-      // Check if this component schema is already registered globally
-      const hasComponentSchema = z.globalRegistry._idmap.has(componentUid);
-
-      // If not registered yet, register it with the component's unique ID
-      if (!hasComponentSchema) {
-        componentSchema.register(z.globalRegistry, {
-          id: componentUid,
-        });
+      // Extract writable and required flags from the attribute
+      if (!('target' in attribute)) {
+        return z.any();
       }
 
-      // For repeatable components, wrap schema in array
-      // For single components, use component schema directly
+      const { _idmap } = z.globalRegistry;
+
+      const set = (id: string, schema: z.ZodType) => {
+        if (_idmap.has(id)) {
+          _idmap.delete(id);
+        }
+
+        z.globalRegistry.add(schema, { id });
+      };
+
+      const { writable, required, min, max, component, repeatable } = attribute;
+
+      const existsInGlobalRegistry = _idmap.has(component);
+
+      let componentSchema: z.ZodType;
+
+      if (existsInGlobalRegistry) {
+        componentSchema = _idmap.get(component) as z.ZodType;
+      } else {
+        set(component, z.any());
+
+        const validator = new CoreComponentRouteValidator(strapi, component);
+        const schema = validator.entry;
+
+        set(component, schema);
+
+        componentSchema = schema;
+      }
+
       const baseSchema = repeatable ? z.array(componentSchema) : componentSchema;
+
       const schema = augmentSchema(baseSchema, [
         (schema) => (min !== undefined && schema instanceof z.ZodArray ? schema.min(min) : schema),
         (schema) => (max !== undefined && schema instanceof z.ZodArray ? schema.max(max) : schema),
@@ -115,7 +129,7 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'date': {
       const { writable, required, default: defaultValue } = attribute;
 
-      const schema = augmentSchema(z.date(), [
+      const schema = augmentSchema(z.string(), [
         maybeRequired(required),
         maybeWithDefault(defaultValue),
         maybeReadonly(writable),
@@ -126,7 +140,7 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'datetime': {
       const { writable, required, default: defaultValue } = attribute;
 
-      const baseSchema = z.string().datetime();
+      const baseSchema = z.string();
 
       const schema = augmentSchema(baseSchema, [
         maybeRequired(required),
@@ -241,40 +255,41 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     // TODO(zodV4): handle polymorphic relations using discriminated unions
     case 'relation': {
       // Extract writable and required flags from the attribute
-      const { writable, required } = attribute;
-      // Get the target content type UID from the attribute, handling potential undefined
-      const targetUid = (attribute as { target?: UID.ContentType })?.target;
-
-      // Check if this is a many-to-many or one-to-many relation
-      const isToMany = relations.isAnyToMany(attribute);
-
-      // Handle case where target content type is not set
-      if (!targetUid || targetUid.length === 0) {
-        // TODO will happen with morphTo-xxx ???
-        console.error('Relation target is not set', attribute);
-        // Return array of any for many relations, any for single relations
-        return isToMany ? z.array(z.any()) : z.any();
+      if (!('target' in attribute)) {
+        return z.any();
       }
 
-      // Create validator for the target content type
-      const contentTypeValidator = new CoreContentTypeRouteValidator(
-        strapi,
-        targetUid as UID.ContentType
-      );
-      // Get the schema for the target content type
-      const contentTypeSchema = contentTypeValidator.data;
-      // Check if schema is already registered to avoid duplicates
-      const hasContentTypeSchema = z.globalRegistry._idmap.has(targetUid);
+      const { _idmap } = z.globalRegistry;
 
-      // Register the schema if not already registered
-      if (!hasContentTypeSchema) {
-        contentTypeSchema.register(z.globalRegistry, {
-          id: targetUid,
-        });
+      const set = (id: string, schema: z.ZodType) => {
+        if (_idmap.has(id)) {
+          _idmap.delete(id);
+        }
+
+        z.globalRegistry.add(schema, { id });
+      };
+
+      const { writable, required, target } = attribute as Schema.Attribute.RelationWithTarget;
+
+      const existsInGlobalRegistry = _idmap.has(target);
+
+      let targetSchema: z.ZodType;
+
+      if (existsInGlobalRegistry) {
+        targetSchema = _idmap.get(target) as z.ZodType;
+      } else {
+        set(target, z.any());
+
+        const validator = new CoreContentTypeRouteValidator(strapi, target);
+        const schema = validator.document;
+
+        set(target, schema);
+
+        targetSchema = schema;
       }
 
-      // Create array schema for many relations, single schema for one relations
-      const baseSchema = isToMany ? z.array(contentTypeSchema) : contentTypeSchema;
+      const baseSchema = relations.isAnyToMany(attribute) ? z.array(targetSchema) : targetSchema;
+
       // Add required and readonly constraints based on attribute flags
       const schema = augmentSchema(baseSchema, [maybeRequired(required), maybeReadonly(writable)]);
 
@@ -384,9 +399,9 @@ export const mapAttributeToInputSchema = (attribute: Schema.Attribute.AnyAttribu
     case 'biginteger': {
       const { required, min, max, default: defaultValue } = attribute;
 
-      const schema = augmentSchema(z.bigint(), [
-        (schema) => (min !== undefined ? schema.min(min as unknown as bigint) : schema),
-        (schema) => (max !== undefined ? schema.max(max as unknown as bigint) : schema),
+      const schema = augmentSchema(z.string(), [
+        (schema) => (min !== undefined ? schema.min(min as unknown as number) : schema),
+        (schema) => (max !== undefined ? schema.max(max as unknown as number) : schema),
         maybeRequired(required),
         maybeWithDefault(defaultValue),
       ]);
@@ -426,7 +441,7 @@ export const mapAttributeToInputSchema = (attribute: Schema.Attribute.AnyAttribu
     case 'date': {
       const { required, default: defaultValue } = attribute;
 
-      const schema = augmentSchema(z.date(), [
+      const schema = augmentSchema(z.string(), [
         maybeRequired(required),
         maybeWithDefault(defaultValue),
       ]);
@@ -436,9 +451,7 @@ export const mapAttributeToInputSchema = (attribute: Schema.Attribute.AnyAttribu
     case 'datetime': {
       const { required, default: defaultValue } = attribute;
 
-      const baseSchema = z.string().datetime();
-
-      const schema = augmentSchema(baseSchema, [
+      const schema = augmentSchema(z.string(), [
         maybeRequired(required),
         maybeWithDefault(defaultValue),
       ]);

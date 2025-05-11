@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import * as z from 'zod';
 
 import type { OpenAPIV3 } from 'openapi-types';
@@ -33,12 +34,35 @@ import type { OpenAPIV3 } from 'openapi-types';
 
 export const zodToOpenAPI = (
   zodSchema: z.ZodType
-): OpenAPIV3.SchemaObject | z.z.core.JSONSchema.BaseSchema | undefined => {
-  const jsonSchema = z.toJSONSchema(zodSchema);
+): OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject => {
+  try {
+    const id = randomUUID();
+    const registry = z.registry<{ id: string }>();
 
-  // TODO: without the use of '@asteasolutions/zod-to-openapi' we need a new way
-  // to map this jsonSchema to an OpenAPI compliant Schema Object
-  // The purpose of this POC is to show how zod v4 can be used to handle
-  // references (e.g. relations and components)
-  return jsonSchema;
+    // Add the schema to the local registry with a custom, unique ID
+    registry.add(zodSchema, { id });
+
+    // Copy the global registry definitions into the local registry to make sure references are resolved
+    // This prevent "__shared" definitions from being created
+    for (const [key, value] of z.globalRegistry._idmap) {
+      registry.add(value, { id: key });
+    }
+
+    // Generate the schemas and only return the one we want, transform the URI path to be OpenAPI compliant
+    const { schemas } = z.toJSONSchema(registry, { uri: toComponentsPath });
+
+    // TODO: make sure it's compliant
+    return schemas[id] as OpenAPIV3.SchemaObject;
+  } catch (e) {
+    console.log(e);
+    throw new Error("Couldn't transform the zod schema into an OpenAPI schema");
+  }
 };
+
+/**
+ * Generates a path string for referencing a component schema by its identifier.
+ *
+ * @param id - The identifier of the component schema.
+ * @returns The constructed path string for the specified component schema.
+ */
+export const toComponentsPath = (id: string) => `#/components/schemas/${id}`;

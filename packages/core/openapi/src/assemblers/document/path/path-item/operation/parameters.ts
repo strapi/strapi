@@ -38,7 +38,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
 
     for (const [name, zodSchema] of Object.entries(params)) {
       const required = !zodSchema.isOptional();
-      const schema = zodToOpenAPI(zodSchema);
+      const schema = zodToOpenAPI(zodSchema) as any;
 
       pathParams.push({ name: name, in: 'path', required, schema });
     }
@@ -57,7 +57,7 @@ export class OperationParametersAssembler implements Assembler.Operation {
 
     for (const [name, zodSchema] of Object.entries(query)) {
       const required = !zodSchema.isOptional();
-      const schema = zodToOpenAPI(zodSchema);
+      const schema = zodToOpenAPI(zodSchema) as any;
       const param: QueryParameterObject = { name: name, in: 'query', required, schema };
 
       // In Strapi, query params are always interpreted as query strings, which isn't supported by the specification
