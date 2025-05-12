@@ -48,7 +48,7 @@ export default {
       searchable: false,
     },
     encryptedKey: {
-      type: 'string',
+      type: 'text',
       minLength: 1,
       configurable: false,
       required: false,
