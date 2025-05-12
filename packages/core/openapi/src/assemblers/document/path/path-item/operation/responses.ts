@@ -26,9 +26,11 @@ export class OperationResponsesAssembler implements Assembler.Operation {
     }
 
     if (route.response) {
+      const schema = zodToOpenAPI(route.response);
+
       responses[200] = {
         description: 'OK',
-        content: { 'application/json': { schema: zodToOpenAPI(route.response) as any } },
+        content: { 'application/json': { schema } },
       };
     }
 

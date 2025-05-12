@@ -57,7 +57,7 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
    * ```
    */
   get documentID() {
-    return z.string().uuid().describe('The document ID, represented by a UUID');
+    return z.uuid().describe('The document ID, represented by a UUID');
   }
 
   /**
@@ -80,16 +80,21 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
 
     const attributesSchema = entries
       // Remove passwords from the attribute list
+      // TODO: Make sure we're not leaking other fields like that
       .filter(([, attribute]) => !['password'].includes(attribute.type))
       // Merge all attributes into a single schema
       .reduce((acc, [attributeName, attribute]) => {
-        return acc.merge(z.object({ [attributeName]: mapAttributeToSchema(attribute) }));
+        return acc.extend({
+          get [attributeName]() {
+            return mapAttributeToSchema(attribute);
+          },
+        });
       }, z.object({}));
 
-    const defaultSchema = z.object({ documentId: this.documentID, id: z.number() });
-    const schema = defaultSchema.merge(attributesSchema);
-
-    return schema;
+    return attributesSchema.extend({
+      documentId: this.documentID,
+      id: z.number(),
+    });
   }
 
   /**
@@ -221,30 +226,25 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
   get data() {
     const { _scalarFields, _populatableFields, _schema } = this;
 
-    const scalarEntries = Object.entries(_scalarFields);
-    const populatableEntries = Object.entries(_populatableFields);
-
     const isWritableAttribute = ([attributeName]: [string, Schema.Attribute.AnyAttribute]) => {
       return contentTypes.isWritableAttribute(_schema, attributeName);
     };
 
-    const scalarSchema = scalarEntries
-      // Remove non-writable attributes
-      .filter(isWritableAttribute)
-      // Merge all attributes into a single schema
-      .reduce((acc, [attributeName, attribute]) => {
-        return acc.merge(z.object({ [attributeName]: mapAttributeToInputSchema(attribute) }));
-      }, z.object({}));
+    const entries = Object.entries({ ..._scalarFields, ..._populatableFields });
 
-    const populatableSchema = populatableEntries
-      // Remove non-writable attributes
-      .filter(isWritableAttribute)
-      // Merge all attributes into a single schema
-      .reduce((acc, [attributeName, attribute]) => {
-        return acc.merge(z.object({ [attributeName]: mapAttributeToInputSchema(attribute) }));
-      }, z.object({}));
-
-    return z.object({}).merge(scalarSchema).merge(populatableSchema);
+    return (
+      entries
+        // Remove non-writable attributes
+        .filter(isWritableAttribute)
+        // Combine schemas
+        .reduce((acc, [attributeName, attribute]) => {
+          return acc.extend({
+            get [attributeName]() {
+              return mapAttributeToInputSchema(attribute);
+            },
+          });
+        }, z.object())
+    );
   }
 
   get query() {

@@ -1,4 +1,4 @@
-import { UID, type Schema } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 import { relations } from '@strapi/utils';
 import { z } from 'zod';
@@ -81,11 +81,6 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
       return schema.describe('A boolean field');
     }
     case 'component': {
-      // Extract writable and required flags from the attribute
-      if (!('target' in attribute)) {
-        return z.any();
-      }
-
       const { _idmap } = z.globalRegistry;
 
       const set = (id: string, schema: z.ZodType) => {
