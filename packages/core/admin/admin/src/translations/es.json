@@ -530,6 +530,7 @@
   "global.documentation": "Documentación",
   "global.enabled": "Habilitado",
   "global.finish": "Terminar",
+  "global.localeToggle.label": "Selecione el idioma de la interfaz",
   "global.marketplace": "Marketplace",
   "global.name": "Nombre",
   "global.none": "Ninguno",
