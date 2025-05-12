@@ -602,8 +602,12 @@ const useDocumentActions: UseDocumentActions = () => {
 
           return { error: res.error };
         }
-
-        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+        });
 
         toggleNotification({
           type: 'success',
@@ -627,7 +631,16 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, setCurrentStep, toggleNotification, trackUsage]
+    [
+      createDocument,
+      formatAPIError,
+      formatMessage,
+      fromPreview,
+      fromRelationModal,
+      setCurrentStep,
+      toggleNotification,
+      trackUsage,
+    ]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
