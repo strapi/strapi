@@ -5,6 +5,7 @@ import link from './link';
 import login from './login';
 import logout from './logout';
 import createProject from './create-project';
+import { createGrowthSsoTrial } from './create-growth-sso-trial';
 import listProjects from './list-projects';
 import listEnvironments from './environment/list';
 import linkEnvironment from './environment/link';
@@ -21,6 +22,8 @@ export const cli = {
   listProjects,
   listEnvironments,
 };
+
+export { createGrowthSsoTrial };
 
 const cloudCommands = [
   deployProject,
