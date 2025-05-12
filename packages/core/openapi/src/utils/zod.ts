@@ -54,7 +54,6 @@ export const zodToOpenAPI = (
     // TODO: make sure it's compliant
     return schemas[id] as OpenAPIV3.SchemaObject;
   } catch (e) {
-    console.log(e);
     throw new Error("Couldn't transform the zod schema into an OpenAPI schema");
   }
 };

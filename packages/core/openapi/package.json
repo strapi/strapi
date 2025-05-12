@@ -56,7 +56,6 @@
     "npm": ">=6.0.0"
   },
   "dependencies": {
-    "@asteasolutions/zod-to-openapi": "7.3.0",
     "@strapi/types": "5.13.0",
     "debug": "4.3.4",
     "openapi-types": "12.1.3",
