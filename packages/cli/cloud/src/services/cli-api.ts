@@ -119,7 +119,7 @@ export async function cloudApiFactory(
 ): Promise<CloudApiService> {
   const localConfig = await getLocalConfig();
   const customHeaders = {
-    'x-device-id': localConfig.deviceId,
+    'x-device-id': localConfig.installId,
     'x-app-version': packageJson.version,
     'x-os-name': os.type(),
     'x-os-version': os.version(),

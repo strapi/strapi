@@ -21,6 +21,8 @@ export type CloudCliConfig = {
     questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>;
     defaults: Partial<ProjectAnswers>;
     introText: string;
+    userChoice?: object;
+    reference?: string;
   };
   projectDeployment: {
     confirmationText: string;
@@ -34,6 +36,7 @@ export type CloudCliConfig = {
 export interface CLIContext {
   cwd: string;
   logger: Logger;
+  promptExperiment?: string;
 }
 
 export type StrapiCloudCommand = (params: {

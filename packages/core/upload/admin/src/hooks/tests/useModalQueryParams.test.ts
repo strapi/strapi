@@ -20,9 +20,7 @@ describe('useModalQueryParams', () => {
     const { result } = renderHook(() => useModalQueryParams());
 
     expect(result.current[0].queryObject).toStrictEqual(FIXTURE_QUERY);
-    expect(result.current[0].rawQuery).toMatchInlineSnapshot(
-      `"page=1&sort=updatedAt:DESC&pageSize=10"`
-    );
+    expect(result.current[0].rawQuery).toEqual('page=1&sort=updatedAt:DESC&pageSize=10');
 
     expect(result.current[1]).toStrictEqual({
       onChangeFilters: expect.any(Function),
