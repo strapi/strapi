@@ -4,6 +4,7 @@ import { OperationIDAssembler } from './operation-id';
 import { OperationParametersAssembler } from './parameters';
 import { OperationResponsesAssembler } from './responses';
 import { OperationTagsAssembler } from './tags';
+import { BodyAssembler } from './body';
 
 export class OperationAssemblerFactory {
   createAll(): Assembler.Operation[] {
@@ -12,6 +13,7 @@ export class OperationAssemblerFactory {
       this._createParametersAssembler(),
       this._createResponsesAssembler(),
       this._createTagsAssembler(),
+      this._createBodyAssembler(),
     ];
   }
 
@@ -29,5 +31,9 @@ export class OperationAssemblerFactory {
 
   private _createTagsAssembler() {
     return new OperationTagsAssembler();
+  }
+
+  private _createBodyAssembler() {
+    return new BodyAssembler();
   }
 }

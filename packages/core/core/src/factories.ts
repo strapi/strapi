@@ -2,6 +2,7 @@ import { pipe, omit, pick } from 'lodash/fp';
 import type { Core, UID, Utils } from '@strapi/types';
 
 import { createController } from './core-api/controller';
+import { CoreContentTypeRouteValidator } from './core-api/routes/validation';
 import { createService } from './core-api/service';
 import { createRoutes } from './core-api/routes';
 
@@ -91,13 +92,13 @@ function createCoreRouter<T extends UID.ContentType>(
       if (!routes) {
         const contentType = strapi.contentType(uid);
 
-        const defaultRoutes = createRoutes({ contentType });
+        const defaultRoutes = createRoutes({ contentType, strapi });
         const keys = Object.keys(defaultRoutes) as Array<keyof typeof defaultRoutes>;
 
         keys.forEach((routeName) => {
           const defaultRoute = defaultRoutes[routeName];
 
-          Object.assign(defaultRoute.config, config[routeName] || {});
+          defaultRoute.config = (config[routeName] ?? {}) as Core.RouteConfig;
         });
 
         const selectedRoutes = pipe(
@@ -113,8 +114,21 @@ function createCoreRouter<T extends UID.ContentType>(
   };
 }
 
+const createCoreValidator = <T extends UID.ContentType>(
+  uid: T,
+  strapi: Core.Strapi
+): CoreContentTypeRouteValidator => {
+  return new CoreContentTypeRouteValidator(strapi, uid);
+};
+
 const isCustomController = <T extends Core.Controller>(controller: T): boolean => {
   return symbols.CustomController in controller;
 };
 
-export { createCoreController, createCoreService, createCoreRouter, isCustomController };
+export {
+  createCoreController,
+  createCoreService,
+  createCoreRouter,
+  createCoreValidator,
+  isCustomController,
+};
