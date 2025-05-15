@@ -42,7 +42,7 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
 
 const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const model = document.schema?.modelName;
+  const model = document.schema?.uid;
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
