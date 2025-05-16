@@ -48,16 +48,14 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "data": {
-            "content": "the brown fox jumps over the lazy dog",
-            "documentId": "12345",
-            "id": 2,
-            "title": "test",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        data: {
+          content: 'the brown fox jumps over the lazy dog',
+          documentId: '12345',
+          id: 2,
+          title: 'test',
+        },
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -92,15 +90,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't clone entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't clone entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't clone entry.");
     });
@@ -126,16 +122,14 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "data": {
-            "content": "the brown fox jumps over the lazy dog",
-            "documentId": "12345",
-            "id": 1,
-            "title": "test",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        data: {
+          content: 'the brown fox jumps over the lazy dog',
+          documentId: '12345',
+          id: 1,
+          title: 'test',
+        },
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -168,15 +162,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-            {
-              "error": {
-                "details": {},
-                "message": "Couldn't create entry.",
-                "name": "ApplicationError",
-              },
-            }
-          `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't create entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't create entry.");
     });
@@ -198,13 +190,11 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -233,15 +223,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-                {
-                  "error": {
-                    "details": {},
-                    "message": "Couldn't delete entry.",
-                    "name": "ApplicationError",
-                  },
-                }
-              `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't delete entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't delete entry.");
     });
@@ -265,11 +253,9 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "count": 2,
-        }
-      `);
+      expect(response).toEqual({
+        count: 2,
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -298,15 +284,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-                {
-                  "error": {
-                    "details": {},
-                    "message": "Couldn't delete entries.",
-                    "name": "ApplicationError",
-                  },
-                }
-              `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't delete entries.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't delete entries.");
     });
@@ -328,13 +312,11 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -363,15 +345,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't discard entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't discard entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't discard entry.");
     });
@@ -393,13 +373,11 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -428,15 +406,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-                {
-                  "error": {
-                    "details": {},
-                    "message": "Couldn't delete entry.",
-                    "name": "ApplicationError",
-                  },
-                }
-              `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't delete entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't delete entry.");
     });
@@ -463,14 +439,12 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "publishedAt": "2024-01-23T16:23:38.948Z",
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        publishedAt: '2024-01-23T16:23:38.948Z',
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -504,15 +478,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't publish entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't publish entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't publish entry.");
     });
@@ -540,19 +512,17 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "data": {
-            "content": "the brown fox jumps over the lazy dog",
-            "createdAt": "",
-            "documentId": "12345",
-            "id": 1,
-            "name": "Entry 1",
-            "publishedAt": "",
-            "updatedAt": "",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        data: {
+          content: 'the brown fox jumps over the lazy dog',
+          createdAt: '',
+          documentId: '12345',
+          id: 1,
+          name: 'Entry 1',
+          publishedAt: '',
+          updatedAt: '',
+        },
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -587,15 +557,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't update entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't update entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't update entry.");
     });
@@ -617,14 +585,12 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "documentId": "12345",
-          "id": 1,
-          "publishedAt": null,
-          "title": "test",
-        }
-      `);
+      expect(response).toEqual({
+        documentId: '12345',
+        id: 1,
+        publishedAt: null,
+        title: 'test',
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -653,15 +619,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't unpublish entry.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          details: {},
+          message: "Couldn't unpublish entry.",
+          name: 'ApplicationError',
+        },
+      });
 
       await screen.findByText("Couldn't unpublish entry.");
     });
@@ -682,11 +646,9 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-          {
-            "count": 2,
-          }
-      `);
+      expect(response).toEqual({
+        count: 2,
+      });
     });
 
     it('should return the errors when unsuccessful', async () => {
@@ -714,15 +676,13 @@ describe('useDocumentActions', () => {
         response = res;
       });
 
-      expect(response).toMatchInlineSnapshot(`
-        {
-          "error": {
-            "details": {},
-            "message": "Couldn't unpublish entries.",
-            "name": "ApplicationError",
-          },
-        }
-      `);
+      expect(response).toEqual({
+        error: {
+          name: 'ApplicationError',
+          message: "Couldn't unpublish entries.",
+          details: {},
+        },
+      });
 
       await screen.findByText("Couldn't unpublish entries.");
     });

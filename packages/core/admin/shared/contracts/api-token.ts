@@ -3,6 +3,7 @@ import type { Data } from '@strapi/types';
 
 export type ApiToken = {
   accessKey: string;
+  encryptedKey: string;
   createdAt: string;
   description: string;
   expiresAt: string;
