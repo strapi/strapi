@@ -4,7 +4,51 @@ import { useParams } from 'react-router-dom';
 // @ts-ignore
 import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
-import { Grid, Flex, Typography, JSONInput } from '@strapi/design-system';
+import { Grid, Flex, Typography, JSONInput, Box, Button } from '@strapi/design-system';
+import styled from 'styled-components';
+
+const FieldFrame = styled(Box)`
+  position: relative;
+  width: 100%;
+  button {
+    position: absolute;
+    top: 0;
+    /* transform: translateY(-100%); */
+    right: 0;
+    display: none;
+  }
+  &:hover {
+    button {
+      display: block;
+    }
+    border: 2px solid ${({ theme }) => theme.colors.primary600};
+  }
+`;
+
+const FieldWrapper = ({ children, path }) => {
+  React.useEffect(() => {
+    const handleMessage = (message) => {};
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const handleClick = () => {
+    console.log(window.parent);
+    if (window.parent) {
+      window.parent.postMessage({ type: 'willEditField', payload: path }, '*');
+    }
+  };
+
+  return (
+    <FieldFrame>
+      {children}
+      <Button onClick={handleClick} size="XS">
+        Edit
+      </Button>
+    </FieldFrame>
+  );
+};
 
 const PreviewComponent = () => {
   const { uid: model, documentId, locale, status, collectionType } = useParams();
@@ -85,6 +129,16 @@ const PreviewComponent = () => {
                   Locale
                 </Typography>
                 <Typography tag="dd">{locale}</Typography>
+              </Grid.Item>
+              <Grid.Item col={6} s={12} direction="column" alignItems="start">
+                <Typography variant="sigma" textColor="neutral600" tag="dt">
+                  City
+                </Typography>
+                <FieldWrapper path="city">
+                  <Typography width={'100%'} tag="dd" display={'block'}>
+                    {document?.city}
+                  </Typography>
+                </FieldWrapper>
               </Grid.Item>
             </Grid.Root>
             {document && <JSONInput value={JSON.stringify(document, null, 2)} disabled />}

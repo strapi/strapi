@@ -7,8 +7,9 @@ import {
   createContext,
   Form as FormContext,
   Blocker,
+  useForm,
 } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, IconButton, Modal, Portal } from '@strapi/design-system';
 import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
@@ -20,6 +21,7 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { FormLayout } from '../../pages/EditView/components/FormLayout';
+import { InputRenderer } from '../../pages/EditView/components/InputRenderer';
 import { buildValidParams } from '../../utils/api';
 import { createYupSchema } from '../../utils/validation';
 import { PreviewHeader } from '../components/PreviewHeader';
@@ -53,6 +55,30 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
+const VisualEditingModal = ({ modalField, setModalField, documentResponse }) => {
+  return (
+    <Modal.Root open={modalField != null} onOpenChange={() => setModalField(null)}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>Editing {modalField}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {modalField && (
+            <InputRenderer
+              document={documentResponse}
+              attribute={documentResponse.schema.attributes[modalField]}
+              label={modalField}
+              name={modalField}
+              type={documentResponse.schema.attributes[modalField].type}
+              visible={true}
+            />
+          )}
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
 const PreviewPage = () => {
   const location = useLocation();
   const { formatMessage } = useIntl();
@@ -76,6 +102,18 @@ const PreviewPage = () => {
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
+  const [modalField, setModalField] = React.useState(null);
+  React.useEffect(() => {
+    const handleMessage = (message: MessageEvent) => {
+      if (message.data.type === 'willEditField') {
+        setModalField(message.data.payload);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   if (!collectionType) {
     throw new Error('Could not find collectionType in url params');
@@ -275,6 +313,11 @@ const PreviewPage = () => {
                   )}
                 </Box>
               </Flex>
+              <VisualEditingModal
+                modalField={modalField}
+                setModalField={setModalField}
+                documentResponse={documentResponse}
+              />
             </Flex>
           )}
         </FormContext>
