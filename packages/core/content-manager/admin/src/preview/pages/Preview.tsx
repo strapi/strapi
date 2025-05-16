@@ -7,7 +7,7 @@ import {
   createContext,
   Form as FormContext,
   Blocker,
-  useForm,
+  useField,
 } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, IconButton, Modal, Portal } from '@strapi/design-system';
 import { ArrowLineLeft } from '@strapi/icons';
@@ -55,7 +55,34 @@ const AnimatedArrow = styled(ArrowLineLeft)<{ isSideEditorOpen: boolean }>`
   transition: rotate 0.2s ease-in-out;
 `;
 
-const VisualEditingModal = ({ modalField, setModalField, documentResponse }) => {
+const VisualEditingModal = ({
+  modalField,
+  setModalField,
+  documentResponse,
+  iframe,
+}: {
+  iframe: React.MutableRefObject<HTMLIFrameElement>;
+  modalField: string;
+  setModalField: (value: unknown) => void;
+  documentResponse: ReturnType<UseDocument>;
+}) => {
+  const { value } = useField(modalField);
+
+  React.useEffect(() => {
+    if (modalField) {
+      iframe.current?.contentWindow?.postMessage(
+        {
+          type: 'strapiFieldTyping',
+          payload: {
+            field: modalField,
+            value,
+          },
+        },
+        // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+        new URL(window.location.href).origin
+      );
+    }
+  }, [modalField, value, iframe]);
   return (
     <Modal.Root open={modalField != null} onOpenChange={() => setModalField(null)}>
       <Modal.Content>
@@ -66,10 +93,10 @@ const VisualEditingModal = ({ modalField, setModalField, documentResponse }) => 
           {modalField && (
             <InputRenderer
               document={documentResponse}
-              attribute={documentResponse.schema.attributes[modalField]}
+              attribute={documentResponse.schema!.attributes[modalField]}
               label={modalField}
               name={modalField}
-              type={documentResponse.schema.attributes[modalField].type}
+              type={documentResponse.schema!.attributes[modalField].type}
               visible={true}
             />
           )}
@@ -317,6 +344,7 @@ const PreviewPage = () => {
                 modalField={modalField}
                 setModalField={setModalField}
                 documentResponse={documentResponse}
+                iframe={iframeRef}
               />
             </Flex>
           )}
