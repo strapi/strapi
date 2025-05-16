@@ -5,6 +5,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
+import { RESPONSIVE_CONTAINER_BREAKPOINTS } from '../../FormLayout';
 
 interface ComponentCategoryProps {
   category: string;
@@ -34,7 +35,7 @@ const ComponentCategory = ({
           {formatMessage({ id: category, defaultMessage: category })}
         </Accordion.Trigger>
       </Accordion.Header>
-      <Accordion.Content>
+      <ResponsiveAccordionContent>
         <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           {components.map(({ uid, displayName, icon }) => (
             <ComponentBox
@@ -59,16 +60,37 @@ const ComponentCategory = ({
             </ComponentBox>
           ))}
         </Grid>
-      </Accordion.Content>
+      </ResponsiveAccordionContent>
     </Accordion.Item>
   );
 };
 
-const Grid = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, 14rem);
-  grid-gap: ${({ theme }) => theme.spaces[1]};
+const ResponsiveAccordionContent = styled(Accordion.Content)`
+  container-type: inline-size;
 `;
+
+/**
+ * TODO:
+ * JSDOM cannot handle container queries.
+ * This is a temporary workaround so that tests do not fail in the CI when jestdom throws an error
+ * for failing to parse the stylesheet.
+ */
+const Grid =
+  process.env.NODE_ENV !== 'test'
+    ? styled(Box)`
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 100%);
+        grid-gap: 4px;
+
+        @container (min-width: ${() => RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+          grid-template-columns: repeat(auto-fill, 14rem);
+        }
+      `
+    : styled(Box)`
+        display: grid;
+        grid-template-columns: repeat(auto-fill, 100%);
+        grid-gap: 4px;
+      `;
 
 const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   color: ${({ theme }) => theme.colors.neutral600};

@@ -157,6 +157,7 @@ tests/cli/.env
 ############################
 examples/**/types/generated
 .nx/cache
+.nx/workspace-data
 
 # Ignore yarn.lock inside templates
 templates/yarn.lock

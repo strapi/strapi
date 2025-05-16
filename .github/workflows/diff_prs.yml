@@ -1,0 +1,32 @@
+name: Export Pull Requests Diff Table
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: 'Base branch to compare from (default: develop).'
+        default: 'develop'
+        required: false
+      target_branch:
+        description: 'Target branch to compare to.'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-prs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Merged PRs Between Branches
+        id: pr_diff
+        uses: ./.github/actions/pr_diff
+        with:
+          owner: strapi
+          repo: strapi
+          base_branch: ${{ github.event.inputs.base_branch }}
+          target_branch: ${{ github.event.inputs.target_branch }}

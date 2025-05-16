@@ -13,6 +13,7 @@ import {
   update as apiTokenUpdate,
   getByName,
 } from '../api-token';
+import encryptionService from '../encryption';
 
 const getActionProvider = (actions = []) => {
   return {
@@ -24,6 +25,30 @@ describe('API Token', () => {
   const mockedApiToken = {
     randomBytes: 'api-token_test-random-bytes',
     hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
+  };
+
+  const ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex');
+
+  const setupStrapiMock = (overrides = {}) => {
+    global.strapi = {
+      db: {
+        query: jest.fn(() => ({})),
+      },
+      config: {
+        get: jest.fn((key) => {
+          if (key === 'admin.secrets.encryptionKey') {
+            return ENCRYPTION_KEY;
+          }
+          return '';
+        }),
+      },
+      admin: {
+        services: {
+          encryption: encryptionService,
+        },
+      },
+      ...overrides,
+    } as any;
   };
 
   let now: any;
@@ -48,16 +73,13 @@ describe('API Token', () => {
     test('Creates a new read-only token', async () => {
       const create = jest.fn(({ data }) => Promise.resolve(data));
 
-      global.strapi = {
+      setupStrapiMock({
         db: {
           query() {
             return { create };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       const attributes = {
         name: 'api-token_tests-name',
@@ -72,6 +94,7 @@ describe('API Token', () => {
         data: {
           ...attributes,
           accessKey: hash(mockedApiToken.hexedString),
+          encryptedKey: expect.any(String),
           expiresAt: null,
           lifespan: null,
         },
@@ -80,6 +103,7 @@ describe('API Token', () => {
       expect(res).toEqual({
         ...attributes,
         accessKey: mockedApiToken.hexedString,
+        encryptedKey: expect.any(String),
         expiresAt: null,
         lifespan: null,
       });
@@ -96,16 +120,13 @@ describe('API Token', () => {
       const expectedExpires = Date.now() + attributes.lifespan;
 
       const create = jest.fn(({ data }) => Promise.resolve(data));
-      global.strapi = {
+      setupStrapiMock({
         db: {
           query() {
             return { create };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       const res = await apiTokenCreate(attributes);
 
@@ -114,6 +135,7 @@ describe('API Token', () => {
         data: {
           ...attributes,
           accessKey: hash(mockedApiToken.hexedString),
+          encryptedKey: expect.any(String),
           expiresAt: expectedExpires,
           lifespan: attributes.lifespan,
         },
@@ -122,6 +144,7 @@ describe('API Token', () => {
       expect(res).toEqual({
         ...attributes,
         accessKey: mockedApiToken.hexedString,
+        encryptedKey: expect.any(String),
         expiresAt: expectedExpires,
         lifespan: attributes.lifespan,
       });
@@ -137,16 +160,13 @@ describe('API Token', () => {
       } as any;
 
       const create = jest.fn(({ data }) => Promise.resolve(data));
-      global.strapi = {
+      setupStrapiMock({
         db: {
           query() {
             return { create };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       expect(async () => {
         await apiTokenCreate(attributes);
@@ -182,7 +202,7 @@ describe('API Token', () => {
         )
       );
 
-      global.strapi = {
+      setupStrapiMock({
         ...getActionProvider(['admin::content.content.read'] as any),
         db: {
           query() {
@@ -193,10 +213,7 @@ describe('API Token', () => {
             };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       const res = await apiTokenCreate(attributes);
 
@@ -213,6 +230,7 @@ describe('API Token', () => {
         data: {
           ...omit('permissions', attributes),
           accessKey: hash(mockedApiToken.hexedString),
+          encryptedKey: expect.any(String),
           expiresAt: null,
           lifespan: null,
         },
@@ -265,7 +283,7 @@ describe('API Token', () => {
         )
       );
 
-      global.strapi = {
+      setupStrapiMock({
         ...getActionProvider(['admin::content.content.read'] as any),
         db: {
           query() {
@@ -276,10 +294,7 @@ describe('API Token', () => {
             };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       const res = await apiTokenCreate(attributes);
 
@@ -297,6 +312,7 @@ describe('API Token', () => {
         data: {
           ...omit('permissions', attributes),
           accessKey: hash(mockedApiToken.hexedString),
+          encryptedKey: expect.any(String),
           expiresAt: null,
           lifespan: null,
         },
@@ -338,7 +354,7 @@ describe('API Token', () => {
         )
       );
 
-      global.strapi = {
+      setupStrapiMock({
         ...getActionProvider(['api::foo.foo.find', 'api::foo.foo.create'] as any),
         db: {
           query() {
@@ -349,10 +365,7 @@ describe('API Token', () => {
             };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       const res = await apiTokenCreate(attributes);
 
@@ -386,7 +399,7 @@ describe('API Token', () => {
         )
       );
 
-      global.strapi = {
+      setupStrapiMock({
         ...getActionProvider(['valid-permission'] as any),
         db: {
           query() {
@@ -396,10 +409,7 @@ describe('API Token', () => {
             };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       await expect(() => apiTokenCreate(attributes)).rejects.toThrowError(
         new errors.ApplicationError(
@@ -426,6 +436,15 @@ describe('API Token', () => {
         },
       } as any;
 
+      setupStrapiMock({
+        config: {
+          get: jest.fn(() => ({
+            admin: { apiToken: { salt: 'api-token_tests-salt' } },
+          })),
+          set: mockedConfigSet,
+        },
+      });
+
       checkSaltIsDefined();
 
       expect(mockedAppendFile).not.toHaveBeenCalled();
@@ -433,11 +452,11 @@ describe('API Token', () => {
     });
 
     test('It throws if the salt is not defined', () => {
-      global.strapi = {
+      setupStrapiMock({
         config: {
           get: jest.fn(() => null),
         },
-      } as any;
+      });
 
       try {
         checkSaltIsDefined();
@@ -611,17 +630,13 @@ describe('API Token', () => {
     test('It regenerates the accessKey', async () => {
       const update = jest.fn(({ data }) => Promise.resolve(data));
 
-      global.strapi = {
+      setupStrapiMock({
         db: {
           query() {
             return { update };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
-
+      });
       const id = 1;
       const res = await regenerate(id);
 
@@ -630,24 +645,25 @@ describe('API Token', () => {
         select: ['id', 'accessKey'],
         data: {
           accessKey: hash(mockedApiToken.hexedString),
+          encryptedKey: expect.any(String),
         },
       });
-      expect(res).toEqual({ accessKey: mockedApiToken.hexedString });
+      expect(res).toEqual({
+        accessKey: mockedApiToken.hexedString,
+        encryptedKey: expect.any(String),
+      });
     });
 
     test('It throws a NotFound if the id is not found', async () => {
       const update = jest.fn(() => Promise.resolve(null));
 
-      global.strapi = {
+      setupStrapiMock({
         db: {
           query() {
             return { update };
           },
         },
-        config: {
-          get: jest.fn(() => ''),
-        },
-      } as any;
+      });
 
       const id = 1;
       await expect(async () => {
@@ -659,6 +675,7 @@ describe('API Token', () => {
         select: ['id', 'accessKey'],
         data: {
           accessKey: hash(mockedApiToken.hexedString),
+          encryptedKey: expect.any(String),
         },
       });
     });

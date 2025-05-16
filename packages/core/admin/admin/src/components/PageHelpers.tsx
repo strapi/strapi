@@ -79,7 +79,7 @@ const Error = (props: ErrorProps) => {
           icon={<WarningCircle width="16rem" />}
           content={formatMessage({
             id: 'anErrorOccurred',
-            defaultMessage: 'Woops! Something went wrong. Please, try again.',
+            defaultMessage: 'Whoops! Something went wrong. Please, try again.',
           })}
           {...props}
         />

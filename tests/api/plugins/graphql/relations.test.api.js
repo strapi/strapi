@@ -533,6 +533,53 @@ describe('Test Graphql Relations API End to End', () => {
       });
     });
 
+    test('Relation filtering', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            articles_connection {
+              data {
+                documentId
+                attributes {
+                  name
+                  labels_connection(filters: { name: { endsWith: "Color" } }) {
+                    data {
+                      documentId
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body.data?.articles_connection?.data).toBeInstanceOf(Array);
+
+      body.data.articles_connection.data.forEach((article) => {
+        const { data: labels } = article.attributes.labels_connection;
+        expect(labels).toBeInstanceOf(Array);
+
+        for (const label of labels) {
+          expect(label.attributes).toMatchObject(
+            expect.objectContaining({ name: expect.stringMatching(/.*Color$/) })
+          );
+        }
+      });
+    });
+
     test('Update Article relations removes correctly a relation', async () => {
       const article = data.articles[0];
       const labels = [data.labels[0]];

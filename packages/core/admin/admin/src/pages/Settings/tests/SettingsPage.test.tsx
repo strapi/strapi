@@ -23,6 +23,11 @@ const render = (settings: StrapiAppContextValue['settings']) =>
           <StrapiAppProvider
             components={{}}
             fields={{}}
+            widgets={{
+              widgets: {},
+              register: jest.fn(),
+              getAll: jest.fn(),
+            }}
             customFields={{
               customFields: {},
               get: jest.fn(),

@@ -22,8 +22,6 @@ const createPreviewService = ({ strapi }: { strapi: Core.Strapi }) => {
         strapi.log.error(`Failed to get preview URL: ${error}`);
         throw new errors.ApplicationError('Failed to get preview URL');
       }
-
-      return;
     },
   };
 };

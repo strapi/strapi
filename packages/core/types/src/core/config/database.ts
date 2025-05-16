@@ -59,7 +59,8 @@ export interface Database<TClient extends ClientKind> {
       unknown
     >;
   settings?: {
-    forceMigration?: boolean;
-    runMigrations?: boolean;
+    forceMigration?: boolean | undefined;
+    runMigrations?: boolean | undefined;
+    useTypescriptMigrations?: boolean | undefined;
   };
 }

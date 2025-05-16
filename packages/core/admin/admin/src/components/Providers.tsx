@@ -36,6 +36,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
     <StrapiAppProvider
       components={strapi.library.components}
       customFields={strapi.customFields}
+      widgets={strapi.widgets}
       fields={strapi.library.fields}
       menu={strapi.router.menu}
       getAdminInjectedComponents={strapi.getAdminInjectedComponents}
@@ -59,7 +60,6 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         <ConfigurationProvider
                           defaultAuthLogo={strapi.configurations.authLogo}
                           defaultMenuLogo={strapi.configurations.menuLogo}
-                          showTutorials={strapi.configurations.tutorials}
                           showReleaseNotification={strapi.configurations.notifications.releases}
                         >
                           {children}

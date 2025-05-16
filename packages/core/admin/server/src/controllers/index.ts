@@ -10,7 +10,6 @@ import transfer from './transfer';
 import user from './user';
 import webhooks from './webhooks';
 import contentApi from './content-api';
-import { createHomepageController } from './homepage';
 
 export default {
   admin,
@@ -23,5 +22,4 @@ export default {
   user,
   webhooks,
   'content-api': contentApi,
-  homepage: createHomepageController,
 };

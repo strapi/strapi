@@ -390,6 +390,24 @@ const documentApi = contentManagerApi.injectEndpoints({
           patchResult.undo();
         }
       },
+      transformResponse: (response: Update.Response, meta, arg): Update.Response => {
+        /**
+         * TODO v6
+         * Adapt plugin:users-permissions.user to return the same response
+         * shape as all other requests. The error is returned as expected.
+         */
+        if (!('data' in response) && arg.model === 'plugin::users-permissions.user') {
+          return {
+            data: response,
+            meta: {
+              availableStatus: [],
+              availableLocales: [],
+            },
+          };
+        }
+
+        return response;
+      },
     }),
     unpublishDocument: builder.mutation<
       Unpublish.Response,

@@ -1,4 +1,4 @@
-import { Modules, Data } from '@strapi/types';
+import type { Modules, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 type PaginationQuery = Modules.EntityService.Params.Pagination.PageNotation;

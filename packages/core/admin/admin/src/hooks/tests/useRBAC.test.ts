@@ -50,27 +50,23 @@ describe('useRBAC', () => {
       })
     );
 
-    expect(result.current.allowedActions).toMatchInlineSnapshot(`
-      {
-        "canCreate": false,
-        "canDelete": false,
-        "canRead": false,
-        "canUpdate": false,
-      }
-    `);
+    expect(result.current.allowedActions).toEqual({
+      canCreate: false,
+      canDelete: false,
+      canRead: false,
+      canUpdate: false,
+    });
 
     expect(result.current.isLoading).toBe(true);
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.allowedActions).toMatchInlineSnapshot(`
-      {
-        "canCreate": true,
-        "canDelete": true,
-        "canRead": true,
-        "canUpdate": true,
-      }
-    `);
+    expect(result.current.allowedActions).toEqual({
+      canCreate: true,
+      canDelete: true,
+      canRead: true,
+      canUpdate: true,
+    });
   });
 
   it('should return falsey values if after matching the permissions and no match is found', async () => {
@@ -89,11 +85,9 @@ describe('useRBAC', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.allowedActions).toMatchInlineSnapshot(`
-      {
-        "canUnacceptable": false,
-      }
-    `);
+    expect(result.current.allowedActions).toEqual({
+      canUnacceptable: false,
+    });
   });
 
   describe('checking against the server if there are conditions in the permissions', () => {
@@ -115,11 +109,9 @@ describe('useRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result.current.allowedActions).toMatchInlineSnapshot(`
-        {
-          "canCreate": true,
-        }
-      `);
+      expect(result.current.allowedActions).toEqual({
+        canCreate: true,
+      });
     });
 
     it("should return falsey values if the permissions condition doesn't pass", async () => {
@@ -156,11 +148,9 @@ describe('useRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result.current.allowedActions).toMatchInlineSnapshot(`
-        {
-          "canCreate": false,
-        }
-      `);
+      expect(result.current.allowedActions).toEqual({
+        canCreate: false,
+      });
 
       server.restoreHandlers();
     });
@@ -220,12 +210,10 @@ describe('useRBAC', () => {
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      expect(result.current.allowedActions).toMatchInlineSnapshot(`
-        {
-          "canCreate": false,
-          "canUpdate": true,
-        }
-      `);
+      expect(result.current.allowedActions).toEqual({
+        canCreate: false,
+        canUpdate: true,
+      });
 
       server.restoreHandlers();
     });

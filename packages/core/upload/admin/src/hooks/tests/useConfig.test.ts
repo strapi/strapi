@@ -10,12 +10,10 @@ describe('useConfig', () => {
 
       await waitFor(() => expect(result.current.config.isLoading).toBe(false));
 
-      expect(result.current.config.data).toMatchInlineSnapshot(`
-        {
-          "pageSize": 20,
-          "sort": "updatedAt:DESC",
-        }
-      `);
+      expect(result.current.config.data).toEqual({
+        pageSize: 20,
+        sort: 'updatedAt:DESC',
+      });
     });
 
     test('should still return an object even if the server returns a falsey value', async () => {

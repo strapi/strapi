@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useParams } from 'react-router-dom';
 
 // @ts-ignore
@@ -8,12 +8,30 @@ import { Grid, Flex, Typography, JSONInput } from '@strapi/design-system';
 
 const PreviewComponent = () => {
   const { uid: model, documentId, locale, status, collectionType } = useParams();
-  const { document } = useDocument({
+  const { document, refetch } = useDocument({
     model,
     documentId,
-    params: { locale, status },
+    params: {
+      locale,
+      status,
+      populate: '*',
+    },
     collectionType,
   });
+
+  React.useEffect(() => {
+    const handleStrapiUpdate = (event) => {
+      if (event.data?.type === 'strapiUpdate') {
+        refetch();
+      }
+    };
+
+    window.addEventListener('message', handleStrapiUpdate);
+
+    return () => {
+      window.removeEventListener('message', handleStrapiUpdate);
+    };
+  }, []);
 
   return (
     <Layouts.Root>

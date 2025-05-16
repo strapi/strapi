@@ -27,34 +27,49 @@ const cmPermissions: Record<string, Permission[]> = {
   ],
 };
 
+const getPermission = ({
+  isInContentTypeView,
+  contentTypeKind,
+}: {
+  isInContentTypeView: boolean;
+  contentTypeKind: string;
+}) => {
+  if (isInContentTypeView) {
+    if (contentTypeKind === 'singleType') {
+      return cmPermissions.singleTypesConfigurations;
+    }
+
+    return cmPermissions.collectionTypesConfigurations;
+  }
+
+  return cmPermissions.componentsConfigurations;
+};
+
 interface LinkToCMSettingsViewProps {
   disabled: boolean;
   contentTypeKind?: string;
   isInContentTypeView?: boolean;
-  isTemporary?: boolean;
   targetUid?: string;
 }
 
 export const LinkToCMSettingsView = memo(
   ({
     disabled,
-    isTemporary = false,
     isInContentTypeView = true,
     contentTypeKind = 'collectionType',
     targetUid = '',
   }: LinkToCMSettingsViewProps) => {
     const { formatMessage } = useIntl();
     const navigate = useNavigate();
-    const { collectionTypesConfigurations, componentsConfigurations, singleTypesConfigurations } =
-      cmPermissions;
+    const permissionsToApply = getPermission({ isInContentTypeView, contentTypeKind });
+
     const label = formatMessage({
       id: 'content-type-builder.form.button.configure-view',
       defaultMessage: 'Configure the view',
     });
-    let permissionsToApply = collectionTypesConfigurations;
 
     const handleClick = () => {
-      if (isTemporary) {
+      if (disabled) {
         return false;
       }
 
@@ -67,13 +82,6 @@ export const LinkToCMSettingsView = memo(
       return false;
     };
 
-    if (isInContentTypeView && contentTypeKind === 'singleType') {
-      permissionsToApply = singleTypesConfigurations;
-    }
-
-    if (!isInContentTypeView) {
-      permissionsToApply = componentsConfigurations;
-    }
     const { isLoading, allowedActions } = useRBAC({
       viewConfig: permissionsToApply,
     });
@@ -87,12 +95,7 @@ export const LinkToCMSettingsView = memo(
     }
 
     return (
-      <Button
-        startIcon={<ListPlus />}
-        variant="tertiary"
-        onClick={handleClick}
-        disabled={isTemporary || disabled}
-      >
+      <Button startIcon={<ListPlus />} variant="tertiary" onClick={handleClick} disabled={disabled}>
         {label}
       </Button>
     );

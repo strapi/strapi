@@ -20,9 +20,11 @@ describe.skip('Relation cell content', () => {
       },
     };
 
-    it('renders and matches the snapshot', async () => {
-      const { container } = render(<RelationSingle {...DEFAULT_PROPS_FIXTURE} />);
-      expect(container).toMatchSnapshot();
+    it('renders with expected content', async () => {
+      const { getByText } = render(<RelationSingle {...DEFAULT_PROPS_FIXTURE} />);
+
+      // We expect to see the content's name value rendered
+      expect(getByText('1')).toBeInTheDocument();
     });
   });
   describe('RelationMultiple', () => {

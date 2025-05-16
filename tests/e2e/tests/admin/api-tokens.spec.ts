@@ -15,7 +15,7 @@ const createAPIToken = async (page, tokenName, duration, type) => {
   await page.getByRole('option', { name: type }).click();
 
   await page.getByRole('button', { name: 'Save' }).click();
-  await expect(page.getByText('Make sure to copy this token')).toBeVisible();
+  await expect(page.getByText('Copy this token for use elsewhere')).toBeVisible();
   await expect(page.getByText('Expiration date:')).toBeVisible();
 };
 

@@ -13,8 +13,10 @@ jest.mock('../useContentTypeBuilderMenu.ts', () => {
   return {
     useContentTypeBuilderMenu: jest.fn(() => ({
       menu: mockData,
-      searchValue: '',
-      onSearchChange() {},
+      search: {
+        value: '',
+        onChange() {},
+      },
     })),
   };
 });

@@ -263,6 +263,7 @@ const EditView = () => {
                 }}
                 token={transferToken}
                 setToken={setTransferToken}
+                canShowToken={false}
                 canEditInputs={canEditInputs}
                 canRegenerate={canRegenerate}
                 isSubmitting={isSubmitting}

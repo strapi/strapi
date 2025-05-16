@@ -25,10 +25,18 @@ const render = () => ({
 });
 
 describe('<ColorPickerInput />', () => {
-  it('renders and matches the snapshot', () => {
-    const { container } = render();
+  it('renders with the correct elements', () => {
+    const { getByRole, getByText } = render();
 
-    expect(container).toMatchSnapshot();
+    // Check for the label
+    expect(getByText('color-picker')).toBeInTheDocument();
+
+    // Check for the color picker button
+    const colorPickerButton = getByRole('button', { name: 'Color picker toggle' });
+    expect(colorPickerButton).toBeInTheDocument();
+
+    // The button should be present (we can't check the exact style as it might be implemented differently)
+    expect(colorPickerButton).toHaveAttribute('aria-label', 'Color picker toggle');
   });
 
   it('toggles the popover', async () => {

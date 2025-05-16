@@ -18,10 +18,29 @@ const makeApp = (queryValue: Query['_q'] | null) => (
 );
 
 describe('SearchAsset', () => {
-  it('renders and matches the snapshot', () => {
-    const { container } = render(makeApp(null));
+  it('renders a search icon button when not open', () => {
+    const { getByRole, queryByRole } = render(makeApp(null));
 
-    expect(container).toMatchSnapshot();
+    // Should initially show a button with the search icon
+    const searchButton = getByRole('button', { name: 'Search' });
+    expect(searchButton).toBeInTheDocument();
+
+    // Should not display the searchbar yet
+    const searchInput = queryByRole('textbox', { name: 'search' });
+    expect(searchInput).not.toBeInTheDocument();
+  });
+
+  it('shows searchbar after clicking the search button', () => {
+    const { getByRole } = render(makeApp(null));
+
+    // Click the search button
+    const searchButton = getByRole('button', { name: 'Search' });
+    fireEvent.click(searchButton);
+
+    // Now it should show the searchbar
+    const searchInput = getByRole('textbox', { name: 'search' });
+    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveValue('');
   });
 
   it('should set input value to queryValue if it exists', () => {

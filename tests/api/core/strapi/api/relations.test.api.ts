@@ -1,3 +1,15 @@
+/**
+ * TODO:
+ * # Bidirectional relations
+ *
+ *  Testing bidirectional relations is a bit tricky with our current setup on the api test.
+ *  As soon as we can test it we should implement:
+ *  - Bidirectional relations targeting the same content type (self referencing)
+ *    - Can connect, disconnect, reorder
+ *    - Can publish and discard
+ *  - Test inverse order of relations is preserved when publishing.
+ *
+ */
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createContentAPIRequest } from 'api-tests/request';

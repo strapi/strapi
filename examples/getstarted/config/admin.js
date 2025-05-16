@@ -14,6 +14,9 @@ module.exports = ({ env }) => ({
       salt: env('TRANSFER_TOKEN_SALT', 'example-salt'),
     },
   },
+  secrets: {
+    encryptionKey: env('ENCRYPTION_KEY', 'example-key'),
+  },
   flags: {
     nps: env.bool('FLAG_NPS', true),
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),

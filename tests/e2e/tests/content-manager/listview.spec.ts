@@ -58,10 +58,28 @@ test.describe('List View', () => {
       const publishButton = page.getByRole('button', { name: 'Publish' }).first();
       await publishButton.click();
 
-      // Wait for the selected entries modal to appear
-      await page.waitForSelector(
-        'text=0 entries already published. 2 entries ready to publish. 0 entries waiting for action'
-      );
+      await page.waitForSelector('text=Ready to publish');
+
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Already published 0',
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Ready to publish 2',
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Waiting for action 0',
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Ready to publish changes 0',
+        })
+      ).toBeVisible();
 
       const entry1 = page
         .getByLabel('Publish entries')
@@ -80,9 +98,26 @@ test.describe('List View', () => {
         .getByRole('checkbox', { name: 'Select all entries' });
       await selectAll.uncheck();
 
-      await page.waitForSelector(
-        'text=0 entries already published. 0 entries ready to publish. 0 entries waiting for action'
-      );
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Already published 0',
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Ready to publish 0',
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Waiting for action 0',
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('gridcell', {
+          name: 'Ready to publish changes 0',
+        })
+      ).toBeVisible();
 
       // Check if the publish button is disabled
       const publishModalButton = page

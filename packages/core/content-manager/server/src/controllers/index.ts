@@ -7,6 +7,7 @@ import singleTypes from './single-types';
 import uid from './uid';
 import history from '../history';
 import preview from '../preview';
+import homepage from '../homepage';
 
 export default {
   'collection-types': collectionTypes,
@@ -18,4 +19,5 @@ export default {
   uid,
   ...(history.controllers ? history.controllers : {}),
   ...(preview.controllers ? preview.controllers : {}),
+  ...homepage.controllers,
 };

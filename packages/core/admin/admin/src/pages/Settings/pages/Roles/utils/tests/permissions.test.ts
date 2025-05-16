@@ -73,18 +73,16 @@ describe('permissions', () => {
         'test'
       );
 
-      expect(matchingPermission).toMatchInlineSnapshot(`
-        {
-          "action": "plugins::users-permissions.roles.update",
-          "actionParameters": [],
-          "conditions": [],
-          "createdAt": "",
-          "id": 5,
-          "properties": {},
-          "subject": "test",
-          "updatedAt": "",
-        }
-      `);
+      expect(matchingPermission).toEqual({
+        action: 'plugins::users-permissions.roles.update',
+        actionParameters: [],
+        conditions: [],
+        createdAt: '',
+        id: 5,
+        properties: {},
+        subject: 'test',
+        updatedAt: '',
+      });
     });
 
     it('should return undefined if no permission matches the provided action and subject', () => {
@@ -94,7 +92,7 @@ describe('permissions', () => {
         'test'
       );
 
-      expect(matchingPermission).toMatchInlineSnapshot(`undefined`);
+      expect(matchingPermission).toBeUndefined();
     });
   });
 
@@ -156,7 +154,7 @@ describe('permissions', () => {
           collectionTypes: {},
           singleTypes: {},
         })
-      ).toMatchInlineSnapshot(`[]`);
+      ).toEqual([]);
     });
 
     it('should return a formatted array of permissions when some permissions are enabled', () => {
@@ -216,22 +214,20 @@ describe('permissions', () => {
           collectionTypes: {},
           singleTypes: {},
         })
-      ).toMatchInlineSnapshot(`
-        [
-          {
-            "action": "plugin::content-type-builder.read",
-            "conditions": [],
-            "properties": {},
-            "subject": null,
-          },
-          {
-            "action": "plugin::documentation.settings.update",
-            "conditions": [],
-            "properties": {},
-            "subject": null,
-          },
-        ]
-      `);
+      ).toEqual([
+        {
+          action: 'plugin::content-type-builder.read',
+          conditions: [],
+          properties: {},
+          subject: null,
+        },
+        {
+          action: 'plugin::documentation.settings.update',
+          conditions: [],
+          properties: {},
+          subject: null,
+        },
+      ]);
     });
   });
 });

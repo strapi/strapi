@@ -6,3 +6,4 @@ index.d.ts
 index.js
 bin/
 scripts/
+rollup.config.mjs

@@ -14,14 +14,12 @@ describe('api', () => {
 
       const params = buildValidParams(queryParams);
 
-      expect(params).toMatchInlineSnapshot(`
-        {
-          "locale": "en",
-          "page": "1",
-          "pageSize": "10",
-          "sort": "name:ASC",
-        }
-      `);
+      expect(params).toEqual({
+        locale: 'en',
+        page: '1',
+        pageSize: '10',
+        sort: 'name:ASC',
+      });
     });
   });
 });

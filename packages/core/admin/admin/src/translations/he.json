@@ -63,7 +63,7 @@
   "Roles.components.List.empty.withSearch": "אין תפקיד שמתאים לחיפוש ({search}) ...",
   "Settings.PageTitle": "הגדרות - {name}",
   "Settings.application.description": "צפה בפרטי הפרויקטים שלך",
-  "Settings.application.edition-title": "חבילה נוכחית",
+  "Settings.application.edition-title": "מהדורה נוכחית",
   "Settings.application.link-pricing": "צפה בכל המחירים",
   "Settings.application.link-upgrade": "שדרג את הפרויקט שלך",
   "Settings.application.node-version": "גרסת NODE",

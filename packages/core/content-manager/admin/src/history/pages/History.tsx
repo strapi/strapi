@@ -211,6 +211,7 @@ const HistoryPage = () => {
             labelledBy={headerId}
           >
             <VersionHeader headerId={headerId} />
+
             <VersionContent />
           </Main>
           <VersionsList />

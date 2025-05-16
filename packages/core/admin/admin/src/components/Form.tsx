@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Button, Dialog, useCallbackRef, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  type BoxProps,
+  Button,
+  Dialog,
+  useCallbackRef,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
@@ -114,7 +121,8 @@ interface FormHelpers<TFormValues extends FormValues = FormValues>
   extends Pick<FormContextValue<TFormValues>, 'setErrors' | 'setValues' | 'resetForm'> {}
 
 interface FormProps<TFormValues extends FormValues = FormValues>
-  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>> {
+  extends Partial<Pick<FormContextValue<TFormValues>, 'disabled' | 'initialValues'>>,
+    Pick<BoxProps, 'width' | 'height'> {
   children:
     | React.ReactNode
     | ((
@@ -424,7 +432,15 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
     const composedRefs = useComposedRefs(formRef, ref);
 
     return (
-      <form ref={composedRefs} method={method} noValidate onSubmit={handleSubmit}>
+      <Box
+        tag="form"
+        ref={composedRefs}
+        method={method}
+        noValidate
+        onSubmit={handleSubmit}
+        width={props.width}
+        height={props.height}
+      >
         <FormProvider
           disabled={disabled}
           onChange={handleChange}
@@ -451,7 +467,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
               })
             : props.children}
         </FormProvider>
-      </form>
+      </Box>
     );
   }
 ) as <TFormValues extends FormValues>(
@@ -574,7 +590,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         }
 
         const [key] = generateNKeysBetween(
-          currentField.at(position - 1)?.__temp_key__,
+          position > 0 ? currentField.at(position - 1)?.__temp_key__ : null,
           currentField.at(position)?.__temp_key__,
           1
         );
@@ -582,7 +598,10 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.values = setIn(
           state.values,
           action.payload.field,
-          setIn(currentField, position.toString(), { ...action.payload.value, __temp_key__: key })
+          currentField.toSpliced(position, 0, {
+            ...action.payload.value,
+            __temp_key__: key,
+          })
         );
 
         break;
@@ -674,7 +693,7 @@ interface FieldValue<TValue = any> {
   rawError?: any;
 }
 
-const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> => {
+function useField<TValue = any>(path: string): FieldValue<TValue | undefined> {
   const { formatMessage } = useIntl();
 
   const initialValue = useForm(
@@ -723,7 +742,7 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
     onChange: handleChange,
     value: value,
   };
-};
+}
 
 const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
   return (

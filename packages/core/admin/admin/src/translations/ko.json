@@ -89,7 +89,7 @@
   "Settings.tokens.types.full-access": "전체 액세스",
   "Settings.tokens.types.read-only": "읽기 전용",
   "Settings.application.description": "프로젝트 세부 정보",
-  "Settings.application.edition-title": "현재 플랜",
+  "Settings.application.edition-title": "현재 에디션",
   "Settings.application.link-pricing": "모든 가격 정책 보기",
   "Settings.application.link-upgrade": "어드민 패널 업그레이드",
   "Settings.application.node-version": "node version",

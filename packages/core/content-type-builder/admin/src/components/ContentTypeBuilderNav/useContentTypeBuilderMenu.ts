@@ -25,7 +25,7 @@ export const useContentTypeBuilderMenu = () => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [search, setSearch] = useState('');
+  const [searchValue, setSearchValue] = useState('');
   const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
   const { locale } = useIntl();
 
@@ -37,6 +37,7 @@ export const useContentTypeBuilderMenu = () => {
     sensitivity: 'base',
   });
 
+  // TODO: Allow creating mutliple schemas in parallel
   const canOpenModalCreateCTorComponent =
     !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
     !Object.keys(components).some(
@@ -46,6 +47,7 @@ export const useContentTypeBuilderMenu = () => {
 
   const handleClickOpenModalCreateCollectionType = () => {
     if (canOpenModalCreateCTorComponent) {
+      // TODO: Review tracking with product
       trackUsage(`willCreateContentType`);
 
       const nextState = {
@@ -110,6 +112,7 @@ export const useContentTypeBuilderMenu = () => {
       name: category,
       title: category,
       isEditable: isInDevelopmentMode,
+      // TODO: re-add functionality to edit category name
       onClickEdit(e: MouseEvent, data: any) {
         e.stopPropagation();
 
@@ -181,7 +184,9 @@ export const useContentTypeBuilderMenu = () => {
         ...section,
         links: section.links
           .map((link) => {
-            const filteredLinks = link.links.filter((link: any) => startsWith(link.title, search));
+            const filteredLinks = link.links.filter((link: any) =>
+              startsWith(link.title, searchValue)
+            );
 
             if (filteredLinks.length === 0) {
               return null;
@@ -200,7 +205,7 @@ export const useContentTypeBuilderMenu = () => {
     }
 
     const filteredLinks = section.links
-      .filter((link) => startsWith(link.title, search))
+      .filter((link) => startsWith(link.title, searchValue))
       .sort((a, b) => formatter.compare(a.title, b.title));
 
     return {
@@ -212,7 +217,10 @@ export const useContentTypeBuilderMenu = () => {
 
   return {
     menu: data,
-    searchValue: search,
-    onSearchChange: setSearch,
+    search: {
+      value: searchValue,
+      onChange: setSearchValue,
+      clear: () => setSearchValue(''),
+    },
   };
 };

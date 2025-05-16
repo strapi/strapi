@@ -46,7 +46,7 @@ module.exports = ({ env }) => ({
       providerOptions: {
         key: env('AWS_SES_KEY'),
         secret: env('AWS_SES_SECRET'),
-        amazon: 'https://email.us-east-1.amazonaws.com',
+        amazon: `https://email.${env('AWS_SES_REGION', 'us-east-1')}.amazonaws.com`, // https://docs.aws.amazon.com/general/latest/gr/ses.html
       },
       settings: {
         defaultFrom: 'myemail@protonmail.com',
@@ -56,4 +56,12 @@ module.exports = ({ env }) => ({
   },
   // ...
 });
+```
+
+**Path -** `.env`
+
+```env
+AWS_SES_KEY=
+AWS_SES_SECRET=
+AWS_SES_REGION=
 ```

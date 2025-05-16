@@ -484,7 +484,7 @@ export const createEntityManager = (db: Database): EntityManager => {
       const deletedRows = await this.createQueryBuilder(uid)
         .where(where)
         .delete()
-        .execute<number>();
+        .execute<number>({ mapResults: false });
 
       const result = { count: deletedRows };
 
@@ -613,6 +613,15 @@ export const createEntityManager = (db: Database): EntityManager => {
             const encodedId = encodePolymorphicId(rowId, rowType);
 
             row.order = orderMap[encodedId];
+          });
+
+          // delete previous relations
+          await deleteRelatedMorphOneRelationsAfterMorphToManyUpdate(rows as any, {
+            uid,
+            attributeName,
+            joinTable,
+            db,
+            transaction: trx,
           });
 
           await this.createQueryBuilder(joinTable.name).insert(rows).transacting(trx).execute();

@@ -149,10 +149,12 @@ const HeaderCombobox = ({ name, label, ...restProps }: HeaderComboboxProps) => {
     field.onChange(name, value);
   };
 
-  const handleCreateOption = (value: string) => {
+  const handleCreateOption = (value?: string) => {
     setOptions((prev) => [...prev, value as HTTPHeaders]);
 
-    handleChange(value);
+    if (value) {
+      handleChange(value);
+    }
   };
 
   return (

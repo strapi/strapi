@@ -75,11 +75,9 @@ describe('useTracking', () => {
       }
     );
 
-    expect(res).toMatchInlineSnapshot(`
-      {
-        "success": true,
-      }
-    `);
+    expect(res).toEqual({
+      success: true,
+    });
   });
 
   it('should not fire axios.post if strapi.telemetryDisabled is true', async () => {

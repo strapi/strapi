@@ -212,6 +212,7 @@ yargs
                 testDir: path.join(testDomainRoot, domain),
                 port,
                 appDir: testAppPath,
+                reportFileName: `playwright-${domain}-${port}.xml`,
               });
 
               const configFileTemplate = `
@@ -240,6 +241,105 @@ module.exports = config
               });
 
               await execa('git', [...gitUser, 'commit', '-m', 'initial commit'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
+              // We need to generate the typescript and documentation files to avoid re-generating after each file reset
+
+              // Start Strapi and wait for it to be ready
+              console.log(`Starting Strapi for domain '${domain}' to generate files...`);
+              const strapiProcess = execa('npm', ['run', 'develop'], {
+                cwd: testAppPath,
+                env: {
+                  PORT: port,
+                  STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
+                },
+                detached: true, // This is important for CI
+              });
+
+              // Wait for Strapi to be ready by checking HTTP endpoint
+              await new Promise((resolve, reject) => {
+                const startTime = Date.now();
+                const timeout = 160 * 1000; // 160 seconds, matching Playwright's timeout
+                const checkInterval = 1000; // Check every second
+
+                const checkServer = async () => {
+                  try {
+                    const response = await fetch(`http://127.0.0.1:${port}/_health`);
+                    if (response.ok) {
+                      console.log('Strapi is ready, shutting down...');
+                      // In CI, we need to kill the entire process group
+                      if (process.env.CI) {
+                        process.kill(-strapiProcess.pid, 'SIGINT');
+                      } else {
+                        strapiProcess.kill('SIGINT');
+                      }
+                      resolve();
+                      return;
+                    }
+                  } catch (err) {
+                    // Server not ready yet, continue checking
+                  }
+
+                  if (Date.now() - startTime > timeout) {
+                    console.log('Timeout reached, forcing shutdown...');
+                    if (process.env.CI) {
+                      process.kill(-strapiProcess.pid, 'SIGKILL');
+                    } else {
+                      strapiProcess.kill('SIGKILL');
+                    }
+                    reject(new Error('Strapi failed to start within timeout period'));
+                    return;
+                  }
+
+                  setTimeout(checkServer, checkInterval);
+                };
+
+                // Start checking
+                checkServer();
+
+                // Log stdout and stderr for debugging
+                strapiProcess.stdout.on('data', (data) => {
+                  console.log(`[stdout] ${data.toString().trim()}`);
+                });
+
+                strapiProcess.stderr.on('data', (data) => {
+                  console.error(`[stderr] ${data.toString().trim()}`);
+                });
+
+                strapiProcess.on('error', (err) => {
+                  console.error(`[Strapi ERROR] Process error:`, err);
+                  reject(err);
+                });
+
+                strapiProcess.on('exit', (code) => {
+                  console.log(`Strapi process exited with code ${code}`);
+                });
+              });
+
+              // Double check that Strapi has shut down
+              await new Promise((resolve) => {
+                const checkPort = async () => {
+                  try {
+                    await fetch(`http://127.0.0.1:${port}/_health`);
+                    // If we can connect, port is still in use
+                    setTimeout(checkPort, 1000);
+                  } catch (err) {
+                    // Port is free
+                    resolve();
+                  }
+                };
+                checkPort();
+              });
+
+              // Commit the generated files
+              await execa('git', [...gitUser, 'add', '-A', '.'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
+              await execa('git', [...gitUser, 'commit', '-m', 'commit generated files'], {
                 stdio: 'inherit',
                 cwd: testAppPath,
               });

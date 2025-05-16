@@ -23,7 +23,7 @@ import { useMatch } from 'react-router-dom';
 import { styled, keyframes } from 'styled-components';
 
 import { useDebounce } from '../../../../hooks/useDebounce';
-import { useDoc } from '../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../hooks/useDocumentContext';
 import { CLONE_PATH } from '../../../../router';
 import {
   useGenerateUIDMutation,
@@ -47,7 +47,7 @@ interface UIDInputProps extends Omit<InputProps, 'type'> {
 
 const UIDInput = React.forwardRef<any, UIDInputProps>(
   ({ hint, label, labelAction, name, required, ...props }, ref) => {
-    const { model, id } = useDoc();
+    const { currentDocumentMeta } = useDocumentContext('UIDInput');
     const allFormValues = useForm('InputUID', (form) => form.values);
     const [availability, setAvailability] = React.useState<CheckUIDAvailability.Response>();
     const [showRegenerate, setShowRegenerate] = React.useState(false);
@@ -67,10 +67,10 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
       error: apiError,
     } = useGetDefaultUIDQuery(
       {
-        contentTypeUID: model,
+        contentTypeUID: currentDocumentMeta.model,
         field: name,
         data: {
-          id: id ?? '',
+          id: currentDocumentMeta.documentId ?? '',
           ...allFormValues,
         },
         params,
@@ -104,9 +104,9 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const handleRegenerateClick = async () => {
       try {
         const res = await generateUID({
-          contentTypeUID: model,
+          contentTypeUID: currentDocumentMeta.model,
           field: name,
-          data: { id: id ?? '', ...allFormValues },
+          data: { id: currentDocumentMeta.documentId ?? '', ...allFormValues },
           params,
         });
 
@@ -135,7 +135,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
       error: availabilityError,
     } = useGetAvailabilityQuery(
       {
-        contentTypeUID: model,
+        contentTypeUID: currentDocumentMeta.model,
         field: name,
         value: debouncedValue ? debouncedValue.trim() : '',
         params,

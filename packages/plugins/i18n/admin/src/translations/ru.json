@@ -56,7 +56,6 @@
   "plugin.description.long": "Этот плагин позволяет создавать, читать и обновлять контент (словом, производить всевозможные действия с контентом) на разных языках, как из панели администратора, так и через API.",
   "plugin.description.short": "Этот плагин позволяет создавать, читать и обновлять контент на разных языках, как из панели администратора, так и через API.",
   "plugin.name": "Интернационализация",
-  "plugin.schema.i18n.ensure-unique-localization": "Уникальные поля должны быть переведены",
   "plugin.schema.i18n.localized.description-content-type": "Позволяет перевести запись на разные языки",
   "plugin.schema.i18n.localized.description-field": "Поле может иметь разные значения на каждом языке",
   "plugin.schema.i18n.localized.label-content-type": "Интернационализация",

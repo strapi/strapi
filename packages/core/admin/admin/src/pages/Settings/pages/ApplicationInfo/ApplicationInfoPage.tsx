@@ -178,7 +178,7 @@ const ApplicationInfoPage = () => {
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.edition-title',
-                        defaultMessage: 'current plan',
+                        defaultMessage: 'current edition',
                       })}
                     </Typography>
                     <Flex gap={3} direction="column" alignItems="start" tag="dd">

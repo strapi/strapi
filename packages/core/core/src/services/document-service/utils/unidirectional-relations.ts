@@ -1,7 +1,7 @@
 /* eslint-disable no-continue */
 import { keyBy, omit } from 'lodash/fp';
 
-import { UID, Schema } from '@strapi/types';
+import type { UID, Schema } from '@strapi/types';
 
 interface LoadContext {
   oldVersions: { id: string; locale: string }[];

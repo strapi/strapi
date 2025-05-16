@@ -497,7 +497,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
   const { formatMessage } = useIntl();
   const listViewPathMatch = useMatch(LIST_PATH);
   const canDelete = useDocumentRBAC('DeleteAction', (state) => state.canDelete);
-  const { delete: deleteAction } = useDocumentActions();
+  const { delete: deleteAction, isLoading } = useDocumentActions();
   const { toggleNotification } = useNotification();
   const setSubmitting = useForm('DeleteAction', (state) => state.setSubmitting);
   const isLocalized = document?.locale != null;
@@ -529,6 +529,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
           </Typography>
         </Flex>
       ),
+      loading: isLoading,
       onConfirm: async () => {
         /**
          * If we have a match, we're in the list view

@@ -3,11 +3,10 @@ import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 import { navToHeader } from '../../../utils/shared';
 import { sharedSetup } from '../../../utils/setup';
-import { createCollectionType } from '../../../utils/content-types';
 
 test.describe('Edit collection type', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   // use existing type to avoid extra resets and flakiness
   const ctName = 'Article';
@@ -24,9 +23,7 @@ test.describe('Edit collection type', () => {
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterEach(async () => {
+  test.afterAll(async () => {
     await resetFiles();
   });
 
@@ -42,8 +39,6 @@ test.describe('Edit collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
-    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
-    // Fix the bug then remove this
     await waitForRestart(page);
 
     await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
@@ -67,10 +62,6 @@ test.describe('Edit collection type', () => {
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
-    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
-    // Fix the bug then remove this
-    await page.reload();
-
     // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
     await page.getByRole('button', { name: 'Edit' }).first().click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
@@ -89,10 +80,6 @@ test.describe('Edit collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
-
-    // TODO: this is here because of a bug where the admin UI doesn't understand the option has changed
-    // Fix the bug then remove this
-    await page.reload();
 
     // toggle on - we see that the "off" worked because here it doesn't prompt to confirm data loss
     await page.getByRole('button', { name: 'Edit' }).first().click();
@@ -177,9 +164,6 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    // TODO: fix bug that requires a page refresh to see that content types have been updated
-    await page.reload();
-
     await expect(page.getByRole('heading', { name: newname })).toBeVisible();
   });
 
@@ -193,9 +177,39 @@ test.describe('Edit collection type', () => {
 
     await waitForRestart(page);
 
-    // TODO: fix bug that requires a page refresh to see that content types have been updated
-    await page.reload();
-
     await expect(page.getByRole('heading', { name: ctName })).not.toBeVisible();
+  });
+
+  test('Can enable localization on a content type, create a text field, disable internationalization on the field and enable uniqueness on the same field', async ({
+    page,
+  }) => {
+    // Create a text field
+    await page.getByRole('button', { name: 'Add another field', exact: true }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
+    await page.getByLabel('Name', { exact: true }).fill('localizedField');
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
+
+    // Disable internationalization on the field
+    await page.getByRole('button', { name: 'Edit localizedField' }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Enable localization for this field').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
+
+    // Enable uniqueness on the field
+    await page.getByRole('button', { name: 'Edit localizedField' }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Unique field').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await waitForRestart(page);
+    await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
 });

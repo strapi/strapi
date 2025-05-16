@@ -9,7 +9,6 @@ import {
   Accordion,
   IconButton,
   useComposedRefs,
-  Grid,
   BoxComponent,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
@@ -19,13 +18,14 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDoc } from '../../../../../hooks/useDocument';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
@@ -51,7 +51,8 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const { components } = useDoc();
+  const { currentDocument } = useDocumentContext('RepeatableComponent');
+  const components = currentDocument.components;
 
   const {
     value = [],
@@ -273,7 +274,7 @@ const RepeatableComponent = ({
               >
                 {layout.map((row, index) => {
                   return (
-                    <Grid.Root gap={4} key={index}>
+                    <ResponsiveGridRoot gap={4} key={index}>
                       {row.map(({ size, ...field }) => {
                         /**
                          * Layouts are built from schemas so they don't understand the complete
@@ -289,7 +290,7 @@ const RepeatableComponent = ({
                         });
 
                         return (
-                          <Grid.Item
+                          <ResponsiveGridItem
                             col={size}
                             key={completeFieldName}
                             s={12}
@@ -301,11 +302,12 @@ const RepeatableComponent = ({
                               ...field,
                               label: translatedLabel,
                               name: completeFieldName,
+                              document: currentDocument,
                             })}
-                          </Grid.Item>
+                          </ResponsiveGridItem>
                         );
                       })}
-                    </Grid.Root>
+                    </ResponsiveGridRoot>
                   );
                 })}
               </Component>
@@ -437,6 +439,7 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
+                disabled={disabled}
                 variant="ghost"
                 onClick={onDeleteComponent}
                 label={formatMessage({
@@ -447,6 +450,7 @@ const Component = ({
                 <Trash />
               </IconButton>
               <IconButton
+                disabled={disabled}
                 ref={composedAccordionRefs}
                 variant="ghost"
                 onClick={(e) => e.stopPropagation()}

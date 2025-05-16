@@ -12,7 +12,7 @@
   "control-card.save": "Salvar",
   "filter.add": "Adicionar filtro",
   "form.button.replace-media": "Substituir mídia",
-  "form.input.decription.file-alt": "Esse texto será mostrado se a imagem não puder ser carregada.",
+  "form.input.description.file-alt": "Esse texto será mostrado se a imagem não puder ser carregada.",
   "form.input.label.file-alt": "Texto alternativo",
   "form.input.label.file-caption": "Legenda",
   "form.input.label.file-name": "Nome do arquivo",
