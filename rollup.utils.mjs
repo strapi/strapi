@@ -21,7 +21,7 @@ const basePlugins = () => [
     extensions: ['.css'],
     inject: true,
     minimize: true,
-    extract: false,
+    extract: true,
   }),
   nodeResolve({
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json', '.css'],
