@@ -9,7 +9,7 @@ import {
   Blocker,
   useField,
 } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, IconButton, Modal, Portal } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, IconButton, Popover, Portal } from '@strapi/design-system';
 import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
@@ -62,19 +62,19 @@ const VisualEditingModal = ({
   iframe,
 }: {
   iframe: React.MutableRefObject<HTMLIFrameElement>;
-  modalField: string;
+  modalField: any;
   setModalField: (value: unknown) => void;
   documentResponse: ReturnType<UseDocument>;
 }) => {
-  const { value } = useField(modalField);
+  const { value } = useField(modalField?.path);
 
   React.useEffect(() => {
-    if (modalField) {
+    if (modalField?.path) {
       iframe.current?.contentWindow?.postMessage(
         {
           type: 'strapiFieldTyping',
           payload: {
-            field: modalField,
+            field: modalField.path,
             value,
           },
         },
@@ -82,27 +82,53 @@ const VisualEditingModal = ({
         new URL(window.location.href).origin
       );
     }
-  }, [modalField, value, iframe]);
+  }, [modalField?.path, value, iframe]);
+
+  if (!modalField || !documentResponse.schema) {
+    return null;
+  }
+
+  const iframeRect = iframe.current.getBoundingClientRect();
+
   return (
-    <Modal.Root open={modalField != null} onOpenChange={() => setModalField(null)}>
-      <Modal.Content>
-        <Modal.Header>
-          <Modal.Title>Editing {modalField}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {modalField && (
+    <>
+      {modalField && (
+        <Box
+          position={'fixed'}
+          top={iframeRect.top + 'px'}
+          left={iframeRect.left + 'px'}
+          width={iframeRect.width + 'px'}
+          height={iframeRect.height + 'px'}
+          // background={'neutral800'}
+          // style={{ opacity: 0.1 }}
+          zIndex={4}
+        />
+      )}
+      <Popover.Root open={modalField != null} onOpenChange={(open) => !open && setModalField(null)}>
+        <Popover.Trigger>
+          <Box
+            id="hello"
+            position="fixed"
+            width={modalField.position.width + 'px'}
+            height={modalField.position.height + 'px'}
+            top={iframeRect.top + modalField.position.top + 'px'}
+            left={iframeRect.left + modalField.position.left + 'px'}
+          />
+        </Popover.Trigger>
+        <Popover.Content sideOffset={4}>
+          <Box padding={4} width="400px">
             <InputRenderer
               document={documentResponse}
-              attribute={documentResponse.schema!.attributes[modalField]}
-              label={modalField}
-              name={modalField}
-              type={documentResponse.schema!.attributes[modalField].type}
+              attribute={documentResponse.schema.attributes[modalField.path]}
+              label={modalField.path}
+              name={modalField.path}
+              type={documentResponse.schema.attributes[modalField.path].type}
               visible={true}
             />
-          )}
-        </Modal.Body>
-      </Modal.Content>
-    </Modal.Root>
+          </Box>
+        </Popover.Content>
+      </Popover.Root>
+    </>
   );
 };
 
@@ -134,6 +160,7 @@ const PreviewPage = () => {
   React.useEffect(() => {
     const handleMessage = (message: MessageEvent) => {
       if (message.data.type === 'willEditField') {
+        console.log('willEditField', message.data.payload);
         setModalField(message.data.payload);
       }
     };

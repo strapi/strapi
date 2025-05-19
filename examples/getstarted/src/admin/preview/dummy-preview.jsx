@@ -7,32 +7,33 @@ import { unstable_useDocument as useDocument } from '@strapi/content-manager/str
 import { Grid, Flex, Typography, JSONInput, Box, Button, Portal } from '@strapi/design-system';
 import styled from 'styled-components';
 
-const FieldFrame = styled(Box)`
+const StyledFrame = styled(Box)`
   position: relative;
   width: 100%;
   button {
     position: absolute;
     top: 0;
-    /* transform: translateY(-100%); */
-    right: 0;
+    transform: translateY(-100%);
+    right: -2px;
     display: none;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
   &:hover {
     button {
       display: block;
     }
-    border: 2px solid ${({ theme }) => theme.colors.primary600};
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary500};
   }
 `;
 
 const FieldWrapper = ({ children, path, initialValue }) => {
   const [value, setValue] = React.useState(initialValue);
-  console.log('initialValue', initialValue, 'value', value);
+  const frame = React.useRef(null);
 
   React.useEffect(() => {
     const handleMessage = (message) => {
       if (message.data?.type === 'strapiFieldTyping' && message.data?.payload?.field === path) {
-        console.log('Field typing', message.data.payload.value);
         setValue(message.data.payload.value);
       }
     };
@@ -42,19 +43,27 @@ const FieldWrapper = ({ children, path, initialValue }) => {
   }, []);
 
   const handleClick = () => {
-    console.log(window.parent);
-    if (window.parent) {
-      window.parent.postMessage({ type: 'willEditField', payload: path }, '*');
+    if (window.parent && frame.current) {
+      window.parent.postMessage(
+        {
+          type: 'willEditField',
+          payload: {
+            path,
+            position: frame.current.getBoundingClientRect(),
+          },
+        },
+        '*'
+      );
     }
   };
 
   return (
-    <FieldFrame>
+    <StyledFrame ref={frame}>
       {children(value)}
-      <Button onClick={handleClick} size="XS">
+      <Button onClick={handleClick} size="XS" borderRadius="0">
         Edit
       </Button>
-    </FieldFrame>
+    </StyledFrame>
   );
 };
 
@@ -154,11 +163,7 @@ const PreviewComponent = () => {
                         City
                       </Typography>
                       <FieldWrapper path="city" initialValue={document?.city}>
-                        {(value) => (
-                          <Typography width={'100%'} tag="dd" display={'block'}>
-                            {value}
-                          </Typography>
-                        )}
+                        {(value) => <Typography tag="dd">{value}</Typography>}
                       </FieldWrapper>
                     </Grid.Item>
                   )}
