@@ -53,16 +53,17 @@ const command = () => {
       )
       .hook('preAction', async (thisCommand) => {
         const opts = thisCommand.opts();
+        const hasEnvUrl = process.env.STRAPI_TRANSFER_URL;
+        const hasEnvToken = process.env.STRAPI_TRANSFER_TOKEN;
 
         const logDocumentation = () => {
-          const hasUrl = process.env.STRAPI_TRANSFER_URL;
-          const hasToken = process.env.STRAPI_TRANSFER_TOKEN;
-
           console.info(
             'ℹ️  Data transfer documentation: https://docs.strapi.io/dev-docs/data-management/transfer'
           );
+        };
 
-          if (!hasUrl && !hasToken) {
+        const logEnvironmentVariables = () => {
+          if (!hasEnvUrl && !hasEnvToken) {
             console.info('ℹ️  No transfer configuration found in environment variables');
             console.info(
               '   → Add STRAPI_TRANSFER_URL and STRAPI_TRANSFER_TOKEN environment variables to make the transfer process faster for future runs'
@@ -72,13 +73,13 @@ const command = () => {
 
           console.info('ℹ️  Found transfer configuration in your environment:');
 
-          if (hasUrl) {
+          if (hasEnvUrl) {
             console.info(
-              `   → Environment STRAPI_TRANSFER_URL (${hasUrl}) will be used as the transfer URL`
+              `   → Environment STRAPI_TRANSFER_URL (${hasEnvUrl}) will be used as the transfer URL`
             );
           }
 
-          if (hasToken) {
+          if (hasEnvToken) {
             console.info(
               '   → Environment STRAPI_TRANSFER_TOKEN value will be used as the transfer token'
             );
@@ -88,15 +89,19 @@ const command = () => {
         };
 
         const determineDirection = async () => {
+          // If user has not provided a direction from CLI, log the documentation
+          if (!opts.from && !opts.to) {
+            logDocumentation();
+          }
+
+          logEnvironmentVariables();
+
           if (opts.from) {
             return opts.from;
           }
           if (opts.to) {
             return opts.to;
           }
-
-          // If user has not provided a direction from CLI, log the documentation
-          logDocumentation();
 
           const { dir } = await inquirer.prompt([
             {
