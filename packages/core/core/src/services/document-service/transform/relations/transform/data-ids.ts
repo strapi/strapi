@@ -66,7 +66,7 @@ const getRelationIds = curry(
 /**
  * Ensure set/connect/disconnect syntax for all relations in the data object
  */
-const standarizeRelations = (data: Record<string, any>, uid: string) => {
+const standardizeRelations = (data: Record<string, any>, uid: string) => {
   return traverseEntityRelations(
     async ({ key, value, attribute }, { set }) => {
       if (!attribute) return;
@@ -148,4 +148,4 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
   );
 };
 
-export { transformDataIdsVisitor, standarizeRelations };
+export { transformDataIdsVisitor, standardizeRelations };

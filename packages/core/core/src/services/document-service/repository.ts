@@ -24,7 +24,7 @@ import { createEventManager } from './events';
 import * as unidirectionalRelations from './utils/unidirectional-relations';
 import * as bidirectionalRelations from './utils/bidirectional-relations';
 import entityValidator from '../entity-validator';
-import { standarizeRelations } from './transform/relations/transform/data-ids';
+import { standardizeRelations } from './transform/relations/transform/data-ids';
 
 const { validators } = validate;
 
@@ -195,7 +195,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
     const clonedEntries = await async.map(entriesToClone, async (entryToClone: any) => {
       // Step 1: Create new entries with standardized original data
-      const newData = await standarizeRelations(
+      const newData = await standardizeRelations(
         {
           ...omit(['id', 'createdAt', 'updatedAt'], entryToClone),
           documentId: createDocumentId(),
@@ -237,7 +237,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
             );
           },
           // Use set/connect/disconnect syntax for relations
-          (data) => standarizeRelations(data, uid)
+          (data) => standardizeRelations(data, uid)
         )(queryParams.data);
 
         return entries.update(newEntry, { ...queryParams, data: updateData });
