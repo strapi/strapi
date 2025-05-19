@@ -32,6 +32,7 @@ import type {
   ErrorHandlerContext,
   ErrorHandlers,
   ErrorCode,
+  StageProgress,
 } from '../../types';
 import type { Diff } from '../utils/json';
 
@@ -340,51 +341,60 @@ class TransferEngine<
     return new PassThrough({
       objectMode: true,
       transform: (asset, _encoding, callback) => {
-        if (asset && asset.stream && typeof asset.stream.on === 'function') {
-          const key = aggregate && aggregate.key ? aggregate.key(asset) : undefined;
-          asset.stream.on('data', (chunk: Buffer) => {
-            if (!this.progress.data[stage]) {
-              this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
-            }
-            const stageProgress = this.progress.data[stage];
-            if (stageProgress) {
-              stageProgress.bytes += chunk.length;
-              if (key) {
-                if (!stageProgress.aggregates) {
-                  stageProgress.aggregates = {};
-                }
-                if (!stageProgress.aggregates[key]) {
-                  stageProgress.aggregates[key] = { count: 0, bytes: 0 };
-                }
-                stageProgress.aggregates[key].bytes += chunk.length;
-              }
-            }
-            this.#emitStageUpdate('progress', stage);
-          });
-          asset.stream.on('end', () => {
-            if (!this.progress.data[stage]) {
-              this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
-            }
-            const stageProgress = this.progress.data[stage];
-            if (stageProgress) {
-              stageProgress.count += 1;
-              if (key) {
-                if (!stageProgress.aggregates) {
-                  stageProgress.aggregates = {};
-                }
-                if (!stageProgress.aggregates[key]) {
-                  stageProgress.aggregates[key] = { count: 0, bytes: 0 };
-                }
-                stageProgress.aggregates[key].count += 1;
-              }
-            }
-            this.#emitStageUpdate('progress', stage);
-          });
+        if (!asset?.stream || typeof asset.stream.on !== 'function') {
+          return callback(null, asset);
         }
+
+        const key = aggregate?.key?.(asset);
+        if (!this.progress.data[stage]) {
+          this.progress.data[stage] = { count: 0, bytes: 0, startTime: Date.now() };
+        }
+        const stageProgress = this.progress.data[stage];
+
+        if (!stageProgress) {
+          throw new TransferEngineError('fatal', 'Stage progress data not found');
+        }
+
+        asset.stream.on('data', (chunk: Buffer) => {
+          stageProgress.bytes += chunk.length;
+          if (key) {
+            this.#updateAggregateBytes(stageProgress, key, chunk.length);
+          }
+          this.#emitStageUpdate('progress', stage);
+        });
+
+        asset.stream.on('end', () => {
+          stageProgress.count += 1;
+          if (key) {
+            this.#incrementAggregateCount(stageProgress, key);
+          }
+          this.#emitStageUpdate('progress', stage);
+        });
+
         callback(null, asset);
       },
     });
   }
+
+  #updateAggregateBytes = (stageProgress: StageProgress, key: string, bytes: number) => {
+    if (!stageProgress.aggregates) {
+      stageProgress.aggregates = {};
+    }
+    if (!stageProgress.aggregates[key]) {
+      stageProgress.aggregates[key] = { count: 0, bytes: 0 };
+    }
+    stageProgress.aggregates[key].bytes += bytes;
+  };
+
+  #incrementAggregateCount = (stageProgress: StageProgress, key: string) => {
+    if (!stageProgress.aggregates) {
+      stageProgress.aggregates = {};
+    }
+    if (!stageProgress.aggregates[key]) {
+      stageProgress.aggregates[key] = { count: 0, bytes: 0 };
+    }
+    stageProgress.aggregates[key].count += 1;
+  };
 
   /**
    * Shorthand method used to trigger transfer update events to every listeners
