@@ -91,10 +91,12 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
         });
       }, z.object({}));
 
-    return attributesSchema.extend({
-      documentId: this.documentID,
-      id: z.number(),
-    });
+    return z
+      .object({
+        documentId: this.documentID,
+        id: z.number(),
+      })
+      .extend(attributesSchema.shape);
   }
 
   /**
