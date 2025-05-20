@@ -238,7 +238,16 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
     case 'media': {
       const { writable, required, multiple } = attribute;
 
-      const baseSchema = multiple ? z.array(z.any()) : z.any();
+      const uploadPlugin = strapi.plugin('upload');
+      // @ts-expect-error there is a mismatch between a raw module and a loader module
+      const fileSchema = uploadPlugin.contentTypes.file as Struct.ContentTypeSchema;
+
+      const mediaSchema = safeSchemaCreation(
+        fileSchema.uid,
+        () => new CoreContentTypeRouteValidator(strapi, fileSchema.uid).document
+      );
+
+      const baseSchema = multiple ? z.array(mediaSchema) : mediaSchema;
 
       const schema = augmentSchema(baseSchema, [maybeRequired(required), maybeReadonly(writable)]);
 
@@ -251,34 +260,12 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
         return z.any();
       }
 
-      const { _idmap } = z.globalRegistry;
-
-      const set = (id: string, schema: z.ZodType) => {
-        if (_idmap.has(id)) {
-          _idmap.delete(id);
-        }
-
-        z.globalRegistry.add(schema, { id });
-      };
-
       const { writable, required, target } = attribute as Schema.Attribute.RelationWithTarget;
 
-      const existsInGlobalRegistry = _idmap.has(target);
-
-      let targetSchema: z.ZodType;
-
-      if (existsInGlobalRegistry) {
-        targetSchema = _idmap.get(target) as z.ZodType;
-      } else {
-        set(target, z.any());
-
-        const validator = new CoreContentTypeRouteValidator(strapi, target);
-        const schema = validator.document;
-
-        set(target, schema);
-
-        targetSchema = schema;
-      }
+      const targetSchema = safeSchemaCreation(
+        target,
+        () => new CoreContentTypeRouteValidator(strapi, target).document
+      );
 
       const baseSchema = relations.isAnyToMany(attribute) ? z.array(targetSchema) : targetSchema;
 
@@ -635,4 +622,35 @@ const maybeWithMinMax = (min?: number, max?: number) => {
 
 const augmentSchema = <T extends z.Schema>(schema: T, modifiers: ((schema: T) => z.Schema)[]) => {
   return modifiers.reduce((acc, modifier) => modifier(acc) as T, schema);
+};
+
+const safeGlobalRegistrySet = (id: string, schema: z.ZodType) => {
+  const { _idmap } = z.globalRegistry;
+
+  // Allow safe overrides in the ID map
+  if (_idmap.has(id)) {
+    _idmap.delete(id);
+  }
+
+  z.globalRegistry.add(schema, { id });
+};
+
+const safeSchemaCreation = (id: string, callback: () => z.ZodType) => {
+  const { _idmap } = z.globalRegistry;
+
+  const existsInGlobalRegistry = _idmap.has(id);
+
+  if (existsInGlobalRegistry) {
+    return _idmap.get(id) as z.ZodType;
+  }
+
+  // Temporary any placeholder before replacing with the actual schema type
+  // Used to prevent infinite loops in cyclical data structures
+  safeGlobalRegistrySet(id, z.any());
+
+  const schema = callback();
+
+  safeGlobalRegistrySet(id, schema);
+
+  return schema;
 };
