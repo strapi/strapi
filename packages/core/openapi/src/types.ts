@@ -12,3 +12,7 @@ export type PathContext = Context<PathContextData>;
 
 export type PathItemContextData = Partial<OpenAPIV3.PathItemObject>;
 export type PathItemContext = Context<PathItemContextData>;
+
+export interface GenerationOptions {
+  type: 'admin' | 'content-api';
+}
