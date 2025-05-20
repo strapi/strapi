@@ -45,9 +45,6 @@ import { CoreContentTypeRouteValidator } from './content-type';
  *
  * @throws {Error} Throws an error if an unsupported attribute type is provided
  *
- * @remarks
- * - Complex types (component, relation, dynamic zone) use placeholder schemas
- *
  * @todo: Move to @strapi/utils if needed for other validation
  */
 export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): z.Schema => {
