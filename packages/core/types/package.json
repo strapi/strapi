@@ -57,7 +57,7 @@
     "typedoc": "0.25.10",
     "typedoc-github-wiki-theme": "1.1.0",
     "typedoc-plugin-markdown": "3.17.1",
-    "zod": "next"
+    "zod": "^4.0.0-beta"
   },
   "devDependencies": {
     "@strapi/ts-zen": "^0.2.0",

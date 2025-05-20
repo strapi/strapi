@@ -8667,7 +8667,7 @@ __metadata:
     vite: "npm:5.4.17"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
-    zod: "npm:next"
+    zod: "npm:^4.0.0-beta"
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -8852,7 +8852,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:6.1.8"
     yup: "npm:0.32.9"
-    zod: "npm:next"
+    zod: "npm:^4.0.0-beta"
   peerDependencies:
     "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -8940,7 +8940,7 @@ __metadata:
     typescript: "npm:5.4.4"
     undici: "npm:6.21.2"
     yup: "npm:0.32.9"
-    zod: "npm:next"
+    zod: "npm:^4.0.0-beta"
   languageName: unknown
   linkType: soft
 
@@ -9192,7 +9192,7 @@ __metadata:
     "@types/debug": "npm:^4"
     debug: "npm:4.3.4"
     openapi-types: "npm:12.1.3"
-    zod: "npm:next"
+    zod: "npm:^4.0.0-beta"
   languageName: unknown
   linkType: soft
 
@@ -9733,7 +9733,7 @@ __metadata:
     typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.4.4"
     undici: "npm:6.21.2"
-    zod: "npm:next"
+    zod: "npm:^4.0.0-beta"
   languageName: unknown
   linkType: soft
 
@@ -9887,7 +9887,7 @@ __metadata:
     preferred-pm: "npm:3.1.2"
     tsconfig: "npm:5.13.0"
     yup: "npm:0.32.9"
-    zod: "npm:next"
+    zod: "npm:^4.0.0-beta"
   languageName: unknown
   linkType: soft
 
@@ -32225,7 +32225,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:next":
+"zod@npm:^4.0.0-beta":
   version: 4.0.0-beta.20250505T195954
   resolution: "zod@npm:4.0.0-beta.20250505T195954"
   dependencies:

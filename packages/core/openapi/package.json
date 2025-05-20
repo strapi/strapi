@@ -59,7 +59,7 @@
     "@strapi/types": "5.13.0",
     "debug": "4.3.4",
     "openapi-types": "12.1.3",
-    "zod": "next"
+    "zod": "^4.0.0-beta"
   },
   "devDependencies": {
     "@strapi/types": "5.13.0",
