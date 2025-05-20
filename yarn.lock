@@ -8667,7 +8667,7 @@ __metadata:
     vite: "npm:5.4.17"
     vite-plugin-dts: "npm:^4.3.0"
     yup: "npm:0.32.9"
-    zod: "npm:3.22.4"
+    zod: "npm:next"
   peerDependencies:
     "@strapi/data-transfer": ^5.0.0
     react: ^17.0.0 || ^18.0.0
@@ -9887,7 +9887,7 @@ __metadata:
     preferred-pm: "npm:3.1.2"
     tsconfig: "npm:5.13.0"
     yup: "npm:0.32.9"
-    zod: "npm:^3.22.4"
+    zod: "npm:next"
   languageName: unknown
   linkType: soft
 
@@ -32218,7 +32218,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:3.22.4, zod@npm:^3.19.1, zod@npm:^3.22.4":
+"zod@npm:^3.19.1, zod@npm:^3.22.4":
   version: 3.22.4
   resolution: "zod@npm:3.22.4"
   checksum: 10c0/7578ab283dac0eee66a0ad0fc4a7f28c43e6745aadb3a529f59a4b851aa10872b3890398b3160f257f4b6817b4ce643debdda4fb21a2c040adda7862cab0a587
