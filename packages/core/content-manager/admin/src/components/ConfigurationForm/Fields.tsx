@@ -1,5 +1,14 @@
 import * as React from 'react';
 
+import {
+  useDroppable,
+  DndContext,
+  UniqueIdentifier,
+  DragOverlay,
+  closestCenter,
+} from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useField, useForm } from '@strapi/admin/strapi-admin';
 import {
   Modal,
@@ -9,19 +18,16 @@ import {
   IconButton,
   IconButtonComponent,
   Typography,
-  useComposedRefs,
   Link,
   Menu,
 } from '@strapi/design-system';
 import { Cog, Cross, Drag, Pencil, Plus } from '@strapi/icons';
 import { generateNKeysBetween as generateNKeysBetweenImpl } from 'fractional-indexing';
-import { getEmptyImage } from 'react-dnd-html5-backend';
+import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { ItemTypes } from '../../constants/dragAndDrop';
-import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
 import { getTranslation } from '../../utils/translations';
 import { ComponentIcon } from '../ComponentIcon';
 
@@ -34,118 +40,78 @@ type FormField = ConfigurationFormData['layout'][number]['children'][number];
 type Field = Omit<ConfigurationFormData['layout'][number]['children'][number], '__temp_key__'>;
 
 /* -------------------------------------------------------------------------------------------------
- * Fields
+ * Drag and Drop
  * -----------------------------------------------------------------------------------------------*/
 
-interface FieldsProps extends Pick<EditLayout, 'metadatas'>, Pick<FieldProps, 'components'> {
-  attributes: {
-    [key: string]: FieldProps['attribute'];
+const DroppableContainer = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const { setNodeRef } = useDroppable({
+    id,
+  });
+
+  return <div ref={setNodeRef}>{children}</div>;
+};
+
+export const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
+  const { attributes, setNodeRef, transform, transition } = useSortable({
+    id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
   };
-  fieldSizes: Record<string, number>;
-  components: EditLayout['components'];
-}
 
-const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
-  const { formatMessage } = useIntl();
-
-  const layout = useForm<ConfigurationFormData['layout']>(
-    'Fields',
-    (state) => state.values.layout ?? []
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      {children}
+    </div>
   );
-  const onChange = useForm('Fields', (state) => state.onChange);
-  const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
-  const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
+};
 
-  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
+const useDragAndDrop = (layout: ConfigurationFormData['layout']) => {
+  const createDragAndDropContainersFromLayout = React.useCallback(
+    (layout: ConfigurationFormData['layout']) => {
+      return layout.map((row, containerIndex) => ({
+        ...row,
+        // Use unique ids for drag and drop items
+        dndId: `container-${crypto.randomUUID()}`,
+        children: row.children.map((child, childIndex) => ({
+          ...child,
+          dndId: `item-${crypto.randomUUID()}`,
+          formName: `layout.${containerIndex}.children.${childIndex}`,
+        })),
+      }));
+    },
+    []
+  );
 
-  /**
-   * Get the fields that are not already in the layout
-   * But also check that they are visible before we give users
-   * the option to display them. e.g. `id` is not visible.
-   */
-  const remainingFields = Object.entries(metadatas).reduce<Field[]>((acc, current) => {
-    const [name, { visible, ...field }] = current;
+  const [containers, setContainers] = React.useState(() =>
+    createDragAndDropContainersFromLayout(layout)
+  );
 
-    if (!existingFields.includes(name) && visible === true) {
-      const type = attributes[name]?.type;
-      const size = type ? fieldSizes[type] : 12;
+  const [activeDragItem, setActiveDragItem] = React.useState<
+    (typeof containers)[number]['children'][number] | null
+  >(null);
 
-      acc.push({
-        ...field,
-        label: field.label ?? name,
-        name,
-        size,
-      });
+  function findContainer(
+    id: UniqueIdentifier,
+    containersAsDictionary: Record<string, (typeof containers)[number]>
+  ) {
+    if (id in containersAsDictionary) {
+      return id;
     }
 
-    return acc;
-  }, []);
+    return Object.keys(containersAsDictionary).find((key) =>
+      containersAsDictionary[key].children.find((child) => child.dndId === id)
+    );
+  }
 
-  const handleMoveField: FieldProps['onMoveField'] = (
-    [newRowIndex, newFieldIndex],
-    [currentRowIndex, currentFieldIndex]
-  ) => {
-    /**
-     * Because this view has the constraint that the sum of field sizes cannot be greater
-     * than 12, we don't use the form's method to move field rows, instead, we calculate
-     * the new layout and set the entire form.
-     */
-    const newLayout = structuredClone(layout);
+  const getActiveItem = (id: UniqueIdentifier, container: (typeof containers)[number]) => {
+    return container.children.find((item) => id === item.dndId);
+  };
 
-    /**
-     * Remove field from the current layout space using splice so we have the item
-     */
-    const [field] = newLayout[currentRowIndex].children.splice(currentFieldIndex, 1);
-
-    if (!field || field.name === TEMP_FIELD_NAME) {
-      return;
-    }
-
-    const newRow = newLayout[newRowIndex].children;
-    const [newFieldKey] = generateNKeysBetween(newRow, 1, currentFieldIndex, newFieldIndex);
-
-    /**
-     * Next we inject the field into it's new row at it's specified index, we then remove the spaces
-     * if they exist and recalculate into potentially two arrays ONLY if the sizing is now over 12,
-     * the row and the rest of the row that couldn't fit.
-     *
-     * for example, if i have a row of `[{size: 4}, {size: 6}]` and i add `{size: 8}` a index 0,
-     * the new array will look like `[{size: 8}, {size: 4}, {size: 6}]` which breaks the limit of 12,
-     * so instead we make two arrays for the new rows `[[{size: 8}, {size: 4}], [{size: 6}]]` which we
-     * then inject at the original row point with spacers included.
-     */
-    newRow.splice(newFieldIndex, 0, { ...field, __temp_key__: newFieldKey });
-
-    if (newLayout[newRowIndex].children.reduce((acc, curr) => acc + curr.size, 0) > 12) {
-      const recalculatedRows = chunkArray(
-        newLayout[newRowIndex].children.filter((field) => field.name !== TEMP_FIELD_NAME)
-      );
-
-      const rowKeys = generateNKeysBetween(
-        newLayout,
-        recalculatedRows.length,
-        currentRowIndex,
-        newRowIndex
-      );
-
-      newLayout.splice(
-        newRowIndex,
-        1,
-        ...recalculatedRows.map((row, index) => ({
-          __temp_key__: rowKeys[index],
-          children: row,
-        }))
-      );
-    }
-
-    /**
-     * Now we remove our spacers from the rows so we can understand what dead rows exist:
-     * - if there's only spacers left
-     * - there's nothing in the row, e.g. a size 12 field left it.
-     * These rows are then filtered out.
-     * After that, we recalculate the spacers for the rows that need them.
-     */
-    const newLayoutWithSpacers = newLayout
+  const createContainersWithSpacers = (layout: typeof containers) => {
+    return layout
       .map((row) => ({
         ...row,
         children: row.children.filter((field) => field.name !== TEMP_FIELD_NAME),
@@ -176,9 +142,85 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
         return row;
       });
-
-    onChange('layout', newLayoutWithSpacers);
   };
+
+  /**
+   * Recomputes the containers when a value in layout changes,
+   * for example when a field size is changed.
+   */
+  React.useEffect(() => {
+    setContainers(createDragAndDropContainersFromLayout(layout));
+  }, [layout, createDragAndDropContainersFromLayout]);
+
+  return {
+    containers,
+    setContainers,
+    activeDragItem,
+    setActiveDragItem,
+    findContainer,
+    getActiveItem,
+    createContainersWithSpacers,
+  };
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Fields
+ * -----------------------------------------------------------------------------------------------*/
+
+interface FieldsProps extends Pick<EditLayout, 'metadatas'>, Pick<FieldProps, 'components'> {
+  attributes: {
+    [key: string]: FieldProps['attribute'];
+  };
+  fieldSizes: Record<string, number>;
+  components: EditLayout['components'];
+}
+
+const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
+  const { formatMessage } = useIntl();
+
+  const layout = useForm<ConfigurationFormData['layout']>(
+    'Fields',
+    (state) => state.values.layout ?? []
+  );
+
+  const onChange = useForm('Fields', (state) => state.onChange);
+  const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
+  const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
+
+  const {
+    containers,
+    activeDragItem,
+    setActiveDragItem,
+    findContainer,
+    getActiveItem,
+    setContainers,
+    createContainersWithSpacers,
+  } = useDragAndDrop(layout);
+
+  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
+
+  /**
+   * Get the fields that are not already in the layout
+   * But also check that they are visible before we give users
+   * the option to display them. e.g. `id` is not visible.
+   */
+  const remainingFields = Object.entries(metadatas).reduce<Field[]>((acc, current) => {
+    const [name, { visible, ...field }] = current;
+
+    if (!existingFields.includes(name) && visible === true) {
+      const type = attributes[name]?.type;
+      const size = type ? fieldSizes[type] : 12;
+
+      acc.push({
+        ...field,
+        label: field.label ?? name,
+        name,
+        size,
+      });
+    }
+
+    return acc;
+  }, []);
 
   const handleRemoveField =
     (rowIndex: number, fieldIndex: number): FieldProps['onRemoveField'] =>
@@ -198,109 +240,221 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   };
 
   return (
-    <Flex paddingTop={6} direction="column" alignItems="stretch" gap={4}>
-      <Flex alignItems="flex-start" direction="column" justifyContent="space-between">
-        <Typography fontWeight="bold">
-          {formatMessage({
-            id: getTranslation('containers.list.displayedFields'),
-            defaultMessage: 'Displayed fields',
-          })}
-        </Typography>
-        <Typography variant="pi" textColor="neutral600">
-          {formatMessage({
-            id: 'containers.SettingPage.editSettings.description',
-            defaultMessage: 'Drag & drop the fields to build the layout',
-          })}
-        </Typography>
-      </Flex>
-      <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
-        <Flex direction="column" alignItems="stretch" gap={2}>
-          {layout.map((row, rowIndex) => (
-            <Grid.Root gap={2} key={row.__temp_key__}>
-              {row.children.map(({ size, ...field }, fieldIndex) => (
-                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
-                  <Field
-                    attribute={attributes[field.name]}
-                    components={components}
-                    index={[rowIndex, fieldIndex]}
-                    name={`layout.${rowIndex}.children.${fieldIndex}`}
-                    onMoveField={handleMoveField}
-                    onRemoveField={handleRemoveField(rowIndex, fieldIndex)}
-                  />
-                </Grid.Item>
-              ))}
-            </Grid.Root>
-          ))}
-          <Menu.Root>
-            <Menu.Trigger
-              startIcon={<Plus />}
-              endIcon={null}
-              disabled={remainingFields.length === 0}
-              fullWidth
-              variant="secondary"
-            >
+    <>
+      <DndContext
+        collisionDetection={closestCenter}
+        onDragStart={(event) => {
+          const containersAsDictionary = Object.fromEntries(
+            containers.map((container) => [container.dndId, container])
+          );
+          const activeContainer = findContainer(event.active.id, containersAsDictionary);
+
+          if (!activeContainer) return;
+
+          const activeItem = getActiveItem(
+            event.active.id,
+            containersAsDictionary[activeContainer]
+          );
+          if (activeItem) {
+            setActiveDragItem(activeItem);
+          }
+        }}
+        onDragOver={({ active, over }) => {
+          const containersAsDictionary = Object.fromEntries(
+            containers.map((container) => [container.dndId, container])
+          );
+          const activeContainer = findContainer(active.id, containersAsDictionary);
+          const overContainer = findContainer(over?.id ?? '', containersAsDictionary);
+          const activeContainerIndex = containers.findIndex(
+            (container) => container.dndId === activeContainer
+          );
+          const overContainerIndex = containers.findIndex(
+            (container) => container.dndId === overContainer
+          );
+
+          if (!activeContainer || !overContainer) {
+            return;
+          }
+
+          const draggedItem = getActiveItem(active.id, containersAsDictionary[activeContainer]);
+          const overItems = containersAsDictionary[overContainer].children;
+          const overIndex = overItems.findIndex((item) => item.dndId === over?.id);
+
+          if (!draggedItem) return;
+
+          if (draggedItem?.size === 12) {
+            // Move the item with its container
+            const update = arrayMove(containers, activeContainerIndex, overContainerIndex);
+            setContainers(update);
+            return;
+          }
+
+          const update = produce(containers, (draft) => {
+            draft[activeContainerIndex].children = draft[activeContainerIndex].children.filter(
+              (item) => item.dndId !== active.id
+            );
+            const spaceTaken = draft[overContainerIndex].children.reduce((acc, curr) => {
+              if (curr.name === TEMP_FIELD_NAME) {
+                return acc;
+              }
+
+              return acc + curr.size;
+            }, 0);
+
+            // Check the sizes of the children, if there is no room, exit
+            if (spaceTaken + draggedItem.size > 12) {
+              // Leave the item where it started
+              draft[activeContainerIndex].children = containers[activeContainerIndex].children;
+              return;
+            }
+
+            // There is room for the item, drop it
+            draft[overContainerIndex].children.splice(overIndex, 0, draggedItem);
+          });
+
+          setContainers(update);
+        }}
+        onDragEnd={(event) => {
+          const { active, over } = event;
+          const { id } = active;
+          const overId = over?.id;
+          const containersAsDictionary = Object.fromEntries(
+            containers.map((container) => [container.dndId, container])
+          );
+          const activeContainer = findContainer(id, containersAsDictionary);
+          const overContainer = findContainer(overId!, containersAsDictionary);
+
+          if (!activeContainer || !overContainer) {
+            return;
+          }
+
+          const activeIndex = containersAsDictionary[activeContainer].children.findIndex(
+            (children) => children.dndId === id
+          );
+          const overIndex = containersAsDictionary[overContainer].children.findIndex(
+            (children) => children.dndId === overId
+          );
+
+          const movedContainerItems = produce(containersAsDictionary, (draft) => {
+            if (activeIndex !== overIndex) {
+              // Move items around inside their own container
+              draft[activeContainer].children = arrayMove(
+                draft[activeContainer].children,
+                activeIndex,
+                overIndex
+              );
+            }
+          });
+          const updatedContainers = Object.values(movedContainerItems);
+          const containersWithSpacedItems = createContainersWithSpacers(
+            updatedContainers
+          ) as typeof containers;
+
+          // Remove properties the server does not expect before updating the form
+          const updatedLayout = containersWithSpacedItems.map(
+            ({ dndId: _dndId, children, ...container }) => ({
+              ...container,
+              children: children.map(({ dndId: _dndId, formName: _formName, ...child }) => child),
+            })
+          );
+
+          onChange('layout', updatedLayout);
+          setActiveDragItem(null);
+        }}
+      >
+        <Flex paddingTop={6} direction="column" alignItems="stretch" gap={4}>
+          <Flex alignItems="flex-start" direction="column" justifyContent="space-between">
+            <Typography fontWeight="bold">
               {formatMessage({
-                id: getTranslation('containers.SettingPage.add.field'),
-                defaultMessage: 'Insert another field',
+                id: getTranslation('containers.list.displayedFields'),
+                defaultMessage: 'Displayed fields',
               })}
-            </Menu.Trigger>
-            <Menu.Content>
-              {remainingFields.map((field) => (
-                <Menu.Item key={field.name} onSelect={handleAddField(field)}>
-                  {field.label}
-                </Menu.Item>
+            </Typography>
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage({
+                id: 'containers.SettingPage.editSettings.description',
+                defaultMessage: 'Drag & drop the fields to build the layout',
+              })}
+            </Typography>
+          </Flex>
+          <Box
+            padding={4}
+            hasRadius
+            borderStyle="dashed"
+            borderWidth="1px"
+            borderColor="neutral300"
+          >
+            <Flex direction="column" alignItems="stretch" gap={2}>
+              {containers.map((container, containerIndex) => (
+                <React.Fragment key={container.dndId}>
+                  <SortableContext
+                    id={container.dndId}
+                    items={container.children.map((child) => ({ id: child.dndId }))}
+                  >
+                    <DroppableContainer id={container.dndId}>
+                      <Grid.Root gap={2}>
+                        {container.children.map((child, childIndex) => (
+                          <Grid.Item
+                            col={child.size}
+                            key={child.dndId}
+                            direction="column"
+                            alignItems="stretch"
+                          >
+                            <>
+                              <SortableItem id={child.dndId}>
+                                <Field
+                                  attribute={attributes[child.name]}
+                                  components={components}
+                                  name={child.formName}
+                                  onRemoveField={handleRemoveField(containerIndex, childIndex)}
+                                  dndId={child.dndId}
+                                />
+                              </SortableItem>
+                            </>
+                          </Grid.Item>
+                        ))}
+                      </Grid.Root>
+                    </DroppableContainer>
+                  </SortableContext>
+                </React.Fragment>
               ))}
-            </Menu.Content>
-          </Menu.Root>
+              <DragOverlay>
+                {activeDragItem ? (
+                  <Field
+                    attribute={attributes[activeDragItem.name]}
+                    components={components}
+                    name={activeDragItem.formName}
+                    dndId={activeDragItem.dndId}
+                  />
+                ) : null}
+              </DragOverlay>
+              <Menu.Root>
+                <Menu.Trigger
+                  startIcon={<Plus />}
+                  endIcon={null}
+                  disabled={remainingFields.length === 0}
+                  fullWidth
+                  variant="secondary"
+                >
+                  {formatMessage({
+                    id: getTranslation('containers.SettingPage.add.field'),
+                    defaultMessage: 'Insert another field',
+                  })}
+                </Menu.Trigger>
+                <Menu.Content>
+                  {remainingFields.map((field) => (
+                    <Menu.Item key={field.name} onSelect={handleAddField(field)}>
+                      {field.label}
+                    </Menu.Item>
+                  ))}
+                </Menu.Content>
+              </Menu.Root>
+            </Flex>
+          </Box>
         </Flex>
-      </Box>
-    </Flex>
+      </DndContext>
+    </>
   );
-};
-
-/**
- * @internal
- * @description Small abstraction to solve within an array of fields where you can
- * add a field to the beginning or start, move back and forth what it's index range
- * should be when calculating it's new temp key
- */
-const generateNKeysBetween = <Field extends { __temp_key__: string }>(
-  field: Field[],
-  count: number,
-  currInd: number,
-  newInd: number
-) => {
-  const startKey = currInd > newInd ? field[newInd - 1]?.__temp_key__ : field[newInd]?.__temp_key__;
-  const endKey = currInd > newInd ? field[newInd]?.__temp_key__ : field[newInd + 1]?.__temp_key__;
-
-  return generateNKeysBetweenImpl(startKey, endKey, count);
-};
-
-/**
- * @internal
- * @description chunks a row of layouts by the max size we allow, 12. It does not add the
- * spacers again, that should be added separately.
- */
-const chunkArray = (array: FormField[]) => {
-  const result: Array<FormField[]> = [];
-  let temp: FormField[] = [];
-
-  array.reduce((acc, field) => {
-    if (acc + field.size > 12) {
-      result.push(temp);
-      temp = [field];
-      return field.size;
-    } else {
-      temp.push(field);
-      return acc + field.size;
-    }
-  }, 0);
-
-  if (temp.length > 0) {
-    result.push(temp);
-  }
-
-  return result;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -309,9 +463,8 @@ const chunkArray = (array: FormField[]) => {
 
 interface FieldProps extends Pick<EditFieldFormProps, 'name' | 'attribute'> {
   components: EditLayout['components'];
-  index: [row: number, index: number];
-  onMoveField: UseDragAndDropOptions<number[]>['onMoveItem'];
-  onRemoveField: React.MouseEventHandler<HTMLButtonElement>;
+  dndId: string;
+  onRemoveField?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 const TEMP_FIELD_NAME = '_TEMP_';
@@ -320,32 +473,20 @@ const TEMP_FIELD_NAME = '_TEMP_';
  * Displays a field in the layout with drag options, also
  * opens a modal  to edit the details of said field.
  */
-const Field = ({ attribute, components, name, index, onMoveField, onRemoveField }: FieldProps) => {
+const Field = ({ attribute, components, name, onRemoveField, dndId }: FieldProps) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
-
   const { value } = useField<FormField>(name);
-
-  const [{ isDragging }, objectRef, dropRef, dragRef, dragPreviewRef] = useDragAndDrop<
-    Array<number>
-  >(true, {
-    dropSensitivity: 'immediate',
-    type: ItemTypes.EDIT_FIELD,
-    item: { index, label: value?.label, name },
-    index,
-    onMoveItem: onMoveField,
+  const { listeners, setActivatorNodeRef } = useSortable({
+    id: dndId,
   });
-
-  React.useEffect(() => {
-    dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
-  }, [dragPreviewRef]);
-
-  const composedRefs = useComposedRefs<HTMLSpanElement>(dragRef, objectRef);
 
   const handleRemoveField: React.MouseEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    onRemoveField(e);
+    if (onRemoveField) {
+      onRemoveField?.(e);
+    }
   };
 
   const onEditFieldMeta: React.MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -354,14 +495,16 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
     setIsModalOpen(true);
   };
 
-  const tempRefs = useComposedRefs<HTMLSpanElement>(dropRef, objectRef);
-
   if (!value) {
     return null;
   }
 
   if (value.name === TEMP_FIELD_NAME) {
-    return <Flex tag="span" height="100%" style={{ opacity: 0 }} ref={tempRefs} />;
+    return <Flex tag="span" height="100%" style={{ opacity: 0 }} />;
+  }
+
+  if (!attribute) {
+    return null;
   }
 
   return (
@@ -370,8 +513,6 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
         borderColor="neutral150"
         background="neutral100"
         hasRadius
-        style={{ opacity: isDragging ? 0.5 : 1 }}
-        ref={dropRef}
         gap={3}
         cursor="pointer"
         onClick={() => {
@@ -379,6 +520,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
         }}
       >
         <DragButton
+          ref={setActivatorNodeRef}
           tag="span"
           withTooltip={false}
           label={formatMessage(
@@ -388,8 +530,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
             },
             { item: value.label }
           )}
-          onClick={(e) => e.stopPropagation()}
-          ref={composedRefs}
+          {...listeners}
         >
           <Drag />
         </DragButton>
