@@ -255,7 +255,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       );
     } finally {
       // delete temporary folder
-      await fse.remove(tmpWorkingDirectory);
+      await fse.remove(tmpWorkingDirectory).catch(err => {
+        console.error("Error removing file:", tmpWorkingDirectory, err);
+      });
     }
 
     return uploadedFiles;

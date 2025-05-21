@@ -73,10 +73,14 @@ const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
     if (files) {
       if (Array.isArray(files)) {
         // not awaiting to not slow the request
-        Promise.all(files.map((file) => fse.remove(file.filepath)));
+        Promise.all(files.map((file) => fse.remove(file.filepath).catch(err => {
+          console.error("Error removing file:", file.filepath, err);
+        })));
       } else if (files && files.filepath) {
         // not awaiting to not slow the request
-        fse.remove(files.filepath);
+        fse.remove(files.filepath).catch(err => {
+          console.error("Error removing file:", files.filepath, err);
+        });
       }
       delete ctx.request.files;
     }
