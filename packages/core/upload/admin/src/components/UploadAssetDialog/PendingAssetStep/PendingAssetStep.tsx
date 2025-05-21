@@ -35,6 +35,7 @@ interface PendingAssetStepProps {
   onUploadSucceed: (file: RawFile) => void;
   trackedLocation?: string;
   initialAssetsToAdd?: File[];
+  limitConcurrentUploads?: boolean;
 }
 
 export const PendingAssetStep = ({
@@ -48,11 +49,13 @@ export const PendingAssetStep = ({
   onCancelUpload,
   onUploadSucceed,
   trackedLocation,
+  limitConcurrentUploads = false,
 }: PendingAssetStepProps) => {
   const assetCountRef = React.useRef(0);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const [uploadStatus, setUploadStatus] = React.useState(Status.Idle);
+  const [currentAssetUpload, setCurrentAssetUpload] = React.useState(0);
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -144,7 +147,7 @@ export const PendingAssetStep = ({
           </Flex>
           <KeyboardNavigable tagName="article">
             <Grid.Root gap={4}>
-              {assets.map((asset) => {
+              {assets.map((asset, index) => {
                 const assetKey = asset.url;
 
                 if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
@@ -157,6 +160,11 @@ export const PendingAssetStep = ({
                         id={assetKey}
                         onCancel={onCancelUpload}
                         onStatusChange={(status) => handleStatusChange(status, asset.rawFile!)}
+                        setCurrentAssetUpload={setCurrentAssetUpload}
+                        performUpload={
+                          !limitConcurrentUploads ||
+                          (limitConcurrentUploads && index === currentAssetUpload)
+                        }
                         size="S"
                         folderId={folderId}
                       />
