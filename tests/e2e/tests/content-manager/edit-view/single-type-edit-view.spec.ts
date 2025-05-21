@@ -128,10 +128,10 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.keyboard.press('Escape'); // close the menu since we're not actioning on it atm.
 
-      await page.getByRole('textbox').nth(1).click();
+      await page.getByRole('textbox').nth(2).click();
       await page
         .getByRole('textbox')
-        .nth(1)
+        .nth(2)
         .fill(
           "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
         );
@@ -200,10 +200,10 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
-      await page.getByRole('textbox').nth(1).click();
+      await page.getByRole('textbox').nth(2).click();
       await page
         .getByRole('textbox')
-        .nth(1)
+        .nth(2)
         .fill(
           "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
         );

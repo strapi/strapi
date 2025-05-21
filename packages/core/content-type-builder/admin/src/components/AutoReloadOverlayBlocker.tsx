@@ -26,13 +26,14 @@ export interface AutoReloadOverlayBlockerConfig {
  * -----------------------------------------------------------------------------------------------*/
 
 export interface AutoReloadOverlayBlockerContextValue {
-  lockAppWithAutoreload?: (config?: AutoReloadOverlayBlockerConfig) => void;
-  unlockAppWithAutoreload?: () => void;
+  lockAppWithAutoreload: (config?: AutoReloadOverlayBlockerConfig) => void;
+  unlockAppWithAutoreload: () => void;
 }
 
-const AutoReloadOverlayBlockerContext = React.createContext<AutoReloadOverlayBlockerContextValue>(
-  {}
-);
+const AutoReloadOverlayBlockerContext = React.createContext<AutoReloadOverlayBlockerContextValue>({
+  lockAppWithAutoreload: () => {},
+  unlockAppWithAutoreload: () => {},
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
@@ -42,7 +43,7 @@ export interface AutoReloadOverlayBlockerProviderProps {
   children: React.ReactNode;
 }
 
-const MAX_ELAPSED_TIME = 30 * 1000;
+const MAX_ELAPSED_TIME = 300 * 1000;
 
 const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlockerProviderProps) => {
   const [isOpen, setIsOpen] = React.useState(false);

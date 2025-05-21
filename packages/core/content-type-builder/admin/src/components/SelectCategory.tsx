@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ComboboxOption, Combobox, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { useDataManager } from '../hooks/useDataManager';
+import { useDataManager } from './DataManager/useDataManager';
 
 interface SelectCategoryProps {
   error?: string | null;

@@ -1,37 +1,16 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
-import {
-  useCollator,
-  useFilter,
-  SubNav,
-  SubNavHeader,
-  SubNavLink,
-  SubNavSection,
-  SubNavSections,
-} from '@strapi/design-system';
+import { useQueryParams, SubNav } from '@strapi/admin/strapi-admin';
+import { Divider, Flex, TextInput, useCollator, useFilter } from '@strapi/design-system';
+import { Cross, Search } from '@strapi/icons';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
-import { styled } from 'styled-components';
 
 import { useContentTypeSchema } from '../hooks/useContentTypeSchema';
 import { useTypedSelector } from '../modules/hooks';
 import { getTranslation } from '../utils/translations';
 
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
-
-const SubNavLinkCustom = styled(SubNavLink)`
-  div {
-    width: inherit;
-    span:nth-child(2) {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: inherit;
-    }
-  }
-`;
 
 const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
@@ -133,30 +112,30 @@ const LeftMenu = () => {
   };
 
   return (
-    <SubNav aria-label={label}>
-      <SubNavHeader
-        label={label}
-        searchable
-        value={search}
-        onChange={handleChangeSearch}
-        onClear={handleClear}
-        searchLabel={formatMessage({
-          id: 'content-manager.components.LeftMenu.Search.label',
-          defaultMessage: 'Search for a content type',
-        })}
-      />
-      <SubNavSections>
+    <SubNav.Main aria-label={label}>
+      <SubNav.Header label={label} />
+      <Divider background="neutral150" />
+      <Flex padding={5} gap={3} direction={'column'} alignItems={'stretch'}>
+        <TextInput
+          startAction={<Search fill="neutral500" />}
+          value={search}
+          onChange={handleChangeSearch}
+          aria-label="Search"
+          placeholder={formatMessage({
+            id: 'content-manager.components.LeftMenu.Search.label',
+            defaultMessage: 'Search for a content type',
+          })}
+          endAction={<Cross onClick={handleClear} fill="neutral500" cursor="pointer" />}
+          size="S"
+        />
+      </Flex>
+      <SubNav.Sections>
         {menu.map((section) => {
           return (
-            <SubNavSection
-              key={section.id}
-              label={section.title}
-              badgeLabel={section.links.length.toString()}
-            >
+            <SubNav.Section key={section.id} label={section.title}>
               {section.links.map((link) => {
                 return (
-                  <SubNavLinkCustom
-                    tag={NavLink}
+                  <SubNav.Link
                     key={link.uid}
                     to={{
                       pathname: link.to,
@@ -165,17 +144,15 @@ const LeftMenu = () => {
                         plugins: getPluginsParamsForLink(link),
                       }),
                     }}
-                    width="100%"
-                  >
-                    {link.title}
-                  </SubNavLinkCustom>
+                    label={link.title}
+                  />
                 );
               })}
-            </SubNavSection>
+            </SubNav.Section>
           );
         })}
-      </SubNavSections>
-    </SubNav>
+      </SubNav.Sections>
+    </SubNav.Main>
   );
 };
 
