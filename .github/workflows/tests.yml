@@ -238,7 +238,7 @@ jobs:
         # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@main
+        uses: trunk-io/analytics-uploader@v1
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
@@ -289,7 +289,7 @@ jobs:
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@main
+        uses: trunk-io/analytics-uploader@v1
         with:
           junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
