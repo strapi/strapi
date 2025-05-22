@@ -21,7 +21,11 @@ const mockGetRequestContext = jest.fn(() => {
 });
 
 const mockStrapi = {
-  service: jest.fn(),
+  service: jest.fn((name: string) => {
+    if (name === 'admin::persist-tables') {
+      return { persistTablesWithPrefix: jest.fn() };
+    }
+  }),
   plugins: {
     'content-manager': {
       service: jest.fn(() => ({
@@ -73,7 +77,6 @@ const mockStrapi = {
 // @ts-expect-error - ignore
 mockStrapi.documents.use = jest.fn();
 
-// @ts-expect-error - we're not mocking the full Strapi object
 const lifecyclesService = createLifecyclesService({ strapi: mockStrapi });
 
 describe('history lifecycles service', () => {
@@ -81,9 +84,9 @@ describe('history lifecycles service', () => {
     jest.useRealTimers();
   });
 
-  it('inits service only once', () => {
-    lifecyclesService.bootstrap();
-    lifecyclesService.bootstrap();
+  it('inits service only once', async () => {
+    await lifecyclesService.bootstrap();
+    await lifecyclesService.bootstrap();
     // @ts-expect-error - ignore
     expect(mockStrapi.documents.use).toHaveBeenCalledTimes(1);
   });
