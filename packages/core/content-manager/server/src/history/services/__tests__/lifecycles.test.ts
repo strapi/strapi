@@ -77,6 +77,7 @@ const mockStrapi = {
 // @ts-expect-error - ignore
 mockStrapi.documents.use = jest.fn();
 
+// @ts-expect-error - we're not mocking the full Strapi object
 const lifecyclesService = createLifecyclesService({ strapi: mockStrapi });
 
 describe('history lifecycles service', () => {
