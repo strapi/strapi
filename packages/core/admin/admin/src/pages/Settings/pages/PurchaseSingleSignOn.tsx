@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
 import { useTypedSelector } from '../../../core/store/hooks';
-import darkIllustration from '../assets/purchase-page-sso-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-sso-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-sso-illustration-dark.png';
+import lightIllustration from '../assets/purchase-page-sso-illustration-light.png';
 
 const PurchaseSingleSignOn = () => {
   const { formatMessage } = useIntl();
