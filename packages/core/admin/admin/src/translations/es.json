@@ -245,6 +245,7 @@
   "app.components.LeftMenu.collapse": "Contraer la barra de navegación",
   "app.components.LeftMenu.expand": "Expandir la barra de navegación",
   "app.components.LeftMenu.logout": "Cerrar sesión",
+  "app.components.LeftMenu.trialCountdown": "Tu prueba termina el {date}.",
   "app.components.LeftMenuFooter.help": "Ayuda",
   "app.components.LeftMenuFooter.poweredBy": "Potenciado por ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "Tipos de Colección",

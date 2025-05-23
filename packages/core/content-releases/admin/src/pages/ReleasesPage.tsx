@@ -10,6 +10,7 @@ import {
   useRBAC,
   isFetchError,
   Layouts,
+  GradientBadge,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
@@ -283,6 +284,14 @@ const ReleasesPage = () => {
           id: 'content-releases.pages.Releases.title',
           defaultMessage: 'Releases',
         })}
+        secondaryAction={
+          <GradientBadge
+            label={formatMessage({
+              id: 'components.premiumFeature.title',
+              defaultMessage: 'Premium feature',
+            })}
+          />
+        }
         subtitle={formatMessage({
           id: 'content-releases.pages.Releases.header-subtitle',
           defaultMessage: 'Create and manage content updates',

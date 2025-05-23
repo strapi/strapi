@@ -21,7 +21,7 @@ interface ConfigurationLogo {
 
 const admin = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ProjectSettings', 'LicenseLimits'],
+    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'LicenseTrialTimeLeft'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -107,6 +107,13 @@ const admin = adminApi
         }),
         providesTags: ['LicenseLimits'],
       }),
+      getLicenseTrialTimeLeft: builder.query<{ trialEndsAt: string }, void>({
+        query: () => ({
+          url: '/admin/license-trial-time-left',
+          method: 'GET',
+        }),
+        providesTags: ['LicenseTrialTimeLeft'],
+      }),
     }),
     overrideExisting: false,
   });
@@ -119,6 +126,7 @@ const {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
+  useGetLicenseTrialTimeLeftQuery,
 } = admin;
 
 export {
@@ -129,6 +137,7 @@ export {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
+  useGetLicenseTrialTimeLeftQuery,
 };
 
 export type { ConfigurationLogo };

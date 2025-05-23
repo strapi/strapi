@@ -371,6 +371,7 @@
   "app.components.LeftMenu.logout": "Saioa amaitu",
   "app.components.LeftMenu.logo.alt": "Aplikazioaren logotipoa",
   "app.components.LeftMenu.plugins": "Pluginak",
+  "app.components.LeftMenu.trialCountdown": "Zure proba {date} egunera amaituko du.",
   "app.components.LeftMenu.navbrand.title": "Strapi Arbela",
   "app.components.LeftMenu.navbrand.workplace": "Lantokia",
   "app.components.LeftMenuFooter.help": "Laguntza",

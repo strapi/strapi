@@ -36,6 +36,7 @@ interface BrowserStrapi {
     REVIEW_WORKFLOWS: 'review-workflows';
     isEnabled: (featureName?: string) => boolean;
   };
+  isTrial: boolean;
   flags: {
     promoteEE?: boolean;
     nps?: boolean;

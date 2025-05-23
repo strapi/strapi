@@ -294,6 +294,7 @@
   "app.components.LeftMenu.logout": "Wyloguj",
   "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
   "app.components.LeftMenu.navbrand.workplace": "Workplace",
+  "app.components.LeftMenu.trialCountdown": "Twoja próba się skończy {date}.",
   "app.components.LeftMenuFooter.help": "Wsparcie",
   "app.components.LeftMenuFooter.poweredBy": "Obsługiwane przez ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "Typy kolekcji",

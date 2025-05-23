@@ -66,4 +66,12 @@ export default [
       ],
     },
   },
+  {
+    method: 'GET',
+    path: '/license-trial-time-left',
+    handler: 'admin.licenseTrialTimeLeft',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
 ];

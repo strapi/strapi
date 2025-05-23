@@ -294,6 +294,7 @@
   "app.components.LeftMenu.logout": "लॉग आउट",
   "app.components.LeftMenu.navbrand.title": "स्ट्रैपी डैशबोर्ड",
   "app.components.LeftMenu.navbrand.workplace": "कार्यस्थल",
+  "app.components.LeftMenu.trialCountdown": "आपका परीक्षण {date} पर समाप्त हो जाएगा।",
   "app.components.LeftMenuFooter.help": "मदद करना",
   "app.components.LeftMenuFooter.poweredBy": "द्वारा संचालित ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "संग्रह प्रकार",

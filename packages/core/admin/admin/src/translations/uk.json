@@ -459,6 +459,7 @@
   "app.components.LeftMenu.navbrand.title": "Панель управління Strapi",
   "app.components.LeftMenu.navbrand.workplace": "Робоче місце",
   "app.components.LeftMenu.plugins": "Плаґіни",
+  "app.components.LeftMenu.trialCountdown": "Ваш пробний період закінчується {date}.",
   "app.components.LeftMenuFooter.help": "Допомога",
   "app.components.LeftMenuFooter.poweredBy": "Працює на ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "Типи Колекцій",

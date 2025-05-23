@@ -211,6 +211,7 @@
   "app.components.LeftMenu.collapse": "નવબારને સંકુચિત કરો",
   "app.components.LeftMenu.expand": "નવબાર વિસ્તૃત કરો",
   "app.components.LeftMenu.logout": "લોગઆઉટ",
+  "app.components.LeftMenu.trialCountdown": "તમારી પ્રયાસ અંતમાં {date} પર થાય છે.",
   "app.components.LeftMenu.navbrand.title": "સ્ટ્રેપી ડેશબોર્ડ",
   "app.components.LeftMenu.navbrand.workplace": "કાર્યસ્થળ",
   "app.components.LeftMenuFooter.help": "સહાય",

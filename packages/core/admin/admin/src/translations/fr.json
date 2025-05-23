@@ -318,6 +318,7 @@
   "app.components.LeftMenu.collapse": "Réduire la barre de navigation",
   "app.components.LeftMenu.expand": "Développer la barre de navigation",
   "app.components.LeftMenu.logout": "Déconnexion",
+  "app.components.LeftMenu.trialCountdown": "Votre essai se termine le {date}.",
   "app.components.LeftMenuFooter.help": "Aide",
   "app.components.LeftMenuFooter.poweredBy": "Propulsé par ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "Types de collection",
