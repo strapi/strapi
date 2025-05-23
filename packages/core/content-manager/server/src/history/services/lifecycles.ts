@@ -101,6 +101,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const serviceUtils = createServiceUtils({ strapi });
+  const { persistTablesWithPrefix } = strapi.service('admin::persist-tables');
 
   return {
     async bootstrap() {
@@ -108,6 +109,9 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (state.isInitialized) {
         return;
       }
+
+      // Avoid data loss in case users temporarily don't have a license
+      await persistTablesWithPrefix('strapi_history_versions');
 
       strapi.documents.use(async (context, next) => {
         const result = (await next()) as any;
