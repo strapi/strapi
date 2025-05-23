@@ -10,6 +10,7 @@ import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
 import type { Core } from '@strapi/types';
+import type { Options } from '@koa/cors';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
@@ -117,7 +118,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const landingPage = determineLandingPage(strapi);
 
   type CustomOptions = {
-    cors: boolean;
+    cors?: Options;
     uploads: boolean;
     bodyParserConfig: boolean;
   };
@@ -133,7 +134,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     formatError: formatGraphqlError,
 
     // Misc
-    cors: false,
+    cors: undefined,
     uploads: false,
     bodyParserConfig: true,
     // send 400 http status instead of 200 for input validation errors
@@ -167,7 +168,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
   // add cors middleware
   if (cors) {
-    handler.push(cors());
+    handler.push(cors(serverConfig.cors));
   }
 
   // add koa bodyparser middleware
