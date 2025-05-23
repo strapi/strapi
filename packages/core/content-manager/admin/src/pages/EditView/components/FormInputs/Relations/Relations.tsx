@@ -341,6 +341,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
         justifyContent="space-between"
         alignItems="stretch"
         wrap="wrap"
+        data-testid={`relation-field-${targetField}`}
       >
         <StyledFlex direction="column" alignItems="start" gap={2} width="100%">
           <RelationsInput
@@ -664,13 +665,19 @@ const RelationsInput = ({
             onInputChange={(event) => {
               handleSearch(event.currentTarget.value);
             }}
+            data-testid={`relation-combobox-${name}`}
             {...props}
           >
             {options.map((opt) => {
               const textValue = getRelationLabel(opt, mainField);
 
               return (
-                <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
+                <ComboboxOption
+                  key={opt.id}
+                  value={opt.id.toString()}
+                  textValue={textValue}
+                  data-testid={`relation-option-${name}-${textValue}`}
+                >
                   <Flex gap={2} justifyContent="space-between">
                     <Flex gap={2}>
                       <LinkIcon fill="neutral500" />
@@ -940,6 +947,7 @@ const RelationsList = ({
         }}
         itemKey={(index) => data[index].id}
         innerElementType="ol"
+        data-testid={`relation-list-${name}`}
       >
         {ListItem}
       </FixedSizeList>
@@ -1052,6 +1060,8 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   const label = isTemporary && document ? getRelationLabel(document, mainField) : originalLabel;
   const status = isTemporary && document ? document?.status : originalStatus;
 
+  const fieldName = name;
+
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
       canDrag && !disabled,
@@ -1100,6 +1110,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       ref={dropRef}
       aria-describedby={ariaDescribedBy}
       cursor={canDrag ? 'all-scroll' : 'default'}
+      data-testid={`relation-item-${fieldName}-${label}`}
     >
       {isDragging ? (
         <RelationItemPlaceholder />
@@ -1130,6 +1141,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                 variant="ghost"
                 onKeyDown={handleKeyDown}
                 disabled={disabled}
+                data-testid={`relation-drag-handle-${fieldName}-${label}`}
               >
                 <Drag />
               </IconButton>
@@ -1151,6 +1163,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               })}
               variant="ghost"
               size="S"
+              data-testid={`relation-disconnect-${fieldName}-${label}`}
             >
               <Cross />
             </IconButton>
