@@ -70,15 +70,24 @@ export const FreeTrialEndedModal = () => {
 
   return (
     <Modal.Root open={open} onOpenChange={setOpen}>
-      <StyledModalContent>
+      <StyledModalContent aria-labelledby="title">
         <StyledModalBody>
           <Box position="absolute" top={0} right={0} padding={2}>
-            <StyledButton variant="ghost" width="2.4rem" height="2.4rem" onClick={handleClose}>
+            <StyledButton
+              aria-label={formatMessage({
+                id: 'app.utils.close-label',
+                defaultMessage: 'Close',
+              })}
+              variant="ghost"
+              width="2.4rem"
+              height="2.4rem"
+              onClick={handleClose}
+            >
               <Cross />
             </StyledButton>
           </Box>
           <Flex direction="column" alignItems="start" justifyContent="stretch" padding={8} gap={4}>
-            <Typography variant="alpha" fontWeight="bold" fontSize={4}>
+            <Typography variant="alpha" fontWeight="bold" fontSize={4} id="title">
               {formatMessage({
                 id: 'app.components.FreeTrialEndedModal.title',
                 defaultMessage: 'Your trial has ended',

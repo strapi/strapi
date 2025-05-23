@@ -55,7 +55,10 @@ export const FreeTrialWelcomeModal = () => {
         <StyledModalBody>
           <Box position="absolute" top={0} right={0} padding={2}>
             <StyledButton
-              aria-label="close"
+              aria-label={formatMessage({
+                id: 'app.utils.close-label',
+                defaultMessage: 'Close',
+              })}
               variant="tertiary"
               width="2.4rem"
               height="2.4rem"
