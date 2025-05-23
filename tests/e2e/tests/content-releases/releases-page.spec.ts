@@ -12,6 +12,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await resetFiles();
     await page.goto('/admin');
+    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
   });
 
