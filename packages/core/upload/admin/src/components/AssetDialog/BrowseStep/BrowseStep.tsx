@@ -57,6 +57,16 @@ const ActionContainer = styled(Box)`
   }
 `;
 
+const FooterContainer = styled(Flex)`
+  div {
+    z-index: 5;
+  }
+
+  nav {
+    z-index: 5;
+  }
+`;
+
 type NumberKeyedObject = Record<number, string>;
 
 type StringFilter = {
@@ -194,267 +204,270 @@ export const BrowseStep = ({
   };
 
   return (
-    <Box>
-      {onSelectAllAsset && (
-        <Box paddingBottom={4}>
-          <Flex justifyContent="space-between" alignItems="flex-start">
-            {(assetCount > 0 || folderCount > 0 || isFiltering) && (
-              <Flex gap={2} wrap="wrap">
-                {multiple && isGridView && (
-                  <Flex
-                    paddingLeft={2}
-                    paddingRight={2}
-                    background="neutral0"
-                    hasRadius
-                    borderColor="neutral200"
-                    height="3.2rem"
-                  >
-                    <Checkbox
-                      aria-label={formatMessage({
-                        id: getTrad('bulk.select.label'),
-                        defaultMessage: 'Select all assets',
-                      })}
-                      checked={
-                        !areAllAssetSelected && hasSomeAssetSelected
-                          ? 'indeterminate'
-                          : areAllAssetSelected
-                      }
-                      onCheckedChange={onSelectAllAsset}
-                    />
-                  </Flex>
-                )}
-                {isGridView && <SortPicker onChangeSort={onChangeSort} value={queryObject?.sort} />}
-                <Filters
-                  appliedFilters={queryObject?.filters?.$and as ImportedFilterStructure[]}
-                  onChangeFilters={onChangeFilters}
-                />
-              </Flex>
-            )}
-
-            {(assetCount > 0 || folderCount > 0 || isSearching) && (
-              <Flex marginLeft="auto" shrink={0} gap={2}>
-                <ActionContainer paddingTop={1} paddingBottom={1}>
-                  <IconButton
-                    label={
-                      isGridView
-                        ? formatMessage({
-                            id: 'view-switch.list',
-                            defaultMessage: 'List View',
-                          })
-                        : formatMessage({
-                            id: 'view-switch.grid',
-                            defaultMessage: 'Grid View',
-                          })
-                    }
-                    onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                  >
-                    {isGridView ? <List /> : <GridIcon />}
-                  </IconButton>
-                </ActionContainer>
-                <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
-              </Flex>
-            )}
-          </Flex>
-        </Box>
-      )}
-
-      {canRead && breadcrumbs?.length && breadcrumbs.length > 0 && currentFolder && (
-        <Box paddingTop={3}>
-          <Breadcrumbs
-            onChangeFolder={onChangeFolder}
-            label={formatMessage({
-              id: getTrad('header.breadcrumbs.nav.label'),
-              defaultMessage: 'Folders navigation',
-            })}
-            breadcrumbs={breadcrumbs as BreadcrumbDataFolder[]}
-            currentFolderId={queryObject?.folder as number | undefined}
-          />
-        </Box>
-      )}
-
-      {assetCount === 0 && folderCount === 0 && (
-        <Box paddingBottom={6}>
-          <EmptyAssets
-            size="S"
-            count={6}
-            action={
-              canCreate &&
-              !isFiltering &&
-              !isSearching && (
-                <Button variant="secondary" startIcon={<Plus />} onClick={onAddAsset}>
-                  {formatMessage({
-                    id: getTrad('header.actions.add-assets'),
-                    defaultMessage: 'Add new assets',
-                  })}
-                </Button>
-              )
-            }
-            content={
-              // eslint-disable-next-line no-nested-ternary
-              isSearchingOrFiltering
-                ? formatMessage({
-                    id: getTrad('list.assets-empty.title-withSearch'),
-                    defaultMessage: 'There are no assets with the applied filters',
-                  })
-                : canCreate && !isSearching
-                  ? formatMessage({
-                      id: getTrad('list.assets.empty'),
-                      defaultMessage: 'Upload your first assets...',
-                    })
-                  : formatMessage({
-                      id: getTrad('list.assets.empty.no-permissions'),
-                      defaultMessage: 'The asset list is empty',
-                    })
-            }
-          />
-        </Box>
-      )}
-
-      {!isGridView && (folderCount > 0 || assetCount > 0) && (
-        <TableList
-          allowedTypes={allowedTypes}
-          assetCount={assetCount}
-          folderCount={folderCount}
-          indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
-          isFolderSelectionAllowed={false}
-          onChangeSort={onChangeSort}
-          onChangeFolder={handleClickFolderCard}
-          onEditAsset={onEditAsset}
-          onEditFolder={onEditFolder}
-          onSelectOne={onSelectAsset}
-          onSelectAll={onSelectAllAsset!}
-          rows={
-            [...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets] as
-              | FolderRow[]
-              | FileRow[]
-          }
-          selected={selectedAssets}
-          shouldDisableBulkSelect={!multiple}
-          sortQuery={queryObject?.sort ?? ''}
-        />
-      )}
-
-      {isGridView && (
-        <>
-          {folderCount > 0 && (
-            <FolderGridList
-              title={
-                (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
-                  formatMessage(
-                    {
-                      id: getTrad('list.folders.title'),
-                      defaultMessage: 'Folders ({count})',
-                    },
-                    { count: folderCount }
-                  )) ||
-                ''
-              }
-            >
-              {folders.map((folder) => {
-                return (
-                  <Grid.Item
-                    col={3}
-                    key={`folder-${folder.id}`}
-                    direction="column"
-                    alignItems="stretch"
-                  >
-                    <FolderCard
-                      ariaLabel={folder.name}
-                      id={`folder-${folder.id}`}
-                      onClick={() => handleClickFolderCard(folder.id, folder.path)}
-                      cardActions={
-                        onEditFolder && (
-                          <IconButton
-                            withTooltip={false}
-                            label={formatMessage({
-                              id: getTrad('list.folder.edit'),
-                              defaultMessage: 'Edit folder',
-                            })}
-                            onClick={() => onEditFolder(folder)}
-                          >
-                            <Pencil />
-                          </IconButton>
-                        )
-                      }
+    <>
+      <Box>
+        {onSelectAllAsset && (
+          <Box paddingBottom={4}>
+            <Flex justifyContent="space-between" alignItems="flex-start">
+              {(assetCount > 0 || folderCount > 0 || isFiltering) && (
+                <Flex gap={2} wrap="wrap">
+                  {multiple && isGridView && (
+                    <Flex
+                      paddingLeft={2}
+                      paddingRight={2}
+                      background="neutral0"
+                      hasRadius
+                      borderColor="neutral200"
+                      height="3.2rem"
                     >
-                      <FolderCardBody>
-                        <FolderCardBodyAction
-                          onClick={() => handleClickFolderCard(folder.id, folder.path)}
-                        >
-                          <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
-                            <TypographyMaxWidth
-                              fontWeight="semiBold"
-                              ellipsis
-                              textColor="neutral800"
-                            >
-                              {folder.name}
-                              {/* VisuallyHidden dash here allows to separate folder title and count informations
-                              for voice reading structure purpose */}
-                              <VisuallyHidden>-</VisuallyHidden>
-                            </TypographyMaxWidth>
-                            <TypographyMaxWidth
-                              tag="span"
-                              textColor="neutral600"
-                              variant="pi"
-                              ellipsis
-                            >
-                              {formatMessage(
-                                {
-                                  id: getTrad('list.folder.subtitle'),
-                                  defaultMessage:
-                                    '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
-                                },
-                                {
-                                  folderCount: folder.children?.count,
-                                  filesCount: folder.files?.count,
-                                }
-                              )}
-                            </TypographyMaxWidth>
-                          </Flex>
-                        </FolderCardBodyAction>
-                      </FolderCardBody>
-                    </FolderCard>
-                  </Grid.Item>
-                );
+                      <Checkbox
+                        aria-label={formatMessage({
+                          id: getTrad('bulk.select.label'),
+                          defaultMessage: 'Select all assets',
+                        })}
+                        checked={
+                          !areAllAssetSelected && hasSomeAssetSelected
+                            ? 'indeterminate'
+                            : areAllAssetSelected
+                        }
+                        onCheckedChange={onSelectAllAsset}
+                      />
+                    </Flex>
+                  )}
+                  {isGridView && (
+                    <SortPicker onChangeSort={onChangeSort} value={queryObject?.sort} />
+                  )}
+                  <Filters
+                    appliedFilters={queryObject?.filters?.$and as ImportedFilterStructure[]}
+                    onChangeFilters={onChangeFilters}
+                  />
+                </Flex>
+              )}
+
+              {(assetCount > 0 || folderCount > 0 || isSearching) && (
+                <Flex marginLeft="auto" shrink={0} gap={2}>
+                  <ActionContainer paddingTop={1} paddingBottom={1}>
+                    <IconButton
+                      label={
+                        isGridView
+                          ? formatMessage({
+                              id: 'view-switch.list',
+                              defaultMessage: 'List View',
+                            })
+                          : formatMessage({
+                              id: 'view-switch.grid',
+                              defaultMessage: 'Grid View',
+                            })
+                      }
+                      onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
+                    >
+                      {isGridView ? <List /> : <GridIcon />}
+                    </IconButton>
+                  </ActionContainer>
+                  <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
+                </Flex>
+              )}
+            </Flex>
+          </Box>
+        )}
+
+        {canRead && breadcrumbs?.length && breadcrumbs.length > 0 && currentFolder && (
+          <Box paddingTop={3}>
+            <Breadcrumbs
+              onChangeFolder={onChangeFolder}
+              label={formatMessage({
+                id: getTrad('header.breadcrumbs.nav.label'),
+                defaultMessage: 'Folders navigation',
               })}
-            </FolderGridList>
-          )}
+              breadcrumbs={breadcrumbs as BreadcrumbDataFolder[]}
+              currentFolderId={queryObject?.folder as number | undefined}
+            />
+          </Box>
+        )}
 
-          {assetCount > 0 && folderCount > 0 && (
-            <Box paddingTop={6}>
-              <Divider />
-            </Box>
-          )}
+        {assetCount === 0 && folderCount === 0 && (
+          <Box paddingBottom={6}>
+            <EmptyAssets
+              size="S"
+              count={6}
+              action={
+                canCreate &&
+                !isFiltering &&
+                !isSearching && (
+                  <Button variant="secondary" startIcon={<Plus />} onClick={onAddAsset}>
+                    {formatMessage({
+                      id: getTrad('header.actions.add-assets'),
+                      defaultMessage: 'Add new assets',
+                    })}
+                  </Button>
+                )
+              }
+              content={
+                // eslint-disable-next-line no-nested-ternary
+                isSearchingOrFiltering
+                  ? formatMessage({
+                      id: getTrad('list.assets-empty.title-withSearch'),
+                      defaultMessage: 'There are no assets with the applied filters',
+                    })
+                  : canCreate && !isSearching
+                    ? formatMessage({
+                        id: getTrad('list.assets.empty'),
+                        defaultMessage: 'Upload your first assets...',
+                      })
+                    : formatMessage({
+                        id: getTrad('list.assets.empty.no-permissions'),
+                        defaultMessage: 'The asset list is empty',
+                      })
+              }
+            />
+          </Box>
+        )}
 
-          {assetCount > 0 && (
-            <Box paddingTop={6}>
-              <AssetGridList
-                allowedTypes={allowedTypes}
-                size="S"
-                assets={assets}
-                onSelectAsset={onSelectAsset}
-                selectedAssets={selectedAssets as FileWithType[]}
-                onEditAsset={onEditAsset!}
+        {!isGridView && (folderCount > 0 || assetCount > 0) && (
+          <TableList
+            allowedTypes={allowedTypes}
+            assetCount={assetCount}
+            folderCount={folderCount}
+            indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
+            isFolderSelectionAllowed={false}
+            onChangeSort={onChangeSort}
+            onChangeFolder={handleClickFolderCard}
+            onEditAsset={onEditAsset}
+            onEditFolder={onEditFolder}
+            onSelectOne={onSelectAsset}
+            onSelectAll={onSelectAllAsset!}
+            rows={
+              [...folders.map((folder) => ({ ...folder, type: 'folder' })), ...assets] as
+                | FolderRow[]
+                | FileRow[]
+            }
+            selected={selectedAssets}
+            shouldDisableBulkSelect={!multiple}
+            sortQuery={queryObject?.sort ?? ''}
+          />
+        )}
+
+        {isGridView && (
+          <>
+            {folderCount > 0 && (
+              <FolderGridList
                 title={
-                  ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
-                    queryObject.page === 1 &&
+                  (((isSearchingOrFiltering && assetCount > 0) || !isSearchingOrFiltering) &&
                     formatMessage(
                       {
-                        id: getTrad('list.assets.title'),
-                        defaultMessage: 'Assets ({count})',
+                        id: getTrad('list.folders.title'),
+                        defaultMessage: 'Folders ({count})',
                       },
-                      { count: assetCount }
+                      { count: folderCount }
                     )) ||
                   ''
                 }
-              />
-            </Box>
-          )}
-        </>
-      )}
+              >
+                {folders.map((folder) => {
+                  return (
+                    <Grid.Item
+                      col={3}
+                      key={`folder-${folder.id}`}
+                      direction="column"
+                      alignItems="stretch"
+                    >
+                      <FolderCard
+                        ariaLabel={folder.name}
+                        id={`folder-${folder.id}`}
+                        onClick={() => handleClickFolderCard(folder.id, folder.path)}
+                        cardActions={
+                          onEditFolder && (
+                            <IconButton
+                              withTooltip={false}
+                              label={formatMessage({
+                                id: getTrad('list.folder.edit'),
+                                defaultMessage: 'Edit folder',
+                              })}
+                              onClick={() => onEditFolder(folder)}
+                            >
+                              <Pencil />
+                            </IconButton>
+                          )
+                        }
+                      >
+                        <FolderCardBody>
+                          <FolderCardBodyAction
+                            onClick={() => handleClickFolderCard(folder.id, folder.path)}
+                          >
+                            <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
+                              <TypographyMaxWidth
+                                fontWeight="semiBold"
+                                ellipsis
+                                textColor="neutral800"
+                              >
+                                {folder.name}
+                                {/* VisuallyHidden dash here allows to separate folder title and count informations
+                              for voice reading structure purpose */}
+                                <VisuallyHidden>-</VisuallyHidden>
+                              </TypographyMaxWidth>
+                              <TypographyMaxWidth
+                                tag="span"
+                                textColor="neutral600"
+                                variant="pi"
+                                ellipsis
+                              >
+                                {formatMessage(
+                                  {
+                                    id: getTrad('list.folder.subtitle'),
+                                    defaultMessage:
+                                      '{folderCount, plural, =0 {# folder} one {# folder} other {# folders}}, {filesCount, plural, =0 {# asset} one {# asset} other {# assets}}',
+                                  },
+                                  {
+                                    folderCount: folder.children?.count,
+                                    filesCount: folder.files?.count,
+                                  }
+                                )}
+                              </TypographyMaxWidth>
+                            </Flex>
+                          </FolderCardBodyAction>
+                        </FolderCardBody>
+                      </FolderCard>
+                    </Grid.Item>
+                  );
+                })}
+              </FolderGridList>
+            )}
 
+            {assetCount > 0 && folderCount > 0 && (
+              <Box paddingTop={6}>
+                <Divider />
+              </Box>
+            )}
+
+            {assetCount > 0 && (
+              <Box paddingTop={6}>
+                <AssetGridList
+                  allowedTypes={allowedTypes}
+                  size="S"
+                  assets={assets}
+                  onSelectAsset={onSelectAsset}
+                  selectedAssets={selectedAssets as FileWithType[]}
+                  onEditAsset={onEditAsset!}
+                  title={
+                    ((!isSearchingOrFiltering || (isSearchingOrFiltering && folderCount > 0)) &&
+                      queryObject.page === 1 &&
+                      formatMessage(
+                        {
+                          id: getTrad('list.assets.title'),
+                          defaultMessage: 'Assets ({count})',
+                        },
+                        { count: assetCount }
+                      )) ||
+                    ''
+                  }
+                />
+              </Box>
+            )}
+          </>
+        )}
+      </Box>
       {pagination.pageCount > 0 && (
-        <Flex justifyContent="space-between" paddingTop={4}>
+        <FooterContainer justifyContent="space-between" paddingTop={4}>
           <PageSize
             pageSize={queryObject.pageSize! as number}
             onChangePageSize={onChangePageSize}
@@ -464,8 +477,8 @@ export const BrowseStep = ({
             onChangePage={onChangePage}
             pagination={pagination}
           />
-        </Flex>
+        </FooterContainer>
       )}
-    </Box>
+    </>
   );
 };
