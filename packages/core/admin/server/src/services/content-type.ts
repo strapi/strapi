@@ -178,18 +178,15 @@ const cleanPermissionFields = (
       nestingLevel,
     });
 
-    const requiredFields = getNestedFields(strapi.contentTypes[subject], {
-      components: strapi.components,
-      requiredOnly: true,
-      nestingLevel,
-      existingFields: fields,
-    });
+    const currentFields: string[] = fields || [];
+    const validUserFields: string[] = uniq(intersection(currentFields, possibleFields));
 
-    // @ts-expect-error lodash types
-    const badNestedFields = uniq([...intersection(fields, possibleFields), ...requiredFields]);
-
-    const newFields = badNestedFields.filter(
-      (field) => !badNestedFields.some(startsWith(`${field}.`))
+    const newFields = validUserFields.filter(
+      (field: string) =>
+        !validUserFields.some(
+          (validUserField: string) =>
+            validUserField !== field && startsWith(validUserField, `${field}.`)
+        )
     );
 
     return permissionDomain.setProperty('fields', newFields, permission);
