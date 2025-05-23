@@ -632,7 +632,7 @@ const RelationsInput = ({
             }}
             creatableStartIcon={<Plus fill="neutral500" />}
             name={name}
-            autocomplete="list"
+            autocomplete={{ type: 'list', filter: 'contains' }}
             placeholder={
               placeholder ||
               formatMessage({
