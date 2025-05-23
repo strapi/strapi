@@ -583,7 +583,10 @@ const PublishAction: DocumentActionComponent = ({
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { id } = useParams();
   const { formatMessage } = useIntl();
-  const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
+  const { canPublish, canReadFields } = useDocumentRBAC(
+    'PublishAction',
+    ({ canPublish, canReadFields }) => ({ canPublish, canReadFields })
+  );
   const { publish, isLoading } = useDocumentActions();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
   const [
@@ -742,14 +745,35 @@ const PublishAction: DocumentActionComponent = ({
         status: 'published',
       });
       if (errors) {
-        toggleNotification({
-          type: 'danger',
-          message: formatMessage({
-            id: 'content-manager.validation.error',
-            defaultMessage:
-              'There are validation errors in your document. Please fix them before saving.',
-          }),
-        });
+        let hasUnreadableRequiredField = false;
+        for (const fieldName of Object.keys(schema.attributes)) {
+          const attribute = schema.attributes[fieldName];
+
+          if (attribute && attribute.required) {
+            const userCanReadThisField = (canReadFields ?? []).includes(fieldName);
+
+            if (!userCanReadThisField) {
+              hasUnreadableRequiredField = true;
+              break;
+            }
+          }
+        }
+
+        if (hasUnreadableRequiredField) {
+          toggleNotification({
+            type: 'danger',
+            message: 'Test error about unreadable required field', // TODO: the new error message ??
+          });
+        } else {
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: 'content-manager.validation.error',
+              defaultMessage:
+                'There are validation errors in your document. Please fix them before saving.',
+            }),
+          });
+        }
         return;
       }
       const res = await publish(
