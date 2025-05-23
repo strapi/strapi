@@ -28,6 +28,8 @@ const DEFAULT_FEATURES = {
   ],
 };
 
+const LICENSE_REGISTRY_URI = 'https://license.strapi.io';
+
 const publicKey = fs.readFileSync(resolve(__dirname, '../../resources/key.pub'));
 
 class LicenseCheckError extends Error {
@@ -96,7 +98,7 @@ const fetchLicense = async (
   const { installId: installIdFromPackageJson } = strapi.config;
 
   const response = await strapi
-    .fetch(`https://license.strapi.io/api/licenses/validate`, {
+    .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/validate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -127,4 +129,4 @@ const fetchLicense = async (
   }
 };
 
-export { readLicense, verifyLicense, fetchLicense, LicenseCheckError };
+export { readLicense, verifyLicense, fetchLicense, LicenseCheckError, LICENSE_REGISTRY_URI };

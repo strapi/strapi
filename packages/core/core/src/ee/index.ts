@@ -2,7 +2,13 @@ import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
 
-import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
+import {
+  readLicense,
+  verifyLicense,
+  fetchLicense,
+  LicenseCheckError,
+  LICENSE_REGISTRY_URI,
+} from './license';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
@@ -226,7 +232,7 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
 
 const trialDaysLeft = async (): Promise<{ trialEndsAt: string } | null> => {
   const res = await strapi
-    .fetch(`https://license.strapi.io/api/licenses/${ee.licenseInfo.licenseKey}/trial-countdown`, {
+    .fetch(`${LICENSE_REGISTRY_URI}/api/licenses/${ee.licenseInfo.licenseKey}/trial-countdown`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
