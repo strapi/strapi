@@ -57,7 +57,7 @@ export default {
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
       type: strapi.ee.type,
-      isTrial: true,
+      isTrial: strapi.ee.isTrial,
       features: strapi.ee.features.list() ?? [],
     };
 
