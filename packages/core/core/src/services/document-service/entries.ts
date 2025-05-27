@@ -31,7 +31,7 @@ const createEntriesService = (
       const i18nService = strapi.plugin('i18n')?.service('content-types');
       const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
 
-      const whereClause: Record<string, any> = { documentId: data.documentId };
+      const whereClause: Record<string, unknown> = { documentId: data.documentId };
 
       if (isLocalized) {
         whereClause.locale = data.locale;
