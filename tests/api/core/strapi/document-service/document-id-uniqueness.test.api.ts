@@ -8,12 +8,12 @@ describe('Document Service - Document ID Uniqueness', () => {
   let testUtils;
   let strapi: Core.Strapi;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     testUtils = await createTestSetup(resources);
     strapi = testUtils.strapi;
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await destroyTestSetup(testUtils);
   });
 
@@ -61,7 +61,7 @@ describe('Document Service - Document ID Uniqueness', () => {
 
   it('allows creating a published document with the same documentId and locale as a draft', async () => {
     const api = strapi.documents(ARTICLE_UID);
-    const documentId = 'test-diff-locale';
+    const documentId = 'test-published-draft-same-document-id';
 
     await api.create({
       data: { documentId, title: 'English version' },
