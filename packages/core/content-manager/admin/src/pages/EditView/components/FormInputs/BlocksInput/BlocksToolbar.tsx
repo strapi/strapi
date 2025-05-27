@@ -41,6 +41,8 @@ const ToolbarSeparator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
   height: 2.4rem;
+  margin-left: 0.8rem;
+  margin-right: 0.8rem;
 `;
 
 const FlexButton = styled<FlexComponent<'button'>>(Flex)`
@@ -331,7 +333,7 @@ const BlockOption = ({ value, icon: Icon, label, blockSelected }: BlockOptionPro
 
   return (
     <SingleSelectOption
-      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral500'} />}
       value={value}
     >
       {formatMessage(label)}
@@ -443,11 +445,11 @@ const ListButton = ({ block, format, location = 'toolbar' }: ListButtonProps) =>
 
     return (
       <StyledMenuItem
+        startIcon={<Icon />}
         onSelect={() => toggleList(format)}
         isActive={isListActive()}
         disabled={isListDisabled()}
       >
-        <Icon />
         {formatMessage(block.label)}
       </StyledMenuItem>
     );
@@ -532,8 +534,12 @@ const LinkButton = ({
 
   if (location === 'menu') {
     return (
-      <StyledMenuItem onSelect={addLink} isActive={isLinkActive()} disabled={isLinkDisabled()}>
-        <Link />
+      <StyledMenuItem
+        startIcon={<Link />}
+        onSelect={addLink}
+        isActive={isLinkActive()}
+        disabled={isLinkDisabled()}
+      >
         {formatMessage(label)}
       </StyledMenuItem>
     );
@@ -651,28 +657,16 @@ const MoreMenu = ({ setLastVisibleIndex, hasHiddenItems, rootRef, children }: Mo
 };
 
 const StyledMenuItem = styled(Menu.Item)<{ isActive: boolean }>`
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary100};
-  }
-
   ${(props) =>
     props.isActive &&
     css`
-      font-weight: bold;
-      background-color: ${({ theme }) => theme.colors.primary100};
       color: ${({ theme }) => theme.colors.primary600};
-      font-weight: bold;
+      font-weight: 600;
     `}
-
-  > span {
-    display: inline-flex;
-    gap: ${({ theme }) => theme.spaces[2]};
-    align-items: center;
-  }
 
   svg {
     fill: ${({ theme, isActive }) =>
-      isActive ? theme.colors.primary600 : theme.colors.neutral600};
+      isActive ? theme.colors.primary600 : theme.colors.neutral500};
   }
 `;
 
@@ -730,8 +724,7 @@ const BlocksToolbar = () => {
           />
         ),
         menu: (
-          <StyledMenuItem onSelect={handleSelect} isActive={isActive}>
-            <Icon />
+          <StyledMenuItem startIcon={<Icon />} onSelect={handleSelect} isActive={isActive}>
             {formatMessage(modifier.label)}
           </StyledMenuItem>
         ),
@@ -746,8 +739,8 @@ const BlocksToolbar = () => {
     {
       // List buttons can only be rendered together when in the toolbar
       toolbar: (
-        <Flex direction="row" gap={1}>
-          <ToolbarSeparator />
+        <Flex direction="row">
+          <ToolbarSeparator style={{ marginLeft: '0.4rem' }} />
           <Toolbar.ToggleGroup type="single" asChild>
             <Flex gap={1}>
               <ListButton block={blocks['list-unordered']} format="unordered" location="toolbar" />
@@ -769,7 +762,7 @@ const BlocksToolbar = () => {
 
   return (
     <Toolbar.Root aria-disabled={disabled} asChild>
-      <ToolbarWrapper gap={2} padding={2} width="100%">
+      <ToolbarWrapper padding={2} width="100%">
         <BlocksDropdown />
         <ToolbarSeparator />
         <Toolbar.ToggleGroup type="multiple" asChild>
