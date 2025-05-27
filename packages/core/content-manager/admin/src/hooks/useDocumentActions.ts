@@ -11,6 +11,8 @@ import {
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { useRelationModal } from '../pages/EditView/components/FormInputs/Relations/RelationModal';
+import { usePreviewContext } from '../preview/pages/Preview';
 import {
   useAutoCloneDocumentMutation,
   useCloneDocumentMutation,
@@ -192,13 +194,19 @@ type IUseDocumentActs = ReturnType<UseDocumentActions>;
  *
  * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document-operations} for more information
  */
-const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelationModal = false) => {
+const useDocumentActions: UseDocumentActions = () => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
   const setCurrentStep = useGuidedTour('useDocumentActions', (state) => state.setCurrentStep);
+
+  // Get metadata from context providers for tracking purposes
+  const previewContext = usePreviewContext('useDocumentActions', () => true, false);
+  const relationContext = useRelationModal('useDocumentActions', () => true, false);
+  const fromPreview = previewContext != undefined;
+  const fromRelationModal = relationContext != undefined;
 
   const [deleteDocument, { isLoading: isDeleting }] = useDeleteDocumentMutation();
   const _delete: IUseDocumentActs['delete'] = React.useCallback(
@@ -594,8 +602,12 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelatio
 
           return { error: res.error };
         }
-
-        trackUsage('didCreateEntry', { ...trackerProperty, documentId: res.data.data.documentId });
+        trackUsage('didCreateEntry', {
+          ...trackerProperty,
+          documentId: res.data.data.documentId,
+          fromPreview,
+          fromRelationModal,
+        });
 
         toggleNotification({
           type: 'success',
@@ -619,7 +631,16 @@ const useDocumentActions: UseDocumentActions = (fromPreview = false, fromRelatio
         throw err;
       }
     },
-    [createDocument, formatAPIError, formatMessage, setCurrentStep, toggleNotification, trackUsage]
+    [
+      createDocument,
+      formatAPIError,
+      formatMessage,
+      fromPreview,
+      fromRelationModal,
+      setCurrentStep,
+      toggleNotification,
+      trackUsage,
+    ]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();

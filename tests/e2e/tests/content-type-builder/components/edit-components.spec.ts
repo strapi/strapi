@@ -14,7 +14,7 @@ import { navToHeader } from '../../../utils/shared';
 
 test.describe('Update a new component', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   const originalAttributes = [{ type: 'text', name: 'testtext' }] satisfies AddAttribute[];
 

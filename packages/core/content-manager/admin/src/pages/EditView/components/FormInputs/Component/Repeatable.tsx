@@ -18,7 +18,7 @@ import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocumentContext } from '../../../../../features/DocumentContext';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
@@ -51,7 +51,7 @@ const RepeatableComponent = ({
   const { formatMessage } = useIntl();
   const { search: searchString } = useLocation();
   const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const currentDocument = useDocumentContext('RepeatableComponent', (state) => state.document);
+  const { currentDocument } = useDocumentContext('RepeatableComponent');
   const components = currentDocument.components;
 
   const {
@@ -439,6 +439,7 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
+                disabled={disabled}
                 variant="ghost"
                 onClick={onDeleteComponent}
                 label={formatMessage({
@@ -449,6 +450,7 @@ const Component = ({
                 <Trash />
               </IconButton>
               <IconButton
+                disabled={disabled}
                 ref={composedAccordionRefs}
                 variant="ghost"
                 onClick={(e) => e.stopPropagation()}
