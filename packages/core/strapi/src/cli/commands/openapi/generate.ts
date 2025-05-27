@@ -23,7 +23,18 @@ interface StrapiInfoConfig {
   version: string;
 }
 
+const EXPERIMENTAL_MSG = chalk.yellow(`
+⚠️  The OpenAPI generation feature is currently experimental.
+    Its behavior and output might change in future releases without following semver.
+    Please report any issues you encounter on https://github.com/strapi/strapi/issues/new?template=BUG_REPORT.yml.
+`);
+
+/**
+ * @experimental
+ */
 const action = async (options: CommandOptions) => {
+  console.warn(EXPERIMENTAL_MSG);
+
   const filePath = options.output ?? DEFAULT_OUTPUT;
   const app = await createStrapiApp();
 
