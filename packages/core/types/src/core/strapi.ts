@@ -43,7 +43,7 @@ export interface Strapi extends Container {
     type: string | null | undefined;
     isEE: boolean;
     isTrial: boolean;
-    trialDaysLeft: () => Promise<{ trialEndsAt: string } | null>;
+    trialDaysLeft: ({ strapi }: { strapi: Core.Strapi }) => Promise<{ trialEndsAt: string } | null>;
     features: {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];

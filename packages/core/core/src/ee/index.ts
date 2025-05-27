@@ -11,10 +11,6 @@ import {
 } from './license';
 import { shiftCronExpression } from '../utils/cron';
 
-const silentFetch = createStrapiFetch(strapi, {
-  logs: false,
-});
-
 const ONE_MINUTE = 1000 * 60;
 
 interface EE {
@@ -234,7 +230,15 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 };
 
-const trialDaysLeft = async (): Promise<{ trialEndsAt: string } | null> => {
+const trialDaysLeft = async ({
+  strapi,
+}: {
+  strapi: Core.Strapi;
+}): Promise<{ trialEndsAt: string } | null> => {
+  const silentFetch = createStrapiFetch(strapi, {
+    logs: false,
+  });
+
   const res = await silentFetch(
     `${LICENSE_REGISTRY_URI}/api/licenses/${ee.licenseInfo.licenseKey}/trial-countdown`,
     {
