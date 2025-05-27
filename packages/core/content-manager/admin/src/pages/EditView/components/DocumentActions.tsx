@@ -745,24 +745,20 @@ const PublishAction: DocumentActionComponent = ({
         status: 'published',
       });
       if (errors) {
-        let hasUnreadableRequiredField = false;
-        for (const fieldName of Object.keys(schema.attributes)) {
+        const hasUnreadableRequiredField = Object.keys(schema.attributes).some((fieldName) => {
           const attribute = schema.attributes[fieldName];
 
-          if (attribute && attribute.required) {
-            const userCanReadThisField = (canReadFields ?? []).includes(fieldName);
-
-            if (!userCanReadThisField) {
-              hasUnreadableRequiredField = true;
-              break;
-            }
-          }
-        }
+          return attribute?.required && !(canReadFields ?? []).includes(fieldName);
+        });
 
         if (hasUnreadableRequiredField) {
           toggleNotification({
             type: 'danger',
-            message: 'Test error about unreadable required field', // TODO: the new error message ??
+            message: formatMessage({
+              id: 'content-manager.validation.error.unreadable-required-field',
+              defaultMessage:
+                'Your current permissions prevent access to certain required fields. Please request access from an administrator to proceed.',
+            }),
           });
         } else {
           toggleNotification({

@@ -181,13 +181,17 @@ const cleanPermissionFields = (
     const currentFields: string[] = fields || [];
     const validUserFields: string[] = uniq(intersection(currentFields, possibleFields));
 
-    const newFields = validUserFields.filter(
-      (field: string) =>
-        !validUserFields.some(
-          (validUserField: string) =>
-            validUserField !== field && startsWith(validUserField, `${field}.`)
-        )
-    );
+    // A field is considered "not nested" if no other valid user field starts with this field's path followed by a dot.
+    // This helps to remove redundant parent paths when a more specific child path is already included.
+    // For example, if 'component.title' is present, 'component' would be filtered out by this condition.
+    const isNotNestedField = (field: string) =>
+      !validUserFields.some(
+        (validUserField: string) =>
+          validUserField !== field && startsWith(validUserField, `${field}.`)
+      );
+
+    // Filter out fields that are parent paths of other included fields.
+    const newFields = validUserFields.filter(isNotNestedField);
 
     return permissionDomain.setProperty('fields', newFields, permission);
   }, []);
