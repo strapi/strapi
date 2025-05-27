@@ -1,6 +1,5 @@
 import type { Core, Schema } from '@strapi/types';
 
-
 import { contentTypes, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { z } from 'zod';
 import type { QueryParam } from './validation/content-type';
