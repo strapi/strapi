@@ -32,6 +32,7 @@ export interface Strapi extends Container {
   requestContext: Modules.RequestContext.RequestContext;
   customFields: Modules.CustomFields.CustomFields;
   fetch: Modules.Fetch.Fetch;
+  silentFetch: Modules.Fetch.Fetch;
   dirs: StrapiDirectories;
   admin: Core.Module;
   isLoaded: boolean;
