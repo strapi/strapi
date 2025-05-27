@@ -26,7 +26,7 @@ const createEntriesService = (
       throw new Error('Create requires data attribute');
     }
 
-    // Check for uniqueness based on documentId, locale (if localized), and publication state (if draftAndPublish)
+    // Check for uniqueness based on documentId and locale (if localized)
     if (data.documentId) {
       const i18nService = strapi.plugin('i18n')?.service('content-types');
       const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
