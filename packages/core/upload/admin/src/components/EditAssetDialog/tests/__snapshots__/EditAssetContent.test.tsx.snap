@@ -394,6 +394,9 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c13>div {
   padding-block: 40px;
+  margin: 0 -2px 0 -2px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 
 .c13>div>div {
