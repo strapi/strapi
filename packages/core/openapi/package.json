@@ -56,10 +56,10 @@
     "npm": ">=6.0.0"
   },
   "dependencies": {
-    "@strapi/utils": "5.13.0",
+    "@strapi/types": "5.13.0",
     "debug": "4.3.4",
     "openapi-types": "12.1.3",
-    "path-to-regexp": "8.2.0"
+    "zod": "^4.0.0-beta"
   },
   "devDependencies": {
     "@strapi/types": "5.13.0",

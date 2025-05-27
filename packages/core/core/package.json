@@ -104,7 +104,8 @@
     "statuses": "2.0.1",
     "typescript": "5.4.4",
     "undici": "6.21.2",
-    "yup": "0.32.9"
+    "yup": "0.32.9",
+    "zod": "^4.0.0-beta"
   },
   "devDependencies": {
     "@strapi/ts-zen": "^0.2.0",

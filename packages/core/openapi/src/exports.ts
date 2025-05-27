@@ -14,11 +14,8 @@ import {
   rules,
 } from './routes';
 
+import type { GenerationOptions } from './types';
 import type { GeneratorOutput } from './generator';
-
-export interface GenerationOptions {
-  type: 'admin' | 'content-api';
-}
 
 /**
  * @experimental
@@ -51,3 +48,5 @@ export const generate = (strapi: Core.Strapi, options?: GenerationOptions): Gene
 
   return generator.generate();
 };
+
+export { GenerationOptions, GeneratorOutput };

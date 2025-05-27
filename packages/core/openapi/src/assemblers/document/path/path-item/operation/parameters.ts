@@ -1,22 +1,23 @@
 import type { Core } from '@strapi/types';
 import type { OpenAPIV3 } from 'openapi-types';
-
-import { REGEX_STRAPI_PATH_PARAMS } from '../../../../../constants';
-
-import type { OperationContext } from '../../../../../types';
-import { createDebugger } from '../../../../../utils';
 import type { Assembler } from '../../../..';
 
+import type { OperationContext } from '../../../../../types';
+import { createDebugger, zodToOpenAPI } from '../../../../../utils';
+
 const debug = createDebugger('assembler:parameters');
+
+type PathParameterObject = OpenAPIV3.ParameterObject & { in: 'path' };
+type QueryParameterObject = OpenAPIV3.ParameterObject & { in: 'query' };
 
 export class OperationParametersAssembler implements Assembler.Operation {
   assemble(context: OperationContext, route: Core.Route): void {
     debug('assembling parameters for %o %o...', route.method, route.path);
 
-    const pathParameters = this._getPathParameters(context, route);
+    const pathParameters = this._getPathParameters(route);
     debug('found %o path parameters', pathParameters.length);
 
-    const queryParameters = this._getQueryParameters();
+    const queryParameters = this._getQueryParameters(route);
     debug('found %o query parameters', queryParameters.length);
 
     const parameters = [...pathParameters, ...queryParameters];
@@ -25,23 +26,47 @@ export class OperationParametersAssembler implements Assembler.Operation {
     context.output.data.parameters = parameters;
   }
 
-  private _getPathParameters(
-    _context: OperationContext,
-    route: Core.Route
-  ): (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject)[] {
-    const matches = Array.from(route.path.matchAll(REGEX_STRAPI_PATH_PARAMS));
+  private _getPathParameters(route: Core.Route): PathParameterObject[] {
+    const { params } = route.request ?? {};
 
-    return matches.map<OpenAPIV3.ParameterObject>((match) => ({
-      name: match[1],
-      in: 'path',
-      required: true,
-      schema: { type: 'string' },
-    }));
+    // TODO: Allow auto inference (from path) if enabled through configuration
+    if (!params) {
+      return [];
+    }
+
+    const pathParams: PathParameterObject[] = [];
+
+    for (const [name, zodSchema] of Object.entries(params)) {
+      const required = !zodSchema.isOptional();
+      const schema = zodToOpenAPI(zodSchema) as any;
+
+      pathParams.push({ name, in: 'path', required, schema });
+    }
+
+    return pathParams;
   }
 
-  private _getQueryParameters(): (OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject)[] {
-    // Not implemented yet, need to wait for better route config
-    // Contains stuff like the filters, sort, and populate
-    return [];
+  private _getQueryParameters(route: Core.Route): QueryParameterObject[] {
+    const { query } = route.request ?? {};
+
+    if (!query) {
+      return [];
+    }
+
+    const queryParams: QueryParameterObject[] = [];
+
+    for (const [name, zodSchema] of Object.entries(query)) {
+      const required = !zodSchema.isOptional();
+      const schema = zodToOpenAPI(zodSchema) as any;
+      const param: QueryParameterObject = { name, in: 'query', required, schema };
+
+      // In Strapi, query params are always interpreted as query strings, which isn't supported by the specification
+      // TODO: Make that configurable somehow
+      Object.assign(param, { 'x-strapi-serialize': 'querystring' });
+
+      queryParams.push(param);
+    }
+
+    return queryParams;
   }
 }
