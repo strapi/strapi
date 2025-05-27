@@ -30,11 +30,26 @@ const createEntriesService = (
     if (data.documentId) {
       const i18nService = strapi.plugin('i18n')?.service('content-types');
       const isLocalized = i18nService?.isLocalizedContentType(contentType) ?? false;
+      const hasDraftAndPublish = contentType.options?.draftAndPublish === true;
 
       const whereClause: Record<string, unknown> = { documentId: data.documentId };
 
       if (isLocalized) {
         whereClause.locale = data.locale;
+      }
+
+      let publishedStateDescription = '';
+
+      if (hasDraftAndPublish) {
+        if (data.publishedAt) {
+          // Current entry is published, check for existing published entry
+          whereClause.publishedAt = { $notNull: true };
+          publishedStateDescription = 'published';
+        } else {
+          // Current entry is a draft, check for existing draft entry
+          whereClause.publishedAt = { $null: true };
+          publishedStateDescription = 'draft';
+        }
       }
 
       const existingEntry = await strapi.db.query(uid).findOne({
@@ -43,11 +58,10 @@ const createEntriesService = (
       });
 
       if (existingEntry) {
-        let errorMsg = `An entry with documentId "${data.documentId}"`;
+        let errorMsg = `A ${publishedStateDescription} entry with documentId "${data.documentId}"`;
         if (isLocalized && data.locale) {
           errorMsg += ` and locale "${data.locale}"`;
         }
-
         errorMsg += ` already exists for UID "${uid}". This combination must be unique.`;
         throw new errors.ApplicationError(errorMsg);
       }
