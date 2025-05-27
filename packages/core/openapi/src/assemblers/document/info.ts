@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import type { DocumentContext } from '../../types';
 
@@ -19,7 +19,7 @@ export class DocumentInfoAssembler implements Assembler.Document {
 
     debug(`assembling document's info for %O...`, { name, version });
 
-    const info: OpenAPIV3.InfoObject = {
+    const info: OpenAPIV3_1.InfoObject = {
       title: this._title(name),
       description: this._description(name, version),
       version,

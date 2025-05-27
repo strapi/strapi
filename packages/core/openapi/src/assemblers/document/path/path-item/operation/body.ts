@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import type { OperationContext } from '../../../../../types';
 import type { Assembler } from '../../../..';
@@ -16,7 +16,7 @@ export class BodyAssembler implements Assembler.Operation {
       return;
     }
 
-    const content: Record<string, OpenAPIV3.MediaTypeObject> = {};
+    const content: Record<string, OpenAPIV3_1.MediaTypeObject> = {};
 
     for (const [media, zodSchema] of Object.entries(body)) {
       content[media] = { schema: zodToOpenAPI(zodSchema) as any };

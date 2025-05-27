@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Assembler } from '../../../..';
 
 import type { OperationContext } from '../../../../../types';
@@ -7,8 +7,8 @@ import { createDebugger, zodToOpenAPI } from '../../../../../utils';
 
 const debug = createDebugger('assembler:parameters');
 
-type PathParameterObject = OpenAPIV3.ParameterObject & { in: 'path' };
-type QueryParameterObject = OpenAPIV3.ParameterObject & { in: 'query' };
+type PathParameterObject = OpenAPIV3_1.ParameterObject & { in: 'path' };
+type QueryParameterObject = OpenAPIV3_1.ParameterObject & { in: 'query' };
 
 export class OperationParametersAssembler implements Assembler.Operation {
   assemble(context: OperationContext, route: Core.Route): void {

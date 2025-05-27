@@ -1,3 +1,3 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
-export type ComponentType = keyof OpenAPIV3.ComponentsObject;
+export type ComponentType = keyof OpenAPIV3_1.ComponentsObject;

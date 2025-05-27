@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import * as z from 'zod';
 
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 /**
  * Converts a Zod schema to an OpenAPI Schema Object.
@@ -34,7 +34,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 
 export const zodToOpenAPI = (
   zodSchema: z.ZodType
-): OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject => {
+): OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject => {
   try {
     const id = randomUUID();
     const registry = z.registry<{ id: string }>();
@@ -52,7 +52,7 @@ export const zodToOpenAPI = (
     const { schemas } = z.toJSONSchema(registry, { uri: toComponentsPath });
 
     // TODO: make sure it's compliant
-    return schemas[id] as OpenAPIV3.SchemaObject;
+    return schemas[id] as OpenAPIV3_1.SchemaObject;
   } catch (e) {
     throw new Error("Couldn't transform the zod schema into an OpenAPI schema");
   }
