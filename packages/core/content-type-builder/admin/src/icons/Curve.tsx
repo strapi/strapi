@@ -3,7 +3,7 @@ import { styled } from 'styled-components';
 
 const StyledBox = styled(Box)`
   position: absolute;
-  left: -1.8rem;
+  left: -3.4rem;
   top: 0px;
 
   &:before {

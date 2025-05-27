@@ -1,249 +1,251 @@
-import { ComponentType, Fragment } from 'react';
+import { useState } from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
 import {
-  Box,
-  Button,
-  EmptyStateLayout,
-  Table,
-  Tbody,
-  Td,
-  TFooter,
-  Th,
-  Thead,
-  Tr,
-  Typography,
-} from '@strapi/design-system';
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverlay,
+  UniqueIdentifier,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useTracking } from '@strapi/admin/strapi-admin';
+import { Box, Button, EmptyStateLayout } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
+import { createPortal } from 'react-dom';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
-import { useDataManager } from '../hooks/useDataManager';
-import { useFormModalNavigation } from '../hooks/useFormModalNavigation';
 import { getTrad } from '../utils/getTrad';
 
-import { BoxWrapper } from './BoxWrapper';
-import { ComponentList } from './ComponentList';
-import { DynamicZoneList } from './DynamicZoneList';
-import { NestedTFooter } from './NestedFooter';
+import { AttributeRow, type AttributeRowProps } from './AttributeRow';
+import { useDataManager } from './DataManager/useDataManager';
+import { NestedTFooter, TFooter } from './Footers';
+import { useFormModalNavigation } from './FormModalNavigation/useFormModalNavigation';
 
-import type { SchemaType } from '../types';
-import type { Internal } from '@strapi/types';
+import type { Component, ContentType } from '../types';
+import type { UID } from '@strapi/types';
 
-interface ListProps {
+export const ListGrid = styled(Box)`
+  white-space: nowrap;
+  list-style: none;
+  list-style-type: none;
+`;
+
+type ListProps = {
   addComponentToDZ?: () => void;
-  customRowComponent: ComponentType<any>;
-  editTarget: SchemaType;
-  firstLoopComponentUid?: string;
+  firstLoopComponentUid?: UID.Component | null;
   isFromDynamicZone?: boolean;
-  isNestedInDZComponent?: boolean;
   isMain?: boolean;
-  items: any[];
-  secondLoopComponentUid?: string | null;
-  targetUid?: Internal.UID.Schema;
+  secondLoopComponentUid?: UID.Component | null;
   isSub?: boolean;
-}
+  type: ContentType | Component;
+};
+
+const SortableRow = (props: AttributeRowProps) => {
+  const { isInDevelopmentMode } = useDataManager();
+
+  const {
+    isDragging,
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    setActivatorNodeRef,
+  } = useSortable({
+    disabled:
+      !isInDevelopmentMode || props.item.status === 'REMOVED' || props.type.status === 'REMOVED',
+    id: props.item.id,
+    data: { index: props.item.index },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString({
+      x: transform?.x ?? 0,
+      y: transform?.y ?? 0,
+      scaleX: 1,
+      scaleY: 1,
+    }),
+    transition,
+  };
+
+  return (
+    <AttributeRow
+      ref={setNodeRef}
+      handleRef={setActivatorNodeRef}
+      isDragging={isDragging}
+      attributes={attributes}
+      listeners={listeners}
+      style={style}
+      {...props}
+    />
+  );
+};
 
 export const List = ({
   addComponentToDZ,
-  customRowComponent,
-  editTarget,
   firstLoopComponentUid,
   isFromDynamicZone = false,
   isMain = false,
-  isNestedInDZComponent = false,
   isSub = false,
-  items = [],
   secondLoopComponentUid,
-  targetUid,
+  type,
 }: ListProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { isInDevelopmentMode, modifiedData, isInContentTypeView } = useDataManager();
-
+  const { isInDevelopmentMode, moveAttribute } = useDataManager();
   const { onOpenModalAddField } = useFormModalNavigation();
-  const onClickAddField = () => {
-    trackUsage('hasClickedCTBAddFieldBanner');
 
-    onOpenModalAddField({ forTarget: editTarget, targetUid });
-  };
+  const items = type?.attributes.map((item, index) => {
+    return {
+      id: `${type.uid}_${item.name}`,
+      index,
+      ...item,
+    };
+  });
 
-  if (!targetUid) {
-    return (
-      <Table colCount={2} rowCount={2}>
-        <Thead>
-          <Tr>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
-              </Typography>
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td colSpan={2}>
-              <EmptyStateLayout
-                content={formatMessage({
-                  id: getTrad('table.content.create-first-content-type'),
-                  defaultMessage: 'Create your first Collection-Type',
-                })}
-                hasRadius
-                icon={<EmptyDocuments width="16rem" />}
-              />
-            </Td>
-          </Tr>
-        </Tbody>
-      </Table>
-    );
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+
+  const isDeleted = type?.status === 'REMOVED';
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  function handlerDragStart({ active }: DragStartEvent) {
+    if (!active) {
+      return;
+    }
+
+    setActiveId(active.id);
   }
 
-  if (items.length === 0 && isMain) {
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    setActiveId(null);
+
+    if (over) {
+      if (active.id !== over.id) {
+        moveAttribute({
+          forTarget: type.modelType,
+          targetUid: type.uid,
+          from: active.data.current!.index,
+          to: over.data.current!.index,
+        });
+      }
+    }
+  }
+
+  const activeItem = items.find((item) => item.id === activeId);
+
+  const onClickAddField = () => {
+    if (isDeleted) {
+      return;
+    }
+
+    trackUsage('hasClickedCTBAddFieldBanner');
+
+    onOpenModalAddField({ forTarget: type?.modelType, targetUid: type.uid });
+  };
+
+  if (type?.attributes.length === 0 && isMain) {
     return (
-      <Table colCount={2} rowCount={2}>
-        <Thead>
-          <Tr>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma" textColor="neutral600">
-                {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
-              </Typography>
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          <Tr>
-            <Td colSpan={2}>
-              <EmptyStateLayout
-                action={
-                  <Button
-                    onClick={onClickAddField}
-                    size="L"
-                    startIcon={<Plus />}
-                    variant="secondary"
-                  >
-                    {formatMessage({
-                      id: getTrad('table.button.no-fields'),
-                      defaultMessage: 'Add new field',
-                    })}
-                  </Button>
-                }
-                content={formatMessage(
-                  isInContentTypeView
-                    ? {
-                        id: getTrad('table.content.no-fields.collection-type'),
-                        defaultMessage: 'Add your first field to this Collection-Type',
-                      }
-                    : {
-                        id: getTrad('table.content.no-fields.component'),
-                        defaultMessage: 'Add your first field to this component',
-                      }
-                )}
-                hasRadius
-                icon={<EmptyDocuments width="16rem" />}
-              />
-            </Td>
-          </Tr>
-        </Tbody>
-      </Table>
+      <EmptyStateLayout
+        action={
+          <Button onClick={onClickAddField} size="L" startIcon={<Plus />} variant="secondary">
+            {formatMessage({
+              id: getTrad('table.button.no-fields'),
+              defaultMessage: 'Add new field',
+            })}
+          </Button>
+        }
+        content={formatMessage(
+          type.modelType === 'contentType'
+            ? {
+                id: getTrad('table.content.no-fields.collection-type'),
+                defaultMessage: 'Add your first field to this Collection-Type',
+              }
+            : {
+                id: getTrad('table.content.no-fields.component'),
+                defaultMessage: 'Add your first field to this component',
+              }
+        )}
+        hasRadius
+        icon={<EmptyDocuments width="16rem" />}
+      />
     );
   }
 
   return (
-    <BoxWrapper>
-      <Box
-        paddingLeft={6}
-        paddingRight={isMain ? 6 : 0}
-        {...(isMain && { style: { overflowX: 'auto' } })}
-      >
-        <table>
-          {isMain && (
-            <thead>
-              <tr>
-                <th>
-                  <Typography variant="sigma" textColor="neutral800">
-                    {formatMessage({ id: 'global.name', defaultMessage: 'Name' })}
-                  </Typography>
-                </th>
-                <th colSpan={2}>
-                  <Typography variant="sigma" textColor="neutral800">
-                    {formatMessage({ id: 'global.type', defaultMessage: 'Type' })}
-                  </Typography>
-                </th>
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {items.map((item) => {
-              const { type } = item;
-              const CustomRow = customRowComponent;
-
-              return (
-                <Fragment key={item.name}>
-                  <CustomRow
-                    {...item}
-                    isNestedInDZComponent={isNestedInDZComponent}
-                    targetUid={targetUid}
-                    editTarget={editTarget}
-                    firstLoopComponentUid={firstLoopComponentUid}
-                    isFromDynamicZone={isFromDynamicZone}
-                    secondLoopComponentUid={secondLoopComponentUid}
-                  />
-
-                  {type === 'component' && (
-                    <ComponentList
-                      {...item}
-                      customRowComponent={customRowComponent}
-                      targetUid={targetUid}
-                      isNestedInDZComponent={isFromDynamicZone}
-                      editTarget={editTarget}
-                      firstLoopComponentUid={firstLoopComponentUid}
-                    />
-                  )}
-
-                  {type === 'dynamiczone' && (
-                    <DynamicZoneList
-                      {...item}
-                      customRowComponent={customRowComponent}
-                      addComponent={addComponentToDZ}
-                      targetUid={targetUid}
-                    />
-                  )}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </Box>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+      onDragStart={handlerDragStart}
+      onDragCancel={() => setActiveId(null)}
+      modifiers={[restrictToVerticalAxis]}
+    >
+      <ListGrid tag="ul">
+        {createPortal(
+          <DragOverlay zIndex={10}>
+            {activeItem && (
+              <AttributeRow
+                isOverlay
+                item={activeItem}
+                firstLoopComponentUid={firstLoopComponentUid}
+                isFromDynamicZone={isFromDynamicZone}
+                secondLoopComponentUid={secondLoopComponentUid}
+                type={type}
+                addComponentToDZ={addComponentToDZ}
+              />
+            )}
+          </DragOverlay>,
+          document.body
+        )}
+        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+          {items.map((item) => {
+            return (
+              <SortableRow
+                key={item.id}
+                item={item}
+                firstLoopComponentUid={firstLoopComponentUid}
+                isFromDynamicZone={isFromDynamicZone}
+                secondLoopComponentUid={secondLoopComponentUid}
+                type={type}
+                addComponentToDZ={addComponentToDZ}
+              />
+            );
+          })}
+        </SortableContext>
+      </ListGrid>
 
       {isMain && isInDevelopmentMode && (
-        <TFooter cursor="pointer" icon={<Plus />} onClick={onClickAddField}>
+        <TFooter
+          cursor={isDeleted ? 'normal' : 'pointer'}
+          icon={<Plus />}
+          onClick={onClickAddField}
+          color={isDeleted ? 'neutral' : 'primary'}
+        >
           {formatMessage({
             id: getTrad(
-              `form.button.add.field.to.${
-                modifiedData.contentType
-                  ? modifiedData.contentType.schema.kind
-                  : editTarget || 'collectionType'
-              }`
+              `form.button.add.field.to.${type.modelType === 'component' ? 'component' : type.kind}`
             ),
             defaultMessage: 'Add another field',
           })}
         </TFooter>
       )}
-      {isSub && isInDevelopmentMode && !isFromDynamicZone && (
+      {isSub && isInDevelopmentMode && (
         <NestedTFooter
+          cursor={isDeleted ? 'normal' : 'pointer'}
           icon={<Plus />}
           onClick={onClickAddField}
-          color={isFromDynamicZone ? 'primary' : 'neutral'}
+          color={isFromDynamicZone && !isDeleted ? 'primary' : 'neutral'}
         >
           {formatMessage({
             id: getTrad(`form.button.add.field.to.component`),
@@ -251,6 +253,6 @@ export const List = ({
           })}
         </NestedTFooter>
       )}
-    </BoxWrapper>
+    </DndContext>
   );
 };
