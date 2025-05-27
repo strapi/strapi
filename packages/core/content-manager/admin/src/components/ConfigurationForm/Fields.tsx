@@ -68,7 +68,7 @@ export const SortableItem = ({ id, children }: { id: string; children: React.Rea
   );
 };
 
-const useDragAndDrop = (layout: ConfigurationFormData['layout']) => {
+const useDndContainers = (layout: ConfigurationFormData['layout']) => {
   const createDragAndDropContainersFromLayout = React.useCallback(
     (layout: ConfigurationFormData['layout']) => {
       return layout.map((row, containerIndex) => ({
@@ -195,7 +195,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     getActiveItem,
     setContainers,
     createContainersWithSpacers,
-  } = useDragAndDrop(layout);
+  } = useDndContainers(layout);
 
   const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
 
@@ -240,220 +240,214 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   };
 
   return (
-    <>
-      <DndContext
-        collisionDetection={closestCenter}
-        onDragStart={(event) => {
-          const containersAsDictionary = Object.fromEntries(
-            containers.map((container) => [container.dndId, container])
-          );
-          const activeContainer = findContainer(event.active.id, containersAsDictionary);
+    <DndContext
+      collisionDetection={closestCenter}
+      onDragStart={(event) => {
+        const containersAsDictionary = Object.fromEntries(
+          containers.map((container) => [container.dndId, container])
+        );
+        const activeContainer = findContainer(event.active.id, containersAsDictionary);
 
-          if (!activeContainer) return;
+        if (!activeContainer) return;
 
-          const activeItem = getActiveItem(
-            event.active.id,
-            containersAsDictionary[activeContainer]
-          );
-          if (activeItem) {
-            setActiveDragItem(activeItem);
-          }
-        }}
-        onDragOver={({ active, over }) => {
-          const containersAsDictionary = Object.fromEntries(
-            containers.map((container) => [container.dndId, container])
-          );
-          const activeContainer = findContainer(active.id, containersAsDictionary);
-          const overContainer = findContainer(over?.id ?? '', containersAsDictionary);
-          const activeContainerIndex = containers.findIndex(
-            (container) => container.dndId === activeContainer
-          );
-          const overContainerIndex = containers.findIndex(
-            (container) => container.dndId === overContainer
-          );
+        const activeItem = getActiveItem(event.active.id, containersAsDictionary[activeContainer]);
 
-          if (!activeContainer || !overContainer) {
-            return;
-          }
+        if (activeItem) {
+          setActiveDragItem(activeItem);
+        }
+      }}
+      onDragOver={({ active, over }) => {
+        const containersAsDictionary = Object.fromEntries(
+          containers.map((container) => [container.dndId, container])
+        );
+        const activeContainer = findContainer(active.id, containersAsDictionary);
+        const overContainer = findContainer(over?.id ?? '', containersAsDictionary);
+        const activeContainerIndex = containers.findIndex(
+          (container) => container.dndId === activeContainer
+        );
+        const overContainerIndex = containers.findIndex(
+          (container) => container.dndId === overContainer
+        );
 
-          const draggedItem = getActiveItem(active.id, containersAsDictionary[activeContainer]);
-          const overItems = containersAsDictionary[overContainer].children;
-          const overIndex = overItems.findIndex((item) => item.dndId === over?.id);
+        if (!activeContainer || !overContainer) {
+          return;
+        }
 
-          if (!draggedItem) return;
+        const draggedItem = getActiveItem(active.id, containersAsDictionary[activeContainer]);
+        const overItems = containersAsDictionary[overContainer].children;
+        const overIndex = overItems.findIndex((item) => item.dndId === over?.id);
 
-          if (draggedItem?.size === 12) {
-            // Move the item with its container
-            const update = arrayMove(containers, activeContainerIndex, overContainerIndex);
-            setContainers(update);
-            return;
-          }
+        if (!draggedItem) return;
 
-          const update = produce(containers, (draft) => {
-            draft[activeContainerIndex].children = draft[activeContainerIndex].children.filter(
-              (item) => item.dndId !== active.id
-            );
-            const spaceTaken = draft[overContainerIndex].children.reduce((acc, curr) => {
-              if (curr.name === TEMP_FIELD_NAME) {
-                return acc;
-              }
-
-              return acc + curr.size;
-            }, 0);
-
-            // Check the sizes of the children, if there is no room, exit
-            if (spaceTaken + draggedItem.size > 12) {
-              // Leave the item where it started
-              draft[activeContainerIndex].children = containers[activeContainerIndex].children;
-              return;
-            }
-
-            // There is room for the item, drop it
-            draft[overContainerIndex].children.splice(overIndex, 0, draggedItem);
-          });
-
+        // Handle a full width field being dragged
+        if (draggedItem?.size === 12) {
+          // Move the item and its container
+          const update = arrayMove(containers, activeContainerIndex, overContainerIndex);
           setContainers(update);
-        }}
-        onDragEnd={(event) => {
-          const { active, over } = event;
-          const { id } = active;
-          const overId = over?.id;
-          const containersAsDictionary = Object.fromEntries(
-            containers.map((container) => [container.dndId, container])
-          );
-          const activeContainer = findContainer(id, containersAsDictionary);
-          const overContainer = findContainer(overId!, containersAsDictionary);
+          return;
+        }
 
-          if (!activeContainer || !overContainer) {
+        /**
+         * Handle an item being dragged from one container to another,
+         * the item is removed from its current container, and then added to its new container
+         * An item can only be added in a container if there is enough space.
+         */
+        const update = produce(containers, (draft) => {
+          draft[activeContainerIndex].children = draft[activeContainerIndex].children.filter(
+            (item) => item.dndId !== active.id
+          );
+          const spaceTaken = draft[overContainerIndex].children.reduce((acc, curr) => {
+            if (curr.name === TEMP_FIELD_NAME) {
+              return acc;
+            }
+
+            return acc + curr.size;
+          }, 0);
+
+          // Check the sizes of the children, if there is no room, exit
+          if (spaceTaken + draggedItem.size > 12) {
+            // Leave the item where it started
+            draft[activeContainerIndex].children = containers[activeContainerIndex].children;
             return;
           }
 
-          const activeIndex = containersAsDictionary[activeContainer].children.findIndex(
-            (children) => children.dndId === id
-          );
-          const overIndex = containersAsDictionary[overContainer].children.findIndex(
-            (children) => children.dndId === overId
-          );
+          // There is room for the item, drop it
+          draft[overContainerIndex].children.splice(overIndex, 0, draggedItem);
+        });
 
-          const movedContainerItems = produce(containersAsDictionary, (draft) => {
-            if (activeIndex !== overIndex) {
-              // Move items around inside their own container
-              draft[activeContainer].children = arrayMove(
-                draft[activeContainer].children,
-                activeIndex,
-                overIndex
-              );
-            }
-          });
-          const updatedContainers = Object.values(movedContainerItems);
-          const containersWithSpacedItems = createContainersWithSpacers(
-            updatedContainers
-          ) as typeof containers;
+        setContainers(update);
+      }}
+      onDragEnd={(event) => {
+        const { active, over } = event;
+        const { id } = active;
+        const overId = over?.id;
+        const containersAsDictionary = Object.fromEntries(
+          containers.map((container) => [container.dndId, container])
+        );
+        const activeContainer = findContainer(id, containersAsDictionary);
+        const overContainer = findContainer(overId!, containersAsDictionary);
 
-          // Remove properties the server does not expect before updating the form
-          const updatedLayout = containersWithSpacedItems.map(
-            ({ dndId: _dndId, children, ...container }) => ({
-              ...container,
-              children: children.map(({ dndId: _dndId, formName: _formName, ...child }) => child),
-            })
-          );
+        if (!activeContainer || !overContainer) {
+          return;
+        }
 
-          onChange('layout', updatedLayout);
-          setActiveDragItem(null);
-        }}
-      >
-        <Flex paddingTop={6} direction="column" alignItems="stretch" gap={4}>
-          <Flex alignItems="flex-start" direction="column" justifyContent="space-between">
-            <Typography fontWeight="bold">
-              {formatMessage({
-                id: getTranslation('containers.list.displayedFields'),
-                defaultMessage: 'Displayed fields',
-              })}
-            </Typography>
-            <Typography variant="pi" textColor="neutral600">
-              {formatMessage({
-                id: 'containers.SettingPage.editSettings.description',
-                defaultMessage: 'Drag & drop the fields to build the layout',
-              })}
-            </Typography>
-          </Flex>
-          <Box
-            padding={4}
-            hasRadius
-            borderStyle="dashed"
-            borderWidth="1px"
-            borderColor="neutral300"
-          >
-            <Flex direction="column" alignItems="stretch" gap={2}>
-              {containers.map((container, containerIndex) => (
-                <React.Fragment key={container.dndId}>
-                  <SortableContext
-                    id={container.dndId}
-                    items={container.children.map((child) => ({ id: child.dndId }))}
-                  >
-                    <DroppableContainer id={container.dndId}>
-                      <Grid.Root gap={2}>
-                        {container.children.map((child, childIndex) => (
-                          <Grid.Item
-                            col={child.size}
-                            key={child.dndId}
-                            direction="column"
-                            alignItems="stretch"
-                          >
-                            <>
-                              <SortableItem id={child.dndId}>
-                                <Field
-                                  attribute={attributes[child.name]}
-                                  components={components}
-                                  name={child.formName}
-                                  onRemoveField={handleRemoveField(containerIndex, childIndex)}
-                                  dndId={child.dndId}
-                                />
-                              </SortableItem>
-                            </>
-                          </Grid.Item>
-                        ))}
-                      </Grid.Root>
-                    </DroppableContainer>
-                  </SortableContext>
-                </React.Fragment>
-              ))}
-              <DragOverlay>
-                {activeDragItem ? (
-                  <Field
-                    attribute={attributes[activeDragItem.name]}
-                    components={components}
-                    name={activeDragItem.formName}
-                    dndId={activeDragItem.dndId}
-                  />
-                ) : null}
-              </DragOverlay>
-              <Menu.Root>
-                <Menu.Trigger
-                  startIcon={<Plus />}
-                  endIcon={null}
-                  disabled={remainingFields.length === 0}
-                  fullWidth
-                  variant="secondary"
-                >
-                  {formatMessage({
-                    id: getTranslation('containers.SettingPage.add.field'),
-                    defaultMessage: 'Insert another field',
-                  })}
-                </Menu.Trigger>
-                <Menu.Content>
-                  {remainingFields.map((field) => (
-                    <Menu.Item key={field.name} onSelect={handleAddField(field)}>
-                      {field.label}
-                    </Menu.Item>
-                  ))}
-                </Menu.Content>
-              </Menu.Root>
-            </Flex>
-          </Box>
+        const activeIndex = containersAsDictionary[activeContainer].children.findIndex(
+          (children) => children.dndId === id
+        );
+        const overIndex = containersAsDictionary[overContainer].children.findIndex(
+          (children) => children.dndId === overId
+        );
+
+        const movedContainerItems = produce(containersAsDictionary, (draft) => {
+          if (activeIndex !== overIndex) {
+            // Move items around inside their own container
+            draft[activeContainer].children = arrayMove(
+              draft[activeContainer].children,
+              activeIndex,
+              overIndex
+            );
+          }
+        });
+        const updatedContainers = Object.values(movedContainerItems);
+        const containersWithSpacedItems = createContainersWithSpacers(
+          updatedContainers
+        ) as typeof containers;
+
+        // Remove properties the server does not expect before updating the form
+        const updatedLayout = containersWithSpacedItems.map(
+          ({ dndId: _dndId, children, ...container }) => ({
+            ...container,
+            children: children.map(({ dndId: _dndId, formName: _formName, ...child }) => child),
+          })
+        );
+
+        onChange('layout', updatedLayout);
+        setActiveDragItem(null);
+      }}
+    >
+      <Flex paddingTop={6} direction="column" alignItems="stretch" gap={4}>
+        <Flex alignItems="flex-start" direction="column" justifyContent="space-between">
+          <Typography fontWeight="bold">
+            {formatMessage({
+              id: getTranslation('containers.list.displayedFields'),
+              defaultMessage: 'Displayed fields',
+            })}
+          </Typography>
+          <Typography variant="pi" textColor="neutral600">
+            {formatMessage({
+              id: 'containers.SettingPage.editSettings.description',
+              defaultMessage: 'Drag & drop the fields to build the layout',
+            })}
+          </Typography>
         </Flex>
-      </DndContext>
-    </>
+        <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
+          <Flex direction="column" alignItems="stretch" gap={2}>
+            {containers.map((container, containerIndex) => (
+              <React.Fragment key={container.dndId}>
+                <SortableContext
+                  id={container.dndId}
+                  items={container.children.map((child) => ({ id: child.dndId }))}
+                >
+                  <DroppableContainer id={container.dndId}>
+                    <Grid.Root gap={2}>
+                      {container.children.map((child, childIndex) => (
+                        <Grid.Item
+                          col={child.size}
+                          key={child.dndId}
+                          direction="column"
+                          alignItems="stretch"
+                        >
+                          <SortableItem id={child.dndId}>
+                            <Field
+                              attribute={attributes[child.name]}
+                              components={components}
+                              name={child.formName}
+                              onRemoveField={handleRemoveField(containerIndex, childIndex)}
+                              dndId={child.dndId}
+                            />
+                          </SortableItem>
+                        </Grid.Item>
+                      ))}
+                    </Grid.Root>
+                  </DroppableContainer>
+                </SortableContext>
+              </React.Fragment>
+            ))}
+            <DragOverlay>
+              {activeDragItem ? (
+                <Field
+                  attribute={attributes[activeDragItem.name]}
+                  components={components}
+                  name={activeDragItem.formName}
+                  dndId={activeDragItem.dndId}
+                />
+              ) : null}
+            </DragOverlay>
+            <Menu.Root>
+              <Menu.Trigger
+                startIcon={<Plus />}
+                endIcon={null}
+                disabled={remainingFields.length === 0}
+                fullWidth
+                variant="secondary"
+              >
+                {formatMessage({
+                  id: getTranslation('containers.SettingPage.add.field'),
+                  defaultMessage: 'Insert another field',
+                })}
+              </Menu.Trigger>
+              <Menu.Content>
+                {remainingFields.map((field) => (
+                  <Menu.Item key={field.name} onSelect={handleAddField(field)}>
+                    {field.label}
+                  </Menu.Item>
+                ))}
+              </Menu.Content>
+            </Menu.Root>
+          </Flex>
+        </Box>
+      </Flex>
+    </DndContext>
   );
 };
 
