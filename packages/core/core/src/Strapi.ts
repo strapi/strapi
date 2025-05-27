@@ -108,10 +108,6 @@ class Strapi extends Container implements Core.Strapi {
   get fetch(): Modules.Fetch.Fetch {
     return this.get('fetch');
   }
-  
-  get silentFetch(): Modules.Fetch.Fetch {
-    return this.get('silentFetch');
-  }
 
   get cron(): Modules.Cron.CronService {
     return this.get('cron');
@@ -268,7 +264,6 @@ class Strapi extends Container implements Core.Strapi {
       .add('startupLogger', () => utils.createStartupLogger(this))
       .add('logger', () => logger)
       .add('fetch', () => utils.createStrapiFetch(this))
-      .add('silentFetch', () => utils.createStrapiFetch(this, { logs: false }))
       .add('features', () => createFeaturesService(this))
       .add('requestContext', requestContext)
       .add('customFields', createCustomFields(this))

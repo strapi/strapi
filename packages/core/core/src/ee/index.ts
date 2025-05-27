@@ -1,7 +1,7 @@
 import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
-
+import { createStrapiFetch } from '../utils/fetch';
 import {
   readLicense,
   verifyLicense,
@@ -10,6 +10,10 @@ import {
   LICENSE_REGISTRY_URI,
 } from './license';
 import { shiftCronExpression } from '../utils/cron';
+
+const silentFetch = createStrapiFetch(strapi, {
+  logs: false,
+});
 
 const ONE_MINUTE = 1000 * 60;
 
@@ -231,20 +235,18 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
 };
 
 const trialDaysLeft = async (): Promise<{ trialEndsAt: string } | null> => {
-  const res = await strapi
-    .silentFetch(
-      `${LICENSE_REGISTRY_URI}/api/licenses/${ee.licenseInfo.licenseKey}/trial-countdown`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    )
-    .catch(() => {
-      throw new LicenseCheckError(
-        'Could not proceed to retrieve the trial time left for your license.',
-        true
-      );
-    });
+  const res = await silentFetch(
+    `${LICENSE_REGISTRY_URI}/api/licenses/${ee.licenseInfo.licenseKey}/trial-countdown`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  ).catch(() => {
+    throw new LicenseCheckError(
+      'Could not proceed to retrieve the trial time left for your license.',
+      true
+    );
+  });
 
   const data = await res.json();
 
