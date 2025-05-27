@@ -203,4 +203,4 @@ export type StartsWith<TValue extends string, TPrefix extends Literal> = Extends
  * This type is particularly useful for API parameters where specific values should be suggested,
  * but custom values shouldn't be restricted.
  */
-export type LiteralUnion<T extends U, U = string> = T | (U & {});
+export type LiteralUnion<T extends U, U = string> = T | (U & NonNullable<unknown>);
