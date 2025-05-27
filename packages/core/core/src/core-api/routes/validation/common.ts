@@ -33,7 +33,7 @@ export abstract class AbstractCoreRouteValidator<T extends UID.Schema> {
    * @param strapi The Strapi instance to be used.
    * @param uid The unique identifier for the instance.
    */
-  protected constructor(strapi: Core.Strapi, uid: T) {
+  public constructor(strapi: Core.Strapi, uid: T) {
     this._strapi = strapi;
     this._uid = uid;
   }

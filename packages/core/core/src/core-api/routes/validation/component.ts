@@ -1,7 +1,7 @@
-import type { Core, UID } from '@strapi/types';
-import { z } from 'zod';
+import type { UID } from '@strapi/types';
 
-import { mapAttributeToSchema } from './attributes';
+// eslint-disable-next-line import/no-cycle
+import { createAttributesSchema } from './mappers';
 import { AbstractCoreRouteValidator } from './common';
 
 /**
@@ -21,16 +21,6 @@ import { AbstractCoreRouteValidator } from './common';
  */
 export class CoreComponentRouteValidator extends AbstractCoreRouteValidator<UID.Component> {
   /**
-   * Creates a new instance of CoreComponentRouteValidator
-   *
-   * @param strapi - The Strapi instance
-   * @param uid - The component's unique identifier
-   */
-  constructor(strapi: Core.Strapi, uid: UID.Component) {
-    super(strapi, uid);
-  }
-
-  /**
    * Generates a comprehensive validation schema for a single component entry.
    *
    * Combines scalar fields and populatable fields into a single schema.
@@ -48,12 +38,6 @@ export class CoreComponentRouteValidator extends AbstractCoreRouteValidator<UID.
 
     const entries = Object.entries({ ..._scalarFields, ..._populatableFields });
 
-    return entries.reduce((acc, [attributeName, attribute]) => {
-      return acc.extend({
-        get [attributeName]() {
-          return mapAttributeToSchema(attribute);
-        },
-      });
-    }, z.object());
+    return createAttributesSchema(entries);
   }
 }

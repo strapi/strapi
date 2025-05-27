@@ -1,9 +1,10 @@
-import type { Core, Schema, UID } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 
 import { contentTypes } from '@strapi/utils';
 import { z } from 'zod';
 
-import { mapAttributeToInputSchema, mapAttributeToSchema } from './attributes';
+// eslint-disable-next-line import/no-cycle
+import { createAttributesInputSchema, createAttributesSchema } from './mappers';
 import { AbstractCoreRouteValidator } from './common';
 
 export type QueryParam =
@@ -36,16 +37,6 @@ export type QueryParam =
  */
 export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UID.ContentType> {
   /**
-   * Creates a new instance of CoreContentTypeRouteValidator
-   *
-   * @param strapi - The Strapi instance
-   * @param uid - The content-type's unique identifier
-   */
-  constructor(strapi: Core.Strapi, uid: UID.ContentType) {
-    super(strapi, uid);
-  }
-
-  /**
    * Generates a validation schema for document IDs
    *
    * @returns A schema that validates UUIDs
@@ -74,22 +65,14 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
    * ```
    */
   get document() {
-    const { _scalarFields, _populatableFields } = this;
+    const entries = Object.entries({ ...this._scalarFields, ...this._populatableFields });
 
-    const entries = Object.entries({ ..._scalarFields, ..._populatableFields });
-
-    const attributesSchema = entries
+    const sanitizedAttributes = entries
       // Remove passwords from the attribute list
-      // TODO: Make sure we're not leaking other fields like that
-      .filter(([, attribute]) => !['password'].includes(attribute.type))
-      // Merge all attributes into a single schema
-      .reduce((acc, [attributeName, attribute]) => {
-        return acc.extend({
-          get [attributeName]() {
-            return mapAttributeToSchema(attribute);
-          },
-        });
-      }, z.object({}));
+      .filter(([, attribute]) => !['password'].includes(attribute.type));
+
+    // Merge all attributes into a single schema
+    const attributesSchema = createAttributesSchema(sanitizedAttributes);
 
     return z
       .object({
@@ -226,27 +209,17 @@ export class CoreContentTypeRouteValidator extends AbstractCoreRouteValidator<UI
   }
 
   get data() {
-    const { _scalarFields, _populatableFields, _schema } = this;
-
     const isWritableAttribute = ([attributeName]: [string, Schema.Attribute.AnyAttribute]) => {
-      return contentTypes.isWritableAttribute(_schema, attributeName);
+      return contentTypes.isWritableAttribute(this._schema, attributeName);
     };
 
-    const entries = Object.entries({ ..._scalarFields, ..._populatableFields });
+    const entries = Object.entries({ ...this._scalarFields, ...this._populatableFields });
 
-    return (
-      entries
-        // Remove non-writable attributes
-        .filter(isWritableAttribute)
-        // Combine schemas
-        .reduce((acc, [attributeName, attribute]) => {
-          return acc.extend({
-            get [attributeName]() {
-              return mapAttributeToInputSchema(attribute);
-            },
-          });
-        }, z.object())
-    );
+    const sanitizedAttributes = entries
+      // Remove non-writable attributes
+      .filter(isWritableAttribute);
+
+    return createAttributesInputSchema(sanitizedAttributes);
   }
 
   get query() {
