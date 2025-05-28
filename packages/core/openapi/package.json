@@ -1,6 +1,6 @@
 {
   "name": "@strapi/openapi",
-  "version": "5.13.0",
+  "version": "5.13.1",
   "description": "A tool set to help generate and validate API documentation for Strapi projects",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -56,13 +56,13 @@
     "npm": ">=6.0.0"
   },
   "dependencies": {
-    "@strapi/types": "5.13.0",
+    "@strapi/types": "5.13.1",
     "debug": "4.3.4",
     "openapi-types": "12.1.3",
     "zod": "^4.0.0-beta"
   },
   "devDependencies": {
-    "@strapi/types": "5.13.0",
+    "@strapi/types": "5.13.1",
     "@types/debug": "^4"
   }
 }
