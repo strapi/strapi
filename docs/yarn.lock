@@ -9732,14 +9732,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"image-size@npm:^1.0.2":
-  version: 1.1.1
-  resolution: "image-size@npm:1.1.1"
+"image-size@npm:1.2.1":
+  version: 1.2.1
+  resolution: "image-size@npm:1.2.1"
   dependencies:
     queue: "npm:6.0.2"
   bin:
     image-size: bin/image-size.js
-  checksum: 10c0/2660470096d12be82195f7e80fe03274689fbd14184afb78eaf66ade7cd06352518325814f88af4bde4b26647889fe49e573129f6e7ba8f5ff5b85cc7f559000
+  checksum: 10c0/f8b3c19d4476513f1d7e55c3e6db80997b315444743e2040d545cbcaee59be03d2eb40c46be949a8372697b7003fdb0c04925d704390a7f606bc8181e25c0ed4
   languageName: node
   linkType: hard
 
