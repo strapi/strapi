@@ -70,15 +70,18 @@ export const SortableItem = ({ id, children }: { id: string; children: React.Rea
 };
 
 const useDndContainers = (layout: ConfigurationFormData['layout']) => {
+  /**
+   * Compute uids and formName for drag and drop items for the incoming layout
+   */
   const createDragAndDropContainersFromLayout = React.useCallback(
     (layout: ConfigurationFormData['layout']) => {
       return layout.map((row, containerIndex) => ({
         ...row,
         // Use unique ids for drag and drop items
-        dndId: `container-${crypto.randomUUID()}`,
+        dndId: `container-${containerIndex}`,
         children: row.children.map((child, childIndex) => ({
           ...child,
-          dndId: `item-${crypto.randomUUID()}`,
+          dndId: `container-${containerIndex}-child-${childIndex}`,
           // The formName must be recomputed each time an item is moved
           formName: `layout.${containerIndex}.children.${childIndex}`,
         })),
@@ -154,8 +157,8 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
   };
 
   /**
-   * Recomputes the containers when a value in layout changes,
-   * for example when a field size is changed.
+   * When layout changes (e.g. when a field size is changed or the containers are reordered)
+   * we need to update the ids and form names
    */
   React.useEffect(() => {
     const containers = createDragAndDropContainersFromLayout(layout);
@@ -387,6 +390,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           })
         );
 
+        // Update the layout, the containers then resync
         onChange('layout', updatedLayout);
         setActiveDragItem(null);
       }}
