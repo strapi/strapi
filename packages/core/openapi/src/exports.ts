@@ -18,7 +18,33 @@ import type { GenerationOptions } from './types';
 import type { GeneratorOutput } from './generator';
 
 /**
+ * Generates an in-memory OpenAPI specification for Strapi routes.
+ *
  * @experimental
+ *
+ * @param strapi - The Strapi application instance.
+ * @param options - Optional configuration for the generation process.
+ * @param options.type - The type of routes to generate documentation for, either 'admin' or 'content-api'.
+ *                       Defaults to 'content-api'.
+ * @returns An object containing the generated OpenAPI document and other relevant outputs.
+ *
+ * @example
+ * ```typescript
+ * import { generate } from '@strapi/openapi';
+ *
+ * // Assuming 'strapi' is your Strapi instance
+ * const output = generate(strapi, { type: 'content-api' });
+ * console.log(output.document);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * import { generate } from '@strapi/openapi';
+ *
+ * // Generate documentation for all route types (default)
+ * const output = generate(strapi);
+ * console.log(output.document);
+ * ```
  */
 export const generate = (strapi: Core.Strapi, options?: GenerationOptions): GeneratorOutput => {
   const { type = 'content-api' } = options ?? {};
@@ -29,6 +55,7 @@ export const generate = (strapi: Core.Strapi, options?: GenerationOptions): Gene
     postProcessors: new PostProcessorsFactory().createAll(),
   };
 
+  // Data sources for the Strapi routes
   const routeCollector = new RouteCollector(
     [
       new AdminRoutesProvider(strapi),
@@ -49,4 +76,4 @@ export const generate = (strapi: Core.Strapi, options?: GenerationOptions): Gene
   return generator.generate();
 };
 
-export { GenerationOptions, GeneratorOutput };
+export type { GenerationOptions, GeneratorOutput };
