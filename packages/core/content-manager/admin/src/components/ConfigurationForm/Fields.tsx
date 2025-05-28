@@ -1,12 +1,6 @@
 import * as React from 'react';
 
-import {
-  useDroppable,
-  DndContext,
-  UniqueIdentifier,
-  DragOverlay,
-  closestCenter,
-} from '@dnd-kit/core';
+import { useDroppable, DndContext, UniqueIdentifier, DragOverlay } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useField, useForm } from '@strapi/admin/strapi-admin';
@@ -43,12 +37,18 @@ type Field = Omit<ConfigurationFormData['layout'][number]['children'][number], '
  * Drag and Drop
  * -----------------------------------------------------------------------------------------------*/
 
-const DroppableContainer = ({ id, children }: { id: string; children: React.ReactNode }) => {
-  const { setNodeRef } = useDroppable({
+const DroppableContainer = ({
+  id,
+  children,
+}: {
+  id: string;
+  children: (props: ReturnType<typeof useDroppable>) => React.ReactNode;
+}) => {
+  const droppable = useDroppable({
     id,
   });
 
-  return <div ref={setNodeRef}>{children}</div>;
+  return children(droppable);
 };
 
 export const SortableItem = ({ id, children }: { id: string; children: React.ReactNode }) => {
@@ -59,6 +59,7 @@ export const SortableItem = ({ id, children }: { id: string; children: React.Rea
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    height: '100%',
   };
 
   return (
@@ -78,6 +79,7 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
         children: row.children.map((child, childIndex) => ({
           ...child,
           dndId: `item-${crypto.randomUUID()}`,
+          // The formName must be recomputed each time an item is moved
           formName: `layout.${containerIndex}.children.${childIndex}`,
         })),
       }));
@@ -88,7 +90,6 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
   const [containers, setContainers] = React.useState(() =>
     createDragAndDropContainersFromLayout(layout)
   );
-
   const [activeDragItem, setActiveDragItem] = React.useState<
     (typeof containers)[number]['children'][number] | null
   >(null);
@@ -97,19 +98,27 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
     id: UniqueIdentifier,
     containersAsDictionary: Record<string, (typeof containers)[number]>
   ) {
+    // If the key is at the root level, it is the container
     if (id in containersAsDictionary) {
       return id;
     }
 
+    // Otherwise, it is a child of a container
     return Object.keys(containersAsDictionary).find((key) =>
       containersAsDictionary[key].children.find((child) => child.dndId === id)
     );
   }
 
-  const getActiveItem = (id: UniqueIdentifier, container: (typeof containers)[number]) => {
+  /**
+   * Gets an item from a container based on its id
+   */
+  const getItemFromContainer = (id: UniqueIdentifier, container: (typeof containers)[number]) => {
     return container.children.find((item) => id === item.dndId);
   };
 
+  /**
+   * Recomputes the empty space in the grid
+   */
   const createContainersWithSpacers = (layout: typeof containers) => {
     return layout
       .map((row) => ({
@@ -149,7 +158,8 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
    * for example when a field size is changed.
    */
   React.useEffect(() => {
-    setContainers(createDragAndDropContainersFromLayout(layout));
+    const containers = createDragAndDropContainersFromLayout(layout);
+    setContainers(containers);
   }, [layout, createDragAndDropContainersFromLayout]);
 
   return {
@@ -158,7 +168,7 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
     activeDragItem,
     setActiveDragItem,
     findContainer,
-    getActiveItem,
+    getItemFromContainer,
     createContainersWithSpacers,
   };
 };
@@ -192,7 +202,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     activeDragItem,
     setActiveDragItem,
     findContainer,
-    getActiveItem,
+    getItemFromContainer,
     setContainers,
     createContainersWithSpacers,
   } = useDndContainers(layout);
@@ -241,7 +251,6 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
   return (
     <DndContext
-      collisionDetection={closestCenter}
       onDragStart={(event) => {
         const containersAsDictionary = Object.fromEntries(
           containers.map((container) => [container.dndId, container])
@@ -250,7 +259,10 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
         if (!activeContainer) return;
 
-        const activeItem = getActiveItem(event.active.id, containersAsDictionary[activeContainer]);
+        const activeItem = getItemFromContainer(
+          event.active.id,
+          containersAsDictionary[activeContainer]
+        );
 
         if (activeItem) {
           setActiveDragItem(activeItem);
@@ -273,9 +285,17 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           return;
         }
 
-        const draggedItem = getActiveItem(active.id, containersAsDictionary[activeContainer]);
-        const overItems = containersAsDictionary[overContainer].children;
-        const overIndex = overItems.findIndex((item) => item.dndId === over?.id);
+        const draggedItem = getItemFromContainer(
+          active.id,
+          containersAsDictionary[activeContainer]
+        );
+        const overItem = getItemFromContainer(
+          over?.id ?? '',
+          containersAsDictionary[overContainer]
+        );
+        const overIndex = containersAsDictionary[overContainer].children.findIndex(
+          (item) => item.dndId === over?.id
+        );
 
         if (!draggedItem) return;
 
@@ -311,7 +331,13 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             return;
           }
 
-          // There is room for the item, drop it
+          if (overItem?.name === TEMP_FIELD_NAME) {
+            // We are over an invisible spacer, replace it with the dragged item
+            draft[overContainerIndex].children.splice(overIndex, 1, draggedItem);
+            return;
+          }
+
+          // There is room for the item in the container, drop it
           draft[overContainerIndex].children.splice(overIndex, 0, draggedItem);
         });
 
@@ -348,13 +374,13 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
             );
           }
         });
-        const updatedContainers = Object.values(movedContainerItems);
-        const containersWithSpacedItems = createContainersWithSpacers(
-          updatedContainers
-        ) as typeof containers;
 
         // Remove properties the server does not expect before updating the form
-        const updatedLayout = containersWithSpacedItems.map(
+        const updatedContainers = Object.values(movedContainerItems);
+        const updatedContainersWithSpacers = createContainersWithSpacers(
+          updatedContainers
+        ) as typeof containers;
+        const updatedLayout = updatedContainersWithSpacers.map(
           ({ dndId: _dndId, children, ...container }) => ({
             ...container,
             children: children.map(({ dndId: _dndId, formName: _formName, ...child }) => child),
@@ -383,13 +409,14 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
           <Flex direction="column" alignItems="stretch" gap={2}>
             {containers.map((container, containerIndex) => (
-              <React.Fragment key={container.dndId}>
-                <SortableContext
-                  id={container.dndId}
-                  items={container.children.map((child) => ({ id: child.dndId }))}
-                >
-                  <DroppableContainer id={container.dndId}>
-                    <Grid.Root gap={2}>
+              <SortableContext
+                key={container.dndId}
+                id={container.dndId}
+                items={container.children.map((child) => ({ id: child.dndId }))}
+              >
+                <DroppableContainer id={container.dndId}>
+                  {({ setNodeRef }) => (
+                    <Grid.Root key={container.dndId} ref={setNodeRef} gap={2}>
                       {container.children.map((child, childIndex) => (
                         <Grid.Item
                           col={child.size}
@@ -409,9 +436,9 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
                         </Grid.Item>
                       ))}
                     </Grid.Root>
-                  </DroppableContainer>
-                </SortableContext>
-              </React.Fragment>
+                  )}
+                </DroppableContainer>
+              </SortableContext>
             ))}
             <DragOverlay>
               {activeDragItem ? (
