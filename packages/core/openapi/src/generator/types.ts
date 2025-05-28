@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 export interface GeneratorOutputOptions {
   validate?: boolean;
@@ -9,6 +9,6 @@ export interface GeneratorOptions {
 }
 
 export interface GeneratorOutput {
-  document: OpenAPIV3.Document;
+  document: OpenAPIV3_1.Document;
   durationMs: number;
 }

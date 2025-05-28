@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import type { Assembler } from '../assemblers';
 import type { DocumentContextFactory } from '../context';
@@ -79,7 +79,7 @@ export class OpenAPIGenerator {
 
     const { data, stats } = context.output;
 
-    return { document: data as OpenAPIV3.Document, durationMs: stats.time.elapsedTime };
+    return { document: data as OpenAPIV3_1.Document, durationMs: stats.time.elapsedTime };
   }
 
   private _initContext(strapi: Core.Strapi): DocumentContext {

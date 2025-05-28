@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { Assembler } from '../../../..';
 import type { OperationContext } from '../../../../../types';
 import { zodToOpenAPI } from '../../../../../utils';
@@ -18,7 +18,7 @@ export class OperationResponsesAssembler implements Assembler.Operation {
   assemble(context: OperationContext, route: Core.Route): void {
     const { output } = context;
 
-    const responses = { ...output.data.responses } satisfies OpenAPIV3.ResponsesObject;
+    const responses = { ...output.data.responses } satisfies OpenAPIV3_1.ResponsesObject;
 
     // Register common error responses first to allow manual overrides
     for (const [errorCode, response] of Object.entries(this._errors)) {

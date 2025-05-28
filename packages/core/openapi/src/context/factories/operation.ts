@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 import { RegistriesFactory } from '../../registries';
 
@@ -10,7 +10,7 @@ import type { PartialContext } from '../types';
 import { AbstractContextFactory } from './abstract';
 
 export class OperationContextFactory extends AbstractContextFactory<
-  Partial<OpenAPIV3.OperationObject>
+  Partial<OpenAPIV3_1.OperationObject>
 > {
   constructor(
     registriesFactory: RegistriesFactory = new RegistriesFactory(),

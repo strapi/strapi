@@ -1,4 +1,4 @@
-import { OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV3_1, OpenAPIV3 } from 'openapi-types';
 
 import type { Core } from '@strapi/types';
 
@@ -49,19 +49,20 @@ export class OperationAssembler implements Assembler.PathItem {
 
       debug('assembled operation object for %o %o', method, path);
 
-      output.data[methodIndex] = operationObject;
+      Object.assign(output.data, { [methodIndex]: operationObject });
     }
   }
 
   private _validateOperationObject(
-    operation: Partial<OpenAPIV3.OperationObject>
-  ): asserts operation is OpenAPIV3.OperationObject {
+    operation: Partial<OpenAPIV3_1.OperationObject>
+  ): asserts operation is OpenAPIV3_1.OperationObject {
     if (!('responses' in operation)) {
       throw new Error('Invalid operation object: missing "responses" property');
     }
   }
 
-  private _validateHTTPIndex(method: string): asserts method is OpenAPIV3.HttpMethods {
+  private _validateHTTPIndex(method: string): asserts method is OpenAPIV3_1.HttpMethods {
+    // HttpMethods is exported as an enum in OpenAPIV3 and as a type only in OpenAPIV3_1
     const allowedMethods = Object.values<string>(OpenAPIV3.HttpMethods);
     const isAllowedMethod = allowedMethods.includes(method);
 
