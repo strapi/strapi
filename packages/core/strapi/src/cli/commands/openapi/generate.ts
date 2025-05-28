@@ -4,13 +4,8 @@ import * as openapi from '@strapi/openapi';
 import type { Core } from '@strapi/types';
 
 import chalk from 'chalk';
-import { createCommand } from 'commander';
 import fse from 'fs-extra';
 import path from 'path';
-
-import { runAction } from '../../utils/helpers';
-
-import type { StrapiCommand } from '../../types';
 
 const DEFAULT_OUTPUT = path.join(process.cwd(), 'specification.json');
 
@@ -76,14 +71,4 @@ const summarize = (app: Core.Strapi, durationMs: number, filePath: string): void
   );
 };
 
-/**
- * `$ strapi openapi:generate [-o, --output <output>]`
- */
-const command: StrapiCommand = () => {
-  return createCommand('openapi:generate')
-    .description('Generate an OpenAPI specification for the current Strapi application')
-    .option('-o, --output <output>', 'Output file path')
-    .action(runAction('openapi:generate', action));
-};
-
-export { action, command };
+export { action };
