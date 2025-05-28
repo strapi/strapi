@@ -267,7 +267,7 @@ const createScalarAttributeValidator =
 const createAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMetas, options: ValidatorContext) => {
     let validator = yup.mixed();
-
+    console.log('metas ==>', metas.model, metas.attr);
     if (isMediaAttribute(metas.attr)) {
       validator = yup.mixed();
     } else if (isScalarAttribute(metas.attr)) {
@@ -376,6 +376,9 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
         `Invalid payload submitted for the ${createOrUpdate} of an entity of type ${displayName}. Expected an object, but got ${typeof data}`
       );
     }
+    console.log('model', model);
+    console.log('data', data);
+    console.log('entity', entity);
 
     const validator = createModelValidator(createOrUpdate)(
       {

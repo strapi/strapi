@@ -1011,7 +1011,6 @@ const UpdateAction: DocumentActionComponent = ({
 
         return;
       }
-
       if (isCloning) {
         const res = await clone(
           {

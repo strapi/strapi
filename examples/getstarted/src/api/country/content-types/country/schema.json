@@ -9,7 +9,6 @@
     "name": "Country"
   },
   "options": {
-    "comment": "",
     "draftAndPublish": false
   },
   "pluginOptions": {
@@ -30,6 +29,7 @@
     },
     "code": {
       "type": "string",
+      "required":true,
       "maxLength": 3,
       "unique": true,
       "minLength": 2,
@@ -37,7 +37,20 @@
         "i18n": {
           "localized": true
         }
+      },
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "visible"
+            },
+            true
+          ]
+        }
       }
+    },
+    "visible": {
+      "type": "boolean"
     }
   }
 }

@@ -23,7 +23,7 @@ const createDocument = async (ctx: any, opts?: Options) => {
   const { userAbility, user } = ctx.state;
   const { model } = ctx.params;
   const { body } = ctx.request;
-
+  console.log('createDocument', { model, body });
   const documentManager = getService('document-manager');
   const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
