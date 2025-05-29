@@ -275,7 +275,7 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American');
       await page
         .getByRole('textbox')
-        .nth(1)
+        .nth(2)
         .fill('I miss the denver broncos, now I can only watch it on the evening.');
 
       await page.getByRole('combobox', { name: 'authors' }).click();

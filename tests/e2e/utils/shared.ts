@@ -142,7 +142,12 @@ export const findAndClose = async (page: Page, text: string, options: FindAndClo
   // Click all 'Close' buttons.
   const count = await closeBtns.count();
   for (let i = 0; i < count; i++) {
-    await closeBtns.nth(i).click();
+    if (await closeBtns.nth(i).isVisible()) {
+      await closeBtns
+        .nth(i)
+        .click()
+        .catch(() => {});
+    }
   }
 };
 
