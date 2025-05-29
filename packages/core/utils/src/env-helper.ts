@@ -42,7 +42,9 @@ function bool(key: string, defaultValue?: boolean | null | undefined): boolean |
   return getKey(key) === 'true';
 }
 
-function json(key: string, defaultValue?: object | null | undefined): any {
+function json<T extends object>(key: string, defaultValue: T): T;
+function json<T extends object>(key: string, defaultValue?: T | null | undefined): T | undefined;
+function json(key: string, defaultValue?: object | null | undefined): object | undefined {
   if (!_.has(process.env, key)) {
     return defaultValue ?? undefined;
   }
@@ -102,7 +104,7 @@ function oneOf(
     throw new Error(`env.oneOf requires expectedValues`);
   }
 
-  if (defaultValue && !expectedValues.includes(defaultValue)) {
+  if (defaultValue != null && !expectedValues.includes(defaultValue)) {
     throw new Error(`env.oneOf requires defaultValue to be included in expectedValues`);
   }
 
