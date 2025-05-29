@@ -20,7 +20,9 @@ export const createStrapiFetch = (
       ...options,
     };
 
-    if (logs) strapi.log.debug(`Making request for ${url}`);
+    if (logs) {
+      strapi.log.debug(`Making request for ${url}`);
+    }
 
     return fetch(url, fetchOptions);
   }
@@ -30,7 +32,9 @@ export const createStrapiFetch = (
     strapi.config.get<string>('server.proxy.global');
 
   if (proxy) {
-    if (logs) strapi.log.info(`Using proxy for Fetch requests: ${proxy}`);
+    if (logs) {
+      strapi.log.info(`Using proxy for Fetch requests: ${proxy}`);
+    }
     strapiFetch.dispatcher = new ProxyAgent(proxy);
   }
 

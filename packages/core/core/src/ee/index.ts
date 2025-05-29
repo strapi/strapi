@@ -232,7 +232,7 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 };
 
-const trialDaysLeft = async ({
+const getTrialEndDate = async ({
   strapi,
 }: {
   strapi: Core.Strapi;
@@ -272,7 +272,7 @@ const get = (featureName: string) => list().find((feature) => feature.name === f
 export default Object.freeze({
   init,
   checkLicense,
-  trialDaysLeft,
+  getTrialEndDate,
 
   get isEE() {
     return ee.enabled;

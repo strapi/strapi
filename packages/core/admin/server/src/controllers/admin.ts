@@ -179,7 +179,7 @@ export default {
   },
 
   async licenseTrialTimeLeft() {
-    const data = await strapi.ee.trialDaysLeft({
+    const data = await strapi.ee.getTrialEndDate({
       strapi,
     });
 
