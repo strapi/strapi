@@ -103,4 +103,8 @@ describe('Releases Settings page', () => {
     const defaultTimezoneCombobox = screen.getByRole('combobox', { name: 'Default timezone' });
     expect(defaultTimezoneCombobox).toBeEnabled();
   });
+
+  // Add tests in the case of saving a correct value
+  // Add test to remove a default value
+  // Try put a wrong value in the default timezone combobox
 });

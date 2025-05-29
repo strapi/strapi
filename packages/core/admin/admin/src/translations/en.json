@@ -618,6 +618,7 @@
   "components.Input.error.contentTypeName.taken": "This name already exists",
   "components.Input.error.custom-error": "{errorMessage} ",
   "components.Input.error.password.noMatch": "Passwords do not match",
+  "components.Input.error.validation.combobox.invalid": "The value provided is not valid.",
   "components.Input.error.validation.email": "This is not a valid email",
   "components.Input.error.validation.json": "This doesn't match the JSON format",
   "components.Input.error.validation.lowercase": "The value must be a lowercase string",
