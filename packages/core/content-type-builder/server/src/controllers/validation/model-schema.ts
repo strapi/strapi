@@ -50,14 +50,18 @@ const createAttributesValidator = ({ types, modelType, relations }: CreateAttrib
             return conflictingKeysValidator(key);
           }
 
-          if (attribute.type === 'relation') {
-            return getRelationValidator(attribute, relations).test(isValidKey(key));
+          if (!_.has(attribute, 'type')) {
+            return typeOrRelationValidator
           }
 
           if (_.has(attribute, 'type')) {
             return getTypeValidator(attribute, { types, modelType, attributes }).test(
               isValidKey(key)
             );
+          }
+
+          if (attribute.type === 'relation') {
+            return getRelationValidator(attribute, relations).test(isValidKey(key));
           }
 
           return typeOrRelationValidator;
