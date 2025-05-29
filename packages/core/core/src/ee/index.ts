@@ -41,6 +41,8 @@ const disable = (message: string) => {
   // Only keep the license key and isTrial for potential re-enabling during a later check
   ee.licenseInfo = pick(['licenseKey', 'isTrial'], ee.licenseInfo);
 
+  ee.licenseInfo.isTrial = false;
+
   ee.enabled = false;
 
   if (shouldEmitEvent) {

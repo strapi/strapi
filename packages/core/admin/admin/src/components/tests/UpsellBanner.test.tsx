@@ -1,6 +1,7 @@
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import { render, screen } from '@tests/utils';
 
+import { useGetLicenseTrialTimeLeftQuery } from '../../../src/services/admin';
 import { UpsellBanner } from '../UpsellBanner';
 
 jest.mock('@strapi/admin/strapi-admin/ee', () => ({
@@ -20,6 +21,10 @@ jest.mock('../../../src/services/admin', () => ({
 }));
 
 describe('UpsellBanner', () => {
+  beforeEach(() => {
+    localStorage.removeItem('STRAPI_FREE_TRIAL_ENDS_AT');
+  });
+
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -46,7 +51,38 @@ describe('UpsellBanner', () => {
     expect(screen.getByRole('link', { name: 'Upgrade now' })).toHaveAttribute('target', '_blank');
   });
 
-  it('should render when license is trial but ended', () => {
+  it('should not render when license is not trial', () => {
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({
+      license: {
+        isTrial: false,
+      },
+    }));
+
+    // @ts-expect-error – mock
+    useGetLicenseTrialTimeLeftQuery.mockImplementationOnce(() => ({
+      data: {},
+    }));
+
+    render(<UpsellBanner />);
+
+    expect(screen.queryByText('Access to Growth plan features:')).not.toBeInTheDocument();
+  });
+
+  it('should render when license trial ended less than 7 days ago', () => {
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({
+      license: {
+        isTrial: false,
+      },
+    }));
+
+    // @ts-expect-error – mock
+    useGetLicenseTrialTimeLeftQuery.mockImplementationOnce(() => ({
+      data: {},
+    }));
+
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT', '2025-05-21T09:50:00.000Z');
     jest.setSystemTime(new Date(2025, 4, 22));
 
     render(<UpsellBanner />);
@@ -65,7 +101,7 @@ describe('UpsellBanner', () => {
     );
   });
 
-  it('should not render when license is not trial', () => {
+  it('should not render when license trial ended more than 7 days ago', () => {
     // @ts-expect-error – mock
     useLicenseLimits.mockImplementationOnce(() => ({
       license: {
@@ -73,8 +109,16 @@ describe('UpsellBanner', () => {
       },
     }));
 
+    // @ts-expect-error – mock
+    useGetLicenseTrialTimeLeftQuery.mockImplementationOnce(() => ({
+      data: {},
+    }));
+
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT', '2025-05-10T09:50:00.000Z');
+    jest.setSystemTime(new Date(2025, 4, 22));
+
     render(<UpsellBanner />);
 
-    expect(screen.queryByText('Access to Growth plan features:')).not.toBeInTheDocument();
+    expect(screen.queryByText('Your trial has ended:')).not.toBeInTheDocument();
   });
 });

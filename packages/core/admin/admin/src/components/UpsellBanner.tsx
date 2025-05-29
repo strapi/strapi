@@ -1,9 +1,13 @@
+import { useEffect } from 'react';
+
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import { Box, Flex, LinkButton, Typography } from '@strapi/design-system';
+import { isAfter, subDays } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useGetLicenseTrialTimeLeftQuery } from '../../src/services/admin';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 const BannerBackground = styled(Flex)`
   background: linear-gradient(
@@ -13,33 +17,8 @@ const BannerBackground = styled(Flex)`
   );
 `;
 
-const UpsellBanner = () => {
+const Banner = ({ isTrialEndedRecently }: { isTrialEndedRecently: boolean }) => {
   const { formatMessage } = useIntl();
-  const { license, isError, isLoading } = useLicenseLimits();
-
-  const timeLeftData = useGetLicenseTrialTimeLeftQuery(undefined, {
-    skip: !license?.isTrial,
-  });
-
-  if (
-    isError ||
-    isLoading ||
-    !license?.isTrial ||
-    timeLeftData.isLoading ||
-    timeLeftData.isError ||
-    !timeLeftData.data ||
-    !timeLeftData.data.trialEndsAt
-  ) {
-    return null;
-  }
-
-  const targetDate = new Date(timeLeftData.data.trialEndsAt);
-  const now = new Date();
-
-  const millisecondsPerDay = 1000 * 60 * 60 * 24;
-  const timeDifference = targetDate.getTime() - now.getTime();
-
-  const daysLeft = Math.ceil(timeDifference / millisecondsPerDay);
 
   return (
     <BannerBackground width="100%" justifyContent="center">
@@ -62,7 +41,7 @@ const UpsellBanner = () => {
             fontSize={2}
           >
             {formatMessage(
-              daysLeft <= 0
+              isTrialEndedRecently
                 ? {
                     id: 'app.components.UpsellBanner.intro.ended',
                     defaultMessage: 'Your trial has ended: ',
@@ -81,7 +60,7 @@ const UpsellBanner = () => {
             fontSize={2}
           >
             {formatMessage(
-              daysLeft <= 0
+              isTrialEndedRecently
                 ? {
                     id: 'app.components.UpsellBanner.text.ended',
                     defaultMessage: 'Keep access to Growth features by upgrading now.',
@@ -102,7 +81,7 @@ const UpsellBanner = () => {
             target="_blank"
           >
             {formatMessage(
-              daysLeft <= 0
+              isTrialEndedRecently
                 ? {
                     id: 'app.components.UpsellBanner.button.ended',
                     defaultMessage: 'Keep Growth plan',
@@ -117,6 +96,43 @@ const UpsellBanner = () => {
       </Flex>
     </BannerBackground>
   );
+};
+
+const UpsellBanner = () => {
+  const { license } = useLicenseLimits();
+
+  const [cachedTrialEndsAt, setCachedTrialEndsAt] = usePersistentState<string | undefined>(
+    'STRAPI_FREE_TRIAL_ENDS_AT',
+    undefined
+  );
+
+  const sevenDaysAgo = subDays(new Date(), 7);
+
+  const timeLeftData = useGetLicenseTrialTimeLeftQuery(undefined, {
+    skip: !license?.isTrial,
+  });
+
+  useEffect(() => {
+    if (timeLeftData.data?.trialEndsAt) {
+      setCachedTrialEndsAt(timeLeftData.data.trialEndsAt);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeftData.data?.trialEndsAt]);
+
+  // When the license is not a trial + not EE, and the cached trial end date is found in the localstorage, that means the trial has ended
+  // We show the banner to encourage the user to upgrade (for 7 days after the trial ends)
+  const isTrialEndedRecently = Boolean(
+    !license?.isTrial &&
+      !window.strapi.isEE &&
+      cachedTrialEndsAt &&
+      isAfter(new Date(cachedTrialEndsAt), sevenDaysAgo)
+  );
+
+  if (timeLeftData.data?.trialEndsAt || isTrialEndedRecently) {
+    return <Banner isTrialEndedRecently={isTrialEndedRecently} />;
+  }
+
+  return null;
 };
 
 export { UpsellBanner };
