@@ -6,7 +6,6 @@ import {
   InputRenderer as FormInputRenderer,
   useField,
   Form,
-  createRulesEngine,
 } from '@strapi/admin/strapi-admin';
 import { Alert, Box, Field, Flex, Link, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -326,7 +325,6 @@ const VersionInputRenderer = ({
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
-  const fieldValues = useForm('Fields', (state) => state.values);
 
   const editableFields = id ? canUpdateFields : canCreateFields;
   const readableFields = id ? canReadFields : canCreateFields;
@@ -346,17 +344,6 @@ const VersionInputRenderer = ({
   const {
     edit: { components: componentsLayout },
   } = useDocLayout();
-
-  const rulesEngine = createRulesEngine();
-  const attribute = props.attribute;
-
-  if (attribute?.conditions && attribute?.conditions.visible) {
-    const isVisible = rulesEngine.evaluate(attribute?.conditions.visible, fieldValues);
-
-    if (!isVisible) {
-      return null;
-    }
-  }
 
   if (!visible) {
     return null;

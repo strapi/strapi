@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Form, Layouts } from '@strapi/admin/strapi-admin';
+import { Form, Layouts, useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
 import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -103,6 +103,7 @@ function getRemaingFieldsLayout({
  * -----------------------------------------------------------------------------------------------*/
 
 const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
+  const fieldValues = useForm('Fields', (state) => state.values);
   if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
     const [row] = panel;
     const [field] = row;
@@ -128,24 +129,41 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
       borderColor="neutral150"
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
-        {panel.map((row, gridRowIndex) => (
-          <Grid.Root key={gridRowIndex} gap={4}>
-            {row.map(({ size, ...field }) => {
-              return (
-                <Grid.Item
-                  col={size}
-                  key={field.name}
-                  s={12}
-                  xs={12}
-                  direction="column"
-                  alignItems="stretch"
-                >
-                  <VersionInputRenderer {...field} />
-                </Grid.Item>
-              );
-            })}
-          </Grid.Root>
-        ))}
+        {panel.map((row, gridRowIndex) => {
+          const visibleFields = row.filter((field) => {
+            const condition = field.attribute?.conditions?.visible;
+
+            if (condition) {
+              const rulesEngine = createRulesEngine();
+              return rulesEngine.evaluate(condition, fieldValues);
+            }
+
+            return true;
+          });
+
+          if (visibleFields.length === 0) {
+            return null; // Skip rendering the entire grid row
+          }
+
+          return (
+            <Grid.Root key={gridRowIndex} gap={4}>
+              {visibleFields.map(({ size, ...field }) => {
+                return (
+                  <Grid.Item
+                    col={size}
+                    key={field.name}
+                    s={12}
+                    xs={12}
+                    direction="column"
+                    alignItems="stretch"
+                  >
+                    <VersionInputRenderer {...field} />
+                  </Grid.Item>
+                );
+              })}
+            </Grid.Root>
+          );
+        })}
       </Flex>
     </Box>
   );

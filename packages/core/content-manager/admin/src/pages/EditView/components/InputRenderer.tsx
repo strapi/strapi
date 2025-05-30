@@ -5,7 +5,6 @@ import {
   useForm,
   InputRenderer as FormInputRenderer,
   useField,
-  createRulesEngine,
 } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
@@ -56,7 +55,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
   const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
   const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
   const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
-  const fieldValues = useForm('Fields', (state) => state.values);
 
   let idToCheck = document.document?.documentId;
   if (collectionType === SINGLE_TYPES) {
@@ -82,16 +80,6 @@ const InputRenderer = ({ visible, hint: providedHint, document, ...props }: Inpu
 
   // We pass field in case of Custom Fields to keep backward compatibility
   const field = useField(props.name);
-  const rulesEngine = createRulesEngine();
-  const attribute = document.schema?.attributes[props.name];
-
-  if (attribute?.conditions && attribute?.conditions.visible) {
-    const isVisible = rulesEngine.evaluate(attribute?.conditions.visible, fieldValues);
-
-    if (!isVisible) {
-      return null;
-    }
-  }
 
   if (!visible) {
     return null;

@@ -42,7 +42,7 @@ import {
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
-import { AnyData } from '../utils/data';
+import { AnyData, stripInvisibleAttributes } from '../utils/data';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
@@ -1006,6 +1006,7 @@ const UpdateAction: DocumentActionComponent = ({
     },
     { skip: !parentDocumentMetaToUpdate }
   );
+  const { schema } = useDoc();
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -1064,7 +1065,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId,
             params: currentDocumentMeta.params,
           },
-          transformData(document)
+          stripInvisibleAttributes(transformData(document), schema)
         );
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
