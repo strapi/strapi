@@ -3,10 +3,12 @@ import { Route, Routes } from 'react-router-dom';
 
 import { RelationsInput, RelationsFieldProps } from '../Relations';
 
-const render = ({
-  initialEntries,
-  ...props
-}: Partial<RelationsFieldProps> & Pick<RenderOptions, 'initialEntries'> = {}) =>
+const render = (
+  {
+    initialEntries,
+    ...props
+  }: Partial<RelationsFieldProps> & Pick<RenderOptions, 'initialEntries'> = { initialEntries: [] }
+) =>
   renderRTL(
     <RelationsInput
       attribute={{
@@ -55,7 +57,9 @@ describe('Relations', () => {
   });
 
   it('should render the relations list when there is data from the API', async () => {
-    render();
+    render({
+      initialEntries: ['/content-manager/collection-types/api::address.address/12345'],
+    });
 
     // Wait for the loading state to finish
     await waitFor(() => {
@@ -64,7 +68,7 @@ describe('Relations', () => {
 
     // Wait for the combobox to be rendered with the correct label
     await waitFor(() => {
-      expect(screen.getByLabelText('relations')).toBeInTheDocument();
+      expect(screen.getByLabelText(/relations/)).toBeInTheDocument();
     });
 
     // Wait for the list items to be rendered
@@ -74,7 +78,7 @@ describe('Relations', () => {
 
     // Wait for the combobox to be updated with the count
     await waitFor(() => {
-      expect(screen.getByLabelText('relations (3)')).toBeInTheDocument();
+      expect(screen.getByLabelText(/relations \(3\)/)).toBeInTheDocument();
     });
 
     // Check for the relation buttons
@@ -96,14 +100,14 @@ describe('Relations', () => {
   it('should render a hint when the prop is passed', async () => {
     render({ hint: 'This is a hint' });
 
+    // Wait for the combobox to be rendered with the correct label
+    await waitFor(() => {
+      expect(screen.getByLabelText(/relations/)).toBeInTheDocument();
+    });
+
     // Wait for the loading state to finish
     await waitFor(() => {
       expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
-    });
-
-    // Wait for the combobox to be rendered with the correct label
-    await waitFor(() => {
-      expect(screen.getByLabelText('relations')).toBeInTheDocument();
     });
 
     // Wait for the list items to be rendered
