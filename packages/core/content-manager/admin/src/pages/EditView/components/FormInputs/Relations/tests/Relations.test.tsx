@@ -93,9 +93,20 @@ describe('Relations', () => {
     expect(screen.getByRole('combobox')).toBeDisabled();
   });
 
-  it.skip('should render a hint when the prop is passed', async () => {
+  it('should render a hint when the prop is passed', async () => {
     render({ hint: 'This is a hint' });
 
+    // Wait for the loading state to finish
+    await waitFor(() => {
+      expect(screen.queryByText('Relations are loading')).not.toBeInTheDocument();
+    });
+
+    // Wait for the combobox to be rendered with the correct label
+    await waitFor(() => {
+      expect(screen.getByLabelText('relations')).toBeInTheDocument();
+    });
+
+    // Wait for the list items to be rendered
     await waitFor(() => {
       expect(screen.getAllByRole('listitem')).toHaveLength(3);
     });
@@ -133,7 +144,9 @@ describe('Relations', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Press up and down arrow to change position, Spacebar to drop, Escape to cancel/)
+          screen.getByText(
+            /Press up and down arrow to change position, Spacebar to drop, Escape to cancel/
+          )
         ).toBeInTheDocument();
       });
     });
