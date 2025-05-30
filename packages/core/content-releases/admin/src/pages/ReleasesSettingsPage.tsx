@@ -65,9 +65,8 @@ const ReleasesSettingsPage = () => {
 
     if (!isBodyTimezoneValid && defaultTimezone) {
       const errorMessage = formatMessage({
-        // OK
         id: 'components.Input.error.validation.combobox.invalid',
-        defaultMessage: 'The value entered is not valid.',
+        defaultMessage: 'The value provided is not valid.',
       });
       setErrors({
         defaultTimezone: errorMessage,
@@ -86,7 +85,6 @@ const ReleasesSettingsPage = () => {
         toggleNotification({
           type: 'success',
           message: formatMessage({
-            // OK
             id: 'content-releases.pages.Settings.releases.setting.default-timezone-notification-success',
             defaultMessage: 'Default timezone updated.',
           }),
@@ -100,7 +98,6 @@ const ReleasesSettingsPage = () => {
         toggleNotification({
           type: 'danger',
           message: formatMessage({
-            // OK
             id: 'notification.error',
             defaultMessage: 'An error occurred',
           }),
@@ -110,7 +107,6 @@ const ReleasesSettingsPage = () => {
       toggleNotification({
         type: 'danger',
         message: formatMessage({
-          // OK
           id: 'notification.error',
           defaultMessage: 'An error occurred',
         }),
@@ -123,7 +119,6 @@ const ReleasesSettingsPage = () => {
   }
 
   const releasePageTitle = formatMessage({
-    // OK
     id: 'content-releases.pages.Releases.title',
     defaultMessage: 'Releases',
   });
@@ -132,7 +127,6 @@ const ReleasesSettingsPage = () => {
     <Layouts.Root>
       <Page.Title>
         {formatMessage(
-          // OK
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: releasePageTitle,
@@ -161,7 +155,6 @@ const ReleasesSettingsPage = () => {
                         type="submit"
                       >
                         {formatMessage({
-                          // Ok
                           id: 'global.save',
                           defaultMessage: 'Save',
                         })}
@@ -178,7 +171,6 @@ const ReleasesSettingsPage = () => {
                   }
                   title={releasePageTitle}
                   subtitle={formatMessage({
-                    // OK
                     id: 'content-releases.pages.Settings.releases.description',
                     defaultMessage: 'Create and manage content updates',
                   })}
@@ -195,7 +187,6 @@ const ReleasesSettingsPage = () => {
                   >
                     <Typography variant="delta" tag="h2">
                       {formatMessage({
-                        // OK
                         id: 'content-releases.pages.Settings.releases.preferences.title',
                         defaultMessage: 'Preferences',
                       })}
@@ -230,7 +221,6 @@ const TimezoneDropdown = () => {
     <Field.Root
       name="defaultTimezone"
       hint={formatMessage({
-        // OK
         id: 'content-releases.pages.Settings.releases.timezone.hint',
         defaultMessage: 'The timezone of every release can still be changed individually.',
       })}
@@ -238,7 +228,6 @@ const TimezoneDropdown = () => {
     >
       <Field.Label>
         {formatMessage({
-          // OK
           id: 'content-releases.pages.Settings.releases.timezone.label',
           defaultMessage: 'Default timezone',
         })}
