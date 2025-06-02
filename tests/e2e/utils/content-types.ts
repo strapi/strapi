@@ -3,6 +3,7 @@ import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
 import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
+import { rowHeight } from '@strapi/admin/admin/src/pages/Settings/pages/Roles/utils/constants';
 
 export interface AddAttribute {
   type: string;
@@ -166,7 +167,7 @@ export const typeMap = {
   relation: { buttonName: 'Relation', listLabel: 'Relation' },
   markdown: { buttonName: 'Rich text (Markdown)', listLabel: 'Rich text (Markdown)' },
   component: { buttonName: 'Component', listLabel: 'Component' },
-  component_repeatable: { buttonName: 'Component', listLabel: 'Component (repeatable)' },
+  component_repeatable: { buttonName: 'Component', listLabel: 'Repeatable Component' },
   dz: { buttonName: 'Dynamic Zone', listLabel: 'Dynamic Zone' },
 };
 
@@ -584,7 +585,7 @@ export const addAttributes = async (
     if (i < attributes.length - 1) {
       if (options?.fromDz) {
         // Locate the row containing the DZ name
-        const dzRow = page.locator('tr').filter({ hasText: options.fromDz }).first();
+        const dzRow = page.locator('div').filter({ hasText: options.fromDz }).first();
 
         // Locate the next sibling row and find the "Add a component" button
         const nextRow = dzRow.locator('xpath=following-sibling::tr[1]');
@@ -624,13 +625,14 @@ const saveAndVerifyContent = async (
   for (let i = 0; i < options.attributes.length; i++) {
     const attribute = options.attributes[i];
     const name = attribute.name || attribute.component?.options.name;
-    const typeCell = await findByRowColumn(page, name, 'Type');
+    const row = await page.getByLabel(name);
 
     if (!getAttributeIdentifiers(attribute).buttonName) {
       throw new Error('unknown type ' + attribute.type);
     }
 
-    await expect(typeCell).toContainText(getAttributeIdentifiers(attribute).listLabel, {
+    const { listLabel } = getAttributeIdentifiers(attribute);
+    await expect(row).toContainText(listLabel, {
       ignoreCase: true,
     });
   }
@@ -644,6 +646,9 @@ export const createComponent = async (page: Page, options: CreateComponentOption
   await fillCreateComponent(page, options);
 
   await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add new field' }).first());
+
   await addAttributes(page, options.attributes, { contentTypeName: options.name });
 
   await saveAndVerifyContent(page, options);
@@ -663,7 +668,7 @@ const createContentType = async (
   await page.getByRole('button', { name: buttonName }).click();
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
-  const displayName = page.getByLabel('Name');
+  const displayName = page.getByLabel('Display name');
   await displayName.fill(name);
 
   const singularIdField = page.getByLabel('API ID (Singular)');
@@ -679,6 +684,9 @@ const createContentType = async (
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add new field' }).first());
+
   await addAttributes(page, options.attributes, { contentTypeName: name });
 
   await saveAndVerifyContent(page, options);
@@ -749,6 +757,7 @@ export const deleteComponent = async (page: Page, componentName: string) => {
   // need to accept the browser modal
   page.on('dialog', (dialog) => dialog.accept());
   await clickAndWait(page, page.getByRole('button', { name: 'Delete', exact: true }));
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 
   await waitForRestart(page);
 };
