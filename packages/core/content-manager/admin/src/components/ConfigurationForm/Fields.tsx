@@ -33,6 +33,8 @@ import type { EditLayout } from '../../hooks/useDocumentLayout';
 type FormField = ConfigurationFormData['layout'][number]['children'][number];
 type Field = Omit<ConfigurationFormData['layout'][number]['children'][number], '__temp_key__'>;
 
+const GRID_COLUMNS = 12;
+
 /* -------------------------------------------------------------------------------------------------
  * Drag and Drop
  * -----------------------------------------------------------------------------------------------*/
@@ -132,7 +134,7 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
       .map((row) => {
         const totalSpaceTaken = row.children.reduce((acc, curr) => acc + curr.size, 0);
 
-        if (totalSpaceTaken < 12) {
+        if (totalSpaceTaken < GRID_COLUMNS) {
           const [spacerKey] = generateNKeysBetweenImpl(
             row.children.at(-1)?.__temp_key__,
             undefined,
@@ -145,7 +147,7 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
               ...row.children,
               {
                 name: TEMP_FIELD_NAME,
-                size: 12 - totalSpaceTaken,
+                size: GRID_COLUMNS - totalSpaceTaken,
                 __temp_key__: spacerKey,
               } satisfies EditFieldSpacerLayout,
             ],
@@ -222,7 +224,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
     if (!existingFields.includes(name) && visible === true) {
       const type = attributes[name]?.type;
-      const size = type ? fieldSizes[type] : 12;
+      const size = type ? fieldSizes[type] : GRID_COLUMNS;
 
       acc.push({
         ...field,
@@ -258,6 +260,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         const containersAsDictionary = Object.fromEntries(
           containers.map((container) => [container.dndId, container])
         );
+
         const activeContainer = findContainer(event.active.id, containersAsDictionary);
 
         if (!activeContainer) return;
@@ -303,7 +306,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         if (!draggedItem) return;
 
         // Handle a full width field being dragged
-        if (draggedItem?.size === 12) {
+        if (draggedItem?.size === GRID_COLUMNS) {
           // Move the item and its container
           const update = arrayMove(containers, activeContainerIndex, overContainerIndex);
           setContainers(update);
@@ -328,7 +331,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           }, 0);
 
           // Check the sizes of the children, if there is no room, exit
-          if (spaceTaken + draggedItem.size > 12) {
+          if (spaceTaken + draggedItem.size > GRID_COLUMNS) {
             // Leave the item where it started
             draft[activeContainerIndex].children = containers[activeContainerIndex].children;
             return;
