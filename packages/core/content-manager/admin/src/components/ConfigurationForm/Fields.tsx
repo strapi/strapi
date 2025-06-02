@@ -71,7 +71,72 @@ export const SortableItem = ({ id, children }: { id: string; children: React.Rea
   );
 };
 
-const useDndContainers = (layout: ConfigurationFormData['layout']) => {
+/* -------------------------------------------------------------------------------------------------
+ * Fields
+ * -----------------------------------------------------------------------------------------------*/
+
+interface FieldsProps extends Pick<EditLayout, 'metadatas'>, Pick<FieldProps, 'components'> {
+  attributes: {
+    [key: string]: FieldProps['attribute'];
+  };
+  fieldSizes: Record<string, number>;
+  components: EditLayout['components'];
+}
+
+const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
+  const { formatMessage } = useIntl();
+
+  const layout = useForm<ConfigurationFormData['layout']>(
+    'Fields',
+    (state) => state.values.layout ?? []
+  );
+
+  const onChange = useForm('Fields', (state) => state.onChange);
+  const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
+  const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
+
+  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
+
+  /**
+   * Get the fields that are not already in the layout
+   * But also check that they are visible before we give users
+   * the option to display them. e.g. `id` is not visible.
+   */
+  const remainingFields = Object.entries(metadatas).reduce<Field[]>((acc, current) => {
+    const [name, { visible, ...field }] = current;
+
+    if (!existingFields.includes(name) && visible === true) {
+      const type = attributes[name]?.type;
+      const size = type ? fieldSizes[type] : GRID_COLUMNS;
+
+      acc.push({
+        ...field,
+        label: field.label ?? name,
+        name,
+        size,
+      });
+    }
+
+    return acc;
+  }, []);
+
+  const handleRemoveField =
+    (rowIndex: number, fieldIndex: number): FieldProps['onRemoveField'] =>
+    () => {
+      if (layout[rowIndex].children.length === 1) {
+        removeFieldRow(`layout`, rowIndex);
+      } else {
+        onChange(`layout.${rowIndex}.children`, [
+          ...layout[rowIndex].children.slice(0, fieldIndex),
+          ...layout[rowIndex].children.slice(fieldIndex + 1),
+        ]);
+      }
+    };
+
+  const handleAddField = (field: Field) => () => {
+    addFieldRow('layout', { children: [field] });
+  };
+
   /**
    * Compute uids and formName for drag and drop items for the incoming layout
    */
@@ -103,12 +168,12 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
     id: UniqueIdentifier,
     containersAsDictionary: Record<string, (typeof containers)[number]>
   ) {
-    // If the key is at the root level, it is the container
+    // If the id is a key, then it is the parent container
     if (id in containersAsDictionary) {
       return id;
     }
 
-    // Otherwise, it is a child of a container
+    // Otherwise, it is a child inside a container
     return Object.keys(containersAsDictionary).find((key) =>
       containersAsDictionary[key].children.find((child) => child.dndId === id)
     );
@@ -165,94 +230,7 @@ const useDndContainers = (layout: ConfigurationFormData['layout']) => {
   React.useEffect(() => {
     const containers = createDragAndDropContainersFromLayout(layout);
     setContainers(containers);
-  }, [layout, createDragAndDropContainersFromLayout]);
-
-  return {
-    containers,
-    setContainers,
-    activeDragItem,
-    setActiveDragItem,
-    findContainer,
-    getItemFromContainer,
-    createContainersWithSpacers,
-  };
-};
-
-/* -------------------------------------------------------------------------------------------------
- * Fields
- * -----------------------------------------------------------------------------------------------*/
-
-interface FieldsProps extends Pick<EditLayout, 'metadatas'>, Pick<FieldProps, 'components'> {
-  attributes: {
-    [key: string]: FieldProps['attribute'];
-  };
-  fieldSizes: Record<string, number>;
-  components: EditLayout['components'];
-}
-
-const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
-  const { formatMessage } = useIntl();
-
-  const layout = useForm<ConfigurationFormData['layout']>(
-    'Fields',
-    (state) => state.values.layout ?? []
-  );
-
-  const onChange = useForm('Fields', (state) => state.onChange);
-  const addFieldRow = useForm('Fields', (state) => state.addFieldRow);
-  const removeFieldRow = useForm('Fields', (state) => state.removeFieldRow);
-
-  const {
-    containers,
-    activeDragItem,
-    setActiveDragItem,
-    findContainer,
-    getItemFromContainer,
-    setContainers,
-    createContainersWithSpacers,
-  } = useDndContainers(layout);
-
-  const existingFields = layout.map((row) => row.children.map((field) => field.name)).flat();
-
-  /**
-   * Get the fields that are not already in the layout
-   * But also check that they are visible before we give users
-   * the option to display them. e.g. `id` is not visible.
-   */
-  const remainingFields = Object.entries(metadatas).reduce<Field[]>((acc, current) => {
-    const [name, { visible, ...field }] = current;
-
-    if (!existingFields.includes(name) && visible === true) {
-      const type = attributes[name]?.type;
-      const size = type ? fieldSizes[type] : GRID_COLUMNS;
-
-      acc.push({
-        ...field,
-        label: field.label ?? name,
-        name,
-        size,
-      });
-    }
-
-    return acc;
-  }, []);
-
-  const handleRemoveField =
-    (rowIndex: number, fieldIndex: number): FieldProps['onRemoveField'] =>
-    () => {
-      if (layout[rowIndex].children.length === 1) {
-        removeFieldRow(`layout`, rowIndex);
-      } else {
-        onChange(`layout.${rowIndex}.children`, [
-          ...layout[rowIndex].children.slice(0, fieldIndex),
-          ...layout[rowIndex].children.slice(fieldIndex + 1),
-        ]);
-      }
-    };
-
-  const handleAddField = (field: Field) => () => {
-    addFieldRow('layout', { children: [field] });
-  };
+  }, [layout, createDragAndDropContainersFromLayout, setContainers]);
 
   return (
     <DndContext
