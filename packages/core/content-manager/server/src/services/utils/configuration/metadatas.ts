@@ -103,11 +103,6 @@ async function syncMetadatas(configuration: any, schema: any) {
     const attr = schema.attributes[key];
 
     const updatedMeta = { edit, list };
-    if (key === 'documentId') {
-      _.set(updatedMeta, ['edit'], {});
-      _.set(acc, [key], updatedMeta);
-      return acc;
-    }
 
     // update sortable attr
     if (list.sortable && !isSortable(schema, key)) {
