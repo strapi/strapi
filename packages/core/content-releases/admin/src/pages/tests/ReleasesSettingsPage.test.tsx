@@ -208,7 +208,7 @@ describe('Releases Settings page', () => {
     fireEvent.click(saveButton);
 
     // Wait for the error message
-    const errorMessage = await screen.findAllByText('The value provided is not valid.');
+    const errorMessage = await screen.findAllByText('The value provided is not valid');
     expect(errorMessage).toHaveLength(2);
   });
 });

@@ -54,19 +54,15 @@ const ReleasesSettingsPage = () => {
     { setErrors }: FormHelpers<UpdateDefaultTimezone>
   ) => {
     const { defaultTimezone } = body;
-    const formattedDefaultTimezone = defaultTimezone?.replace(/ /, '&');
+    const formattedDefaultTimezone = defaultTimezone;
     const isBodyTimezoneValid = timezoneList.some(
       (timezone) => timezone.value === formattedDefaultTimezone
     );
-    const newBody =
-      !defaultTimezone || !isBodyTimezoneValid
-        ? { defaultTimezone: null }
-        : { defaultTimezone: formattedDefaultTimezone };
 
     if (!isBodyTimezoneValid && defaultTimezone) {
       const errorMessage = formatMessage({
         id: 'components.Input.error.validation.combobox.invalid',
-        defaultMessage: 'The value provided is not valid.',
+        defaultMessage: 'The value provided is not valid',
       });
       setErrors({
         defaultTimezone: errorMessage,
@@ -77,6 +73,11 @@ const ReleasesSettingsPage = () => {
       });
       return;
     }
+
+    const newBody =
+      !defaultTimezone || !isBodyTimezoneValid
+        ? { defaultTimezone: null }
+        : { defaultTimezone: formattedDefaultTimezone };
 
     try {
       const response = await updateReleaseSettings(newBody);
@@ -235,6 +236,11 @@ const TimezoneDropdown = () => {
       <Combobox
         autocomplete={{ type: 'list', filter: 'contains' }}
         onTextValueChange={(value) => field.onChange('defaultTimezone', value)}
+        onChange={(value) => {
+          if ((field.value && value) || !field.value) {
+            field.onChange('defaultTimezone', value);
+          }
+        }}
         onClear={() => field.onChange('defaultTimezone', '')}
         value={field.value}
         disabled={!canUpdate}
