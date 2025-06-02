@@ -93,6 +93,7 @@ export const extractCredentials = (options: InitOptions): AwsCredentialIdentity 
     return {
       accessKeyId: options.s3Options.credentials.accessKeyId,
       secretAccessKey: options.s3Options.credentials.secretAccessKey,
+      sessionToken: options.s3Options.credentials.sessionToken,
     };
   }
   return null;
