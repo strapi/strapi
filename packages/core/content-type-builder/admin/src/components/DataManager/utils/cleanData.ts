@@ -69,9 +69,8 @@ const stateToRequestData = ({
     })
     .map((component) => {
       const requestFormattedComponent = formatTypeForRequest(component);
-      // Derive event action from request action or status for counting
-      const eventAction = requestFormattedComponent.action as 'create' | 'update' | 'delete';
 
+      const eventAction = requestFormattedComponent.action as 'create' | 'update' | 'delete';
       updateEventCounts(
         { ...component, action: eventAction },
         trackingEventProperties,
@@ -87,9 +86,8 @@ const stateToRequestData = ({
     })
     .map((contentType) => {
       const requestFormattedContentType = formatTypeForRequest(contentType);
-      // Derive event action from request action or status for counting
-      const eventAction = requestFormattedContentType.action as 'create' | 'update' | 'delete';
 
+      const eventAction = requestFormattedContentType.action as 'create' | 'update' | 'delete';
       updateEventCounts(
         { ...contentType, action: eventAction },
         trackingEventProperties,

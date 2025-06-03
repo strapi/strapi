@@ -443,12 +443,6 @@ export interface UseTrackingReturn {
  * ```
  */
 
-const logger = (...args: unknown[]) => {
-  console.log('Tracking', ...args);
-};
-
-const logForEvents = ['didUpdateCTBSchema'];
-
 const useTracking = (): UseTrackingReturn => {
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
@@ -458,13 +452,7 @@ const useTracking = (): UseTrackingReturn => {
       event: TEvent['name'],
       properties?: TEvent['properties']
     ) => {
-      const doLog = logForEvents.includes(event);
       try {
-        if (doLog) {
-          logger('event', event);
-          logger('properties', properties);
-        }
-
         if (uuid && !window.strapi.telemetryDisabled) {
           const res = await axios.post<string>(
             'https://analytics.strapi.io/api/v2/track',
