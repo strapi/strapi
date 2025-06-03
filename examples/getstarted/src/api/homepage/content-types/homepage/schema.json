@@ -35,6 +35,12 @@
         }
       }
     },
+    "mediaType": {
+      "type": "enumeration",
+      "enum": ["multiple", "single"],
+      "default": "multiple",
+      "required": true
+    },
     "single": {
       "type": "media",
       "multiple": false,
@@ -49,11 +55,7 @@
           ]
         }
       },
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ]
+      "allowedTypes": ["images", "files", "videos"]
     },
     "multiple": {
       "type": "media",
@@ -69,19 +71,7 @@
           ]
         }
       },
-      "allowedTypes": [
-        "images",
-        "videos"
-      ]
-    },
-    "mediaType": {
-      "type": "enumeration",
-      "enum": [
-        "multiple",
-        "single"
-      ],
-      "default": "multiple",
-      "required": true
+      "allowedTypes": ["images", "videos"]
     }
   }
 }

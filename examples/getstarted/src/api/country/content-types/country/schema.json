@@ -29,7 +29,7 @@
     },
     "code": {
       "type": "string",
-      "required":true,
+      "required": true,
       "maxLength": 3,
       "unique": true,
       "minLength": 2,
