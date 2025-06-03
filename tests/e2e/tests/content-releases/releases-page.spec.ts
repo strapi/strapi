@@ -171,6 +171,8 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(ctbConfirmationDialog).toBeVisible();
     await ctbConfirmationDialog.getByRole('button', { name: /disable/i }).click();
     await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
 
     // Go to the content manager and bulk select articlesto make sure the "add to release" does not show up
