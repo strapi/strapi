@@ -21,6 +21,11 @@ jest.mock('../../../../../src/services/admin', () => ({
 }));
 
 describe('FreeTrialEndedModal', () => {
+  beforeEach(() => {
+    localStorage.removeItem('STRAPI_FREE_TRIAL_ENDS_AT');
+    localStorage.removeItem('STRAPI_FREE_TRIAL_ENDED_MODAL');
+  });
+
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(2025, 4, 22));
@@ -30,12 +35,37 @@ describe('FreeTrialEndedModal', () => {
     jest.useRealTimers();
   });
 
-  it('should render when license is trial and trial ended', async () => {
+  it('should render when trial ended less than 7 days ago and modal never appeared before', async () => {
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT', '2025-05-21T09:50:00.000Z');
+
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({
+      license: {
+        isTrial: false,
+      },
+    }));
+
     render(<FreeTrialEndedModal />);
 
     await waitFor(() => {
       expect(screen.getByText('Your trial has ended')).toBeInTheDocument();
     });
+  });
+
+  it('should not render when trial ended less than 7 days ago but modal already appeared before', async () => {
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDS_AT', '2025-05-21T09:50:00.000Z');
+    localStorage.setItem('STRAPI_FREE_TRIAL_ENDED_MODAL', 'true');
+
+    // @ts-expect-error – mock
+    useLicenseLimits.mockImplementationOnce(() => ({
+      license: {
+        isTrial: false,
+      },
+    }));
+
+    render(<FreeTrialEndedModal />);
+
+    expect(screen.queryByText('Your trial has ended')).not.toBeInTheDocument();
   });
 
   it('should not render when license is not trial', async () => {
