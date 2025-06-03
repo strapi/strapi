@@ -57,9 +57,17 @@ export const FreeTrialEndedModal = () => {
     setOpen(false);
   };
 
+  const handleOnOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setPreviouslyOpen(true);
+    }
+
+    setOpen(isOpen);
+  };
+
   if (!previouslyOpen && isTrialEndedRecently) {
     return (
-      <Modal.Root open={open} onOpenChange={setOpen}>
+      <Modal.Root open={open} onOpenChange={handleOnOpenChange}>
         <StyledModalContent aria-labelledby="title">
           <StyledModalBody>
             <Box position="absolute" top={0} right={0} padding={2}>
