@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useLicenseLimits } from '../../../../../ee/admin/src/hooks/useLicenseLimits';
 import { SubNav } from '../../../components/SubNav';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
@@ -22,6 +23,17 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
+  const { license } = useLicenseLimits();
+
+  const availableFeatureNames = license?.features.map((feature) => feature.name);
+
+  const linksIdsToLicenseFeaturesNames = {
+    'content-releases': 'cms-content-releases',
+    'review-workflows': 'review-workflows',
+    sso: 'sso',
+    auditLogs: 'audit-logs',
+    'auditLogs-purchase-page': 'audit-logs',
+  };
 
   const filteredMenu = menu.filter(
     (section) => !section.links.every((link) => link.isDisplayed === false)
@@ -67,7 +79,19 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                   endAction={
                     <>
                       {link?.licenseOnly && (
-                        <Lightning fill="primary600" width="1.5rem" height="1.5rem" />
+                        <Lightning
+                          fill={
+                            (availableFeatureNames || []).includes(
+                              linksIdsToLicenseFeaturesNames[
+                                link.id as keyof typeof linksIdsToLicenseFeaturesNames
+                              ] as keyof typeof availableFeatureNames
+                            )
+                              ? 'primary600'
+                              : 'neutral300'
+                          }
+                          width="1.5rem"
+                          height="1.5rem"
+                        />
                       )}
                       {link?.hasNotification && (
                         <StyledBadge

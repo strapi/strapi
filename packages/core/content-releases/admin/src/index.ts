@@ -67,6 +67,7 @@ const admin: Plugin.Config.AdminInput = {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
+        licenseOnly: true,
         permissions: [],
         async Component() {
           const { ProtectedReleasesSettingsPage } = await import('./pages/ReleasesSettingsPage');
