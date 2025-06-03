@@ -89,6 +89,7 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
       middlewareMode: true,
       open: ctx.options.open,
       hmr: {
+        overlay: false,
         server: ctx.options.hmrServer,
         clientPort: ctx.options.hmrClientPort,
       },
