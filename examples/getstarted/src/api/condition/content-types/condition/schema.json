@@ -25,7 +25,17 @@
       }
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "isActive"
+            },
+            false
+          ]
+        }
+      }
     },
     "salary": {
       "type": "integer",
@@ -44,34 +54,19 @@
       "type": "enumeration",
       "conditions": {
         "visible": {
-          "!=": [
+          "==": [
             {
-              "var": "another_bool"
+              "var": "roles"
             },
-            false
+            "healer"
           ]
         }
       },
       "enum": [
-        "bonnie",
-        "clyde",
-        "watts",
-        "white"
+        "healer",
+        "dps",
+        "tank"
       ]
-    },
-    "another_bool": {
-      "type": "boolean",
-      "conditions": {
-        "visible": {
-          "==": [
-            {
-              "var": "isActive"
-            },
-            false
-          ]
-        }
-      },
-      "required": true
     }
   }
 }

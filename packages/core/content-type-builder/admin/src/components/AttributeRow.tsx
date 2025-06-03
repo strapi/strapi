@@ -217,7 +217,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                   repeatable={'repeatable' in item && item.repeatable}
                   multiple={'multiple' in item && item.multiple}
                 />
-                {'conditions' in item &&
+                {/* {'conditions' in item &&
                   item.conditions &&
                   Object.keys(item.conditions).length > 0 && (
                     <Typography
@@ -235,7 +235,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                     >
                       Conditional
                     </Typography>
-                  )}
+                  )} */}
                 {item.type === 'relation' && (
                   <>
                     &nbsp;({getRelationType(item.relation, item.targetAttribute)})&nbsp;

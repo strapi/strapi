@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { createRulesEngine, type Condition } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -9,8 +10,9 @@ import {
   Field,
   SingleSelect,
   SingleSelectOption,
+  Button,
 } from '@strapi/design-system';
-import { Trash } from '@strapi/icons';
+import { Trash, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils/getTrad';
@@ -71,14 +73,25 @@ const convertToJsonLogic = (value: LocalValue): JsonLogicValue | null => {
     return null;
   }
 
-  const operator = value.operator === 'is' ? '==' : '!=';
-  const action = value.action === 'show' ? '==' : '!=';
-
-  return {
-    visible: {
-      [action]: [{ var: value.dependsOn }, value.value],
-    },
+  const rulesEngine = createRulesEngine();
+  const condition: Condition = {
+    dependsOn: value.dependsOn,
+    operator: value.operator,
+    value: value.value,
   };
+
+  try {
+    rulesEngine.validate(condition);
+    const action = value.action === 'show' ? '==' : '!=';
+    return {
+      visible: {
+        [action]: [{ var: value.dependsOn }, value.value],
+      },
+    };
+  } catch (error) {
+    console.error('Invalid condition:', error);
+    return null;
+  }
 };
 
 export const ConditionForm = ({
@@ -91,6 +104,7 @@ export const ConditionForm = ({
 }: ConditionFormProps) => {
   const { formatMessage } = useIntl();
   const [localValue, setLocalValue] = React.useState<LocalValue>(convertFromJsonLogic(value));
+  const hasCondition = Boolean(value?.visible);
 
   // Add safety check for conditionFields
   if (!Array.isArray(conditionFields)) {
@@ -99,6 +113,38 @@ export const ConditionForm = ({
 
   const selectedField = conditionFields.find((field) => field.name === localValue.dependsOn);
   const isEnumField = selectedField?.type === 'enumeration';
+
+  const handleApplyCondition = () => {
+    const initialValue: LocalValue = {
+      dependsOn: '',
+      operator: 'is',
+      value: '',
+      action: 'show',
+    };
+    setLocalValue(initialValue);
+    onChange({
+      target: {
+        name,
+        value: convertToJsonLogic(initialValue),
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    setLocalValue({
+      dependsOn: '',
+      operator: 'is',
+      value: '',
+      action: 'show',
+    });
+    onChange({
+      target: {
+        name,
+        value: null,
+      },
+    });
+    onDelete();
+  };
 
   const handleFieldChange = (fieldName: string | number) => {
     const newValue = fieldName?.toString() || '';
@@ -182,6 +228,19 @@ export const ConditionForm = ({
     }
   };
 
+  if (!hasCondition) {
+    return (
+      <Box padding={4} hasRadius background="neutral0" borderColor="neutral200">
+        <Button onClick={handleApplyCondition} startIcon={<Plus />} variant="secondary" fullWidth>
+          {formatMessage({
+            id: getTrad('form.attribute.condition.apply'),
+            defaultMessage: 'Apply condition',
+          })}
+        </Button>
+      </Box>
+    );
+  }
+
   return (
     <Box padding={4} hasRadius background="neutral0" borderColor="neutral200">
       <Flex justifyContent="space-between" alignItems="center" marginBottom={4}>
@@ -189,7 +248,7 @@ export const ConditionForm = ({
           Condition for <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
         </Typography>
         <IconButton
-          onClick={onDelete}
+          onClick={handleDelete}
           label={formatMessage({
             id: getTrad('form.button.delete'),
             defaultMessage: 'Delete',
@@ -205,7 +264,7 @@ export const ConditionForm = ({
       </Box>
       <Grid.Root gap={4}>
         <Grid.Item col={4}>
-          <Field.Root name={`${name}.field`} required>
+          <Field.Root name={`${name}.field`}>
             <SingleSelect
               value={localValue.dependsOn}
               onChange={handleFieldChange}
@@ -223,7 +282,7 @@ export const ConditionForm = ({
           </Field.Root>
         </Grid.Item>
         <Grid.Item col={4}>
-          <Field.Root name={`${name}.operator`} required>
+          <Field.Root name={`${name}.operator`}>
             <SingleSelect
               value={localValue.operator}
               onChange={handleOperatorChange}
@@ -249,7 +308,7 @@ export const ConditionForm = ({
           </Field.Root>
         </Grid.Item>
         <Grid.Item col={4}>
-          <Field.Root name={`${name}.value`} required>
+          <Field.Root name={`${name}.value`}>
             <SingleSelect
               value={localValue.value?.toString() || ''}
               onChange={handleValueChange}
@@ -291,7 +350,7 @@ export const ConditionForm = ({
         </Typography>
       </Box>
       <Box paddingTop={2}>
-        <Field.Root name={`${name}.action`} required>
+        <Field.Root name={`${name}.action`}>
           <SingleSelect
             value={localValue.action}
             onChange={handleActionChange}
