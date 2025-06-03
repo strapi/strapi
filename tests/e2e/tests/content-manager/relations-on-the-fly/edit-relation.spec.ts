@@ -8,7 +8,7 @@ const AUTHOR_EDIT_URL =
 
 test.describe('Relations on the fly - Edit a Relation', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('rotf.tar');
     await page.goto('/admin');
     await login({ page });
   });
