@@ -365,6 +365,21 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUpdateCTBSchema {
+  name: 'didUpdateCTBSchema';
+  properties: {
+    newContentTypes: number;
+    editedContentTypes: number;
+    deletedContentTypes: number;
+    newComponents: number;
+    editedComponents: number;
+    deletedComponents: number;
+    newFields: number;
+    editedFields: number;
+    deletedFields: number;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -385,7 +400,8 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidPublishRelease
-  | MediaEvents;
+  | MediaEvents
+  | DidUpdateCTBSchema;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {
@@ -426,15 +442,29 @@ export interface UseTrackingReturn {
  * }
  * ```
  */
+
+const logger = (...args: unknown[]) => {
+  console.log('Tracking', ...args);
+};
+
+const logForEvents = ['didUpdateCTBSchema'];
+
 const useTracking = (): UseTrackingReturn => {
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
+
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
       event: TEvent['name'],
       properties?: TEvent['properties']
     ) => {
+      const doLog = logForEvents.includes(event);
       try {
+        if (doLog) {
+          logger('event', event);
+          logger('properties', properties);
+        }
+
         if (uuid && !window.strapi.telemetryDisabled) {
           const res = await axios.post<string>(
             'https://analytics.strapi.io/api/v2/track',
