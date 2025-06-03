@@ -1,3 +1,4 @@
+import 'global-agent/bootstrap';
 import { isObject } from 'lodash/fp';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
@@ -189,6 +190,9 @@ export default async (opts: CmdOptions) => {
 
     exitWith(0, exitMessageText('transfer'));
   } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore: the key exists...
+    console.error(e, e?.details?.details);
     await strapi.telemetry.send('didDEITSProcessFail', getTransferTelemetryPayload(engine));
     exitWith(1, exitMessageText('transfer', true));
   }
