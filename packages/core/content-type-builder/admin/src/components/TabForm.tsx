@@ -1,4 +1,6 @@
-import { Box, Grid, Typography } from '@strapi/design-system';
+import { useState } from 'react';
+
+import { Box, Grid, Typography, Button, Field } from '@strapi/design-system';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
@@ -29,7 +31,6 @@ export const TabForm = ({
         if (section.items.length === 0) {
           return null;
         }
-
         return (
           <Box key={sectionIndex}>
             {section.sectionTitle && (
@@ -39,6 +40,12 @@ export const TabForm = ({
                 </Typography>
               </Box>
             )}
+            {section.intlLabel && (
+              <Typography variant="pi" textColor="neutral600">
+                {formatMessage(section.intlLabel)}
+              </Typography>
+            )}
+
             <Grid.Root gap={4}>
               {section.items.map((input: any, i: number) => {
                 const key = `${sectionIndex}.${i}`;
@@ -89,6 +96,111 @@ export const TabForm = ({
                   );
                 }
 
+                // Special handling for 'condition-form'
+                if (input.type === 'condition-form') {
+                  const currentCondition = get(modifiedData, input.name);
+
+                  // Get all attributes from the content type schema
+                  const contentTypeAttributes =
+                    genericInputProps.contentTypeSchema?.attributes || [];
+
+                  // Ensure we have a valid contentTypeSchema before proceeding
+                  if (!genericInputProps.contentTypeSchema) {
+                    console.warn('contentTypeSchema is undefined, skipping condition form');
+                    return null;
+                  }
+
+                  // Filter for boolean and enumeration fields only
+                  const availableFields = contentTypeAttributes
+                    .filter((attr: any) => {
+                      // Only allow boolean and enumeration fields
+                      return attr.type === 'boolean' || attr.type === 'enumeration';
+                    })
+                    .map((attr: any) => ({
+                      name: attr.name,
+                      type: attr.type,
+                      enum: attr.type === 'enumeration' ? attr.enum : undefined,
+                    }));
+
+                  // Helper to format the condition for display
+                  const formatCondition = (condition: any) => {
+                    if (!condition?.visible) {
+                      return '';
+                    }
+
+                    const [[operator, conditions]] = Object.entries(condition.visible);
+                    const [fieldVar, value] = conditions as [{ var: string }, any];
+
+                    const dependsOnField = availableFields.find(
+                      (field: { name: string }) => field.name === fieldVar.var
+                    );
+                    const dependsOnFieldName = dependsOnField ? dependsOnField.name : fieldVar.var;
+
+                    const operatorText = operator === '==' ? 'is' : 'is not';
+                    const valueText = String(value);
+                    const actionText = operator === '==' ? 'Show' : 'Hide';
+                    const attributeDisplayName =
+                      genericInputProps.attributeName || modifiedData.name;
+
+                    return `If ${dependsOnFieldName} ${operatorText} ${valueText}, then ${actionText} ${attributeDisplayName}`;
+                  };
+
+                  return (
+                    <Grid.Item
+                      col={input.size || 12}
+                      key={input.name || key}
+                      direction="column"
+                      alignItems="stretch"
+                    >
+                      {!currentCondition || Object.keys(currentCondition).length === 0 ? (
+                        <Box>
+                          {currentCondition && Object.keys(currentCondition).length > 0 && (
+                            <Typography variant="sigma" textColor="neutral800" marginBottom={2}>
+                              {formatCondition(currentCondition)}
+                            </Typography>
+                          )}
+                          <Button
+                            marginTop={
+                              currentCondition && Object.keys(currentCondition).length > 0 ? 0 : 4
+                            }
+                            fullWidth={true}
+                            variant="secondary"
+                            onClick={() => {
+                              // This button should only appear if there's no condition
+                              // Clicking it should probably add a default condition structure
+                              // For now, we can log or handle as needed, but toggling state is removed
+                              onChange({
+                                target: {
+                                  name: input.name,
+                                  value: { visible: { '==': [{ var: '' }, ''] } },
+                                },
+                              });
+                            }}
+                            startIcon={<span aria-hidden>＋</span>}
+                          >
+                            {formatMessage({
+                              id: 'form.attribute.condition.apply',
+                              defaultMessage: 'Apply condition',
+                            })}
+                          </Button>
+                        </Box>
+                      ) : (
+                        <GenericInput
+                          {...input}
+                          {...genericInputProps}
+                          error={errorId}
+                          onChange={onChange}
+                          value={value}
+                          autoFocus={i === 0}
+                          attributeName={modifiedData.name}
+                          conditionFields={availableFields}
+                        />
+                      )}
+                    </Grid.Item>
+                  );
+                }
+
+                // Default rendering for all other input types
                 return (
                   <Grid.Item
                     col={input.size || 6}

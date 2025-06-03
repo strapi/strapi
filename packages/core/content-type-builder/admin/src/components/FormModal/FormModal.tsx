@@ -44,6 +44,7 @@ import { SingularName } from '../SingularName';
 import { TabForm } from '../TabForm';
 import { TextareaEnum } from '../TextareaEnum';
 
+import { ConditionForm } from './attributes/ConditionForm';
 import { forms } from './forms/forms';
 import { actions, initialState, type State as FormModalState } from './reducer';
 import { canEditContentType } from './utils/canEditContentType';
@@ -400,7 +401,7 @@ export const FormModal = () => {
     ({
       target: { name, value, type, ...rest },
     }: {
-      target: { name: string; value: string; type: string };
+      target: { name: string; value: string | string[]; type: string };
     }) => {
       const namesThatCanResetToNullValue = [
         'enumName',
@@ -416,6 +417,9 @@ export const FormModal = () => {
 
       if (namesThatCanResetToNullValue.includes(name) && value === '') {
         val = null;
+      } else if (name === 'enum') {
+        // For enum values, ensure we're working with an array
+        val = Array.isArray(value) ? value : [value];
       } else {
         val = value;
       }
@@ -462,6 +466,10 @@ export const FormModal = () => {
           errors: {},
         })
       );
+
+      // Add logging for condition data
+      console.log('FormModal handleSubmit - modifiedData:', modifiedData);
+      console.log('FormModal handleSubmit - conditions:', modifiedData.conditions);
 
       sendButtonAddMoreFieldEvent(shouldContinue);
 
@@ -929,6 +937,7 @@ export const FormModal = () => {
       'text-plural': PluralName,
       'text-singular': SingularName,
       'textarea-enum': TextareaEnum,
+      'condition-form': ConditionForm,
       ...inputsFromPlugins,
     },
     componentToCreate,
@@ -942,7 +951,15 @@ export const FormModal = () => {
     isCreating,
     targetUid,
     forTarget,
+    contentTypeSchema: type,
   };
+
+  // eslint-disable-next-line no-console
+  console.log('FormModal genericInputProps:', {
+    contentTypeSchema: type,
+    modifiedData,
+    forTarget,
+  });
 
   const advancedForm = formToDisplay.advanced({
     data: modifiedData,

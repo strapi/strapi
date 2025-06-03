@@ -12,16 +12,58 @@
   "pluginOptions": {},
   "attributes": {
     "isActive": {
-      "type": "boolean"
+      "type": "boolean",
+      "conditions": {
+        "visible": {
+          "!=": [
+            {
+              "var": "roles"
+            },
+            "bonnie"
+          ]
+        }
+      }
     },
     "name": {
       "type": "string"
     },
-    "role": {
+    "salary": {
+      "type": "integer",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "another_bool"
+            },
+            true
+          ]
+        }
+      }
+    },
+    "roles": {
       "type": "enumeration",
       "conditions": {
         "visible": {
           "!=": [
+            {
+              "var": "another_bool"
+            },
+            false
+          ]
+        }
+      },
+      "enum": [
+        "bonnie",
+        "clyde",
+        "watts",
+        "white"
+      ]
+    },
+    "another_bool": {
+      "type": "boolean",
+      "conditions": {
+        "visible": {
+          "==": [
             {
               "var": "isActive"
             },
@@ -29,24 +71,7 @@
           ]
         }
       },
-      "enum": [
-        "heal",
-        "tank",
-        "dps"
-      ]
-    },
-    "email": {
-      "type": "email",
-      "conditions": {
-        "visible": {
-          "==": [
-            {
-              "var": "role"
-            },
-            "heal"
-          ]
-        }
-      }
+      "required": true
     }
   }
 }

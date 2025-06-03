@@ -217,6 +217,25 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                   repeatable={'repeatable' in item && item.repeatable}
                   multiple={'multiple' in item && item.multiple}
                 />
+                {'conditions' in item &&
+                  item.conditions &&
+                  Object.keys(item.conditions).length > 0 && (
+                    <Typography
+                      variant="sigma"
+                      textColor="neutral600"
+                      backgroundColor="neutral150"
+                      paddingLeft={2}
+                      paddingRight={2}
+                      has
+                      BorderRadius="epsilon"
+                      textTransform="uppercase"
+                      fontSize="0.6rem"
+                      fontWeight="bold"
+                      marginLeft={1}
+                    >
+                      Conditional
+                    </Typography>
+                  )}
                 {item.type === 'relation' && (
                   <>
                     &nbsp;({getRelationType(item.relation, item.targetAttribute)})&nbsp;

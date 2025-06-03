@@ -81,6 +81,8 @@ interface GenericInputProps<
   value?: Schema.Attribute.Value<TAttribute>;
   isNullable?: boolean;
   autoFocus?: boolean;
+  attributeName?: string;
+  conditionFields?: Record<string, boolean>;
 }
 
 const GenericInput = ({
@@ -102,6 +104,8 @@ const GenericInput = ({
   isNullable,
   autoFocus,
   attribute,
+  attributeName,
+  conditionFields,
   ...rest
 }: GenericInputProps) => {
   const { formatMessage } = useIntl();
@@ -201,6 +205,8 @@ const GenericInput = ({
         type={type}
         value={value}
         autoFocus={autoFocus}
+        attributeName={attributeName}
+        conditionFields={conditionFields}
       />
     );
   }
