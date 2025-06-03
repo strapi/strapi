@@ -1,3 +1,4 @@
+import { useForm, createRulesEngine } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -42,6 +43,7 @@ interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
 const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
   const modelUid = document.schema?.uid;
+  const fieldValues = useForm('Fields', (state) => state.values);
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -79,31 +81,50 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
             })}
           >
             <Flex direction="column" alignItems="stretch" gap={6}>
-              {panel.map((row, gridRowIndex) => (
-                <ResponsiveGridRoot key={gridRowIndex} gap={4}>
-                  {row.map(({ size, ...field }) => {
-                    const fieldWithTranslatedLabel = {
-                      ...field,
-                      label: formatMessage({
-                        id: `content-manager.content-types.${modelUid}.${field.name}`,
-                        defaultMessage: field.label,
-                      }),
-                    };
-                    return (
-                      <ResponsiveGridItem
-                        col={size}
-                        key={field.name}
-                        s={12}
-                        xs={12}
-                        direction="column"
-                        alignItems="stretch"
-                      >
-                        <InputRenderer {...fieldWithTranslatedLabel} document={document} />
-                      </ResponsiveGridItem>
-                    );
-                  })}
-                </ResponsiveGridRoot>
-              ))}
+              {panel.map((row, gridRowIndex) => {
+                const visibleFields = row.filter(({ name }) => {
+                  const attribute = document.schema?.attributes[name];
+                  const condition = attribute?.conditions?.visible;
+
+                  if (condition) {
+                    const rulesEngine = createRulesEngine();
+                    return rulesEngine.evaluate(condition, fieldValues);
+                  }
+
+                  return true;
+                });
+
+                if (visibleFields.length === 0) {
+                  return null; // Skip rendering the entire grid row
+                }
+
+                return (
+                  <ResponsiveGridRoot key={gridRowIndex} gap={4}>
+                    {visibleFields.map(({ size, ...field }) => {
+                      const fieldWithTranslatedLabel = {
+                        ...field,
+                        label: formatMessage({
+                          id: `content-manager.content-types.${modelUid}.${field.name}`,
+                          defaultMessage: field.label,
+                        }),
+                      };
+
+                      return (
+                        <ResponsiveGridItem
+                          col={size}
+                          key={field.name}
+                          s={12}
+                          xs={12}
+                          direction="column"
+                          alignItems="stretch"
+                        >
+                          <InputRenderer {...fieldWithTranslatedLabel} document={document} />
+                        </ResponsiveGridItem>
+                      );
+                    })}
+                  </ResponsiveGridRoot>
+                );
+              })}
             </Flex>
           </Box>
         );

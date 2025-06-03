@@ -1,3 +1,4 @@
+import { createRulesEngine } from '@strapi/admin/strapi-admin';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 
@@ -210,11 +211,40 @@ const transformDocument =
     return transformations(document);
   };
 
+/**
+ * Removes values from the data object if their corresponding attribute has a
+ * visibility condition that evaluates to false.
+ *
+ * @param {object} schema - The content type schema (with attributes).
+ * @param {object} data - The data object to filter based on visibility.
+ * @returns {object} A new data object with only visible fields retained.
+ */
+const stripInvisibleAttributes = (data: AnyData, schema?: Schema.ContentType) => {
+  if (!schema || !schema.attributes) return data;
+  const rulesEngine = createRulesEngine();
+  const result = { ...data };
+
+  for (const [attrName, attrDef] of Object.entries(schema.attributes)) {
+    const visibilityCondition = attrDef?.conditions?.visible;
+
+    if (visibilityCondition) {
+      const isVisible = rulesEngine.evaluate(visibilityCondition, data);
+
+      if (!isVisible) {
+        delete result[attrName];
+      }
+    }
+  }
+
+  return result;
+};
+
 export {
   removeProhibitedFields,
   prepareRelations,
   prepareTempKeys,
   removeFieldsThatDontExistOnSchema,
   transformDocument,
+  stripInvisibleAttributes,
 };
 export type { AnyData };

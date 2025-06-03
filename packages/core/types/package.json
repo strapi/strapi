@@ -51,6 +51,7 @@
     "@strapi/permissions": "5.14.0",
     "@strapi/utils": "5.14.0",
     "commander": "8.3.0",
+    "json-logic-js": "2.0.5",
     "koa": "2.15.4",
     "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
@@ -61,6 +62,7 @@
   "devDependencies": {
     "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
+    "@types/json-logic-js": "2.0.8",
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",
     "@types/node-schedule": "2.1.7",
