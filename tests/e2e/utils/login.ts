@@ -28,11 +28,11 @@ export const login = async ({
 
   await page.getByRole('button', { name: 'Login' }).click();
 
-  try {
-    const dialog = page.getByRole('dialog', { name: "We're glad to have you on board" });
-    // Ensure the growth trial banner is closed
+  // Check for dialog with a short timeout
+  const dialog = page.getByRole('dialog', { name: "We're glad to have you on board" });
+  const isDialogVisible = await dialog.isVisible().catch(() => false);
+
+  if (isDialogVisible) {
     await dialog.getByRole('button', { name: 'Close' }).click();
-  } catch (e) {
-    // No dialog found, safe to continue
   }
 };
