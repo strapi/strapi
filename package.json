@@ -163,6 +163,7 @@
     "rimraf": "5.0.5",
     "rollup": "4.27.4",
     "rollup-plugin-html": "0.2.1",
+    "rollup-plugin-postcss": "4.0.2",
     "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
