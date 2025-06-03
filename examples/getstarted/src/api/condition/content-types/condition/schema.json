@@ -1,0 +1,62 @@
+{
+  "kind": "collectionType",
+  "collectionName": "conditions",
+  "info": {
+    "singularName": "condition",
+    "pluralName": "conditions",
+    "displayName": "condition"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "isActive": {
+      "type": "boolean",
+      "conditions": {
+        "visible": {
+          "!=": [
+            {
+              "var": "roles"
+            },
+            "bonnie"
+          ]
+        }
+      }
+    },
+    "name": {
+      "type": "string",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "isActive"
+            },
+            false
+          ]
+        }
+      }
+    },
+    "salary": {
+      "type": "integer"
+    },
+    "roles": {
+      "type": "enumeration",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "roles"
+            },
+            "dps"
+          ]
+        }
+      },
+      "enum": [
+        "healer",
+        "dps",
+        "tank"
+      ]
+    }
+  }
+}

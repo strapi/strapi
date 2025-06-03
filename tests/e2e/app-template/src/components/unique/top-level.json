@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_unique_top_level",
+  "category": "unique",
+  "info": {
+    "displayName": "Top Level",
+    "description": "Contains a nested component with all the possible unique field types."
+  },
+  "attributes": {
+    "nestedUnique": {
+      "type": "component",
+      "repeatable": false,
+      "component": "unique.all",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_page_blocks_hero_images",
+  "info": {
+    "displayName": "Hero Image"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "blocks"
+    },
+    "background_image": {
+      "allowedTypes": ["images", "files", "videos", "audios"],
+      "type": "media",
+      "multiple": false,
+      "required": false
+    }
+  }
+}

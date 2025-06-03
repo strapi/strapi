@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "target": "ES2021",
+    "checkJs": true,
+    "allowJs": true
+  }
+}

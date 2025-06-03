@@ -1,0 +1,30 @@
+name: 'Daily Cron - 00:00'
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  issues: write
+  statuses: read
+
+jobs:
+  cron-tasks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check for inactive issues that can't be reproduced
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          labels: 'status: can not reproduce'
+          inactive-day: 14
+          close-reason: 'completed'
+          body: |
+            Hello!
+
+            As we have not received any new or updated information to reproduce this issue in the last 14 days we are marking this issue as closed. Should you have new information please feel free to respond and we will consider reopening it.
+
+            If anyone else have updated information for this issue, please open up a new bug report and simply reference this closed bug report so that we can get any new information you may have. If you have questions please refer to the [contributor's guide](https://github.com/strapi/strapi/blob/main/CONTRIBUTING.md#reporting-an-issue) on opening issues.
+
+            Thank you and have a great day!

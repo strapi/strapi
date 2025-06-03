@@ -1,0 +1,52 @@
+{
+  "name": "@strapi/typescript-utils",
+  "version": "5.14.0",
+  "description": "Typescript support for Strapi",
+  "keywords": [
+    "strapi",
+    "generators"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git",
+    "directory": "packages/utils/typescript"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./lib/index.js",
+  "types": "index.d.ts",
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "lint": "run -T eslint .",
+    "test": "run -T jest",
+    "test:watch": "run -T jest --watch"
+  },
+  "dependencies": {
+    "chalk": "4.1.2",
+    "cli-table3": "0.6.5",
+    "fs-extra": "11.2.0",
+    "lodash": "4.17.21",
+    "prettier": "3.3.3",
+    "typescript": "5.4.4"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "11.0.4"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  }
+}

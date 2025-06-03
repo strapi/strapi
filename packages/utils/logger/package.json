@@ -1,0 +1,54 @@
+{
+  "name": "@strapi/logger",
+  "version": "5.14.0",
+  "description": "Strapi's logger",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:ts": "run -T tsc --noEmit",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "lodash": "4.17.21",
+    "winston": "3.10.0"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "5.14.0",
+    "tsconfig": "5.14.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "name": "@strapi/database",
+  "version": "5.14.0",
+  "description": "Strapi's database layer",
+  "homepage": "https://strapi.io",
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T  rollup -c",
+    "build:types": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T tsc --noEmit && run -T eslint .",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@paralleldrive/cuid2": "2.2.2",
+    "@strapi/utils": "5.14.0",
+    "ajv": "8.16.0",
+    "date-fns": "2.30.0",
+    "debug": "4.3.4",
+    "fs-extra": "11.2.0",
+    "knex": "3.0.1",
+    "lodash": "4.17.21",
+    "semver": "7.5.4",
+    "umzug": "3.8.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "11.0.4",
+    "eslint-config-custom": "5.14.0",
+    "tsconfig": "5.14.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  }
+}

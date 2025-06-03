@@ -1,0 +1,72 @@
+---
+title: useLicenseLimits
+description: API reference for the useLicenseLimits hook
+tags:
+  - admin
+  - hooks
+  - users
+  - ee
+---
+
+An abstraction around `react-query`'s `useQuery` hook to fetch license limits for a project.
+
+## Usage
+
+```js
+const { license, getFeature, isError, isLoading } = useLicenseLimits(options);
+```
+
+## Options
+
+### `enabled`
+
+Boolean flag which is passed onto react-query indicating whether the license check should be performed. This
+can be useful if e.g. other permissions need to be checked before.
+
+## Result
+
+### `license`
+
+An object that contains the raw admin API response.
+
+### `getFeature(name: string)`
+
+Returns options for a given feature. If the feature was not found, it returns an empty object. This is mostly a
+convenience method, to avoid having to filter the features array on the license object every time.
+
+#### Usage
+
+```
+const { getFeature } = useLicenseLimits();
+
+const reviewWorkflowOptions = getFeature('review-workflows');
+```
+
+## Typescript
+
+```ts
+import { UseQueryResult } from 'react-query';
+
+// Note: the list of attributes might be incomplete
+interface License {
+  enforcementUserCount: number;
+  currentActiveUserCount: number;
+  permittedSeats: number;
+  shouldNotify: boolean;
+  shouldStopCreate: boolean;
+  licenseLimitStatus: 'OVER_LIMIT' | 'AT_LIMIT';
+  isHostedOnStrapiCloud: boolean;
+  features: LicenseFeature[];
+}
+
+interface LicenseFeature {
+  name: string;
+  options?: object;
+}
+
+type Options {
+  enabled?: boolean;
+}
+
+type UseLicenseLimit = (options: Options) => Pick<UseQueryResult, 'isError' | 'isLoading'> & { license: License, getFeature: (name: string) => object }
+```

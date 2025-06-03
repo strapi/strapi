@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "lead_form_submissions",
+  "info": {
+    "singularName": "lead-form-submission",
+    "pluralName": "lead-form-submissions",
+    "displayName": "Lead form submission",
+    "name": "lead-form-submission"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["seen", "contacted", "ignored"]
+    },
+    "location": {
+      "type": "string"
+    }
+  }
+}

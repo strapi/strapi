@@ -1,0 +1,14 @@
+export { default as contentTypes } from './content-types';
+export { default as components } from './components';
+export { default as services } from './services';
+export { default as policies } from './policies';
+export { default as middlewares } from './middlewares';
+export { default as hooks } from './hooks';
+export { default as controllers } from './controllers';
+export { default as modules } from './modules';
+export { default as plugins } from './plugins';
+export { default as customFields } from './custom-fields';
+export { default as apis } from './apis';
+export { default as sanitizers } from './sanitizers';
+export { default as validators } from './validators';
+export { registry as models } from './models';

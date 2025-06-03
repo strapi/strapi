@@ -1,0 +1,544 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
+.c1 {
+  height: 100%;
+}
+
+.c4 {
+  height: 100%;
+  background: #ffffff;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+}
+
+.c6 {
+  position: relative;
+}
+
+.c11 {
+  padding-block-start: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+}
+
+.c14 {
+  padding-block-start: 4px;
+}
+
+.c19 {
+  padding-block-start: 4px;
+  flex-grow: 1;
+}
+
+.c22 {
+  padding-inline-start: 8px;
+  padding-inline-end: 8px;
+  min-width: 20px;
+  background: #eaeaef;
+}
+
+.c29 {
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 4px;
+  bottom: 4px;
+  right: 4px;
+  color: #ffffff;
+  background: #32324d;
+  border-radius: 4px;
+  position: absolute;
+}
+
+.c31 {
+  width: 100%;
+  height: 16.4rem;
+}
+
+.c2 {
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
+.c7 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c12 {
+  align-items: flex-start;
+  flex-direction: row;
+  display: flex;
+}
+
+.c20 {
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c23 {
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c33 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+}
+
+.c15 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c16 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #32324d;
+  font-weight: 600;
+}
+
+.c17 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c26 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+  line-height: 1rem;
+}
+
+.c30 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
+.c34 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c28 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c24 {
+  border-radius: 4px;
+  padding-block: 0.7rem;
+}
+
+.c10 {
+  margin: 0;
+  padding: 0;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.c9 {
+  display: flex;
+  justify-content: center;
+  height: 16.4rem;
+  width: 100%;
+  background: repeating-conic-gradient(#f6f6f9 0% 25%, transparent 0% 50%) 50%/20px 20px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.c21 {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.c25 {
+  margin-left: 4px;
+}
+
+.c13 {
+  word-break: break-all;
+}
+
+.c8 {
+  border-bottom: 1px solid #eaeaef;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+
+.c3 {
+  grid-column: span 12;
+  max-width: 100%;
+}
+
+.c18 {
+  text-transform: uppercase;
+}
+
+.c5 {
+  cursor: pointer;
+}
+
+.c32 {
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(     180deg,     #ffffff 0%,     #f6f6f9 121.48%   );
+}
+
+.c27 canvas,
+.c27 video {
+  display: block;
+  pointer-events: none;
+  max-width: 100%;
+  max-height: 16.4rem;
+}
+
+@media (min-width: 520px) {
+  .c3 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 768px) {
+  .c3 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1080px) {
+  .c3 {
+    grid-column: span 3;
+  }
+}
+
+<div>
+  <div
+    class=""
+  >
+    <div
+      class="c0"
+    >
+      <div
+        class="c1 c2 c3"
+      >
+        <article
+          aria-labelledby=":r0:-title"
+          class="c4 c5"
+          role="button"
+          tabindex="-1"
+        >
+          <div
+            class="c6 c7 c8"
+          >
+            <div
+              class="c9"
+            >
+              <img
+                alt="strapi-cover_1fabc982ce.png"
+                aria-hidden="true"
+                class="c10"
+                src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?updatedAt=2021-09-14T07%3A32%3A50.816Z"
+              />
+            </div>
+          </div>
+          <div
+            class="c11"
+          >
+            <div
+              class="c12"
+            >
+              <div
+                class="c13"
+              >
+                <div
+                  class="c14"
+                >
+                  <h2
+                    class="c15"
+                  >
+                    <span
+                      class="c16"
+                      id=":r0:-title"
+                    >
+                      strapi-cover_1fabc982ce.png
+                    </span>
+                  </h2>
+                </div>
+                <div
+                  class="c17"
+                >
+                  <span
+                    class="c18"
+                  >
+                    png
+                  </span>
+                   - 1066✕551
+                </div>
+              </div>
+              <div
+                class="c19 c20"
+              >
+                <div
+                  class="c21"
+                >
+                  <div
+                    class="c22 c23 c24 c25"
+                  >
+                    <span
+                      class="c26"
+                    >
+                      Image
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div
+        class="c1 c2 c3"
+      >
+        <article
+          aria-labelledby=":r1:-title"
+          class="c4 c5"
+          role="button"
+          tabindex="-1"
+        >
+          <div
+            class="c6 c7 c8"
+          >
+            <div
+              class="c9"
+            >
+              <div
+                class="c27"
+              >
+                <figure
+                  class=""
+                >
+                  <video
+                    crossorigin="anonymous"
+                    src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
+                  >
+                    <source
+                      type="video/mp4"
+                    />
+                  </video>
+                  <figcaption
+                    class="c28"
+                  >
+                    mov_bbb.mp4
+                  </figcaption>
+                </figure>
+              </div>
+            </div>
+            <time
+              class="c29"
+            >
+              <span
+                class="c30"
+              >
+                ...
+              </span>
+            </time>
+          </div>
+          <div
+            class="c11"
+          >
+            <div
+              class="c12"
+            >
+              <div
+                class="c13"
+              >
+                <div
+                  class="c14"
+                >
+                  <h2
+                    class="c15"
+                  >
+                    <span
+                      class="c16"
+                      id=":r1:-title"
+                    >
+                      mov_bbb.mp4
+                    </span>
+                  </h2>
+                </div>
+                <div
+                  class="c17"
+                >
+                  <span
+                    class="c18"
+                  >
+                    mp4
+                  </span>
+                </div>
+              </div>
+              <div
+                class="c19 c20"
+              >
+                <div
+                  class="c21"
+                >
+                  <div
+                    class="c22 c23 c24 c25"
+                  >
+                    <span
+                      class="c26"
+                    >
+                      Video
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div
+        class="c1 c2 c3"
+      >
+        <article
+          aria-labelledby=":r2:-title"
+          class="c4 c5"
+          role="button"
+          tabindex="-1"
+        >
+          <div
+            class="c6 c7 c8"
+          >
+            <div
+              class="c31 c7 c32"
+            >
+              <div
+                class="c33"
+              >
+                <svg
+                  aria-label="CARTE MARIAGE AVS - Printemps.pdf"
+                  fill="#8e8ea9"
+                  height="24"
+                  viewBox="0 0 32 32"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 15h20a1 1 0 0 0 1-1v-3a1 1 0 0 0-.293-.707l-7-7A1 1 0 0 0 19 3H7a2 2 0 0 0-2 2v9a1 1 0 0 0 1 1m13-9.5 5.5 5.5H19zM28 19a1 1 0 0 1-1 1h-3v2h2a1 1 0 0 1 0 2h-2v2a1 1 0 0 1-2 0v-7a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1M8 18H6a1 1 0 0 0-1 1v7a1 1 0 1 0 2 0v-1h1a3.5 3.5 0 1 0 0-7m0 5H7v-3h1a1.5 1.5 0 1 1 0 3m8-5h-2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2a4.5 4.5 0 1 0 0-9m0 7h-1v-5h1a2.5 2.5 0 0 1 0 5"
+                  />
+                </svg>
+                <span
+                  class="c34"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            class="c11"
+          >
+            <div
+              class="c12"
+            >
+              <div
+                class="c13"
+              >
+                <div
+                  class="c14"
+                >
+                  <h2
+                    class="c15"
+                  >
+                    <span
+                      class="c16"
+                      id=":r2:-title"
+                    >
+                      CARTE MARIAGE AVS - Printemps.pdf
+                    </span>
+                  </h2>
+                </div>
+                <div
+                  class="c17"
+                >
+                  <span
+                    class="c18"
+                  >
+                    pdf
+                  </span>
+                </div>
+              </div>
+              <div
+                class="c19 c20"
+              >
+                <div
+                  class="c21"
+                >
+                  <div
+                    class="c22 c23 c24 c25"
+                  >
+                    <span
+                      class="c26"
+                    >
+                      Doc
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+  <span
+    class="c28"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

@@ -1,0 +1,355 @@
+{
+  "conditions": [
+    {
+      "id": "admin::is-creator",
+      "displayName": "Is creator",
+      "category": "default"
+    },
+    {
+      "id": "admin::has-same-role-as-creator",
+      "displayName": "Has same role as creator",
+      "category": "default"
+    }
+  ],
+  "sections": {
+    "plugins": [],
+    "settings": [
+      {
+        "displayName": "Access the Email Settings page",
+        "category": "email",
+        "subCategory": "general",
+        "action": "plugin::email.settings.read"
+      },
+      {
+        "displayName": "Access the Media Library settings page",
+        "category": "media library",
+        "subCategory": "general",
+        "action": "plugin::upload.settings.read"
+      },
+      {
+        "displayName": "Create",
+        "category": "Internationalization",
+        "subCategory": "Locales",
+        "action": "plugin::i18n.locale.create"
+      },
+      {
+        "displayName": "Read",
+        "category": "Internationalization",
+        "subCategory": "Locales",
+        "action": "plugin::i18n.locale.read"
+      },
+      {
+        "displayName": "Update",
+        "category": "Internationalization",
+        "subCategory": "Locales",
+        "action": "plugin::i18n.locale.update"
+      },
+      {
+        "displayName": "Delete",
+        "category": "Internationalization",
+        "subCategory": "Locales",
+        "action": "plugin::i18n.locale.delete"
+      }
+    ],
+    "singleTypes": {
+      "actions": [
+        {
+          "label": "Create",
+          "actionId": "plugin::content-manager.explorer.create",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["fields", "locales"]
+        },
+        {
+          "label": "Read",
+          "actionId": "plugin::content-manager.explorer.read",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["fields", "locales"]
+        },
+        {
+          "label": "Update",
+          "actionId": "plugin::content-manager.explorer.update",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["fields", "locales"]
+        },
+        {
+          "label": "Delete",
+          "actionId": "plugin::content-manager.explorer.delete",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["locales"]
+        },
+        {
+          "label": "Publish",
+          "actionId": "plugin::content-manager.explorer.publish",
+          "subjects": [
+            "api::category.category",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["locales"]
+        }
+      ],
+      "subjects": [
+        {
+          "uid": "api::homepage.homepage",
+          "label": "homepage",
+          "properties": [
+            {
+              "label": "Fields",
+              "value": "fields",
+              "children": [
+                {
+                  "label": "title",
+                  "value": "title",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "label": "Locales",
+              "value": "locales",
+              "children": [
+                {
+                  "label": "English (en)",
+                  "value": "en"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "collectionTypes": {
+      "actions": [
+        {
+          "label": "Create",
+          "actionId": "plugin::content-manager.explorer.create",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["fields", "locales"]
+        },
+        {
+          "label": "Read",
+          "actionId": "plugin::content-manager.explorer.read",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["fields", "locales"]
+        },
+        {
+          "label": "Update",
+          "actionId": "plugin::content-manager.explorer.update",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["fields", "locales"]
+        },
+        {
+          "label": "Delete",
+          "actionId": "plugin::content-manager.explorer.delete",
+          "subjects": [
+            "plugin::myplugin.test",
+            "plugin::users-permissions.user",
+            "api::address.address",
+            "api::category.category",
+            "api::country.country",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::like.like",
+            "api::menu.menu",
+            "api::menusection.menusection",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::review.review",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["locales"]
+        },
+        {
+          "label": "Publish",
+          "actionId": "plugin::content-manager.explorer.publish",
+          "subjects": [
+            "api::category.category",
+            "api::homepage.homepage",
+            "api::kitchensink.kitchensink",
+            "api::relation-locale.relation-locale",
+            "api::restaurant.restaurant",
+            "api::tag.tag",
+            "api::temp.temp"
+          ],
+          "applyToProperties": ["locales"]
+        }
+      ],
+      "subjects": [
+        {
+          "uid": "api::address.address",
+          "label": "address",
+          "properties": [
+            {
+              "label": "Fields",
+              "value": "fields",
+              "children": [
+                {
+                  "label": "postal_code",
+                  "value": "postal_code"
+                },
+                {
+                  "label": "city",
+                  "value": "city",
+                  "required": true
+                },
+                {
+                  "label": "repeat_req_min",
+                  "value": "repeat_req_min",
+                  "children": [
+                    {
+                      "label": "name",
+                      "value": "name"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "uid": "api::category.category",
+          "label": "category",
+          "properties": [
+            {
+              "label": "Fields",
+              "value": "fields",
+              "children": [
+                {
+                  "label": "name",
+                  "value": "name"
+                }
+              ]
+            },
+            {
+              "label": "Locales",
+              "value": "locales",
+              "children": [
+                {
+                  "label": "English (en)",
+                  "value": "en"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

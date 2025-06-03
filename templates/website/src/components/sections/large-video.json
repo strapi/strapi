@@ -1,0 +1,29 @@
+{
+  "collectionName": "components_slices_large_videos",
+  "info": {
+    "name": "LargeVideo",
+    "displayName": "Large video",
+    "icon": "play-circle"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "video": {
+      "allowedTypes": ["videos"],
+      "type": "media",
+      "multiple": false,
+      "required": true
+    },
+    "poster": {
+      "allowedTypes": ["images"],
+      "type": "media",
+      "multiple": false,
+      "required": false
+    }
+  }
+}

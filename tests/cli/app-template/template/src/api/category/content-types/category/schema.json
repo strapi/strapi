@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "categories",
+  "info": {
+    "singularName": "category",
+    "pluralName": "categories",
+    "displayName": "Category",
+    "description": ""
+  },
+  "options": {
+    "reviewWorkflows": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "shorttext": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "complexes": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::complex.complex",
+      "mappedBy": "categories_m2m"
+    }
+  }
+}

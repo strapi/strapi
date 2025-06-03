@@ -1,0 +1,478 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FolderCard has all required ids set when rendering a start action 1`] = `
+.c0 {
+  position: relative;
+}
+
+.c2 {
+  padding-block-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-end: 12px;
+  padding-inline-start: 12px;
+  background: #ffffff;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+  cursor: pointer;
+}
+
+.c4 {
+  z-index: 2;
+  position: relative;
+}
+
+.c7 {
+  padding-block-start: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  color: #66b7f1;
+  background: #eaf5ff;
+  border-radius: 4px;
+}
+
+.c9 {
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.c12 {
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 4px;
+  max-width: 100%;
+}
+
+.c16 {
+  right: 16px;
+}
+
+.c3 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c10 {
+  align-items: flex-start;
+  flex-direction: column;
+  display: flex;
+}
+
+.c14 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+  font-weight: 500;
+}
+
+.c18 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c17 {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.c5 {
+  background: #ffffff;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 4px;
+  border: 1px solid #c0c0cf;
+  position: relative;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 2rem;
+}
+
+.c5[data-state='checked'],
+.c5[data-state='indeterminate'] {
+  border: 1px solid #4945ff;
+  background-color: #4945ff;
+}
+
+.c5[data-disabled] {
+  background-color: #dcdce4;
+}
+
+.c5::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.c6 {
+  display: inline-flex;
+  pointer-events: auto!important;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+}
+
+.c6[data-disabled] {
+  cursor: not-allowed;
+}
+
+.c1 {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  width: 100%;
+}
+
+.c1:hover,
+.c1:focus {
+  text-decoration: none;
+}
+
+.c8 path {
+  fill: currentColor;
+}
+
+.c15 {
+  display: none;
+}
+
+.c11 {
+  user-select: none;
+}
+
+.c13:focus {
+  outline: 2px solid #4945ff;
+  outline-offset: -2px;
+}
+
+<div>
+  <div
+    class="c0 "
+    id="folder"
+    tabindex="0"
+  >
+    <button
+      aria-hidden="true"
+      aria-label="Folder 1"
+      class="c1"
+      tabindex="-1"
+      type="button"
+    />
+    <div
+      class="c2 c3"
+    >
+      <div
+        class="c4"
+      >
+        <button
+          aria-checked="false"
+          aria-labelledby="folder-3-title"
+          class="c5"
+          data-state="unchecked"
+          role="checkbox"
+          type="button"
+          value="false"
+        >
+          <span
+            class="c6"
+            data-state="unchecked"
+            style="pointer-events: none;"
+          />
+        </button>
+      </div>
+      <div
+        class="c7"
+      >
+        <svg
+          class="c8"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
+          />
+        </svg>
+      </div>
+      <div
+        class="c9 c10 c11"
+        data-testid="folder-3-title"
+        id="folder-3-title"
+      >
+        <button
+          class="c12 c13"
+          type="button"
+        >
+          <div
+            class="c10"
+          >
+            <span
+              class="c14"
+            >
+              Pictures
+            </span>
+          </div>
+        </button>
+      </div>
+      <div
+        class="c15"
+      >
+        <div
+          class="c16 c3 c17"
+        />
+      </div>
+    </div>
+  </div>
+  <span
+    class="c18"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;
+
+exports[`FolderCard renders and matches the snapshot 1`] = `
+.c0 {
+  position: relative;
+}
+
+.c2 {
+  padding-block-start: 12px;
+  padding-inline-end: 12px;
+  padding-block-end: 12px;
+  padding-inline-start: 12px;
+  background: #ffffff;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+  cursor: pointer;
+}
+
+.c4 {
+  padding-block-start: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
+  color: #66b7f1;
+  background: #eaf5ff;
+  border-radius: 4px;
+}
+
+.c6 {
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.c9 {
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 4px;
+  max-width: 100%;
+}
+
+.c13 {
+  right: 16px;
+}
+
+.c3 {
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
+}
+
+.c7 {
+  align-items: flex-start;
+  flex-direction: column;
+  display: flex;
+}
+
+.c11 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+  font-weight: 500;
+}
+
+.c15 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c14 {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.c1 {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  width: 100%;
+}
+
+.c1:hover,
+.c1:focus {
+  text-decoration: none;
+}
+
+.c5 path {
+  fill: currentColor;
+}
+
+.c12 {
+  display: none;
+}
+
+.c8 {
+  user-select: none;
+}
+
+.c10:focus {
+  outline: 2px solid #4945ff;
+  outline-offset: -2px;
+}
+
+<div>
+  <div
+    class="c0 "
+    id="folder"
+    tabindex="0"
+  >
+    <button
+      aria-hidden="true"
+      aria-label="Folder 1"
+      class="c1"
+      tabindex="-1"
+      type="button"
+    />
+    <div
+      class="c2 c3"
+    >
+      <div
+        class="c4"
+      >
+        <svg
+          class="c5"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
+          />
+        </svg>
+      </div>
+      <div
+        class="c6 c7 c8"
+        data-testid="folder-3-title"
+        id="folder-3-title"
+      >
+        <button
+          class="c9 c10"
+          type="button"
+        >
+          <div
+            class="c7"
+          >
+            <span
+              class="c11"
+            >
+              Pictures
+            </span>
+          </div>
+        </button>
+      </div>
+      <div
+        class="c12"
+      >
+        <div
+          class="c13 c3 c14"
+        />
+      </div>
+    </div>
+  </div>
+  <span
+    class="c15"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

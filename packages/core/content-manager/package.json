@@ -1,0 +1,137 @@
+{
+  "name": "@strapi/content-manager",
+  "version": "5.14.0",
+  "description": "A powerful UI to easily manage your data.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./_internal/shared": {
+      "types": "./dist/shared/index.d.ts",
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@radix-ui/react-toolbar": "1.0.4",
+    "@reduxjs/toolkit": "1.9.7",
+    "@sindresorhus/slugify": "1.1.0",
+    "@strapi/design-system": "2.0.0-rc.24",
+    "@strapi/icons": "2.0.0-rc.24",
+    "@strapi/types": "5.14.0",
+    "@strapi/utils": "5.14.0",
+    "codemirror5": "npm:codemirror@^5.65.11",
+    "date-fns": "2.30.0",
+    "fractional-indexing": "3.2.0",
+    "highlight.js": "^10.4.1",
+    "immer": "9.0.21",
+    "koa": "2.15.4",
+    "lodash": "4.17.21",
+    "markdown-it": "^13.0.2",
+    "markdown-it-abbr": "^1.0.4",
+    "markdown-it-container": "^3.0.0",
+    "markdown-it-deflist": "^2.1.0",
+    "markdown-it-emoji": "^2.0.0",
+    "markdown-it-footnote": "^3.0.3",
+    "markdown-it-ins": "^3.0.1",
+    "markdown-it-mark": "^3.0.1",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "1.0.0",
+    "node-schedule": "2.1.1",
+    "prismjs": "1.30.0",
+    "qs": "6.11.1",
+    "react-dnd": "16.0.1",
+    "react-dnd-html5-backend": "16.0.1",
+    "react-helmet": "^6.1.0",
+    "react-intl": "6.6.2",
+    "react-query": "3.39.3",
+    "react-redux": "8.1.3",
+    "react-window": "1.8.10",
+    "sanitize-html": "2.13.0",
+    "slate": "0.94.1",
+    "slate-history": "0.93.0",
+    "slate-react": "0.98.3",
+    "yup": "0.32.9"
+  },
+  "devDependencies": {
+    "@strapi/admin": "5.14.0",
+    "@strapi/database": "5.14.0",
+    "@testing-library/react": "15.0.7",
+    "@types/jest": "29.5.2",
+    "@types/lodash": "^4.14.191",
+    "@types/prismjs": "1.26.5",
+    "koa-body": "6.0.1",
+    "msw": "1.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8"
+  },
+  "peerDependencies": {
+    "@strapi/admin": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "icon": "plug",
+    "name": "content-manager",
+    "displayName": "Content Manager",
+    "description": "Quick way to see, edit and delete the data in your database.",
+    "required": true,
+    "kind": "plugin"
+  }
+}

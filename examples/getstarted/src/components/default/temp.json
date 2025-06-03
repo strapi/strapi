@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_default_temps",
+  "info": {
+    "displayName": "temp",
+    "icon": "adjust",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "url": {
+      "type": "string"
+    }
+  }
+}

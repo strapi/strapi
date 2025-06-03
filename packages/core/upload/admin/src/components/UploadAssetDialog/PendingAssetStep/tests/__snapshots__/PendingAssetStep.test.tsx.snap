@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
+.c0 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
+@media (min-width: 520px) {
+
+}
+
+@media (min-width: 768px) {
+
+}
+
+@media (min-width: 1080px) {
+
+}
+
+<div>
+  <span
+    class="c0"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

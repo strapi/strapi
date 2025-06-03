@@ -1,0 +1,94 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    groups:
+      babel:
+        patterns:
+          - '@babel/*'
+          - 'babel-*'
+
+      eslint:
+        patterns:
+          - 'eslint'
+          - 'eslint-*'
+          - '@typescript-eslint/*'
+
+      jest:
+        patterns:
+          - 'jest'
+          - 'jest-*'
+
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+
+      react-dnd:
+        patterns:
+          - 'react-dnd'
+          - 'react-dnd-*'
+
+      redux:
+        patterns:
+          - '@reduxjs/toolkit'
+          - 'react-redux'
+
+      richtext-editor:
+        patterns:
+          - 'markdown-it'
+          - 'markdown-it-*'
+
+      storybook:
+        patterns:
+          - 'storybook'
+          - '@storybook/*'
+
+      testing-library:
+        patterns:
+          - '@testing-library/*'
+
+      webpack:
+        patterns:
+          - 'webpack'
+          - 'webpack-cli'
+          - 'webpack-dev-server'
+
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
+    schedule:
+      interval: weekly
+      day: sunday
+      time: '22:00'
+    open-pull-requests-limit: 0
+    versioning-strategy: increase
+    ignore:
+      # Only allow patch as minor babel versions need to be upgraded all together
+      - dependency-name: '@babel/*'
+        update-types:
+          - 'version-update:semver-major'
+          - 'version-update:semver-minor'
+
+      - dependency-name: '*'
+        update-types:
+          - 'version-update:semver-patch'
+          - 'version-update:semver-major'
+
+    labels:
+      - 'source: dependencies'
+      - 'pr: chore'
+
+  - package-ecosystem: github-actions
+    open-pull-requests-limit: 0
+    directory: /
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
+    schedule:
+      interval: weekly
+      day: sunday
+      time: '22:00'
+    labels:
+      - 'source: dependencies'
+      - 'pr: chore'

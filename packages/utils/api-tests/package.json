@@ -1,0 +1,11 @@
+{
+  "name": "api-tests",
+  "version": "5.14.0",
+  "private": true,
+  "dependencies": {
+    "dotenv": "16.4.5",
+    "lodash": "4.17.21",
+    "qs": "6.11.1",
+    "supertest": "6.3.3"
+  }
+}

@@ -1,0 +1,13 @@
+# Don't check auto-generated stuff into git
+coverage
+node_modules
+stats.json
+package-lock.json
+yarn-error.log
+# Cruft
+.DS_Store
+npm-debug.log
+.idea
+.env
+admin/src/plugins-dev.js
+admin/src/plugins.js

@@ -1,0 +1,34 @@
+name: Check Change Freeze
+
+on:
+  pull_request:
+    types: [opened]
+
+permissions: read-all
+
+jobs:
+  check-ownership:
+    name: 'Check if PR was created by a Strapi Team Member'
+    runs-on: ubuntu-latest
+    outputs:
+      isTeamMember: ${{ steps.get-user-teams-membership.outputs.isTeamMember }}
+    steps:
+      - uses: tspascoal/get-user-teams-membership@v3
+        id: get-user-teams-membership
+        with:
+          GITHUB_TOKEN: ${{ secrets.CHECK_OWNERSHIP_TOKEN }}
+          team: team
+          username: ${{ github.actor }}
+  send-response:
+    name: 'Alert user to change freeze'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    needs: [check-ownership]
+    if: ${{ needs.check-ownership.outputs.isTeamMember == 'false' && vars.CHANGE_FREEZE_ENABLED == 'true' }}
+    steps:
+      - uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            This repo is currently under a community change freeze. Please see any pinned issues for more information.
+            If you believe this PR should be merged, please respond with the reason why else we will close all PRs until after the change freeze is lifted.

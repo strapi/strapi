@@ -1,0 +1,21 @@
+{
+  "kind": "singleType",
+  "collectionName": "single_type_non_locals",
+  "info": {
+    "singularName": "single-type-non-local",
+    "pluralName": "single-type-non-locals",
+    "displayName": "SingleTypeNonLocal"
+  },
+  "options": {},
+  "pluginOptions": {},
+  "attributes": {
+    "shorttext": {
+      "type": "string"
+    },
+    "complex_contents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::complex.complex"
+    }
+  }
+}

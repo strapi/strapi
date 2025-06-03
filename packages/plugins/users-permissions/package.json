@@ -1,0 +1,100 @@
+{
+  "name": "@strapi/plugin-users-permissions",
+  "version": "5.14.0",
+  "description": "Protect your API with a full-authentication process based on JWT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-admin": {
+      "source": "./admin/src/index.js",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./server/index.js",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "run -T npm-run-all clean build:code",
+    "build:code": "run -T rollup -c",
+    "clean": "run -T rimraf dist",
+    "lint": "run -T eslint .",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:front:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js",
+    "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@strapi/design-system": "2.0.0-rc.24",
+    "@strapi/icons": "2.0.0-rc.24",
+    "@strapi/utils": "5.14.0",
+    "bcryptjs": "2.4.3",
+    "formik": "2.4.5",
+    "grant": "^5.4.8",
+    "immer": "9.0.21",
+    "jsonwebtoken": "9.0.0",
+    "jwk-to-pem": "2.0.5",
+    "koa": "2.15.4",
+    "koa2-ratelimit": "^1.1.3",
+    "lodash": "4.17.21",
+    "prop-types": "^15.8.1",
+    "purest": "4.0.2",
+    "react-intl": "6.6.2",
+    "react-query": "3.39.3",
+    "react-redux": "8.1.3",
+    "url-join": "4.0.1",
+    "yup": "0.32.9"
+  },
+  "devDependencies": {
+    "@strapi/strapi": "5.14.0",
+    "@testing-library/dom": "10.1.0",
+    "@testing-library/react": "15.0.7",
+    "@testing-library/user-event": "14.5.2",
+    "msw": "1.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "displayName": "Roles & Permissions",
+    "name": "users-permissions",
+    "description": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
+    "required": true,
+    "kind": "plugin"
+  }
+}

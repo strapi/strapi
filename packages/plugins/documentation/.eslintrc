@@ -1,0 +1,17 @@
+{
+  "root": true,
+  "overrides": [
+    {
+      "files": ["admin/**/*"],
+      "extends": ["custom/front"],
+      "rules": {
+        "import/extensions": "off"
+      }
+    },
+    {
+      "files": ["**/*"],
+      "excludedFiles": ["admin/**/*"],
+      "extends": ["custom/back"]
+    }
+  ]
+}

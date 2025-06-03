@@ -1,0 +1,117 @@
+{
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "production": [
+      "{workspaceRoot}/rollup.utils.mjs",
+      "!{projectRoot}/**/*.test.ts",
+      "!{projectRoot}/**/*.test.js",
+      "!{projectRoot}/**/*.test.api.js",
+      "!{projectRoot}/**/__mocks__/**",
+      "!{projectRoot}/**/__tests__/**",
+      "!{projectRoot}/**/*.md",
+      "!{projectRoot}/jest.config.js",
+      "!{projectRoot}/jest.config.front.js",
+      "!{projectRoot}/tsconfig.eslint.json",
+      "!{projectRoot}/.eslintignore",
+      "!{projectRoot}/.eslintrc.js"
+    ]
+  },
+  "cli": {
+    "packageManager": "yarn"
+  },
+  "targetDefaults": {
+    "build": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "build:code": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
+    },
+    "build:types": {
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["^build:types"],
+      "cache": true
+    },
+    "test:unit": {
+      "inputs": ["default", "{workspaceRoot}/jest-preset.unit.js"],
+      "cache": true
+    },
+    "test:front": {
+      "inputs": ["default", "{workspaceRoot}/jest-preset.front.js"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": [
+        "{projectRoot}/**/*.js",
+        "{projectRoot}/**/*.ts",
+        "{projectRoot}/.eslintrc.js",
+        "{projectRoot}/.eslintignore",
+        "{projectRoot}/tsconfig.eslint.json",
+        "{workspaceRoot}/packages/utils/eslint-config-custom/**/*"
+      ],
+      "cache": true
+    }
+  },
+  "useInferencePlugins": false,
+  "parallel": 8,
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": false
+    }
+  },
+  "release": {
+    "projects": ["packages/**/*", ".github/actions/check-pr-status", "scripts/front"],
+    "changelog": {
+      "workspaceChangelog": {
+        "file": false,
+        "createRelease": "github"
+      }
+    },
+    "version": {
+      "conventionalCommits": false,
+      "git": {
+        "commitMessage": "release: {version}"
+      }
+    },
+    "conventionalCommits": {
+      "types": {
+        "docs": {
+          "changelog": {
+            "title": "📚 Documentation Changes"
+          }
+        },
+        "enhancement": {
+          "changelog": {
+            "title": "💅 Enhancement"
+          }
+        },
+        "feat": {
+          "changelog": {
+            "title": "🚀 New feature"
+          }
+        },
+        "fix": {
+          "changelog": {
+            "title": "🔥 Bug fix"
+          }
+        },
+        "security": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "🚨 Security"
+          }
+        },
+        "chore": {
+          "changelog": {
+            "title": "⚙️ Chore"
+          }
+        }
+      }
+    }
+  }
+}

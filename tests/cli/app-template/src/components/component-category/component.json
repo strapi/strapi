@@ -1,0 +1,49 @@
+{
+  "collectionName": "components_component_category_components",
+  "info": {
+    "displayName": "component",
+    "icon": "arrowUp"
+  },
+  "options": {},
+  "attributes": {
+    "shorttext": {
+      "type": "string"
+    },
+    "boolean": {
+      "type": "boolean"
+    },
+    "longtext": {
+      "type": "text"
+    },
+    "blocks": {
+      "type": "blocks"
+    },
+    "json": {
+      "type": "json"
+    },
+    "numberinteger": {
+      "type": "integer"
+    },
+    "email": {
+      "type": "email"
+    },
+    "date": {
+      "type": "date"
+    },
+    "password": {
+      "type": "password"
+    },
+    "enum": {
+      "type": "enumeration",
+      "enum": ["first comp value", "second comp value", "third comp value"]
+    },
+    "markdown": {
+      "type": "richtext"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "admin::user"
+    }
+  }
+}

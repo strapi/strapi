@@ -1,0 +1,37 @@
+---
+title: Release details page
+tags:
+  - content-releases
+  - tech design
+---
+
+### Overview:
+
+The release details page allows users with appropriate permissions to do the following:
+
+#### Group entries:
+
+Entries in a release can be be grouped by the following options:
+
+- Content-Types: Group all entries with the same content type together
+- Locales: Group all entries with the same locale together.
+- Actions: Group all entries with the same action (publish/unpublish) together.
+
+#### Edit a release:
+
+If the user has the `plugin::content-releases.update` permissions, a "three dot" button will appear in the header giving access to a menu with an "Edit" option.
+The Edit button opens a modal, enabling users to modify the release name. To save the changes, the new name must be unique (only for pending releases), non-empty, and distinctly modified.
+
+#### Delete a release:
+
+If the user has the `plugin::content-releases.delete` permissions, a "three dot" button will appear in the header giving access to a menu with a "Delete" option. Selecting this option triggers a confirmation modal.
+
+#### View Entry Status
+
+Each entry within a release is assigned a status, indicating its readiness for actions such as Publish/Unpublish or any validation errors present. If the entry has validation errors, a user can use the entry's "three dots" menu to access the "Edit entry" link which navigates directly to the entry in the content manager.
+
+Within the CM edit view, users can resolve any identified errors. Upon completion, clicking the "Refresh" button on the release details page updates the status of each entry to reflect any changes made.
+
+#### Publish a release:
+
+To execute the release of a content release, users can simply click on the "Publish" button (shown if you have the "plugin::content-releases.publish" permission). If any of the entries exhibit validation errors, the "Publish" action triggers a notification to alert users of the errors.

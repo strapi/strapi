@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_page_blocks_content_and_images",
+  "info": {
+    "displayName": "Content and Image"
+  },
+  "options": {},
+  "attributes": {
+    "content": {
+      "type": "blocks"
+    },
+    "media": {
+      "allowedTypes": ["images", "files", "videos", "audios"],
+      "type": "media",
+      "multiple": true
+    },
+    "content_is_left": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    }
+  }
+}

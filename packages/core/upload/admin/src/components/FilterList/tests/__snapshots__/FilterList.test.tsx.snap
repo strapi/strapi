@@ -1,0 +1,247 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<FilterList /> renders and matches the snapshot 1`] = `
+.c0 {
+  padding-block-start: 4px;
+  padding-inline-end: 4px;
+  padding-block-end: 4px;
+  padding-inline-start: 12px;
+  height: 3.2rem;
+  color: #4945ff;
+  background: #f0f0ff;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d8ff;
+}
+
+.c4 {
+  padding-block-start: 8px;
+  padding-inline-end: 8px;
+  padding-block-end: 8px;
+  padding-inline-start: 8px;
+}
+
+.c1 {
+  align-items: center;
+  flex-direction: row;
+  display: inline-flex;
+}
+
+.c2 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: currentcolor;
+  font-weight: 600;
+}
+
+.c6 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c5 {
+  display: inline-flex;
+  border: none;
+}
+
+.c5>svg {
+  height: 1.2rem;
+  width: 1.2rem;
+}
+
+.c5>svg path {
+  fill: #4945ff;
+}
+
+.c5:hover {
+  cursor: pointer;
+}
+
+.c3 {
+  color: inherit;
+  border-right: 1px solid #d9d8ff;
+  padding-right: 8px;
+}
+
+<div>
+  <div
+    class="c0 c1"
+  >
+    <span
+      class="c2 c3"
+    >
+      type is image
+    </span>
+    <button
+      aria-disabled="false"
+      class="c4 c5"
+    >
+      <svg
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+        />
+      </svg>
+    </button>
+  </div>
+  <div
+    class="c0 c1"
+  >
+    <span
+      class="c2 c3"
+    >
+      type is not image
+    </span>
+    <button
+      aria-disabled="false"
+      class="c4 c5"
+    >
+      <svg
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+        />
+      </svg>
+    </button>
+  </div>
+  <div
+    class="c0 c1"
+  >
+    <span
+      class="c2 c3"
+    >
+      createdAt is Thursday, October 7, 2021
+    </span>
+    <button
+      aria-disabled="false"
+      class="c4 c5"
+    >
+      <svg
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+        />
+      </svg>
+    </button>
+  </div>
+  <div
+    class="c0 c1"
+  >
+    <span
+      class="c2 c3"
+    >
+      type is video
+    </span>
+    <button
+      aria-disabled="false"
+      class="c4 c5"
+    >
+      <svg
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+        />
+      </svg>
+    </button>
+  </div>
+  <div
+    class="c0 c1"
+  >
+    <span
+      class="c2 c3"
+    >
+      type is file
+    </span>
+    <button
+      aria-disabled="false"
+      class="c4 c5"
+    >
+      <svg
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+        />
+      </svg>
+    </button>
+  </div>
+  <div
+    class="c0 c1"
+  >
+    <span
+      class="c2 c3"
+    >
+      type is image, video
+    </span>
+    <button
+      aria-disabled="false"
+      class="c4 c5"
+    >
+      <svg
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+        />
+      </svg>
+    </button>
+  </div>
+  <span
+    class="c6"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
+</div>
+`;

@@ -1,0 +1,83 @@
+{
+  "kind": "collectionType",
+  "collectionName": "unique",
+  "info": {
+    "singularName": "unique",
+    "pluralName": "uniques",
+    "displayName": "Unique"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "uniqueString": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "string",
+      "unique": true
+    },
+    "uniqueNumber": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "unique": true,
+      "type": "integer"
+    },
+    "uniqueEmail": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "email",
+      "unique": true
+    },
+    "uniqueDate": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "unique": true,
+      "type": "date"
+    },
+    "UID": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "type": "uid"
+    },
+    "identifiers": {
+      "type": "component",
+      "repeatable": false,
+      "component": "unique.top-level",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "repeatableIdentifiers": {
+      "type": "component",
+      "repeatable": true,
+      "component": "unique.top-level",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}

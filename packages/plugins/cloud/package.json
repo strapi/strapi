@@ -1,0 +1,74 @@
+{
+  "name": "@strapi/plugin-cloud",
+  "version": "5.14.0",
+  "description": "Instructions to deploy your local project to Strapi Cloud",
+  "license": "MIT",
+  "author": {
+    "name": "Strapi Solutions SAS",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "exports": {
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:admin",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
+    "clean": "run -T rimraf ./dist",
+    "develop": "strapi-plugin watch",
+    "lint": "run -T eslint .",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "watch": "run -T rollup -c -w"
+  },
+  "dependencies": {
+    "@strapi/design-system": "2.0.0-rc.24",
+    "@strapi/icons": "2.0.0-rc.24",
+    "react-intl": "6.6.2"
+  },
+  "devDependencies": {
+    "@strapi/strapi": "5.14.0",
+    "eslint-config-custom": "5.14.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.3",
+    "styled-components": "6.1.8",
+    "tsconfig": "5.14.0",
+    "typescript": "5.4.4"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=22.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "strapi-cloud",
+    "description": "Instructions to deploy your local project to Strapi Cloud",
+    "kind": "plugin",
+    "displayName": "Strapi Cloud"
+  }
+}
