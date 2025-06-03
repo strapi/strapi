@@ -1,0 +1,67 @@
+{
+  "kind": "collectionType",
+  "collectionName": "conditions",
+  "info": {
+    "singularName": "condition",
+    "pluralName": "conditions",
+    "displayName": "condition"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "isActive": {
+      "type": "boolean",
+      "conditions": {
+        "visible": {
+          "!=": [
+            {
+              "var": "roles"
+            },
+            "bonnie"
+          ]
+        }
+      }
+    },
+    "name": {
+      "type": "string"
+    },
+    "salary": {
+      "type": "integer",
+      "conditions": {
+        "visible": {
+          "!=": [
+            {
+              "var": "roles"
+            },
+            "bonnie"
+          ]
+        }
+      }
+    },
+    "roles": {
+      "type": "enumeration",
+      "conditions": {
+        "visible": {
+          "!=": [
+            {
+              "var": "another_bool"
+            },
+            false
+          ]
+        }
+      },
+      "enum": [
+        "bonnie",
+        "clyde",
+        "watts",
+        "white"
+      ]
+    },
+    "another_bool": {
+      "type": "boolean",
+      "required": true
+    }
+  }
+}
