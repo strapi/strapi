@@ -12,56 +12,16 @@
   "pluginOptions": {},
   "attributes": {
     "isActive": {
-      "type": "boolean",
-      "conditions": {
-        "visible": {
-          "!=": [
-            {
-              "var": "roles"
-            },
-            "bonnie"
-          ]
-        }
-      }
+      "type": "boolean"
     },
     "name": {
-      "type": "string",
-      "conditions": {
-        "visible": {
-          "==": [
-            {
-              "var": "isActive"
-            },
-            false
-          ]
-        }
-      }
+      "type": "string"
     },
     "salary": {
-      "type": "integer",
-      "conditions": {
-        "visible": {
-          "==": [
-            {
-              "var": "another_bool"
-            },
-            true
-          ]
-        }
-      }
+      "type": "integer"
     },
     "roles": {
       "type": "enumeration",
-      "conditions": {
-        "visible": {
-          "==": [
-            {
-              "var": "roles"
-            },
-            "healer"
-          ]
-        }
-      },
       "enum": [
         "healer",
         "dps",

@@ -104,7 +104,6 @@ export const TabForm = ({
                   const contentTypeAttributes =
                     genericInputProps.contentTypeSchema?.attributes || [];
 
-                  // Ensure we have a valid contentTypeSchema before proceeding
                   if (!genericInputProps.contentTypeSchema) {
                     console.warn('contentTypeSchema is undefined, skipping condition form');
                     return null;
@@ -113,7 +112,6 @@ export const TabForm = ({
                   // Filter for boolean and enumeration fields only
                   const availableFields = contentTypeAttributes
                     .filter((attr: any) => {
-                      // Only allow boolean and enumeration fields
                       return attr.type === 'boolean' || attr.type === 'enumeration';
                     })
                     .map((attr: any) => ({
@@ -122,7 +120,6 @@ export const TabForm = ({
                       enum: attr.type === 'enumeration' ? attr.enum : undefined,
                     }));
 
-                  // Helper to format the condition for display
                   const formatCondition = (condition: any) => {
                     if (!condition?.visible) {
                       return '';
@@ -167,8 +164,6 @@ export const TabForm = ({
                             variant="secondary"
                             onClick={() => {
                               // This button should only appear if there's no condition
-                              // Clicking it should probably add a default condition structure
-                              // For now, we can log or handle as needed, but toggling state is removed
                               onChange({
                                 target: {
                                   name: input.name,

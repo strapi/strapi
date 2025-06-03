@@ -89,7 +89,6 @@ const convertToJsonLogic = (value: LocalValue): JsonLogicValue | null => {
       },
     };
   } catch (error) {
-    console.error('Invalid condition:', error);
     return null;
   }
 };
@@ -113,6 +112,38 @@ export const ConditionForm = ({
 
   const selectedField = conditionFields.find((field) => field.name === localValue.dependsOn);
   const isEnumField = selectedField?.type === 'enumeration';
+
+  // Helper to update localValue and propagate JSON Logic
+  const updateCondition = (updatedValue: LocalValue) => {
+    setLocalValue(updatedValue);
+    const rulesEngine = createRulesEngine();
+    const condition: Condition = {
+      dependsOn: updatedValue.dependsOn,
+      operator: updatedValue.operator,
+      value: updatedValue.value,
+    };
+    try {
+      rulesEngine.validate(condition);
+      const action = updatedValue.action === 'show' ? '==' : '!=';
+      const jsonLogic = updatedValue.dependsOn
+        ? {
+            visible: {
+              [action]: [{ var: updatedValue.dependsOn }, updatedValue.value],
+            },
+          }
+        : null;
+      if (jsonLogic) {
+        onChange({
+          target: {
+            name,
+            value: jsonLogic,
+          },
+        });
+      }
+    } catch {
+      // Do nothing if invalid
+    }
+  };
 
   const handleApplyCondition = () => {
     const initialValue: LocalValue = {
@@ -150,25 +181,12 @@ export const ConditionForm = ({
     const newValue = fieldName?.toString() || '';
     const field = conditionFields.find((f) => f.name === newValue);
     const isNewFieldEnum = field?.type === 'enumeration';
-
-    // Reset value when changing field type
     const updatedValue: LocalValue = {
       ...localValue,
       dependsOn: newValue,
       value: newValue ? (isNewFieldEnum ? '' : false) : localValue.value,
     };
-    setLocalValue(updatedValue);
-
-    // Convert to JSON Logic format
-    const jsonLogic = convertToJsonLogic(updatedValue);
-    if (jsonLogic) {
-      onChange({
-        target: {
-          name,
-          value: jsonLogic,
-        },
-      });
-    }
+    updateCondition(updatedValue);
   };
 
   const handleOperatorChange = (operator: string | number) => {
@@ -177,35 +195,13 @@ export const ConditionForm = ({
       ...localValue,
       operator: newValue as 'is' | 'isNot',
     };
-    setLocalValue(updatedValue);
-
-    // Convert to JSON Logic format
-    const jsonLogic = convertToJsonLogic(updatedValue);
-    if (jsonLogic) {
-      onChange({
-        target: {
-          name,
-          value: jsonLogic,
-        },
-      });
-    }
+    updateCondition(updatedValue);
   };
 
   const handleValueChange = (newValue: string | number) => {
     const value = isEnumField ? newValue?.toString() : newValue?.toString() === 'true';
     const updatedValue: LocalValue = { ...localValue, value };
-    setLocalValue(updatedValue);
-
-    // Convert to JSON Logic format
-    const jsonLogic = convertToJsonLogic(updatedValue);
-    if (jsonLogic) {
-      onChange({
-        target: {
-          name,
-          value: jsonLogic,
-        },
-      });
-    }
+    updateCondition(updatedValue);
   };
 
   const handleActionChange = (action: string | number) => {
@@ -214,23 +210,12 @@ export const ConditionForm = ({
       ...localValue,
       action: newValue as 'show' | 'hide',
     };
-    setLocalValue(updatedValue);
-
-    // Convert to JSON Logic format
-    const jsonLogic = convertToJsonLogic(updatedValue);
-    if (jsonLogic) {
-      onChange({
-        target: {
-          name,
-          value: jsonLogic,
-        },
-      });
-    }
+    updateCondition(updatedValue);
   };
 
   if (!hasCondition) {
     return (
-      <Box padding={4} hasRadius background="neutral0" borderColor="neutral200">
+      <Box padding={4} margin={4} hasRadius background="neutral0" borderColor="neutral200">
         <Button onClick={handleApplyCondition} startIcon={<Plus />} variant="secondary" fullWidth>
           {formatMessage({
             id: getTrad('form.attribute.condition.apply'),
@@ -242,7 +227,14 @@ export const ConditionForm = ({
   }
 
   return (
-    <Box padding={4} hasRadius background="neutral0" borderColor="neutral200">
+    <Box
+      padding={6}
+      marginTop={4}
+      hasRadius
+      background="neutral0"
+      borderColor="neutral200"
+      shadow="tableShadow"
+    >
       <Flex justifyContent="space-between" alignItems="center" marginBottom={4}>
         <Typography variant="omega">
           Condition for <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
@@ -258,12 +250,16 @@ export const ConditionForm = ({
         </IconButton>
       </Flex>
       <Box paddingBottom={2}>
-        <Typography variant="sigma" textColor="neutral600" style={{ textTransform: 'uppercase' }}>
+        <Typography
+          variant="sigma"
+          textColor="neutral600"
+          style={{ textTransform: 'uppercase', letterSpacing: 1 }}
+        >
           {formatMessage({ id: getTrad('form.attribute.condition.if'), defaultMessage: 'IF' })}
         </Typography>
       </Box>
-      <Grid.Root gap={4}>
-        <Grid.Item col={4}>
+      <Flex gap={4} marginBottom={4}>
+        <Box minWidth={0} flex={1}>
           <Field.Root name={`${name}.field`}>
             <SingleSelect
               value={localValue.dependsOn}
@@ -280,8 +276,8 @@ export const ConditionForm = ({
               ))}
             </SingleSelect>
           </Field.Root>
-        </Grid.Item>
-        <Grid.Item col={4}>
+        </Box>
+        <Box minWidth={0} flex={1}>
           <Field.Root name={`${name}.operator`}>
             <SingleSelect
               value={localValue.operator}
@@ -306,8 +302,8 @@ export const ConditionForm = ({
               </SingleSelectOption>
             </SingleSelect>
           </Field.Root>
-        </Grid.Item>
-        <Grid.Item col={4}>
+        </Box>
+        <Box minWidth={0} flex={1}>
           <Field.Root name={`${name}.value`}>
             <SingleSelect
               value={localValue.value?.toString() || ''}
@@ -342,14 +338,18 @@ export const ConditionForm = ({
               )}
             </SingleSelect>
           </Field.Root>
-        </Grid.Item>
-      </Grid.Root>
-      <Box paddingTop={4}>
-        <Typography variant="sigma" textColor="neutral600" style={{ textTransform: 'uppercase' }}>
+        </Box>
+      </Flex>
+      <Box paddingBottom={2}>
+        <Typography
+          variant="sigma"
+          textColor="neutral600"
+          style={{ textTransform: 'uppercase', letterSpacing: 1 }}
+        >
           {formatMessage({ id: getTrad('form.attribute.condition.then'), defaultMessage: 'THEN' })}
         </Typography>
       </Box>
-      <Box paddingTop={2}>
+      <Box>
         <Field.Root name={`${name}.action`}>
           <SingleSelect
             value={localValue.action}

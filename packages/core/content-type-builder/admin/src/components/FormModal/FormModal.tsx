@@ -467,10 +467,6 @@ export const FormModal = () => {
         })
       );
 
-      // Add logging for condition data
-      console.log('FormModal handleSubmit - modifiedData:', modifiedData);
-      console.log('FormModal handleSubmit - conditions:', modifiedData.conditions);
-
       sendButtonAddMoreFieldEvent(shouldContinue);
 
       const ctTargetUid = targetUid;
@@ -953,13 +949,6 @@ export const FormModal = () => {
     forTarget,
     contentTypeSchema: type,
   };
-
-  // eslint-disable-next-line no-console
-  console.log('FormModal genericInputProps:', {
-    contentTypeSchema: type,
-    modifiedData,
-    forTarget,
-  });
 
   const advancedForm = formToDisplay.advanced({
     data: modifiedData,
