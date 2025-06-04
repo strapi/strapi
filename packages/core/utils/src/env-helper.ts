@@ -19,13 +19,14 @@ function int(key: string, defaultValue?: number | null | undefined): number | un
     return defaultValue ?? undefined;
   }
 
-  const maybeInt = parseInt(getKey(key), 10);
+  const stringValue = getKey(key);
+  const maybeInt = parseInt(stringValue, 10);
 
-  if (Number.isFinite(maybeInt)) {
-    return maybeInt;
+  if (Number.isNaN(maybeInt) && stringValue !== 'NaN') {
+    throw new Error(`env.int encountered an invalid value for ${key}`);
   }
 
-  throw new Error(`env.int encountered an invalid value for ${key}`);
+  return maybeInt;
 }
 
 function float(key: string, defaultValue: number): number;
@@ -35,13 +36,14 @@ function float(key: string, defaultValue?: number | null | undefined): number | 
     return defaultValue ?? undefined;
   }
 
-  const maybeFloat = parseFloat(getKey(key));
+  const stringValue = getKey(key);
+  const maybeFloat = parseFloat(stringValue);
 
-  if (Number.isFinite(maybeFloat)) {
-    return maybeFloat;
+  if (Number.isNaN(maybeFloat) && stringValue !== 'NaN') {
+    throw new Error(`env.float encountered an invalid value for ${key}`);
   }
 
-  throw new Error(`env.float encountered an invalid value for ${key}`);
+  return maybeFloat;
 }
 
 function bool(key: string, defaultValue: boolean): boolean;
@@ -101,11 +103,11 @@ function date(key: string, defaultValue?: Date | null | undefined): Date | undef
 
   const maybeDate = new Date(getKey(key));
 
-  if (Number.isFinite(maybeDate.getTime())) {
-    return maybeDate;
+  if (Number.isNaN(maybeDate.getTime())) {
+    throw new Error(`env.date encountered an invalid value for ${key}`);
   }
 
-  throw new Error(`env.date encountered an invalid value for ${key}`);
+  return maybeDate;
 }
 
 /** Gets a value from env that matches oneOf provided values */
