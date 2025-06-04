@@ -21,7 +21,11 @@ function int(key: string, defaultValue?: number | null | undefined): number | un
 
   const maybeInt = parseInt(getKey(key), 10);
 
-  return Number.isFinite(maybeInt) ? maybeInt : undefined;
+  if (Number.isFinite(maybeInt)) {
+    return maybeInt;
+  }
+
+  throw new Error(`env.int encountered an invalid value for ${key}`);
 }
 
 function float(key: string, defaultValue: number): number;
@@ -33,7 +37,11 @@ function float(key: string, defaultValue?: number | null | undefined): number | 
 
   const maybeFloat = parseFloat(getKey(key));
 
-  return Number.isFinite(maybeFloat) ? maybeFloat : undefined;
+  if (Number.isFinite(maybeFloat)) {
+    return maybeFloat;
+  }
+
+  throw new Error(`env.float encountered an invalid value for ${key}`);
 }
 
 function bool(key: string, defaultValue: boolean): boolean;
@@ -57,7 +65,9 @@ function json(key: string, defaultValue?: object | null | undefined): object | u
     return JSON.parse(getKey(key));
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Invalid json environment variable ${key}: ${error.message}`);
+      throw new Error(
+        `env.json encountered an invalid json environment value for ${key}: ${error.message}`
+      );
     }
 
     throw error;
@@ -91,7 +101,11 @@ function date(key: string, defaultValue?: Date | null | undefined): Date | undef
 
   const maybeDate = new Date(getKey(key));
 
-  return Number.isFinite(maybeDate.getTime()) ? maybeDate : undefined;
+  if (Number.isFinite(maybeDate.getTime())) {
+    return maybeDate;
+  }
+
+  throw new Error(`env.date encountered an invalid value for ${key}`);
 }
 
 /** Gets a value from env that matches oneOf provided values */
