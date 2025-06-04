@@ -327,6 +327,7 @@
   "app.components.LeftMenu.logout": "Sair",
   "app.components.LeftMenu.logo.alt": "logo da aplicação",
   "app.components.LeftMenu.plugins": "Extensões",
+  "app.components.LeftMenu.trialCountdown": "Sua prova termina em {date}.",
   "app.components.LeftMenu.navbrand.title": "Painel do Strapi",
   "app.components.LeftMenu.navbrand.workplace": "Local de trabalho",
   "app.components.LeftMenuFooter.help": "Ajuda",
