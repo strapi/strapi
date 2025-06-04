@@ -219,24 +219,53 @@ const transformDocument =
  * @param {object} data - The data object to filter based on visibility.
  * @returns {object} A new data object with only visible fields retained.
  */
-const stripInvisibleAttributes = (data: AnyData, schema?: Schema.ContentType) => {
-  if (!schema || !schema.attributes) return data;
+const handleInvisibleAttributes = (
+  data: AnyData,
+  schema?: Schema.ContentType,
+  initialValues: AnyData = {}
+): {
+  data: AnyData;
+  removedAttributes: string[];
+} => {
+  if (!schema?.attributes)
+    return {
+      data: data,
+      removedAttributes: [],
+    };
+
   const rulesEngine = createRulesEngine();
-  const result = { ...data };
+  const result: AnyData = { ...data };
+  const removedAttributes = [];
 
   for (const [attrName, attrDef] of Object.entries(schema.attributes)) {
-    const visibilityCondition = attrDef?.conditions?.visible;
+    const condition = attrDef?.conditions?.visible;
 
-    if (visibilityCondition) {
-      const isVisible = rulesEngine.evaluate(visibilityCondition, data);
+    if (!condition) continue;
 
-      if (!isVisible) {
-        delete result[attrName];
+    const isVisible = rulesEngine.evaluate(condition, data);
+
+    if (!isVisible) {
+      delete result[attrName]; // remove if not visible
+      removedAttributes.push(attrName);
+      continue;
+    }
+
+    const userProvidedValue = data[attrName];
+
+    if (!userProvidedValue) {
+      // If visible but not changed (not present in current data)
+      if (initialValues[attrName]) {
+        result[attrName] = initialValues[attrName];
+      } else {
+        result[attrName] = null;
       }
     }
   }
 
-  return result;
+  return {
+    data: result,
+    removedAttributes,
+  };
 };
 
 export {
@@ -245,6 +274,6 @@ export {
   prepareTempKeys,
   removeFieldsThatDontExistOnSchema,
   transformDocument,
-  stripInvisibleAttributes,
+  handleInvisibleAttributes,
 };
 export type { AnyData };

@@ -16,6 +16,7 @@ import { NpsSurvey } from '../components/NpsSurvey';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
+import { UpsellBanner } from '../components/UpsellBanner';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -127,6 +128,7 @@ const AdminLayout = () => {
                 pluginsSectionLinks={pluginsSectionLinks}
               />
               <Box flex={1}>
+                <UpsellBanner />
                 <Outlet />
                 <GuidedTourModal />
               </Box>

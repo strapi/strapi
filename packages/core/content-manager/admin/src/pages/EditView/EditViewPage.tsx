@@ -26,6 +26,7 @@ import { createYupSchema } from '../../utils/validation';
 import { FormLayout } from './components/FormLayout';
 import { Header } from './components/Header';
 import { Panels } from './components/Panels';
+import { handleInvisibleAttributes } from './utils/data';
 
 /* -------------------------------------------------------------------------------------------------
  * EditViewPage
@@ -132,12 +133,22 @@ const EditViewPage = () => {
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
         validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+          // removes hidden fields from the validation
+          // this is necessary because the yup schema doesn't know about the visibility conditions
+          // and we don't want to validate fields that are not visible
+          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(
+            values,
+            schema,
+            initialValues
+          );
+
           const yupSchema = createYupSchema(schema?.attributes, components, {
             status,
+            removedAttributes,
             ...options,
           });
 
-          return yupSchema.validate(values, { abortEarly: false });
+          return yupSchema.validate(cleanedValues, { abortEarly: false });
         }}
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >

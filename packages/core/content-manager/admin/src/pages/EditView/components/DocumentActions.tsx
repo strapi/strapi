@@ -42,7 +42,7 @@ import {
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
-import { AnyData, stripInvisibleAttributes } from '../utils/data';
+import { AnyData, handleInvisibleAttributes } from '../utils/data';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
@@ -772,6 +772,7 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
+      const { data } = handleInvisibleAttributes(transformData(formValues), schema);
       const res = await publish(
         {
           collectionType,
@@ -779,7 +780,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params: currentDocumentMeta.params,
         },
-        transformData(formValues)
+        data
       );
 
       // Reset form if successful
@@ -966,6 +967,7 @@ const UpdateAction: DocumentActionComponent = ({
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
   const setSubmitting = useForm('UpdateAction', ({ setSubmitting }) => setSubmitting);
+  const initialValues = useForm('UpdateAction', ({ initialValues }) => initialValues);
   const document = useForm('UpdateAction', ({ values }) => values);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
@@ -1058,6 +1060,7 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
+        const { data } = handleInvisibleAttributes(transformData(document), schema, initialValues);
         const res = await update(
           {
             collectionType,
@@ -1065,7 +1068,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId,
             params: currentDocumentMeta.params,
           },
-          stripInvisibleAttributes(transformData(document), schema)
+          data
         );
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -1074,12 +1077,13 @@ const UpdateAction: DocumentActionComponent = ({
           resetForm();
         }
       } else {
+        const { data } = handleInvisibleAttributes(transformData(document), schema, initialValues);
         const res = await create(
           {
             model,
             params: currentDocumentMeta.params,
           },
-          transformData(document)
+          data
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
@@ -1202,6 +1206,8 @@ const UpdateAction: DocumentActionComponent = ({
     updateDocumentMutation,
     formatAPIError,
     onPreview,
+    initialValues,
+    schema,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux

@@ -22,6 +22,7 @@ type AnySchema =
 
 interface ValidationOptions {
   status: 'draft' | 'published' | null;
+  removedAttributes?: string[];
 }
 
 const arrayValidator = (attribute: Schema['attributes'][string], options: ValidationOptions) => ({
@@ -61,6 +62,11 @@ const createYupSchema = (
       .shape(
         Object.entries(attributes).reduce<ObjectShape>((acc, [name, attribute]) => {
           if (DOCUMENT_META_FIELDS.includes(name)) {
+            return acc;
+          }
+
+          if (options.removedAttributes?.includes(name)) {
+            // If the attribute is not visible, we don't want to validate it
             return acc;
           }
 
