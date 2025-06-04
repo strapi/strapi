@@ -7,7 +7,7 @@ import { getLocalConfig } from '../config/local';
 
 import packageJson from '../../package.json';
 
-export const VERSION = 'v1';
+export const VERSION = 'v2';
 
 export type ProjectInfo = {
   id: string;
@@ -76,6 +76,10 @@ export type GetProjectResponse = {
   };
 };
 
+export type CreateTrialResponse = {
+  licenseKey: string;
+};
+
 export interface CloudApiService {
   deploy(
     deployInput: {
@@ -110,6 +114,10 @@ export interface CloudApiService {
 
   getProject(project: { name: string }): Promise<AxiosResponse<GetProjectResponse>>;
 
+  createTrial(createTrialInput: {
+    strapiVersion: string;
+  }): Promise<AxiosResponse<CreateTrialResponse>>;
+
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
 
@@ -119,7 +127,7 @@ export async function cloudApiFactory(
 ): Promise<CloudApiService> {
   const localConfig = await getLocalConfig();
   const customHeaders = {
-    'x-device-id': localConfig.deviceId,
+    'x-device-id': localConfig.installId,
     'x-app-version': packageJson.version,
     'x-os-name': os.type(),
     'x-os-version': os.version(),
@@ -274,6 +282,21 @@ export async function cloudApiFactory(
         logger.debug(
           "🥲 Oops! There was a problem retrieving your project's details. Please try again."
         );
+        throw error;
+      }
+    },
+
+    async createTrial({ strapiVersion }): Promise<AxiosResponse<CreateTrialResponse>> {
+      try {
+        const response = await axiosCloudAPI.post(`/cms-trial-request`, { strapiVersion });
+
+        if (response.status !== 200) {
+          throw new Error('Error creating trial.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug('🥲 Oops! There was a problem creating your trial. Please try again.');
         throw error;
       }
     },

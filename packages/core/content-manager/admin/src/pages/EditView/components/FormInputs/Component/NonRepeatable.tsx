@@ -1,7 +1,9 @@
 import { useField } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Grid } from '@strapi/design-system';
+import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
+import { ResponsiveGridItem, ResponsiveGridRoot } from '../../FormLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import type { ComponentInputProps } from './Input';
@@ -18,6 +20,7 @@ const NonRepeatableComponent = ({
   const { value } = useField(name);
   const level = useComponent('NonRepeatableComponent', (state) => state.level);
   const isNested = level > 0;
+  const { currentDocument } = useDocumentContext('NonRepeatableComponent');
 
   return (
     <ComponentProvider id={value?.id} uid={attribute.component} level={level + 1} type="component">
@@ -33,7 +36,7 @@ const NonRepeatableComponent = ({
         <Flex direction="column" alignItems="stretch" gap={6}>
           {layout.map((row, index) => {
             return (
-              <Grid.Root gap={4} key={index}>
+              <ResponsiveGridRoot gap={4} key={index}>
                 {row.map(({ size, ...field }) => {
                   /**
                    * Layouts are built from schemas so they don't understand the complete
@@ -49,7 +52,7 @@ const NonRepeatableComponent = ({
                   });
 
                   return (
-                    <Grid.Item
+                    <ResponsiveGridItem
                       col={size}
                       key={completeFieldName}
                       s={12}
@@ -57,11 +60,16 @@ const NonRepeatableComponent = ({
                       direction="column"
                       alignItems="stretch"
                     >
-                      {children({ ...field, label: translatedLabel, name: completeFieldName })}
-                    </Grid.Item>
+                      {children({
+                        ...field,
+                        label: translatedLabel,
+                        name: completeFieldName,
+                        document: currentDocument,
+                      })}
+                    </ResponsiveGridItem>
                   );
                 })}
-              </Grid.Root>
+              </ResponsiveGridRoot>
             );
           })}
         </Flex>

@@ -113,8 +113,7 @@ const collectorFixtures = ({ stamp }) => [
 const getCollectorByName = (collectors, name) => collectors.find((c) => c.name === name);
 const getStampByName = (stamps, name) => stamps.find((s) => s.name === name);
 
-// TODO: Fix relations
-describe.skip('CM API', () => {
+describe('CM API', () => {
   describe.each([{ populateRelations: false }, { populateRelations: true }])(
     `populate relations in webhooks ($populateRelations)`,
     ({ populateRelations }) => {
@@ -213,11 +212,11 @@ describe.skip('CM API', () => {
         test('findOne', async () => {
           const res = await rq({
             method: 'GET',
-            url: `/content-manager/collection-types/api::collector.collector/${data.collectors[0].id}`,
+            url: `/content-manager/collection-types/api::collector.collector/${data.collectors[0].documentId}`,
           });
 
           expect(res.statusCode).toBe(200);
-          expect(res.body).toMatchObject({
+          expect(res.body.data).toMatchObject({
             age: 25,
             id: 1,
             name: 'Bernard',

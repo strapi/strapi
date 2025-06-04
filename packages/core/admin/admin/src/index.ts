@@ -17,10 +17,13 @@ export * from './components/Filters';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
+export * from './components/WidgetHelpers';
 export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
 export * from './components/ContentBox';
+export * from './components/SubNav';
+export * from './components/GradientBadge';
 
 export { useGuidedTour } from './components/GuidedTour/Provider';
 
@@ -43,12 +46,13 @@ export { useHistory } from './features/BackButton';
  * Hooks
  */
 export { useInjectReducer } from './hooks/useInjectReducer';
-export { useAPIErrorHandler, type ApiError } from './hooks/useAPIErrorHandler';
+export { useAPIErrorHandler } from './hooks/useAPIErrorHandler';
 export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
 export { useFocusInputField } from './hooks/useFocusInputField';
-export { useRBAC } from './hooks/useRBAC';
+export { useRBAC, type AllowedActions } from './hooks/useRBAC';
 export { useClipboard } from './hooks/useClipboard';
+export { useElementOnScreen } from './hooks/useElementOnScreen';
 export { useAdminUsers } from './services/users';
 
 /**
@@ -66,6 +70,7 @@ export type {
   Entity,
 } from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
+export type { Widget as WidgetType } from './core/apis/Widgets';
 
 /**
  * Utils

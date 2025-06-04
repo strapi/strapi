@@ -290,6 +290,7 @@
   "app.components.LeftMenu.logout": "Abmelden",
   "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
   "app.components.LeftMenu.navbrand.workplace": "Arbeitsplatz",
+  "app.components.LeftMenu.trialCountdown": "Dein Test läuft am {date} ab.",
   "app.components.LeftMenuFooter.help": "Hilfe",
   "app.components.LeftMenuFooter.poweredBy": "Powered by ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "Sammlungen",

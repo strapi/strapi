@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.5.2",
+  "version": "5.14.0",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -58,11 +58,15 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist/",
-    "strapi-server.js"
+    "dist/"
   ],
   "scripts": {
-    "build": "pack-up build && vite build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:server build:types:admin build:types:internals",
+    "build:types:internals": "run -T tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:types:server": "run -T tsc -p server/tsconfig.build.json --emitDeclarationOnly",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -72,7 +76,7 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json && run -T tsc -p ee/admin/tsconfig.json",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "pack-up watch"
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
@@ -80,16 +84,16 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-rc.14",
-    "@strapi/icons": "2.0.0-rc.14",
-    "@strapi/permissions": "5.5.2",
-    "@strapi/types": "5.5.2",
-    "@strapi/typescript-utils": "5.5.2",
-    "@strapi/utils": "5.5.2",
+    "@strapi/design-system": "2.0.0-rc.24",
+    "@strapi/icons": "2.0.0-rc.24",
+    "@strapi/permissions": "5.14.0",
+    "@strapi/types": "5.14.0",
+    "@strapi/typescript-utils": "5.14.0",
+    "@strapi/utils": "5.14.0",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
-    "axios": "1.7.4",
+    "axios": "1.8.4",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
     "chalk": "^4.1.2",
@@ -107,7 +111,7 @@
     "invariant": "^2.2.4",
     "is-localhost-ip": "2.0.0",
     "jsonwebtoken": "9.0.0",
-    "koa": "2.15.2",
+    "koa": "2.16.1",
     "koa-compose": "4.1.0",
     "koa-passport": "6.0.0",
     "koa-static": "5.0.0",
@@ -133,15 +137,14 @@
     "scheduler": "0.23.0",
     "semver": "7.5.4",
     "sift": "16.0.1",
-    "typescript": "5.3.2",
+    "typescript": "5.4.4",
     "use-context-selector": "1.4.1",
     "yup": "0.32.9",
-    "zod": "^3.22.4"
+    "zod": "3.24.2"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "5.5.2",
-    "@strapi/data-transfer": "5.5.2",
-    "@strapi/pack-up": "5.0.2",
+    "@strapi/admin-test-utils": "5.14.0",
+    "@strapi/data-transfer": "5.14.0",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",
     "@types/invariant": "2.2.36",
@@ -164,7 +167,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "vite": "5.2.14",
+    "vite": "5.4.19",
     "vite-plugin-dts": "^4.3.0"
   },
   "peerDependencies": {

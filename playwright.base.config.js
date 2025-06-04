@@ -28,14 +28,14 @@ const getEnvBool = (envVar, defaultValue) => {
 
 /**
  * @typedef ConfigOptions
- * @type {{ port: number; testDir: string; appDir: string }}
+ * @type {{ port: number; testDir: string; appDir: string; reportFileName: string }}
  */
 
 /**
  * @see https://playwright.dev/docs/test-configuration
  * @type {(options: ConfigOptions) => import('@playwright/test').PlaywrightTestConfig}
  */
-const createConfig = ({ port, testDir, appDir }) => ({
+const createConfig = ({ port, testDir, appDir, reportFileName }) => ({
   testDir,
 
   /* default timeout for a jest test */
@@ -64,8 +64,8 @@ const createConfig = ({ port, testDir, appDir }) => ({
       'junit',
       {
         outputFile: path.join(
-          getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../test-results/'),
-          'junit.xml'
+          getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../../junit-reports/'),
+          reportFileName
         ),
       },
     ],
@@ -81,7 +81,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
     /* Default time each action such as `click()` can take */
     actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 10 * 1000),
     // Only record trace when retrying a test to optimize test performance
-    trace: 'on-first-retry',
+    trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
     video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
       ? {
           mode: 'on-first-retry', // Only save videos when retrying a test

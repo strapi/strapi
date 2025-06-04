@@ -1,32 +1,53 @@
-import { useState, MouseEvent } from 'react';
+import { useState } from 'react';
 
-import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { useCollator, useFilter } from '@strapi/design-system';
-import isEqual from 'lodash/isEqual';
+import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
-import { useDataManager } from '../../hooks/useDataManager';
-import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
+import { useDataManager } from '../DataManager/useDataManager';
+import { useFormModalNavigation } from '../FormModalNavigation/useFormModalNavigation';
 
-import type { Internal } from '@strapi/types';
+import type { Status } from '../../types';
+
+type Link = {
+  name: string;
+  to: string;
+  status: Status;
+  title: string;
+};
+
+type SubSection = {
+  name: string;
+  title: string;
+  links: Link[];
+};
+
+type MenuSection = {
+  name: string;
+  title: {
+    id: string;
+    defaultMessage: string;
+  };
+  customLink?: {
+    id: string;
+    defaultMessage: string;
+    onClick: () => void;
+  };
+  links: Array<SubSection | Link>;
+  linksCount?: number;
+};
+
+type Menu = MenuSection[];
 
 export const useContentTypeBuilderMenu = () => {
-  const {
-    components,
-    componentsGroupedByCategory,
-    contentTypes,
-    isInDevelopmentMode,
-    sortedContentTypesList,
-    modifiedData,
-    initialData,
-  } = useDataManager();
-  const { toggleNotification } = useNotification();
-  const { formatMessage } = useIntl();
+  const { componentsGroupedByCategory, isInDevelopmentMode, sortedContentTypesList } =
+    useDataManager();
   const { trackUsage } = useTracking();
-  const [search, setSearch] = useState('');
-  const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
+  const [searchValue, setSearchValue] = useState('');
+  const { onOpenModalCreateSchema } = useFormModalNavigation();
   const { locale } = useIntl();
 
   const { startsWith } = useFilter(locale, {
@@ -37,112 +58,84 @@ export const useContentTypeBuilderMenu = () => {
     sensitivity: 'base',
   });
 
-  const canOpenModalCreateCTorComponent =
-    !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
-    !Object.keys(components).some(
-      (component) => components[component as Internal.UID.Component].isTemporary === true
-    ) &&
-    isEqual(modifiedData, initialData);
-
   const handleClickOpenModalCreateCollectionType = () => {
-    if (canOpenModalCreateCTorComponent) {
-      trackUsage(`willCreateContentType`);
+    trackUsage(`willCreateContentType`);
 
-      const nextState = {
-        modalType: 'contentType',
-        kind: 'collectionType',
-        actionType: 'create',
-        forTarget: 'contentType',
-      };
+    const nextState = {
+      modalType: 'contentType',
+      kind: 'collectionType',
+      actionType: 'create',
+      forTarget: 'contentType',
+    };
 
-      onOpenModalCreateSchema(nextState);
-    } else {
-      toggleNotificationCannotCreateSchema();
-    }
+    onOpenModalCreateSchema(nextState);
   };
 
   const handleClickOpenModalCreateSingleType = () => {
-    if (canOpenModalCreateCTorComponent) {
-      trackUsage(`willCreateSingleType`);
+    trackUsage(`willCreateSingleType`);
 
-      const nextState = {
-        modalType: 'contentType',
-        kind: 'singleType',
-        actionType: 'create',
-        forTarget: 'contentType',
-      };
+    const nextState = {
+      modalType: 'contentType',
+      kind: 'singleType',
+      actionType: 'create',
+      forTarget: 'contentType',
+    };
 
-      onOpenModalCreateSchema(nextState);
-    } else {
-      toggleNotificationCannotCreateSchema();
-    }
+    onOpenModalCreateSchema(nextState);
   };
 
   const handleClickOpenModalCreateComponent = () => {
-    if (canOpenModalCreateCTorComponent) {
-      trackUsage('willCreateComponent');
+    trackUsage('willCreateComponent');
 
-      const nextState = {
-        modalType: 'component',
-        kind: null,
-        actionType: 'create',
-        forTarget: 'component',
-      };
+    const nextState = {
+      modalType: 'component',
+      kind: null,
+      actionType: 'create',
+      forTarget: 'component',
+    };
 
-      onOpenModalCreateSchema(nextState);
-    } else {
-      toggleNotificationCannotCreateSchema();
-    }
-  };
-
-  const toggleNotificationCannotCreateSchema = () => {
-    toggleNotification({
-      type: 'info',
-      message: formatMessage({
-        id: getTrad('notification.info.creating.notSaved'),
-        defaultMessage: 'Please save your work before creating a new collection type or component',
-      }),
-    });
+    onOpenModalCreateSchema(nextState);
   };
 
   const componentsData = Object.entries(componentsGroupedByCategory)
     .map(([category, components]) => ({
       name: category,
-      title: category,
-      isEditable: isInDevelopmentMode,
-      onClickEdit(e: MouseEvent, data: any) {
-        e.stopPropagation();
-
-        if (canOpenModalCreateCTorComponent) {
-          onOpenModalEditCategory(data.name);
-        } else {
-          toggleNotificationCannotCreateSchema();
-        }
-      },
+      title: upperFirst(category),
       links: components
         .map((component) => ({
           name: component.uid,
           to: `/plugins/${pluginId}/component-categories/${category}/${component.uid}`,
-          title: component.schema.displayName,
+          title: component.info.displayName,
+          status: component.status,
         }))
         .sort((a, b) => formatter.compare(a.title, b.title)),
     }))
     .sort((a, b) => formatter.compare(a.title, b.title));
 
-  const displayedContentTypes = sortedContentTypesList.filter((obj) => obj.visible);
+  const displayedContentTypes = sortedContentTypesList
+    .filter((obj) => obj.visible)
+    .map((info) => ({
+      kind: info.kind,
+      name: info.name,
+      to: info.to,
+      title: info.title,
+      status: info.status,
+    }));
 
-  const data = [
+  const data: Menu = [
     {
       name: 'models',
       title: {
         id: `${getTrad('menu.section.models.name')}`,
         defaultMessage: 'Collection Types',
       },
-      customLink: isInDevelopmentMode && {
-        id: `${getTrad('button.model.create')}`,
-        defaultMessage: 'Create new collection type',
-        onClick: handleClickOpenModalCreateCollectionType,
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            id: `${getTrad('button.model.create')}`,
+            defaultMessage: 'Create new collection type',
+            onClick: handleClickOpenModalCreateCollectionType,
+          }
+        : undefined,
       links: displayedContentTypes.filter((contentType) => contentType.kind === 'collectionType'),
     },
     {
@@ -151,11 +144,13 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.single-types.name')}`,
         defaultMessage: 'Single Types',
       },
-      customLink: isInDevelopmentMode && {
-        id: `${getTrad('button.single-types.create')}`,
-        defaultMessage: 'Create new single type',
-        onClick: handleClickOpenModalCreateSingleType,
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            id: `${getTrad('button.single-types.create')}`,
+            defaultMessage: 'Create new single type',
+            onClick: handleClickOpenModalCreateSingleType,
+          }
+        : undefined,
       links: displayedContentTypes.filter((singleType) => singleType.kind === 'singleType'),
     },
     {
@@ -164,43 +159,46 @@ export const useContentTypeBuilderMenu = () => {
         id: `${getTrad('menu.section.components.name')}`,
         defaultMessage: 'Components',
       },
-      customLink: isInDevelopmentMode && {
-        id: `${getTrad('button.component.create')}`,
-        defaultMessage: 'Create a new component',
-        onClick: handleClickOpenModalCreateComponent,
-      },
+      customLink: isInDevelopmentMode
+        ? {
+            id: `${getTrad('button.component.create')}`,
+            defaultMessage: 'Create a new component',
+            onClick: handleClickOpenModalCreateComponent,
+          }
+        : undefined,
       links: componentsData,
     },
   ].map((section) => {
-    const hasChild = section.links.some((l) => Array.isArray(l.links));
+    const hasChild = section.links.some((l) => 'links' in l && Array.isArray(l.links));
 
     if (hasChild) {
       let filteredLinksCount = 0;
 
       return {
         ...section,
-        links: section.links
-          .map((link) => {
-            const filteredLinks = link.links.filter((link: any) => startsWith(link.title, search));
+        links: section.links.reduce((acc, link) => {
+          const filteredLinks =
+            'links' in link ? link.links.filter((link) => startsWith(link.title, searchValue)) : [];
 
-            if (filteredLinks.length === 0) {
-              return null;
-            }
+          if (filteredLinks.length === 0) {
+            return acc;
+          }
 
-            filteredLinksCount += filteredLinks.length;
+          filteredLinksCount += filteredLinks.length;
 
-            return {
-              ...link,
-              links: filteredLinks.sort((a: any, b: any) => formatter.compare(a.title, b.title)),
-            };
-          })
-          .filter(Boolean),
+          acc.push({
+            ...link,
+            links: filteredLinks.sort((a, b) => formatter.compare(a.title, b.title)),
+          });
+
+          return acc;
+        }, [] as SubSection[]),
         linksCount: filteredLinksCount,
       };
     }
 
     const filteredLinks = section.links
-      .filter((link) => startsWith(link.title, search))
+      .filter((link) => startsWith(link.title, searchValue))
       .sort((a, b) => formatter.compare(a.title, b.title));
 
     return {
@@ -212,7 +210,10 @@ export const useContentTypeBuilderMenu = () => {
 
   return {
     menu: data,
-    searchValue: search,
-    onSearchChange: setSearch,
+    search: {
+      value: searchValue,
+      onChange: setSearchValue,
+      clear: () => setSearchValue(''),
+    },
   };
 };
