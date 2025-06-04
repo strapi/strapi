@@ -19,7 +19,9 @@ function int(key: string, defaultValue?: number | null | undefined): number | un
     return defaultValue ?? undefined;
   }
 
-  return parseInt(getKey(key), 10);
+  const maybeInt = parseInt(getKey(key), 10);
+
+  return Number.isFinite(maybeInt) ? maybeInt : undefined;
 }
 
 function float(key: string, defaultValue: number): number;
@@ -29,7 +31,9 @@ function float(key: string, defaultValue?: number | null | undefined): number | 
     return defaultValue ?? undefined;
   }
 
-  return parseFloat(getKey(key));
+  const maybeFloat = parseFloat(getKey(key));
+
+  return Number.isFinite(maybeFloat) ? maybeFloat : undefined;
 }
 
 function bool(key: string, defaultValue: boolean): boolean;
@@ -85,7 +89,9 @@ function date(key: string, defaultValue?: Date | null | undefined): Date | undef
     return defaultValue ?? undefined;
   }
 
-  return new Date(getKey(key));
+  const maybeDate = new Date(getKey(key));
+
+  return Number.isFinite(maybeDate.getTime()) ? maybeDate : undefined;
 }
 
 /** Gets a value from env that matches oneOf provided values */
