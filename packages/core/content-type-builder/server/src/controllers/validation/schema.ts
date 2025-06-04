@@ -553,7 +553,7 @@ const attributePropertiesSchema = (meta: SchemaMeta) => {
     timeStampSchema,
     booleanSchema,
     componentSchema,
-    customFieldSchema,
+    customFieldSchema.passthrough(),
 
     relationSchema,
   ]);

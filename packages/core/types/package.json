@@ -52,7 +52,7 @@
     "@strapi/utils": "5.14.0",
     "commander": "8.3.0",
     "json-logic-js": "2.0.5",
-    "koa": "2.15.4",
+    "koa": "2.16.1",
     "koa-body": "6.0.1",
     "node-schedule": "2.1.1",
     "typedoc": "0.25.10",
