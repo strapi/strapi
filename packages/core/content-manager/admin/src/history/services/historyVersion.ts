@@ -1,11 +1,11 @@
-import { Data } from '@strapi/types';
-
 import {
   GetHistoryVersions,
   RestoreHistoryVersion,
 } from '../../../../shared/contracts/history-versions';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { contentManagerApi } from '../../services/api';
+
+import type { Data } from '@strapi/types';
 
 interface RestoreVersion extends RestoreHistoryVersion.Request {
   documentId: Data.ID;

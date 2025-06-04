@@ -15,8 +15,16 @@ import {
   Layouts,
   useTable,
 } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Typography, ButtonProps } from '@strapi/design-system';
+import {
+  Button,
+  Flex,
+  Typography,
+  ButtonProps,
+  Box,
+  EmptyStateLayout,
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -203,7 +211,12 @@ const ListViewPage = () => {
     return <Page.Error />;
   }
 
-  const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
+  const contentTypeTitle = schema?.info.displayName
+    ? formatMessage({ id: schema.info.displayName, defaultMessage: schema.info.displayName })
+    : formatMessage({
+        id: 'content-manager.containers.untitled',
+        defaultMessage: 'Untitled',
+      });
 
   const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
@@ -212,6 +225,73 @@ const ListViewPage = () => {
       search: stringify({ plugins: query.plugins }),
     });
   };
+
+  if (!isFetching && results.length === 0) {
+    return (
+      <Page.Main>
+        <Page.Title>{`${contentTypeTitle}`}</Page.Title>
+        <LayoutsHeaderCustom
+          primaryAction={canCreate ? <CreateButton /> : null}
+          subtitle={formatMessage(
+            {
+              id: getTranslation('pages.ListView.header-subtitle'),
+              defaultMessage:
+                '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+            },
+            { number: pagination?.total }
+          )}
+          title={contentTypeTitle}
+          navigationAction={<BackButton />}
+        />
+        <Layouts.Action
+          endActions={
+            <>
+              <InjectionZone area="listView.actions" />
+              <ViewSettingsMenu
+                setHeaders={handleSetHeaders}
+                resetHeaders={() => setDisplayedHeaders(list.layout)}
+                headers={displayedHeaders.map((header) => header.name)}
+              />
+            </>
+          }
+          startActions={
+            <>
+              {list.settings.searchable && (
+                <SearchInput
+                  disabled={results.length === 0}
+                  label={formatMessage(
+                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                    { target: contentTypeTitle }
+                  )}
+                  placeholder={formatMessage({
+                    id: 'global.search',
+                    defaultMessage: 'Search',
+                  })}
+                  trackedEvent="didSearch"
+                />
+              )}
+              {list.settings.filterable && schema ? (
+                <Filters disabled={results.length === 0} schema={schema} />
+              ) : null}
+            </>
+          }
+        />
+        <Layouts.Content>
+          <Box background="neutral0" shadow="filterShadow" hasRadius>
+            <EmptyStateLayout
+              action={canCreate ? <CreateButton variant="secondary" /> : null}
+              content={formatMessage({
+                id: 'app.components.EmptyStateLayout.content-document',
+                defaultMessage: 'No content found',
+              })}
+              hasRadius
+              icon={<EmptyDocuments width="16rem" />}
+            />
+          </Box>
+        </Layouts.Content>
+      </Page.Main>
+    );
+  }
 
   return (
     <Page.Main>

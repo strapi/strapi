@@ -1,12 +1,14 @@
-import { kebabCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase, snakeCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
-import { clickAndWait, findByRowColumn } from './shared';
+import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
+import { rowHeight } from '@strapi/admin/admin/src/pages/Settings/pages/Roles/utils/constants';
 
 export interface AddAttribute {
   type: string;
-  name: string;
+  name?: string;
+  advanced?: AdvancedAttributeSettings;
   number?: { format: numberFormat };
   date?: { format: dateFormat };
   media?: { multiple: boolean };
@@ -14,8 +16,78 @@ export interface AddAttribute {
   component?: { useExisting?: string; options: Partial<AddComponentOptions> };
   dz?: {
     components: AddComponentAttribute[];
-    options: Partial<AddDynamicZoneOptions>;
   };
+  relation?: {
+    type: keyof typeof relationsMap;
+    target: {
+      name?: string;
+      select?: string;
+    };
+  };
+}
+
+// keys are the relation types used by the RelationNaturePicker component
+// locatorText is the text that should be displayed for the relation type
+// inverted denotes the inverse relation type(s)
+export const relationsMap: Record<
+  string,
+  {
+    locatorText: string;
+    hasInverse: boolean;
+    inverted?: boolean;
+    pluralizeTarget?: boolean;
+    pluralizeName?: boolean;
+  }
+> = {
+  oneWay: {
+    locatorText: 'has one',
+    hasInverse: false,
+    pluralizeTarget: false,
+    pluralizeName: false,
+  },
+  oneToOne: {
+    locatorText: 'has and belongs to one',
+    hasInverse: true,
+    pluralizeTarget: false,
+    pluralizeName: false,
+  },
+  oneToMany: {
+    locatorText: 'belongs to many',
+    hasInverse: true,
+    pluralizeTarget: false,
+    pluralizeName: true,
+  },
+  manyToOne: {
+    locatorText: 'has many',
+    inverted: true,
+    hasInverse: true,
+    pluralizeTarget: true,
+    pluralizeName: false,
+  },
+  manyToMany: {
+    locatorText: 'has and belongs to many',
+    hasInverse: true,
+    pluralizeTarget: true,
+    pluralizeName: true,
+  },
+  manyWay: {
+    locatorText: 'has many',
+    hasInverse: false,
+    pluralizeTarget: true,
+    pluralizeName: true,
+  },
+} as const;
+
+// Advanced Settings for all types
+// TODO: split this into settings based on the attribute type
+interface AdvancedAttributeSettings {
+  required?: boolean;
+  unique?: boolean;
+  maximum?: number;
+  minimum?: number;
+  private?: boolean;
+  default?: any;
+  regexp?: string;
 }
 
 interface AddComponentAttribute extends AddAttribute {
@@ -26,6 +98,10 @@ interface AddDynamicZoneAttribute extends AddAttribute {
   type: 'dz';
 }
 
+interface AddRelationAttribute extends AddAttribute {
+  type: 'relation';
+}
+
 // Type guard function to check if an attribute is a ComponentAttribute
 function isComponentAttribute(attribute: AddAttribute): attribute is AddComponentAttribute {
   return attribute.type === 'component';
@@ -34,7 +110,9 @@ function isDynamicZoneAttribute(attribute: AddAttribute): attribute is AddDynami
   return attribute.type === 'dz';
 }
 
-// Enumeration needs "values"
+function isRelationAttribute(attribute: AddAttribute): attribute is AddRelationAttribute {
+  return attribute.type === 'relation';
+}
 
 type numberFormat = 'integer' | 'big integer' | 'decimal';
 type dateFormat = 'date' | 'time' | 'datetime';
@@ -68,14 +146,12 @@ type AddComponentOptions = {
   repeatable: boolean;
 } & CreateComponentOptions;
 
-type AddDynamicZoneOptions = {};
-
 // lookup table for attribute types+subtypes so they can be found
 // buttonName is the header of the button clicked from the "Add Attribute" screen
 // listLabel is how they appear in the list of all attributes on the content type page
 // This is necessary because the labels used for each attribute type differ based on
 // their other attribute options
-const typeMap = {
+export const typeMap = {
   text: { buttonName: 'Text', listLabel: 'Text' },
   boolean: { buttonName: 'Boolean', listLabel: 'Boolean' },
   blocks: { buttonName: 'Rich text (blocks)', listLabel: 'Rich text (blocks)' },
@@ -91,7 +167,7 @@ const typeMap = {
   relation: { buttonName: 'Relation', listLabel: 'Relation' },
   markdown: { buttonName: 'Rich text (Markdown)', listLabel: 'Rich text (Markdown)' },
   component: { buttonName: 'Component', listLabel: 'Component' },
-  component_repeatable: { buttonName: 'Component', listLabel: 'Component (repeatable)' },
+  component_repeatable: { buttonName: 'Component', listLabel: 'Repeatable Component' },
   dz: { buttonName: 'Dynamic Zone', listLabel: 'Dynamic Zone' },
 };
 
@@ -124,15 +200,24 @@ export const selectComponentIcon = async (page: Page, icon: string) => {
 };
 
 // open the component builder
-const openComponentBuilder = async (page: Page) => {
+export const openComponentBuilder = async (page: Page) => {
   await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
   await clickAndWait(page, page.getByRole('button', { name: 'Create new component' }));
 };
 
 // The initial "create a component" screen from the content type builder nav
+// also supports "create a component" from within a dz
 export const fillCreateComponent = async (page: Page, options: Partial<CreateComponentOptions>) => {
   if (options.name) {
-    await page.getByLabel('Display name').fill(options.name);
+    const displayNameLocator = page.getByLabel('Display name');
+    if (await displayNameLocator.isVisible({ timeout: 0 })) {
+      await displayNameLocator.fill(options.name);
+    } else {
+      const nameLocator = page.getByLabel('Name', { exact: true });
+      if (await nameLocator.isVisible({ timeout: 0 })) {
+        await nameLocator.fill(options.name);
+      }
+    }
   }
 
   if (options.icon) {
@@ -162,7 +247,7 @@ export const fillAddComponentAttribute = async (
   component: AddAttribute['component']
 ) => {
   if (component.options.name) {
-    await page.getByLabel('Name').fill(component.options.name);
+    await fillComponentName(page, component.options.name);
   }
 
   // if existing component, select it
@@ -176,16 +261,133 @@ export const fillAddComponentAttribute = async (
 
     await item.scrollIntoViewIfNeeded();
     await item.click();
+
+    // close the select menu
+    if (await page.getByText('component selected').isVisible({ timeout: 0 })) {
+      await page.getByText('component selected').click({ force: true });
+    }
   }
 
-  // Select repeatable or single
-  const repeatableValue = component.options.repeatable ? 'true' : 'false';
-  await page.click(`label[for="${repeatableValue}"]`);
+  await selectComponentRepeatable(page, component.options.repeatable);
 };
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+export const fillComponentName = async (page: Page, name: string) => {
+  const displayNameLocator = page.getByLabel('Display name');
+  if (await displayNameLocator.isVisible({ timeout: 0 })) {
+    await displayNameLocator.fill(name);
+  } else {
+    const nameLocator = page.getByLabel('Name', { exact: true });
+    if (await nameLocator.isVisible({ timeout: 0 })) {
+      await nameLocator.fill(name);
+    }
+  }
+};
+
+export const selectComponentRepeatable = async (page: Page, value: boolean) => {
+  // Check if the "repeatable" options are present
+  if (await page.locator('input[name="repeatable"]').first().isVisible({ timeout: 0 })) {
+    const repeatableValue = value ? 'true' : 'false';
+    const radioButton = page.locator(`input[name="repeatable"][value="${repeatableValue}"]`);
+    await radioButton.click({ force: true });
+  }
+};
+
+function hasInverse(relation: AddAttribute['relation']): relation is AddAttribute['relation'] & {
+  type: keyof typeof relationsMap;
+  target: { name?: string; select?: string };
+} {
+  return relationsMap[relation?.type]?.hasInverse ?? false;
+}
+
+function isInverted(relation: AddAttribute['relation']): relation is AddAttribute['relation'] & {
+  type: keyof typeof relationsMap;
+  target: { name?: string; select?: string };
+} {
+  const relationType = relation?.type;
+  if (!relationType) return false;
+  const relationConfig = relationsMap[relationType];
+  return Boolean(relationConfig?.inverted);
+}
+
+export const addRelationAttribute = async (
+  page: Page,
+  attribute: AddRelationAttribute,
+  options?: AttributeOptions
+) => {
+  const { relation, name } = attribute;
+  const target = relation?.target;
+  const targetSelect = target?.select;
+  const relationText = relationsMap[relation?.type]?.locatorText;
+
+  // Click the correct relation type button
+  // instead of using aria-label we need to use data-relation-type with the relation type itself
+  await page.locator(`button[data-relation-type="${relation?.type}"]`).click();
+  // check that the button is now aria-pressed
+  await expect(page.locator(`button[data-relation-type="${relation?.type}"]`)).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+
+  // Select the relation type if `targetSelect` is provided
+  const dialog = page.getByRole('dialog'); // Locate the dialog
+  const relationTypePicker = dialog.locator('button[aria-haspopup="menu"]'); // Find the button inside it
+
+  if (targetSelect) {
+    await relationTypePicker.click();
+    await page.getByRole('menuitem', { name: targetSelect }).click();
+  }
+
+  // Verify expected text in the relation type picker
+  const expectedText = isInverted(relation)
+    ? `${targetSelect} ${relationText}`
+    : `${relationText} ${targetSelect}`;
+  await expect(dialog).toContainText(expectedText);
+
+  const nameFieldValue = await page.locator('input[name="name"]').inputValue();
+  const targetNameFieldValue = await page.locator('input[name="targetAttribute"]').inputValue();
+
+  // check that the name field is filled with the target name in the correct pluralization
+  expect(nameFieldValue).toBe(
+    snakeCase(
+      relationsMap[relation?.type]?.pluralizeName
+        ? pluralize(target?.select?.toLowerCase())
+        : target?.select?.toLowerCase()
+    )
+  );
+
+  // verify the target field is filled with the correct pluralization
+  if (options?.contentTypeName && hasInverse(relation)) {
+    expect(targetNameFieldValue).toBe(
+      snakeCase(
+        relationsMap[relation?.type]?.pluralizeTarget
+          ? pluralize(options.contentTypeName.toLowerCase())
+          : options.contentTypeName.toLowerCase()
+      )
+    );
+  }
+
+  //  fill in target attribute or ensure it is disabled
+  const targetAttributeInput = page.locator('input[name="targetAttribute"]');
+
+  if (hasInverse(relation)) {
+    if (relation.target.name) {
+      await targetAttributeInput.fill(relation.target.name);
+    }
+  } else {
+    await expect(targetAttributeInput).toBeDisabled();
+  }
+
+  // Fill in the "Name" field if provided
+  if (name) {
+    await page.locator('input[name="name"]').fill(name);
+  }
+
+  await page.getByRole('button', { name: 'Finish' }).click();
+};
 
 export const addComponentAttribute = async (
   page: Page,
@@ -193,44 +395,87 @@ export const addComponentAttribute = async (
   options: any = {}
 ) => {
   const attrCompOptions = attribute.component.options;
-  await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
 
-  const useExisting = attribute.component.useExisting ? 'false' : 'true';
-  await page.click(`label[for="${useExisting}"]`);
+  const useExistingLabel = attribute.component.useExisting ? 'false' : 'true';
+  await page.click(`label[for="${useExistingLabel}"]`);
 
-  if (!options?.fromDz) {
-    if (attribute.component.useExisting) {
-      await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
-    } else {
-      await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
-    }
-
+  // if "select a component"
+  if (await page.getByRole('button', { name: 'Select a component' }).isVisible({ timeout: 0 })) {
+    await clickAndWait(page, page.getByRole('button', { name: 'Select a component' }));
     await fillAddComponentAttribute(page, attribute.component);
   }
+  // if "configure a component"
+  else if (
+    await page.getByRole('button', { name: 'Configure the component' }).isVisible({ timeout: 0 })
+  ) {
+    await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
+    await clickAndWait(page, page.getByRole('button', { name: 'Configure the component' }));
+  }
+  // if using an existing component
+  else if (attribute.component.useExisting) {
+    await fillAddComponentAttribute(page, attribute.component);
+  }
+  //??
+  else {
+    await fillCreateComponent(page, { ...attrCompOptions, name: attribute.name });
+  }
+
+  await fillComponentName(page, attribute.name);
+
+  await selectComponentRepeatable(page, attribute.component?.options.repeatable);
 
   if (attrCompOptions.attributes) {
-    await clickAndWait(
-      page,
-      page.getByRole('button', { name: new RegExp('Add first field to the component', 'i') })
-    );
+    const addFirstFieldButton = page.getByRole('button', {
+      name: new RegExp('Add first field to the component', 'i'),
+    });
+    const addAnotherFieldButton = page.getByRole('button', {
+      name: new RegExp('Add another field', 'i'),
+    });
+
+    if (await addFirstFieldButton.isVisible({ timeout: 0 })) {
+      await clickAndWait(page, addFirstFieldButton);
+    } else if (await addAnotherFieldButton.isVisible({ timeout: 0 })) {
+      await clickAndWait(page, addAnotherFieldButton);
+    }
+
     await addAttributes(page, attrCompOptions.attributes, { clickFinish: false, ...options });
   }
 };
 
 export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZoneAttribute) => {
-  const options = attribute.dz.options;
-
+  // Fill the name of the dynamic zone
   await page.getByLabel('Name', { exact: true }).fill(attribute.name);
 
+  // Click the "Add components to the zone" button to start adding components
   await clickAndWait(
     page,
     page.getByRole('button', { name: new RegExp('Add components to the zone', 'i') })
   );
 
-  await addAttributes(page, attribute.dz.components, { clickFinish: false, fromDz: true });
+  // Add the components to the dynamic zone
+  await addAttributes(page, attribute.dz.components, {
+    fromDz: attribute.name, // Pass the DZ name to ensure subsequent components are added to the DZ
+  });
+
+  // Finish the dynamic zone creation
+  const finishButton = page.getByRole('button', { name: 'Finish' });
+  if (await finishButton.isVisible({ timeout: 0 })) {
+    await finishButton.click();
+  }
 };
 
-export const fillAttribute = async (page: Page, attribute: AddAttribute, options?: any) => {
+// Add contentTypeName to options interface
+interface AttributeOptions {
+  fromDz?: string;
+  contentTypeName?: string;
+  clickFinish?: boolean;
+}
+
+export const fillAttribute = async (
+  page: Page,
+  attribute: AddAttribute,
+  options?: AttributeOptions
+) => {
   // check if we need to click the attribute button or if we're already on the attribute to fill
   const onFieldTypeSelection = await page
     .getByRole('heading', { name: /Select a field for your/i })
@@ -252,6 +497,8 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     return await addComponentAttribute(page, attribute, options);
   } else if (isDynamicZoneAttribute(attribute)) {
     return await addDynamicZoneAttribute(page, attribute);
+  } else if (isRelationAttribute(attribute)) {
+    return await addRelationAttribute(page, attribute, options);
   }
 
   // Fill the input with the exact label "Name"
@@ -289,45 +536,77 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     await page.locator('textarea[name="enum"]').fill(attribute.enumeration?.values.join('\n'));
   }
 
-  // TODO: add support for advanced options
+  if (attribute.advanced) {
+    const advanced = attribute.advanced;
+    await page.getByText('Advanced Settings').click();
+
+    if (isBoolean(advanced.required)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Required field' });
+      await ensureCheckbox(checkbox, advanced.required);
+    }
+
+    if (isString(advanced.regexp)) {
+      await page.getByLabel('Regexp').fill(advanced.regexp);
+    }
+
+    if (isBoolean(advanced.unique)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Unique field' });
+      await ensureCheckbox(checkbox, advanced.unique);
+    }
+
+    if (isBoolean(advanced.private)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Private field' });
+      await ensureCheckbox(checkbox, advanced.private);
+    }
+
+    if (isNumber(advanced.maximum)) {
+      await page.getByLabel('Maximum').fill(advanced.maximum.toString());
+    }
+
+    if (isNumber(advanced.minimum)) {
+      await page.getByLabel('Minimum').fill(advanced.minimum.toString());
+    }
+
+    if (isString(advanced.default)) {
+      await page.getByLabel('Default').fill(advanced.default);
+    }
+  }
 };
 
-export const addAttributes = async (page: Page, attributes: AddAttribute[], options?: any) => {
+export const addAttributes = async (
+  page: Page,
+  attributes: AddAttribute[],
+  options?: AttributeOptions
+) => {
   for (let i = 0; i < attributes.length; i++) {
     const attribute = attributes[i];
     await fillAttribute(page, attribute, options);
 
     if (i < attributes.length - 1) {
-      // Not the last attribute, click 'Add Another Field'
-      // NOTE: Fields after components only work because 'Add Another Field' is the button text on both the page Add and the modal Add button
-      await clickAndWait(
-        page,
-        page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
-      );
+      if (options?.fromDz) {
+        // Locate the row containing the DZ name
+        const dzRow = page.locator('div').filter({ hasText: options.fromDz }).first();
+
+        // Locate the next sibling row and find the "Add a component" button
+        const nextRow = dzRow.locator('xpath=following-sibling::tr[1]');
+        const addComponentButton = nextRow.locator('button:has-text("Add a component")');
+
+        // Click the button
+        await clickAndWait(page, addComponentButton);
+      } else {
+        // Regular attribute: click 'Add Another Field'
+        await clickAndWait(
+          page,
+          page.getByRole('button', { name: new RegExp('^Add Another Field$', 'i'), exact: true })
+        );
+      }
     } else {
-      // Last attribute, click 'Finish'
-      // TODO: ...but only if it's visible; this covers a bug (in the test utils or in strapi) where modal gets closed from a previous finish
+      // Last attribute, click 'Finish' only if it's visible
       if (await page.getByRole('button', { name: 'Finish' }).isVisible({ timeout: 0 })) {
         await page.getByRole('button', { name: 'Finish' }).click({ force: true });
       }
     }
   }
-};
-
-// attempt to submit a component but don't check for errors so that they can be checked by the caller
-export const submitComponent = async (page: Page, options: CreateComponentOptions) => {
-  await openComponentBuilder(page);
-
-  await fillCreateComponent(page, options);
-
-  await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-
-  if (options.attributes) {
-    await addAttributes(page, options.attributes);
-  }
-
-  // Save the component
-  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 };
 
 const saveAndVerifyContent = async (
@@ -345,13 +624,15 @@ const saveAndVerifyContent = async (
 
   for (let i = 0; i < options.attributes.length; i++) {
     const attribute = options.attributes[i];
-    const name = attribute.component?.options.name || attribute.name;
-    const typeCell = await findByRowColumn(page, name, 'Type');
+    const name = attribute.name || attribute.component?.options.name;
+    const row = await page.getByLabel(name);
 
     if (!getAttributeIdentifiers(attribute).buttonName) {
       throw new Error('unknown type ' + attribute.type);
     }
-    await expect(typeCell).toContainText(getAttributeIdentifiers(attribute).listLabel, {
+
+    const { listLabel } = getAttributeIdentifiers(attribute);
+    await expect(row).toContainText(listLabel, {
       ignoreCase: true,
     });
   }
@@ -365,7 +646,10 @@ export const createComponent = async (page: Page, options: CreateComponentOption
   await fillCreateComponent(page, options);
 
   await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-  await addAttributes(page, options.attributes);
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add new field' }).first());
+
+  await addAttributes(page, options.attributes, { contentTypeName: options.name });
 
   await saveAndVerifyContent(page, options);
 };
@@ -400,7 +684,10 @@ const createContentType = async (
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();
-  await addAttributes(page, options.attributes);
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add new field' }).first());
+
+  await addAttributes(page, options.attributes, { contentTypeName: name });
 
   await saveAndVerifyContent(page, options);
 };
@@ -434,6 +721,22 @@ export const addAttributeToComponent = async (
   });
 };
 
+export const addAttributesToContentType = async (
+  page: Page,
+  ctName: string,
+  attributes: AddAttribute[]
+) => {
+  await navToHeader(page, ['Content-Type Builder', ctName], ctName);
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add another field', exact: true }));
+
+  await addAttributes(page, attributes, { contentTypeName: ctName });
+
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  await waitForRestart(page);
+};
+
 export const removeAttributeFromComponent = async (
   page: Page,
   componentName: string,
@@ -454,6 +757,7 @@ export const deleteComponent = async (page: Page, componentName: string) => {
   // need to accept the browser modal
   page.on('dialog', (dialog) => dialog.accept());
   await clickAndWait(page, page.getByRole('button', { name: 'Delete', exact: true }));
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 
   await waitForRestart(page);
 };

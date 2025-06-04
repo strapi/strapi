@@ -5,6 +5,8 @@ import { GenericInput } from '../../GenericInputs';
 
 import { RelationTargetPicker } from './RelationTargetPicker/RelationTargetPicker';
 
+import type { Internal } from '@strapi/types';
+
 interface RelationFormBoxProps {
   disabled?: boolean;
   error?: Record<string, any>;
@@ -13,7 +15,7 @@ interface RelationFormBoxProps {
   name: string;
   onChange: (value: any) => void;
   oneThatIsCreatingARelationWithAnother?: string;
-  target?: string;
+  target?: Internal.UID.ContentType;
   value?: string;
 }
 
@@ -25,7 +27,7 @@ export const RelationFormBox = ({
   name,
   onChange,
   oneThatIsCreatingARelationWithAnother = '',
-  target = '',
+  target,
   value = '',
 }: RelationFormBoxProps) => {
   return (
@@ -37,7 +39,7 @@ export const RelationFormBox = ({
           </Typography>
         ) : (
           <RelationTargetPicker
-            target={target}
+            target={target!}
             oneThatIsCreatingARelationWithAnother={oneThatIsCreatingARelationWithAnother}
           />
         )}
