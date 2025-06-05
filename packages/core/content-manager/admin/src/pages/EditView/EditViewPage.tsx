@@ -33,7 +33,7 @@ import { Panels } from './components/Panels';
  * -----------------------------------------------------------------------------------------------*/
 
 // Needs to be wrapped in a component to have access to the form context via a hook.
-// Using the render prop instead would cause unnecessary re-renders of Form children
+// Using the Form component's render prop instead would cause unnecessary re-renders of Form children
 const BlockerWrapper = () => {
   const resetForm = useForm('BlockerWrapper', (state) => state.resetForm);
 
