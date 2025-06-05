@@ -15,8 +15,7 @@ function assertCloudError(e: unknown): asserts e is CloudError {
   }
 }
 
-export async function handleCloudLogin(): Promise<void> {
-  let cloudApiConfig;
+export async function handleCloudLogin(): Promise<boolean> {
   const logger = cloudServices.createLogger({
     silent: false,
     debug: process.argv.includes('--debug'),
@@ -24,16 +23,22 @@ export async function handleCloudLogin(): Promise<void> {
   });
   const cloudApiService = await cloudServices.cloudApiFactory({ logger });
   const defaultErrorMessage =
-    'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
+    'An error occurred while trying to interact with Strapi servers. Use strapi deploy command once the project is generated.';
 
+  let cloudApiConfig;
   try {
     const { data: config } = await cloudApiService.config();
     cloudApiConfig = config;
+
+    if (!config?.featureFlags?.cloudLoginPromptEnabled) {
+      return false;
+    }
+
     logger.log(parseToChalk(config.projectCreation.introText));
   } catch (e: unknown) {
     logger.debug(e);
     logger.error(defaultErrorMessage);
-    return;
+    return false;
   }
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>(
     cloudApiConfig.projectCreation?.userChoice || [
@@ -56,7 +61,7 @@ export async function handleCloudLogin(): Promise<void> {
     };
 
     try {
-      await cloudCli.login.action(cliContext);
+      await cloudCli.login.action(cliContext, { showDashboardLink: false });
     } catch (e: Error | CloudError | unknown) {
       logger.debug(e);
       try {
@@ -65,14 +70,19 @@ export async function handleCloudLogin(): Promise<void> {
           const message =
             typeof e.response.data === 'string'
               ? e.response.data
-              : 'We are sorry, but we are not able to log you into Strapi Cloud at the moment.';
+              : 'We are sorry, but we are not able to log you into Strapi servers at the moment.';
           logger.warn(message);
-          return;
+          return false;
         }
       } catch (e) {
         /* empty */
       }
       logger.error(defaultErrorMessage);
+      return false;
     }
+
+    return true;
   }
+
+  return false;
 }

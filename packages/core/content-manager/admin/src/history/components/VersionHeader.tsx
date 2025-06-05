@@ -7,6 +7,7 @@ import {
   useTracking,
   useRBAC,
   Layouts,
+  GradientBadge,
 } from '@strapi/admin/strapi-admin';
 import { Button, Typography, Flex, Link, Dialog } from '@strapi/design-system';
 import { ArrowLeft, WarningCircle } from '@strapi/icons';
@@ -114,6 +115,14 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           hour: 'numeric',
           minute: 'numeric',
         })}
+        secondaryAction={
+          <GradientBadge
+            label={formatMessage({
+              id: 'components.premiumFeature.title',
+              defaultMessage: 'Premium feature',
+            })}
+          />
+        }
         subtitle={
           <Typography variant="epsilon" textColor="neutral600">
             {formatMessage(
