@@ -601,17 +601,6 @@ const RelationsInput = ({
     }))
   );
 
-  if (isLoadingPermissions) {
-    return (
-      <Loader small>
-        {formatMessage({
-          id: 'content-manager.ListViewTable.relation-loading',
-          defaultMessage: 'Relations are loading',
-        })}
-      </Loader>
-    );
-  }
-
   if (error) {
     return (
       <Flex alignItems="center" height="100%" justifyContent="center">
@@ -635,6 +624,7 @@ const RelationsInput = ({
           name={name}
           placeholder={placeholder}
           hasNextPage={hasNextPage}
+          isLoadingPermissions={isLoadingPermissions}
           isLoadingSearchRelations={isLoading}
           handleChange={handleChange}
           setSearchParams={setSearchParams}
@@ -656,6 +646,7 @@ interface RelationModalWithContextProps {
   placeholder?: string;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;
+  isLoadingPermissions: boolean;
   handleChange: (relationId?: string) => void;
   data?: FindAvailable.Response;
   mainField?: MainField;
@@ -674,6 +665,7 @@ const RelationModalWithContext = ({
   placeholder,
   hasNextPage,
   isLoadingSearchRelations,
+  isLoadingPermissions,
   handleChange,
   mainField,
   setSearchParams,
@@ -743,7 +735,7 @@ const RelationModalWithContext = ({
             })
           }
           hasMoreItems={hasNextPage}
-          loading={isLoadingSearchRelations}
+          loading={isLoadingSearchRelations || isLoadingPermissions}
           onOpenChange={() => {
             handleSearch(textValue ?? '');
           }}
