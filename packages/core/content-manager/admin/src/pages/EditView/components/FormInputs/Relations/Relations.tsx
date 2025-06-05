@@ -183,9 +183,10 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
     /**
      * We'll always have a documentId in a created entry, so we look for a componentId first.
      * Same with `uid` and `documentModel`.
+     * The componentId is empty when adding a new component in a repeatable. Let it be null to skip isRelatedToCurrentDocument
      */
     const model = component ? component.uid : currentDocumentMeta.model;
-    const id = component && componentId ? componentId.toString() : documentId;
+    const id = component ? componentId?.toString() : documentId;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.
