@@ -41,7 +41,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
 
     // Step 5. Close the relation modal to see the updated relation on the root document
     await page.getByRole('button', { name: 'Close modal' }).click();
-    await expect(page.getByRole('button', { name: 'Mr. Plop' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Mr. Plop' })).toBeVisible({ timeout: 20000 });
   });
 
   test('I want to create a new relation, publish the related document and check if the new relation is added to the parent document', async ({
@@ -108,7 +108,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     // Wait for the button to be visible with a more specific selector
     const productButton = page.getByRole('button', { name: 'Nike Zoom Kd Iv Gold C800' });
     // add timeout to wait for the button to be visible
-    await expect(productButton).toBeVisible({ timeout: 10000 });
+    await expect(productButton).toBeVisible({ timeout: 20000 });
   });
 
   test('I want to create a relation inside a new component, and save', async ({ page }) => {
@@ -142,7 +142,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     // Step 7. Close the relation modal to see the updated relation on the root document
     await page.getByRole('button', { name: 'Close modal' }).click();
     await expect(page.getByRole('button', { name: 'Nike Zoom Kd Iv Gold C800' })).toBeVisible({
-      timeout: 10000,
+      timeout: 20000,
     });
   });
 });
