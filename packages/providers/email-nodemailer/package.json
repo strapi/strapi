@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "lodash": "4.17.21",
-    "nodemailer": "6.9.1"
+    "nodemailer": "6.10.1"
   },
   "devDependencies": {
     "@types/nodemailer": "6.4.7",
