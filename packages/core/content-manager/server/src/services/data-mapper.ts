@@ -26,10 +26,10 @@ export default () => ({
         id: {
           type: 'integer',
         },
-        ...formatAttributes(contentType),
         documentId: {
           type: 'string',
         },
+        ...formatAttributes(contentType),
       },
     };
   },
