@@ -18,6 +18,7 @@ import {
   useField,
 } from '../../../../../../admin/src/components/Form';
 import { InputRenderer } from '../../../../../../admin/src/components/FormInputs/Renderer';
+import { GradientBadge } from '../../../../../../admin/src/components/GradientBadge';
 import { Layouts } from '../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
@@ -159,6 +160,14 @@ export const SingleSignOnPage = () => {
                   id: 'Settings.sso.description',
                   defaultMessage: 'Configure the settings for the Single Sign-On feature.',
                 })}
+                secondaryAction={
+                  <GradientBadge
+                    label={formatMessage({
+                      id: 'components.premiumFeature.title',
+                      defaultMessage: 'Premium feature',
+                    })}
+                  />
+                }
               />
               <Layouts.Content>
                 {isSubmitting || isLoadingData ? (
