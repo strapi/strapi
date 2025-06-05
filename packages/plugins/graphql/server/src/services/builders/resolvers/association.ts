@@ -59,10 +59,11 @@ export default ({ strapi }: Context) => {
         );
 
         const transformedQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
+
         const defaultFilters = {
           where: {
             // Return the same draft and publish version as the parent
-            publishedAt: { $notNull: parent.publishedAt !== null },
+            publishedAt: { $notNull: 'publishedAt' in parent ? parent.publishedAt !== null : true },
           },
         };
         const dbQuery = merge(defaultFilters, transformedQuery);
