@@ -487,6 +487,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
               alignItems="flex-start"
               gap={2}
               width="100%"
+              wrap="wrap"
             >
               {attribute?.components.map((uid) => (
                 <ComponentLink
