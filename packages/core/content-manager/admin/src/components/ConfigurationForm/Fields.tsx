@@ -285,8 +285,11 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
 
         // Handle a full width field being dragged
         if (draggedItem?.size === GRID_COLUMNS) {
-          // Move the item and its container
-          const update = arrayMove(containers, activeContainerIndex, overContainerIndex);
+          // Swap the items in the containers
+          const update = produce(containers, (draft) => {
+            draft[activeContainerIndex].children = containers[overContainerIndex].children;
+            draft[overContainerIndex].children = containers[activeContainerIndex].children;
+          });
           setContainers(update);
           return;
         }
@@ -349,7 +352,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         );
 
         const movedContainerItems = produce(containersAsDictionary, (draft) => {
-          if (activeIndex !== overIndex) {
+          if (activeIndex !== overIndex && activeContainer === overContainer) {
             // Move items around inside their own container
             draft[activeContainer].children = arrayMove(
               draft[activeContainer].children,
@@ -371,7 +374,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           })
         );
 
-        // Update the layout, the containers then resync
+        // Update the layout
         onChange('layout', updatedLayout);
         setActiveDragItem(null);
       }}
