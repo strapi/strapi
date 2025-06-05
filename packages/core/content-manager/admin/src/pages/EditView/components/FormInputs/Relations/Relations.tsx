@@ -640,16 +640,14 @@ const RelationsInput = ({
   );
 };
 
-interface RelationModalWithContextProps {
+interface RelationModalWithContextProps
+  extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
   relation: DocumentMeta;
-  name: string;
-  placeholder?: string;
   hasNextPage: boolean;
   isLoadingSearchRelations: boolean;
   isLoadingPermissions: boolean;
   handleChange: (relationId?: string) => void;
   data?: FindAvailable.Response;
-  mainField?: MainField;
   fieldValue?: RelationsFormValue;
   setSearchParams: React.Dispatch<
     React.SetStateAction<{
