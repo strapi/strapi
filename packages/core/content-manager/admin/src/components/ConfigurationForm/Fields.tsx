@@ -83,6 +83,24 @@ interface FieldsProps extends Pick<EditLayout, 'metadatas'>, Pick<FieldProps, 'c
   components: EditLayout['components'];
 }
 
+/**
+ * Compute uids and formName for drag and drop items for the incoming layout
+ */
+const createDragAndDropContainersFromLayout = (layout: ConfigurationFormData['layout']) => {
+  return layout.map((row, containerIndex) => ({
+    ...row,
+    // Use unique ids for drag and drop items
+    dndId: `container-${containerIndex}`,
+    children: row.children.map((child, childIndex) => ({
+      ...child,
+      dndId: `container-${containerIndex}-child-${childIndex}`,
+
+      // The formName must be recomputed each time an item is moved
+      formName: `layout.${containerIndex}.children.${childIndex}`,
+    })),
+  }));
+};
+
 const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsProps) => {
   const { formatMessage } = useIntl();
 
@@ -137,37 +155,18 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
     addFieldRow('layout', { children: [field] });
   };
 
-  /**
-   * Compute uids and formName for drag and drop items for the incoming layout
-   */
-  const createDragAndDropContainersFromLayout = React.useCallback(
-    (layout: ConfigurationFormData['layout']) => {
-      return layout.map((row, containerIndex) => ({
-        ...row,
-        // Use unique ids for drag and drop items
-        dndId: `container-${containerIndex}`,
-        children: row.children.map((child, childIndex) => ({
-          ...child,
-          dndId: `container-${containerIndex}-child-${childIndex}`,
-          // The formName must be recomputed each time an item is moved
-          formName: `layout.${containerIndex}.children.${childIndex}`,
-        })),
-      }));
-    },
-    []
-  );
-
   const [containers, setContainers] = React.useState(() =>
     createDragAndDropContainersFromLayout(layout)
   );
-  const [activeDragItem, setActiveDragItem] = React.useState<
-    (typeof containers)[number]['children'][number] | null
-  >(null);
+  type Container = (typeof containers)[number];
+  const [activeDragItem, setActiveDragItem] = React.useState<Container['children'][number] | null>(
+    null
+  );
 
-  function findContainer(
-    id: UniqueIdentifier,
-    containersAsDictionary: Record<string, (typeof containers)[number]>
-  ) {
+  /**
+   * Finds either the parent container id or the child id within a container
+   */
+  function findContainer(id: UniqueIdentifier, containersAsDictionary: Record<string, Container>) {
     // If the id is a key, then it is the parent container
     if (id in containersAsDictionary) {
       return id;
@@ -182,8 +181,15 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   /**
    * Gets an item from a container based on its id
    */
-  const getItemFromContainer = (id: UniqueIdentifier, container: (typeof containers)[number]) => {
+  const getItemFromContainer = (id: UniqueIdentifier, container: Container) => {
     return container.children.find((item) => id === item.dndId);
+  };
+
+  /**
+   * Gets the containers as dictionary for quick lookup
+   */
+  const getContainersAsDictionary = () => {
+    return Object.fromEntries(containers.map((container) => [container.dndId, container]));
   };
 
   /**
@@ -230,14 +236,12 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
   React.useEffect(() => {
     const containers = createDragAndDropContainersFromLayout(layout);
     setContainers(containers);
-  }, [layout, createDragAndDropContainersFromLayout, setContainers]);
+  }, [layout, setContainers]);
 
   return (
     <DndContext
       onDragStart={(event) => {
-        const containersAsDictionary = Object.fromEntries(
-          containers.map((container) => [container.dndId, container])
-        );
+        const containersAsDictionary = getContainersAsDictionary();
 
         const activeContainer = findContainer(event.active.id, containersAsDictionary);
 
@@ -253,9 +257,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         }
       }}
       onDragOver={({ active, over }) => {
-        const containersAsDictionary = Object.fromEntries(
-          containers.map((container) => [container.dndId, container])
-        );
+        const containersAsDictionary = getContainersAsDictionary();
         const activeContainer = findContainer(active.id, containersAsDictionary);
         const overContainer = findContainer(over?.id ?? '', containersAsDictionary);
         const activeContainerIndex = containers.findIndex(
@@ -334,9 +336,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
         const { active, over } = event;
         const { id } = active;
         const overId = over?.id;
-        const containersAsDictionary = Object.fromEntries(
-          containers.map((container) => [container.dndId, container])
-        );
+        const containersAsDictionary = getContainersAsDictionary();
         const activeContainer = findContainer(id, containersAsDictionary);
         const overContainer = findContainer(overId!, containersAsDictionary);
 
