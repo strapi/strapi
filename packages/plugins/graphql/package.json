@@ -78,7 +78,7 @@
     "@types/koa__cors": "5.0.0",
     "cross-env": "^7.0.3",
     "eslint-config-custom": "5.14.0",
-    "koa": "2.15.4",
+    "koa": "2.16.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",

@@ -239,6 +239,7 @@
   "app.components.LeftMenu.logout": "로그아웃",
   "app.components.LeftMenu.navbrand.title": "Strapi 대시보드",
   "app.components.LeftMenu.navbrand.workplace": "작업 공간",
+  "app.components.LeftMenu.trialCountdown": "테스트 기간이 {date}에 종료됩니다.",
   "app.components.LeftMenuFooter.help": "도움말",
   "app.components.LeftMenuFooter.poweredBy": "Powered by ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "콜렉션 타입",
