@@ -1,21 +1,27 @@
 import * as React from 'react';
 
 import {
+  DescriptionComponentRenderer,
   useClipboard,
   useHistory,
   useNotification,
   useQueryParams,
+  useStrapiApp,
 } from '@strapi/admin/strapi-admin';
-import { IconButton, Tabs, Typography, Grid } from '@strapi/design-system';
+import { IconButton, Tabs, Typography, Flex } from '@strapi/design-system';
 import { Cross, Link as LinkIcon } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, type To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { InjectionZone } from '../../components/InjectionZone';
+import { DocumentActionButton } from '../../pages/EditView/components/DocumentActions';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { getDocumentStatus } from '../../pages/EditView/EditViewPage';
 import { usePreviewContext } from '../pages/Preview';
+
+import type { ContentManagerPlugin, DocumentActionProps } from '../../content-manager';
 
 /* -------------------------------------------------------------------------------------------------
  * ClosePreviewButton
@@ -57,6 +63,7 @@ const ClosePreviewButton = () => {
 
   return (
     <IconButton
+      variant="ghost"
       tag={Link}
       relative="path"
       to={toWithFallback}
@@ -115,29 +122,27 @@ const PreviewTabs = () => {
   }
 
   return (
-    <>
-      <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
-        <Tabs.List
-          aria-label={formatMessage({
-            id: 'preview.tabs.label',
-            defaultMessage: 'Document status',
+    <Tabs.Root variant="simple" value={query.status || 'draft'} onValueChange={handleTabChange}>
+      <Tabs.List
+        aria-label={formatMessage({
+          id: 'preview.tabs.label',
+          defaultMessage: 'Document status',
+        })}
+      >
+        <StatusTab value="draft">
+          {formatMessage({
+            id: 'content-manager.containers.List.draft',
+            defaultMessage: 'draft',
           })}
-        >
-          <StatusTab value="draft">
-            {formatMessage({
-              id: 'content-manager.containers.List.draft',
-              defaultMessage: 'draft',
-            })}
-          </StatusTab>
-          <StatusTab value="published" disabled={documentStatus === 'draft'}>
-            {formatMessage({
-              id: 'content-manager.containers.List.published',
-              defaultMessage: 'published',
-            })}
-          </StatusTab>
-        </Tabs.List>
-      </Tabs.Root>
-    </>
+        </StatusTab>
+        <StatusTab value="published" disabled={documentStatus === 'draft'}>
+          {formatMessage({
+            id: 'content-manager.containers.List.published',
+            defaultMessage: 'published',
+          })}
+        </StatusTab>
+      </Tabs.List>
+    </Tabs.Root>
   );
 };
 
@@ -146,24 +151,16 @@ const PreviewTabs = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const PreviewHeader = () => {
-  // Get main field
-  const mainField = usePreviewContext('PreviewHeader', (state) => state.mainField);
+  const title = usePreviewContext('PreviewHeader', (state) => state.title);
   const document = usePreviewContext('PreviewHeader', (state) => state.document);
   const schema = usePreviewContext('PreviewHeader', (state) => state.schema);
+  const meta = usePreviewContext('PreviewHeader', (state) => state.meta);
+  const onPreview = usePreviewContext('PreviewHeader', (state) => state.onPreview);
+  const plugins = useStrapiApp('PreviewHeader', (state) => state.plugins);
 
-  /**
-   * We look to see what the mainField is from the configuration, if it's an id
-   * we don't use it because it's a uuid format and not very user friendly.
-   * Instead, we display the schema name for single-type documents
-   * or "Untitled".
-   */
-  let documentTitle = 'Untitled';
-  if (mainField !== 'id' && document?.[mainField]) {
-    documentTitle = document[mainField];
-  } else if (schema.kind === 'singleType' && schema?.info.displayName) {
-    documentTitle = schema.info.displayName;
-  }
-
+  const [{ query }] = useQueryParams<{
+    status?: 'draft' | 'published';
+  }>();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { copy } = useClipboard();
@@ -179,42 +176,101 @@ const PreviewHeader = () => {
     });
   };
 
+  const hasDraftAndPublish = schema.options?.draftAndPublish ?? false;
+  const documentActionProps = {
+    activeTab: query.status ?? null,
+    collectionType: schema.kind === 'collectionType' ? 'collection-types' : 'single-types',
+    model: schema.uid,
+    documentId: schema.kind === 'collectionType' ? document.documentId : undefined,
+    document,
+    meta,
+  } satisfies DocumentActionProps;
+
   return (
-    <Grid.Root
-      gap={3}
-      gridCols={3}
-      paddingLeft={2}
-      paddingRight={2}
-      background="neutral0"
-      borderColor="neutral150"
-      tag="header"
-    >
+    <Flex height="48px" gap={4} background="neutral0" borderColor="neutral150" tag="header">
       {/* Title and status */}
-      <Grid.Item xs={1} paddingTop={2} paddingBottom={2} gap={3}>
+      <TitleContainer height="100%" paddingLeft={2} paddingRight={4}>
         <ClosePreviewButton />
-        <PreviewTitle tag="h1" fontWeight={600} fontSize={2} maxWidth="200px" title={documentTitle}>
-          {documentTitle}
+        <PreviewTitle
+          tag="h1"
+          title={title}
+          maxWidth="200px"
+          fontSize={2}
+          paddingLeft={2}
+          paddingRight={3}
+          fontWeight={600}
+        >
+          {title}
         </PreviewTitle>
         <Status />
-      </Grid.Item>
-      {/* Tabs */}
-      <Grid.Item xs={1} marginBottom="-1px" alignItems="end" margin="auto">
-        <PreviewTabs />
-      </Grid.Item>
-      {/* Copy link */}
-      <Grid.Item xs={1} justifyContent="end" paddingTop={2} paddingBottom={2}>
-        <IconButton
-          type="button"
-          label={formatMessage({
-            id: 'preview.copy.label',
-            defaultMessage: 'Copy preview link',
-          })}
-          onClick={handleCopyLink}
-        >
-          <LinkIcon />
-        </IconButton>
-      </Grid.Item>
-    </Grid.Root>
+      </TitleContainer>
+
+      {/* Tabs and actions */}
+      <Flex
+        flex={1}
+        paddingRight={2}
+        gap={2}
+        justifyContent={hasDraftAndPublish ? 'space-between' : 'flex-end'}
+      >
+        <Flex flex="1 1 70%">
+          <PreviewTabs />
+        </Flex>
+        <Flex gap={2}>
+          <IconButton
+            type="button"
+            label={formatMessage({
+              id: 'preview.copy.label',
+              defaultMessage: 'Copy preview link',
+            })}
+            onClick={handleCopyLink}
+          >
+            <LinkIcon />
+          </IconButton>
+          <InjectionZone area="preview.actions" />
+          <DescriptionComponentRenderer
+            props={documentActionProps}
+            descriptions={(
+              plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
+            ).getDocumentActions('preview')}
+          >
+            {(actions) => {
+              const filteredActions = actions.filter((action) =>
+                [action.position].flat().includes('preview')
+              );
+              const [primaryAction, secondaryAction] = filteredActions;
+
+              if (!primaryAction && !secondaryAction) return null;
+
+              // Both actions are available when draft and publish enabled
+              if (primaryAction && secondaryAction) {
+                return (
+                  <>
+                    {/* Save */}
+                    <DocumentActionButton
+                      {...secondaryAction}
+                      variant={secondaryAction.variant || 'secondary'}
+                    />
+                    {/* Publish */}
+                    <DocumentActionButton
+                      {...primaryAction}
+                      variant={primaryAction.variant || 'default'}
+                    />
+                  </>
+                );
+              }
+
+              // Otherwise we just have the save action
+              return (
+                <DocumentActionButton
+                  {...primaryAction}
+                  variant={primaryAction.variant || 'secondary'}
+                />
+              );
+            }}
+          </DescriptionComponentRenderer>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };
 
@@ -226,6 +282,10 @@ const PreviewTitle = styled(Typography)`
 
 const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
+`;
+
+const TitleContainer = styled(Flex)`
+  border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 export { PreviewHeader };

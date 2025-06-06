@@ -1,12 +1,13 @@
-import { kebabCase } from 'lodash/fp';
+import { isBoolean, isNumber, isString, kebabCase, snakeCase } from 'lodash/fp';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { expect, type Page } from '@playwright/test';
-import { clickAndWait, findByRowColumn, navToHeader } from './shared';
+import { clickAndWait, ensureCheckbox, findByRowColumn, navToHeader } from './shared';
+import { rowHeight } from '@strapi/admin/admin/src/pages/Settings/pages/Roles/utils/constants';
 
 export interface AddAttribute {
   type: string;
-  name: string;
+  name?: string;
   advanced?: AdvancedAttributeSettings;
   number?: { format: numberFormat };
   date?: { format: dateFormat };
@@ -16,7 +17,66 @@ export interface AddAttribute {
   dz?: {
     components: AddComponentAttribute[];
   };
+  relation?: {
+    type: keyof typeof relationsMap;
+    target: {
+      name?: string;
+      select?: string;
+    };
+  };
 }
+
+// keys are the relation types used by the RelationNaturePicker component
+// locatorText is the text that should be displayed for the relation type
+// inverted denotes the inverse relation type(s)
+export const relationsMap: Record<
+  string,
+  {
+    locatorText: string;
+    hasInverse: boolean;
+    inverted?: boolean;
+    pluralizeTarget?: boolean;
+    pluralizeName?: boolean;
+  }
+> = {
+  oneWay: {
+    locatorText: 'has one',
+    hasInverse: false,
+    pluralizeTarget: false,
+    pluralizeName: false,
+  },
+  oneToOne: {
+    locatorText: 'has and belongs to one',
+    hasInverse: true,
+    pluralizeTarget: false,
+    pluralizeName: false,
+  },
+  oneToMany: {
+    locatorText: 'belongs to many',
+    hasInverse: true,
+    pluralizeTarget: false,
+    pluralizeName: true,
+  },
+  manyToOne: {
+    locatorText: 'has many',
+    inverted: true,
+    hasInverse: true,
+    pluralizeTarget: true,
+    pluralizeName: false,
+  },
+  manyToMany: {
+    locatorText: 'has and belongs to many',
+    hasInverse: true,
+    pluralizeTarget: true,
+    pluralizeName: true,
+  },
+  manyWay: {
+    locatorText: 'has many',
+    hasInverse: false,
+    pluralizeTarget: true,
+    pluralizeName: true,
+  },
+} as const;
 
 // Advanced Settings for all types
 // TODO: split this into settings based on the attribute type
@@ -38,6 +98,10 @@ interface AddDynamicZoneAttribute extends AddAttribute {
   type: 'dz';
 }
 
+interface AddRelationAttribute extends AddAttribute {
+  type: 'relation';
+}
+
 // Type guard function to check if an attribute is a ComponentAttribute
 function isComponentAttribute(attribute: AddAttribute): attribute is AddComponentAttribute {
   return attribute.type === 'component';
@@ -46,7 +110,9 @@ function isDynamicZoneAttribute(attribute: AddAttribute): attribute is AddDynami
   return attribute.type === 'dz';
 }
 
-// Enumeration needs "values"
+function isRelationAttribute(attribute: AddAttribute): attribute is AddRelationAttribute {
+  return attribute.type === 'relation';
+}
 
 type numberFormat = 'integer' | 'big integer' | 'decimal';
 type dateFormat = 'date' | 'time' | 'datetime';
@@ -101,7 +167,7 @@ export const typeMap = {
   relation: { buttonName: 'Relation', listLabel: 'Relation' },
   markdown: { buttonName: 'Rich text (Markdown)', listLabel: 'Rich text (Markdown)' },
   component: { buttonName: 'Component', listLabel: 'Component' },
-  component_repeatable: { buttonName: 'Component', listLabel: 'Component (repeatable)' },
+  component_repeatable: { buttonName: 'Component', listLabel: 'Repeatable Component' },
   dz: { buttonName: 'Dynamic Zone', listLabel: 'Dynamic Zone' },
 };
 
@@ -230,6 +296,99 @@ export const selectComponentRepeatable = async (page: Page, value: boolean) => {
   }
 };
 
+function hasInverse(relation: AddAttribute['relation']): relation is AddAttribute['relation'] & {
+  type: keyof typeof relationsMap;
+  target: { name?: string; select?: string };
+} {
+  return relationsMap[relation?.type]?.hasInverse ?? false;
+}
+
+function isInverted(relation: AddAttribute['relation']): relation is AddAttribute['relation'] & {
+  type: keyof typeof relationsMap;
+  target: { name?: string; select?: string };
+} {
+  const relationType = relation?.type;
+  if (!relationType) return false;
+  const relationConfig = relationsMap[relationType];
+  return Boolean(relationConfig?.inverted);
+}
+
+export const addRelationAttribute = async (
+  page: Page,
+  attribute: AddRelationAttribute,
+  options?: AttributeOptions
+) => {
+  const { relation, name } = attribute;
+  const target = relation?.target;
+  const targetSelect = target?.select;
+  const relationText = relationsMap[relation?.type]?.locatorText;
+
+  // Click the correct relation type button
+  // instead of using aria-label we need to use data-relation-type with the relation type itself
+  await page.locator(`button[data-relation-type="${relation?.type}"]`).click();
+  // check that the button is now aria-pressed
+  await expect(page.locator(`button[data-relation-type="${relation?.type}"]`)).toHaveAttribute(
+    'aria-pressed',
+    'true'
+  );
+
+  // Select the relation type if `targetSelect` is provided
+  const dialog = page.getByRole('dialog'); // Locate the dialog
+  const relationTypePicker = dialog.locator('button[aria-haspopup="menu"]'); // Find the button inside it
+
+  if (targetSelect) {
+    await relationTypePicker.click();
+    await page.getByRole('menuitem', { name: targetSelect }).click();
+  }
+
+  // Verify expected text in the relation type picker
+  const expectedText = isInverted(relation)
+    ? `${targetSelect} ${relationText}`
+    : `${relationText} ${targetSelect}`;
+  await expect(dialog).toContainText(expectedText);
+
+  const nameFieldValue = await page.locator('input[name="name"]').inputValue();
+  const targetNameFieldValue = await page.locator('input[name="targetAttribute"]').inputValue();
+
+  // check that the name field is filled with the target name in the correct pluralization
+  expect(nameFieldValue).toBe(
+    snakeCase(
+      relationsMap[relation?.type]?.pluralizeName
+        ? pluralize(target?.select?.toLowerCase())
+        : target?.select?.toLowerCase()
+    )
+  );
+
+  // verify the target field is filled with the correct pluralization
+  if (options?.contentTypeName && hasInverse(relation)) {
+    expect(targetNameFieldValue).toBe(
+      snakeCase(
+        relationsMap[relation?.type]?.pluralizeTarget
+          ? pluralize(options.contentTypeName.toLowerCase())
+          : options.contentTypeName.toLowerCase()
+      )
+    );
+  }
+
+  //  fill in target attribute or ensure it is disabled
+  const targetAttributeInput = page.locator('input[name="targetAttribute"]');
+
+  if (hasInverse(relation)) {
+    if (relation.target.name) {
+      await targetAttributeInput.fill(relation.target.name);
+    }
+  } else {
+    await expect(targetAttributeInput).toBeDisabled();
+  }
+
+  // Fill in the "Name" field if provided
+  if (name) {
+    await page.locator('input[name="name"]').fill(name);
+  }
+
+  await page.getByRole('button', { name: 'Finish' }).click();
+};
+
 export const addComponentAttribute = async (
   page: Page,
   attribute: AddComponentAttribute,
@@ -266,7 +425,6 @@ export const addComponentAttribute = async (
   await selectComponentRepeatable(page, attribute.component?.options.repeatable);
 
   if (attrCompOptions.attributes) {
-    // TODO: if "
     const addFirstFieldButton = page.getByRole('button', {
       name: new RegExp('Add first field to the component', 'i'),
     });
@@ -306,7 +464,18 @@ export const addDynamicZoneAttribute = async (page: Page, attribute: AddDynamicZ
   }
 };
 
-export const fillAttribute = async (page: Page, attribute: AddAttribute, options?: any) => {
+// Add contentTypeName to options interface
+interface AttributeOptions {
+  fromDz?: string;
+  contentTypeName?: string;
+  clickFinish?: boolean;
+}
+
+export const fillAttribute = async (
+  page: Page,
+  attribute: AddAttribute,
+  options?: AttributeOptions
+) => {
   // check if we need to click the attribute button or if we're already on the attribute to fill
   const onFieldTypeSelection = await page
     .getByRole('heading', { name: /Select a field for your/i })
@@ -328,6 +497,8 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     return await addComponentAttribute(page, attribute, options);
   } else if (isDynamicZoneAttribute(attribute)) {
     return await addDynamicZoneAttribute(page, attribute);
+  } else if (isRelationAttribute(attribute)) {
+    return await addRelationAttribute(page, attribute, options);
   }
 
   // Fill the input with the exact label "Name"
@@ -365,13 +536,47 @@ export const fillAttribute = async (page: Page, attribute: AddAttribute, options
     await page.locator('textarea[name="enum"]').fill(attribute.enumeration?.values.join('\n'));
   }
 
-  // TODO: add support for advanced options
+  if (attribute.advanced) {
+    const advanced = attribute.advanced;
+    await page.getByText('Advanced Settings').click();
+
+    if (isBoolean(advanced.required)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Required field' });
+      await ensureCheckbox(checkbox, advanced.required);
+    }
+
+    if (isString(advanced.regexp)) {
+      await page.getByLabel('Regexp').fill(advanced.regexp);
+    }
+
+    if (isBoolean(advanced.unique)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Unique field' });
+      await ensureCheckbox(checkbox, advanced.unique);
+    }
+
+    if (isBoolean(advanced.private)) {
+      const checkbox = page.getByRole('checkbox', { name: 'Private field' });
+      await ensureCheckbox(checkbox, advanced.private);
+    }
+
+    if (isNumber(advanced.maximum)) {
+      await page.getByLabel('Maximum').fill(advanced.maximum.toString());
+    }
+
+    if (isNumber(advanced.minimum)) {
+      await page.getByLabel('Minimum').fill(advanced.minimum.toString());
+    }
+
+    if (isString(advanced.default)) {
+      await page.getByLabel('Default').fill(advanced.default);
+    }
+  }
 };
 
 export const addAttributes = async (
   page: Page,
   attributes: AddAttribute[],
-  options?: { fromDz?: string } // fromDz is now a string for DZ name
+  options?: AttributeOptions
 ) => {
   for (let i = 0; i < attributes.length; i++) {
     const attribute = attributes[i];
@@ -380,7 +585,7 @@ export const addAttributes = async (
     if (i < attributes.length - 1) {
       if (options?.fromDz) {
         // Locate the row containing the DZ name
-        const dzRow = page.locator('tr').filter({ hasText: options.fromDz }).first();
+        const dzRow = page.locator('div').filter({ hasText: options.fromDz }).first();
 
         // Locate the next sibling row and find the "Add a component" button
         const nextRow = dzRow.locator('xpath=following-sibling::tr[1]');
@@ -420,13 +625,14 @@ const saveAndVerifyContent = async (
   for (let i = 0; i < options.attributes.length; i++) {
     const attribute = options.attributes[i];
     const name = attribute.name || attribute.component?.options.name;
-    const typeCell = await findByRowColumn(page, name, 'Type');
+    const row = await page.getByLabel(name);
 
     if (!getAttributeIdentifiers(attribute).buttonName) {
       throw new Error('unknown type ' + attribute.type);
     }
 
-    await expect(typeCell).toContainText(getAttributeIdentifiers(attribute).listLabel, {
+    const { listLabel } = getAttributeIdentifiers(attribute);
+    await expect(row).toContainText(listLabel, {
       ignoreCase: true,
     });
   }
@@ -440,7 +646,10 @@ export const createComponent = async (page: Page, options: CreateComponentOption
   await fillCreateComponent(page, options);
 
   await clickAndWait(page, page.getByRole('button', { name: 'Continue' }));
-  await addAttributes(page, options.attributes);
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add new field' }).first());
+
+  await addAttributes(page, options.attributes, { contentTypeName: options.name });
 
   await saveAndVerifyContent(page, options);
 };
@@ -459,7 +668,7 @@ const createContentType = async (
   await page.getByRole('button', { name: buttonName }).click();
   await expect(page.getByRole('heading', { name: headingName })).toBeVisible();
 
-  const displayName = page.getByLabel('Name');
+  const displayName = page.getByLabel('Display name');
   await displayName.fill(name);
 
   const singularIdField = page.getByLabel('API ID (Singular)');
@@ -475,7 +684,10 @@ const createContentType = async (
   }
 
   await page.getByRole('button', { name: 'Continue' }).click();
-  await addAttributes(page, options.attributes);
+
+  await clickAndWait(page, page.getByRole('button', { name: 'Add new field' }).first());
+
+  await addAttributes(page, options.attributes, { contentTypeName: name });
 
   await saveAndVerifyContent(page, options);
 };
@@ -518,7 +730,7 @@ export const addAttributesToContentType = async (
 
   await clickAndWait(page, page.getByRole('button', { name: 'Add another field', exact: true }));
 
-  await addAttributes(page, attributes);
+  await addAttributes(page, attributes, { contentTypeName: ctName });
 
   await page.getByRole('button', { name: 'Save' }).click();
 
@@ -545,6 +757,7 @@ export const deleteComponent = async (page: Page, componentName: string) => {
   // need to accept the browser modal
   page.on('dialog', (dialog) => dialog.accept());
   await clickAndWait(page, page.getByRole('button', { name: 'Delete', exact: true }));
+  await clickAndWait(page, page.getByRole('button', { name: 'Save' }));
 
   await waitForRestart(page);
 };

@@ -120,9 +120,30 @@ describe('BrowseStep', () => {
     jest.clearAllMocks();
   });
 
-  it('renders and match snapshot', () => {
-    const { container } = setup();
-    expect(container).toMatchSnapshot();
+  it('renders the core UI elements correctly', () => {
+    const { getByText, getByLabelText } = setup();
+
+    // Check for the folder section with correct count
+    expect(getByText('Folders (1)')).toBeInTheDocument();
+
+    // Check for folder navigation
+    expect(getByLabelText('Folders navigation')).toBeInTheDocument();
+
+    // Verify folder card contains expected info
+    const folderButton = screen.getByRole('button', { name: /folder 1 - 1 folder, 1 asset/i });
+    expect(folderButton).toBeInTheDocument();
+
+    // Check for core UI controls
+    expect(screen.getByRole('button', { name: /List View/i })).toBeInTheDocument();
+
+    // Verify the search functionality is available
+    expect(screen.getByRole('button', { name: /Search/i })).toBeInTheDocument();
+
+    // Check for filters
+    expect(screen.getByText('Filters')).toBeInTheDocument();
+
+    // Check for sort option
+    expect(screen.getByLabelText('Sort by')).toBeInTheDocument();
   });
 
   it('should not fetch folder if the user does not have the permission', () => {

@@ -367,6 +367,7 @@
   "app.components.LeftMenu.logout": "Logga ut",
   "app.components.LeftMenu.logo.alt": "Applikationslogga",
   "app.components.LeftMenu.plugins": "Plugins",
+  "app.components.LeftMenu.trialCountdown": "Din provperiod slutar den {date}.",
   "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
   "app.components.LeftMenu.navbrand.workplace": "Arbetsplats",
   "app.components.LeftMenuFooter.help": "Hjälp",

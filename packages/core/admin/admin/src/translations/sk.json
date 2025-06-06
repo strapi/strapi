@@ -250,6 +250,7 @@
   "app.components.LeftMenu.logout": "Odhlásiť sa",
   "app.components.LeftMenu.logo.alt": "Logo aplikácie",
   "app.components.LeftMenu.plugins": "Pluginy",
+  "app.components.LeftMenu.trialCountdown": "Váš prečerávanie skončí {date}.",
   "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
   "app.components.LeftMenu.navbrand.workplace": "Workplace",
   "app.components.LeftMenuFooter.help": "Pomoc",

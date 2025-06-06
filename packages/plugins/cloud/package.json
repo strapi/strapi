@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-cloud",
-  "version": "5.6.0",
+  "version": "5.15.0",
   "description": "Instructions to deploy your local project to Strapi Cloud",
   "license": "MIT",
   "author": {
@@ -29,27 +29,30 @@
     "dist/"
   ],
   "scripts": {
-    "build": "strapi-plugin build",
+    "build": "run -T npm-run-all clean --parallel build:code build:types",
+    "build:code": "run -T rollup -c",
+    "build:types": "run -T run-p build:types:admin",
+    "build:types:admin": "run -T tsc -p admin/tsconfig.build.json --emitDeclarationOnly",
     "clean": "run -T rimraf ./dist",
     "develop": "strapi-plugin watch",
     "lint": "run -T eslint .",
-    "test:ts:front": "run -T tsc -p admin/tsconfig.json"
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.14",
-    "@strapi/icons": "2.0.0-rc.14",
+    "@strapi/design-system": "2.0.0-rc.24",
+    "@strapi/icons": "2.0.0-rc.24",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
-    "@strapi/sdk-plugin": "^5.2.0",
-    "@strapi/strapi": "5.6.0",
-    "eslint-config-custom": "5.6.0",
+    "@strapi/strapi": "5.15.0",
+    "eslint-config-custom": "5.15.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "tsconfig": "5.6.0",
-    "typescript": "5.3.2"
+    "tsconfig": "5.15.0",
+    "typescript": "5.4.4"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",

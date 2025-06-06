@@ -13,9 +13,9 @@ import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 
-import { useDataManager } from '../../../hooks/useDataManager';
 import { getTrad } from '../../../utils/getTrad';
-import { ON_CHANGE_RELATION_TYPE } from '../../FormModal/constants';
+import { useDataManager } from '../../DataManager/useDataManager';
+import { actions } from '../../FormModal/reducer';
 
 import { IconWrapper, InfosWrapper, Wrapper } from './Components';
 
@@ -35,30 +35,33 @@ interface RelationNaturePickerProps {
   oneThatIsCreatingARelationWithAnother: string;
   relationType: string;
   target: string;
+  targetUid: string;
 }
+
+const ctRelations = ['oneWay', 'oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'manyWay'];
+const componentRelations = ['oneWay', 'manyWay'];
 
 export const RelationNaturePicker = ({
   naturePickerType,
   oneThatIsCreatingARelationWithAnother,
   relationType,
   target,
+  targetUid,
 }: RelationNaturePickerProps) => {
   const dispatch = useDispatch();
   const { formatMessage } = useIntl();
 
-  const { contentTypes, modifiedData } = useDataManager();
-  const ctRelations = ['oneWay', 'oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'manyWay'];
-  const componentRelations = ['oneWay', 'manyWay'];
+  const { contentTypes } = useDataManager();
+
   const dataType =
-    naturePickerType === 'contentType'
-      ? get(modifiedData, [naturePickerType, 'schema', 'kind'], '')
-      : naturePickerType;
+    naturePickerType === 'component' ? 'component' : get(contentTypes, [targetUid, 'kind'], '');
+
   const relationsType = (
     dataType === 'collectionType' ? ctRelations : componentRelations
   ) as RelationType[];
 
   const areDisplayedNamesInverted = relationType === 'manyToOne';
-  const targetLabel = get(contentTypes, [target, 'schema', 'displayName'], 'unknown');
+  const targetLabel = get(contentTypes, [target, 'info', 'displayName'], 'unknown');
   const leftTarget = areDisplayedNamesInverted
     ? targetLabel
     : oneThatIsCreatingARelationWithAnother;
@@ -66,7 +69,7 @@ export const RelationNaturePicker = ({
     ? oneThatIsCreatingARelationWithAnother
     : targetLabel;
   const leftDisplayedValue = pluralize(leftTarget, relationType === 'manyToMany' ? 2 : 1);
-  const restrictedRelations = get(contentTypes, [target, 'schema', 'restrictRelationsTo'], null);
+  const restrictedRelations = get(contentTypes, [target, 'restrictRelationsTo'], null);
 
   const rightDisplayedValue = pluralize(
     rightTarget,
@@ -96,20 +99,23 @@ export const RelationNaturePicker = ({
                     key={relation}
                     onClick={() => {
                       if (isEnabled) {
-                        dispatch({
-                          type: ON_CHANGE_RELATION_TYPE,
-                          target: {
-                            oneThatIsCreatingARelationWithAnother,
-                            targetContentType: target,
-                            value: relation,
-                          },
-                        });
+                        dispatch(
+                          actions.onChangeRelationType({
+                            target: {
+                              oneThatIsCreatingARelationWithAnother,
+                              value: relation,
+                            },
+                          })
+                        );
                       }
                     }}
                     padding={2}
                     type="button"
+                    aria-label={formatMessage({ id: getTrad(`relation.${relation}`) })}
+                    aria-pressed={relationType === relation}
+                    data-relation-type={relation}
                   >
-                    <Asset key={relation} />
+                    <Asset key={relation} aria-hidden="true" />
                   </IconWrapper>
                 );
               })}

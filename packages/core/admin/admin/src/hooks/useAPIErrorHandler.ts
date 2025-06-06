@@ -2,25 +2,10 @@ import * as React from 'react';
 
 import { IntlFormatters, useIntl } from 'react-intl';
 
-import { FetchError } from '../utils/getFetchClient';
+import { FetchError, ApiError } from '../utils/getFetchClient';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 import { setIn } from '../utils/objects';
-
-import type { errors } from '@strapi/utils';
-
-type ApiError =
-  | errors.ApplicationError
-  | errors.ForbiddenError
-  | errors.NotFoundError
-  | errors.NotImplementedError
-  | errors.PaginationError
-  | errors.PayloadTooLargeError
-  | errors.PolicyError
-  | errors.RateLimitError
-  | errors.UnauthorizedError
-  | errors.ValidationError
-  | errors.YupValidationError;
 
 interface UnknownApiError {
   /**
@@ -83,6 +68,8 @@ interface YupFormattedError {
    * The name of the error, typically identifies the type of validation error that occurred.
    */
   name: string;
+
+  value: string;
 }
 
 /**
