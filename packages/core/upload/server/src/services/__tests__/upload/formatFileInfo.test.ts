@@ -1,4 +1,5 @@
 import createUploadService from '../../upload';
+import imageManipulation from '../../image-manipulation';
 
 const uploadService = createUploadService({} as any);
 
@@ -8,6 +9,7 @@ describe('Upload service', () => {
       plugins: {
         upload: {
           services: {
+            'image-manipulation': imageManipulation,
             file: {
               getFolderPath: () => '/a-folder-path',
             },
