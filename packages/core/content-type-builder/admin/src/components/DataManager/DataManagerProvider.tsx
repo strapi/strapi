@@ -193,12 +193,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
 
-      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, successfully: false });
+      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: false });
     } finally {
       setIsSaving(false);
       unlockAppWithAutoreload();
 
-      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, successfully: true });
+      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });
     }
   };
 

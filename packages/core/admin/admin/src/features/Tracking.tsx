@@ -368,7 +368,7 @@ interface DidPublishRelease {
 interface DidUpdateCTBSchema {
   name: 'didUpdateCTBSchema';
   properties: {
-    successfully: boolean;
+    success: boolean;
     newContentTypes: number;
     editedContentTypes: number;
     deletedContentTypes: number;
@@ -443,11 +443,9 @@ export interface UseTrackingReturn {
  * }
  * ```
  */
-
 const useTracking = (): UseTrackingReturn => {
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
   const userId = useAppInfo('useTracking', (state) => state.userId);
-
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
       event: TEvent['name'],
