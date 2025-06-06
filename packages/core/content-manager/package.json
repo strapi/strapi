@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.14.0",
+  "version": "5.15.0",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -61,13 +61,16 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.0.0-rc.24",
     "@strapi/icons": "2.0.0-rc.24",
-    "@strapi/types": "5.14.0",
-    "@strapi/utils": "5.14.0",
+    "@strapi/types": "5.15.0",
+    "@strapi/utils": "5.15.0",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
@@ -102,8 +105,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.14.0",
-    "@strapi/database": "5.14.0",
+    "@strapi/admin": "5.15.0",
+    "@strapi/database": "5.15.0",
     "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
