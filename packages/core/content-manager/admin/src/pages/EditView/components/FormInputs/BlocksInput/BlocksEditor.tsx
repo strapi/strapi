@@ -159,16 +159,6 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
-const blocks: BlocksStore = {
-  ...paragraphBlocks,
-  ...headingBlocks,
-  ...listBlocks,
-  ...linkBlocks,
-  ...imageBlocks,
-  ...quoteBlocks,
-  ...codeBlocks,
-};
-
 interface BlocksEditorProps
   extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
     BlocksContentProps {
@@ -239,6 +229,19 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         }
       };
     }, []);
+
+    const blocks = React.useMemo(
+      () => ({
+        ...paragraphBlocks,
+        ...headingBlocks,
+        ...listBlocks,
+        ...linkBlocks,
+        ...imageBlocks,
+        ...quoteBlocks,
+        ...codeBlocks,
+      }),
+      []
+    ) satisfies BlocksStore;
 
     return (
       <>
