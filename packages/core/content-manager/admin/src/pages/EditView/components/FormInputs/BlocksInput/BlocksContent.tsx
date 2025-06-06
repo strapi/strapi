@@ -535,25 +535,25 @@ const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
     }
   };
 
-  const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = React.useCallback((event) => {
+  const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
     // Find the right block-specific handlers for enter and backspace key presses
-    // switch (event.key) {
-    //   case 'Enter':
-    //     event.preventDefault();
-    //     return handleEnter(event);
-    //   case 'Backspace':
-    //     return handleBackspaceEvent(event);
-    //   case 'Tab':
-    //     return handleTab(event);
-    //   case 'Escape':
-    //     return ReactEditor.blur(editor);
-    // }
-    // handleKeyboardShortcuts(event);
-    // // Check if a snippet was triggered
-    // if (event.key === ' ') {
-    //   checkSnippet(event);
-    // }
-  }, []);
+    switch (event.key) {
+      case 'Enter':
+        event.preventDefault();
+        return handleEnter(event);
+      case 'Backspace':
+        return handleBackspaceEvent(event);
+      case 'Tab':
+        return handleTab(event);
+      case 'Escape':
+        return ReactEditor.blur(editor);
+    }
+    handleKeyboardShortcuts(event);
+    // Check if a snippet was triggered
+    if (event.key === ' ') {
+      checkSnippet(event);
+    }
+  };
 
   /**
    *  scrollSelectionIntoView : Slate's default method to scroll a DOM selection into the view,
