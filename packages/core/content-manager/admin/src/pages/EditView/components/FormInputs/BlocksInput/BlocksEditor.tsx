@@ -147,13 +147,27 @@ function useResetKey(value?: Schema.Attribute.BlocksValue): {
     }
   }, [value]);
 
-  return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
+  const incrementSlateUpdatesCount = React.useCallback(() => {
+    slateUpdatesCount.current += 1;
+  }, []);
+
+  return { key, incrementSlateUpdatesCount };
 }
 
 const pipe =
   (...fns: ((baseEditor: Editor) => Editor)[]) =>
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
+
+const blocks: BlocksStore = {
+  ...paragraphBlocks,
+  ...headingBlocks,
+  ...listBlocks,
+  ...linkBlocks,
+  ...imageBlocks,
+  ...quoteBlocks,
+  ...codeBlocks,
+};
 
 interface BlocksEditorProps
   extends Pick<FieldValue<Schema.Attribute.BlocksValue>, 'onChange' | 'value' | 'error'>,
@@ -189,25 +203,42 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const { key, incrementSlateUpdatesCount } = useResetKey(value);
 
-    const handleSlateChange = (state: Descendant[]) => {
-      const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+    const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
-      if (isAstChange) {
-        incrementSlateUpdatesCount();
+    const handleSlateChange = React.useCallback(
+      (state: Descendant[]) => {
+        const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
-        onChange(name, state as Schema.Attribute.BlocksValue);
-      }
-    };
+        if (isAstChange) {
+          /**
+           * Slate handles the state of the editor internally. We just need to keep Strapi's form
+           * state in sync with it in order to make sure that things like the "modified" state
+           * isn't broken. Updating the whole state on every change is very expensive however,
+           * so we debounce calls to onChange to mitigate input lag.
+           */
+          if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+          }
 
-    const blocks: BlocksStore = {
-      ...paragraphBlocks,
-      ...headingBlocks,
-      ...listBlocks,
-      ...linkBlocks,
-      ...imageBlocks,
-      ...quoteBlocks,
-      ...codeBlocks,
-    };
+          // Set a new debounce timeout
+          debounceTimeout.current = setTimeout(() => {
+            incrementSlateUpdatesCount();
+            onChange(name, state as Schema.Attribute.BlocksValue);
+            debounceTimeout.current = null;
+          }, 300);
+        }
+      },
+      [editor.operations, incrementSlateUpdatesCount, name, onChange]
+    );
+
+    // Clean up the timeout on unmount
+    React.useEffect(() => {
+      return () => {
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+      };
+    }, []);
 
     return (
       <>
