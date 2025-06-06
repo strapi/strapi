@@ -302,7 +302,12 @@ export default {
     const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
-    const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
+    const clonedDocument = await documentManager.clone(
+      document.documentId,
+      sanitizedBody,
+      model,
+      locale
+    );
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {

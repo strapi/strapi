@@ -144,6 +144,8 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
   const { toggleNotification } = useNotification();
   const { autoClone } = useDocumentActions();
   const [prohibitedFields, setProhibitedFields] = React.useState<ProhibitedCloningField[]>([]);
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const locale = query.plugins?.['i18n']?.locale;
 
   return {
     disabled: !canCreate,
@@ -170,10 +172,15 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
         return;
       }
 
-      const res = await autoClone({ model, sourceId: documentId });
+      const res = await autoClone({ model, sourceId: documentId, locale });
 
       if ('data' in res) {
-        navigate(res.data.documentId);
+        navigate({
+          pathname: res.data.documentId,
+          search: stringify({
+            plugins: query.plugins,
+          }),
+        });
 
         /**
          * We return true because we don't need to show a modal anymore.
@@ -213,6 +220,9 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
               tag={NavLink}
               to={{
                 pathname: `clone/${documentId}`,
+                search: stringify({
+                  plugins: query.plugins,
+                }),
               }}
             >
               {formatMessage({

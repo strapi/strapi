@@ -179,7 +179,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
      * Same with `uid` and `documentModel`.
      */
     const model = component ? component.uid : currentDocumentMeta.model;
-    const id = component && componentId ? componentId.toString() : documentId;
+    const id = component ? componentId?.toString() : documentId;
 
     /**
      * The `name` prop is a complete path to the field, e.g. `field1.field2.field3`.

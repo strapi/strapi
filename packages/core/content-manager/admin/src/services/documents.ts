@@ -27,12 +27,16 @@ import type {
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    autoCloneDocument: builder.mutation<Clone.Response, Clone.Params & { query?: string }>({
-      query: ({ model, sourceId, query }) => ({
+    autoCloneDocument: builder.mutation<
+      Clone.Response,
+      Clone.Params & { data: Clone.Request['body']; params?: Clone.Request['query'] }
+    >({
+      query: ({ model, sourceId, data, params }) => ({
         url: `/content-manager/collection-types/${model}/auto-clone/${sourceId}`,
         method: 'POST',
+        data,
         config: {
-          params: query,
+          params,
         },
       }),
       invalidatesTags: (_result, error, { model }) => {
