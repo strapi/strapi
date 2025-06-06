@@ -193,7 +193,8 @@ interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease';
+    | 'didCreateRelease'
+    | 'didStartNewChat';
   properties?: never;
 }
 
@@ -363,6 +364,38 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUsePresetPromptEvent {
+  name: 'didUsePresetPrompt';
+  properties: {
+    type:
+      | 'generate-product-schema'
+      | 'tell-me-about-the-content-type-builder'
+      | 'tell-me-about-strapi';
+  };
+}
+
+interface DidUserSentMessageEvent {
+  name: 'didUserSentMessage';
+  properties: {
+    'attachment-type': 'code' | 'figma' | 'image' | 'none';
+    'number-of-input-tokens': number;
+  };
+}
+
+interface DidAnswerMessageEvent {
+  name: 'didAnswerMessage';
+  properties: {
+    successful: boolean;
+  };
+}
+
+interface DidVoteAnswerEvent {
+  name: 'didVoteAnswer';
+  properties: {
+    value: 'positive' | 'negative';
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -377,6 +410,10 @@ type EventsWithProperties =
   | DidSelectFile
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
+  | DidUsePresetPromptEvent
+  | DidUserSentMessageEvent
+  | DidAnswerMessageEvent
+  | DidVoteAnswerEvent
   | LogoEvent
   | TokenEvents
   | UpdateEntryEvents

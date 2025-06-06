@@ -2,13 +2,14 @@
 import { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 
 import { useChat } from '@ai-sdk/react';
+import { useTracking } from '@strapi/admin/strapi-admin';
 
 import { useDataManager } from '../../DataManager/useDataManager';
 import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
-import { STRAPI_AI_TOKEN } from '../lib/constants';
+import { STRAPI_AI_TOKEN, STRAPI_CODE_MIME_TYPE } from '../lib/constants';
 import { transformMessages } from '../lib/transforms/messages';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
@@ -55,6 +56,8 @@ export const BaseChatProvider = ({
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
+  const { trackUsage } = useTracking();
+
   // DataManager
   const { components, contentTypes } = useDataManager();
 
@@ -99,7 +102,46 @@ export const BaseChatProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat.messages]);
 
+  const getAttachmentType = (attachments: Attachment[]): 'code' | 'figma' | 'image' | 'none' => {
+    // TODO: how do we need to determine the types??
+    if (!attachments.length) {
+      return 'none';
+    }
+
+    if (attachments.some((att) => att.contentType === STRAPI_CODE_MIME_TYPE)) {
+      return 'code';
+    }
+
+    if (
+      attachments.some(
+        (att) => att.contentType?.includes('figma') || att.name?.toLowerCase().includes('figma')
+      )
+    ) {
+      return 'figma';
+    }
+
+    if (attachments.some((att) => att.contentType?.startsWith('image/'))) {
+      return 'image';
+    }
+
+    return 'code';
+  };
+
+  const getTokenCount = (text: string): number => {
+    // TODO: Implement token counting
+    return text.length;
+  };
+
   const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
+    // TODO: test what's being sent here
+    const attachmentType = getAttachmentType(attachments);
+    const tokenCount = getTokenCount(chat.input || '');
+
+    trackUsage('didUserSentMessage', {
+      'attachment-type': attachmentType,
+      'number-of-input-tokens': tokenCount,
+    });
+
     chat.handleSubmit(event, {
       experimental_attachments: attachments
         // Transform to ai/sdk format and remove any attachments that are not yet ready
@@ -132,6 +174,24 @@ export const BaseChatProvider = ({
     }
   }, [messages.length, title, generateTitle]);
 
+  useEffect(() => {
+    // TODO: test this for status changes on the chat
+    if (chat.status === 'error') {
+      trackUsage('didAnswerMessage', {
+        successful: false,
+      });
+    } else if (
+      chat.status !== 'streaming' &&
+      chat.status !== 'submitted' &&
+      messages.length > 0 &&
+      messages[messages.length - 1]?.role === 'assistant'
+    ) {
+      trackUsage('didAnswerMessage', {
+        successful: true,
+      });
+    }
+  }, [chat.status, messages, trackUsage]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -151,6 +211,7 @@ export const BaseChatProvider = ({
         isChatOpen,
         toggleChat: () => setIsChatOpen(!isChatOpen),
         openChat: () => {
+          trackUsage('didStartNewChat');
           setIsChatOpen(true);
         },
         // Attachments

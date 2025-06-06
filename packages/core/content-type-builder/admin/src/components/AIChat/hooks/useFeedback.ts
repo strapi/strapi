@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useNotification } from '@strapi/admin/strapi-admin';
+import { useNotification, useTracking } from '@strapi/admin/strapi-admin';
 
 import { useStrapiChat } from '../providers/ChatProvider';
 
@@ -11,6 +11,7 @@ export const useFeedback = () => {
   const { fetch: sendFeedback, isPending, error } = useFetchSendFeedback();
   const { id, rawMessages: messages, schemas } = useStrapiChat();
   const { toggleNotification } = useNotification();
+  const { trackUsage } = useTracking();
   const { t } = useTranslations();
 
   // Keep track of messages that have received feedback
@@ -25,6 +26,10 @@ export const useFeedback = () => {
     if (hasVoted(messageId)) {
       return Promise.resolve();
     }
+
+    trackUsage('didVoteAnswer', {
+      value: 'positive',
+    });
 
     toggleNotification({
       type: 'success',
@@ -46,6 +51,10 @@ export const useFeedback = () => {
   };
 
   const downvoteMessage = (messageId: string, feedback: string, reasons: FeedbackReasonIds[]) => {
+    trackUsage('didVoteAnswer', {
+      value: 'negative',
+    });
+
     toggleNotification({
       type: 'success',
       message: t('chat.feedback.submitted', 'Thank you for your feedback! '),

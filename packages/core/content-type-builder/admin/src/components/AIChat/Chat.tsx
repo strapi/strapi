@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { styled } from 'styled-components';
 
 import { Alert } from './components/Alert';
@@ -39,6 +40,7 @@ const ResponsiveFlex = styled(Flex)`
 const ChatSuggestions = () => {
   const { append } = useStrapiChat();
   const { t } = useTranslations();
+  const { trackUsage } = useTracking();
 
   const SUGGESTIONS = [
     t('chat.input.defaults.generate', 'Generate a product schema'),
@@ -61,12 +63,16 @@ const ChatSuggestions = () => {
               startIcon={<Sparkle fill="neutral500" />}
               size="M"
               variant="tertiary"
-              onClick={() =>
+              onClick={() => {
+                trackUsage('didUsePresetPrompt', {
+                  type: suggestion.toLowerCase().replace(/\s+/g, '-'),
+                });
+
                 append({
                   role: 'user',
                   content: suggestion,
-                })
-              }
+                });
+              }}
             >
               <Typography fontWeight="regular">{suggestion}</Typography>
             </Button>
