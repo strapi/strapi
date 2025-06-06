@@ -368,6 +368,7 @@ interface DidPublishRelease {
 interface DidUpdateCTBSchema {
   name: 'didUpdateCTBSchema';
   properties: {
+    successfully: boolean;
     newContentTypes: number;
     editedContentTypes: number;
     deletedContentTypes: number;
