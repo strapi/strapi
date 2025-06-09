@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
-import { useTracking } from '@strapi/admin/strapi-admin';
 import { styled } from 'styled-components';
 
 import { Alert } from './components/Alert';
@@ -48,6 +48,13 @@ const ChatSuggestions = () => {
     t('chat.input.defaults.strapi', 'Tell me about Strapi'),
   ] as const;
 
+  const SUGGESTION_TO_PROMPT_TYPE = {
+    [t('chat.input.defaults.generate', 'Generate a product schema')]: 'generate-product-schema',
+    [t('chat.input.defaults.ctb', 'Tell me about the Content-Type Builder')]:
+      'tell-me-about-the-content-type-builder',
+    [t('chat.input.defaults.strapi', 'Tell me about Strapi')]: 'tell-me-about-strapi',
+  } as const;
+
   const suggestionsTitle = t('chat.input.defaults.title', 'How can I help you?');
 
   return (
@@ -65,7 +72,7 @@ const ChatSuggestions = () => {
               variant="tertiary"
               onClick={() => {
                 trackUsage('didUsePresetPrompt', {
-                  type: suggestion.toLowerCase().replace(/\s+/g, '-'),
+                  type: SUGGESTION_TO_PROMPT_TYPE[suggestion],
                 });
 
                 append({
