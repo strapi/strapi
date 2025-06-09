@@ -342,7 +342,8 @@ const ChatInput = (props: any) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const Chat = () => {
-  const { title, messages, isChatOpen, isChatEnabled, toggleChat, reset } = useStrapiChat();
+  const { title, messages, isChatOpen, isChatEnabled, openChat, closeChat, reset } =
+    useStrapiChat();
   const { attachFiles } = useAttachments();
   const { t } = useTranslations();
 
@@ -370,10 +371,10 @@ const Chat = () => {
         size="md"
         position="bottom-right"
         isOpen={isChatOpen}
-        onToggle={toggleChat}
+        onToggle={isChatOpen ? closeChat : openChat}
         toggleIcon={
           <IconButton
-            onClick={toggleChat}
+            onClick={isChatOpen ? closeChat : openChat}
             label={isChatOpen ? closeChatLabel : openChatLabel}
             variant="default"
           >

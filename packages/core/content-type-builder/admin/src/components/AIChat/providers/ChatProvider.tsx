@@ -30,8 +30,8 @@ interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   schemas: Schema[];
   // Chat window
   isChatOpen: boolean;
-  toggleChat: () => void;
   openChat: () => void;
+  closeChat: () => void;
   // Attachments
   attachments: Attachment[];
   setAttachments: React.Dispatch<React.SetStateAction<Attachment[]>>;
@@ -52,6 +52,7 @@ export const BaseChatProvider = ({
 }) => {
   const [chatId, setChatId] = useState<string | undefined>(undefined);
   const [isChatOpen, setIsChatOpen] = useState(defaultOpen);
+  const [openCount, setOpenCount] = useState(0);
 
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -210,10 +211,15 @@ export const BaseChatProvider = ({
         // Chat
         title,
         isChatOpen,
-        toggleChat: () => setIsChatOpen(!isChatOpen),
         openChat: () => {
           setIsChatOpen(true);
+          // if this is the first open, it's a new chat
+          if (openCount === 0) {
+            trackUsage('didStartNewChat');
+          }
+          setOpenCount((prev) => prev + 1);
         },
+        closeChat: () => setIsChatOpen(false),
         // Attachments
         attachments,
         setAttachments,
