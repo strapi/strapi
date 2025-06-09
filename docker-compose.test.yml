@@ -1,9 +1,9 @@
-version: '3'
+version: '3.8'
 
 services:
   postgres:
     image: postgres
-    restart: always
+    restart: unless-stopped
     volumes:
       - pgdata_test:/var/lib/postgresql/data
     environment:
@@ -15,7 +15,7 @@ services:
 
   mysql:
     image: mysql:8
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_DATABASE: strapi_test
       MYSQL_USER: strapi
