@@ -1,6 +1,11 @@
 import { testData } from '../../../../tests/data';
 import { removeProhibitedFields } from '../data';
 
+const defaultFieldsValues = {
+  name: 'name',
+  password: '',
+};
+
 describe('data', () => {
   describe('removeProhibitedFields', () => {
     it('should return an empty object', () => {
@@ -13,9 +18,9 @@ describe('data', () => {
       const { components, contentType } = testData;
 
       expect(
-        removeProhibitedFields(['password'])(contentType, components)({ name: 'test' })
+        removeProhibitedFields(['password'])(contentType, components)({ name: 'name' })
       ).toEqual({
-        name: 'test',
+        name: 'name',
       });
     });
 
@@ -24,10 +29,10 @@ describe('data', () => {
 
       expect(
         removeProhibitedFields(['password'])(contentType, components)({
-          name: 'test',
+          name: 'name',
           password: 'password',
         })
-      ).toEqual({ name: 'test', password: '' });
+      ).toEqual(defaultFieldsValues);
     });
 
     it('should remove all password fields', () => {
@@ -41,14 +46,12 @@ describe('data', () => {
           {
             __component: 'compos.sub-compo',
             id: 7,
-            name: 'name',
-            password: '',
+            ...defaultFieldsValues,
           },
           {
             id: 4,
             documentId: '456789',
-            name: 'name',
-            password: '',
+            ...defaultFieldsValues,
             subcomponotrepeatable: null,
             subrepeatable: [],
             __component: 'compos.test-compo',
@@ -56,8 +59,7 @@ describe('data', () => {
           {
             id: 5,
             documentId: '567890',
-            name: 'name',
-            password: '',
+            ...defaultFieldsValues,
             subcomponotrepeatable: { id: 9, name: 'name', password: '' },
             subrepeatable: [{ id: 8, name: 'name', password: '' }],
             __component: 'compos.test-compo',
@@ -77,8 +79,7 @@ describe('data', () => {
         notrepeatable: {
           id: 1,
           documentId: '123456',
-          name: 'name',
-          password: '',
+          ...defaultFieldsValues,
           subcomponotrepeatable: { id: 4, name: 'name', password: '' },
           subrepeatable: [
             { id: 1, name: 'name', password: '' },
@@ -91,16 +92,14 @@ describe('data', () => {
           {
             id: 2,
             documentId: '234567',
-            name: 'name',
-            password: '',
+            ...defaultFieldsValues,
             subrepeatable: [{ id: 5, name: 'name', password: '' }],
             subcomponotrepeatable: { id: 6, name: 'name', password: '' },
           },
           {
             id: 3,
             documentId: '345678',
-            name: 'name',
-            password: '',
+            ...defaultFieldsValues,
             subrepeatable: [],
             subcomponotrepeatable: null,
           },
