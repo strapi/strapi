@@ -203,6 +203,7 @@ export const BaseChatProvider = ({
         reset: () => {
           chat.stop();
           setChatId(generateRandomId());
+          trackUsage('didStartNewChat');
           resetTitle();
         },
         schemas,
@@ -211,7 +212,6 @@ export const BaseChatProvider = ({
         isChatOpen,
         toggleChat: () => setIsChatOpen(!isChatOpen),
         openChat: () => {
-          trackUsage('didStartNewChat');
           setIsChatOpen(true);
         },
         // Attachments
