@@ -12,6 +12,7 @@ export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
   useTypescriptOnAdmin?: boolean;
   isHostedOnStrapiCloud?: boolean;
+  aiLicenseKey?: string;
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
@@ -63,6 +64,7 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
               ...data,
               projectId: uuid,
               registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+              aiLicenseKey: window.strapi.aiLicenseKey,
             },
           }),
           headers: {

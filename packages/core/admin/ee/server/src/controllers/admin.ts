@@ -50,6 +50,7 @@ export default {
       shouldStopCreate: isNil(permittedSeats) ? false : currentActiveUserCount >= permittedSeats,
       licenseLimitStatus,
       isHostedOnStrapiCloud: env('STRAPI_HOSTING', null) === 'strapi.cloud',
+      aiLicenseKey: env('STRAPI_ADMIN_AI_LICENSE'),
       type: strapi.ee.type,
       features: strapi.ee.features.list() ?? [],
     };
