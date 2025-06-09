@@ -7,7 +7,7 @@ const CREATE_URL = /\/admin\/content-manager\/collection-types\/api::author.auth
 
 test.describe('Relations on the fly - Create a Relation', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('rotf.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
     // Step 0. Login as admin
     await login({ page });
