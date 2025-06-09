@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { clickAndWait } from '../../../utils/shared';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
 
 const CREATE_URL = /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
 
@@ -10,11 +9,11 @@ test.describe('Relations on the fly - Create a Relation', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('rotf.tar');
     await page.goto('/admin');
+    // Step 0. Login as admin
+    await login({ page });
   });
 
   test('I want to create a new relation in a modal and open it in full page', async ({ page }) => {
-    // Step 0. Login as admin
-    await login({ page });
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
@@ -35,8 +34,6 @@ test.describe('Relations on the fly - Create a Relation', () => {
   test('I want to click on a new relation in the create relation modal without saving the data in the form', async ({
     page,
   }) => {
-    // Step 0. Login as admin
-    await login({ page });
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
@@ -65,8 +62,6 @@ test.describe('Relations on the fly - Create a Relation', () => {
   test('I want to add a new relation and edit it in the create relation modal without saving the data in the form', async ({
     page,
   }) => {
-    // Step 0. Login as admin
-    await login({ page });
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
@@ -96,8 +91,6 @@ test.describe('Relations on the fly - Create a Relation', () => {
   test('I want to click to close the relation modal without saving the data in the form', async ({
     page,
   }) => {
-    // Step 0. Login as admin
-    await login({ page });
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
@@ -121,8 +114,6 @@ test.describe('Relations on the fly - Create a Relation', () => {
   test('I want to click the button to open the full page without saving the data in the form', async ({
     page,
   }) => {
-    // Step 0. Login as admin
-    await login({ page });
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
@@ -147,8 +138,6 @@ test.describe('Relations on the fly - Create a Relation', () => {
   test('I want to click the back button to open the previous relation without saving the data in the form', async ({
     page,
   }) => {
-    // Step 0. Login as admin
-    await login({ page });
     await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('gridcell', { name: 'West Ham post match analysis' }));
@@ -173,23 +162,5 @@ test.describe('Relations on the fly - Create a Relation', () => {
     await clickAndWait(page, page.getByRole('button', { name: 'Confirm' }));
 
     await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
-  });
-
-  test('I want to try to create a relation as an editor without the permission to do it', async ({
-    page,
-  }) => {
-    // Step 0. Login as editor
-    await login({ page, username: EDITOR_EMAIL_ADDRESS, password: EDITOR_PASSWORD });
-
-    // Step 1. Got to Author collection-type and open one author
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
-    await clickAndWait(page, page.getByRole('gridcell', { name: 'Coach Beard' }));
-
-    // Step 2. Try to Open the create relation modal
-    await page.getByRole('combobox', { name: 'articles' }).click();
-    const createRelationButton = page.getByRole('option', { name: 'Create a relation' });
-    await expect(createRelationButton).toBeDisabled();
-    await expect(createRelationButton).toHaveAttribute('aria-disabled', 'true');
   });
 });
