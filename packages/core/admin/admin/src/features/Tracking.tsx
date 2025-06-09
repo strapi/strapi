@@ -367,15 +367,15 @@ interface DidPublishRelease {
 interface DidUsePresetPromptEvent {
   name: 'didUsePresetPrompt';
   properties: {
-    type:
+    promptType:
       | 'generate-product-schema'
       | 'tell-me-about-the-content-type-builder'
       | 'tell-me-about-strapi';
   };
 }
 
-interface DidUserSentMessageEvent {
-  name: 'didUserSentMessage';
+interface DidUserSendMessageEvent {
+  name: 'didUserSendMessage';
   properties: {
     'attachment-type': 'code' | 'figma' | 'image' | 'none';
     'number-of-input-tokens': number;
@@ -411,7 +411,7 @@ type EventsWithProperties =
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
   | DidUsePresetPromptEvent
-  | DidUserSentMessageEvent
+  | DidUserSendMessageEvent
   | DidAnswerMessageEvent
   | DidVoteAnswerEvent
   | LogoEvent

@@ -137,7 +137,7 @@ export const BaseChatProvider = ({
     const attachmentType = getAttachmentType(attachments);
     const tokenCount = getTokenCount(chat.input || '');
 
-    trackUsage('didUserSentMessage', {
+    trackUsage('didUserSendMessage', {
       'attachment-type': attachmentType,
       'number-of-input-tokens': tokenCount,
     });

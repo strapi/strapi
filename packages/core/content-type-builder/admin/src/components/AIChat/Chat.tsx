@@ -72,7 +72,7 @@ const ChatSuggestions = () => {
               variant="tertiary"
               onClick={() => {
                 trackUsage('didUsePresetPrompt', {
-                  type: SUGGESTION_TO_PROMPT_TYPE[suggestion],
+                  promptType: SUGGESTION_TO_PROMPT_TYPE[suggestion],
                 });
 
                 append({
