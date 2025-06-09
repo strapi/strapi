@@ -302,12 +302,7 @@ export default {
     const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any, excludeNotCreatable);
     const sanitizedBody = await sanitizeFn(body);
 
-    const clonedDocument = await documentManager.clone(
-      document.documentId,
-      sanitizedBody,
-      model,
-      locale
-    );
+    const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
     ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
@@ -318,6 +313,7 @@ export default {
   },
 
   async autoClone(ctx: any) {
+    console.log('autoClone ctx', ctx.params);
     const { model } = ctx.params;
 
     // Check if the model has fields that prevent auto cloning

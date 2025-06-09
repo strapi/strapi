@@ -105,14 +105,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async clone(
       id: Modules.Documents.ID,
       body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
-      uid: UID.CollectionType,
-      locale?: string
+      uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = {
         data: omitIdField(body),
         populate,
-        locale,
       };
 
       return strapi

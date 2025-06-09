@@ -144,8 +144,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
   const { toggleNotification } = useNotification();
   const { autoClone } = useDocumentActions();
   const [prohibitedFields, setProhibitedFields] = React.useState<ProhibitedCloningField[]>([]);
-  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
-  const locale = query.plugins?.['i18n']?.locale;
+  const [{ query }] = useQueryParams<{ plugins?: Record<string, any> }>();
 
   return {
     disabled: !canCreate,
@@ -172,7 +171,11 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
         return;
       }
 
-      const res = await autoClone({ model, sourceId: documentId, locale });
+      const res = await autoClone({
+        model,
+        sourceId: documentId,
+        locale: query.plugins?.i18n?.locale,
+      });
 
       if ('data' in res) {
         navigate({
