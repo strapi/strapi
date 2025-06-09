@@ -482,6 +482,7 @@ const useTracking = (): UseTrackingReturn => {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
+                aiLicenseKey: window.strapi.aiLicenseKey,
               },
             },
             {
