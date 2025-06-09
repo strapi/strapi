@@ -5,7 +5,7 @@ export const STRAPI_CODE_MIME_TYPE = 'application/vnd.strapi.code';
 export const STRAPI_MAX_ATTACHMENTS = 15;
 export const STRAPI_MAX_ATTACHMENT_SIZE = 15 * 1024 * 1024; // 15MB
 
-export const STRAPI_AI_TOKEN = process.env.STRAPI_ADMIN_AI_LICENSE;
+export const STRAPI_AI_TOKEN = process.env.STRAPI_ADMIN_AI_API_KEY;
 
 /* -------------------------------------------------------------------------------------------------
  * APIs
