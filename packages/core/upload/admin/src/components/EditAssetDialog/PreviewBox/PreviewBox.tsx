@@ -27,7 +27,7 @@ import {
 
 import type { File as FileDefinition, RawFile } from '../../../../../shared/contracts/files';
 
-import 'cropperjs/dist/cropper.css';
+import 'cropperjs/src/css/cropper.css';
 
 interface Asset extends Omit<FileDefinition, 'folder'> {
   isLocal?: boolean;
