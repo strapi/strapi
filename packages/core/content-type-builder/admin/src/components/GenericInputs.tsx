@@ -44,10 +44,38 @@ interface InputOption {
   value: string;
 }
 
-interface CustomInputProps<TAttribute extends Schema.Attribute.AnyAttribute>
-  extends Omit<GenericInputProps<TAttribute>, 'customInputs'> {
-  ref?: React.Ref<HTMLElement>;
+interface CustomInputProps<
+  TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute,
+> {
+  attribute?: TAttribute;
+  autoComplete?: string;
+  description?: TranslationMessage;
+  disabled?: boolean;
+  error?: string;
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
+  intlLabel: TranslationMessage;
+  labelAction?: React.ReactNode;
+  name: string;
+  onChange: (
+    payload: {
+      target: {
+        name: string;
+        value: Schema.Attribute.Value<TAttribute>;
+        type?: string;
+      };
+    },
+    shouldSetInitialValue?: boolean
+  ) => void;
+  onDelete?: () => void;
+  options?: InputOption[];
+  placeholder?: TranslationMessage;
+  required?: boolean;
+  step?: number;
+  type: string;
+  value?: Schema.Attribute.Value<TAttribute>;
+  autoFocus?: boolean;
+  attributeName?: string;
+  conditionFields?: Record<string, boolean>;
 }
 
 interface GenericInputProps<
@@ -72,6 +100,7 @@ interface GenericInputProps<
     },
     shouldSetInitialValue?: boolean
   ) => void;
+  onDelete?: () => void;
   options?: InputOption[];
   placeholder?: TranslationMessage;
   required?: boolean;
@@ -95,6 +124,7 @@ const GenericInput = ({
   error,
   name,
   onChange,
+  onDelete,
   options = [],
   placeholder,
   required,
@@ -199,6 +229,7 @@ const GenericInput = ({
         error={errorMessage || ''}
         name={name}
         onChange={onChange}
+        onDelete={onDelete}
         options={options}
         required={required}
         placeholder={placeholder}

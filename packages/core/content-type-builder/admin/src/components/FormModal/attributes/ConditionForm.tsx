@@ -1,6 +1,7 @@
 import * as React from 'react';
+import { useState } from 'react';
 
-import { createRulesEngine, type Condition } from '@strapi/admin/strapi-admin';
+import { createRulesEngine, ConfirmDialog, type Condition } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Flex,
@@ -11,11 +12,23 @@ import {
   SingleSelect,
   SingleSelectOption,
   Button,
+  Dialog,
 } from '@strapi/design-system';
 import { Trash, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
+import { AttributeIcon } from '../../../components/AttributeIcon';
 import { getTrad } from '../../../utils/getTrad';
+
+const SmallAttributeIcon = styled(AttributeIcon)`
+  width: 16px !important;
+  height: 16px !important;
+  svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+`;
 
 interface ConditionFormProps {
   name: string;
@@ -103,6 +116,7 @@ export const ConditionForm = ({
 }: ConditionFormProps) => {
   const { formatMessage } = useIntl();
   const [localValue, setLocalValue] = React.useState<LocalValue>(convertFromJsonLogic(value));
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const hasCondition = Boolean(value?.visible);
 
   // Add safety check for conditionFields
@@ -175,6 +189,7 @@ export const ConditionForm = ({
       },
     });
     onDelete();
+    setShowConfirmDialog(false);
   };
 
   const handleFieldChange = (fieldName: string | number) => {
@@ -227,146 +242,171 @@ export const ConditionForm = ({
   }
 
   return (
-    <Box
-      padding={6}
-      marginTop={4}
-      hasRadius
-      background="neutral0"
-      borderColor="neutral200"
-      shadow="tableShadow"
-    >
-      <Flex justifyContent="space-between" alignItems="center" marginBottom={4}>
-        <Typography variant="omega">
-          Condition for <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
-        </Typography>
-        <IconButton
-          onClick={handleDelete}
-          label={formatMessage({
-            id: getTrad('form.button.delete'),
-            defaultMessage: 'Delete',
-          })}
-        >
-          <Trash />
-        </IconButton>
-      </Flex>
-      <Box paddingBottom={2}>
-        <Typography
-          variant="sigma"
-          textColor="neutral600"
-          style={{ textTransform: 'uppercase', letterSpacing: 1 }}
-        >
-          {formatMessage({ id: getTrad('form.attribute.condition.if'), defaultMessage: 'IF' })}
-        </Typography>
-      </Box>
-      <Flex gap={4} marginBottom={4}>
-        <Box minWidth={0} flex={1}>
-          <Field.Root name={`${name}.field`}>
-            <SingleSelect
-              value={localValue.dependsOn}
-              onChange={handleFieldChange}
-              placeholder={formatMessage({
-                id: getTrad('form.attribute.condition.field'),
-                defaultMessage: 'field',
+    <Box marginTop={2}>
+      <Box
+        background="neutral0"
+        hasRadius
+        borderColor="neutral200"
+        borderWidth={0.5}
+        borderStyle="solid"
+      >
+        <Flex justifyContent="space-between" alignItems="center" padding={4}>
+          <Typography variant="sigma" textColor="neutral800">
+            {formatMessage(
+              {
+                id: getTrad('form.attribute.condition.title'),
+                defaultMessage: 'Condition for {name}',
+              },
+              {
+                name: <strong>{attributeName}</strong>,
+              }
+            )}
+          </Typography>
+          <Dialog.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+            <Dialog.Trigger>
+              <IconButton label="Delete">
+                <Trash />
+              </IconButton>
+            </Dialog.Trigger>
+            <ConfirmDialog onConfirm={handleDelete}>
+              {formatMessage({
+                id: getTrad('popUpWarning.bodyMessage.delete-condition'),
+                defaultMessage: 'Are you sure you want to delete this condition?',
               })}
+            </ConfirmDialog>
+          </Dialog.Root>
+        </Flex>
+
+        <Box background="neutral100" padding={4}>
+          <Box paddingBottom={2}>
+            <Typography
+              variant="sigma"
+              textColor="neutral600"
+              style={{ textTransform: 'uppercase', letterSpacing: 1 }}
             >
-              {conditionFields.map((field) => (
-                <SingleSelectOption key={field.name} value={field.name}>
-                  <span style={{ fontWeight: 'bold' }}>{field.name}</span>
+              {formatMessage({ id: getTrad('form.attribute.condition.if'), defaultMessage: 'IF' })}
+            </Typography>
+          </Box>
+          <Flex gap={4}>
+            <Box minWidth={0} flex={1}>
+              <Field.Root name={`${name}.field`}>
+                <SingleSelect
+                  value={localValue.dependsOn}
+                  onChange={handleFieldChange}
+                  placeholder={formatMessage({
+                    id: getTrad('form.attribute.condition.field'),
+                    defaultMessage: 'field',
+                  })}
+                >
+                  {conditionFields.map((field) => (
+                    <SingleSelectOption key={field.name} value={field.name}>
+                      <Flex gap={2} alignItems="center">
+                        <SmallAttributeIcon type={field.type} />
+                        <span>{field.name}</span>
+                      </Flex>
+                    </SingleSelectOption>
+                  ))}
+                </SingleSelect>
+              </Field.Root>
+            </Box>
+            <Box minWidth={0} flex={1}>
+              <Field.Root name={`${name}.operator`}>
+                <SingleSelect
+                  value={localValue.operator}
+                  onChange={handleOperatorChange}
+                  disabled={!localValue.dependsOn}
+                  placeholder={formatMessage({
+                    id: getTrad('form.attribute.condition.operator'),
+                    defaultMessage: 'condition',
+                  })}
+                >
+                  <SingleSelectOption value="is">
+                    {formatMessage({
+                      id: getTrad('form.attribute.condition.operator.is'),
+                      defaultMessage: 'is',
+                    })}
+                  </SingleSelectOption>
+                  <SingleSelectOption value="isNot">
+                    {formatMessage({
+                      id: getTrad('form.attribute.condition.operator.isNot'),
+                      defaultMessage: 'is not',
+                    })}
+                  </SingleSelectOption>
+                </SingleSelect>
+              </Field.Root>
+            </Box>
+            <Box minWidth={0} flex={1}>
+              <Field.Root name={`${name}.value`}>
+                <SingleSelect
+                  value={localValue.value?.toString() || ''}
+                  onChange={handleValueChange}
+                  disabled={!localValue.dependsOn}
+                  placeholder={formatMessage({
+                    id: getTrad('form.attribute.condition.value'),
+                    defaultMessage: 'value',
+                  })}
+                >
+                  {isEnumField && selectedField?.enum ? (
+                    selectedField.enum.map((enumValue) => (
+                      <SingleSelectOption key={enumValue} value={enumValue}>
+                        {enumValue}
+                      </SingleSelectOption>
+                    ))
+                  ) : (
+                    <>
+                      <SingleSelectOption value="true">
+                        {formatMessage({
+                          id: getTrad('form.attribute.condition.value.true'),
+                          defaultMessage: 'true',
+                        })}
+                      </SingleSelectOption>
+                      <SingleSelectOption value="false">
+                        {formatMessage({
+                          id: getTrad('form.attribute.condition.value.false'),
+                          defaultMessage: 'false',
+                        })}
+                      </SingleSelectOption>
+                    </>
+                  )}
+                </SingleSelect>
+              </Field.Root>
+            </Box>
+          </Flex>
+        </Box>
+
+        <Box background="neutral100" padding={4}>
+          <Box paddingBottom={4}>
+            <Typography
+              variant="sigma"
+              textColor="neutral600"
+              style={{ textTransform: 'uppercase', letterSpacing: 1 }}
+            >
+              {formatMessage({
+                id: getTrad('form.attribute.condition.then'),
+                defaultMessage: 'THEN',
+              })}
+            </Typography>
+          </Box>
+          <Box paddingBottom={4}>
+            <Field.Root name={`${name}.action`}>
+              <SingleSelect
+                value={localValue.action}
+                onChange={handleActionChange}
+                placeholder={formatMessage({
+                  id: getTrad('form.attribute.condition.action'),
+                  defaultMessage: 'action',
+                })}
+              >
+                <SingleSelectOption value="show">
+                  Show <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
                 </SingleSelectOption>
-              ))}
-            </SingleSelect>
-          </Field.Root>
+                <SingleSelectOption value="hide">
+                  Hide <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
+                </SingleSelectOption>
+              </SingleSelect>
+            </Field.Root>
+          </Box>
         </Box>
-        <Box minWidth={0} flex={1}>
-          <Field.Root name={`${name}.operator`}>
-            <SingleSelect
-              value={localValue.operator}
-              onChange={handleOperatorChange}
-              disabled={!localValue.dependsOn}
-              placeholder={formatMessage({
-                id: getTrad('form.attribute.condition.operator'),
-                defaultMessage: 'condition',
-              })}
-            >
-              <SingleSelectOption value="is">
-                {formatMessage({
-                  id: getTrad('form.attribute.condition.operator.is'),
-                  defaultMessage: 'is',
-                })}
-              </SingleSelectOption>
-              <SingleSelectOption value="isNot">
-                {formatMessage({
-                  id: getTrad('form.attribute.condition.operator.isNot'),
-                  defaultMessage: 'is not',
-                })}
-              </SingleSelectOption>
-            </SingleSelect>
-          </Field.Root>
-        </Box>
-        <Box minWidth={0} flex={1}>
-          <Field.Root name={`${name}.value`}>
-            <SingleSelect
-              value={localValue.value?.toString() || ''}
-              onChange={handleValueChange}
-              disabled={!localValue.dependsOn}
-              placeholder={formatMessage({
-                id: getTrad('form.attribute.condition.value'),
-                defaultMessage: 'value',
-              })}
-            >
-              {isEnumField && selectedField?.enum ? (
-                selectedField.enum.map((enumValue) => (
-                  <SingleSelectOption key={enumValue} value={enumValue}>
-                    {enumValue}
-                  </SingleSelectOption>
-                ))
-              ) : (
-                <>
-                  <SingleSelectOption value="true">
-                    {formatMessage({
-                      id: getTrad('form.attribute.condition.value.true'),
-                      defaultMessage: 'true',
-                    })}
-                  </SingleSelectOption>
-                  <SingleSelectOption value="false">
-                    {formatMessage({
-                      id: getTrad('form.attribute.condition.value.false'),
-                      defaultMessage: 'false',
-                    })}
-                  </SingleSelectOption>
-                </>
-              )}
-            </SingleSelect>
-          </Field.Root>
-        </Box>
-      </Flex>
-      <Box paddingBottom={2}>
-        <Typography
-          variant="sigma"
-          textColor="neutral600"
-          style={{ textTransform: 'uppercase', letterSpacing: 1 }}
-        >
-          {formatMessage({ id: getTrad('form.attribute.condition.then'), defaultMessage: 'THEN' })}
-        </Typography>
-      </Box>
-      <Box>
-        <Field.Root name={`${name}.action`}>
-          <SingleSelect
-            value={localValue.action}
-            onChange={handleActionChange}
-            placeholder={formatMessage({
-              id: getTrad('form.attribute.condition.action'),
-              defaultMessage: 'action',
-            })}
-          >
-            <SingleSelectOption value="show">
-              Show <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
-            </SingleSelectOption>
-            <SingleSelectOption value="hide">
-              Hide <span style={{ fontWeight: 'bold' }}>{attributeName || name}</span>
-            </SingleSelectOption>
-          </SingleSelect>
-        </Field.Root>
       </Box>
     </Box>
   );

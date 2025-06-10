@@ -1,6 +1,7 @@
 import { forwardRef, memo, useState } from 'react';
 
-import { Box, Flex, IconButton, Typography, Link, Badge } from '@strapi/design-system';
+import { ConfirmDialog } from '@strapi/admin/strapi-admin';
+import { Box, Flex, IconButton, Typography, Link, Badge, Dialog } from '@strapi/design-system';
 import { ChevronDown, Drag, Lock, Pencil, Trash } from '@strapi/icons';
 import get from 'lodash/get';
 import upperFirst from 'lodash/upperFirst';
@@ -102,6 +103,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
   const { onOpenModalEditField, onOpenModalEditCustomField } = useFormModalNavigation();
 
   const { formatMessage } = useIntl();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const isDeleted = item.status === 'REMOVED';
 
@@ -114,6 +116,60 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
   const isPluginContentType = get(targetContentType, 'plugin');
 
   const src = 'target' in item && item.target ? 'relation' : ico;
+
+  interface DependentRow {
+    contentType: string;
+    attribute: string;
+  }
+
+  const checkDependentRows = (): DependentRow[] => {
+    const dependentRows: DependentRow[] = [];
+    // Check all content types for attributes that depend on this one
+    Object.values(contentTypes).forEach((contentType: any) => {
+      if (contentType.attributes) {
+        Object.entries(contentType.attributes).forEach(([attrName, attr]: [string, any]) => {
+          if (attr.conditions?.visible) {
+            const [[operator, conditions]] = Object.entries(attr.conditions.visible);
+            const [fieldVar] = conditions as [{ var: string }, any];
+            if (fieldVar.var === item.name) {
+              dependentRows.push({
+                contentType: contentType.info.displayName,
+                attribute: attrName,
+              });
+            }
+          }
+        });
+      }
+    });
+    return dependentRows;
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const dependentRows = checkDependentRows();
+    if (dependentRows.length > 0) {
+      setShowConfirmDialog(true);
+    } else {
+      removeAttribute({
+        forTarget: type.modelType,
+        targetUid: type.uid,
+        attributeToRemoveName: item.name,
+      });
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    removeAttribute({
+      forTarget: type.modelType,
+      targetUid: type.uid,
+      attributeToRemoveName: item.name,
+    });
+    setShowConfirmDialog(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowConfirmDialog(false);
+  };
 
   const handleClick = () => {
     if (isMorph) {
@@ -301,14 +357,7 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                     </IconButton>
                   )}
                   <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeAttribute({
-                        forTarget: type.modelType,
-                        targetUid: type.uid,
-                        attributeToRemoveName: item.name,
-                      });
-                    }}
+                    onClick={handleDelete}
                     label={`${formatMessage({
                       id: 'global.delete',
                       defaultMessage: 'Delete',
@@ -318,6 +367,22 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                   >
                     <Trash />
                   </IconButton>
+                  <Dialog.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                    <ConfirmDialog onConfirm={handleConfirmDelete} onCancel={handleCancelDelete}>
+                      {formatMessage(
+                        {
+                          id: getTrad('popUpWarning.bodyMessage.delete-attribute-with-conditions'),
+                          defaultMessage:
+                            'Some conditions in other fields are based on the value of this one. Are you sure you want to delete it?',
+                        },
+                        {
+                          attributes: checkDependentRows()
+                            .map(({ contentType, attribute }) => `${contentType}.${attribute}`)
+                            .join(', '),
+                        }
+                      )}
+                    </ConfirmDialog>
+                  </Dialog.Root>
                 </>
               ) : (
                 <Flex padding={2}>

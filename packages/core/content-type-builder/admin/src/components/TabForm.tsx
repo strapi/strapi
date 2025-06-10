@@ -189,6 +189,13 @@ export const TabForm = ({
                           autoFocus={i === 0}
                           attributeName={modifiedData.name}
                           conditionFields={availableFields}
+                          onDelete={() => {
+                            onChange({
+                              target: {
+                                name: input.name,
+                              },
+                            });
+                          }}
                         />
                       )}
                     </Grid.Item>
