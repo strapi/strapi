@@ -4,7 +4,7 @@ import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
@@ -229,6 +229,15 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
         }
       };
     }, []);
+
+    // Ensure the editor is in sync after discard
+    React.useEffect(() => {
+      // Compare the field value with the editor state to check for a stale selection
+      if (value && JSON.stringify(editor.children) !== JSON.stringify(value)) {
+        // When there is a diff, unset selection to avoid an invalid state
+        Transforms.deselect(editor);
+      }
+    }, [editor, value]);
 
     const blocks = React.useMemo(
       () => ({
