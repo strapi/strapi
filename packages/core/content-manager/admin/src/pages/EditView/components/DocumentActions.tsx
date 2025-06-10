@@ -605,6 +605,9 @@ const PublishAction: DocumentActionComponent = ({
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
+  const {
+    currentDocument: { components },
+  } = useDocumentContext('PublishAction');
 
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
@@ -772,7 +775,10 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
-      const { data } = handleInvisibleAttributes(transformData(formValues), schema);
+      const { data } = handleInvisibleAttributes(transformData(formValues), {
+        schema,
+        components,
+      });
       const res = await publish(
         {
           collectionType,
@@ -960,6 +966,9 @@ const UpdateAction: DocumentActionComponent = ({
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
   const { create, update, clone, isLoading } = useDocumentActions();
+  const {
+    currentDocument: { components },
+  } = useDocumentContext('UpdateAction');
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
   const { getInitialFormValues } = useDoc();
@@ -1060,7 +1069,12 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
-        const { data } = handleInvisibleAttributes(transformData(document), schema, initialValues);
+        const { data } = handleInvisibleAttributes(transformData(document), {
+          schema,
+          initialValues,
+          components,
+        });
+
         const res = await update(
           {
             collectionType,
@@ -1077,7 +1091,11 @@ const UpdateAction: DocumentActionComponent = ({
           resetForm();
         }
       } else {
-        const { data } = handleInvisibleAttributes(transformData(document), schema, initialValues);
+        const { data } = handleInvisibleAttributes(transformData(document), {
+          schema,
+          initialValues,
+          components,
+        });
         const res = await create(
           {
             model,
@@ -1208,6 +1226,7 @@ const UpdateAction: DocumentActionComponent = ({
     onPreview,
     initialValues,
     schema,
+    components,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux

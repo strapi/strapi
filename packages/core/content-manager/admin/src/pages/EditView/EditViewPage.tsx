@@ -136,11 +136,11 @@ const EditViewPage = () => {
           // removes hidden fields from the validation
           // this is necessary because the yup schema doesn't know about the visibility conditions
           // and we don't want to validate fields that are not visible
-          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(
-            values,
+          const { data: cleanedValues, removedAttributes } = handleInvisibleAttributes(values, {
             schema,
-            initialValues
-          );
+            initialValues,
+            components,
+          });
 
           const yupSchema = createYupSchema(schema?.attributes, components, {
             status,

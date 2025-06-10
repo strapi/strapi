@@ -47,7 +47,7 @@ const arrayValidator = (attribute: Schema['attributes'][string], options: Valida
     return true;
   },
 });
-
+const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /**
  * TODO: should we create a Map to store these based on the hash of the schema?
  */
@@ -56,19 +56,35 @@ const createYupSchema = (
   components: ComponentsDictionary = {},
   options: ValidationOptions = { status: null }
 ): yup.ObjectSchema<any> => {
-  const createModelSchema = (attributes: Schema['attributes']): yup.ObjectSchema<any> =>
+  const createModelSchema = (
+    attributes: Schema['attributes'],
+    removedAttributes: string[] = []
+  ): yup.ObjectSchema<any> =>
     yup
       .object()
       .shape(
         Object.entries(attributes).reduce<ObjectShape>((acc, [name, attribute]) => {
+          const getNestedPathsForAttribute = (removed: string[], attrName: string): string[] => {
+            const prefix = `${attrName}.`;
+            const bracketRegex = new RegExp(`^${escapeRegex(attrName)}\\[\\d+\\]\\.`);
+
+            return removed
+              .filter((p) => p.startsWith(prefix) || bracketRegex.test(p))
+              .map((p) =>
+                p.startsWith(prefix) ? p.slice(prefix.length) : p.replace(bracketRegex, '')
+              );
+          };
+
           if (DOCUMENT_META_FIELDS.includes(name)) {
             return acc;
           }
 
-          if (options.removedAttributes?.includes(name)) {
+          if (removedAttributes?.includes(name)) {
             // If the attribute is not visible, we don't want to validate it
             return acc;
           }
+
+          const nestedRemoved = getNestedPathsForAttribute(removedAttributes, name);
 
           /**
            * These validations won't apply to every attribute
@@ -95,13 +111,13 @@ const createYupSchema = (
                 return {
                   ...acc,
                   [name]: transformSchema(
-                    yup.array().of(createModelSchema(attributes).nullable(false))
+                    yup.array().of(createModelSchema(attributes, nestedRemoved).nullable(false))
                   ).test(arrayValidator(attribute, options)),
                 };
               } else {
                 return {
                   ...acc,
-                  [name]: transformSchema(createModelSchema(attributes).nullable()),
+                  [name]: transformSchema(createModelSchema(attributes, nestedRemoved).nullable()),
                 };
               }
             }
@@ -126,7 +142,7 @@ const createYupSchema = (
                           return validation;
                         }
 
-                        return validation.concat(createModelSchema(attributes));
+                        return validation.concat(createModelSchema(attributes, nestedRemoved));
                       }
                     ) as unknown as yup.ObjectSchema<any>
                   )
@@ -177,7 +193,7 @@ const createYupSchema = (
        */
       .default(null);
 
-  return createModelSchema(attributes);
+  return createModelSchema(attributes, options.removedAttributes);
 };
 
 const createAttributeSchema = (
