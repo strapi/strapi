@@ -15,6 +15,7 @@ import { MainNav } from './MainNav/MainNav';
 import { NavBrand } from './MainNav/NavBrand';
 import { NavLink } from './MainNav/NavLink';
 import { NavUser } from './MainNav/NavUser';
+import { TrialCountdown } from './MainNav/TrialCountdown';
 
 const sortLinks = (links: MenuItem[]) => {
   return links.sort((a, b) => {
@@ -82,7 +83,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
           ? listLinks.map((link) => {
               const LinkIcon = link.icon;
               const badgeContentLock = link?.licenseOnly ? (
-                <Lightning fill="warning500" />
+                <Lightning fill="primary600" />
               ) : undefined;
 
               const badgeContentNumeric =
@@ -128,6 +129,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             })
           : null}
       </NavListWrapper>
+      <TrialCountdown />
       <NavUser initials={initials}>{userDisplayName}</NavUser>
     </MainNav>
   );

@@ -10,7 +10,7 @@ import { handleCloudLogin } from './cloud';
 import { createStrapi } from './create-strapi';
 import { checkNodeRequirements } from './utils/check-requirements';
 import { checkInstallPath } from './utils/check-install-path';
-import { machineID } from './utils/machine-id';
+import { installID } from './utils/install-id';
 import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
@@ -118,11 +118,16 @@ async function run(args: string[]): Promise<void> {
 
   const rootPath = await checkInstallPath(appDirectory);
 
+  let shouldCreateGrowthSsoTrial = false;
   if (!options.skipCloud) {
-    await handleCloudLogin();
+    shouldCreateGrowthSsoTrial = await handleCloudLogin();
   }
 
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
+
+  const randomUUID = crypto.randomUUID();
+  const uuid = (process.env.STRAPI_UUID_PREFIX || '') + randomUUID;
+  const installId = installID(uuid);
 
   const scope: Scope = {
     rootPath,
@@ -139,9 +144,9 @@ async function run(args: string[]): Promise<void> {
     packageJsonStrapi: {
       template: options.template,
     },
-    uuid: (process.env.STRAPI_UUID_PREFIX || '') + crypto.randomUUID(),
+    uuid,
     docker: process.env.DOCKER === 'true',
-    deviceId: machineID(),
+    installId,
     tmpPath,
     gitInit: true,
     devDependencies: {},
@@ -155,6 +160,7 @@ async function run(args: string[]): Promise<void> {
       'react-router-dom': '^6.0.0',
       'styled-components': '^6.0.0',
     },
+    shouldCreateGrowthSsoTrial,
   };
 
   if (options.template !== undefined) {

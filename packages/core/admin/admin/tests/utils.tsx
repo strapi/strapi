@@ -108,6 +108,11 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
           <StrapiAppProvider
             components={{}}
             rbac={new RBAC()}
+            widgets={{
+              widgets: {},
+              getAll: jest.fn(),
+              register: jest.fn(),
+            }}
             customFields={{
               customFields: {},
               get: jest.fn().mockReturnValue({
@@ -155,7 +160,6 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                           <GuidedTourProvider>
                             <ConfigurationContextProvider
                               showReleaseNotification={false}
-                              showTutorials={false}
                               logos={{
                                 auth: { default: 'default' },
                                 menu: { default: 'default' },

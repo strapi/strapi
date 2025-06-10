@@ -289,7 +289,7 @@ export const attributeTypes = {
       relation: yup.string().required(),
       type: yup.string().required(),
       targetAttribute: yup.lazy(() => {
-        const relationType = getRelationType(modifiedData.relation, modifiedData.targetAttribute);
+        const relationType = getRelationType(modifiedData.relation!, modifiedData.targetAttribute);
 
         if (relationType === 'oneWay' || relationType === 'manyWay') {
           return yup.string().nullable();

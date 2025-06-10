@@ -1,205 +1,180 @@
-import { BackButton, useTracking, Layouts } from '@strapi/admin/strapi-admin';
-import { Box, Button, Flex } from '@strapi/design-system';
-import { Check, Pencil, Plus } from '@strapi/icons';
-import get from 'lodash/get';
-import has from 'lodash/has';
-import isEqual from 'lodash/isEqual';
+/* eslint-disable import/no-default-export */
+import { useTracking, Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Button, Flex, Typography } from '@strapi/design-system';
+import { Information, Pencil, Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { useDataManager } from '../../components/DataManager/useDataManager';
+import { useFormModalNavigation } from '../../components/FormModalNavigation/useFormModalNavigation';
 import { List } from '../../components/List';
-import { ListRow } from '../../components/ListRow';
-import { useDataManager } from '../../hooks/useDataManager';
-import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
-import { getAttributeDisplayedType } from '../../utils/getAttributeDisplayedType';
 import { getTrad } from '../../utils/getTrad';
 
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 
+import type { Internal } from '@strapi/types';
+
 const LayoutsHeaderCustom = styled(Layouts.Header)`
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const ListView = () => {
-  const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
-    useDataManager();
+  const { isInDevelopmentMode, contentTypes, components, isLoading } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const match = useMatch('/plugins/content-type-builder/:kind/:currentUID');
+  const { contentTypeUid, componentUid } = useParams<{
+    contentTypeUid: Internal.UID.ContentType;
+    componentUid: Internal.UID.Component;
+  }>();
 
-  const {
-    onOpenModalAddComponentsToDZ,
-    onOpenModalAddField,
-    onOpenModalEditField,
-    onOpenModalEditSchema,
-    onOpenModalEditCustomField,
-  } = useFormModalNavigation();
+  const { onOpenModalAddComponentsToDZ, onOpenModalAddField, onOpenModalEditSchema } =
+    useFormModalNavigation();
 
-  const firstMainDataPath = isInContentTypeView ? 'contentType' : 'component';
-  const mainDataTypeAttributesPath = [firstMainDataPath, 'schema', 'attributes'];
-  const targetUid = get(modifiedData, [firstMainDataPath, 'uid']);
-  const isTemporary = get(modifiedData, [firstMainDataPath, 'isTemporary'], false);
-  const contentTypeKind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], null);
+  const type = contentTypeUid
+    ? contentTypes[contentTypeUid]
+    : componentUid
+      ? components[componentUid]
+      : null;
 
-  const attributes = get(modifiedData, mainDataTypeAttributesPath, []);
-  const isFromPlugin = has(initialData, [firstMainDataPath, 'plugin']);
-  const hasModelBeenModified = !isEqual(modifiedData, initialData);
-
-  const forTarget = isInContentTypeView ? 'contentType' : 'component';
-
-  const handleClickAddComponentToDZ = (dynamicZoneTarget?: string) => {
-    onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid });
-  };
-
-  const handleClickEditField = async (
-    forTarget: string,
-    targetUid: string,
-    attributeName: string,
-    type: string,
-    customField: any
-  ) => {
-    const attributeType = getAttributeDisplayedType(type);
-    const step = type === 'component' ? '2' : null;
-
-    if (customField) {
-      onOpenModalEditCustomField({
-        forTarget,
-        targetUid,
-        attributeName,
-        attributeType,
-        customFieldUid: customField,
-      });
-    } else {
-      onOpenModalEditField({
-        forTarget,
-        targetUid,
-        attributeName,
-        attributeType,
-        step,
-      });
-    }
-  };
-
-  let label = get(modifiedData, [firstMainDataPath, 'schema', 'displayName'], '');
-  const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
-
-  const isCreatingFirstContentType = match?.params.currentUID === 'create-content-type';
-
-  if (!label && isCreatingFirstContentType) {
-    label = formatMessage({
-      id: getTrad('button.model.create'),
-      defaultMessage: 'Create new collection type',
-    });
+  if (isLoading) {
+    return null;
   }
 
-  const onEdit = () => {
-    const contentType = kind || firstMainDataPath;
+  if (!type) {
+    const allowedEndpoints = Object.values(contentTypes)
+      .filter((ct) => ct.visible === true && !ct.plugin)
+      .map((ct) => ct.uid)
+      .sort();
 
-    if (contentType === 'collectionType') {
-      trackUsage('willEditNameOfContentType');
+    if (allowedEndpoints.length > 0) {
+      return <Navigate to={`/plugins/content-type-builder/content-types/${allowedEndpoints[0]}`} />;
     }
-    if (contentType === 'singleType') {
-      trackUsage('willEditNameOfSingleType');
+
+    return <Navigate to="/plugins/content-type-builder/content-types/create-content-type" />;
+  }
+
+  const isFromPlugin = 'plugin' in type && type?.plugin !== undefined;
+
+  const forTarget = contentTypeUid ? 'contentType' : 'component';
+
+  const label = type?.info?.displayName ?? '';
+
+  const canEdit = isInDevelopmentMode && !isFromPlugin;
+
+  const handleClickAddComponentToDZ = (dynamicZoneTarget?: string) => {
+    onOpenModalAddComponentsToDZ({ dynamicZoneTarget, targetUid: type.uid });
+  };
+
+  const onEdit = () => {
+    if ('kind' in type) {
+      if (type?.kind === 'collectionType') {
+        trackUsage('willEditNameOfContentType');
+      }
+
+      if (type?.kind === 'singleType') {
+        trackUsage('willEditNameOfSingleType');
+      }
+
+      onOpenModalEditSchema({
+        modalType: forTarget,
+        forTarget: forTarget,
+        targetUid: type.uid,
+        kind: type?.kind,
+      });
+
+      return;
     }
 
     onOpenModalEditSchema({
-      modalType: firstMainDataPath,
-      forTarget: firstMainDataPath,
-      targetUid,
-      kind: contentType,
+      modalType: forTarget,
+      forTarget: forTarget,
+      targetUid: type.uid,
     });
   };
 
-  usePrompt({
-    when: hasModelBeenModified,
-    message: formatMessage({ id: getTrad('prompt.unsaved'), defaultMessage: 'Are you sure?' }),
+  const addNewFieldLabel = formatMessage({
+    id: getTrad('table.button.no-fields'),
+    defaultMessage: 'Add new field',
   });
 
+  const addAnotherFieldLabel = formatMessage({
+    id: getTrad('button.attributes.add.another'),
+    defaultMessage: 'Add another field',
+  });
+
+  const isDeleted = type.status === 'REMOVED';
+
   const primaryAction = isInDevelopmentMode && (
-    <Flex gap={2} marginLeft={2}>
-      {/* DON'T display the add field button when the content type has not been created */}
-      {!isCreatingFirstContentType && (
-        <Button
-          startIcon={<Plus />}
-          variant="secondary"
-          minWidth="max-content"
-          onClick={() => {
-            onOpenModalAddField({ forTarget, targetUid });
-          }}
-        >
-          {formatMessage({
-            id: getTrad('button.attributes.add.another'),
-            defaultMessage: 'Add another field',
-          })}
-        </Button>
-      )}
+    <Flex gap={2}>
+      <LinkToCMSettingsView
+        key="link-to-cm-settings-view"
+        type={type}
+        disabled={type.status === 'NEW' || isDeleted}
+      />
       <Button
-        startIcon={<Check />}
-        onClick={async () => await submitData()}
-        type="submit"
-        disabled={isEqual(modifiedData, initialData)}
+        startIcon={<Pencil />}
+        variant="tertiary"
+        onClick={onEdit}
+        disabled={!canEdit || isDeleted}
       >
         {formatMessage({
-          id: 'global.save',
-          defaultMessage: 'Save',
+          id: 'app.utils.edit',
+          defaultMessage: 'Edit',
         })}
+      </Button>
+      <Button
+        startIcon={<Plus />}
+        variant="secondary"
+        minWidth="max-content"
+        onClick={() => {
+          onOpenModalAddField({ forTarget, targetUid: type.uid });
+        }}
+        disabled={isDeleted}
+      >
+        {type.attributes.length === 0 ? addNewFieldLabel : addAnotherFieldLabel}
       </Button>
     </Flex>
   );
 
-  const secondaryAction = isInDevelopmentMode && !isFromPlugin && !isCreatingFirstContentType && (
-    <Button startIcon={<Pencil />} variant="tertiary" onClick={onEdit}>
-      {formatMessage({
-        id: 'app.utils.edit',
-        defaultMessage: 'Edit',
-      })}
-    </Button>
-  );
-
   return (
     <>
-      <LayoutsHeaderCustom
-        id="title"
-        primaryAction={primaryAction}
-        secondaryAction={secondaryAction}
-        title={upperFirst(label)}
-        subtitle={formatMessage({
-          id: getTrad('listView.headerLayout.description'),
-          defaultMessage: 'Build the data architecture of your content',
-        })}
-        navigationAction={<BackButton />}
-      />
-      <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={4}>
-          <Flex justifyContent="flex-end">
-            <Flex gap={2}>
-              <LinkToCMSettingsView
-                key="link-to-cm-settings-view"
-                targetUid={targetUid}
-                isInContentTypeView={isInContentTypeView}
-                contentTypeKind={contentTypeKind}
-                disabled={isCreatingFirstContentType || isTemporary}
-              />
-            </Flex>
+      {isDeleted && (
+        <Flex background="danger100" justifyContent={'center'} padding={4}>
+          <Flex gap={2}>
+            <Information fill="danger600" height="2rem" width="2rem" />
+            <Typography>
+              {formatMessage(
+                {
+                  id: getTrad('table.warning.deleted'),
+                  defaultMessage: `This {kind} has been deleted`,
+                },
+                {
+                  kind: type.modelType === 'contentType' ? 'Content Type' : 'Component',
+                }
+              )}
+            </Typography>
           </Flex>
-          <Box background="neutral0" shadow="filterShadow" hasRadius>
-            <List
-              items={attributes}
-              customRowComponent={(props) => <ListRow {...props} onClick={handleClickEditField} />}
-              addComponentToDZ={handleClickAddComponentToDZ}
-              targetUid={targetUid}
-              editTarget={forTarget}
-              isMain
-            />
-          </Box>
         </Flex>
+      )}
+      <LayoutsHeaderCustom id="title" primaryAction={primaryAction} title={upperFirst(label)} />
+      <Layouts.Content>
+        <Box
+          background="neutral0"
+          shadow="filterShadow"
+          hasRadius
+          overflow="auto"
+          borderColor="neutral150"
+        >
+          <List type={type} addComponentToDZ={handleClickAddComponentToDZ} isMain />
+        </Box>
       </Layouts.Content>
     </>
   );
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ListView;

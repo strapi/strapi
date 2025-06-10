@@ -6,19 +6,23 @@ import {
   useRBAC,
   createContext,
   Form as FormContext,
+  Blocker,
 } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, Portal } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, IconButton, Portal } from '@strapi/design-system';
+import { ArrowLineLeft } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { GetPreviewUrl } from '../../../../shared/contracts/preview';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { FormLayout } from '../../pages/EditView/components/FormLayout';
 import { buildValidParams } from '../../utils/api';
-import { PreviewContent, UnstablePreviewContent } from '../components/PreviewContent';
-import { PreviewHeader, UnstablePreviewHeader } from '../components/PreviewHeader';
+import { createYupSchema } from '../../utils/validation';
+import { PreviewHeader } from '../components/PreviewHeader';
 import { useGetPreviewUrlQuery } from '../services/preview';
 
 import type { UID } from '@strapi/types';
@@ -34,6 +38,7 @@ interface PreviewContextValue {
   meta: NonNullable<ReturnType<UseDocument>['meta']>;
   schema: NonNullable<ReturnType<UseDocument>['schema']>;
   layout: EditLayout;
+  onPreview: () => void;
 }
 
 const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>('PreviewPage');
@@ -42,8 +47,18 @@ const [PreviewProvider, usePreviewContext] = createContext<PreviewContextValue>(
  * PreviewPage
  * -----------------------------------------------------------------------------------------------*/
 
+const AnimatedArrow = styled(ArrowLineLeft)<{ isSideEditorOpen: boolean }>`
+  will-change: transform;
+  rotate: ${(props) => (props.isSideEditorOpen ? '0deg' : '180deg')};
+  transition: rotate 0.2s ease-in-out;
+`;
+
 const PreviewPage = () => {
+  const location = useLocation();
   const { formatMessage } = useIntl();
+
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+  const [isSideEditorOpen, setIsSideEditorOpen] = React.useState(true);
 
   // Read all the necessary data from the URL to find the right preview URL
   const {
@@ -57,6 +72,7 @@ const PreviewPage = () => {
   }>();
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
+    status?: string;
   }>();
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -84,30 +100,29 @@ const PreviewPage = () => {
       status: params.status as GetPreviewUrl.Request['query']['status'],
     },
   });
-
   const documentResponse = useDocument({
     model,
     collectionType,
     documentId,
     params,
   });
-
   const documentLayoutResponse = useDocumentLayout(model);
 
-  if (
-    documentResponse.isLoading ||
-    previewUrlResponse.isLoading ||
-    documentLayoutResponse.isLoading
-  ) {
+  const isLoading =
+    previewUrlResponse.isLoading || documentLayoutResponse.isLoading || documentResponse.isLoading;
+  if (isLoading && !documentResponse.document?.documentId) {
     return <Page.Loading />;
   }
+
+  const initialValues = documentResponse.getInitialFormValues();
 
   if (
     previewUrlResponse.error ||
     documentLayoutResponse.error ||
     !documentResponse.document ||
     !documentResponse.meta ||
-    !documentResponse.schema
+    !documentResponse.schema ||
+    !initialValues
   ) {
     return <Page.Error />;
   }
@@ -117,6 +132,31 @@ const PreviewPage = () => {
   }
 
   const documentTitle = documentResponse.getTitle(documentLayoutResponse.edit.settings.mainField);
+
+  const validateSync = (values: Record<string, unknown>, options: Record<string, string>) => {
+    const yupSchema = createYupSchema(
+      documentResponse.schema?.attributes,
+      documentResponse.components,
+      {
+        status: documentResponse.document?.status,
+        ...options,
+      }
+    );
+
+    return yupSchema.validateSync(values, { abortEarly: false });
+  };
+
+  const previewUrl = previewUrlResponse.data.data.url;
+
+  const onPreview = () => {
+    iframeRef?.current?.contentWindow?.postMessage(
+      { type: 'strapiUpdate' },
+      // The iframe origin is safe to use since it must be provided through the allowedOrigins config
+      new URL(iframeRef.current.src).origin
+    );
+  };
+
+  const hasAdvancedPreview = window.strapi.features.isEnabled('cms-advanced-preview');
 
   return (
     <>
@@ -132,27 +172,111 @@ const PreviewPage = () => {
         )}
       </Page.Title>
       <PreviewProvider
-        url={previewUrlResponse.data.data.url}
+        url={previewUrl}
         document={documentResponse.document}
         title={documentTitle}
         meta={documentResponse.meta}
         schema={documentResponse.schema}
         layout={documentLayoutResponse.edit}
+        onPreview={onPreview}
       >
-        <FormContext method="POST" initialValues={documentResponse.document} height="100%">
-          <Flex direction="column" height="100%" alignItems="stretch">
-            {window.strapi.future.isEnabled('unstablePreviewSideEditor') ? (
-              <>
-                <UnstablePreviewHeader />
-                <UnstablePreviewContent />
-              </>
-            ) : (
-              <>
-                <PreviewHeader />
-                <PreviewContent />
-              </>
-            )}
-          </Flex>
+        <FormContext
+          method="PUT"
+          disabled={
+            query.status === 'published' &&
+            documentResponse &&
+            documentResponse.document.status !== 'draft'
+          }
+          initialValues={documentResponse.getInitialFormValues()}
+          initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
+          height="100%"
+          validate={(values: Record<string, unknown>, options: Record<string, string>) => {
+            const yupSchema = createYupSchema(
+              documentResponse.schema?.attributes,
+              documentResponse.components,
+              {
+                status: documentResponse.document?.status,
+                ...options,
+              }
+            );
+
+            return yupSchema.validate(values, { abortEarly: false });
+          }}
+        >
+          {({ resetForm }) => (
+            <Flex direction="column" height="100%" alignItems="stretch">
+              <Blocker onProceed={resetForm} />
+              <PreviewHeader />
+              <Flex flex={1} overflow="auto" alignItems="stretch">
+                {hasAdvancedPreview && (
+                  <Box
+                    overflow="auto"
+                    width={isSideEditorOpen ? '50%' : 0}
+                    borderWidth="0 1px 0 0"
+                    borderColor="neutral150"
+                    paddingTop={6}
+                    paddingBottom={6}
+                    // Remove horizontal padding when the editor is closed or it won't fully disappear
+                    paddingLeft={isSideEditorOpen ? 6 : 0}
+                    paddingRight={isSideEditorOpen ? 6 : 0}
+                    transition="all 0.2s ease-in-out"
+                  >
+                    <FormLayout
+                      layout={documentLayoutResponse.edit.layout}
+                      document={documentResponse}
+                      hasBackground={false}
+                    />
+                  </Box>
+                )}
+
+                <Box position="relative" flex={1} height="100%" overflow="hidden">
+                  <Box
+                    data-testid="preview-iframe"
+                    ref={iframeRef}
+                    src={previewUrl}
+                    /**
+                     * For some reason, changing an iframe's src tag causes the browser to add a new item in the
+                     * history stack. This is an issue for us as it means clicking the back button will not let us
+                     * go back to the edit view. To fix it, we need to trick the browser into thinking this is a
+                     * different iframe when the preview URL changes. So we set a key prop to force React
+                     * to mount a different node when the src changes.
+                     */
+                    key={previewUrl}
+                    title={formatMessage({
+                      id: 'content-manager.preview.panel.title',
+                      defaultMessage: 'Preview',
+                    })}
+                    width="100%"
+                    height="100%"
+                    borderWidth={0}
+                    tag="iframe"
+                  />
+                  {hasAdvancedPreview && (
+                    <IconButton
+                      variant="tertiary"
+                      label={formatMessage(
+                        isSideEditorOpen
+                          ? {
+                              id: 'content-manager.preview.content.close-editor',
+                              defaultMessage: 'Close editor',
+                            }
+                          : {
+                              id: 'content-manager.preview.content.open-editor',
+                              defaultMessage: 'Open editor',
+                            }
+                      )}
+                      onClick={() => setIsSideEditorOpen((prev) => !prev)}
+                      position="absolute"
+                      top={2}
+                      left={2}
+                    >
+                      <AnimatedArrow isSideEditorOpen={isSideEditorOpen} />
+                    </IconButton>
+                  )}
+                </Box>
+              </Flex>
+            </Flex>
+          )}
         </FormContext>
       </PreviewProvider>
     </>
@@ -174,6 +298,7 @@ const ProtectedPreviewPageImpl = () => {
   } = useRBAC([
     { action: 'plugin::content-manager.explorer.read', subject: model },
     { action: 'plugin::content-manager.explorer.update', subject: model },
+    { action: 'plugin::content-manager.explorer.publish', subject: model },
   ]);
 
   if (isLoading) {

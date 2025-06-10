@@ -4,6 +4,7 @@ import {
   Page,
   Blocker,
   Form,
+  useForm,
   useRBAC,
   useNotification,
   useQueryParams,
@@ -16,7 +17,7 @@ import { styled } from 'styled-components';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
-import { type UseDocument, useDoc } from '../../hooks/useDocument';
+import { useDoc, type UseDocument } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
@@ -31,6 +32,15 @@ import { Panels } from './components/Panels';
  * EditViewPage
  * -----------------------------------------------------------------------------------------------*/
 
+// Needs to be wrapped in a component to have access to the form context via a hook.
+// Using the Form component's render prop instead would cause unnecessary re-renders of Form children
+const BlockerWrapper = () => {
+  const resetForm = useForm('BlockerWrapper', (state) => state.resetForm);
+
+  // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
+  return <Blocker onProceed={resetForm} />;
+};
+
 const EditViewPage = () => {
   const location = useLocation();
   const [
@@ -44,6 +54,7 @@ const EditViewPage = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
 
+  const doc = useDoc();
   const {
     document,
     meta,
@@ -56,7 +67,7 @@ const EditViewPage = () => {
     hasError,
     getTitle,
     getInitialFormValues,
-  } = useDoc();
+  } = doc;
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
@@ -93,6 +104,7 @@ const EditViewPage = () => {
       settings: { mainField },
     },
   } = useDocumentLayout(model);
+  const pageTitle = getTitle(mainField);
 
   const { isLazyLoading } = useLazyComponents([]);
 
@@ -100,15 +112,11 @@ const EditViewPage = () => {
 
   const initialValues = getInitialFormValues(isCreatingDocument);
 
-  if (hasError) {
-    return <Page.Error />;
-  }
-
   if (isLoading && !document?.documentId) {
     return <Page.Loading />;
   }
 
-  if (!initialValues) {
+  if (!initialValues || hasError) {
     return <Page.Error />;
   }
 
@@ -129,7 +137,7 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Page.Title>{getTitle(mainField)}</Page.Title>
+      <Page.Title>{pageTitle}</Page.Title>
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
@@ -144,60 +152,55 @@ const EditViewPage = () => {
         }}
         initialErrors={location?.state?.forceValidation ? validateSync(initialValues, {}) : {}}
       >
-        {({ resetForm }) => (
-          <>
-            <Header
-              isCreating={isCreatingDocument}
-              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-              title={getTitle(mainField)}
-            />
-            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
-              <Tabs.List
-                aria-label={formatMessage({
-                  id: getTranslation('containers.edit.tabs.label'),
-                  defaultMessage: 'Document status',
-                })}
-              >
-                {hasDraftAndPublished ? (
-                  <>
-                    <StatusTab value="draft">
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.draft'),
-                        defaultMessage: 'draft',
-                      })}
-                    </StatusTab>
-                    <StatusTab
-                      disabled={!meta || meta.availableStatus.length === 0}
-                      value="published"
-                    >
-                      {formatMessage({
-                        id: getTranslation('containers.edit.tabs.published'),
-                        defaultMessage: 'published',
-                      })}
-                    </StatusTab>
-                  </>
-                ) : null}
-              </Tabs.List>
-              <Grid.Root paddingTop={8} gap={4}>
-                <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
-                  <Tabs.Content value="draft">
-                    <FormLayout layout={layout} />
-                  </Tabs.Content>
-                  <Tabs.Content value="published">
-                    <FormLayout layout={layout} />
-                  </Tabs.Content>
-                </Grid.Item>
-                <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
-                  <Panels />
-                </Grid.Item>
-              </Grid.Root>
-            </Tabs.Root>
-            <Blocker
-              // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-              onProceed={resetForm}
-            />
-          </>
-        )}
+        <>
+          <Header
+            isCreating={isCreatingDocument}
+            status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+            title={pageTitle}
+          />
+          <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+            <Tabs.List
+              aria-label={formatMessage({
+                id: getTranslation('containers.edit.tabs.label'),
+                defaultMessage: 'Document status',
+              })}
+            >
+              {hasDraftAndPublished ? (
+                <>
+                  <StatusTab value="draft">
+                    {formatMessage({
+                      id: getTranslation('containers.edit.tabs.draft'),
+                      defaultMessage: 'draft',
+                    })}
+                  </StatusTab>
+                  <StatusTab
+                    disabled={!meta || meta.availableStatus.length === 0}
+                    value="published"
+                  >
+                    {formatMessage({
+                      id: getTranslation('containers.edit.tabs.published'),
+                      defaultMessage: 'published',
+                    })}
+                  </StatusTab>
+                </>
+              ) : null}
+            </Tabs.List>
+            <Grid.Root paddingTop={8} gap={4}>
+              <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
+                <Tabs.Content value="draft">
+                  <FormLayout layout={layout} document={doc} />
+                </Tabs.Content>
+                <Tabs.Content value="published">
+                  <FormLayout layout={layout} document={doc} />
+                </Tabs.Content>
+              </Grid.Item>
+              <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
+                <Panels />
+              </Grid.Item>
+            </Grid.Root>
+          </Tabs.Root>
+          <BlockerWrapper />
+        </>
       </Form>
     </Main>
   );

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { version as strapiVersion } from '@strapi/admin/package.json';
+import packageInfo from '@strapi/admin/package.json';
 import { Box, Flex, SkipToContent } from '@strapi/design-system';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -13,10 +13,10 @@ import { GuidedTourModal } from '../components/GuidedTour/Modal';
 import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { LeftMenu } from '../components/LeftMenu';
 import { NpsSurvey } from '../components/NpsSurvey';
-import { Onboarding } from '../components/Onboarding';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
+import { UpsellBanner } from '../components/UpsellBanner';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -25,6 +25,8 @@ import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
+
+const { version: strapiVersion } = packageInfo;
 
 const AdminLayout = () => {
   const setGuidedTourVisibility = useGuidedTour(
@@ -37,7 +39,6 @@ const AdminLayout = () => {
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
-
   const [tagName, setTagName] = React.useState<string>(strapiVersion);
 
   React.useEffect(() => {
@@ -91,7 +92,6 @@ const AdminLayout = () => {
     generalSectionLinks,
     pluginsSectionLinks,
   } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
-  const { showTutorials } = useConfiguration('Admin');
 
   /**
    * Make sure the event is only send once after accessing the admin panel
@@ -128,9 +128,9 @@ const AdminLayout = () => {
                 pluginsSectionLinks={pluginsSectionLinks}
               />
               <Box flex={1}>
+                <UpsellBanner />
                 <Outlet />
                 <GuidedTourModal />
-                {showTutorials && <Onboarding />}
               </Box>
             </Flex>
           </Box>
