@@ -313,7 +313,6 @@ export default {
   },
 
   async autoClone(ctx: any) {
-    console.log('autoClone ctx', ctx.params);
     const { model } = ctx.params;
 
     // Check if the model has fields that prevent auto cloning
