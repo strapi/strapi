@@ -84,22 +84,44 @@ describe('SearchInput', () => {
     expect(new URLSearchParams(getByRole('listitem').textContent ?? '').has('_q')).toBe(false);
   });
 
-  it('should close the search field when the input loses focus', async () => {
-    const { user, getByRole, queryByRole } = render(<SearchInput label="Search label" />);
+  describe('blur behavior', () => {
+    it.each([
+      {
+        name: 'should close the search field when empty',
+        inputValue: '',
+        expectedToBeInDocument: false,
+      },
+      {
+        name: 'should keep the search field open when not empty',
+        inputValue: 'test',
+        expectedToBeInDocument: true,
+      },
+    ])('$name', async ({ inputValue, expectedToBeInDocument }) => {
+      const { user, getByRole, queryByRole } = render(<SearchInput label="Search label" />);
 
-    // Open the search input by clicking the search icon button
-    await user.click(getByRole('button', { name: 'Search' }));
+      // Open the search input
+      await user.click(getByRole('button', { name: 'Search' }));
 
-    // The textbox should now be visible
-    const textbox = getByRole('textbox', { name: 'Search label' });
-    expect(textbox).toBeInTheDocument();
+      const textbox = getByRole('textbox', { name: 'Search label' });
+      expect(textbox).toBeInTheDocument();
 
-    // Simulate the blur event with no related target (i.e. clicked outside)
-    fireEvent.blur(textbox, { relatedTarget: null });
+      // Type the value if any
+      if (inputValue) {
+        await user.type(textbox, inputValue);
+        await user.keyboard('[Enter]');
+      }
 
-    // Wait for the state update and verify the textbox is no longer in the document
-    await waitFor(() => {
-      expect(queryByRole('textbox', { name: 'Search label' })).not.toBeInTheDocument();
+      // Simulate blur
+      fireEvent.blur(textbox, { relatedTarget: null });
+
+      // Check visibility
+      await waitFor(() => {
+        if (expectedToBeInDocument) {
+          expect(getByRole('textbox', { name: 'Search label' })).toBeInTheDocument();
+        } else {
+          expect(queryByRole('textbox', { name: 'Search label' })).not.toBeInTheDocument();
+        }
+      });
     });
   });
 });

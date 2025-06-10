@@ -73,7 +73,7 @@ const SearchInput = ({
           onClear={handleClear}
           placeholder={placeholder}
           onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget)) {
+            if (!e.currentTarget.contains(e.relatedTarget) && e.currentTarget.value === '') {
               setIsOpen(false);
             }
           }}
