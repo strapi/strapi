@@ -327,8 +327,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   padding-block: 4px;
 }
 
-.c19 ::placeholder {
-  color: #8e8ea9;
+.c19::placeholder {
+  color: #666687;
   opacity: 1;
 }
 
