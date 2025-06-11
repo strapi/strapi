@@ -95,9 +95,6 @@ export type ProhibitedCloningField = [fieldNames: string[], 'unique' | 'relation
 export declare namespace AutoClone {
   export interface Request {
     body: {};
-    query: {
-      locale?: string | null;
-    };
   }
 
   export interface Params {

@@ -108,8 +108,11 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
+      // Extract the locale to pass it as a plain param
+      const locale = body?.locale;
       const params = {
         data: omitIdField(body),
+        locale,
         populate,
       };
 

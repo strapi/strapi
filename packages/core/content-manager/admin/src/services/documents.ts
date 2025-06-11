@@ -29,12 +29,13 @@ const documentApi = contentManagerApi.injectEndpoints({
   endpoints: (builder) => ({
     autoCloneDocument: builder.mutation<
       Clone.Response,
-      Clone.Params & { data: Clone.Request['body']; params?: Clone.Request['query'] }
+      Clone.Params & {
+        params?: Find.Request['query'] & Clone.Request['query'];
+      }
     >({
-      query: ({ model, sourceId, data, params }) => ({
+      query: ({ model, sourceId, params }) => ({
         url: `/content-manager/collection-types/${model}/auto-clone/${sourceId}`,
         method: 'POST',
-        data,
         config: {
           params,
         },

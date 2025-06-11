@@ -651,7 +651,6 @@ const useDocumentActions: UseDocumentActions = () => {
         const res = await autoCloneDocument({
           model,
           sourceId,
-          data: {},
           params: locale ? { locale } : undefined,
         });
 
