@@ -11,9 +11,6 @@ let strapi;
 let rq;
 let graphqlQuery;
 
-// Utils
-const selectFields = pick(['name']);
-
 const articleModel = {
   attributes: {
     name: {
@@ -39,6 +36,12 @@ const labelModel = {
       target: 'api::article.article',
       targetAttribute: 'labels',
     },
+    one_to_many_articles: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: 'api::article.article',
+      targetAttribute: 'label',
+    },
   },
   draftAndPublish: true,
   singularName: 'label',
@@ -48,15 +51,44 @@ const labelModel = {
   collectionName: '',
 };
 
-const labels = [{ name: 'label 1' }, { name: 'label 2' }];
+const labels = [
+  { name: 'label 1', documentId: 'label-1', publishedAt: new Date() },
+  { name: 'label 1', documentId: 'label-1', publishedAt: null },
+  { name: 'label 2', documentId: 'label-2', publishedAt: new Date() },
+  { name: 'label 2', documentId: 'label-2', publishedAt: null },
+];
 
 const articles = ({ label: labels }) => {
   const labelIds = labels.map((label) => label.id);
   return [
-    { name: 'article 1', documentId: 'article-1', publishedAt: new Date(), labels: labelIds },
-    { name: 'article 1', documentId: 'article-1', publishedAt: null, labels: labelIds },
-    { name: 'article 2', documentId: 'article-2', publishedAt: new Date(), labels: labelIds },
-    { name: 'article 2', documentId: 'article-2', publishedAt: null, labels: labelIds },
+    {
+      name: 'article 1',
+      documentId: 'article-1',
+      publishedAt: new Date(),
+      labels: labelIds,
+      label: labelIds[0],
+    },
+    {
+      name: 'article 1',
+      documentId: 'article-1',
+      publishedAt: null,
+      labels: labelIds,
+      label: labelIds[1],
+    },
+    {
+      name: 'article 2',
+      documentId: 'article-2',
+      publishedAt: new Date(),
+      labels: labelIds,
+      label: labelIds[0],
+    },
+    {
+      name: 'article 2',
+      documentId: 'article-2',
+      publishedAt: null,
+      labels: labelIds,
+      label: labelIds[1],
+    },
   ];
 };
 
@@ -100,6 +132,7 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
                 documentId
                 attributes {
                   name
+                  publishedAt
                 }
               }
             }
@@ -110,16 +143,10 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       const { body } = res;
 
       expect(res.statusCode).toBe(200);
-      expect(body).toMatchObject({
-        data: {
-          labels_connection: {
-            data: labels.map((label) => ({
-              documentId: expect.any(String),
-              attributes: pick('name', label),
-            })),
-          },
-        },
-      });
+      expect(body.data.labels_connection.data.length).toBe(2);
+      expect(body.data.labels_connection.data.every((label) => label.attributes.publishedAt)).toBe(
+        true
+      );
 
       // assign for later use
       data.labels = data.labels.concat(res.body.data.labels_connection.data);
@@ -139,6 +166,7 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
                       documentId
                       attributes {
                         name
+                        publishedAt
                       }
                     }
                   }
@@ -150,15 +178,11 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       });
 
       const { body } = res;
-
       expect(res.statusCode).toBe(200);
-      expect(body).toMatchObject({
-        data: {
-          articles_connection: {
-            data: expect.arrayContaining(data.articles),
-          },
-        },
-      });
+      expect(body.data.articles_connection.data.length).toBe(2);
+      expect(
+        body.data.articles_connection.data.every((article) => article.attributes.publishedAt)
+      ).toBe(false);
 
       // assign for later use
       data.articles = res.body.data.articles_connection.data;
@@ -203,7 +227,7 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       });
     });
 
-    test('List labels with live articles', async () => {
+    test('List labels with published articles', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
@@ -212,6 +236,14 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
                 documentId
                 attributes {
                   name
+                  one_to_many_articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
                   articles_connection {
                     data {
                       documentId
@@ -231,48 +263,50 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       const { body } = res;
 
       expect(res.statusCode).toBe(200);
-      expect(body).toMatchObject({
-        data: {
-          labels_connection: {
-            data: expect.arrayContaining(
-              data.labels.map((label) => ({
-                documentId: label.documentId,
-                attributes: {
-                  ...label.attributes,
-                  articles_connection: {
-                    data: expect.arrayContaining(
-                      // Only the first article is published
-                      data.articles.slice(0, 1).map((article) => ({
-                        documentId: article.documentId,
-                        attributes: {
-                          ...selectFields(article.attributes),
-                          publishedAt: expect.any(String),
-                        },
-                      }))
-                    ),
-                  },
-                },
-              }))
-            ),
-          },
-        },
-      });
+      // Check the manyToMany response
+      expect(body.data.labels_connection.data[0].attributes.articles_connection.data.length).toBe(
+        2
+      );
+      expect(
+        body.data.labels_connection.data[0].attributes.articles_connection.data.every(
+          (article) => article.attributes.publishedAt
+        )
+      ).toBe(true);
+      // Check the oneToMany response
+      expect(
+        body.data.labels_connection.data[0].attributes.one_to_many_articles_connection.data.length
+      ).toBe(2);
+      expect(
+        body.data.labels_connection.data[0].attributes.one_to_many_articles_connection.data.every(
+          (article) => article.attributes.publishedAt
+        )
+      ).toBe(true);
     });
 
-    test('List labels with preview articles', async () => {
+    test('List labels with draft articles', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            labels_connection {
+            labels_connection(status: DRAFT) {
               data {
                 documentId
+                publishedAt
                 attributes {
                   name
+                  one_to_many_articles_connection {
+                    data {
+                      documentId
+                      attributes {
+                        publishedAt
+                      }
+                    }
+                  }
                   articles_connection {
                     data {
                       documentId
                       attributes {
                         name
+                        publishedAt
                       }
                     }
                   }
@@ -284,31 +318,27 @@ describe('Test Graphql Relations with Draft and Publish enabled', () => {
       });
 
       const { body } = res;
+      console.dir(body, { depth: null });
 
       expect(res.statusCode).toBe(200);
-      expect(body).toMatchObject({
-        data: {
-          labels_connection: {
-            data: expect.arrayContaining(
-              data.labels.map((label) => ({
-                documentId: label.documentId,
-                attributes: {
-                  ...label.attributes,
-                  articles_connection: {
-                    data: expect.arrayContaining(
-                      // All articles should be returned, even if they are not published
-                      data.articles.map((article) => ({
-                        documentId: article.documentId,
-                        attributes: selectFields(article.attributes),
-                      }))
-                    ),
-                  },
-                },
-              }))
-            ),
-          },
-        },
-      });
+      // Check the manyToMany response
+      expect(body.data.labels_connection.data[0].attributes.articles_connection.data.length).toBe(
+        2
+      );
+      expect(
+        body.data.labels_connection.data[0].attributes.articles_connection.data.every(
+          (article) => article.attributes.publishedAt
+        )
+      ).toBe(false);
+      // Check the oneToMany response
+      expect(
+        body.data.labels_connection.data[0].attributes.one_to_many_articles_connection.data.length
+      ).toBe(2);
+      expect(
+        body.data.labels_connection.data[0].attributes.one_to_many_articles_connection.data.every(
+          (article) => article.attributes.publishedAt
+        )
+      ).toBe(false);
     });
   });
 });

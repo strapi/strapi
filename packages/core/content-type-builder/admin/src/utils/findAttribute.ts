@@ -1,5 +1,5 @@
-import { AttributeType } from '../types';
+import { AnyAttribute } from '../types';
 
-export const findAttribute = (attributes: AttributeType[], attributeToFind: string) => {
+export const findAttribute = (attributes: AnyAttribute[], attributeToFind: string) => {
   return attributes.find(({ name }) => name === attributeToFind);
 };

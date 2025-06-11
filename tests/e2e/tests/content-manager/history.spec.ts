@@ -1,9 +1,9 @@
 import { test, expect, Page } from '@playwright/test';
-import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, describeOnCondition, findAndClose, skipCtbTour } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
+import { sharedSetup } from '../../utils/setup';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -37,17 +37,17 @@ const goToHistoryPage = async (page: Page) => {
 
 const goToContentTypeBuilder = async (page: Page) => {
   await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
-  await skipCtbTour(page);
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
-    await resetFiles();
-    await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
-    await login({ page });
-    await page.waitForURL('/admin');
+    await sharedSetup('history-spec', page, {
+      login: true,
+      skipTour: true,
+      resetFiles: true,
+      importData: 'with-admin.tar',
+      resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests
+    });
   });
 
   test.afterAll(async () => {
@@ -55,9 +55,7 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test('A user should be able to restore a history version', async ({ page }) => {
-    await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-    await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
-    await page.waitForURL(ARTICLE_CREATE_URL);
+    await navToHeader(page, ['Content Manager', 'Create new entry'], 'Content Manager');
 
     const titleInput = page.getByRole('textbox', { name: 'title' });
     // Create an initial entry to also create an initial version
@@ -71,7 +69,6 @@ describeOnCondition(edition === 'EE')('History', () => {
     await findAndClose(page, 'Saved Document');
 
     await goToHistoryPage(page);
-    await page.waitForURL(ARTICLE_HISTORY_URL);
 
     // Select the original version and restore it
     const versionCards = page.getByRole('listitem', { name: 'Version card' });
@@ -81,7 +78,7 @@ describeOnCondition(edition === 'EE')('History', () => {
     const confirmationDialog = page.getByRole('alertdialog', { name: 'Confirmation' });
     await expect(confirmationDialog).toBeVisible();
     await confirmationDialog.getByRole('button', { name: 'Restore' }).click();
-    await page.waitForURL(ARTICLE_EDIT_URL);
+
     await expect(titleInput).toHaveValue('Being from Kansas');
   });
 
@@ -201,7 +198,7 @@ describeOnCondition(edition === 'EE')('History', () => {
     test('A user should see the relations and whether some are missing', async ({ page }) => {
       // Create new author
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Author' }).first());
       await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
@@ -273,7 +270,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
       await waitForRestart(page);
-      await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
+      await expect(page.getByLabel('titleRename')).toBeVisible();
 
       /**
        * Update the existing entry to create another version
@@ -431,11 +428,11 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
       await waitForRestart(page);
-      await expect(page.getByRole('cell', { name: 'authors', exact: true })).toBeVisible();
+      await expect(page.getByLabel('authors')).toBeVisible();
 
       // Create new author
       await clickAndWait(page, page.getByRole('link', { name: 'Content Manager' }));
-      await clickAndWait(page, page.getByRole('link', { name: 'Author' }));
+      await clickAndWait(page, page.getByRole('link', { name: 'Author' }).first());
       await clickAndWait(page, page.getByRole('link', { name: /Create new entry/, exact: true }));
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
@@ -499,7 +496,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
       await waitForRestart(page);
-      await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
+      await expect(page.getByLabel('titleRename')).toBeVisible();
 
       /**
        * Update the existing entry to create another version

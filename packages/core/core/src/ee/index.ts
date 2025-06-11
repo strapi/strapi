@@ -1,8 +1,14 @@
 import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
 import type { Core } from '@strapi/types';
-
-import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
+import { createStrapiFetch } from '../utils/fetch';
+import {
+  readLicense,
+  verifyLicense,
+  fetchLicense,
+  LicenseCheckError,
+  LICENSE_REGISTRY_URI,
+} from './license';
 import { shiftCronExpression } from '../utils/cron';
 
 const ONE_MINUTE = 1000 * 60;
@@ -15,13 +21,16 @@ interface EE {
     expireAt?: string;
     seats?: number;
     type?: string;
+    isTrial: boolean;
   };
   logger?: Logger;
 }
 
 const ee: EE = {
   enabled: false,
-  licenseInfo: {},
+  licenseInfo: {
+    isTrial: false,
+  },
 };
 
 const disable = (message: string) => {
@@ -29,8 +38,10 @@ const disable = (message: string) => {
   const shouldEmitEvent = ee.enabled !== false;
 
   ee.logger?.warn(`${message} Switching to CE.`);
-  // Only keep the license key for potential re-enabling during a later check
-  ee.licenseInfo = pick('licenseKey', ee.licenseInfo);
+  // Only keep the license key and isTrial for potential re-enabling during a later check
+  ee.licenseInfo = pick(['licenseKey', 'isTrial'], ee.licenseInfo);
+
+  ee.licenseInfo.isTrial = false;
 
   ee.enabled = false;
 
@@ -221,6 +232,33 @@ const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 };
 
+const getTrialEndDate = async ({
+  strapi,
+}: {
+  strapi: Core.Strapi;
+}): Promise<{ trialEndsAt: string } | null> => {
+  const silentFetch = createStrapiFetch(strapi, {
+    logs: false,
+  });
+
+  const res = await silentFetch(
+    `${LICENSE_REGISTRY_URI}/api/licenses/${ee.licenseInfo.licenseKey}/trial-countdown`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  ).catch(() => {
+    throw new LicenseCheckError(
+      'Could not proceed to retrieve the trial time left for your license.',
+      true
+    );
+  });
+
+  const data = await res.json();
+
+  return data;
+};
+
 const list = () => {
   return (
     ee.licenseInfo.features?.map((feature) =>
@@ -234,6 +272,7 @@ const get = (featureName: string) => list().find((feature) => feature.name === f
 export default Object.freeze({
   init,
   checkLicense,
+  getTrialEndDate,
 
   get isEE() {
     return ee.enabled;
@@ -245,6 +284,10 @@ export default Object.freeze({
 
   get type() {
     return ee.licenseInfo.type;
+  },
+
+  get isTrial() {
+    return ee.licenseInfo.isTrial;
   },
 
   features: Object.freeze({

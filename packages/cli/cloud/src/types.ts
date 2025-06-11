@@ -31,6 +31,10 @@ export type CloudCliConfig = {
   buildLogsMaxRetries: string;
   notificationsConnectionTimeout: string;
   maxProjectFileSize: string;
+  featureFlags: {
+    cloudLoginPromptEnabled: boolean;
+    growthSsoTrialEnabled: boolean;
+  };
 };
 
 export interface CLIContext {
@@ -53,7 +57,7 @@ export type StrapiCloudCommandInfo = {
   name: string;
   description: string;
   command: StrapiCloudCommand;
-  action: (ctx: CLIContext) => Promise<unknown>;
+  action: (ctx: CLIContext, options?: Record<string, unknown>) => Promise<unknown>;
 };
 
 export type TrackPayload = Record<string, unknown>;
