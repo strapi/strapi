@@ -681,7 +681,8 @@ const useDocumentActions: UseDocumentActions = () => {
   const clone: IUseDocumentActs['clone'] = React.useCallback(
     async ({ model, documentId, params }, body, trackerProperty) => {
       try {
-        const { id: _id, ...restBody } = body;
+        // Omit id and documentId so they are not copied to the clone
+        const { id: _id, documentId: _documentId, ...restBody } = body;
 
         /**
          * If we're cloning we want to post directly to this endpoint

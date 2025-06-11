@@ -108,8 +108,10 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
+
       const params = {
-        data: omitIdField(body),
+        // Ensure id and documentId are not copied to the clone
+        data: omit(['id', 'documentId'], body),
         populate,
       };
 
