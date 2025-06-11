@@ -3,14 +3,16 @@ import type { Common } from '@strapi/types';
 
 import { formatApplicationError, formatHttpError, formatInternalError } from '../services/errors';
 
-// NOTE: The error.name check is not necessary in the v5 branch!
-// Therefore it should be considered a hack workaround for an actual bug which means that there is a bug
-// somewhere else in the code.
-// The issue is most likely somewhere where ValidationErrors are being created that are not
-// instanceof errors.ApplicationError despite actually being ApplicationErrors.
-//
-// This code is only included because v4 is in maintenance mode and this is a safe fix, but does not solve the
-// root cause of the problem.
+/**
+ * NOTE: In the v5 branch, this error.name check is not needed.
+ * This is a temporary workaround to cover a deeper bug elsewhere in the code.
+ *
+ * The real issue is likely that somewhere a ValidationError is being created
+ * that does not pass instanceof errors.ApplicationError, despite actually being an ApplicationError.
+ *
+ * This workaround is included only because v4 is in maintenance mode and this is a safe fix.
+ * It does not address the root cause of the problem.
+ */
 export function isErrorOfTypeOrSubclass<T>(
   error: any,
   constructor: { new (...args: any[]): T }
