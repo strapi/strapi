@@ -161,20 +161,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       {} as ContentTypes
     );
 
-    const requestData = stateToRequestData({
+    const { requestData, trackingEventProperties } = stateToRequestData({
       components: state.current.components,
       contentTypes: mutatedCTs,
     });
 
     const isSendingContentTypes = Object.keys(state.current.contentTypes).length > 0;
-    const isSendingComponents = Object.keys(state.current.components).length > 0;
-
-    if (isSendingContentTypes) {
-      trackUsage('willSaveContentType');
-    }
-    if (isSendingComponents) {
-      trackUsage('willSaveComponent');
-    }
 
     lockAppWithAutoreload();
 
@@ -187,15 +179,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         setCurrentStep(null);
       }
 
-      if (isSendingContentTypes) {
-        trackUsage('didSaveContentType');
-
-        // trackUsage('didEditNameOfContentType');
-      }
-      if (isSendingComponents) {
-        trackUsage('didSaveComponent');
-      }
-
       // Make sure the server has restarted
       await serverRestartWatcher();
 
@@ -204,22 +187,18 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       // Update the app's permissions
       await updatePermissions();
     } catch (err) {
-      // if (isSendingContentTypes) {
-      //   trackUsage('didNotSaveContentType');
-      // }
-
-      if (isSendingComponents) {
-        trackUsage('didNotSaveComponent');
-      }
-
       console.error({ err });
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
+
+      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: false });
     } finally {
-      setIsSaving(true);
+      setIsSaving(false);
       unlockAppWithAutoreload();
+
+      trackUsage('didUpdateCTBSchema', { ...trackingEventProperties, success: true });
     }
   };
 

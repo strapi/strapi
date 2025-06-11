@@ -108,10 +108,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
+
       // Extract the locale to pass it as a plain param
       const locale = body?.locale;
       const params = {
-        data: omitIdField(body),
+        // Ensure id and documentId are not copied to the clone
+        data: omit(['id', 'documentId'], body),
         locale,
         populate,
       };

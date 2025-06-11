@@ -11,8 +11,8 @@ import {
   isValidDefaultJSON,
   isValidName,
   isValidEnum,
-  isValidUID,
   isValidRegExpPattern,
+  UID_REGEX,
 } from './common';
 
 export type GetTypeValidatorOptions = {
@@ -84,7 +84,19 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
               return !!(_.isNil(targetField) || _.isNil(value));
             }
           )
-          .test(isValidUID),
+          .test(
+            'isValidDefaultRegexUID',
+            `\${path} must match the custom regex or the default one "${UID_REGEX}"`,
+            function (value) {
+              const { regex } = this.parent;
+
+              if (regex) {
+                return !_.isNil(value) && (value === '' || new RegExp(regex).test(value));
+              }
+
+              return value === '' || UID_REGEX.test(value as string);
+            }
+          ),
         minLength: validators.minLength,
         maxLength: validators.maxLength.max(256).test(maxLengthIsGreaterThanOrEqualToMinLength),
         options: yup.object().shape({
@@ -94,6 +106,7 @@ const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: 
           customReplacements: yup.array().of(yup.array().of(yup.string()).min(2).max(2)),
           preserveLeadingUnderscore: yup.boolean(),
         }),
+        regex: yup.string().test(isValidRegExpPattern),
       };
     }
 
