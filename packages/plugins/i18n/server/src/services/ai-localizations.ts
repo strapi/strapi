@@ -1,5 +1,5 @@
 import type { Core, Modules, Schema, UID } from '@strapi/types';
-import { traverseEntity } from '@strapi/utils';
+import { traverseEntity, structuredCloneSafe } from '@strapi/utils';
 import { getService } from '../utils';
 
 const isLocalizedAttribute = (attribute: Schema.Attribute.Attribute | undefined): boolean => {
@@ -369,7 +369,7 @@ const createAILocalizationsService = ({ strapi }: { strapi: Core.Strapi }) => {
             populate: deepPopulate,
           });
 
-          let mergedData = structuredClone(content);
+          let mergedData = structuredCloneSafe(content);
 
           const sourceForUnsupportedFields = derivedDoc || sourceDocWithAllFields;
           mergedData = await mergeUnsupportedFields(

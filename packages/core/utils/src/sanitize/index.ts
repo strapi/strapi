@@ -1,5 +1,5 @@
 import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep, omit, pick } from 'lodash/fp';
+import { isArray, omit, pick } from 'lodash/fp';
 import type { z } from 'zod/v4';
 
 import { constants, getNonWritableAttributes } from '../content-types';
@@ -19,6 +19,7 @@ import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '
 import type { Model, Data } from '../types';
 import { validatePublicationFilterQueryParam } from '../publication-filter';
 import { hasSort } from '../sort-query';
+import { structuredCloneSafe } from '../structured-clone-safe';
 
 export interface Options {
   auth?: unknown;
@@ -189,7 +190,7 @@ const createAPISanitizers = (opts: APIOptions) => {
     }
     const { filters, sort, fields, populate } = query;
 
-    const sanitizedQuery = cloneDeep(query);
+    const sanitizedQuery = structuredCloneSafe(query);
 
     if ('publicationFilter' in sanitizedQuery) {
       validatePublicationFilterQueryParam(sanitizedQuery.publicationFilter);

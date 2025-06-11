@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep';
+import { structuredCloneSafe } from '@strapi/utils';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
@@ -177,9 +177,9 @@ export const formsAPI: FormAPI = {
     return initShape.shape({ pluginOptions: yup.object().shape(pluginOptionsShape) });
   },
   mutateContentTypeSchema(data: Record<string, unknown>, initialData: Record<string, unknown>) {
-    let enhancedData = cloneDeep(data);
+    let enhancedData = structuredCloneSafe(data);
 
-    const refData = cloneDeep(initialData);
+    const refData = structuredCloneSafe(initialData);
 
     this.contentTypeSchemaMutations.forEach((cb) => {
       enhancedData = cb(enhancedData, refData);

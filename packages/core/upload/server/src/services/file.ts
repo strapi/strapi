@@ -6,8 +6,7 @@ import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 import fse from 'fs-extra';
-import { cloneDeep } from 'lodash/fp';
-import { async, errors, file as fileUtils } from '@strapi/utils';
+import { async, errors, file as fileUtils, structuredCloneSafe } from '@strapi/utils';
 
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
 import { getService } from '../utils';
@@ -302,7 +301,7 @@ const signFileUrls = async (file: File) => {
     file.isUrlSigned = true;
   };
 
-  const signedFile = cloneDeep(file);
+  const signedFile = structuredCloneSafe(file);
 
   // Sign each file format
   await signUrl(signedFile);

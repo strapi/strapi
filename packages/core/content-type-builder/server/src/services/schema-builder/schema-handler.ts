@@ -3,6 +3,7 @@ import type { Internal, Struct } from '@strapi/types';
 import fse from 'fs-extra';
 import _ from 'lodash';
 
+import { structuredCloneSafe } from '@strapi/utils';
 import { isConfigurable } from '../../utils/attributes';
 
 export type Infos = {
@@ -36,7 +37,7 @@ export default function createSchemaHandler(infos: Infos) {
       } as Struct.ContentTypeSchema),
   };
 
-  const state = _.cloneDeep(initialState);
+  const state = structuredCloneSafe(initialState);
 
   // always keep it the same to rollback
   Object.freeze(initialState.schema);
@@ -84,13 +85,13 @@ export default function createSchemaHandler(infos: Infos) {
     },
 
     get schema() {
-      return _.cloneDeep(state.schema);
+      return structuredCloneSafe(state.schema);
     },
 
     setSchema(val: Struct.ContentTypeSchema) {
       modified = true;
 
-      state.schema = _.cloneDeep(val);
+      state.schema = structuredCloneSafe(val);
       return this;
     },
 
