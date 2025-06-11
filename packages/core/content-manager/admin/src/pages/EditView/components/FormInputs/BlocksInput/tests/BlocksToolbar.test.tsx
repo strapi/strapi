@@ -871,4 +871,21 @@ describe('BlocksToolbar', () => {
     const linkButton = screen.getByLabelText(/link/i);
     expect(linkButton).toBeDisabled();
   });
+
+  it('should move selection to the first node if selection is out of bounds', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'First paragraph' }],
+      },
+    ]);
+    await select({
+      anchor: { path: [5, 0], offset: 0 },
+      focus: { path: [5, 0], offset: 0 },
+    });
+    expect(screen.getByRole('toolbar')).toBeInTheDocument();
+
+    expect(baseEditor.selection?.anchor.path).toEqual([0, 0]);
+    expect(baseEditor.selection?.focus.path).toEqual([0, 0]);
+  });
 });
