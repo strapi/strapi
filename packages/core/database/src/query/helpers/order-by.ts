@@ -97,7 +97,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
   const { tableName } = db.metadata.get(uid);
 
   // The orderBy is cloned to avoid unwanted mutations of the original object
-  const orderBy = _.cloneDeep<OrderByValue[]>(qb.state.orderBy);
+  const orderBy = structuredClone<OrderByValue[]>(qb.state.orderBy);
 
   // 0. Init a new Knex query instance (referenced as resultQuery) using the DB connection
   //    The connection reuse the original table name (aliased if needed)

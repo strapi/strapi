@@ -9,7 +9,6 @@ import {
   constant,
   isNil,
   identity,
-  cloneDeep,
   join,
   first,
 } from 'lodash/fp';
@@ -124,7 +123,7 @@ const populate = traverseFactory()
   })
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    transform: structuredClone<Record<string, unknown>>,
 
     remove(key, data) {
       // eslint-disable-next-line no-unused-vars

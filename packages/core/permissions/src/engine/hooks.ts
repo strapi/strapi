@@ -1,4 +1,4 @@
-import { cloneDeep, has, isArray } from 'lodash/fp';
+import { has, isArray } from 'lodash/fp';
 import { hooks } from '@strapi/utils';
 
 import * as domain from '../domain';
@@ -31,7 +31,7 @@ const createEngineHooks = (): PermissionEngineHooks => ({
  */
 const createValidateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
-    return cloneDeep(permission);
+    return structuredClone(permission);
   },
 });
 
@@ -40,7 +40,7 @@ const createValidateContext = (permission: Permission) => ({
  */
 const createBeforeEvaluateContext = (permission: Permission) => ({
   get permission(): Readonly<Permission> {
-    return cloneDeep(permission);
+    return structuredClone(permission);
   },
 
   addCondition(condition: string) {
@@ -63,7 +63,7 @@ const createWillRegisterContext = ({ permission, options }: WillRegisterContextP
   ...options,
 
   get permission() {
-    return cloneDeep(permission);
+    return structuredClone(permission);
   },
 
   condition: {

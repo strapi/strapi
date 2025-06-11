@@ -73,7 +73,7 @@ describe('Documentation plugin | Documentation service', () => {
     const mockFinalDoc = lastMockCall[1];
 
     // The final documenation is read only, clone deep for this test
-    const validatePromise = SwaggerParser.validate(_.cloneDeep(mockFinalDoc));
+    const validatePromise = SwaggerParser.validate(structuredClone(mockFinalDoc));
 
     await expect(validatePromise).resolves.not.toThrow();
   });

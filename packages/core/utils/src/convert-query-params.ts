@@ -7,7 +7,6 @@
 
 import _ from 'lodash';
 import {
-  cloneDeep,
   get,
   isArray,
   isEmpty,
@@ -593,7 +592,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     // Don't mutate the original object
-    const filtersCopy = cloneDeep(filters);
+    const filtersCopy = structuredClone(filters);
 
     return convertAndSanitizeFilters(filtersCopy, schema);
   };

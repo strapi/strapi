@@ -42,7 +42,7 @@ const strapi = {
 describe('Documentation plugin | Build component schema', () => {
   beforeEach(() => {
     // Reset the mocked strapi instance
-    global.strapi = _.cloneDeep(strapi);
+    global.strapi = structuredClone(strapi);
   });
 
   afterAll(() => {

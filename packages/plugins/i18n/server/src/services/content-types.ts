@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
+import { pick, pipe, has, prop, isNil, isArray } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getService } from '../utils';
 
@@ -70,7 +70,7 @@ const removeId = (value: any) => {
   }
 };
 
-const removeIds = (model: any) => (entry: any) => removeIdsMut(model, cloneDeep(entry));
+const removeIds = (model: any) => (entry: any) => removeIdsMut(model, structuredClone(entry));
 
 const removeIdsMut = (model: any, entry: any) => {
   if (isNil(entry)) {

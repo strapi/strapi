@@ -49,7 +49,7 @@ export default async function loadComponents(strapi: Core.Strapi) {
       const uid: UID.Component = `${category}.${key}`;
 
       acc[uid] = Object.assign(schema, {
-        __schema__: _.cloneDeep(schema),
+        __schema__: structuredClone(schema),
         uid,
         category,
         modelType: 'component' as const,

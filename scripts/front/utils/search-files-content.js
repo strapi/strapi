@@ -69,7 +69,7 @@ class FilesContentSearch {
 
   search(matchFunction) {
     const results = [];
-    const localFiles = _.cloneDeep(this.files);
+    const localFiles = structuredClone(this.files);
 
     for (const file of localFiles) {
       const matchedString = matchFunction(file.content);

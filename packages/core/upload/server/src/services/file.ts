@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash/fp';
 import { async } from '@strapi/utils';
 
 import { FOLDER_MODEL_UID, FILE_MODEL_UID } from '../constants';
@@ -41,7 +40,7 @@ const signFileUrls = async (file: File) => {
     file.isUrlSigned = true;
   };
 
-  const signedFile = cloneDeep(file);
+  const signedFile = structuredClone(file);
 
   // Sign each file format
   await signUrl(signedFile);

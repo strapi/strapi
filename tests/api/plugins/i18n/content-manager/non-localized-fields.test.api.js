@@ -6,7 +6,6 @@ const { createTestBuilder } = require('api-tests/builder');
 const { set } = require('lodash/fp');
 
 const modelsUtils = require('api-tests/models');
-const { cloneDeep } = require('lodash');
 
 let strapi;
 let rq;
@@ -483,7 +482,7 @@ describe('i18n', () => {
                 method: 'PUT',
                 url: `/content-manager/collection-types/api::category.category/${documentId}`,
                 body: {
-                  [key]: transformConnectToDisconnect(cloneDeep(updatedValue)),
+                  [key]: transformConnectToDisconnect(structuredClone(updatedValue)),
                 },
               });
 

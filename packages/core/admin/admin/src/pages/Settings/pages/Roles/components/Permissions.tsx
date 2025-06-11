@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Tabs } from '@strapi/design-system';
 import { produce } from 'immer';
-import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
@@ -334,7 +333,7 @@ const reducer = (state: State, action: Action) =>
       }
       case 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX': {
         const { pathToCollectionType, propertyName, rowName, value } = action;
-        let nextModifiedDataState = cloneDeep(state.modifiedData);
+        let nextModifiedDataState = structuredClone(state.modifiedData);
         const pathToModifiedDataCollectionType = pathToCollectionType.split('..');
 
         const objToUpdate = get(nextModifiedDataState, pathToModifiedDataCollectionType, {});
@@ -387,7 +386,7 @@ const reducer = (state: State, action: Action) =>
         break;
       }
       case 'ON_CHANGE_SIMPLE_CHECKBOX': {
-        let nextModifiedDataState = cloneDeep(state.modifiedData);
+        let nextModifiedDataState = structuredClone(state.modifiedData);
 
         set(nextModifiedDataState, [...action.keys.split('..')], action.value);
 
@@ -437,7 +436,7 @@ const reducer = (state: State, action: Action) =>
       case 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX': {
         const { keys, value } = action;
         const pathToValue = [...keys.split('..')];
-        let nextModifiedDataState = cloneDeep(state.modifiedData);
+        let nextModifiedDataState = structuredClone(state.modifiedData);
         const oldValues = get(nextModifiedDataState, pathToValue, {});
 
         const updatedValues = updateValues(oldValues, value);
