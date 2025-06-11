@@ -145,6 +145,7 @@ export const attributeTypes = {
      * into the GraphQL plugin.
      */
     const GRAPHQL_ENUM_REGEX = /^[_A-Za-z][_0-9A-Za-z]*$/;
+    const GRAPHQL_RESERVED_KEYWORDS = ['true', 'false', 'null', 'undefined'];
 
     const shape = {
       name: yup
@@ -197,6 +198,18 @@ export const attributeTypes = {
             return values
               .map(toRegressedEnumValue)
               .every((value) => GRAPHQL_ENUM_REGEX.test(value));
+          },
+        })
+        .test({
+          name: 'isNotReservedKeyword',
+          message: getTrad('error.validation.enum-reserved-keyword'),
+          test: (values) => {
+            if (!values) {
+              return false;
+            }
+            return !values
+              .map(toRegressedEnumValue)
+              .some((value) => GRAPHQL_RESERVED_KEYWORDS.includes(value.toLowerCase()));
           },
         }),
       enumName: yup.string().nullable(),
