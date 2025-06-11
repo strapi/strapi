@@ -39,11 +39,7 @@
           ]
         }
       },
-      "enum": [
-        "healer",
-        "dps",
-        "tank"
-      ]
+      "enum": ["healer", "dps", "tank"]
     },
     "salary": {
       "type": "integer",
