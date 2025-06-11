@@ -1,4 +1,4 @@
-import { get } from 'lodash/fp';
+import { get, merge } from 'lodash/fp';
 import { async, errors } from '@strapi/utils';
 import type { Internal } from '@strapi/types';
 
@@ -58,8 +58,15 @@ export default ({ strapi }: Context) => {
           }
         );
 
-        const dbQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
+        const transformedQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
 
+        const defaultFilters = {
+          where: {
+            // Return the same draft and publish version as the parent
+            publishedAt: { $notNull: 'publishedAt' in parent ? parent.publishedAt !== null : true },
+          },
+        };
+        const dbQuery = merge(defaultFilters, transformedQuery);
         const data = await strapi.db?.query(contentTypeUID).load(parent, attributeName, dbQuery);
 
         const info = {
