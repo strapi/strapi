@@ -182,11 +182,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           return currentData;
         },
         // Clone to avoid mutating the original version data
-        structuredClone(version.data)
+        globalThis.structuredClone(version.data)
       );
 
       // Remove the schema attributes history should ignore
-      const schema = structuredClone(version.schema);
+      const schema = globalThis.structuredClone(version.schema);
       schema.attributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
 
       const dataWithoutMissingRelations = await traverseEntity(

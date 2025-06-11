@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Cog, ShoppingCart, House } from '@strapi/icons';
-import cloneDeep from 'lodash/cloneDeep';
 
 import { useTypedSelector } from '../core/store/hooks';
 import { useAuth, AuthContextValue } from '../features/Auth';
@@ -163,7 +162,7 @@ const getGeneralLinks = async (
     return [];
   }
 
-  const authorizedGeneralLinksClone = cloneDeep(authorizedGeneralSectionLinks);
+  const authorizedGeneralLinksClone = globalThis.structuredClone(authorizedGeneralSectionLinks);
 
   authorizedGeneralLinksClone[settingsLinkIndex].notificationsCount = shouldUpdateStrapi ? 1 : 0;
 

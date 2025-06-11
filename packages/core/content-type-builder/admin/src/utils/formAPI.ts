@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
@@ -177,9 +176,9 @@ export const formsAPI: FormAPI = {
     return initShape.shape({ pluginOptions: yup.object().shape(pluginOptionsShape) });
   },
   mutateContentTypeSchema(data: Record<string, unknown>, initialData: Record<string, unknown>) {
-    let enhancedData = cloneDeep(data);
+    let enhancedData = globalThis.structuredClone(data);
 
-    const refData = cloneDeep(initialData);
+    const refData = globalThis.structuredClone(initialData);
 
     this.contentTypeSchemaMutations.forEach((cb) => {
       enhancedData = cb(enhancedData, refData);

@@ -1,4 +1,3 @@
-import _ from 'lodash/fp';
 import buildComponentSchema from '../helpers/build-component-schema';
 
 const strapi = {
@@ -42,7 +41,7 @@ const strapi = {
 describe('Documentation plugin | Build component schema', () => {
   beforeEach(() => {
     // Reset the mocked strapi instance
-    global.strapi = _.cloneDeep(strapi);
+    global.strapi = globalThis.structuredClone(strapi);
   });
 
   afterAll(() => {

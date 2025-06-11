@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash/fp';
 import _ from 'lodash';
 import { yup, contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
@@ -30,7 +29,7 @@ const createContentType = (uid: string, definition: ContentTypeDefinition) => {
     throw e;
   }
 
-  const { schema, actions, lifecycles } = cloneDeep(definition);
+  const { schema, actions, lifecycles } = globalThis.structuredClone(definition);
 
   // general info
   Object.assign(schema, {
@@ -152,7 +151,7 @@ const getGlobalId = (schema: Schema.ContentType, prefix?: string) => {
 };
 
 const pickSchema = (model: Schema.ContentType) => {
-  const schema = _.cloneDeep(
+  const schema = globalThis.structuredClone(
     _.pick(model, [
       'connection',
       'collectionName',

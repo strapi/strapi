@@ -10,7 +10,6 @@ import {
   pipe,
   isNil,
   first,
-  cloneDeep,
 } from 'lodash/fp';
 
 import { hasSort } from '../sort-query';
@@ -119,7 +118,7 @@ const sort = traverseFactory()
   })
   // Parse object values
   .parse(isObj, () => ({
-    transform: cloneDeep,
+    transform: globalThis.structuredClone<Record<string, unknown>>,
 
     remove(key, data) {
       // eslint-disable-next-line no-unused-vars
