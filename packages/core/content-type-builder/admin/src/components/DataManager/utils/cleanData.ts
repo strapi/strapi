@@ -32,20 +32,77 @@ const sortContentType = (types: ContentTypes) => {
   );
 };
 
-const stateToRequestData = (state: { components: Components; contentTypes: ContentTypes }) => {
-  const { components, contentTypes } = state;
+type TrackingEventProperties = {
+  newContentTypes: number;
+  editedContentTypes: number;
+  deletedContentTypes: number;
+  newComponents: number;
+  editedComponents: number;
+  deletedComponents: number;
+  newFields: number;
+  editedFields: number;
+  deletedFields: number;
+};
+
+const stateToRequestData = ({
+  components,
+  contentTypes,
+}: {
+  components: Components;
+  contentTypes: ContentTypes;
+}) => {
+  const trackingEventProperties: TrackingEventProperties = {
+    newContentTypes: 0,
+    editedContentTypes: 0,
+    deletedContentTypes: 0,
+    newComponents: 0,
+    editedComponents: 0,
+    deletedComponents: 0,
+    newFields: 0,
+    editedFields: 0,
+    deletedFields: 0,
+  };
+
+  const formattedComponents = Object.values(components)
+    .filter((compo) => {
+      return ['NEW', 'CHANGED', 'REMOVED'].includes(compo.status);
+    })
+    .map((component) => {
+      const requestFormattedComponent = formatTypeForRequest(component);
+
+      const eventAction = requestFormattedComponent.action as 'create' | 'update' | 'delete';
+      updateEventCounts(
+        { ...component, action: eventAction },
+        trackingEventProperties,
+        'component'
+      );
+
+      return requestFormattedComponent;
+    });
+
+  const formattedContentTypes = Object.values(contentTypes)
+    .filter((contentType) => {
+      return ['NEW', 'CHANGED', 'REMOVED'].includes(contentType.status);
+    })
+    .map((contentType) => {
+      const requestFormattedContentType = formatTypeForRequest(contentType);
+
+      const eventAction = requestFormattedContentType.action as 'create' | 'update' | 'delete';
+      updateEventCounts(
+        { ...contentType, action: eventAction },
+        trackingEventProperties,
+        'contentType'
+      );
+
+      return requestFormattedContentType;
+    });
 
   return {
-    components: Object.values(components)
-      .filter((compo) => {
-        return ['NEW', 'CHANGED', 'REMOVED'].includes(compo.status);
-      })
-      .map(formatTypeForRequest),
-    contentTypes: Object.values(contentTypes)
-      .filter((ct) => {
-        return ['NEW', 'CHANGED', 'REMOVED'].includes(ct.status);
-      })
-      .map(formatTypeForRequest),
+    requestData: {
+      components: formattedComponents,
+      contentTypes: formattedContentTypes,
+    },
+    trackingEventProperties,
   };
 };
 
@@ -122,6 +179,71 @@ const formatTypeForRequest = (type: ContentType | Component) => {
       };
     }),
   };
+};
+
+const updateEventCounts = (
+  type: (ContentType | Component) & { action?: 'create' | 'update' | 'delete' },
+  counts: TrackingEventProperties,
+  entityType: 'component' | 'contentType'
+) => {
+  if (!type || typeof type.action !== 'string') {
+    return;
+  }
+
+  const isContentType = entityType === 'contentType';
+
+  switch (type.action) {
+    case 'create':
+      if (isContentType) {
+        counts.newContentTypes++;
+      } else {
+        counts.newComponents++;
+      }
+      break;
+    case 'update':
+      if (isContentType) {
+        counts.editedContentTypes++;
+      } else {
+        counts.editedComponents++;
+      }
+      break;
+    case 'delete':
+      if (isContentType) {
+        counts.deletedContentTypes++;
+      } else {
+        counts.deletedComponents++;
+      }
+      break;
+    default:
+      break;
+  }
+
+  if (Array.isArray(type.attributes)) {
+    if (type.action === 'delete') {
+      counts.deletedFields += type.attributes.length;
+    } else {
+      type.attributes.forEach((attribute) => {
+        if (!attribute || typeof attribute.status !== 'string') {
+          return;
+        }
+
+        switch (attribute.status) {
+          case 'NEW':
+            counts.newFields++;
+            break;
+          case 'CHANGED':
+            counts.editedFields++;
+            break;
+          case 'REMOVED':
+            counts.deletedFields++;
+            break;
+          case 'UNCHANGED':
+          default:
+            break;
+        }
+      });
+    }
+  }
 };
 
 export { stateToRequestData, sortContentType };
