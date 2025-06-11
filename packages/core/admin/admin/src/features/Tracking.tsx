@@ -365,6 +365,22 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUpdateCTBSchema {
+  name: 'didUpdateCTBSchema';
+  properties: {
+    success: boolean;
+    newContentTypes: number;
+    editedContentTypes: number;
+    deletedContentTypes: number;
+    newComponents: number;
+    editedComponents: number;
+    deletedComponents: number;
+    newFields: number;
+    editedFields: number;
+    deletedFields: number;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | PublishEntryEvents
@@ -385,7 +401,8 @@ type EventsWithProperties =
   | WillModifyTokenEvent
   | WillNavigateEvent
   | DidPublishRelease
-  | MediaEvents;
+  | MediaEvents
+  | DidUpdateCTBSchema;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

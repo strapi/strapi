@@ -17,6 +17,7 @@ export interface DocumentVersion {
 
 const AVAILABLE_STATUS_FIELDS = [
   'id',
+  'documentId',
   'locale',
   'updatedAt',
   'createdAt',
@@ -27,6 +28,7 @@ const AVAILABLE_STATUS_FIELDS = [
 ];
 const AVAILABLE_LOCALES_FIELDS = [
   'id',
+  'documentId',
   'locale',
   'updatedAt',
   'createdAt',
