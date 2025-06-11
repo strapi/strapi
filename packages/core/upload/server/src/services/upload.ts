@@ -1,13 +1,11 @@
 import os from 'os';
 import path from 'path';
-import crypto from 'crypto';
 import fs from 'fs';
 import fse from 'fs-extra';
 import _ from 'lodash';
 import { extension } from 'mime-types';
 import {
   sanitize,
-  strings,
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
@@ -47,14 +45,6 @@ const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const randomSuffix = () => crypto.randomBytes(5).toString('hex');
-
-  const generateFileName = (name: string) => {
-    const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
-
-    return `${baseName}_${randomSuffix()}`;
-  };
-
   const sendMediaMetrics = (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
       strapi.telemetry.send('didSaveMediaWithCaption');
@@ -133,6 +123,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     } = {}
   ): Promise<Omit<UploadableFile, 'getStream'>> {
     const fileService = getService('file');
+    const imageManipulationService = getService('image-manipulation');
 
     if (!isValidFilename(filename)) {
       throw new ApplicationError('File name contains invalid characters');
@@ -156,7 +147,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       caption: fileInfo.caption,
       folder: fileInfo.folder,
       folderPath: await fileService.getFolderPath(fileInfo.folder),
-      hash: generateFileName(basename),
+      hash: imageManipulationService.generateFileName(basename),
       ext,
       mime: type,
       size: bytesToKbytes(size),

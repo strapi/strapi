@@ -240,6 +240,7 @@
   "app.components.LeftMenu.collapse": "Collapse the navbar",
   "app.components.LeftMenu.expand": "Expand the navbar",
   "app.components.LeftMenu.logout": "ログアウト",
+  "app.components.LeftMenu.trialCountdown": "試用期間が終了するのは {date} です。",
   "app.components.LeftMenuFooter.help": "Help",
   "app.components.LeftMenuFooter.poweredBy": "Powered by ",
   "app.components.LeftMenuLinkContainer.collectionTypes": "コレクションタイプ",

@@ -17,7 +17,7 @@ test.describe('Blocks editor', () => {
     const code = 'const problems = 99';
     await navToHeader(page, ['Content Manager', 'Homepage'], 'Homepage');
     await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
-    const textbox = page.getByRole('textbox').nth(1);
+    const textbox = page.getByRole('textbox').nth(2);
     await expect(textbox).toBeVisible();
     await textbox.click();
     await textbox.fill(code);

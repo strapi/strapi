@@ -3,6 +3,7 @@ import { omit, difference, isNil, isEmpty, map, isArray, uniq, isNumber } from '
 import { errors } from '@strapi/utils';
 import type { Update, ApiToken, ApiTokenBody } from '../../../shared/contracts/api-token';
 import constants from './constants';
+import { getService } from '../utils';
 
 const { ValidationError, NotFoundError } = errors;
 
@@ -117,15 +118,28 @@ const getBy = async (whereParams: WhereParams = {}): Promise<ApiToken | null> =>
     return null;
   }
 
-  const token = await strapi.db
-    .query('admin::api-token')
-    .findOne({ select: SELECT_FIELDS, populate: POPULATE_FIELDS, where: whereParams });
+  const token = await strapi.db.query('admin::api-token').findOne({
+    select: [...SELECT_FIELDS, 'encryptedKey'],
+    populate: POPULATE_FIELDS,
+    where: whereParams,
+  });
 
   if (!token) {
     return token;
   }
 
-  return flattenTokenPermissions(token);
+  const { encryptedKey, ...rest } = token;
+
+  if (!encryptedKey) {
+    return flattenTokenPermissions(rest);
+  }
+
+  const accessKey = getService('encryption').decrypt(encryptedKey);
+
+  return flattenTokenPermissions({
+    ...rest,
+    accessKey,
+  });
 };
 
 /**
@@ -164,7 +178,9 @@ const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
  * Create a token and its permissions
  */
 const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
+  const encryptionService = getService('encryption');
   const accessKey = crypto.randomBytes(128).toString('hex');
+  const encryptedKey = encryptionService.encrypt(accessKey);
 
   assertCustomTokenPermissionsValidity(attributes.type, attributes.permissions);
   assertValidLifespan(attributes.lifespan);
@@ -176,6 +192,7 @@ const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
     data: {
       ...omit('permissions', attributes),
       accessKey: hash(accessKey),
+      encryptedKey,
       ...getExpirationFields(attributes.lifespan),
     },
   });
@@ -211,12 +228,15 @@ const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
 
 const regenerate = async (id: string | number): Promise<ApiToken> => {
   const accessKey = crypto.randomBytes(128).toString('hex');
+  const encryptionService = getService('encryption');
+  const encryptedKey = encryptionService.encrypt(accessKey);
 
   const apiToken: ApiToken = await strapi.db.query('admin::api-token').update({
     select: ['id', 'accessKey'],
     where: { id },
     data: {
       accessKey: hash(accessKey),
+      encryptedKey,
     },
   });
 

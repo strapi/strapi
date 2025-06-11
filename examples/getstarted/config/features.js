@@ -1,5 +1,3 @@
 module.exports = ({ env }) => ({
-  future: {
-    unstableWidgetsApi: true,
-  },
+  future: {},
 });
