@@ -530,6 +530,12 @@ const uidSchema = basePropertiesSchema.extend({
       preserveLeadingUnderscore: z.boolean().optional(),
     })
     .optional(),
+  regex: z
+    .string()
+    .optional()
+    .refine((value) => {
+      return value === '' || !!new RegExp(value as string);
+    }, 'Invalid regular expression pattern'),
 });
 
 const customFieldSchema = basePropertiesSchema.extend({

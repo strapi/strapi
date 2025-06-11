@@ -438,6 +438,7 @@ export const advancedForm = {
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
+            attributeOptions.regex,
           ],
         },
         conditionSection,

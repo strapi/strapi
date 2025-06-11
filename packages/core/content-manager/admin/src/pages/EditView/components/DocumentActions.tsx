@@ -986,6 +986,11 @@ const UpdateAction: DocumentActionComponent = ({
 
   // need to discriminate if the update is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('UpdateAction', () => true, false);
+  const relationalModalSchema = useRelationModal(
+    'UpdateAction',
+    (state) => state.currentDocument.schema,
+    false
+  );
   const fieldToConnect = useRelationModal(
     'UpdateAction',
     (state) => state.state.fieldToConnect,
@@ -1070,11 +1075,10 @@ const UpdateAction: DocumentActionComponent = ({
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
         const { data } = handleInvisibleAttributes(transformData(document), {
-          schema,
+          schema: fromRelationModal ? relationalModalSchema : schema,
           initialValues,
           components,
         });
-
         const res = await update(
           {
             collectionType,
@@ -1092,7 +1096,7 @@ const UpdateAction: DocumentActionComponent = ({
         }
       } else {
         const { data } = handleInvisibleAttributes(transformData(document), {
-          schema,
+          schema: fromRelationModal ? relationalModalSchema : schema,
           initialValues,
           components,
         });
@@ -1227,6 +1231,7 @@ const UpdateAction: DocumentActionComponent = ({
     initialValues,
     schema,
     components,
+    relationalModalSchema,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux
