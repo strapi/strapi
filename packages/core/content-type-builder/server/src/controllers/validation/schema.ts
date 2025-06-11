@@ -179,12 +179,6 @@ const conditionSchema = z.object({
   visible: z.record(z.string(), z.array(z.any())),
 });
 
-// Add logging for condition validation
-const validateCondition = (value: unknown) => {
-  console.log('Validating condition:', value);
-  return conditionSchema.safeParse(value);
-};
-
 const basePropertiesSchema = z.object({
   type: z.enum([
     'string',
@@ -215,7 +209,6 @@ const basePropertiesSchema = z.object({
   private: z.boolean().nullish(),
   pluginOptions: z.record(z.unknown()).optional(),
   conditions: z.preprocess((val) => {
-    console.log('Preprocessing conditions:', val);
     return val;
   }, conditionSchema.optional()),
 });
