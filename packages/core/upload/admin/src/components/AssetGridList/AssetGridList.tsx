@@ -1,6 +1,6 @@
 // TODO: find a better naming convention for the file that was an index file before
 import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetCard } from '../AssetCard/AssetCard';
 
