@@ -111,25 +111,15 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
     );
   }
 
-  let DocIcon;
+  type IconComponent = typeof FileIcon;
+  const DOC_ICON_MAP: Record<string, IconComponent> = {
+    pdf: FilePdf,
+    csv: FileCsv,
+    xls: FileXls,
+    zip: FileZip,
+  };
 
-  switch (fileExtension) {
-    case 'pdf':
-      DocIcon = FilePdf;
-      break;
-    case 'csv':
-      DocIcon = FileCsv;
-      break;
-    case 'xls':
-      DocIcon = FileXls;
-      break;
-    case 'zip':
-      DocIcon = FileZip;
-      break;
-    default:
-      DocIcon = FileIcon;
-      break;
-  }
+  const DocIcon = fileExtension ? DOC_ICON_MAP[fileExtension] || FileIcon : FileIcon;
 
   return (
     <Flex
