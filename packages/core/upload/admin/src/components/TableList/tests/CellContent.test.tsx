@@ -42,13 +42,23 @@ const ComponentFixture = (props: Partial<CellContentProps>) => {
 const setup = (props: Partial<CellContentProps>) => render(<ComponentFixture {...props} />);
 
 describe('TableList | CellContent', () => {
-  it('should render image cell type when element type is asset and mime does not include image', () => {
-    const { container, getByText } = setup({
-      content: { ...PROPS_FIXTURE.content, mime: 'application/pdf', ext: 'pdf' },
-    });
+  const fileTypesToTest = [
+    { mime: 'application/pdf', ext: 'pdf', expectedIcon: 'file-pdf-icon' },
+    { mime: 'application/vnd.ms-excel', ext: 'xls', expectedIcon: 'file-xls-icon' },
+    { mime: 'text/csv', ext: 'csv', expectedIcon: 'file-csv-icon' },
+    { mime: 'application/zip', ext: 'zip', expectedIcon: 'file-zip-icon' },
+    { mime: 'text/plain', ext: 'txt', expectedIcon: 'file-icon' },
+  ];
+  fileTypesToTest.forEach((fileType) => {
+    it(`should render the ${fileType.expectedIcon === 'file-icon' ? 'default file' : 'corresponding'} icon according to the file type (${fileType.ext})`, () => {
+      const { ext, expectedIcon, mime } = fileType;
+      const { container, getByTestId } = setup({
+        content: { ...PROPS_FIXTURE.content, mime, ext },
+      });
 
-    expect(getByText('pdf')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
+      expect(getByTestId(expectedIcon)).toBeInTheDocument();
+      expect(container).toMatchSnapshot();
+    });
   });
 
   it('should render image cell type when element type is folder', () => {

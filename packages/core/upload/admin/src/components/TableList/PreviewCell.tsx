@@ -120,6 +120,8 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
   };
 
   const DocIcon = fileExtension ? DOC_ICON_MAP[fileExtension] || FileIcon : FileIcon;
+  const testId =
+    fileExtension && DOC_ICON_MAP[fileExtension] ? `file-${fileExtension}-icon` : 'file-icon';
 
   return (
     <Flex
@@ -130,7 +132,7 @@ export const PreviewCell = ({ type, content }: PreviewCellProps) => {
       width="3.2rem"
       height="3.2rem"
     >
-      <DocIcon width={16} height={16} />
+      <DocIcon width={16} height={16} data-testid={testId} />
     </Flex>
   );
 };
