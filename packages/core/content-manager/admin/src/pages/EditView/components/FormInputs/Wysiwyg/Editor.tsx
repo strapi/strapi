@@ -364,7 +364,7 @@ const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: 
   .CodeMirror-wrap pre.CodeMirror-line-like {
     word-wrap: break-word;
     white-space: pre-wrap;
-    word-break: normal;
+    word-break: break-word;
   }
 
   .CodeMirror-linebackground {
