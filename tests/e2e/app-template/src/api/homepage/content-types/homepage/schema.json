@@ -31,6 +31,11 @@
       "type": "component",
       "repeatable": false,
       "component": "meta.seo"
+    },
+    "authors": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::author.author"
     }
   }
 }

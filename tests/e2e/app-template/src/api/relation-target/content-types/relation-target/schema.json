@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "relation_targets",
+  "info": {
+    "singularName": "relation-target",
+    "pluralName": "relation-targets",
+    "displayName": "Relation Target",
+    "description": "Basic content type for relation testing"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "oneToOneInverse": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-source.relation-source",
+      "mappedBy": "oneToOneRel"
+    },
+    "oneToManyRel": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-source.relation-source",
+      "mappedBy": "manyToOneRel"
+    },
+    "manyToOneRel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::relation-source.relation-source",
+      "inversedBy": "oneToManyRel"
+    },
+    "manyToManyInverse": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-source.relation-source",
+      "mappedBy": "manyToManyRel"
+    }
+  }
+}

@@ -305,6 +305,122 @@ This single type is internationalized.
 }
 ```
 
+### Relation Source
+
+This collection type is designed specifically for testing relation fields and has both Draft & Publish and i18n enabled. Used in e2e tests for relation functionality.
+
+```json
+{
+  // ...
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "required": true
+    },
+    "oneToOneRel": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-target.relation-target",
+      "inversedBy": "oneToOneInverse"
+    },
+    "oneToManyRel": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-target.relation-target",
+      "mappedBy": "manyToOneRel"
+    },
+    "manyToOneRel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::relation-target.relation-target",
+      "inversedBy": "oneToManyRel"
+    },
+    "manyToManyRel": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-target.relation-target",
+      "inversedBy": "manyToManyInverse"
+    },
+    "oneWayRel": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-target.relation-target"
+    },
+    "selfRel": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-source.relation-source"
+    },
+    "componentWithRel": {
+      "type": "component",
+      "repeatable": false,
+      "component": "relations.relation-component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "dynamicZone": {
+      "type": "dynamiczone",
+      "components": ["relations.relation-component"],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+  // ...
+}
+```
+
+### Relation Target
+
+A basic content type without Draft & Publish or i18n features. Used as the target for relation tests.
+
+```json
+{
+  // ...
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "oneToOneInverse": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::relation-source.relation-source",
+      "mappedBy": "oneToOneRel"
+    },
+    "oneToManyRel": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::relation-source.relation-source",
+      "mappedBy": "manyToOneRel"
+    },
+    "manyToOneRel": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::relation-source.relation-source",
+      "inversedBy": "oneToManyRel"
+    },
+    "manyToManyInverse": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::relation-source.relation-source",
+      "mappedBy": "manyToManyRel"
+    }
+  }
+  // ...
+}
+```
+
 ## API Customisations
 
 ### Config
