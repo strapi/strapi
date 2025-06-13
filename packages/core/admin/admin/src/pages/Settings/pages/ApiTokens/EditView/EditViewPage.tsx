@@ -51,6 +51,8 @@ export const EditView = () => {
         }
       : null
   );
+  const [showToken, setShowToken] = React.useState(Boolean(locationState?.apiToken?.accessKey));
+  const hideTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const { trackUsage } = useTracking();
   const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const {
@@ -69,7 +71,6 @@ export const EditView = () => {
 
   const contentAPIPermissionsQuery = useGetPermissionsQuery();
   const contentAPIRoutesQuery = useGetRoutesQuery();
-
   /**
    * Separate effects otherwise we could end
    * up duplicating the same notification.
@@ -172,6 +173,23 @@ export const EditView = () => {
       }
     }
   }, [data]);
+
+  React.useEffect(() => {
+    // Only set up timer when token is shown
+    if (showToken) {
+      hideTimerRef.current = setTimeout(() => {
+        setShowToken(false);
+      }, 30000); // 30 seconds
+
+      // Cleanup on unmount or when showToken changes
+      return () => {
+        if (hideTimerRef.current) {
+          clearTimeout(hideTimerRef.current);
+          hideTimerRef.current = null;
+        }
+      };
+    }
+  }, [showToken]);
 
   const [createToken] = useCreateAPITokenMutation();
   const [updateToken] = useUpdateAPITokenMutation();
@@ -304,6 +322,14 @@ export const EditView = () => {
     });
   };
 
+  const toggleToken = () => {
+    setShowToken((prev) => !prev);
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  };
+
   const providerValue = {
     ...state,
     onChange: handleChangeCheckbox,
@@ -312,6 +338,7 @@ export const EditView = () => {
   };
 
   const canEditInputs = (canUpdate && !isCreating) || (canCreate && isCreating);
+  const canShowToken = !!apiToken?.accessKey;
 
   if (isLoading) {
     return <Page.Loading />;
@@ -352,17 +379,21 @@ export const EditView = () => {
                   }}
                   token={apiToken}
                   setToken={setApiToken}
+                  toggleToken={toggleToken}
+                  showToken={showToken}
                   canEditInputs={canEditInputs}
                   canRegenerate={canRegenerate}
+                  canShowToken={canShowToken}
                   isSubmitting={isSubmitting}
                   regenerateUrl="/admin/api-tokens/"
                 />
 
                 <Layouts.Content>
                   <Flex direction="column" alignItems="stretch" gap={6}>
-                    {Boolean(apiToken?.name) && (
-                      <TokenBox token={apiToken?.accessKey} tokenType={API_TOKEN_TYPE} />
+                    {apiToken?.accessKey && showToken && (
+                      <TokenBox token={apiToken.accessKey} tokenType={API_TOKEN_TYPE} />
                     )}
+
                     <FormApiTokenContainer
                       errors={errors}
                       onChange={handleChange}

@@ -1,10 +1,8 @@
-'use strict';
+import { createTestBuilder } from 'api-tests/builder';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createAuthRequest } from 'api-tests/request';
 
-const { createTestBuilder } = require('api-tests/builder');
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createAuthRequest } = require('api-tests/request');
-const modelsUtils = require('api-tests/models');
-const { isArray } = require('lodash');
+import modelsUtils from 'api-tests/models';
 
 let strapi;
 let rq;
@@ -125,7 +123,7 @@ const shopModel = {
   pluralName: 'shops',
 };
 
-const createEntry = async (singularName, data, populate) => {
+const createEntry = async (singularName: string, data: any, populate?: string[]) => {
   const { body } = await rq({
     method: 'POST',
     url: `/content-manager/collection-types/api::${singularName}.${singularName}`,
@@ -135,7 +133,7 @@ const createEntry = async (singularName, data, populate) => {
   return body;
 };
 
-const updateEntry = async (singularName, id, data, populate) => {
+const updateEntry = async (singularName: string, id: string, data: any, populate?: string[]) => {
   const { body } = await rq({
     method: 'PUT',
     url: `/content-manager/collection-types/api::${singularName}.${singularName}/${id}`,
@@ -145,7 +143,7 @@ const updateEntry = async (singularName, id, data, populate) => {
   return body;
 };
 
-const cloneEntry = async (singularName, id, data, populate) => {
+const cloneEntry = async (singularName: string, id: string, data: any, populate?: string[]) => {
   const res = await rq({
     method: 'POST',
     url: `/content-manager/collection-types/api::${singularName}.${singularName}/clone/${id}`,
@@ -156,7 +154,7 @@ const cloneEntry = async (singularName, id, data, populate) => {
   return res.body;
 };
 
-const getRelations = async (uid, field, id) => {
+const getRelations = async (uid: string, field: string, id: string) => {
   const res = await rq({
     method: 'GET',
     url: `/content-manager/relations/${uid}/${id}/${field}`,
@@ -165,9 +163,9 @@ const getRelations = async (uid, field, id) => {
   return res.body;
 };
 
-const mapRelationsByMode = (mode, docids, ids) => {
+const mapRelationsByMode = (mode: string, docids: string | string[], ids: string | string[]) => {
   if (mode === 'docIdObject') {
-    if (isArray(docids)) {
+    if (Array.isArray(docids)) {
       return docids.map((id) => {
         return {
           documentId: id,
@@ -177,7 +175,7 @@ const mapRelationsByMode = (mode, docids, ids) => {
     return { documentId: docids };
   }
   if (mode === 'idObject') {
-    if (isArray(ids)) {
+    if (Array.isArray(ids)) {
       return ids.map((id) => {
         return {
           id,
@@ -285,6 +283,11 @@ describe('Relations', () => {
         test('In reversed order', async () => {
           const oneRelation = mapRelationsByMode(mode, [docid1], [id1]);
           const manyRelations = mapRelationsByMode(mode, [docid1, docid2], [id1, id2]);
+
+          if (!Array.isArray(manyRelations)) {
+            // Noop for type narrowing
+            return;
+          }
           manyRelations.reverse();
 
           const shop = await createEntry(
@@ -1061,7 +1064,7 @@ describe('Relations', () => {
     });
   });
 
-  describe.skip('Clone entity with relations', () => {
+  describe('Clone entity with relations', () => {
     test('Auto cloning entity with relations should fail', async () => {
       const createdShop = await createEntry(
         'shop',
@@ -1089,194 +1092,6 @@ describe('Relations', () => {
       });
 
       expect(res.statusCode).toBe(400);
-    });
-
-    test('Clone entity with relations and connect data', async () => {
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_ow: { connect: [docid1] },
-          products_oo: { connect: [docid1] },
-          products_mo: { connect: [docid1] },
-          products_om: { connect: [docid1] },
-          products_mm: { connect: [docid1] },
-          products_mw: { connect: [docid1] },
-          myCompo: {
-            compo_products_ow: { connect: [docid1] },
-            compo_products_mw: { connect: [docid1] },
-          },
-        },
-        ['myCompo']
-      );
-
-      const { id, name } = await cloneEntry('shop', createdShop.documentId, {
-        name: 'Cazotte Shop 2',
-        products_ow: { connect: [docid2] },
-        products_oo: { connect: [docid2] },
-        products_mo: { connect: [docid2] },
-        products_om: { connect: [docid2] },
-        products_mm: { connect: [docid2] },
-        products_mw: { connect: [docid2] },
-        myCompo: {
-          id: createdShop.data.myCompo.id,
-          compo_products_ow: { connect: [docid2] },
-          compo_products_mw: { connect: [docid2] },
-        },
-      });
-
-      expect(name).toBe('Cazotte Shop 2');
-
-      const clonedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id }, populate: populateShop });
-
-      expect(clonedShop.myCompo.compo_products_mw).toMatchObject([
-        { documentId: docid1 },
-        { documentId: docid2 },
-      ]);
-      expect(clonedShop.myCompo.compo_products_ow).toMatchObject({ documentId: docid2 });
-      expect(clonedShop.products_mm).toMatchObject([
-        { documentId: docid1 },
-        { documentId: docid2 },
-      ]);
-      expect(clonedShop.products_mo).toMatchObject({ documentId: docid2 });
-      expect(clonedShop.products_mw).toMatchObject([
-        { documentId: docid1 },
-        { documentId: docid2 },
-      ]);
-      expect(clonedShop.products_om).toMatchObject([
-        { documentId: docid1 },
-        { documentId: docid2 },
-      ]);
-      expect(clonedShop.products_oo).toMatchObject({ documentId: docid2 });
-      expect(clonedShop.products_ow).toMatchObject({ documentId: docid2 });
-    });
-
-    test('Clone entity with relations and disconnect data', async () => {
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_ow: { connect: [docid1] },
-          products_oo: { connect: [docid1] },
-          products_mo: { connect: [docid1] },
-          products_om: { connect: [docid1, docid2] },
-          products_mm: { connect: [docid1, docid2] },
-          products_mw: { connect: [docid1, docid2] },
-          myCompo: {
-            compo_products_ow: { connect: [docid1] },
-            compo_products_mw: { connect: [docid1, docid2] },
-          },
-        },
-        ['myCompo']
-      );
-
-      const { id, name } = await cloneEntry('shop', createdShop.documentId, {
-        name: 'Cazotte Shop 2',
-        products_ow: { disconnect: [docid1] },
-        products_oo: { disconnect: [docid1] },
-        products_mo: { disconnect: [docid1] },
-        products_om: { disconnect: [docid1] },
-        products_mm: { disconnect: [docid1] },
-        products_mw: { disconnect: [docid1] },
-        myCompo: {
-          id: createdShop.myCompo.id,
-          compo_products_ow: { disconnect: [docid1] },
-          compo_products_mw: { disconnect: [docid1] },
-        },
-      });
-
-      expect(name).toBe('Cazotte Shop 2');
-
-      const clonedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id }, populate: populateShop });
-
-      expect(clonedShop.myCompo.compo_products_mw).toMatchObject([{ documentId: docid2 }]);
-      expect(clonedShop.myCompo.compo_products_ow).toBe(null);
-      expect(clonedShop.products_mm).toMatchObject([{ documentId: docid2 }]);
-      expect(clonedShop.products_mo).toBe(null);
-      expect(clonedShop.products_mw).toMatchObject([{ documentId: docid2 }]);
-      expect(clonedShop.products_om).toMatchObject([{ documentId: docid2 }]);
-      expect(clonedShop.products_oo).toBe(null);
-      expect(clonedShop.products_ow).toBe(null);
-    });
-
-    test('Clone entity with relations and disconnect data should not steal relations', async () => {
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_ow: { connect: [docid1] },
-          products_oo: { connect: [docid1] },
-          products_mo: { connect: [docid1] },
-          products_om: { connect: [docid1, docid2] },
-          products_mm: { connect: [docid1, docid2] },
-          products_mw: { connect: [docid1, docid2] },
-          myCompo: {
-            compo_products_ow: { connect: [docid1] },
-            compo_products_mw: { connect: [docid1, docid2] },
-          },
-        },
-        ['myCompo']
-      );
-
-      await cloneEntry('shop', createdShop.documentId, {
-        name: 'Cazotte Shop 2',
-        products_oo: { disconnect: [docid1] },
-        products_om: { disconnect: [docid1] },
-      });
-
-      const populatedCreatedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { documentId: createdShop.data.documentId }, populate: populateShop });
-
-      expect(populatedCreatedShop.products_om).toMatchObject([{ documentId: docid1 }]);
-      expect(populatedCreatedShop.products_oo).toMatchObject({ documentId: docid1 });
-    });
-
-    test('Clone entity with relations and set data should not steal relations', async () => {
-      const createdShop = await createEntry(
-        'shop',
-        {
-          name: 'Cazotte Shop',
-          products_ow: { connect: [docid1] },
-          products_oo: { connect: [docid1] },
-          products_mo: { connect: [docid1] },
-          products_om: { connect: [docid1, docid2] },
-          products_mm: { connect: [docid1, docid2] },
-          products_mw: { connect: [docid1, docid2] },
-          myCompo: {
-            compo_products_ow: { connect: [docid1] },
-            compo_products_mw: { connect: [docid1, docid2] },
-          },
-        },
-        ['myCompo']
-      );
-
-      const cloned = await cloneEntry('shop', createdShop.data.documentId, {
-        name: 'Cazotte Shop 2',
-        products_ow: { set: [docid2] }, // id 1 should not be stolen from createdShop products_ow
-        products_oo: { set: [docid2] }, // id 1 should not be stolen from createdShop products_oo
-        products_mo: { set: [docid2] }, // id 1 should not be stolen from createdShop products_om
-      });
-
-      expect(cloned.data.documentId).toBeDefined();
-      expect(cloned.data.products_ow.count).toBe(1);
-      expect(cloned.data.products_oo.count).toBe(1);
-      expect(cloned.data.products_mo.count).toBe(1);
-      expect(cloned.data.products_om.count).toBe(2);
-      expect(cloned.data.products_mm.count).toBe(2);
-      expect(cloned.data.products_mw.count).toBe(2);
-
-      const populatedCreatedShop = await strapi.db
-        .query('api::shop.shop')
-        .findOne({ where: { id: createdShop.data.id }, populate: populateShop });
-
-      expect(populatedCreatedShop.products_om).toMatchObject([{ documentId: docid1 }]);
-      expect(populatedCreatedShop.products_oo).toMatchObject({ documentId: docid1 });
-      expect(populatedCreatedShop.products_ow).toMatchObject({ documentId: docid1 });
     });
   });
 });

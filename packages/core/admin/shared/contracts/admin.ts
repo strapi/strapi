@@ -214,6 +214,7 @@ export declare namespace GetLicenseLimitInformation {
       shouldNotify: boolean;
       shouldStopCreate: boolean;
       type: string;
+      isTrial: boolean;
     };
     error?: errors.ApplicationError;
   }

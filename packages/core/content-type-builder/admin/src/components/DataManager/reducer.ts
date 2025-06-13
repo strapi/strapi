@@ -4,7 +4,6 @@ import omit from 'lodash/omit';
 
 import { getRelationType } from '../../utils/getRelationType';
 import { makeUnique } from '../../utils/makeUnique';
-import { createComponentUid } from '../FormModal/utils/createUid';
 
 import { createUndoRedoSlice } from './undoRedo';
 

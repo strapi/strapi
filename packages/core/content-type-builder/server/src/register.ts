@@ -1,4 +1,3 @@
-import type { Core } from '@strapi/types';
 import { mergeWith } from 'lodash/fp';
 
 /**
@@ -47,7 +46,7 @@ const extendMiddlewareConfiguration = (middleware = { name: '', config: {} }) =>
   strapi.config.set('middlewares', configuredMiddlewares);
 };
 
-export default async ({ strapi }: { strapi: Core.Strapi }) => {
+export default async (/* { strapi }: { strapi: Core.Strapi } */) => {
   extendMiddlewareConfiguration({
     name: 'strapi::security',
     config: {
