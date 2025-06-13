@@ -10,6 +10,7 @@ import { Link as NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { Curve } from '../icons/Curve';
+import { checkDependentRows } from '../utils/conditions';
 import { getAttributeDisplayedType } from '../utils/getAttributeDisplayedType';
 import { getRelationType } from '../utils/getRelationType';
 import { getTrad } from '../utils/getTrad';
@@ -117,36 +118,9 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
 
   const src = 'target' in item && item.target ? 'relation' : ico;
 
-  interface DependentRow {
-    contentType: string;
-    attribute: string;
-  }
-
-  const checkDependentRows = (): DependentRow[] => {
-    const dependentRows: DependentRow[] = [];
-    // Check all content types for attributes that depend on this one
-    Object.values(contentTypes).forEach((contentType: any) => {
-      if (contentType.attributes) {
-        Object.entries(contentType.attributes).forEach(([attrName, attr]: [string, any]) => {
-          if (attr.conditions?.visible) {
-            const [[operator, conditions]] = Object.entries(attr.conditions.visible);
-            const [fieldVar] = conditions as [{ var: string }, any];
-            if (fieldVar.var === item.name) {
-              dependentRows.push({
-                contentType: contentType.info.displayName,
-                attribute: attrName,
-              });
-            }
-          }
-        });
-      }
-    });
-    return dependentRows;
-  };
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const dependentRows = checkDependentRows();
+    const dependentRows = checkDependentRows(contentTypes, item.name);
     if (dependentRows.length > 0) {
       setShowConfirmDialog(true);
     } else {
@@ -369,18 +343,28 @@ const MemoizedRow = memo((props: Omit<AttributeRowProps, 'style'>) => {
                   </IconButton>
                   <Dialog.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
                     <ConfirmDialog onConfirm={handleConfirmDelete} onCancel={handleCancelDelete}>
-                      {formatMessage(
-                        {
-                          id: getTrad('popUpWarning.bodyMessage.delete-attribute-with-conditions'),
-                          defaultMessage:
-                            'Some conditions in other fields are based on the value of this one. Are you sure you want to delete it?',
-                        },
-                        {
-                          attributes: checkDependentRows()
-                            .map(({ contentType, attribute }) => `${contentType}.${attribute}`)
-                            .join(', '),
-                        }
-                      )}
+                      <Box>
+                        <Typography>
+                          {formatMessage({
+                            id: getTrad(
+                              'popUpWarning.bodyMessage.delete-attribute-with-conditions'
+                            ),
+                            defaultMessage:
+                              'The following fields have conditions that depend on this field: ',
+                          })}
+                          <Typography fontWeight="bold">
+                            {checkDependentRows(contentTypes, item.name)
+                              .map(({ attribute }) => attribute)
+                              .join(', ')}
+                          </Typography>
+                          {formatMessage({
+                            id: getTrad(
+                              'popUpWarning.bodyMessage.delete-attribute-with-conditions-end'
+                            ),
+                            defaultMessage: '. Are you sure you want to delete it?',
+                          })}
+                        </Typography>
+                      </Box>
                     </ConfirmDialog>
                   </Dialog.Root>
                 </>

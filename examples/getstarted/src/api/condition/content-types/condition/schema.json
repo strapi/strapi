@@ -11,48 +11,8 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "isActive": {
+    "isActiveewr": {
       "type": "boolean"
-    },
-    "name": {
-      "type": "string",
-      "conditions": {
-        "visible": {
-          "==": [
-            {
-              "var": "isActive"
-            },
-            false
-          ]
-        }
-      }
-    },
-    "roles": {
-      "type": "enumeration",
-      "conditions": {
-        "visible": {
-          "==": [
-            {
-              "var": "roles"
-            },
-            "dps"
-          ]
-        }
-      },
-      "enum": ["healer", "dps", "tank"]
-    },
-    "salary": {
-      "type": "integer",
-      "conditions": {
-        "visible": {
-          "!=": [
-            {
-              "var": "roles"
-            },
-            "healer"
-          ]
-        }
-      }
     }
   }
 }

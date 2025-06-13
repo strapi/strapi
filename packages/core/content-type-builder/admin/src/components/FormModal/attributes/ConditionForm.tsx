@@ -5,21 +5,21 @@ import { createRulesEngine, ConfirmDialog, type Condition } from '@strapi/admin/
 import {
   Box,
   Flex,
-  Grid,
   IconButton,
   Typography,
   Field,
   SingleSelect,
   SingleSelectOption,
-  Button,
   Dialog,
 } from '@strapi/design-system';
-import { Trash, Plus } from '@strapi/icons';
+import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
+import * as yup from 'yup';
 
 import { AttributeIcon } from '../../../components/AttributeIcon';
 import { getTrad } from '../../../utils/getTrad';
+import { ApplyConditionButton } from '../../ApplyConditionButton';
 
 const SmallAttributeIcon = styled(AttributeIcon)`
   width: 16px !important;
@@ -231,12 +231,7 @@ export const ConditionForm = ({
   if (!hasCondition) {
     return (
       <Box padding={4} margin={4} hasRadius background="neutral0" borderColor="neutral200">
-        <Button onClick={handleApplyCondition} startIcon={<Plus />} variant="secondary" fullWidth>
-          {formatMessage({
-            id: getTrad('form.attribute.condition.apply'),
-            defaultMessage: 'Apply condition',
-          })}
-        </Button>
+        <ApplyConditionButton onClick={handleApplyCondition} />
       </Box>
     );
   }

@@ -1,8 +1,8 @@
-import { useState } from 'react';
-
-import { Box, Grid, Typography, Button, Field } from '@strapi/design-system';
+import { Box, Grid, Typography, Button, Tooltip } from '@strapi/design-system';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
+
+import { formatCondition, getAvailableConditionFields } from '../utils/conditions';
 
 import { GenericInput } from './GenericInputs';
 
@@ -109,38 +109,17 @@ export const TabForm = ({
                     return null;
                   }
 
-                  // Filter for boolean and enumeration fields only
-                  const availableFields = contentTypeAttributes
-                    .filter((attr: any) => {
-                      return attr.type === 'boolean' || attr.type === 'enumeration';
-                    })
-                    .map((attr: any) => ({
-                      name: attr.name,
-                      type: attr.type,
-                      enum: attr.type === 'enumeration' ? attr.enum : undefined,
-                    }));
+                  // Filter for boolean and enumeration fields only, excluding the current field
+                  const availableFields = getAvailableConditionFields(
+                    contentTypeAttributes,
+                    modifiedData.name
+                  );
 
-                  const formatCondition = (condition: any) => {
-                    if (!condition?.visible) {
-                      return '';
-                    }
-
-                    const [[operator, conditions]] = Object.entries(condition.visible);
-                    const [fieldVar, value] = conditions as [{ var: string }, any];
-
-                    const dependsOnField = availableFields.find(
-                      (field: { name: string }) => field.name === fieldVar.var
-                    );
-                    const dependsOnFieldName = dependsOnField ? dependsOnField.name : fieldVar.var;
-
-                    const operatorText = operator === '==' ? 'is' : 'is not';
-                    const valueText = String(value);
-                    const actionText = operator === '==' ? 'Show' : 'Hide';
-                    const attributeDisplayName =
-                      genericInputProps.attributeName || modifiedData.name;
-
-                    return `If ${dependsOnFieldName} ${operatorText} ${valueText}, then ${actionText} ${attributeDisplayName}`;
-                  };
+                  const noFieldsMessage = formatMessage({
+                    id: 'form.attribute.condition.no-fields',
+                    defaultMessage:
+                      'No boolean or enumeration fields available to set conditions on.',
+                  });
 
                   return (
                     <Grid.Item
@@ -153,31 +132,37 @@ export const TabForm = ({
                         <Box>
                           {currentCondition && Object.keys(currentCondition).length > 0 && (
                             <Typography variant="sigma" textColor="neutral800" marginBottom={2}>
-                              {formatCondition(currentCondition)}
+                              {formatCondition(
+                                currentCondition,
+                                availableFields,
+                                genericInputProps.attributeName || modifiedData.name
+                              )}
                             </Typography>
                           )}
-                          <Button
-                            marginTop={
-                              currentCondition && Object.keys(currentCondition).length > 0 ? 0 : 4
-                            }
-                            fullWidth={true}
-                            variant="secondary"
-                            onClick={() => {
-                              // This button should only appear if there's no condition
-                              onChange({
-                                target: {
-                                  name: input.name,
-                                  value: { visible: { '==': [{ var: '' }, ''] } },
-                                },
-                              });
-                            }}
-                            startIcon={<span aria-hidden>＋</span>}
-                          >
-                            {formatMessage({
-                              id: 'form.attribute.condition.apply',
-                              defaultMessage: 'Apply condition',
-                            })}
-                          </Button>
+                          <Tooltip description={noFieldsMessage}>
+                            <Button
+                              marginTop={
+                                currentCondition && Object.keys(currentCondition).length > 0 ? 0 : 4
+                              }
+                              fullWidth={true}
+                              variant="secondary"
+                              onClick={() => {
+                                onChange({
+                                  target: {
+                                    name: input.name,
+                                    value: { visible: { '==': [{ var: '' }, ''] } },
+                                  },
+                                });
+                              }}
+                              startIcon={<span aria-hidden>＋</span>}
+                              disabled={availableFields.length === 0}
+                            >
+                              {formatMessage({
+                                id: 'form.attribute.condition.apply',
+                                defaultMessage: 'Apply condition',
+                              })}
+                            </Button>
+                          </Tooltip>
                         </Box>
                       ) : (
                         <GenericInput
