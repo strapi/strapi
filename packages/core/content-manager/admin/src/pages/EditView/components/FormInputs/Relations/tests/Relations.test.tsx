@@ -67,19 +67,14 @@ describe('Relations', () => {
     });
 
     // Wait for the combobox to be rendered with the correct label
-    await waitFor(() => {
-      expect(screen.getByLabelText(/relations/)).toBeInTheDocument();
-    });
+    await screen.findByLabelText(/relations/);
 
     // Wait for the list items to be rendered
-    await waitFor(() => {
-      expect(screen.getAllByRole('listitem')).toHaveLength(3);
-    });
+    const listItems = await screen.findAllByRole('listitem');
+    expect(listItems).toHaveLength(3);
 
     // Wait for the combobox to be updated with the count
-    await waitFor(() => {
-      expect(screen.getByLabelText(/relations \(3\)/)).toBeInTheDocument();
-    });
+    await screen.findByLabelText(/relations \(3\)/);
 
     // Check for the relation buttons
     expect(screen.getByRole('button', { name: 'Relation entity 1' })).toBeInTheDocument();
