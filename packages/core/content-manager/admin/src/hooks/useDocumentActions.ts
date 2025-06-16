@@ -73,6 +73,7 @@ type UseDocumentActions = (
   autoClone: (args: {
     model: string;
     sourceId: string;
+    locale?: string;
   }) => Promise<OperationResponse<AutoClone.Response>>;
   clone: (
     args: {
@@ -645,11 +646,12 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
   const autoClone: IUseDocumentActs['autoClone'] = React.useCallback(
-    async ({ model, sourceId }) => {
+    async ({ model, sourceId, locale }) => {
       try {
         const res = await autoCloneDocument({
           model,
           sourceId,
+          params: locale ? { locale } : undefined,
         });
 
         if ('error' in res) {
