@@ -13,8 +13,19 @@ exports[`Header renders 1`] = `
   padding-block-end: 8px;
 }
 
+.c2 {
+  cursor: pointer;
+}
+
 .c7 {
   min-width: 0;
+}
+
+.c11 {
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .c6 {
@@ -28,24 +39,6 @@ exports[`Header renders 1`] = `
   align-items: center;
   flex-direction: row;
   display: flex;
-}
-
-.c9 {
-  font-weight: 600;
-  font-size: 3.2rem;
-  line-height: 1.25;
-  color: currentcolor;
-}
-
-.c2 {
-  cursor: pointer;
-}
-
-.c11 {
-  padding-inline-start: 16px;
-  padding-inline-end: 16px;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .c10 {
@@ -63,26 +56,27 @@ exports[`Header renders 1`] = `
   display: inline-flex;
 }
 
-.c14 {
-  align-items: center;
-  flex-direction: row;
-  display: flex;
-}
-
 .c5 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: #4945ff;
 }
 
-.c15 {
+.c9 {
+  font-weight: 600;
+  font-size: 3.2rem;
+  line-height: 1.25;
+  color: currentcolor;
+}
+
+.c14 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: currentcolor;
   font-weight: 600;
 }
 
-.c17 {
+.c16 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -126,7 +120,7 @@ exports[`Header renders 1`] = `
   cursor: default;
 }
 
-.c16 {
+.c15 {
   height: 3.2rem;
   text-decoration: none;
   border: 1px solid #4945ff;
@@ -134,17 +128,17 @@ exports[`Header renders 1`] = `
   color: #ffffff;
 }
 
-.c16:hover {
+.c15:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c15:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16[aria-disabled='true'] {
+.c15[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
@@ -215,7 +209,7 @@ exports[`Header renders 1`] = `
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c16 {
+  .c15 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -276,7 +270,7 @@ exports[`Header renders 1`] = `
           >
             <span
               aria-hidden="true"
-              class="c14"
+              class="c8"
             >
               <svg
                 fill="currentColor"
@@ -291,18 +285,18 @@ exports[`Header renders 1`] = `
               </svg>
             </span>
             <span
-              class="c15"
+              class="c14"
             >
               Add new folder
             </span>
           </button>
           <button
             aria-disabled="false"
-            class="c11 c12 c16"
+            class="c11 c12 c15"
           >
             <span
               aria-hidden="true"
-              class="c14"
+              class="c8"
             >
               <svg
                 fill="currentColor"
@@ -317,7 +311,7 @@ exports[`Header renders 1`] = `
               </svg>
             </span>
             <span
-              class="c15"
+              class="c14"
             >
               Add new assets
             </span>
@@ -327,7 +321,7 @@ exports[`Header renders 1`] = `
     </div>
   </div>
   <span
-    class="c17"
+    class="c16"
   >
     <p
       aria-live="polite"

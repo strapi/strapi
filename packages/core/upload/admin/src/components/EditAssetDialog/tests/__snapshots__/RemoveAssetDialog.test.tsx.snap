@@ -90,6 +90,17 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   font-weight: 600;
 }
 
+.c2 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c17 {
   height: 3.2rem;
   text-decoration: none;
@@ -182,17 +193,6 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 
 .c10 path {
   fill: #d02b20;
-}
-
-.c2 {
-  border: 0;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
