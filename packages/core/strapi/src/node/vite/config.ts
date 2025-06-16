@@ -22,7 +22,10 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
     cacheDir: 'node_modules/.strapi/vite',
     configFile: false,
     define: {
-      'process.env': ctx.env,
+      process: {
+        env: ctx.env,
+        browser: true,
+      },
     },
     envPrefix: 'STRAPI_ADMIN_',
     optimizeDeps: {
