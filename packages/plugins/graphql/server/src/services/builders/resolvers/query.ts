@@ -16,7 +16,10 @@ export default ({ strapi }: Context) => ({
           auth: ctx?.state?.auth,
         });
 
-        // Store the root query args in context so they can be accessed deeply down the tree (dz, components, etc..)
+        /**
+         * NOTE: For internal use only
+         * Store the root query args in context so they can be forwarded to deep relations
+         */
         ctx.rootQueryArgs = args;
 
         return strapi.documents!(uid).findMany({ status: 'published', ...sanitizedQuery });
@@ -31,7 +34,10 @@ export default ({ strapi }: Context) => ({
           auth: ctx?.state?.auth,
         });
 
-        // Store the root query args in context so they can be accessed deeply down the tree (dz, components, etc..)
+        /**
+         * NOTE: For internal use only
+         * Store the root query args in context so they can be forwarded to deep relations
+         */
         ctx.rootQueryArgs = args;
 
         return strapi.documents!(uid).findFirst({ status: 'published', ...sanitizedQuery });
@@ -48,7 +54,10 @@ export default ({ strapi }: Context) => ({
           auth: ctx?.state?.auth,
         });
 
-        // Store the root query args in context so they can be accessed deeply down the tree (dz, components, etc..)
+        /**
+         * NOTE: For internal use only
+         * Store the root query args in context so they can be forwarded to deep relations
+         */
         ctx.rootQueryArgs = args;
 
         return strapi.documents!(uid).findOne({
