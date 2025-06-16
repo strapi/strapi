@@ -15,7 +15,7 @@ function formatPluginName(pluginSlug) {
     case 'plugin::i18n':
       return 'i18n';
     case 'plugin::upload':
-      return 'Upload';
+      return 'Media Library';
     case 'plugin::users-permissions':
       return 'Users-permissions';
     default:
