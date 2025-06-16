@@ -10,6 +10,13 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   position: fixed;
 }
 
+.c1 {
+  gap: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
+}
+
 .c5 {
   padding-block-start: 16px;
   padding-inline-end: 20px;
@@ -33,13 +40,6 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
-}
-
-.c1 {
-  gap: 8px;
-  align-items: stretch;
-  flex-direction: column;
-  display: flex;
 }
 
 .c6 {
