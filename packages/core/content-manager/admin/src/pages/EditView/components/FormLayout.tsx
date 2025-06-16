@@ -54,6 +54,7 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
   const { formatMessage } = useIntl();
   const modelUid = document.schema?.uid;
   const fieldValues = useForm('Fields', (state) => state.values);
+  const rulesEngine = createRulesEngine();
 
   const getLabel = (name: string, label: string) => {
     return formatMessage({
@@ -68,6 +69,15 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
         if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
           const [row] = panel;
           const [field] = row;
+          const attribute = document.schema?.attributes[field.name];
+          const condition = attribute?.conditions?.visible;
+
+          if (condition) {
+            const isVisible = rulesEngine.evaluate(condition, fieldValues);
+            if (!isVisible) {
+              return null; // Skip rendering the dynamic zone if the condition is not met
+            }
+          }
 
           return (
             <Grid.Root key={field.name} gap={4}>
@@ -91,7 +101,6 @@ const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps)
                   const condition = attribute?.conditions?.visible;
 
                   if (condition) {
-                    const rulesEngine = createRulesEngine();
                     return rulesEngine.evaluate(condition, fieldValues);
                   }
 
