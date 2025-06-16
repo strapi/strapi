@@ -332,7 +332,7 @@ const handleInvisibleAttributes = (
     } else if (initialValue !== undefined) {
       result[attrName] = initialValue;
     } else {
-      if (attrName === 'id') {
+      if (attrName === 'id' || attrName === 'documentId') {
         // If the attribute is 'id', we don't want to set it to null, as it should not be removed.
         continue;
       }
