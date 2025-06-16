@@ -13,6 +13,7 @@ import { useFolders } from '../../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../../hooks/useMediaLibraryPermissions';
 import { usePersistentState } from '../../../../hooks/usePersistentState';
 import { useSelectionState } from '../../../../hooks/useSelectionState';
+import { useSettings } from '../../../../hooks/useSettings';
 import { MediaLibrary } from '../MediaLibrary';
 
 const FIXTURE_ASSET_PAGINATION = {
@@ -78,6 +79,11 @@ jest.mock('../../../../hooks/useSelectionState', () => ({
 jest.mock('../../../../hooks/usePersistentState', () => ({
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
+jest.mock('../../../../hooks/useSettings', () => ({
+  useSettings: jest
+    .fn()
+    .mockReturnValue({ data: { limitConcurrentUploads: false }, isLoading: false }),
+}));
 const renderML = () => ({
   ...renderRTL(<MediaLibrary />, {
     wrapper({ children }) {
@@ -130,6 +136,13 @@ describe('Media library homepage', () => {
 
     it('shows a loader while resolving folders', () => {
       (useFolders as jest.Mock).mockReturnValueOnce({ isLoading: true });
+      const { getByRole, getByText } = renderML();
+      expect(getByRole('main')).toHaveAttribute('aria-busy', 'true');
+      expect(getByText('Loading content.')).toBeInTheDocument();
+    });
+
+    it('shows a loader while resolving settings', () => {
+      (useSettings as jest.Mock).mockReturnValueOnce({ isLoading: true });
       const { getByRole, getByText } = renderML();
       expect(getByRole('main')).toHaveAttribute('aria-busy', 'true');
       expect(getByText('Loading content.')).toBeInTheDocument();

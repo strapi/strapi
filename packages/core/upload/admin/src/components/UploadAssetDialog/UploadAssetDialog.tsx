@@ -34,6 +34,7 @@ export interface UploadAssetDialogProps {
   addUploadedFiles?: (files: Asset[] | File[]) => void;
   folderId?: string | number | null;
   initialAssetsToAdd?: Asset[];
+  limitConcurrentUploads?: boolean;
   onClose: () => void;
   open: boolean;
   trackedLocation?: string;
@@ -49,6 +50,7 @@ export const UploadAssetDialog = ({
   onClose = () => {},
   addUploadedFiles,
   trackedLocation,
+  limitConcurrentUploads = false,
   open,
   validateAssetsTypes = (_, cb) => cb(),
 }: UploadAssetDialogProps) => {
@@ -144,6 +146,7 @@ export const UploadAssetDialog = ({
             onCancelUpload={handleCancelUpload}
             onUploadSucceed={handleUploadSuccess}
             initialAssetsToAdd={initialAssetsToAdd}
+            limitConcurrentUploads={limitConcurrentUploads}
             addUploadedFiles={addUploadedFiles}
             folderId={folderId}
             trackedLocation={trackedLocation}
