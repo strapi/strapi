@@ -2,9 +2,6 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { clickAndWait } from '../../../utils/shared';
-import { EDITOR_EMAIL_ADDRESS, EDITOR_PASSWORD } from '../../../constants';
-
-const CREATE_URL = /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
 
 test.describe('Relations on the fly - Create a Relation and Save', () => {
   test.beforeEach(async ({ page }) => {
@@ -81,7 +78,7 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     // Step 1. Got to Shop single-type
     await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
     // Step 2. Choose the product carousel component and open its toggle
-    await page.getByRole('button', { name: 'Product carousel' }).click();
+    await page.getByRole('button', { name: 'Product carousel', exact: true }).click();
     // Step 3. Select a product
     await page.getByRole('combobox', { name: 'products' }).click();
     // Step 4. Open the relation modal
@@ -119,10 +116,9 @@ test.describe('Relations on the fly - Create a Relation and Save', () => {
     await clickAndWait(page, page.getByRole('link', { name: 'Shop' }));
     // Step 2. Add a new component
     await clickAndWait(page, page.getByRole('button', { name: 'Add a component to content' }));
-    await clickAndWait(page, page.getByRole('button', { name: 'Product carousel', exact: true }));
-
     // Step 3. Choose the new product carousel component and open its toggle
-    await page.getByRole('button', { name: 'Product carousel', exact: true }).click();
+    await clickAndWait(page, page.getByRole('button', { name: 'Product carousel' }).first());
+
     // Step 4. Select a product
     await page.getByRole('combobox', { name: 'products' }).click();
     // Step 5. Open the relation modal
