@@ -76,9 +76,7 @@ const ConfigurationProvider = ({
   );
   const token = useAuth('ConfigurationProvider', (state) => state.token);
 
-  const {
-    allowedActions: { canRead },
-  } = useRBAC(permissions);
+  const { allowedActions } = useRBAC(permissions);
 
   const {
     data: { authLogo: customAuthLogo, menuLogo: customMenuLogo } = {},
@@ -96,7 +94,7 @@ const ConfigurationProvider = ({
   }, [error, formatMessage, toggleNotification]);
 
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
-    skip: !token || !canRead,
+    skip: !token || !allowedActions.canRead,
   });
 
   const [updateProjectSettingsMutation] = useUpdateProjectSettingsMutation();
