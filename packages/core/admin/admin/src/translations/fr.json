@@ -497,6 +497,7 @@
   "global.finish": "Terminer",
   "global.last-change.redo": "Rétablir dernier changement",
   "global.last-change.undo": "Annuler dernier changement",
+  "global.last-changes.discard": "Annuler derniers changements",
   "global.marketplace": "Marketplace",
   "global.name": "Nom",
   "global.none": "Aucun",

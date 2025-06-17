@@ -732,6 +732,7 @@
   "global.finish": "Finish",
   "global.last-change.redo": "Redo last change",
   "global.last-change.undo": "Undo last change",
+  "global.last-changes.discard": "Discard last changes",
   "global.marketplace": "Marketplace",
   "global.more": "More",
   "global.name": "Name",

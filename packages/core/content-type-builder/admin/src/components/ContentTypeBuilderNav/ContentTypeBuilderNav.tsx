@@ -145,7 +145,6 @@ export const ContentTypeBuilderNav = () => {
                   id: 'global.last-change.undo',
                   defaultMessage: 'Undo last change',
                 })}
-                Undo last change
               </Menu.Item>
               <Menu.Item
                 disabled={!history.canRedo || !isInDevelopmentMode}
@@ -164,7 +163,12 @@ export const ContentTypeBuilderNav = () => {
               >
                 <Flex gap={2}>
                   <Cross />
-                  <Typography>Discard all changes</Typography>
+                  <Typography>
+                    {formatMessage({
+                      id: 'global.last-changes.discard',
+                      defaultMessage: 'Discard last changes',
+                    })}
+                  </Typography>
                 </Flex>
               </DiscardAllMenuItem>
             </Menu.Content>
