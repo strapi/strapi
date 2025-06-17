@@ -730,6 +730,8 @@
   "global.enabled": "Enabled",
   "global.error": "Something went wrong",
   "global.finish": "Finish",
+  "global.last-change.redo": "Redo last change",
+  "global.last-change.undo": "Undo last change",
   "global.marketplace": "Marketplace",
   "global.more": "More",
   "global.name": "Name",

@@ -136,19 +136,26 @@ export const ContentTypeBuilderNav = () => {
               </VisuallyHidden>
             </Menu.Trigger>
             <Menu.Content zIndex={1}>
-              <Menu.Item disabled={!history.canUndo || !isInDevelopmentMode} onSelect={undoHandler}>
-                <Flex gap={2}>
-                  <ArrowCounterClockwise fill="neutral500" />
-                  <Typography>Undo last change</Typography>
-                </Flex>
+              <Menu.Item
+                disabled={!history.canUndo || !isInDevelopmentMode}
+                onSelect={undoHandler}
+                startIcon={<ArrowCounterClockwise />}
+              >
+                {formatMessage({
+                  id: 'global.last-change.undo',
+                  defaultMessage: 'Undo last change',
+                })}
+                Undo last change
               </Menu.Item>
-              <Menu.Item disabled={!history.canRedo || !isInDevelopmentMode} onSelect={redoHandler}>
-                <Typography>
-                  <Flex gap={2}>
-                    <ArrowClockwise fill="neutral500" />
-                    <Typography>Redo last change</Typography>
-                  </Flex>
-                </Typography>
+              <Menu.Item
+                disabled={!history.canRedo || !isInDevelopmentMode}
+                onSelect={redoHandler}
+                startIcon={<ArrowClockwise />}
+              >
+                {formatMessage({
+                  id: 'global.last-change.redo',
+                  defaultMessage: 'Redo last change',
+                })}
               </Menu.Item>
               <Menu.Separator />
               <DiscardAllMenuItem
