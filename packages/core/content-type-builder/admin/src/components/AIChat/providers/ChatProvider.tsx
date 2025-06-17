@@ -9,7 +9,7 @@ import { FeedbackProvider } from '../FeedbackModal';
 import { useAIChat } from '../hooks/useAIFetch';
 import { useChatTitle } from '../hooks/useChatTitle';
 import { useLastSeenSchemas } from '../hooks/useLastSeenSchemas';
-import { STRAPI_AI_TOKEN, STRAPI_CODE_MIME_TYPE } from '../lib/constants';
+import { STRAPI_AI_TOKEN } from '../lib/constants';
 import { transformMessages } from '../lib/transforms/messages';
 import { transformCTBToChat } from '../lib/transforms/schemas/fromCTB';
 import { Attachment } from '../lib/types/attachments';
@@ -19,6 +19,8 @@ import { UploadProjectToChatProvider } from '../UploadCodeModal';
 import { UploadFigmaToChatProvider } from '../UploadFigmaModal';
 
 import { SchemaChatProvider } from './SchemaProvider';
+
+type AttachmentType = 'code' | 'figma' | 'image' | 'none';
 
 interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   isChatEnabled: boolean;
@@ -35,6 +37,9 @@ interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   // Attachments
   attachments: Attachment[];
   setAttachments: React.Dispatch<React.SetStateAction<Attachment[]>>;
+  // Attachment type tracking
+  currentAttachmentType: AttachmentType;
+  setCurrentAttachmentType: (type: AttachmentType) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -56,6 +61,9 @@ export const BaseChatProvider = ({
 
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+
+  // Attachment type tracking - set by providers
+  const [currentAttachmentType, setCurrentAttachmentType] = useState<AttachmentType>('none');
 
   const { trackUsage } = useTracking();
 
@@ -103,30 +111,12 @@ export const BaseChatProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat.messages]);
 
-  const getAttachmentType = (attachments: Attachment[]): 'code' | 'figma' | 'image' | 'none' => {
-    // TODO: how do we need to determine the types??
-    if (!attachments.length) {
-      return 'none';
+  // Reset attachment type when attachments change
+  useEffect(() => {
+    if (attachments.length === 0) {
+      setCurrentAttachmentType('none');
     }
-
-    if (attachments.some((att) => att.contentType === STRAPI_CODE_MIME_TYPE)) {
-      return 'code';
-    }
-
-    if (
-      attachments.some(
-        (att) => att.contentType?.includes('figma') || att.name?.toLowerCase().includes('figma')
-      )
-    ) {
-      return 'figma';
-    }
-
-    if (attachments.some((att) => att.contentType?.startsWith('image/'))) {
-      return 'image';
-    }
-
-    return 'code';
-  };
+  }, [attachments]);
 
   const getTokenCount = (text: string): number => {
     // TODO: Implement token counting
@@ -134,12 +124,10 @@ export const BaseChatProvider = ({
   };
 
   const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
-    // TODO: test what's being sent here
-    const attachmentType = getAttachmentType(attachments);
     const tokenCount = getTokenCount(chat.input || '');
 
     trackUsage('didUserSendMessage', {
-      'attachment-type': attachmentType,
+      'attachment-type': currentAttachmentType,
       'number-of-input-tokens': tokenCount,
     });
 
@@ -223,6 +211,9 @@ export const BaseChatProvider = ({
         // Attachments
         attachments,
         setAttachments,
+        // Attachment type tracking
+        currentAttachmentType,
+        setCurrentAttachmentType,
       }}
     >
       {children}
