@@ -4,6 +4,13 @@ import { render, waitFor, type RenderOptions } from '@strapi/strapi/admin/test';
 
 import { App } from '../App';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const renderApp = (opts?: RenderOptions) => render(<App />, opts);
 
 const versions = ['2.0.0', '1.2.0', '1.0.0'];
