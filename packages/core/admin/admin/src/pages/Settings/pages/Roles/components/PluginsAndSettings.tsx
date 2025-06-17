@@ -91,6 +91,8 @@ const Row = ({
   const { formatMessage } = useIntl();
 
   const categoryName = name.split('::').pop() ?? '';
+  const categoryDisplayName =
+    categoryName === 'upload' ? 'Media Library' : capitalise(categoryName.replace(/-/g, ' '));
 
   return (
     <Accordion.Item value={name}>
@@ -102,7 +104,7 @@ const Row = ({
             { category: categoryName }
           )} ${kind === 'plugins' ? 'plugin' : kind}`}
         >
-          {capitalise(categoryName)}
+          {categoryDisplayName}
         </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content>
