@@ -18,6 +18,12 @@ type Messages = typeof en;
 
 jest.mock('../../../utils/downloadFile');
 jest.mock('../../../hooks/useFolderStructure');
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 const messageForPlugin = Object.keys(en).reduce<Record<string, string>>((acc, curr) => {
   acc[curr] = `upload.${en[curr as keyof Messages]}`;
 
