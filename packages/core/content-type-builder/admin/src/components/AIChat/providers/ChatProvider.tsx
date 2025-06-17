@@ -164,14 +164,12 @@ export const BaseChatProvider = ({
   }, [messages.length, title, generateTitle]);
 
   useEffect(() => {
-    // TODO: test this for status changes on the chat
     if (chat.status === 'error') {
       trackUsage('didAnswerMessage', {
         successful: false,
       });
     } else if (
-      chat.status !== 'streaming' &&
-      chat.status !== 'submitted' &&
+      chat.status === 'ready' &&
       messages.length > 0 &&
       messages[messages.length - 1]?.role === 'assistant'
     ) {
