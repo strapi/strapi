@@ -72,6 +72,7 @@ const SearchInput = ({
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onClear={handleClear}
           placeholder={placeholder}
+          onBlur={() => setIsOpen(false)}
         >
           {label}
         </Searchbar>
