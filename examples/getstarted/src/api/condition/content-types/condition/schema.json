@@ -4,15 +4,30 @@
   "info": {
     "singularName": "condition",
     "pluralName": "conditions",
-    "displayName": "condition"
+    "displayName": "Condition"
   },
   "options": {
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "isActiveewr": {
+    "isActive": {
       "type": "boolean"
+    },
+    "country": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::country.country",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "isActive"
+            },
+            true
+          ]
+        }
+      }
     }
   }
 }

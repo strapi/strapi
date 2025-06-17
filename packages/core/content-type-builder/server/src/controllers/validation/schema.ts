@@ -236,6 +236,9 @@ const baseRelationSchema = z.object({
   configurable: z.boolean().nullish(),
   private: z.boolean().nullish(),
   pluginOptions: z.record(z.unknown()).optional(),
+  conditions: z.preprocess((val) => {
+    return val;
+  }, conditionSchema.optional()),
 });
 
 const oneToOneSchema = baseRelationSchema.extend({
