@@ -96,9 +96,9 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     ADMIN_PATH: adminPublicPath,
     STRAPI_ADMIN_BACKEND_URL: sameOrigin ? serverPublicPath : serverAbsoluteUrl,
     STRAPI_TELEMETRY_DISABLED: String(strapiInstance.telemetry.isDisabled),
-    // TODO: Use production url as default
+    // TODO: Get this url from a utility/consts rather than duplicating it in AIChat constants.ts
     STRAPI_ADMIN_AI_URL:
-      process.env.STRAPI_ADMIN_AI_URL || 'https://strapi-ai.apps.staging.strapi.team/',
+      process.env.STRAPI_ADMIN_AI_URL?.replace(/\/+$/, '') ?? 'https://strapi-ai.apps.strapi.io',
     STRAPI_ADMIN_AI_API_KEY: process.env.STRAPI_ADMIN_AI_API_KEY,
   });
 
