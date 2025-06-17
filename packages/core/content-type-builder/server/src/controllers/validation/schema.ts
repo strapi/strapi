@@ -175,6 +175,10 @@ const enumRefinement: z.SuperRefinement<{
   }
 };
 
+const conditionSchema = z.object({
+  visible: z.record(z.string(), z.array(z.any())),
+});
+
 const basePropertiesSchema = z.object({
   type: z.enum([
     'string',
@@ -204,6 +208,9 @@ const basePropertiesSchema = z.object({
   configurable: z.boolean().nullish(),
   private: z.boolean().nullish(),
   pluginOptions: z.record(z.unknown()).optional(),
+  conditions: z.preprocess((val) => {
+    return val;
+  }, conditionSchema.optional()),
 });
 
 const maxLengthSchema = z.number().int().positive().optional();
