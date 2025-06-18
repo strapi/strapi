@@ -322,9 +322,10 @@ test.describe('Edit View', () => {
         .getByRole('listitem')
         .filter({ has: page.getByRole('heading') })
         .all();
-      expect(components).toHaveLength(2);
+      expect(components).toHaveLength(3);
       expect(components[0]).toHaveText(/product carousel/i);
       expect(components[1]).toHaveText(/content and image/i);
+      expect(components[2]).toHaveText(/product carousel/i);
 
       // Add components at specific locations:
       // - very last position
@@ -346,12 +347,13 @@ test.describe('Edit View', () => {
         .filter({ has: page.getByRole('heading') })
         .allTextContents();
 
-      expect(componentTexts.length).toBe(5);
+      expect(componentTexts.length).toBe(6);
       expect(componentTexts[0].toLowerCase()).toContain('hero image');
       expect(componentTexts[1].toLowerCase()).toContain('product carousel');
       expect(componentTexts[2].toLowerCase()).toContain('hero image');
       expect(componentTexts[3].toLowerCase()).toContain('content and image');
       expect(componentTexts[4].toLowerCase()).toContain('product carousel');
+      expect(componentTexts[5].toLowerCase()).toContain('product carousel');
     });
   });
 });
