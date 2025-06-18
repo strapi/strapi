@@ -12,6 +12,7 @@ export interface TelemetryProperties {
   useTypescriptOnServer?: boolean;
   useTypescriptOnAdmin?: boolean;
   isHostedOnStrapiCloud?: boolean;
+  aiLicenseKey?: string;
   numberOfAllContentTypes?: number;
   numberOfComponents?: number;
   numberOfDynamicZones?: number;
@@ -63,6 +64,7 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
               ...data,
               projectId: uuid,
               registeredWidgets: getAllWidgets().map((widget) => widget.uid),
+              aiLicenseKey: window.strapi.aiLicenseKey,
             },
           }),
           headers: {
@@ -193,7 +195,8 @@ interface EventWithoutProperties {
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
     | 'didEditFieldNameOnContentType'
-    | 'didCreateRelease';
+    | 'didCreateRelease'
+    | 'didStartNewChat';
   properties?: never;
 }
 
@@ -365,6 +368,38 @@ interface DidPublishRelease {
   };
 }
 
+interface DidUsePresetPromptEvent {
+  name: 'didUsePresetPrompt';
+  properties: {
+    promptType:
+      | 'generate-product-schema'
+      | 'tell-me-about-the-content-type-builder'
+      | 'tell-me-about-strapi';
+  };
+}
+
+interface DidUserSendMessageEvent {
+  name: 'didUserSendMessage';
+  properties: {
+    'attachment-type': 'code' | 'figma' | 'image' | 'none';
+    'number-of-input-tokens': number;
+  };
+}
+
+interface DidAnswerMessageEvent {
+  name: 'didAnswerMessage';
+  properties: {
+    successful: boolean;
+  };
+}
+
+interface DidVoteAnswerEvent {
+  name: 'didVoteAnswer';
+  properties: {
+    value: 'positive' | 'negative';
+  };
+}
+
 interface DidUpdateCTBSchema {
   name: 'didUpdateCTBSchema';
   properties: {
@@ -395,6 +430,10 @@ type EventsWithProperties =
   | DidSelectFile
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
+  | DidUsePresetPromptEvent
+  | DidUserSendMessageEvent
+  | DidAnswerMessageEvent
+  | DidVoteAnswerEvent
   | LogoEvent
   | TokenEvents
   | UpdateEntryEvents
@@ -464,6 +503,7 @@ const useTracking = (): UseTrackingReturn => {
                 ...telemetryProperties,
                 projectId: uuid,
                 projectType: window.strapi.projectType,
+                aiLicenseKey: window.strapi.aiLicenseKey,
               },
             },
             {

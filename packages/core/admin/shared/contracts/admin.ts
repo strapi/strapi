@@ -103,6 +103,7 @@ export declare namespace TelemetryProperties {
       useTypescriptOnServer: boolean;
       useTypescriptOnAdmin: boolean;
       isHostedOnStrapiCloud: boolean;
+      aiLicenseKey?: string;
       numberOfAllContentTypes: number;
       numberOfComponents: number;
       numberOfDynamicZones: number;

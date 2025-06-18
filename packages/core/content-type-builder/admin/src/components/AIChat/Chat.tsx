@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Button, Typography, Box } from '@strapi/design-system';
 import { Sparkle, ArrowUp, Plus, Paperclip, Upload, Code } from '@strapi/icons';
 import { styled } from 'styled-components';
@@ -39,12 +40,20 @@ const ResponsiveFlex = styled(Flex)`
 const ChatSuggestions = () => {
   const { append } = useStrapiChat();
   const { t } = useTranslations();
+  const { trackUsage } = useTracking();
 
   const SUGGESTIONS = [
     t('chat.input.defaults.generate', 'Generate a product schema'),
     t('chat.input.defaults.ctb', 'Tell me about the Content-Type Builder'),
     t('chat.input.defaults.strapi', 'Tell me about Strapi'),
   ] as const;
+
+  const SUGGESTION_TO_PROMPT_TYPE = {
+    [t('chat.input.defaults.generate', 'Generate a product schema')]: 'generate-product-schema',
+    [t('chat.input.defaults.ctb', 'Tell me about the Content-Type Builder')]:
+      'tell-me-about-the-content-type-builder',
+    [t('chat.input.defaults.strapi', 'Tell me about Strapi')]: 'tell-me-about-strapi',
+  } as const;
 
   const suggestionsTitle = t('chat.input.defaults.title', 'How can I help you?');
 
@@ -61,12 +70,16 @@ const ChatSuggestions = () => {
               startIcon={<Sparkle fill="neutral500" />}
               size="M"
               variant="tertiary"
-              onClick={() =>
+              onClick={() => {
+                trackUsage('didUsePresetPrompt', {
+                  promptType: SUGGESTION_TO_PROMPT_TYPE[suggestion],
+                });
+
                 append({
                   role: 'user',
                   content: suggestion,
-                })
-              }
+                });
+              }}
             >
               <Typography fontWeight="regular">{suggestion}</Typography>
             </Button>
@@ -329,7 +342,8 @@ const ChatInput = (props: any) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const Chat = () => {
-  const { title, messages, isChatOpen, isChatEnabled, toggleChat, reset } = useStrapiChat();
+  const { title, messages, isChatOpen, isChatEnabled, openChat, closeChat, reset } =
+    useStrapiChat();
   const { attachFiles } = useAttachments();
   const { t } = useTranslations();
 
@@ -357,10 +371,10 @@ const Chat = () => {
         size="md"
         position="bottom-right"
         isOpen={isChatOpen}
-        onToggle={toggleChat}
+        onToggle={isChatOpen ? closeChat : openChat}
         toggleIcon={
           <IconButton
-            onClick={toggleChat}
+            onClick={isChatOpen ? closeChat : openChat}
             label={isChatOpen ? closeChatLabel : openChatLabel}
             variant="default"
           >

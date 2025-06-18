@@ -369,7 +369,6 @@ export const UploadCodeModal = () => {
   const { t } = useTranslations();
 
   // Attach files to the chat
-  const { input, setInput } = useStrapiChat();
   const { addAttachments } = useAttachments();
 
   const { processZipFile, processFolder, isLoading, error } = useCodeUpload({
@@ -377,7 +376,8 @@ export const UploadCodeModal = () => {
   });
 
   const { isCodeUploadOpen, closeCodeUpload, submitOnFinish } = useUploadProjectToChat();
-  const { setMessages, reload, openChat } = useStrapiChat();
+  const { setMessages, reload, openChat, input, setInput, setCurrentAttachmentType } =
+    useStrapiChat();
 
   const handleCancel = () => {
     setProjectName(null);
@@ -386,6 +386,8 @@ export const UploadCodeModal = () => {
   };
 
   const handleComplete = async () => {
+    setCurrentAttachmentType('code');
+
     // Ensure chat is opened
     openChat();
 

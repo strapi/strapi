@@ -2,6 +2,7 @@
 import { createContext, useContext, ReactNode, useMemo, useState, useEffect } from 'react';
 
 import { useChat } from '@ai-sdk/react';
+import { useTracking } from '@strapi/admin/strapi-admin';
 
 import { useDataManager } from '../../DataManager/useDataManager';
 import { FeedbackProvider } from '../FeedbackModal';
@@ -19,6 +20,8 @@ import { UploadFigmaToChatProvider } from '../UploadFigmaModal';
 
 import { SchemaChatProvider } from './SchemaProvider';
 
+type AttachmentType = 'code' | 'figma' | 'image' | 'none';
+
 interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   isChatEnabled: boolean;
   title?: string;
@@ -29,11 +32,14 @@ interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   schemas: Schema[];
   // Chat window
   isChatOpen: boolean;
-  toggleChat: () => void;
   openChat: () => void;
+  closeChat: () => void;
   // Attachments
   attachments: Attachment[];
   setAttachments: React.Dispatch<React.SetStateAction<Attachment[]>>;
+  // Attachment type tracking
+  currentAttachmentType: AttachmentType;
+  setCurrentAttachmentType: (type: AttachmentType) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -51,9 +57,15 @@ export const BaseChatProvider = ({
 }) => {
   const [chatId, setChatId] = useState<string | undefined>(undefined);
   const [isChatOpen, setIsChatOpen] = useState(defaultOpen);
+  const [openCount, setOpenCount] = useState(0);
 
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+
+  // Attachment type tracking - set by providers
+  const [currentAttachmentType, setCurrentAttachmentType] = useState<AttachmentType>('none');
+
+  const { trackUsage } = useTracking();
 
   // DataManager
   const { components, contentTypes } = useDataManager();
@@ -99,7 +111,26 @@ export const BaseChatProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat.messages]);
 
+  // Reset attachment type when attachments change
+  useEffect(() => {
+    if (attachments.length === 0) {
+      setCurrentAttachmentType('none');
+    }
+  }, [attachments]);
+
+  const getTokenCount = (text: string): number => {
+    // TODO: Implement token counting
+    return text.length;
+  };
+
   const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
+    const tokenCount = getTokenCount(chat.input || '');
+
+    trackUsage('didUserSendMessage', {
+      'attachment-type': currentAttachmentType,
+      'number-of-input-tokens': tokenCount,
+    });
+
     chat.handleSubmit(event, {
       experimental_attachments: attachments
         // Transform to ai/sdk format and remove any attachments that are not yet ready
@@ -132,6 +163,22 @@ export const BaseChatProvider = ({
     }
   }, [messages.length, title, generateTitle]);
 
+  useEffect(() => {
+    if (chat.status === 'error') {
+      trackUsage('didAnswerMessage', {
+        successful: false,
+      });
+    } else if (
+      chat.status === 'ready' &&
+      messages.length > 0 &&
+      messages[messages.length - 1]?.role === 'assistant'
+    ) {
+      trackUsage('didAnswerMessage', {
+        successful: true,
+      });
+    }
+  }, [chat.status, messages, trackUsage]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -143,19 +190,28 @@ export const BaseChatProvider = ({
         reset: () => {
           chat.stop();
           setChatId(generateRandomId());
+          trackUsage('didStartNewChat');
           resetTitle();
         },
         schemas,
         // Chat
         title,
         isChatOpen,
-        toggleChat: () => setIsChatOpen(!isChatOpen),
         openChat: () => {
           setIsChatOpen(true);
+          // if this is the first open, it's a new chat
+          if (openCount === 0) {
+            trackUsage('didStartNewChat');
+          }
+          setOpenCount((prev) => prev + 1);
         },
+        closeChat: () => setIsChatOpen(false),
         // Attachments
         attachments,
         setAttachments,
+        // Attachment type tracking
+        currentAttachmentType,
+        setCurrentAttachmentType,
       }}
     >
       {children}
