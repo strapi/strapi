@@ -69,6 +69,20 @@ export const advancedForm = {
     }
 
     if (repeatable) {
+      const minComponentsAttribute = {
+        ...attributeOptions.min,
+        intlLabel: {
+          id: getTrad('form.attribute.item.minimumComponents'),
+          defaultMessage: 'Minimum components',
+        },
+      };
+      const maxComponentsAttribute = {
+        ...attributeOptions.max,
+        intlLabel: {
+          id: getTrad('form.attribute.item.maximumComponents'),
+          defaultMessage: 'Maximum components',
+        },
+      };
       return {
         sections: [
           {
@@ -79,8 +93,8 @@ export const advancedForm = {
             items: [
               attributeOptions.required,
               attributeOptions.private,
-              attributeOptions.max,
-              attributeOptions.min,
+              minComponentsAttribute,
+              maxComponentsAttribute,
             ],
           },
         ],
@@ -403,6 +417,7 @@ export const advancedForm = {
             attributeOptions.maxLength,
             attributeOptions.minLength,
             attributeOptions.private,
+            attributeOptions.regex,
           ],
         },
       ],

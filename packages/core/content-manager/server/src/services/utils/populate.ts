@@ -50,6 +50,7 @@ function getPopulateForRelation(
   // Mainly needed for bulk locale publishing, so the Client has all the information necessary to perform validations
   if (attributeName === 'localizations') {
     const validationPopulate = getPopulateForValidation(model.uid as UID.Schema);
+
     return {
       populate: validationPopulate.populate,
     };
@@ -207,6 +208,18 @@ const getPopulateForValidation = (uid: UID.Schema): Record<string, any> => {
         populateAcc.fields.push(attributeName);
       }
       return populateAcc;
+    }
+
+    if (isMedia(attribute)) {
+      if (getDoesAttributeRequireValidation(attribute)) {
+        populateAcc.populate = populateAcc.populate || {};
+        populateAcc.populate[attributeName] = {
+          populate: {
+            folder: true,
+          },
+        };
+        return populateAcc;
+      }
     }
 
     if (isComponent(attribute)) {
