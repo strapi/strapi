@@ -234,7 +234,9 @@ const createAttributeSchema = (
     case 'text':
       return yup.string();
     case 'uid':
-      return yup.string().matches(/^[A-Za-z0-9-_.~]*$/);
+      return yup
+        .string()
+        .matches(attribute.regex ? new RegExp(attribute.regex) : /^[A-Za-z0-9-_.~]*$/);
     default:
       /**
        * This allows any value.

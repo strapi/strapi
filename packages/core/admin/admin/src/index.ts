@@ -22,6 +22,8 @@ export * from './components/Pagination';
 export * from './components/SearchInput';
 export * from './components/Table';
 export * from './components/ContentBox';
+export * from './components/SubNav';
+export * from './components/GradientBadge';
 
 export { useGuidedTour } from './components/GuidedTour/Provider';
 

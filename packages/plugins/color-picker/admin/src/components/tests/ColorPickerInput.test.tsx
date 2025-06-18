@@ -6,6 +6,13 @@ import { IntlProvider } from 'react-intl';
 
 import { ColorPickerInput } from '../ColorPickerInput';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 const render = () => ({
   ...renderRTL(<ColorPickerInput name="color" label={'color-picker'} type="string" />, {
     wrapper: ({ children }) => {

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.13.1",
+  "version": "5.15.1",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -84,12 +84,12 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-rc.24",
-    "@strapi/icons": "2.0.0-rc.24",
-    "@strapi/permissions": "5.13.1",
-    "@strapi/types": "5.13.1",
-    "@strapi/typescript-utils": "5.13.1",
-    "@strapi/utils": "5.13.1",
+    "@strapi/design-system": "2.0.0-rc.26",
+    "@strapi/icons": "2.0.0-rc.26",
+    "@strapi/permissions": "5.15.1",
+    "@strapi/types": "5.15.1",
+    "@strapi/typescript-utils": "5.15.1",
+    "@strapi/utils": "5.15.1",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -111,7 +111,7 @@
     "invariant": "^2.2.4",
     "is-localhost-ip": "2.0.0",
     "jsonwebtoken": "9.0.0",
-    "koa": "2.15.4",
+    "koa": "2.16.1",
     "koa-compose": "4.1.0",
     "koa-passport": "6.0.0",
     "koa-static": "5.0.0",
@@ -140,11 +140,11 @@
     "typescript": "5.4.4",
     "use-context-selector": "1.4.1",
     "yup": "0.32.9",
-    "zod": "^3.22.4"
+    "zod": "3.24.2"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "5.13.1",
-    "@strapi/data-transfer": "5.13.1",
+    "@strapi/admin-test-utils": "5.15.1",
+    "@strapi/data-transfer": "5.15.1",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",
     "@types/invariant": "2.2.36",
@@ -167,7 +167,7 @@
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
     "styled-components": "6.1.8",
-    "vite": "5.4.17",
+    "vite": "5.4.19",
     "vite-plugin-dts": "^4.3.0"
   },
   "peerDependencies": {

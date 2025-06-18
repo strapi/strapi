@@ -40,7 +40,7 @@ test.describe('List view', () => {
     }
     await page.getByRole('option', { name: 'French (fr)' }).click();
     expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('fr');
-    await expect(page.getByRole('row', { name: 'No content found' })).toBeVisible();
+    await expect(page.getByText('No content found')).toBeVisible();
 
     /**
      * Navigate to the authors list-view (this content-type does not have i18n enabled)
@@ -74,7 +74,7 @@ test.describe('List view', () => {
      */
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     await page.getByRole('option', { name: 'Spanish (es)' }).click();
-    await expect(page.getByRole('row', { name: 'No content found' })).toBeVisible();
+    await expect(page.getByText('No content found')).toBeVisible();
     await page.getByRole('link', { name: 'Create new entry' }).first().click();
     expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
     await expect(page.getByRole('heading', { name: 'Create an entry' })).toBeVisible();

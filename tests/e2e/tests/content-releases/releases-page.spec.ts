@@ -1,19 +1,20 @@
 import { test, expect } from '@playwright/test';
-import { clickAndWait, describeOnCondition, skipCtbTour } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { login } from '../../utils/login';
+import { clickAndWait, describeOnCondition } from '../../utils/shared';
 import { waitForRestart } from '../../utils/restart';
 import { resetFiles } from '../../utils/file-reset';
+import { sharedSetup } from '../../utils/setup';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 describeOnCondition(edition === 'EE')('Releases page', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await resetFiles();
-    await page.goto('/admin');
-    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
-    await login({ page });
+    await sharedSetup('history-spec', page, {
+      login: true,
+      skipTour: true,
+      resetFiles: true,
+      importData: 'with-admin.tar',
+      resetAlways: true, // NOTE: this makes tests extremely slow, but it's necessary to ensure isolation between tests
+    });
   });
 
   test.afterAll(async () => {
@@ -162,7 +163,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     // Disable draft & publish for the Article content type
     await clickAndWait(page, page.getByRole('link', { name: 'Content-Type Builder' }));
-    await skipCtbTour(page);
     await clickAndWait(page, page.getByRole('link', { name: 'Article' }));
     await clickAndWait(page, page.getByRole('button', { name: 'Edit', exact: true }));
     await clickAndWait(page, page.getByRole('tab', { name: /advanced settings/i }));
@@ -171,6 +171,8 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(ctbConfirmationDialog).toBeVisible();
     await ctbConfirmationDialog.getByRole('button', { name: /disable/i }).click();
     await clickAndWait(page, page.getByRole('button', { name: 'Finish' }));
+
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
 
     // Go to the content manager and bulk select articlesto make sure the "add to release" does not show up

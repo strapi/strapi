@@ -3,6 +3,13 @@ import { screen, render } from '@tests/utils';
 
 import { MediaLibraryInput } from '../MediaLibraryInput';
 
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
+
 describe('<MediaLibraryInput />', () => {
   it('renders and matches the snapshot', () => {
     render(<MediaLibraryInput attribute={{}} name="test" label="default message" required />, {
