@@ -15,7 +15,7 @@
   "control-card.stop-crop": "Stop beskæring",
   "filter.add": "Tilføj filter",
   "form.button.replace-media": "Erstat medie",
-  "form.input.decription.file-alt": "Teksten bliver vist hvis mediet ikke kan vises.",
+  "form.input.description.file-alt": "Teksten bliver vist hvis mediet ikke kan vises.",
   "form.input.label.file-alt": "Alternativ tekst",
   "form.input.label.file-caption": "Billedeskrift",
   "form.input.label.file-name": "Filnavn",

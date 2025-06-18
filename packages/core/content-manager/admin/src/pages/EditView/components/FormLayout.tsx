@@ -1,11 +1,14 @@
-import { Box, Flex, Grid } from '@strapi/design-system';
+import * as React from 'react';
+
+import { Box, BoxProps, Flex, Grid } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useDoc } from '../../../hooks/useDocument';
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
 import { InputRenderer } from './InputRenderer';
+
+import type { UseDocument } from '../../../hooks/useDocument';
 
 export const RESPONSIVE_CONTAINER_BREAKPOINTS = {
   sm: '27.5rem', // 440px
@@ -15,19 +18,47 @@ export const ResponsiveGridRoot = styled(Grid.Root)`
   container-type: inline-size;
 `;
 
-export const ResponsiveGridItem = styled(Grid.Item)`
-  grid-column: span 12;
+export const ResponsiveGridItem =
+  /**
+   * TODO:
+   * JSDOM cannot handle container queries.
+   * This is a temporary workaround so that tests do not fail in the CI when jestdom throws an error
+   * for failing to parse the stylesheet.
+   */
+  process.env.NODE_ENV !== 'test'
+    ? styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+        @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
+          ${({ col }) => col && `grid-column: span ${col};`}
+        }
+      `
+    : styled(Grid.Item)<{ col: number }>`
+        grid-column: span 12;
+      `;
 
-  @container (min-width: ${RESPONSIVE_CONTAINER_BREAKPOINTS.sm}) {
-    ${({ col }) => col && `grid-column: span ${col};`}
-  }
-`;
+const panelStyles = {
+  padding: 6,
+  borderColor: 'neutral150',
+  background: 'neutral0',
+  hasRadius: true,
+  shadow: 'tableShadow',
+} satisfies BoxProps;
 
-interface FormLayoutProps extends Pick<EditLayout, 'layout'> {}
+interface FormLayoutProps extends Pick<EditLayout, 'layout'> {
+  hasBackground?: boolean;
+  document: ReturnType<UseDocument>;
+}
 
-const FormLayout = ({ layout }: FormLayoutProps) => {
+const FormLayout = ({ layout, document, hasBackground = true }: FormLayoutProps) => {
   const { formatMessage } = useIntl();
-  const { model } = useDoc();
+  const modelUid = document.schema?.uid;
+
+  const getLabel = (name: string, label: string) => {
+    return formatMessage({
+      id: `content-manager.content-types.${modelUid}.${name}`,
+      defaultMessage: label,
+    });
+  };
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
@@ -36,46 +67,25 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
           const [row] = panel;
           const [field] = row;
 
-          const fieldWithTranslatedLabel = {
-            ...field,
-            label: formatMessage({
-              id: `content-manager.content-types.${model}.${field.name}`,
-              defaultMessage: field.label,
-            }),
-          };
-
           return (
             <Grid.Root key={field.name} gap={4}>
               <Grid.Item col={12} s={12} xs={12} direction="column" alignItems="stretch">
-                <InputRenderer {...fieldWithTranslatedLabel} />
+                <InputRenderer
+                  {...field}
+                  label={getLabel(field.name, field.label)}
+                  document={document}
+                />
               </Grid.Item>
             </Grid.Root>
           );
         }
 
         return (
-          <Box
-            key={index}
-            hasRadius
-            background="neutral0"
-            shadow="tableShadow"
-            paddingLeft={6}
-            paddingRight={6}
-            paddingTop={6}
-            paddingBottom={6}
-            borderColor="neutral150"
-          >
+          <Box key={index} {...(hasBackground && panelStyles)}>
             <Flex direction="column" alignItems="stretch" gap={6}>
               {panel.map((row, gridRowIndex) => (
                 <ResponsiveGridRoot key={gridRowIndex} gap={4}>
                   {row.map(({ size, ...field }) => {
-                    const fieldWithTranslatedLabel = {
-                      ...field,
-                      label: formatMessage({
-                        id: `content-manager.content-types.${model}.${field.name}`,
-                        defaultMessage: field.label,
-                      }),
-                    };
                     return (
                       <ResponsiveGridItem
                         col={size}
@@ -85,7 +95,11 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
                         direction="column"
                         alignItems="stretch"
                       >
-                        <InputRenderer {...fieldWithTranslatedLabel} />
+                        <InputRenderer
+                          {...field}
+                          label={getLabel(field.name, field.label)}
+                          document={document}
+                        />
                       </ResponsiveGridItem>
                     );
                   })}

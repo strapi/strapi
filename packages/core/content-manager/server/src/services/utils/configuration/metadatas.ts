@@ -23,6 +23,14 @@ function createDefaultMetadatas(schema: any) {
         sortable: true,
       },
     },
+    documentId: {
+      edit: {},
+      list: {
+        label: 'documentId',
+        searchable: true,
+        sortable: true,
+      },
+    },
   };
 }
 
@@ -95,6 +103,7 @@ async function syncMetadatas(configuration: any, schema: any) {
     const attr = schema.attributes[key];
 
     const updatedMeta = { edit, list };
+
     // update sortable attr
     if (list.sortable && !isSortable(schema, key)) {
       _.set(updatedMeta, ['list', 'sortable'], false);

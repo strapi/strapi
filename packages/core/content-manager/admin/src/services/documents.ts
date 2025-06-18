@@ -27,12 +27,17 @@ import type {
 const documentApi = contentManagerApi.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    autoCloneDocument: builder.mutation<Clone.Response, Clone.Params & { query?: string }>({
-      query: ({ model, sourceId, query }) => ({
+    autoCloneDocument: builder.mutation<
+      Clone.Response,
+      Clone.Params & {
+        params?: Find.Request['query'] & Clone.Request['query'];
+      }
+    >({
+      query: ({ model, sourceId, params }) => ({
         url: `/content-manager/collection-types/${model}/auto-clone/${sourceId}`,
         method: 'POST',
         config: {
-          params: query,
+          params,
         },
       }),
       invalidatesTags: (_result, error, { model }) => {
@@ -389,6 +394,24 @@ const documentApi = contentManagerApi.injectEndpoints({
           // Rollback the optimistic update if there's an error
           patchResult.undo();
         }
+      },
+      transformResponse: (response: Update.Response, meta, arg): Update.Response => {
+        /**
+         * TODO v6
+         * Adapt plugin:users-permissions.user to return the same response
+         * shape as all other requests. The error is returned as expected.
+         */
+        if (!('data' in response) && arg.model === 'plugin::users-permissions.user') {
+          return {
+            data: response,
+            meta: {
+              availableStatus: [],
+              availableLocales: [],
+            },
+          };
+        }
+
+        return response;
       },
     }),
     unpublishDocument: builder.mutation<
