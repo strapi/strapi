@@ -57,8 +57,8 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.25",
-    "@strapi/icons": "2.0.0-rc.25",
+    "@strapi/design-system": "2.0.0-rc.26",
+    "@strapi/icons": "2.0.0-rc.26",
     "react-colorful": "5.6.1",
     "react-intl": "6.6.2"
   },
