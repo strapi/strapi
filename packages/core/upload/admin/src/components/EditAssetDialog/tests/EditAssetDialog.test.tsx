@@ -10,6 +10,12 @@ import { EditAssetDialog, Asset } from '../EditAssetContent';
 
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../utils/downloadFile');
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 
 type Messages = typeof en;
 

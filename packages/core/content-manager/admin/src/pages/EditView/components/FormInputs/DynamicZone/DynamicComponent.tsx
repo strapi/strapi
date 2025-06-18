@@ -9,7 +9,6 @@ import {
   IconButton,
   useComposedRefs,
   Menu,
-  MenuItem,
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
@@ -178,9 +177,9 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index)}>
+                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index)}>
                       {displayName}
-                    </MenuItem>
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
@@ -198,9 +197,9 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
+                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
                       {displayName}
-                    </MenuItem>
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
