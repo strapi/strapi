@@ -378,14 +378,6 @@ interface DidUsePresetPromptEvent {
   };
 }
 
-interface DidUserSendMessageEvent {
-  name: 'didUserSendMessage';
-  properties: {
-    'attachment-type': 'code' | 'figma' | 'image' | 'none';
-    'number-of-input-tokens': number;
-  };
-}
-
 interface DidAnswerMessageEvent {
   name: 'didAnswerMessage';
   properties: {
@@ -431,7 +423,6 @@ type EventsWithProperties =
   | DidSortMediaLibraryElementsEvent
   | DidSubmitWithErrorsFirstAdminEvent
   | DidUsePresetPromptEvent
-  | DidUserSendMessageEvent
   | DidAnswerMessageEvent
   | DidVoteAnswerEvent
   | LogoEvent
