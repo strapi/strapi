@@ -40,8 +40,8 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.26",
-    "@strapi/icons": "2.0.0-rc.26",
+    "@strapi/design-system": "2.0.0-rc.27",
+    "@strapi/icons": "2.0.0-rc.27",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
