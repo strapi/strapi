@@ -1,7 +1,7 @@
 import { getChildrenMaxDepth, getComponentDepth } from '../getMaxDepth';
 
-import type { ComponentWithChildren } from '../../components/DataManagerProvider/utils/retrieveComponentsThatHaveComponents';
-import type { NestedComponent } from '../../components/DataManagerProvider/utils/retrieveNestedComponents';
+import type { ComponentWithChildren } from '../../components/DataManager/utils/retrieveComponentsThatHaveComponents';
+import type { NestedComponent } from '../../components/DataManager/utils/retrieveNestedComponents';
 
 const componentsWithChildComponents: Array<ComponentWithChildren> = [
   {

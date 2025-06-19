@@ -71,7 +71,7 @@ interface AuthProviderProps {
 
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
-  USER: 'userInfo',
+  STATUS: 'isLoggedIn',
 };
 
 const AuthProvider = ({
@@ -83,6 +83,13 @@ const AuthProvider = ({
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
   const [{ rawQuery }] = useQueryParams();
+
+  const locationRef = React.useRef(location);
+
+  // Update ref without causing re-render
+  React.useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
   const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
@@ -149,7 +156,7 @@ const AuthProvider = ({
      * This will log a user out of all tabs if they log out in one tab.
      */
     const handleUserStorageChange = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEYS.USER && event.newValue === null) {
+      if (event.key === STORAGE_KEYS.STATUS && event.newValue === null) {
         clearStateAndLogout();
       }
     };
@@ -231,7 +238,10 @@ const AuthProvider = ({
       const matchingPermissions = actualUserPermissions.filter(
         (permission) =>
           permissions.findIndex(
-            (perm) => perm.action === permission.action && perm.subject === permission.subject
+            (perm) =>
+              perm.action === permission.action &&
+              // Only check the subject if it's provided
+              (perm.subject == undefined || perm.subject === permission.subject)
           ) >= 0
       );
 
@@ -239,7 +249,7 @@ const AuthProvider = ({
         {
           user,
           permissions: userPermissions,
-          pathname: location.pathname,
+          pathname: locationRef.current.pathname,
           search: (rawQueryContext || rawQuery).split('?')[1] ?? '',
         },
         matchingPermissions
@@ -266,7 +276,7 @@ const AuthProvider = ({
         return middlewaredPermissions.filter((_, index) => data?.data[index] === true);
       }
     },
-    [checkPermissions, location.pathname, rawQuery, runRbacMiddleware, user, userPermissions]
+    [checkPermissions, rawQuery, runRbacMiddleware, user, userPermissions]
   );
 
   const isLoading = isLoadingUser || isLoadingPermissions;

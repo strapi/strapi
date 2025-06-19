@@ -367,6 +367,7 @@
   "app.components.LeftMenu.logout": "Uitloggen",
   "app.components.LeftMenu.logo.alt": "Application logo",
   "app.components.LeftMenu.plugins": "Plugins",
+  "app.components.LeftMenu.trialCountdown": "Je proefperiode eindigt op {date}.",
   "app.components.LeftMenu.navbrand.title": "Strapi Dashboard",
   "app.components.LeftMenu.navbrand.workplace": "Werkplek",
   "app.components.LeftMenuFooter.help": "Help",

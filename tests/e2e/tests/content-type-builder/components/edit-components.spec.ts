@@ -14,7 +14,7 @@ import { navToHeader } from '../../../utils/shared';
 
 test.describe('Update a new component', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   const originalAttributes = [{ type: 'text', name: 'testtext' }] satisfies AddAttribute[];
 
@@ -95,11 +95,11 @@ test.describe('Update a new component', () => {
 
     // confirm that it exists in the content type this component was in
     await navToHeader(page, ['Content-Type Builder', collectionType.name], collectionType.name);
-    await expect(page.getByText(addedAttribute.name, { exact: true })).toBeVisible();
+    await expect(page.getByLabel(addedAttribute.name, { exact: true })).toBeVisible();
 
     // confirm that it exists in the single type this component was in
     await navToHeader(page, ['Content-Type Builder', singleType.name], singleType.name);
-    await expect(page.getByText(addedAttribute.name, { exact: true })).toBeVisible();
+    await expect(page.getByLabel(addedAttribute.name, { exact: true })).toBeVisible();
   });
 
   test('Remove attribute from component', async ({ page }) => {
@@ -133,7 +133,9 @@ test.describe('Update a new component', () => {
     await expect(page.getByText(componentAttributeName, { exact: true })).toBeVisible();
 
     // confirm it exists in navigation
-    await expect(page.getByRole('link', { name: 'SomeComponent' })).toBeVisible();
+    await expect(
+      page.getByRole('navigation').getByRole('link', { name: 'SomeComponent' })
+    ).toBeVisible();
 
     // delete it
     await deleteComponent(page, 'SomeComponent');
@@ -147,6 +149,8 @@ test.describe('Update a new component', () => {
     await expect(page.getByText(componentAttributeName, { exact: true })).not.toBeVisible();
 
     // confirm that is not longer exists in the navigation
-    await expect(page.getByRole('link', { name: 'SomeComponent' })).not.toBeVisible();
+    await expect(
+      page.getByRole('navigation').getByRole('link', { name: 'SomeComponent' })
+    ).not.toBeVisible();
   });
 });

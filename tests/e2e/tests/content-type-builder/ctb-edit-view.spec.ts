@@ -23,11 +23,11 @@ test.describe('Edit View CTB', () => {
     // Navigate to the Shop single type and verify some essential buttons are visible
     await page.getByRole('link', { name: 'Shop' }).click();
     await expect(
-      page.getByRole('button', {
-        name: 'Add another field to this component',
-      })
-    ).toBeVisible();
+      page.getByRole('button', { name: 'Add another field to this component' })
+    ).toHaveCount(2);
+
     await expect(page.getByRole('button', { name: 'Add a component' })).toBeVisible();
+
     await expect(
       page.getByRole('button', { name: 'Add another field to this single type' })
     ).toBeVisible();

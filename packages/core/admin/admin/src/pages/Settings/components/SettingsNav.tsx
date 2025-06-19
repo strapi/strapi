@@ -1,38 +1,22 @@
-import {
-  SubNav,
-  SubNavHeader,
-  SubNavLink,
-  SubNavSection,
-  SubNavSections,
-} from '@strapi/design-system';
+import { Badge, Divider } from '@strapi/design-system';
 import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
+import { SubNav } from '../../../components/SubNav';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
-
-const CustomIcon = styled(Lightning)`
-  right: 15px;
-  position: absolute;
-  bottom: 50%;
-  transform: translateY(50%);
-
-  path {
-    fill: ${({ theme }) => theme.colors.warning500};
-  }
-`;
-
-const Link = styled(SubNavLink)`
-  &.active ${CustomIcon} {
-    right: 13px;
-  }
-`;
 
 interface SettingsNavProps {
   menu: SettingsMenu;
 }
+
+const StyledBadge = styled(Badge)`
+  border-radius: 50%;
+  padding: ${({ theme }) => theme.spaces[2]};
+  height: 2rem;
+`;
 
 const SettingsNav = ({ menu }: SettingsNavProps) => {
   const { formatMessage } = useIntl();
@@ -67,30 +51,42 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   };
 
   return (
-    <SubNav aria-label={label}>
-      <SubNavHeader label={label} />
-      <SubNavSections>
+    <SubNav.Main aria-label={label}>
+      <SubNav.Header label={label} />
+      <Divider background="neutral150" marginBottom={5} />
+      <SubNav.Sections>
         {sections.map((section) => (
-          <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
+          <SubNav.Section key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map((link) => {
               return (
-                <Link
-                  tag={NavLink}
-                  withBullet={link.hasNotification}
+                <SubNav.Link
                   to={link.to}
                   onClick={handleClickOnLink(link.to)}
                   key={link.id}
-                  position="relative"
-                >
-                  {formatMessage(link.intlLabel)}
-                  {link?.licenseOnly && <CustomIcon width="1.5rem" height="1.5rem" />}
-                </Link>
+                  label={formatMessage(link.intlLabel)}
+                  endAction={
+                    <>
+                      {link?.licenseOnly && (
+                        <Lightning fill="primary600" width="1.5rem" height="1.5rem" />
+                      )}
+                      {link?.hasNotification && (
+                        <StyledBadge
+                          aria-label="Notification"
+                          backgroundColor="primary600"
+                          textColor="neutral0"
+                        >
+                          1
+                        </StyledBadge>
+                      )}
+                    </>
+                  }
+                />
               );
             })}
-          </SubNavSection>
+          </SubNav.Section>
         ))}
-      </SubNavSections>
-    </SubNav>
+      </SubNav.Sections>
+    </SubNav.Main>
   );
 };
 

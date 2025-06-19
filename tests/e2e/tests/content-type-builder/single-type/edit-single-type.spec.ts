@@ -6,7 +6,7 @@ import { sharedSetup } from '../../../utils/setup';
 
 test.describe('Edit single type', () => {
   // very long timeout for these tests because they restart the server multiple times
-  test.describe.configure({ timeout: 300000 });
+  test.describe.configure({ timeout: 500000 });
 
   // Use the existing single-type from our test data
   const ctName = 'Homepage';
@@ -23,9 +23,7 @@ test.describe('Edit single type', () => {
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterEach(async () => {
+  test.afterAll(async () => {
     await resetFiles();
   });
 
@@ -42,14 +40,14 @@ test.describe('Edit single type', () => {
 
     await waitForRestart(page);
 
-    await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
+    await expect(page.getByLabel('product')).toBeVisible();
 
     // update relation in Content-Type Builder to oneToOne
     await page.getByRole('button', { name: /edit product/i }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
-    await expect(page.getByRole('cell', { name: 'product', exact: true })).toBeVisible();
+    await expect(page.getByLabel('product')).toBeVisible();
   });
 
   test('Can toggle internationalization', async ({ page }) => {
@@ -59,6 +57,7 @@ test.describe('Edit single type', () => {
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
@@ -67,6 +66,7 @@ test.describe('Edit single type', () => {
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
@@ -78,6 +78,7 @@ test.describe('Edit single type', () => {
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
 
@@ -86,6 +87,7 @@ test.describe('Edit single type', () => {
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
     await waitForRestart(page);
     await expect(page.getByRole('heading', { name: ctName })).toBeVisible();
   });
@@ -161,6 +163,7 @@ test.describe('Edit single type', () => {
     await page.getByRole('textbox', { name: 'Display name' }).fill(newname);
 
     await page.getByRole('button', { name: 'Finish', exact: true }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
 
     await waitForRestart(page);
 
@@ -174,6 +177,7 @@ test.describe('Edit single type', () => {
     page.on('dialog', (dialog) => dialog.accept());
 
     await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
 
     await waitForRestart(page);
 

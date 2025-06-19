@@ -9,7 +9,6 @@ import {
   IconButton,
   useComposedRefs,
   Menu,
-  MenuItem,
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
@@ -19,7 +18,8 @@ import { styled } from 'styled-components';
 
 import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
+import { useDocumentContext } from '../../../../../hooks/useDocumentContext';
+import { useDocumentLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
@@ -57,9 +57,11 @@ const DynamicComponent = ({
 }: DynamicComponentProps) => {
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
+  const { currentDocument, currentDocumentMeta } = useDocumentContext('DynamicComponent');
+
   const {
     edit: { components },
-  } = useDocLayout();
+  } = useDocumentLayout(currentDocumentMeta.model);
 
   const title = React.useMemo(() => {
     const { mainField } = components[componentUid]?.settings ?? { mainField: 'id' };
@@ -174,9 +176,9 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index)}>
+                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index)}>
                       {displayName}
-                    </MenuItem>
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
@@ -194,9 +196,9 @@ const DynamicComponent = ({
                 <React.Fragment key={category}>
                   <Menu.Label>{category}</Menu.Label>
                   {components.map(({ displayName, uid }) => (
-                    <MenuItem key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
+                    <Menu.Item key={componentUid} onSelect={() => onAddComponent(uid, index + 1)}>
                       {displayName}
-                    </MenuItem>
+                    </Menu.Item>
                   ))}
                 </React.Fragment>
               ))}
@@ -267,9 +269,17 @@ const DynamicComponent = ({
                                   alignItems="stretch"
                                 >
                                   {children ? (
-                                    children({ ...fieldWithTranslatedLabel, name: fieldName })
+                                    children({
+                                      ...fieldWithTranslatedLabel,
+                                      document: currentDocument,
+                                      name: fieldName,
+                                    })
                                   ) : (
-                                    <InputRenderer {...fieldWithTranslatedLabel} name={fieldName} />
+                                    <InputRenderer
+                                      {...fieldWithTranslatedLabel}
+                                      document={currentDocument}
+                                      name={fieldName}
+                                    />
                                   )}
                                 </ResponsiveGridItem>
                               );

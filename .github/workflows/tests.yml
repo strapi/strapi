@@ -212,17 +212,13 @@ jobs:
         shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
-
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
@@ -242,9 +238,9 @@ jobs:
         # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@main
+        uses: trunk-io/analytics-uploader@v1
         with:
-          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
@@ -277,7 +273,6 @@ jobs:
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
-
       - name: Run [EE] E2E tests
         uses: ./.github/actions/run-e2e-tests
         with:
@@ -294,9 +289,9 @@ jobs:
       # Add the Trunk Analytics Uploader step
       - name: Upload results to trunk
         if: '!cancelled()'
-        uses: trunk-io/analytics-uploader@main
+        uses: trunk-io/analytics-uploader@v1
         with:
-          junit-paths: test-apps/e2e/test-results/**/junit.xml
+          junit-paths: test-apps/junit-reports/*.xml
           org-slug: strapi
           token: ${{ secrets.TRUNK_API_TOKEN }}
         continue-on-error: true
@@ -439,7 +434,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/4, 2/4, 3/4, 4/4]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       postgres:
         image: postgres
@@ -482,7 +477,7 @@ jobs:
     strategy:
       matrix:
         node: [20, 22]
-        shard: [1/4, 2/4, 3/4, 4/4]
+        shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
         image: bitnami/mysql:latest

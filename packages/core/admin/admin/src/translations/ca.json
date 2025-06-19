@@ -293,6 +293,7 @@
   "app.components.LeftMenu.collapse": "Contreure la barra de navegació",
   "app.components.LeftMenu.expand": "Expandir la barra de navegació",
   "app.components.LeftMenu.logout": "Tancar sessió",
+  "app.components.LeftMenu.trialCountdown": "El vostre període d'assaig finalitza el {date}.",
   "app.components.LeftMenu.navbrand.title": "Panell de Strapi",
   "app.components.LeftMenu.navbrand.workplace": "Lloc de treball",
   "app.components.LeftMenuFooter.help": "Ajuda",

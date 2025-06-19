@@ -4,7 +4,7 @@ import { createContext, type FieldValue } from '@strapi/admin/strapi-admin';
 import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, type Descendant, createEditor } from 'slate';
+import { Editor, type Descendant, createEditor, Transforms } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
 import { styled, type CSSProperties } from 'styled-components';
@@ -114,13 +114,6 @@ const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
 `;
 
-const ExpandIconButton = styled(IconButton)`
-  position: absolute;
-  bottom: 1.2rem;
-  right: 1.2rem;
-  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
-`;
-
 /**
  * Forces an update of the Slate editor when the value prop changes from outside of Slate.
  * The root cause is that Slate is not a controlled component: https://github.com/ianstormtaylor/slate/issues/4612
@@ -154,7 +147,11 @@ function useResetKey(value?: Schema.Attribute.BlocksValue): {
     }
   }, [value]);
 
-  return { key, incrementSlateUpdatesCount: () => (slateUpdatesCount.current += 1) };
+  const incrementSlateUpdatesCount = React.useCallback(() => {
+    slateUpdatesCount.current += 1;
+  }, []);
+
+  return { key, incrementSlateUpdatesCount };
 }
 
 const pipe =
@@ -177,11 +174,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
-    const [isExpandedMode, setIsExpandedMode] = React.useState(false);
-
-    const handleToggleExpand = () => {
-      setIsExpandedMode((prev) => !prev);
-    };
+    const [isExpandedMode, handleToggleExpand] = React.useReducer((prev) => !prev, false);
 
     /**
      * Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
@@ -200,25 +193,64 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
 
     const { key, incrementSlateUpdatesCount } = useResetKey(value);
 
-    const handleSlateChange = (state: Descendant[]) => {
-      const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
+    const debounceTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
-      if (isAstChange) {
-        incrementSlateUpdatesCount();
+    const handleSlateChange = React.useCallback(
+      (state: Descendant[]) => {
+        const isAstChange = editor.operations.some((op) => op.type !== 'set_selection');
 
-        onChange(name, state as Schema.Attribute.BlocksValue);
+        if (isAstChange) {
+          /**
+           * Slate handles the state of the editor internally. We just need to keep Strapi's form
+           * state in sync with it in order to make sure that things like the "modified" state
+           * isn't broken. Updating the whole state on every change is very expensive however,
+           * so we debounce calls to onChange to mitigate input lag.
+           */
+          if (debounceTimeout.current) {
+            clearTimeout(debounceTimeout.current);
+          }
+
+          // Set a new debounce timeout
+          debounceTimeout.current = setTimeout(() => {
+            incrementSlateUpdatesCount();
+            onChange(name, state as Schema.Attribute.BlocksValue);
+            debounceTimeout.current = null;
+          }, 300);
+        }
+      },
+      [editor.operations, incrementSlateUpdatesCount, name, onChange]
+    );
+
+    // Clean up the timeout on unmount
+    React.useEffect(() => {
+      return () => {
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+      };
+    }, []);
+
+    // Ensure the editor is in sync after discard
+    React.useEffect(() => {
+      // Compare the field value with the editor state to check for a stale selection
+      if (value && JSON.stringify(editor.children) !== JSON.stringify(value)) {
+        // When there is a diff, unset selection to avoid an invalid state
+        Transforms.deselect(editor);
       }
-    };
+    }, [editor, value]);
 
-    const blocks: BlocksStore = {
-      ...paragraphBlocks,
-      ...headingBlocks,
-      ...listBlocks,
-      ...linkBlocks,
-      ...imageBlocks,
-      ...quoteBlocks,
-      ...codeBlocks,
-    };
+    const blocks = React.useMemo(
+      () => ({
+        ...paragraphBlocks,
+        ...headingBlocks,
+        ...listBlocks,
+        ...linkBlocks,
+        ...imageBlocks,
+        ...quoteBlocks,
+        ...codeBlocks,
+      }),
+      []
+    ) satisfies BlocksStore;
 
     return (
       <>
@@ -246,14 +278,18 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             <EditorLayout
               error={error}
               disabled={disabled}
-              onCollapse={handleToggleExpand}
+              onToggleExpand={handleToggleExpand}
               ariaDescriptionId={ariaDescriptionId}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
               <BlocksContent {...contentProps} />
               {!isExpandedMode && (
-                <ExpandIconButton
+                <IconButton
+                  position="absolute"
+                  bottom="1.2rem"
+                  right="1.2rem"
+                  shadow="filterShadow"
                   label={formatMessage({
                     id: getTranslation('components.Blocks.expand'),
                     defaultMessage: 'Expand',
@@ -261,7 +297,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
                   onClick={handleToggleExpand}
                 >
                   <Expand />
-                </ExpandIconButton>
+                </IconButton>
               )}
             </EditorLayout>
           </BlocksEditorProvider>

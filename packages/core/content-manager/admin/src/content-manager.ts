@@ -80,9 +80,7 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
   type?: 'actions' | 'releases';
 }
 
-interface DocumentActionProps extends EditViewContext {
-  onPreview?: () => void;
-}
+interface DocumentActionProps extends EditViewContext {}
 
 interface DocumentActionComponent
   extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {

@@ -39,6 +39,11 @@ export interface FirstPublisedAtFieldProp {
   enabled: boolean;
 }
 
+export interface FlagsProp {
+  nps?: boolean | undefined;
+  promoteEE?: boolean | undefined;
+}
+
 export interface Admin {
   // required
   apiToken: ApiTokenProp;
@@ -51,4 +56,5 @@ export interface Admin {
   forgotPassword?: ForgotPasswordProp;
   rateLimit?: RateLimitProp;
   firstPublishedAtField?: FirstPublisedAtFieldProp;
+  flags?: FlagsProp;
 }

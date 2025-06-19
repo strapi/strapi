@@ -4,7 +4,7 @@ export { default as setCreatorFields } from './set-creator-fields';
 export { default as providerFactory } from './provider-factory';
 export { default as traverseEntity } from './traverse-entity';
 export { default as importDefault } from './import-default';
-export { default as machineID } from './machine-id';
+export { generateInstallId } from './install-id';
 
 export { validateYupSchema, validateYupSchemaSync } from './validators';
 export { isOperator, isOperatorOfType } from './operators';
@@ -24,6 +24,7 @@ export * as errors from './errors';
 export * as contentTypes from './content-types';
 export * as relations from './relations';
 export * as hooks from './hooks';
+export * as rulesEngine from './rules-engine';
 export * from './zod';
 export * as types from './types';
 
