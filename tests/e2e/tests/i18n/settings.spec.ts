@@ -212,7 +212,10 @@ test.describe('Settings', () => {
      * Lets go back to the list view and assert that the changes are reflected.
      */
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
-    expect(await page.getByRole('row').all()).toHaveLength(2);
+    /**
+     * It is 3 because it contains also the header row
+     */
+    expect(await page.getByRole('row').all()).toHaveLength(3);
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('UK English');
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of ['UK English', ...LOCALES].filter((locale) => locale !== 'English (en)')) {
