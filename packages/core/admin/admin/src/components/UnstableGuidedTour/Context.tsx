@@ -10,49 +10,66 @@ import type { Tours } from './Tours';
  * GuidedTourProvider
  * -----------------------------------------------------------------------------------------------*/
 
-// Infer valid tour names from the tours object
 type ValidTourName = keyof Tours;
 
-// Now use ValidTourName in all type definitions
-type Action = {
-  type: 'next_step';
-  payload: ValidTourName;
-};
+type Action =
+  | {
+      type: 'next_step';
+      payload: ValidTourName;
+    }
+  | {
+      type: 'skip_tour';
+      payload: ValidTourName;
+    };
 
 type State = {
-  currentSteps: Record<ValidTourName, number>;
+  tours: Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
 };
 
 const [GuidedTourProviderImpl, unstableUseGuidedTour] = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
-}>('GuidedTour');
+}>('UnstableGuidedTour');
 
 function reducer(state: State, action: Action): State {
   return produce(state, (draft) => {
     if (action.type === 'next_step') {
-      draft.currentSteps[action.payload] += 1;
+      const nextStep = draft.tours[action.payload].currentStep + 1;
+      draft.tours[action.payload].currentStep = nextStep;
+      draft.tours[action.payload].isCompleted = nextStep === draft.tours[action.payload].length;
+      // TODO: Update local storage
+    }
+
+    if (action.type === 'skip_tour') {
+      draft.tours[action.payload].isCompleted = true;
+      // TODO: Update local storage
     }
   });
 }
 
 const UnstableGuidedTourContext = ({
   children,
-  tours,
+  tours: registeredTours,
 }: {
   children: React.ReactNode;
+  // NOTE: Maybe we just import this directly instead of a prop?
   tours: Tours;
 }) => {
-  // Derive the tour steps from the tours object
-  const currentSteps = Object.keys(tours).reduce(
+  // Derive the tour state from the tours object
+  const tours = Object.keys(registeredTours).reduce(
     (acc, tourName) => {
-      acc[tourName as ValidTourName] = 0;
+      const tourLength = Object.keys(registeredTours[tourName as ValidTourName]).length;
+      acc[tourName as ValidTourName] = {
+        currentStep: 0,
+        length: tourLength,
+        isCompleted: false,
+      };
       return acc;
     },
-    {} as Record<ValidTourName, number>
+    {} as Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>
   );
   const [state, dispatch] = React.useReducer(reducer, {
-    currentSteps,
+    tours,
   });
 
   return (

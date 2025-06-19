@@ -799,5 +799,10 @@
   "request.error.model.unknown": "This model doesn't exist",
   "selectButtonTitle": "Select",
   "skipToContent": "Skip to content",
-  "submit": "Submit"
+  "submit": "Submit",
+  "tours.contentManager.Introduction.title": "Content manager",
+  "tours.contentManager.Introduction.content": "Create and manage content from your collection types and single types.",
+  "tours.stepCount": "Step {currentStep} of {tourLength}",
+  "tours.skip": "Skip",
+  "tours.next": "Next"
 }
