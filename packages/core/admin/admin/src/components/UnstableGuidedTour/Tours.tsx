@@ -3,8 +3,6 @@ import * as React from 'react';
 import { Box, Popover } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { useAuth } from '../../features/Auth';
-
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
 import { Step, createStepComponents } from './Step';
 
@@ -27,6 +25,19 @@ const tours = {
             defaultMessage="Create and manage content from your collection types and single types."
           />
           <Step.Actions showSkip />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'CreateEntry',
+      content: (Step) => (
+        <Step.Root align="end">
+          <Step.Title id="tours.contentManager.CreateEntry.title" defaultMessage="Create entry" />
+          <Step.Content
+            id="tours.contentManager.CreateEntry.content"
+            defaultMessage="Click this button to create an entry"
+          />
+          <Step.Actions />
         </Step.Root>
       ),
     },
@@ -55,7 +66,6 @@ export const GuidedTourOverlay = styled(Box)`
   inset: 0;
   background-color: rgba(50, 50, 77, 0.2);
   z-index: 10;
-  pointer-events: none;
 `;
 
 const UnstableGuidedTourTooltip = ({
@@ -74,7 +84,8 @@ const UnstableGuidedTourTooltip = ({
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
-  const isPopoverOpen = isCurrentStep && !state.tours[tourName].isCompleted;
+  const isEnabled = state.meta.isFirstSuperAdminUser && !state.tours[tourName].isCompleted;
+  const isPopoverOpen = isEnabled && isCurrentStep;
 
   // Lock the scroll
   React.useEffect(() => {

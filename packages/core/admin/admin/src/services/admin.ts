@@ -6,6 +6,7 @@ import {
   type UpdateProjectSettings,
   type Plugins,
   type GetLicenseLimitInformation,
+  GetGuidedTourMeta,
 } from '../../../shared/contracts/admin';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
@@ -114,6 +115,20 @@ const admin = adminApi
         }),
         providesTags: ['LicenseTrialTimeLeft'],
       }),
+      getGuidedTourMeta: builder.query<
+        GetGuidedTourMeta.Response,
+        GetGuidedTourMeta.Request['query']
+      >({
+        query: ({ id }) => ({
+          url: '/admin/guided-tour-meta',
+          method: 'GET',
+          config: {
+            params: {
+              id,
+            },
+          },
+        }),
+      }),
     }),
     overrideExisting: false,
   });
@@ -127,6 +142,7 @@ const {
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
   useGetLicenseTrialTimeLeftQuery,
+  useGetGuidedTourMetaQuery,
 } = admin;
 
 export {
@@ -138,6 +154,7 @@ export {
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
   useGetLicenseTrialTimeLeftQuery,
+  useGetGuidedTourMetaQuery,
 };
 
 export type { ConfigurationLogo };

@@ -22,6 +22,7 @@ import type {
   Plugins,
   TelemetryProperties,
   UpdateProjectSettings,
+  GetGuidedTourMeta,
 } from '../../../shared/contracts/admin';
 
 const { isUsingTypeScript } = tsUtils;
@@ -184,5 +185,18 @@ export default {
     });
 
     return data;
+  },
+
+  async getGuidedTourMeta(ctx: Context) {
+    const userService = getService('user');
+    const { id } = ctx.query as GetGuidedTourMeta.Request['query'];
+
+    const isFirstSuperAdminUser = id ? await userService.isFirstSuperAdminUser(id) : false;
+
+    return {
+      data: {
+        isFirstSuperAdminUser,
+      },
+    } satisfies GetGuidedTourMeta.Response;
   },
 };

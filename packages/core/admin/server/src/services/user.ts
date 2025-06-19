@@ -162,6 +162,30 @@ const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
 };
 
 /**
+ * Check if a user is the last super admin
+ * @param userId user's id to look for
+ */
+const isFirstSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
+  const currentUser = (await findOne(userId)) as AdminUser | null;
+
+  if (!currentUser || !hasSuperAdminRole(currentUser)) return false;
+
+  const [oldestUser] = await strapi.db.query('admin::user').findMany({
+    populate: {
+      roles: {
+        where: {
+          code: { $eq: SUPER_ADMIN_CODE },
+        },
+      },
+    },
+    orderBy: { createdAt: 'asc' },
+    limit: 1,
+  });
+
+  return oldestUser.id === currentUser.id;
+};
+
+/**
  * Check if a user with specific attributes exists in the database
  * @param attributes A partial user object
  */
@@ -390,4 +414,5 @@ export default {
   displayWarningIfUsersDontHaveRole,
   resetPasswordByEmail,
   getLanguagesInUse,
+  isFirstSuperAdminUser,
 };
