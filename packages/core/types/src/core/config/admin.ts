@@ -35,6 +35,10 @@ export interface TransferProp {
   token: TransferTokenProp;
 }
 
+export interface FirstPublisedAtFieldProp {
+  enabled: boolean;
+}
+
 export interface Admin {
   // required
   apiToken: ApiTokenProp;
@@ -46,4 +50,5 @@ export interface Admin {
   url?: string;
   forgotPassword?: ForgotPasswordProp;
   rateLimit?: RateLimitProp;
+  firstPublishedAtField?: FirstPublisedAtFieldProp;
 }

@@ -19,7 +19,6 @@ exports[`Content Type Builder - Content types Collection Types Get collection ty
       "description": "",
       "displayName": "Test Collection Type",
       "draftAndPublish": true,
-      "firstPublishedAtField": true,
       "kind": "collectionType",
       "pluginOptions": {
         "i18n": {
@@ -50,7 +49,6 @@ exports[`Content Type Builder - Content types Collection Types Get collection ty
       "description": "",
       "displayName": "CT with DP",
       "draftAndPublish": true,
-      "firstPublishedAtField": true,
       "kind": "collectionType",
       "pluralName": "ct-with-dps",
       "restrictRelationsTo": null,

@@ -83,7 +83,6 @@ export interface Model {
   options?: {
     populateCreatorFields?: boolean;
     draftAndPublish?: boolean;
-    firstPublishedAtField?: boolean;
   };
   privateAttributes?: string[];
   attributes: Record<string, AnyAttribute>;

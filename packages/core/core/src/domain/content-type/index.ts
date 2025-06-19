@@ -86,18 +86,17 @@ const addDraftAndPublish = (schema: Schema.ContentType) => {
 };
 
 const addFirstPublishedAt = (schema: Schema.ContentType) => {
-  const enabled =
-    _.get(schema, 'options.firstPublishedAtField', false) &&
+  const isNonPrivate =
+    strapi.config.get('admin.firstPublishedAtField.enabled', false) &&
     _.get(schema, 'options.draftAndPublish', false);
 
-  if (enabled) {
-    schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
-      type: 'datetime',
-      configurable: false,
-      writable: true,
-      visible: false,
-    };
-  }
+  schema.attributes[FIRST_PUBLISHED_AT_ATTRIBUTE] = {
+    type: 'datetime',
+    configurable: false,
+    writable: true,
+    visible: false,
+    private: !isNonPrivate,
+  };
 };
 
 const addCreatorFields = (schema: Schema.ContentType) => {
