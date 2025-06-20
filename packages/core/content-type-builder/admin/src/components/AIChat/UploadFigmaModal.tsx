@@ -274,8 +274,6 @@ export const UploadFigmaModal = () => {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const { t } = useTranslations();
 
-  const { setCurrentAttachmentType } = useStrapiChat();
-
   const { addAttachments } = useAttachments();
   const { isFigmaUploadOpen, closeFigmaUpload, submitOnFinish } = useUploadFigmaToChat();
   const { input, setInput, setMessages, reload, openChat } = useStrapiChat();
@@ -319,8 +317,6 @@ export const UploadFigmaModal = () => {
       closeFigmaUpload();
       return;
     }
-
-    setCurrentAttachmentType('figma');
 
     // Ensure chat is opened
     openChat();
