@@ -96,7 +96,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
         ) : (
           <Flex flex={1} justifyContent={showStepCount ? 'space-between' : 'flex-end'}>
             {showStepCount && (
-              <Typography variant="omega">
+              <Typography variant="omega" fontSize="12px">
                 <FormattedMessage
                   id="tours.stepCount"
                   defaultMessage="Step {currentStep} of {tourLength}"
