@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { CarouselInput, CarouselSlide } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../../utils/getTrad';
 import { EditAssetDialog } from '../../EditAssetDialog/EditAssetContent';
@@ -66,6 +67,11 @@ export const CarouselAssets = React.forwardRef(
 
     const currentAsset = assets[selectedAssetIndex];
 
+    const CarouselSlideWrapper = styled.div<{ $selected: boolean }>`
+      & > div {
+        display: ${({ $selected }) => ($selected ? 'flex' : 'none')};
+      }
+    `;
     return (
       <>
         <CarouselInput
@@ -99,35 +105,40 @@ export const CarouselAssets = React.forwardRef(
           }
         >
           {assets.length === 0 ? (
-            <CarouselSlide
-              label={formatMessage(
-                {
-                  id: getTrad('mediaLibraryInput.slideCount'),
-                  defaultMessage: '{n} of {m} slides',
-                },
-                { n: 1, m: 1 }
-              )}
-            >
-              <EmptyStateAsset
-                disabled={disabled}
-                onClick={onAddAsset}
-                onDropAsset={onDropAsset!}
-              />
-            </CarouselSlide>
-          ) : (
-            assets.map((asset, index) => (
+            <CarouselSlideWrapper $selected={selectedAssetIndex === 0}>
               <CarouselSlide
-                key={asset.id}
                 label={formatMessage(
                   {
                     id: getTrad('mediaLibraryInput.slideCount'),
                     defaultMessage: '{n} of {m} slides',
                   },
-                  { n: index + 1, m: assets.length }
+                  { n: 1, m: 1 }
                 )}
+                selected={selectedAssetIndex === 0}
               >
-                <CarouselAsset asset={asset} />
+                <EmptyStateAsset
+                  disabled={disabled}
+                  onClick={onAddAsset}
+                  onDropAsset={onDropAsset!}
+                />
               </CarouselSlide>
+            </CarouselSlideWrapper>
+          ) : (
+            assets.map((asset, index) => (
+              <CarouselSlideWrapper key={asset.id} $selected={selectedAssetIndex === index}>
+                <CarouselSlide
+                  label={formatMessage(
+                    {
+                      id: getTrad('mediaLibraryInput.slideCount'),
+                      defaultMessage: '{n} of {m} slides',
+                    },
+                    { n: index + 1, m: assets.length }
+                  )}
+                  selected={selectedAssetIndex === index}
+                >
+                  <CarouselAsset asset={asset} />
+                </CarouselSlide>
+              </CarouselSlideWrapper>
             ))
           )}
         </CarouselInput>
