@@ -69,7 +69,6 @@ const UnstableGuidedTourTooltip = ({
   tourName: ValidTourName;
   step: number;
 }) => {
-  useAuth;
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
