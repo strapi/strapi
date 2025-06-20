@@ -1,4 +1,12 @@
-import type { State, Action } from './Context';
+import * as React from 'react';
+
+import { Box, Popover } from '@strapi/design-system';
+import { styled } from 'styled-components';
+
+import { useAuth } from '../../features/Auth';
+
+import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
+import { Step, createStepComponents } from './Step';
 
 /* -------------------------------------------------------------------------------------------------
  * Tours
@@ -7,17 +15,89 @@ import type { State, Action } from './Context';
 const tours = {
   contentManager: createTour('contentManager', [
     {
-      name: 'TEST',
-      content: () => (
-        <>
-          <div>This is TEST</div>
-        </>
+      name: 'Introduction',
+      content: (Step) => (
+        <Step.Root sideOffset={-36}>
+          <Step.Title
+            id="tours.contentManager.Introduction.title"
+            defaultMessage="Content manager"
+          />
+          <Step.Content
+            id="tours.contentManager.Introduction.content"
+            defaultMessage="Create and manage content from your collection types and single types."
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
       ),
     },
   ]),
 } as const;
 
 type Tours = typeof tours;
+
+/* -------------------------------------------------------------------------------------------------
+ * GuidedTourTooltip
+ * -----------------------------------------------------------------------------------------------*/
+
+type Content = (
+  Step: Step,
+  {
+    state,
+    dispatch,
+  }: {
+    state: State;
+    dispatch: React.Dispatch<Action>;
+  }
+) => React.ReactNode;
+
+export const GuidedTourOverlay = styled(Box)`
+  position: fixed;
+  inset: 0;
+  background-color: rgba(50, 50, 77, 0.2);
+  z-index: 10;
+  pointer-events: none;
+`;
+
+const UnstableGuidedTourTooltip = ({
+  children,
+  content,
+  tourName,
+  step,
+}: {
+  children: React.ReactNode;
+  content: Content;
+  tourName: ValidTourName;
+  step: number;
+}) => {
+  const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
+  const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
+  const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
+
+  const isCurrentStep = state.tours[tourName].currentStep === step;
+  const isPopoverOpen = isCurrentStep && !state.tours[tourName].isCompleted;
+
+  // Lock the scroll
+  React.useEffect(() => {
+    if (!isPopoverOpen) return;
+
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, [isPopoverOpen]);
+
+  return (
+    <>
+      {isPopoverOpen && <GuidedTourOverlay />}
+      <Popover.Root open={isPopoverOpen}>
+        <Popover.Anchor>{children}</Popover.Anchor>
+        {content(Step, { state, dispatch })}
+      </Popover.Root>
+    </>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Tour factory
@@ -27,14 +107,6 @@ type TourStep<P extends string> = {
   name: P;
   content: Content;
 };
-
-type Content = ({
-  state,
-  dispatch,
-}: {
-  state: State;
-  dispatch: React.Dispatch<Action>;
-}) => React.ReactNode;
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {
   type Components = {
@@ -47,25 +119,13 @@ function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: s
     }
 
     acc[step.name as keyof Components] = ({ children }: { children: React.ReactNode }) => (
-      <div>
-        <div>TODO: GuidedTourTooltip goes here and receives these props</div>
-        <div style={{ display: 'flex', gap: 2 }}>
-          <span>content:</span>
-          {step.content({ state: { currentSteps: { contentManager: 0 } }, dispatch: () => {} })}
-        </div>
-        <div style={{ display: 'flex', gap: 2 }}>
-          <span>children:</span>
-          {children}
-        </div>
-        <div style={{ display: 'flex', gap: 2 }}>
-          <span>tourName:</span>
-          {tourName}
-        </div>
-        <div style={{ display: 'flex', gap: 2 }}>
-          <span>step:</span>
-          {index}
-        </div>
-      </div>
+      <UnstableGuidedTourTooltip
+        tourName={tourName as ValidTourName}
+        step={index}
+        content={step.content}
+      >
+        {children}
+      </UnstableGuidedTourTooltip>
     );
 
     return acc;
