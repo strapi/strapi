@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Popover, Box, Flex, Button, Typography } from '@strapi/design-system';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, type MessageDescriptor } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { unstableUseGuidedTour, ValidTourName } from './Context';
@@ -18,8 +18,8 @@ type WithChildren = {
 
 type WithIntl = {
   children?: undefined;
-  id: string;
-  defaultMessage: string;
+  id: MessageDescriptor['id'];
+  defaultMessage: MessageDescriptor['defaultMessage'];
 };
 
 type WithActionsChildren = {
