@@ -9,6 +9,15 @@ import { SubNav } from '../../../components/SubNav';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
 
+type LinkId =
+  | 'content-releases'
+  | 'review-workflows'
+  | 'sso'
+  | 'auditLogs'
+  | 'auditLogs-purchase-page';
+
+type FeatureName = 'cms-content-releases' | 'review-workflows' | 'sso' | 'audit-logs';
+
 interface SettingsNavProps {
   menu: SettingsMenu;
 }
@@ -27,7 +36,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
 
   const availableFeatureNames = license?.features.map((feature) => feature.name);
 
-  const linksIdsToLicenseFeaturesNames = {
+  const linksIdsToLicenseFeaturesNames: Record<LinkId, FeatureName> = {
     'content-releases': 'cms-content-releases',
     'review-workflows': 'review-workflows',
     sso: 'sso',
@@ -46,6 +55,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
       links: section.links.map((link) => {
         return {
           ...link,
+          id: link.id as LinkId,
           title: link.intlLabel,
           name: link.id,
         };
@@ -82,9 +92,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                         <Lightning
                           fill={
                             (availableFeatureNames || []).includes(
-                              linksIdsToLicenseFeaturesNames[
-                                link.id as keyof typeof linksIdsToLicenseFeaturesNames
-                              ] as keyof typeof availableFeatureNames
+                              linksIdsToLicenseFeaturesNames[link.id]
                             )
                               ? 'primary600'
                               : 'neutral300'
