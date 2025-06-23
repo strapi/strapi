@@ -22,8 +22,6 @@ const merge = mergeWith((a, b) => {
 
 type StrapiGraphQLContext = BaseContext & {
   rootQueryArgs?: Record<string, unknown>;
-  state: any; // if you want to be stricter, replace 'any' with your app-specific state shape
-  koaContext: any;
 };
 
 export const determineLandingPage = (
