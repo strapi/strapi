@@ -20,7 +20,15 @@ const merge = mergeWith((a, b) => {
   }
 });
 
-export const determineLandingPage = (strapi: Core.Strapi) => {
+type StrapiGraphQLContext = BaseContext & {
+  rootQueryArgs?: Record<string, unknown>;
+  state: any; // if you want to be stricter, replace 'any' with your app-specific state shape
+  koaContext: any;
+};
+
+export const determineLandingPage = (
+  strapi: Core.Strapi
+): ApolloServerPlugin<StrapiGraphQLContext> => {
   const { config } = strapi.plugin('graphql');
   const utils = strapi.plugin('graphql').service('utils');
 
@@ -115,6 +123,21 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const path: string = config('endpoint');
 
   const landingPage = determineLandingPage(strapi);
+  const pluginAddRootQueryArgs: ApolloServerPlugin<StrapiGraphQLContext> = {
+    async requestDidStart() {
+      return {
+        async executionDidStart() {
+          return {
+            willResolveField({ source, args, contextValue, info }) {
+              if (!source && info.operation.operation === 'query') {
+                contextValue.rootQueryArgs = args;
+              }
+            },
+          };
+        },
+      };
+    },
+  };
 
   type CustomOptions = {
     cors: boolean;
@@ -122,7 +145,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     bodyParserConfig: boolean;
   };
 
-  const defaultServerConfig: ApolloServerOptions<BaseContext> & CustomOptions = {
+  const defaultServerConfig: ApolloServerOptions<StrapiGraphQLContext> & CustomOptions = {
     // Schema
     schema,
 
@@ -138,7 +161,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
     bodyParserConfig: true,
     // send 400 http status instead of 200 for input validation errors
     status400ForVariableCoercionErrors: true,
-    plugins: [landingPage],
+    plugins: [landingPage, pluginAddRootQueryArgs],
 
     cache: 'bounded' as const,
   };
@@ -146,7 +169,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const serverConfig = merge(
     defaultServerConfig,
     config('apolloServer')
-  ) as ApolloServerOptions<BaseContext> & CustomOptions;
+  ) as ApolloServerOptions<StrapiGraphQLContext> & CustomOptions;
 
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);

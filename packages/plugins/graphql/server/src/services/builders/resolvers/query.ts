@@ -16,12 +16,6 @@ export default ({ strapi }: Context) => ({
           auth: ctx?.state?.auth,
         });
 
-        /**
-         * NOTE: For internal use only
-         * Store the root query args in context so they can be forwarded to deep relations
-         */
-        ctx.rootQueryArgs = args;
-
         return strapi.documents!(uid).findMany({ status: 'published', ...sanitizedQuery });
       },
 
@@ -33,12 +27,6 @@ export default ({ strapi }: Context) => ({
         const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
-
-        /**
-         * NOTE: For internal use only
-         * Store the root query args in context so they can be forwarded to deep relations
-         */
-        ctx.rootQueryArgs = args;
 
         return strapi.documents!(uid).findFirst({ status: 'published', ...sanitizedQuery });
       },
@@ -53,12 +41,6 @@ export default ({ strapi }: Context) => ({
         const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
-
-        /**
-         * NOTE: For internal use only
-         * Store the root query args in context so they can be forwarded to deep relations
-         */
-        ctx.rootQueryArgs = args;
 
         return strapi.documents!(uid).findOne({
           status: 'published',
