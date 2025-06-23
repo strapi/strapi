@@ -3,6 +3,7 @@ import { Duplicate, Key } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../../../components/ContentBox';
+import { tours as unstable_tours } from '../../../../components/UnstableGuidedTour/Tours';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useClipboard } from '../../../../hooks/useClipboard';
@@ -35,7 +36,7 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
     }
   };
 
-  return (
+  const contentBox = (
     <ContentBox
       endAction={
         token && (
@@ -59,7 +60,7 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
         token ||
         formatMessage({
           id: 'Settings.tokens.copy.editTitle',
-          defaultMessage: 'This token isn’t accessible anymore.',
+          defaultMessage: "This token isn't accessible anymore.",
         })
       }
       subtitle={
@@ -73,7 +74,7 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
                 : {
                     id: 'Settings.tokens.copy.lastWarning',
                     defaultMessage:
-                      'Make sure to copy this token, you won’t be able to see it again!',
+                      "Make sure to copy this token, you won't be able to see it again!",
                   }
             )
           : formatMessage({
@@ -84,5 +85,11 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
       icon={<Key />}
       iconBackground="neutral100"
     />
+  );
+
+  return tokenType === 'api-token' ? (
+    <unstable_tours.apiTokens.CopyAPIToken>{contentBox}</unstable_tours.apiTokens.CopyAPIToken>
+  ) : (
+    contentBox
   );
 };

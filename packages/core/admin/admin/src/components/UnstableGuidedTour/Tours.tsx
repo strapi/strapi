@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-import { Box, Popover } from '@strapi/design-system';
+import { Box, Popover, Flex, Button } from '@strapi/design-system';
+import { FormattedMessage } from 'react-intl';
 import { styled } from 'styled-components';
-
-import { useAuth } from '../../features/Auth';
 
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
 import { Step, createStepComponents } from './Step';
@@ -29,6 +28,82 @@ const tours = {
           <Step.Actions showSkip />
         </Step.Root>
       ),
+    },
+  ]),
+  apiTokens: createTour('apiTokens', [
+    {
+      name: 'Introduction',
+      content: (Step) => (
+        <Step.Root sideOffset={-36}>
+          <Step.Title id="tours.apiTokens.Introduction.title" defaultMessage="API tokens" />
+          <Step.Content
+            id="tours.apiTokens.Introduction.content"
+            defaultMessage="Create and manage API tokens with highly customizable permissions."
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'CreateAnAPIToken',
+      content: (Step) => (
+        <Step.Root side={'bottom'} align="end" sideOffset={20}>
+          <Step.Title
+            id="tours.apiTokens.CreateAnAPIToken.title"
+            defaultMessage="Create an API token"
+          />
+          <Step.Content
+            id="tours.apiTokens.CreateAnAPIToken.content"
+            defaultMessage="Create a new API token. Choose a name, duration and type."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'CopyAPIToken',
+      content: (Step) => (
+        <Step.Root side="bottom" align="start" sideOffset={-10}>
+          <Step.Title
+            id="tours.apiTokens.CopyAPIToken.title"
+            defaultMessage="Copy your new API token"
+          />
+          <Step.Content
+            id="tours.apiTokens.CopyAPIToken.content"
+            defaultMessage="Make sure to do it now, you won’t be able to see it again. You’ll need to generate a new one if you lose it."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'FinalStep',
+      content: (Step) => {
+        const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
+        return (
+          <Step.Root side="bottom" align="start" sideOffset={-10}>
+            <Step.Title
+              id="tours.apiTokens.FinalStep.title"
+              defaultMessage="It’s time to deploy your application!"
+            />
+            <Step.Content
+              id="tours.apiTokens.FinalStep.content"
+              defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
+            />
+            <Step.Actions showStepCount={false}>
+              <Flex>
+                <Button
+                  onClick={() => {
+                    dispatch({ type: 'next_step', payload: 'apiTokens' });
+                  }}
+                >
+                  <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
+                </Button>
+              </Flex>
+            </Step.Actions>
+          </Step.Root>
+        );
+      },
     },
   ]),
 } as const;
