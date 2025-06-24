@@ -5,7 +5,7 @@ import path from 'path';
 import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
-import '@strapi/types';
+import { Internal } from '@strapi/types';
 import { env } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
 import {
@@ -193,9 +193,38 @@ export default {
 
     const isFirstSuperAdminUser = id ? await userService.isFirstSuperAdminUser(id) : false;
 
+    // Check if any content-type schemas have been create on the api:: namespace
+    const contentTypeSchemaNames = Object.keys(strapi.contentTypes).filter((contentTypeUid) =>
+      contentTypeUid.startsWith('api::')
+    );
+    const didCreateContentTypeSchema = contentTypeSchemaNames.length > 0;
+
+    // Check if any content has been created for content-types on the api:: namespace
+    let hasContent = false;
+    for (const contentTypeSchemaName of contentTypeSchemaNames) {
+      const docs = await strapi
+        .documents(contentTypeSchemaName as Internal.UID.ContentType)
+        .count({});
+      if (docs > 0) {
+        hasContent = true;
+        break;
+      }
+    }
+    const didCreateContent = didCreateContentTypeSchema && hasContent;
+
+    // Check if any api tokens have been created besides the default ones
+    const DEFAULT_API_TOKENS = ['Read Only', 'Full Access'];
+    const apiTokenNames = (await strapi.documents('admin::api-token').findMany()).map(
+      (token) => token.name
+    );
+    const didCreateApiToken = apiTokenNames.some((name) => !DEFAULT_API_TOKENS.includes(name));
+
     return {
       data: {
         isFirstSuperAdminUser,
+        didCreateContentTypeSchema,
+        didCreateContent,
+        didCreateApiToken,
       },
     } satisfies GetGuidedTourMeta.Response;
   },

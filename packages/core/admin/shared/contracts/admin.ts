@@ -233,6 +233,9 @@ export declare namespace GetGuidedTourMeta {
   export interface Response {
     data: {
       isFirstSuperAdminUser: boolean;
+      didCreateContentTypeSchema: boolean;
+      didCreateContent: boolean;
+      didCreateApiToken: boolean;
     };
     error?: errors.ApplicationError;
   }

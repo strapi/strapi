@@ -3,6 +3,8 @@ import * as React from 'react';
 import { Box, Popover } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
+import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
+
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
 import { Step, createStepComponents } from './Step';
 
@@ -11,7 +13,7 @@ import { Step, createStepComponents } from './Step';
  * -----------------------------------------------------------------------------------------------*/
 
 const tours = {
-  contentManager: createTour('contentManager', [
+  TEST: createTour('TEST', [
     {
       name: 'Introduction',
       content: (Step) => (
@@ -29,9 +31,10 @@ const tours = {
       ),
     },
     {
-      name: 'CreateEntry',
+      name: 'Done',
+      requiredActions: ['didCreateApiToken'],
       content: (Step) => (
-        <Step.Root align="end">
+        <Step.Root align="start">
           <Step.Title id="tours.contentManager.CreateEntry.title" defaultMessage="Create entry" />
           <Step.Content
             id="tours.contentManager.CreateEntry.content"
@@ -73,19 +76,27 @@ const UnstableGuidedTourTooltip = ({
   content,
   tourName,
   step,
+  requiredActions,
 }: {
   children: React.ReactNode;
   content: Content;
   tourName: ValidTourName;
   step: number;
+  requiredActions?: string[];
 }) => {
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
+
+  const isRequiredActionsCompleted =
+    requiredActions?.every((action) => {
+      return state.completedActions.includes(action);
+    }) ?? true;
+
   const isEnabled = state.meta.isFirstSuperAdminUser && !state.tours[tourName].isCompleted;
-  const isPopoverOpen = isEnabled && isCurrentStep;
+  const isPopoverOpen = isEnabled && isCurrentStep && isRequiredActionsCompleted;
 
   // Lock the scroll
   React.useEffect(() => {
@@ -117,6 +128,7 @@ const UnstableGuidedTourTooltip = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
+  requiredActions?: (keyof GetGuidedTourMeta.Response['data'])[];
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {
@@ -134,6 +146,7 @@ function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: s
         tourName={tourName as ValidTourName}
         step={index}
         content={step.content}
+        requiredActions={step.requiredActions}
       >
         {children}
       </UnstableGuidedTourTooltip>

@@ -169,4 +169,49 @@ describe('GuidedTour | reducer', () => {
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
   });
+
+  describe('init', () => {
+    it('should set meta and update completedActions based on meta state', () => {
+      const initialState = {
+        tours: {
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
+        },
+        meta: {},
+        completedActions: [],
+      };
+
+      const action: Action = {
+        type: 'init',
+        payload: {
+          didCreateContentTypeSchema: true,
+          didCreateContent: false,
+          didCreateApiToken: true,
+          isFirstSuperAdminUser: true,
+        },
+      };
+
+      const expectedState = {
+        tours: {
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
+        },
+        meta: {
+          didCreateContentTypeSchema: true,
+          didCreateContent: false,
+          didCreateApiToken: true,
+          isFirstSuperAdminUser: true,
+        },
+        completedActions: ['didCreateContentTypeSchema', 'didCreateApiToken'],
+      };
+
+      expect(reducer(initialState, action)).toEqual(expectedState);
+    });
+  });
 });
