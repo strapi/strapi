@@ -118,7 +118,7 @@ describe('Guided Tour Meta', () => {
 
     test('Detects created custom API tokens', async () => {
       // Create a custom API token
-      await strapi.documents('admin::api-token').create({
+      const createdToken = await strapi.documents('admin::api-token').create({
         data: {
           name: 'Custom Token',
           type: 'read-only',
@@ -135,6 +135,11 @@ describe('Guided Tour Meta', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.didCreateApiToken).toBe(true);
+
+      // Cleanup
+      await strapi.documents('admin::api-token').delete({
+        documentId: createdToken.documentId,
+      });
     });
   });
 });
