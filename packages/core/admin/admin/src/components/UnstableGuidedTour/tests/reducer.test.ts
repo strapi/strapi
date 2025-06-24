@@ -15,6 +15,7 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'next_step',
+        // @ts-expect-error Remove once actual tours are in place
         payload: 'contentManager',
       };
 
@@ -28,6 +29,7 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
+      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
@@ -49,6 +51,7 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'next_step',
+        // @ts-expect-error Remove once actual tours are in place
         payload: 'contentManager',
       };
 
@@ -67,6 +70,7 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
+      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
@@ -83,6 +87,7 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'next_step',
+        // @ts-expect-error Remove once actual tours are in place
         payload: 'contentManager',
       };
 
@@ -96,6 +101,7 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
+      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
   });
@@ -114,6 +120,7 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'skip_tour',
+        // @ts-expect-error Remove once actual tours are in place
         payload: 'contentManager',
       };
 
@@ -127,6 +134,7 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
+      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
@@ -148,6 +156,7 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'skip_tour',
+        // @ts-expect-error Remove once actual tours are in place
         payload: 'contentManager',
       };
 
@@ -166,6 +175,7 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
+      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
   });
@@ -211,6 +221,7 @@ describe('GuidedTour | reducer', () => {
         completedActions: ['didCreateContentTypeSchema', 'didCreateApiToken'],
       };
 
+      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
   });
