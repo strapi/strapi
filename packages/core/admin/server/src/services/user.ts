@@ -162,7 +162,7 @@ const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
 };
 
 /**
- * Check if a user is the last super admin
+ * Check if a user is the first super admin
  * @param userId user's id to look for
  */
 const isFirstSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {

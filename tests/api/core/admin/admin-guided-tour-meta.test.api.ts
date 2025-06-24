@@ -90,9 +90,7 @@ describe('Guided Tour Meta', () => {
       });
 
       expect(res.status).toBe(200);
-      expect(res.body.data).toMatchObject({
-        didCreateContentTypeSchema: true,
-      });
+      expect(res.body.data.didCreateContentTypeSchema).toBe(true);
     });
 
     test('Detects created content', async () => {
@@ -111,9 +109,7 @@ describe('Guided Tour Meta', () => {
       });
 
       expect(res.status).toBe(200);
-      expect(res.body.data).toMatchObject({
-        didCreateContent: true,
-      });
+      expect(res.body.data.didCreateContent).toBe(true);
     });
 
     test('Detects created custom API tokens', async () => {
