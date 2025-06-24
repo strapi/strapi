@@ -3,7 +3,7 @@ import * as React from 'react';
 import { createContext } from '@radix-ui/react-context';
 import { useIntl } from 'react-intl';
 
-import { UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { Logo, UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { Page } from '../components/PageHelpers';
 import { useTypedSelector } from '../core/store/hooks';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
@@ -67,6 +67,8 @@ const ConfigurationProvider = ({
   defaultMenuLogo,
   showReleaseNotification = false,
 }: ConfigurationProviderProps) => {
+  const [authLogoUpdated, setAuthLogoUpdated] = React.useState<Partial<Logo> | null>(null);
+  const [menuLogoUpdated, setMenuLogoUpdated] = React.useState<Partial<Logo> | null>(null);
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -76,7 +78,9 @@ const ConfigurationProvider = ({
   );
   const token = useAuth('ConfigurationProvider', (state) => state.token);
 
-  const { allowedActions } = useRBAC(permissions);
+  const {
+    allowedActions: { canRead },
+  } = useRBAC(permissions);
 
   const {
     data: { authLogo: customAuthLogo, menuLogo: customMenuLogo } = {},
@@ -94,7 +98,7 @@ const ConfigurationProvider = ({
   }, [error, formatMessage, toggleNotification]);
 
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
-    skip: !token || !allowedActions.canRead,
+    skip: !token || !canRead,
   });
 
   const [updateProjectSettingsMutation] = useUpdateProjectSettingsMutation();
@@ -119,6 +123,8 @@ const ConfigurationProvider = ({
       const res = await updateProjectSettingsMutation(formData);
 
       if ('data' in res) {
+        setAuthLogoUpdated(res.data.authLogo);
+        setMenuLogoUpdated(res.data.menuLogo);
         const updatedMenuLogo = !!res.data.menuLogo && !!body.menuLogo?.rawFile;
         const updatedAuthLogo = !!res.data.authLogo && !!body.authLogo?.rawFile;
 
@@ -157,19 +163,23 @@ const ConfigurationProvider = ({
       showReleaseNotification={showReleaseNotification}
       logos={{
         menu: {
-          custom: isSuccess
-            ? data?.menuLogo
-            : {
-                url: customMenuLogo ?? '',
-              },
+          custom: menuLogoUpdated
+            ? menuLogoUpdated
+            : isSuccess
+              ? data?.menuLogo
+              : {
+                  url: customMenuLogo ?? '',
+                },
           default: defaultMenuLogo,
         },
         auth: {
-          custom: isSuccess
-            ? data?.authLogo
-            : {
-                url: customAuthLogo ?? '',
-              },
+          custom: authLogoUpdated
+            ? authLogoUpdated
+            : isSuccess
+              ? data?.authLogo
+              : {
+                  url: customAuthLogo ?? '',
+                },
           default: defaultAuthLogo,
         },
       }}
