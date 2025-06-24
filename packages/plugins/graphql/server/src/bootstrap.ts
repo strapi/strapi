@@ -121,6 +121,15 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   const path: string = config('endpoint');
 
   const landingPage = determineLandingPage(strapi);
+  /**
+   * We need the arguments passed to the root query to be available in the association resolver
+   * so we can forward those arguments along to any relations.
+   *
+   * In order to do that we are currently storing the arguments in context.
+   * There is likely a better solution, but for now this is the simplest fix we could find.
+   *
+   * @see https://github.com/strapi/strapi/issues/23524
+   */
   const pluginAddRootQueryArgs: ApolloServerPlugin<StrapiGraphQLContext> = {
     async requestDidStart() {
       return {
@@ -128,6 +137,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
           return {
             willResolveField({ source, args, contextValue, info }) {
               if (!source && info.operation.operation === 'query') {
+                // NOTE: context.rootQueryArgs is intended for internal use only
                 contextValue.rootQueryArgs = args;
               }
             },
