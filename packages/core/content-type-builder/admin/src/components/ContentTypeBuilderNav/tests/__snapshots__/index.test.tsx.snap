@@ -286,8 +286,8 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c32 {
   text-decoration: none;
-  padding-block: 0.25rem;
-  padding-inline: 0.25rem;
+  padding-block: 0.2rem;
+  padding-inline: 0.2rem;
   border: 1px solid transparent;
   background: transparent;
   color: #32324d;

@@ -39,7 +39,6 @@ describe('useDocumentActions', () => {
             documentId: '12345',
           },
           {
-            documentId: '12345',
             title: 'test',
             content: 'the brown fox jumps over the lazy dog',
           }
@@ -51,7 +50,7 @@ describe('useDocumentActions', () => {
       expect(response).toEqual({
         data: {
           content: 'the brown fox jumps over the lazy dog',
-          documentId: '12345',
+          documentId: '67890',
           id: 2,
           title: 'test',
         },
