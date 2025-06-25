@@ -3,8 +3,6 @@ import * as React from 'react';
 import { Box, Popover } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { useAuth } from '../../features/Auth';
-
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
 import { Step, createStepComponents } from './Step';
 
@@ -17,7 +15,7 @@ const tours = {
     {
       name: 'Introduction',
       content: (Step) => (
-        <Step.Root sideOffset={-36}>
+        <Step.Root sideOffset={-36} side={'top'} align={'center'}>
           <Step.Title
             id="tours.contentManager.Introduction.title"
             defaultMessage="Content manager"
@@ -25,6 +23,48 @@ const tours = {
           <Step.Content
             id="tours.contentManager.Introduction.content"
             defaultMessage="Create and manage content from your collection types and single types."
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Fields',
+      content: (Step) => (
+        <Step.Root sideOffset={-36}>
+          <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
+          <Step.Content
+            id="tours.contentManager.Fields.content"
+            defaultMessage="Add content to the fields created in the Content-Type Builder."
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Publish',
+      content: (Step) => (
+        <Step.Root sideOffset={-36}>
+          <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
+          <Step.Content
+            id="tours.contentManager.Publish.content"
+            defaultMessage="Publish entries to make their content available through the Document Service API."
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Final',
+      content: (Step) => (
+        <Step.Root sideOffset={-36}>
+          <Step.Title
+            id="tours.contentManager.Final.title"
+            defaultMessage="It’s time to create API Tokens!"
+          />
+          <Step.Content
+            id="tours.contentManager.Final.content"
+            defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
           />
           <Step.Actions showSkip />
         </Step.Root>
@@ -69,6 +109,9 @@ const UnstableGuidedTourTooltip = ({
   tourName: ValidTourName;
   step: number;
 }) => {
+  if (!window.strapi.future.isEnabled('unstableGuidedTour')) {
+    return children;
+  }
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
