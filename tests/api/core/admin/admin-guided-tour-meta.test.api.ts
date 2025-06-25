@@ -54,7 +54,7 @@ describe('Guided Tour Meta', () => {
       });
     });
 
-    test.only('Detects first super admin user', async () => {
+    test('Detects first super admin user', async () => {
       const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',
@@ -81,7 +81,6 @@ describe('Guided Tour Meta', () => {
         url: '/admin/guided-tour-meta',
         method: 'GET',
       });
-      console.log(secondSuperAdminUserResponse.body.data);
 
       expect(secondSuperAdminUserResponse.status).toBe(200);
       expect(secondSuperAdminUserResponse.body.data.isFirstSuperAdminUser).toBe(false);
