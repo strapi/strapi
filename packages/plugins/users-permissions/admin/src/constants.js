@@ -27,3 +27,10 @@ export const PERMISSIONS = {
   readProviders: [{ action: 'plugin::users-permissions.providers.read', subject: null }],
   updateProviders: [{ action: 'plugin::users-permissions.providers.update', subject: null }],
 };
+
+export const allPermissions = [
+  ...PERMISSIONS.createRole,
+  ...PERMISSIONS.readRoles,
+  ...PERMISSIONS.updateRole,
+  ...PERMISSIONS.deleteRole,
+];

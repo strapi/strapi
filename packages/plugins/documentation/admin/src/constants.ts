@@ -15,3 +15,5 @@ export const PERMISSIONS = {
   regenerate: [{ action: 'plugin::documentation.settings.regenerate', subject: null }],
   update: [{ action: 'plugin::documentation.settings.update', subject: null }],
 };
+
+export const allPermissions = Object.values(PERMISSIONS).flat();

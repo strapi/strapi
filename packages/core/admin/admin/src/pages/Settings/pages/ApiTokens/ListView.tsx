@@ -60,8 +60,8 @@ const TABLE_HEADERS = [
 export const ListView = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions.settings?.['api-tokens']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.['api-tokens'] ?? {}).flat()
   );
   const {
     allowedActions: { canRead, canCreate, canDelete, canUpdate },

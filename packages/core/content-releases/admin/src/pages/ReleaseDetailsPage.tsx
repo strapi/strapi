@@ -44,7 +44,7 @@ import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
-import { PERMISSIONS } from '../constants';
+import { allPermissions } from '../constants';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
@@ -103,7 +103,7 @@ const ReleaseDetailsLayout = ({
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(allPermissions);
   const { canUpdate, canDelete, canPublish } = allowedActions;
   const dispatch = useTypedDispatch();
   const { trackUsage } = useTracking();
@@ -379,7 +379,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   } = useGetReleaseQuery({ id: releaseId });
   const {
     allowedActions: { canUpdate },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(allPermissions);
   const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
   // TODO: Migrated displayedHeader to v5

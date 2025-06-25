@@ -9,7 +9,6 @@ import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
-import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 
 import { WebhookForm, WebhookFormProps, WebhookFormValues } from './components/WebhookForm';
@@ -190,7 +189,7 @@ const EditPage = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedEditPage = () => {
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions);
 
   return (
     <Page.Protect permissions={permissions.settings?.webhooks.update}>

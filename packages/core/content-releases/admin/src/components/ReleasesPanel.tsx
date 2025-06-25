@@ -3,7 +3,7 @@ import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { PERMISSIONS } from '../constants';
+import { allPermissions } from '../constants';
 import { useGetReleasesForEntryQuery } from '../services/release';
 import { getTimezoneOffset } from '../utils/time';
 
@@ -25,7 +25,7 @@ const Panel: PanelComponent = ({
   } = useDocumentLayout(model);
   const { formatMessage, formatDate, formatTime } = useIntl();
 
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(allPermissions);
   const { canRead, canDeleteAction } = allowedActions;
 
   const response = useGetReleasesForEntryQuery(

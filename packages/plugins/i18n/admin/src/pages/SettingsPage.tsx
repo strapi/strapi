@@ -13,7 +13,7 @@ import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';
 import { LocaleTable } from '../components/LocaleTable';
-import { PERMISSIONS } from '../constants';
+import { PERMISSIONS, allPermissions } from '../constants';
 import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
@@ -25,7 +25,7 @@ const SettingsPage = () => {
   const {
     isLoading: isLoadingRBAC,
     allowedActions: { canUpdate, canCreate, canDelete },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(allPermissions);
 
   React.useEffect(() => {
     if (error) {

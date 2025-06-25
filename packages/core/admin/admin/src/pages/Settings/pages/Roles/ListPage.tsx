@@ -28,14 +28,15 @@ import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
-import { selectAdminPermissions } from '../../../../selectors';
 import { isFetchError } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
 const ListPage = () => {
   const { formatMessage } = useIntl();
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.roles ?? {}).flat()
+  );
   const { formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = React.useState(false);
@@ -43,7 +44,7 @@ const ListPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
-  } = useRBAC(permissions.settings?.roles);
+  } = useRBAC(permissions);
 
   const { roles, refetch: refetchRoles } = useAdminRoles(
     { filters: query?._q ? { name: { $containsi: query._q } } : undefined },

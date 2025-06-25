@@ -5,3 +5,5 @@ export const PERMISSIONS = {
   update: [{ action: 'plugin::i18n.locale.update', subject: null }],
   read: [{ action: 'plugin::i18n.locale.read', subject: null }],
 };
+
+export const allPermissions = Object.values(PERMISSIONS).flat();

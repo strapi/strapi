@@ -18,7 +18,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
 
-import { PERMISSIONS } from '../constants';
+import { allPermissions } from '../constants';
 import { DocumentInfos, SettingsInput } from '../types';
 import { getTrad } from '../utils';
 
@@ -54,7 +54,7 @@ type SettingsFormProps = {
 export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
   const { formatMessage } = useIntl();
   const [passwordShown, setPasswordShown] = React.useState(false);
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(allPermissions);
 
   return (
     <Formik

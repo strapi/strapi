@@ -51,7 +51,10 @@ const SCHEMA = yup.object().shape({
 
 export const SingleSignOnPage = () => {
   const { formatMessage } = useIntl();
-  const permissions = useTypedSelector((state) => state.admin_app.permissions);
+  const permissions = useTypedSelector((state) => [
+    ...Object.values(state.admin_app.permissions.settings?.sso ?? {}).flat(),
+    ...(state.admin_app.permissions.settings?.roles.read ?? []),
+  ]);
   const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -66,10 +69,7 @@ export const SingleSignOnPage = () => {
   const {
     isLoading: isLoadingPermissions,
     allowedActions: { canUpdate, canRead: canReadRoles },
-  } = useRBAC({
-    ...permissions.settings?.sso,
-    readRoles: permissions.settings?.roles.read ?? [],
-  });
+  } = useRBAC(permissions);
 
   const { roles, isLoading: isLoadingRoles } = useAdminRoles(undefined, {
     skip: !canReadRoles,

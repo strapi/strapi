@@ -32,10 +32,12 @@ import { ModalForm } from './components/NewUserForm';
 const ListPageCE = () => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [isModalOpened, setIsModalOpen] = React.useState(false);
-  const permissions = useTypedSelector((state) => state.admin_app.permissions);
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.users ?? {}).flat()
+  );
   const {
     allowedActions: { canCreate, canDelete, canRead },
-  } = useRBAC(permissions.settings?.users);
+  } = useRBAC(permissions);
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();

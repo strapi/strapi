@@ -27,7 +27,7 @@ import { Link as ReactRouterLink } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
-import { PERMISSIONS } from '../constants';
+import { allPermissions } from '../constants';
 import { useCreateReleaseActionMutation, useGetReleasesForEntryQuery } from '../services/release';
 
 import { ReleaseActionOptions } from './ReleaseActionOptions';
@@ -170,7 +170,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
   collectionType,
 }: DocumentActionProps) => {
   const { formatMessage } = useIntl();
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(allPermissions);
   const { canCreateAction } = allowedActions;
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
   const { toggleNotification } = useNotification();

@@ -25,14 +25,16 @@ const AssigneeSelect = ({ isCompact }: { isCompact?: boolean }) => {
     id,
     slug: model = '',
   } = useParams<{ collectionType: string; slug: string; id: string }>();
-  const permissions = useTypedSelector((state) => state.admin_app.permissions);
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.users ?? {}).flat()
+  );
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
   const {
     allowedActions: { canRead },
     isLoading: isLoadingPermissions,
-  } = useRBAC(permissions.settings?.users);
+  } = useRBAC(permissions);
   const [{ query }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
   const {

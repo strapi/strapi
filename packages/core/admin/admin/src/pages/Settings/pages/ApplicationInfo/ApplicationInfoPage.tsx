@@ -12,10 +12,10 @@ import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useRBAC } from '../../../../hooks/useRBAC';
-import { selectAdminPermissions } from '../../../../selectors';
 
 import { LogoInput, LogoInputProps } from './components/LogoInput';
 import { DIMENSION, SIZE } from './utils/constants';
+import { useTypedSelector } from '../../../../core/store/hooks';
 
 const AdminSeatInfoCE = () => null;
 
@@ -28,7 +28,9 @@ const ApplicationInfoPage = () => {
   const { formatMessage } = useIntl();
   const { logos: serverLogos, updateProjectSettings } = useConfiguration('ApplicationInfoPage');
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
-  const { settings } = useSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.['project-settings'] ?? {}).flat()
+  );
 
   const communityEdition = useAppInfo('ApplicationInfoPage', (state) => state.communityEdition);
   const latestStrapiReleaseTag = useAppInfo(
@@ -51,7 +53,7 @@ const ApplicationInfoPage = () => {
 
   const {
     allowedActions: { canRead, canUpdate },
-  } = useRBAC(settings ? settings['project-settings'] : {});
+  } = useRBAC(permissions);
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();

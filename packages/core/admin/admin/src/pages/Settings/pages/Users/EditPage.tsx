@@ -18,7 +18,6 @@ import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useRBAC } from '../../../../hooks/useRBAC';
-import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { translatedErrors } from '../../../../utils/translatedErrors';
@@ -69,15 +68,15 @@ const EditPage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
 
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => [
+    ...(state.admin_app.permissions.settings?.users.read ?? []),
+    ...(state.admin_app.permissions.settings?.users.update ?? []),
+  ]);
 
   const {
     isLoading: isLoadingRBAC,
     allowedActions: { canUpdate },
-  } = useRBAC({
-    read: permissions.settings?.users.read ?? [],
-    update: permissions.settings?.users.update ?? [],
-  });
+  } = useRBAC(permissions);
 
   const [updateUser] = useUpdateUserMutation();
 

@@ -37,7 +37,7 @@ import { styled } from 'styled-components';
 import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
-import { PERMISSIONS } from '../constants';
+import { allPermissions } from '../constants';
 import {
   useGetReleasesQuery,
   useGetReleaseSettingsQuery,
@@ -197,7 +197,7 @@ const ReleasesPage = () => {
   const { trackUsage } = useTracking();
   const {
     allowedActions: { canCreate },
-  } = useRBAC(PERMISSIONS);
+  } = useRBAC(allPermissions);
 
   const { isLoading: isLoadingReleases, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';

@@ -61,8 +61,8 @@ const EditView = () => {
   );
   const { trackUsage } = useTracking();
   const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions.settings?.['transfer-tokens']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions.settings?.['transfer-tokens'] ?? {}).flat()
   );
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },

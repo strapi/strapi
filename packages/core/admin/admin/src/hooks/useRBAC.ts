@@ -10,6 +10,28 @@ import { usePrev } from './usePrev';
 
 type AllowedActions = Record<string, boolean>;
 
+interface UseRBACReturnType {
+  allowedActions: AllowedActions;
+  isLoading: boolean;
+  error?: unknown;
+  permissions: Permission[];
+}
+
+interface UseRBAC {
+  /** @deprecated useRBAC should only take an array of permissions, not an object. */
+  (
+    permissionsToCheck?: Record<string, Permission[]> | undefined,
+    passedPermissions?: Permission[] | undefined,
+    rawQueryContext?: string | undefined
+  ): UseRBACReturnType;
+
+  (
+    permissionsToCheck?: Permission[] | undefined,
+    passedPermissions?: Permission[] | undefined,
+    rawQueryContext?: string | undefined
+  ): UseRBACReturnType;
+}
+
 /**
  * @public
  * @description This hooks takes an object or array of permissions (the latter preferred) and
@@ -41,16 +63,7 @@ type AllowedActions = Record<string, boolean>;
  * }
  * ```
  */
-const useRBAC = (
-  permissionsToCheck: Record<string, Permission[]> | Permission[] = [],
-  passedPermissions?: Permission[],
-  rawQueryContext?: string
-): {
-  allowedActions: AllowedActions;
-  isLoading: boolean;
-  error?: unknown;
-  permissions: Permission[];
-} => {
+const useRBAC: UseRBAC = (permissionsToCheck = [], passedPermissions, rawQueryContext) => {
   const isLoadingAuth = useAuth('useRBAC', (state) => state.isLoading);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<unknown>();

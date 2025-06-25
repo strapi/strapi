@@ -72,14 +72,12 @@ In the below example, we're checking if a user can "create" a post from the cont
 import { useRBAC } from '@strapi/strapi/admin';
 
 const MyComponent = () => {
-  const { isLoading, allowedActions } = useRBAC({
-    create: [
-      {
-        action: 'plugin::content-manager.explorer.create',
-        subject: 'api::post.post',
-      },
-    ],
-  });
+  const { isLoading, allowedActions } = useRBAC([
+    {
+      action: 'plugin::content-manager.explorer.create',
+      subject: 'api::post.post',
+    },
+  ]);
 
   if (isLoading) {
     return <p>Loading...</p>;

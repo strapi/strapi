@@ -124,8 +124,8 @@ const EditPage = () => {
     update,
     create,
   } = useReviewWorkflows();
-  const permissions = useTypedSelector(
-    (state) => state.admin_app.permissions['settings']?.['review-workflows']
+  const permissions = useTypedSelector((state) =>
+    Object.values(state.admin_app.permissions['settings']?.['review-workflows'] ?? {}).flat()
   );
   const {
     allowedActions: { canDelete, canUpdate, canCreate },
