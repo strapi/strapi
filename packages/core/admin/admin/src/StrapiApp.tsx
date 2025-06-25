@@ -136,6 +136,21 @@ class StrapiApp {
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
 
     this.router = new Router(getInitialRoutes());
+    this.widgets.register([
+      {
+        icon: User,
+        title: {
+          id: 'widget.profile.title',
+          defaultMessage: 'Profile',
+        },
+        component: async () => {
+          const { ProfileWidget } = await import('./components/Widgets');
+          return ProfileWidget;
+        },
+        pluginId: 'admin.widget.profile',
+        id: 'profile-info',
+      },
+    ]);
   }
 
   addComponents = (components: Component | Component[]) => {
