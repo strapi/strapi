@@ -3,7 +3,8 @@ import * as React from 'react';
 import { Box, Popover } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
+import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
+import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
 import { Step, createStepComponents } from './Step';
@@ -82,21 +83,24 @@ const UnstableGuidedTourTooltip = ({
   content: Content;
   tourName: ValidTourName;
   step: number;
-  requiredActions?: string[];
+  requiredActions?: GetGuidedTourMeta.Response['data']['completedActions'];
 }) => {
+  const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
+
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
+
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
-
-  const isRequiredActionsCompleted =
+  const hasCompletedRequiredActions =
     requiredActions?.every((action) => {
-      return state.completedActions.includes(action);
+      return guidedTourMeta?.data?.completedActions.includes(action);
     }) ?? true;
 
-  const isEnabled = state.meta.isFirstSuperAdminUser && !state.tours[tourName].isCompleted;
-  const isPopoverOpen = isEnabled && isCurrentStep && isRequiredActionsCompleted;
+  const isEnabled =
+    guidedTourMeta?.data?.isFirstSuperAdminUser && !state.tours[tourName].isCompleted;
+  const isPopoverOpen = isEnabled && isCurrentStep && hasCompletedRequiredActions;
 
   // Lock the scroll
   React.useEffect(() => {
@@ -128,7 +132,7 @@ const UnstableGuidedTourTooltip = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
-  requiredActions?: (keyof GetGuidedTourMeta.Response['data'])[];
+  requiredActions?: GetGuidedTourMeta.Response['data']['completedActions'];
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {

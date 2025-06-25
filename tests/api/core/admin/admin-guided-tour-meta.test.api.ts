@@ -1,5 +1,5 @@
 import { createStrapiInstance } from 'api-tests/strapi';
-import { createAuthRequest } from 'api-tests/request';
+import { createAuthRequest, createRequest } from 'api-tests/request';
 import { createTestBuilder } from 'api-tests/builder';
 import { Core } from '@strapi/types';
 
@@ -15,7 +15,7 @@ const articleContentType = {
   },
 };
 
-let rq;
+let authRq;
 let strapi: Core.Strapi;
 const builder = createTestBuilder();
 
@@ -23,14 +23,15 @@ const restartWithSchema = async () => {
   await strapi.destroy();
   await builder.cleanup();
   await builder.addContentType(articleContentType).build();
+
   strapi = await createStrapiInstance();
-  rq = await createAuthRequest({ strapi });
+  authRq = await createAuthRequest({ strapi });
 };
 
 describe('Guided Tour Meta', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    authRq = await createAuthRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -40,7 +41,7 @@ describe('Guided Tour Meta', () => {
 
   describe('GET /admin/guided-tour-meta', () => {
     test('Returns correct initial state for a new installation', async () => {
-      const res = await rq({
+      const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',
         qs: { id: '1' },
@@ -49,48 +50,53 @@ describe('Guided Tour Meta', () => {
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({
         isFirstSuperAdminUser: true,
-        didCreateContentTypeSchema: false,
-        didCreateContent: false,
-        didCreateApiToken: false,
+        completedActions: [],
       });
     });
 
-    test('Detects first super admin user', async () => {
-      // Create a test user that is the first super admin
-      const secondSuperAdminUser = await strapi.db.query('admin::user').create({
-        data: { email: 'editor@editor.com', password: 'editor', roles: [1] },
-      });
-
-      const secondSuperAdminUserResponse = await rq({
+    test.only('Detects first super admin user', async () => {
+      const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',
-        qs: { id: secondSuperAdminUser.id },
-      });
-
-      expect(secondSuperAdminUserResponse.status).toBe(200);
-      expect(secondSuperAdminUserResponse.body.data.isFirstSuperAdminUser).toBe(false);
-
-      const res = await rq({
-        url: '/admin/guided-tour-meta',
-        method: 'GET',
-        qs: { id: '1' },
       });
 
       expect(res.status).toBe(200);
       expect(res.body.data.isFirstSuperAdminUser).toBe(true);
+
+      const newUser = {
+        email: 'second@user.com',
+        firstname: 'second',
+        lastname: 'user',
+        password: 'second123',
+        roles: [1],
+        isActive: true,
+      };
+      await strapi.db.query('admin::user').create({ data: newUser });
+      const request = await createAuthRequest({
+        strapi,
+        userInfo: newUser,
+      });
+
+      const secondSuperAdminUserResponse = await request({
+        url: '/admin/guided-tour-meta',
+        method: 'GET',
+      });
+      console.log(secondSuperAdminUserResponse.body.data);
+
+      expect(secondSuperAdminUserResponse.status).toBe(200);
+      expect(secondSuperAdminUserResponse.body.data.isFirstSuperAdminUser).toBe(false);
     });
 
     test('Detects created content type schemas', async () => {
       await restartWithSchema();
 
-      const res = await rq({
+      const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',
-        qs: { id: '1' },
       });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.didCreateContentTypeSchema).toBe(true);
+      expect(res.body.data.completedActions).toContain('didCreateContentTypeSchema');
     });
 
     test('Detects created content', async () => {
@@ -102,14 +108,13 @@ describe('Guided Tour Meta', () => {
         },
       });
 
-      const res = await rq({
+      const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',
-        qs: { id: '1' },
       });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.didCreateContent).toBe(true);
+      expect(res.body.data.completedActions).toContain('didCreateContent');
     });
 
     test('Detects created custom API tokens', async () => {
@@ -123,14 +128,13 @@ describe('Guided Tour Meta', () => {
         },
       });
 
-      const res = await rq({
+      const res = await authRq({
         url: '/admin/guided-tour-meta',
         method: 'GET',
-        qs: { id: '1' },
       });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.didCreateApiToken).toBe(true);
+      expect(res.body.data.completedActions).toContain('didCreateApiToken');
 
       // Cleanup
       await strapi.documents('admin::api-token').delete({

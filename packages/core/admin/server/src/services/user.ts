@@ -180,6 +180,7 @@ const isFirstSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
     },
     orderBy: { createdAt: 'asc' },
     limit: 1,
+    select: ['id'],
   });
 
   return oldestUser.id === currentUser.id;

@@ -115,18 +115,10 @@ const admin = adminApi
         }),
         providesTags: ['LicenseTrialTimeLeft'],
       }),
-      getGuidedTourMeta: builder.query<
-        GetGuidedTourMeta.Response,
-        GetGuidedTourMeta.Request['query']
-      >({
-        query: ({ id }) => ({
+      getGuidedTourMeta: builder.query<GetGuidedTourMeta.Response, void>({
+        query: () => ({
           url: '/admin/guided-tour-meta',
           method: 'GET',
-          config: {
-            params: {
-              id,
-            },
-          },
         }),
         providesTags: ['GuidedTourMeta'],
       }),
