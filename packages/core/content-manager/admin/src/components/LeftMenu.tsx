@@ -83,6 +83,11 @@ const LeftMenu = () => {
 
   const handleChangeSearch = ({ target: { value } }: { target: { value: string } }) => {
     setSearch(value);
+
+    const clearBtn = document.getElementById('search-clear-btn');
+    if (clearBtn) {
+      clearBtn.style.display = value.trim() === '' ? 'none' : 'inline-block';
+    }
   };
 
   const label = formatMessage({
@@ -125,7 +130,15 @@ const LeftMenu = () => {
             id: 'content-manager.components.LeftMenu.Search.label',
             defaultMessage: 'Search for a content type',
           })}
-          endAction={<Cross onClick={handleClear} fill="neutral500" cursor="pointer" />}
+          endAction={
+            <Cross
+              id="search-clear-btn"
+              onClick={handleClear}
+              fill="neutral500"
+              cursor="pointer"
+              style={{ display: search.trim() === '' ? 'none' : 'inline-block' }}
+            />
+          }
           size="S"
         />
       </Flex>
