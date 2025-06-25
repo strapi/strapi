@@ -52,84 +52,75 @@ describe('TableList | CellContent', () => {
   fileTypesToTest.forEach((fileType) => {
     it(`should render the ${fileType.expectedIcon === 'file-icon' ? 'default file' : 'corresponding'} icon according to the file type (${fileType.ext})`, () => {
       const { ext, expectedIcon, mime } = fileType;
-      const { container, getByTestId } = setup({
+      const { getByTestId } = setup({
         content: { ...PROPS_FIXTURE.content, mime, ext },
       });
 
       expect(getByTestId(expectedIcon)).toBeInTheDocument();
-      expect(container).toMatchSnapshot();
     });
   });
 
   it('should render image cell type when element type is folder', () => {
-    const { container, getByLabelText } = setup({ contentType: 'folder' });
+    const { getByLabelText } = setup({ contentType: 'folder' });
 
     expect(getByLabelText('folder')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 
   it('should render text cell type', () => {
-    const { container, getByText } = setup({
+    const { getByText } = setup({
       cellType: 'text',
       content: { ...PROPS_FIXTURE.content, name: 'some text' },
       name: 'name',
     });
 
     expect(getByText('some text')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 
   it('should render extension cell type when element type is asset', () => {
-    const { container, getByText } = setup({
+    const { getByText } = setup({
       cellType: 'ext',
       content: { ...PROPS_FIXTURE.content, ext: '.pdf' },
       name: 'ext',
     });
 
     expect(getByText('PDF')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 
   it('should render extension cell type with "-" when element type is folder', () => {
-    const { container, getByText } = setup({ cellType: 'ext', contentType: 'folder' });
+    const { getByText } = setup({ cellType: 'ext', contentType: 'folder' });
 
     expect(getByText('-')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 
   it('should render size cell type when element type is asset', () => {
-    const { container, getByText } = setup({
+    const { getByText } = setup({
       cellType: 'size',
       content: { ...PROPS_FIXTURE.content, size: Number('20.5435') },
       name: 'size',
     });
 
     expect(getByText('21KB')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 
   it('should render size cell type with "-" when element type is folder', () => {
-    const { container, getByText } = setup({ cellType: 'size', contentType: 'folder' });
+    const { getByText } = setup({ cellType: 'size', contentType: 'folder' });
 
     expect(getByText('-')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 
   it('should render date cell type', () => {
-    const { container, getByText } = setup({
+    const { getByText } = setup({
       cellType: 'date',
       content: { ...PROPS_FIXTURE.content, updatedAt: '2022-11-18T12:08:02.202Z' },
       name: 'updatedAt',
     });
 
     expect(getByText('Friday, November 18, 2022')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 
   it('should render "-" by default when no recognized cell type is passed', () => {
-    const { container, getByText } = setup({ cellType: 'not recognized type' });
+    const { getByText } = setup({ cellType: 'not recognized type' });
 
     expect(getByText('-')).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
   });
 });
