@@ -4,8 +4,10 @@ import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
 import { type Database } from '../..';
 import { identifiers } from '../../utils/identifiers';
+import { transformLogMessage } from '../logger';
 
 const debug = createDebug('strapi::database::migration');
+const migrationScriptId = '5.0.0-rename-identifiers-longer-than-max-length';
 
 type NameDiff<T> = {
   short: T;
@@ -22,8 +24,9 @@ type IdentifierDiffs = {
 };
 
 export const renameIdentifiersLongerThanMaxLength: Migration = {
-  name: '5.0.0-rename-identifiers-longer-than-max-length',
+  name: migrationScriptId,
   async up(knex, db) {
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} running`));
     const md = db.metadata;
 
     const diffs = findDiffs(md);
@@ -61,6 +64,7 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
         await knex.schema.renameTable(tableDiff.full.tableName, tableDiff.short.tableName);
       }
     }
+    db.logger.info(transformLogMessage('info', `Migration ${migrationScriptId} completed`));
   },
   async down() {
     throw new Error('not implemented');
