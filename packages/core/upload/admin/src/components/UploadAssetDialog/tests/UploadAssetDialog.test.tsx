@@ -3,6 +3,12 @@ import { within } from '@testing-library/react';
 import { fireEvent, render, screen } from '@tests/utils';
 
 import { UploadAssetDialog } from '../UploadAssetDialog';
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 describe('UploadAssetDialog', () => {
   let confirmSpy: jest.SpyInstance;
 

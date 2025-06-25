@@ -78,6 +78,12 @@ jest.mock('../../../../hooks/useSelectionState', () => ({
 jest.mock('../../../../hooks/usePersistentState', () => ({
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
+/**
+ * Mock the cropper import to avoid having an error
+ */
+jest.mock('cropperjs/dist/cropper.css?raw', () => '', {
+  virtual: true,
+});
 const renderML = () => ({
   ...renderRTL(<MediaLibrary />, {
     wrapper({ children }) {

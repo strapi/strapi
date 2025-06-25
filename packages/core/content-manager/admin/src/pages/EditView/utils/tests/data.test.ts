@@ -1,6 +1,11 @@
 import { testData } from '../../../../tests/data';
 import { removeProhibitedFields } from '../data';
 
+const defaultFieldsValues = {
+  name: 'name',
+  password: '',
+};
+
 describe('data', () => {
   describe('removeProhibitedFields', () => {
     it('should return an empty object', () => {
@@ -13,9 +18,9 @@ describe('data', () => {
       const { components, contentType } = testData;
 
       expect(
-        removeProhibitedFields(['password'])(contentType, components)({ name: 'test' })
+        removeProhibitedFields(['password'])(contentType, components)({ name: 'name' })
       ).toEqual({
-        name: 'test',
+        name: 'name',
       });
     });
 
@@ -24,10 +29,10 @@ describe('data', () => {
 
       expect(
         removeProhibitedFields(['password'])(contentType, components)({
-          name: 'test',
+          name: 'name',
           password: 'password',
         })
-      ).toEqual({ name: 'test', password: '' });
+      ).toEqual(defaultFieldsValues);
     });
 
     it('should remove all password fields', () => {
@@ -36,106 +41,70 @@ describe('data', () => {
       const result = removeProhibitedFields(['password'])(contentType, components)(modifiedData);
 
       expect(result).toEqual({
-        id: 1,
-        name: 'name',
         createdAt: '2020-04-28T13:22:13.033Z',
-        updatedAt: '2020-04-28T13:22:13.033Z',
-        password: '',
-        notrepeatable: {
-          id: 1,
-          name: 'name',
-          password: '',
-          subcomponotrepeatable: {
-            id: 4,
-            name: 'name',
-            password: '',
-          },
-          subrepeatable: [
-            {
-              id: 1,
-              name: 'name',
-              password: '',
-            },
-            {
-              id: 2,
-              name: 'name',
-              password: '',
-            },
-            {
-              id: 3,
-              name: 'name',
-              password: '',
-            },
-          ],
-        },
-        repeatable: [
-          {
-            id: 2,
-            name: 'name',
-            password: '',
-            subcomponotrepeatable: {
-              id: 6,
-              name: 'name',
-              password: '',
-            },
-            subrepeatable: [
-              {
-                id: 5,
-                name: 'name',
-                password: '',
-              },
-            ],
-          },
-          {
-            id: 3,
-            name: 'name',
-            password: '',
-            subcomponotrepeatable: null,
-            subrepeatable: [],
-          },
-        ],
         dz: [
           {
             __component: 'compos.sub-compo',
             id: 7,
-            name: 'name',
-            password: '',
+            ...defaultFieldsValues,
           },
           {
-            __component: 'compos.test-compo',
             id: 4,
-            name: 'name',
-            password: '',
+            documentId: '456789',
+            ...defaultFieldsValues,
             subcomponotrepeatable: null,
             subrepeatable: [],
+            __component: 'compos.test-compo',
           },
           {
-            __component: 'compos.test-compo',
             id: 5,
-            name: 'name',
-            password: '',
-            subcomponotrepeatable: {
-              id: 9,
-              name: 'name',
-              password: '',
-            },
-            subrepeatable: [
-              {
-                id: 8,
-                name: 'name',
-                password: '',
-              },
-            ],
+            documentId: '567890',
+            ...defaultFieldsValues,
+            subcomponotrepeatable: { id: 9, name: 'name', password: '' },
+            subrepeatable: [{ id: 8, name: 'name', password: '' }],
+            __component: 'compos.test-compo',
           },
           {
-            __component: 'compos.test-compo',
             id: 6,
+            documentId: '678901',
             name: null,
             password: null,
             subcomponotrepeatable: null,
             subrepeatable: [],
+            __component: 'compos.test-compo',
           },
         ],
+        id: 1,
+        name: 'name',
+        notrepeatable: {
+          id: 1,
+          documentId: '123456',
+          ...defaultFieldsValues,
+          subcomponotrepeatable: { id: 4, name: 'name', password: '' },
+          subrepeatable: [
+            { id: 1, name: 'name', password: '' },
+            { id: 2, name: 'name', password: '' },
+            { id: 3, name: 'name', password: '' },
+          ],
+        },
+        password: '',
+        repeatable: [
+          {
+            id: 2,
+            documentId: '234567',
+            ...defaultFieldsValues,
+            subrepeatable: [{ id: 5, name: 'name', password: '' }],
+            subcomponotrepeatable: { id: 6, name: 'name', password: '' },
+          },
+          {
+            id: 3,
+            documentId: '345678',
+            ...defaultFieldsValues,
+            subrepeatable: [],
+            subcomponotrepeatable: null,
+          },
+        ],
+        updatedAt: '2020-04-28T13:22:13.033Z',
       });
     });
   });
