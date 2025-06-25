@@ -872,7 +872,7 @@ describe('BlocksToolbar', () => {
     expect(linkButton).toBeDisabled();
   });
 
-  it('should move selection to the first node if selection is out of bounds', async () => {
+  it('should move selection to the first node when selection is out of bounds', async () => {
     setup([
       {
         type: 'paragraph',
