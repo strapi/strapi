@@ -19,10 +19,13 @@ let authRq;
 let strapi: Core.Strapi;
 const builder = createTestBuilder();
 
-const restartWithSchema = async () => {
+const restart = async ({ withSchema = false }: { withSchema?: boolean }) => {
   await strapi.destroy();
   await builder.cleanup();
-  await builder.addContentType(articleContentType).build();
+
+  if (withSchema) {
+    await builder.addContentType(articleContentType).build();
+  }
 
   strapi = await createStrapiInstance();
   authRq = await createAuthRequest({ strapi });
@@ -32,6 +35,11 @@ describe('Guided Tour Meta', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     authRq = await createAuthRequest({ strapi });
+  });
+
+  afterEach(async () => {
+    // Ensure each test cleans up
+    await restart({ withSchema: false });
   });
 
   afterAll(async () => {
@@ -87,7 +95,7 @@ describe('Guided Tour Meta', () => {
     });
 
     test('Detects created content type schemas', async () => {
-      await restartWithSchema();
+      await restart({ withSchema: true });
 
       const res = await authRq({
         url: '/admin/guided-tour-meta',
@@ -99,9 +107,9 @@ describe('Guided Tour Meta', () => {
     });
 
     test('Detects created content', async () => {
-      await restartWithSchema();
+      await restart({ withSchema: true });
 
-      await strapi.documents('api::article.article').create({
+      const createdDocument = await strapi.documents('api::article.article').create({
         data: {
           name: 'Article 1',
         },
@@ -114,6 +122,11 @@ describe('Guided Tour Meta', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.completedActions).toContain('didCreateContent');
+
+      // Cleanup
+      await strapi.documents('api::article.article').delete({
+        documentId: createdDocument.documentId,
+      });
     });
 
     test('Detects created custom API tokens', async () => {
