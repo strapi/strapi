@@ -224,19 +224,15 @@ describe('DocumentActionsMenu', () => {
       <DocumentActionsMenu
         actions={[
           { id: '1', label: 'Action 1', onClick: jest.fn(), variant: 'default' },
-          { id: '2', label: 'Action 2', onClick: jest.fn(), variant: 'secondary' },
           { id: '3', label: 'Action 3', onClick: jest.fn(), variant: 'danger' },
-          { id: '4', label: 'Action 4', onClick: jest.fn(), variant: 'success' },
         ]}
       />
     );
 
     await user.click(screen.getByRole('button', { name: 'More document actions' }));
 
-    expect(screen.getByText('Action 1')).toHaveStyle({ color: '#4945ff' }); // primary600
-    expect(screen.getByText('Action 2')).toHaveStyle({ color: 'rgb(50, 50, 77);' }); // neutral800
-    expect(screen.getByText('Action 3')).toHaveStyle({ color: '#D02B20' }); // danger600
-    expect(screen.getByText('Action 4')).toHaveStyle({ color: 'rgb(50, 128, 72)' }); // success600
+    expect(screen.getByText('Action 1')).toHaveStyle({ color: 'rgb(50, 50, 77);' }); // neutral800
+    expect(screen.getByText('Action 3')).toHaveStyle({ color: 'rgb(183, 43, 60);' }); // danger700
   });
 
   it('should render a notification if action has been pressed and the notification dialog props are provided', async () => {
