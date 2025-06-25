@@ -561,5 +561,6 @@
   "components.Blocks.blocks.quote": "Citation",
   "components.Blocks.blocks.image": "Image",
   "components.Blocks.blocks.unorderedList": "Liste à puces",
-  "components.Blocks.blocks.orderedList": "Liste numérotée"
+  "components.Blocks.blocks.orderedList": "Liste numérotée",
+  "widget.profile.title": "Profil"
 }

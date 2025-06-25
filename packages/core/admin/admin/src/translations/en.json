@@ -804,5 +804,6 @@
   "tours.contentManager.Introduction.content": "Create and manage content from your collection types and single types.",
   "tours.stepCount": "Step {currentStep} of {tourLength}",
   "tours.skip": "Skip",
-  "tours.next": "Next"
+  "tours.next": "Next",
+  "widget.profile.title": "Profile"
 }
