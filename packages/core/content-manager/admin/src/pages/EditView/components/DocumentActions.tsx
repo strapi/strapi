@@ -6,6 +6,7 @@ import {
   NotificationConfig,
   useAPIErrorHandler,
   useQueryParams,
+  unstable_tours,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -178,7 +179,10 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <Flex gap={2}>
-        <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+        <unstable_tours.contentManager.Publish>
+          <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+        </unstable_tours.contentManager.Publish>
+
         {restActions.length > 0 ? (
           <DocumentActionsMenu
             actions={restActions}

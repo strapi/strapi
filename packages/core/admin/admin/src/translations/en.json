@@ -806,9 +806,10 @@
   "tours.contentManager.Fields.content": "Add content to the fields created in the Content-Type Builder.",
   "tours.contentManager.Publish.title": "Publish",
   "tours.contentManager.Publish.content": "Publish entries to make their content available through the Document Service API.",
-  "tours.contentManager.Final.title": "It’s time to create API Tokens!",
-  "tours.contentManager.Final.content": "Now that you’ve created and published content, time to create API tokens and set up permissions.",
+  "tours.contentManager.FinalStep.title": "It’s time to create API Tokens!",
+  "tours.contentManager.FinalStep.content": "Now that you’ve created and published content, time to create API tokens and set up permissions.",
   "tours.stepCount": "Step {currentStep} of {tourLength}",
   "tours.skip": "Skip",
-  "tours.next": "Next"
+  "tours.next": "Next",
+  "tours.gotIt": "Got it"
 }

@@ -87,7 +87,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
     const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
     const currentStep = state.tours[tourName].currentStep + 1;
-    const tourLength = state.tours[tourName].length;
+    const tourLength = state.tours[tourName].length - 1;
 
     return (
       <ActionsContainer width="100%" padding={3} paddingLeft={5}>

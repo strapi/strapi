@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Box, Popover } from '@strapi/design-system';
+import { Box, Popover, Flex, Button } from '@strapi/design-system';
+import { FormattedMessage } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
@@ -31,44 +32,57 @@ const tours = {
     {
       name: 'Fields',
       content: (Step) => (
-        <Step.Root sideOffset={-36}>
+        <Step.Root side={'top'} align="start" sideOffset={20}>
           <Step.Title id="tours.contentManager.Fields.title" defaultMessage="Fields" />
           <Step.Content
             id="tours.contentManager.Fields.content"
             defaultMessage="Add content to the fields created in the Content-Type Builder."
           />
-          <Step.Actions showSkip />
+          <Step.Actions />
         </Step.Root>
       ),
     },
     {
       name: 'Publish',
       content: (Step) => (
-        <Step.Root sideOffset={-36}>
+        <Step.Root side={'left'} align="center" sideOffset={20}>
           <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
           <Step.Content
             id="tours.contentManager.Publish.content"
             defaultMessage="Publish entries to make their content available through the Document Service API."
           />
-          <Step.Actions showSkip />
+          <Step.Actions />
         </Step.Root>
       ),
     },
     {
-      name: 'Final',
-      content: (Step) => (
-        <Step.Root sideOffset={-36}>
-          <Step.Title
-            id="tours.contentManager.Final.title"
-            defaultMessage="It’s time to create API Tokens!"
-          />
-          <Step.Content
-            id="tours.contentManager.Final.content"
-            defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
-          />
-          <Step.Actions showSkip />
-        </Step.Root>
-      ),
+      name: 'FinalStep',
+      content: (Step) => {
+        const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
+        return (
+          <Step.Root sideOffset={-36}>
+            <Step.Title
+              id="tours.contentManager.FinalStep.title"
+              defaultMessage="It’s time to create API Tokens!"
+            />
+            <Step.Content
+              id="tours.contentManager.FinalStep.content"
+              defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
+            />
+            <Step.Actions showStepCount={false}>
+              <Flex>
+                <Button
+                  onClick={() => {
+                    dispatch({ type: 'next_step', payload: 'contentManager' });
+                  }}
+                >
+                  <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
+                </Button>
+              </Flex>
+            </Step.Actions>
+          </Step.Root>
+        );
+      },
     },
   ]),
 } as const;
@@ -109,19 +123,21 @@ const UnstableGuidedTourTooltip = ({
   tourName: ValidTourName;
   step: number;
 }) => {
-  if (!window.strapi.future.isEnabled('unstableGuidedTour')) {
-    return children;
-  }
+  const disabledUnstableGuidedTour = !window.strapi.future.isEnabled('unstableGuidedTour');
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
-  const isCurrentStep = state.tours[tourName].currentStep === step;
-  const isPopoverOpen = isCurrentStep && !state.tours[tourName].isCompleted;
+  const isCurrentStep = disabledUnstableGuidedTour
+    ? undefined
+    : state.tours[tourName].currentStep === step;
+  const isPopoverOpen = disabledUnstableGuidedTour
+    ? undefined
+    : isCurrentStep && !state.tours[tourName].isCompleted;
 
   // Lock the scroll
   React.useEffect(() => {
-    if (!isPopoverOpen) return;
+    if (!isPopoverOpen || disabledUnstableGuidedTour) return;
 
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -129,7 +145,11 @@ const UnstableGuidedTourTooltip = ({
     return () => {
       document.body.style.overflow = originalStyle;
     };
-  }, [isPopoverOpen]);
+  }, [disabledUnstableGuidedTour, isPopoverOpen]);
+
+  if (disabledUnstableGuidedTour) {
+    return children;
+  }
 
   return (
     <>
