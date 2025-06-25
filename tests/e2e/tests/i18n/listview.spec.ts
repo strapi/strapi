@@ -31,8 +31,12 @@ test.describe('List view', () => {
      */
     await expect(page.getByRole('row', { name: 'Nike Mens 23/24 Away Stadium' })).toBeVisible();
     await expect(page.getByRole('gridcell', { name: 'Available in' })).toBeVisible();
-    await expect(page.getByRole('gridcell', { name: 'English (en) (default)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'English (en) (default)' })).toBeVisible();
+    await expect(
+      page.getByRole('gridcell', { name: 'English (en) (default)' }).first()
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'English (en) (default)' }).first()
+    ).toBeVisible();
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toBeVisible();
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of LOCALES) {

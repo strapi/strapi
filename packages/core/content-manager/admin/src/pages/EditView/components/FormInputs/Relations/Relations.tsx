@@ -6,6 +6,7 @@ import {
   useForm,
   useNotification,
   useFocusInputField,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -21,8 +22,10 @@ import {
   Field,
   FlexComponent,
   BoxComponent,
+  Loader,
+  EmptyStateLayout,
 } from '@strapi/design-system';
-import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus } from '@strapi/icons';
+import { Cross, Drag, ArrowClockwise, Link as LinkIcon, Plus, WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -33,6 +36,8 @@ import { styled } from 'styled-components';
 import { RelationDragPreviewProps } from '../../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../../constants/collections';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
+import { PERMISSIONS } from '../../../../../constants/plugin';
+import { DocumentRBAC, useDocumentRBAC } from '../../../../../features/DocumentRBAC';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { useDocument } from '../../../../../hooks/useDocument';
 import { type DocumentMeta, useDocumentContext } from '../../../../../hooks/useDocumentContext';
@@ -54,6 +59,7 @@ import { DocumentStatus } from '../../DocumentStatus';
 import { useComponent } from '../ComponentContext';
 import { RelationModalRenderer, getCollectionType } from '../Relations/RelationModal';
 
+import type { FindAvailable } from '../../../../../../../shared/contracts/relations';
 import type { Schema } from '@strapi/types';
 
 /**
@@ -484,7 +490,6 @@ const RelationsInput = ({
   isRelatedToCurrentDocument,
   ...props
 }: RelationsInputProps) => {
-  const [textValue, setTextValue] = React.useState<string | undefined>('');
   const [searchParams, setSearchParams] = React.useState({
     _q: '',
     page: 1,
@@ -492,7 +497,7 @@ const RelationsInput = ({
   const { toggleNotification } = useNotification();
   const { currentDocumentMeta } = useDocumentContext('RelationsInput');
   const { formatMessage } = useIntl();
-  const fieldRef = useFocusInputField<HTMLInputElement>(name);
+
   const field = useField<RelationsFormValue>(name);
 
   const searchParamsDebounced = useDebounce(searchParams, 300);
@@ -540,10 +545,6 @@ const RelationsInput = ({
     currentDocumentMeta.params,
   ]);
 
-  const handleSearch = async (search: string) => {
-    setSearchParams((s) => ({ ...s, _q: search, page: 1 }));
-  };
-
   const hasNextPage = data?.pagination ? data.pagination.page < data.pagination.pageCount : false;
 
   const options = data?.results ?? [];
@@ -582,18 +583,6 @@ const RelationsInput = ({
     onChange(relation);
   };
 
-  const handleLoadMore = () => {
-    if (!data || !data.pagination) {
-      return;
-    } else if (data.pagination.page < data.pagination.pageCount) {
-      setSearchParams((s) => ({ ...s, page: s.page + 1 }));
-    }
-  };
-
-  React.useLayoutEffect(() => {
-    setTextValue('');
-  }, [field.value]);
-
   const relation = {
     collectionType: COLLECTION_TYPES,
     // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
@@ -602,25 +591,127 @@ const RelationsInput = ({
     params: currentDocumentMeta.params,
   } as DocumentMeta;
 
-  const { componentUID } = useComponent('RelationsField', ({ uid }) => ({
-    componentUID: uid,
-  }));
+  const {
+    permissions = [],
+    isLoading: isLoadingPermissions,
+    error,
+  } = useRBAC(
+    PERMISSIONS.map((action) => ({
+      action,
+      subject: relation.model,
+    }))
+  );
+
+  if (error) {
+    return (
+      <Flex alignItems="center" height="100%" justifyContent="center">
+        <EmptyStateLayout
+          icon={<WarningCircle width="16rem" />}
+          content={formatMessage({
+            id: 'anErrorOccurred',
+            defaultMessage: 'Whoops! Something went wrong. Please, try again.',
+          })}
+        />
+      </Flex>
+    );
+  }
 
   return (
     <Field.Root error={field.error} hint={hint} name={name} required={required}>
       <Field.Label action={labelAction}>{label}</Field.Label>
-      <RelationModalRenderer>
-        {({ dispatch }) => (
-          <Combobox
-            ref={fieldRef}
-            creatable="visible"
-            createMessage={() =>
-              formatMessage({
-                id: getTranslation('relation.create'),
-                defaultMessage: 'Create a relation',
-              })
-            }
-            onCreateOption={() => {
+      <DocumentRBAC permissions={permissions} model={relation.model}>
+        <RelationModalWithContext
+          relation={relation}
+          name={name}
+          placeholder={placeholder}
+          hasNextPage={hasNextPage}
+          isLoadingPermissions={isLoadingPermissions}
+          isLoadingSearchRelations={isLoading}
+          handleChange={handleChange}
+          setSearchParams={setSearchParams}
+          data={data}
+          mainField={mainField}
+          fieldValue={field.value}
+          {...props}
+        />
+      </DocumentRBAC>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
+  );
+};
+
+interface RelationModalWithContextProps
+  extends Omit<RelationsInputProps, 'onChange' | 'label' | 'model' | 'isRelatedToCurrentDocument'> {
+  relation: DocumentMeta;
+  hasNextPage: boolean;
+  isLoadingSearchRelations: boolean;
+  isLoadingPermissions: boolean;
+  handleChange: (relationId?: string) => void;
+  data?: FindAvailable.Response;
+  fieldValue?: RelationsFormValue;
+  setSearchParams: React.Dispatch<
+    React.SetStateAction<{
+      _q: string;
+      page: number;
+    }>
+  >;
+}
+
+const RelationModalWithContext = ({
+  relation,
+  name,
+  placeholder,
+  hasNextPage,
+  isLoadingSearchRelations,
+  isLoadingPermissions,
+  handleChange,
+  mainField,
+  setSearchParams,
+  fieldValue,
+  data,
+  ...props
+}: RelationModalWithContextProps) => {
+  const [textValue, setTextValue] = React.useState<string | undefined>('');
+  const { formatMessage } = useIntl();
+  const canCreate = useDocumentRBAC('RelationModalWrapper', (state) => state.canCreate);
+  const fieldRef = useFocusInputField<HTMLInputElement>(name);
+  const { componentUID } = useComponent('RelationsField', ({ uid }) => ({
+    componentUID: uid,
+  }));
+
+  const handleLoadMore = () => {
+    if (!data || !data.pagination) {
+      return;
+    } else if (data.pagination.page < data.pagination.pageCount) {
+      setSearchParams((s) => ({ ...s, page: s.page + 1 }));
+    }
+  };
+
+  const options = data?.results ?? [];
+
+  React.useLayoutEffect(() => {
+    setTextValue('');
+  }, [fieldValue]);
+
+  const handleSearch = async (search: string) => {
+    setSearchParams((s) => ({ ...s, _q: search, page: 1 }));
+  };
+  return (
+    <RelationModalRenderer>
+      {({ dispatch }) => (
+        <Combobox
+          ref={fieldRef}
+          creatable="visible"
+          creatableDisabled={!canCreate}
+          createMessage={() =>
+            formatMessage({
+              id: getTranslation('relation.create'),
+              defaultMessage: 'Create a relation',
+            })
+          }
+          onCreateOption={() => {
+            if (canCreate) {
               dispatch({
                 type: 'GO_TO_RELATION',
                 payload: {
@@ -630,64 +721,62 @@ const RelationsInput = ({
                   fieldToConnectUID: componentUID,
                 },
               });
-            }}
-            creatableStartIcon={<Plus fill="neutral500" />}
-            name={name}
-            autocomplete="list"
-            placeholder={
-              placeholder ||
-              formatMessage({
-                id: getTranslation('relation.add'),
-                defaultMessage: 'Add relation',
-              })
             }
-            hasMoreItems={hasNextPage}
-            loading={isLoading}
-            onOpenChange={() => {
-              handleSearch(textValue ?? '');
-            }}
-            noOptionsMessage={() =>
-              formatMessage({
-                id: getTranslation('relation.notAvailable'),
-                defaultMessage: 'No relations available',
-              })
-            }
-            loadingMessage={formatMessage({
-              id: getTranslation('relation.isLoading'),
-              defaultMessage: 'Relations are loading',
-            })}
-            onLoadMore={handleLoadMore}
-            textValue={textValue}
-            onChange={handleChange}
-            onTextValueChange={(text) => {
-              setTextValue(text);
-            }}
-            onInputChange={(event) => {
-              handleSearch(event.currentTarget.value);
-            }}
-            {...props}
-          >
-            {options.map((opt) => {
-              const textValue = getRelationLabel(opt, mainField);
+          }}
+          creatableStartIcon={<Plus fill="neutral500" />}
+          name={name}
+          autocomplete="list"
+          placeholder={
+            placeholder ||
+            formatMessage({
+              id: getTranslation('relation.add'),
+              defaultMessage: 'Add relation',
+            })
+          }
+          hasMoreItems={hasNextPage}
+          loading={isLoadingSearchRelations || isLoadingPermissions}
+          onOpenChange={() => {
+            handleSearch(textValue ?? '');
+          }}
+          noOptionsMessage={() =>
+            formatMessage({
+              id: getTranslation('relation.notAvailable'),
+              defaultMessage: 'No relations available',
+            })
+          }
+          loadingMessage={formatMessage({
+            id: getTranslation('relation.isLoading'),
+            defaultMessage: 'Relations are loading',
+          })}
+          onLoadMore={handleLoadMore}
+          textValue={textValue}
+          onChange={handleChange}
+          onTextValueChange={(text) => {
+            setTextValue(text);
+          }}
+          onInputChange={(event) => {
+            handleSearch(event.currentTarget.value);
+          }}
+          {...props}
+        >
+          {options?.map((opt) => {
+            const textValue = getRelationLabel(opt, mainField);
 
-              return (
-                <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
-                  <Flex gap={2} justifyContent="space-between">
-                    <Flex gap={2}>
-                      <LinkIcon fill="neutral500" />
-                      <Typography ellipsis>{textValue}</Typography>
-                    </Flex>
-                    {opt.status ? <DocumentStatus status={opt.status} /> : null}
+            return (
+              <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
+                <Flex gap={2} justifyContent="space-between">
+                  <Flex gap={2}>
+                    <LinkIcon fill="neutral500" />
+                    <Typography ellipsis>{textValue}</Typography>
                   </Flex>
-                </ComboboxOption>
-              );
-            })}
-          </Combobox>
-        )}
-      </RelationModalRenderer>
-      <Field.Error />
-      <Field.Hint />
-    </Field.Root>
+                  {opt.status ? <DocumentStatus status={opt.status} /> : null}
+                </Flex>
+              </ComboboxOption>
+            );
+          })}
+        </Combobox>
+      )}
+    </RelationModalRenderer>
   );
 };
 
