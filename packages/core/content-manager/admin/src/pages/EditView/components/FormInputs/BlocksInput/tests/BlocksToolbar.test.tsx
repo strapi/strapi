@@ -633,7 +633,7 @@ describe('BlocksToolbar', () => {
     ]);
   });
 
-  it('creates a new node when selecting a block if there is no selection', async () => {
+  it('creates a new node when selecting a block and there is no selection', async () => {
     const { user } = setup([
       {
         type: 'paragraph',
@@ -872,13 +872,8 @@ describe('BlocksToolbar', () => {
     expect(linkButton).toBeDisabled();
   });
 
-  it('should move selection to the first node when selection is out of bounds', async () => {
-    setup([
-      {
-        type: 'paragraph',
-        children: [{ type: 'text', text: 'First paragraph' }],
-      },
-    ]);
+  it('should move selection to the first node when selection is out of bounds and editor has only one line', async () => {
+    setup();
     await select({
       anchor: { path: [5, 0], offset: 0 },
       focus: { path: [5, 0], offset: 0 },
@@ -887,5 +882,26 @@ describe('BlocksToolbar', () => {
 
     expect(baseEditor.selection?.anchor.path).toEqual([0, 0]);
     expect(baseEditor.selection?.focus.path).toEqual([0, 0]);
+  });
+
+  it('should move selection to last node when selection is out of bounds and editor has more than one line', async () => {
+    setup([
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'A line of text in a paragraph.' }],
+      },
+      {
+        type: 'paragraph',
+        children: [{ type: 'text', text: 'Another line of text in a paragraph.' }],
+      },
+    ]);
+    await select({
+      anchor: { path: [5, 0], offset: 0 },
+      focus: { path: [5, 0], offset: 0 },
+    });
+    expect(screen.getByRole('toolbar')).toBeInTheDocument();
+
+    expect(baseEditor.selection?.anchor.path).toEqual([1, 0]);
+    expect(baseEditor.selection?.focus.path).toEqual([1, 0]);
   });
 });
