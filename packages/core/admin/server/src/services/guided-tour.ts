@@ -1,4 +1,5 @@
 import { Core, Internal } from '@strapi/types';
+import constants from './constants';
 
 export type GuidedTourRequiredActions = {
   didCreateContentTypeSchema: boolean;
@@ -27,12 +28,16 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
     })();
     const didCreateContent = didCreateContentTypeSchema && hasContent;
 
+    const defaultTokens = Object.values(constants.DEFAULT_API_TOKENS);
     // Check if any api tokens have been created besides the default ones
-    const DEFAULT_API_TOKENS = ['Read Only', 'Full Access'];
-    const apiTokenNames = (await strapi.documents('admin::api-token').findMany()).map(
-      (token) => token.name
+    const createdApiTokens = await strapi
+      .documents('admin::api-token')
+      .findMany({ fields: ['name', 'description'] });
+    const didCreateApiToken = createdApiTokens.some((doc) =>
+      defaultTokens.every(
+        (token) => token.name !== doc.name && token.description !== doc.description
+      )
     );
-    const didCreateApiToken = apiTokenNames.some((name) => !DEFAULT_API_TOKENS.includes(name));
 
     // Compute an array of action names that have been completed
     const requiredActions = {
