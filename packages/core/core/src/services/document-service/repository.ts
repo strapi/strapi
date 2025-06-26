@@ -240,9 +240,34 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
+        const dataToCreate = { ...queryParams.data, documentId };
+
+        // Check if this is a localized content type and if i18n plugin is available
+        const i18nService = strapi.plugin('i18n')?.service('content-types');
+        if (i18nService?.isLocalizedContentType(contentType)) {
+          // Find an existing entry for the same document to copy unlocalized fields from
+          const existingEntry = await strapi.db.query(contentType.uid).findOne({
+            where: { documentId },
+            // Prefer published entry, but fall back to any entry
+            orderBy: { publishedAt: 'desc' },
+          });
+
+          // If an entry exists in another locale, copy its non-localized fields
+          if (existingEntry) {
+            const nonLocalizedAttributes = i18nService.getNonLocalizedAttributes(contentType);
+
+            // Don't override provided data
+            for (const attr of nonLocalizedAttributes) {
+              if (existingEntry[attr] !== undefined && dataToCreate[attr] === undefined) {
+                dataToCreate[attr] = existingEntry[attr];
+              }
+            }
+          }
+        }
+
         updatedDraft = await entries.create({
           ...queryParams,
-          data: { ...queryParams.data, documentId },
+          data: dataToCreate,
         });
         emitEvent('entry.create', updatedDraft);
       }
