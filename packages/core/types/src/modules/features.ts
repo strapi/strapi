@@ -1,5 +1,7 @@
 export interface FeaturesConfig {
-  future?: object;
+  future?: {
+    unstableGuidedTour?: boolean;
+  };
 }
 
 export interface FeaturesService {
