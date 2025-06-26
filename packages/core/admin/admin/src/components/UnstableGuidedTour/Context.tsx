@@ -55,9 +55,6 @@ const UnstableGuidedTourContext = ({
   // NOTE: Maybe we just import this directly instead of a prop?
   tours: Tours;
 }) => {
-  if (!window.strapi.future.isEnabled('unstableGuidedTour')) {
-    return children;
-  }
   // Derive the tour state from the tours object
   const tours = Object.keys(registeredTours).reduce(
     (acc, tourName) => {
