@@ -22,6 +22,22 @@ const constants = {
     DAYS_30: 30 * DAY_IN_MS,
     DAYS_90: 90 * DAY_IN_MS,
   },
+  DEFAULT_API_TOKENS: [
+    {
+      name: 'Read Only',
+      description:
+        'A default API token with read-only permissions, only used for accessing resources',
+      type: 'read-only',
+      lifespan: null,
+    },
+    {
+      name: 'Full Access',
+      description:
+        'A default API token with full access permissions, used for accessing or modifying resources',
+      type: 'full-access',
+      lifespan: null,
+    },
+  ] as const,
   TRANSFER_TOKEN_TYPE: {
     PUSH: 'push',
     PULL: 'pull',
