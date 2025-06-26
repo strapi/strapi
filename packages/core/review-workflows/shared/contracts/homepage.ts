@@ -12,6 +12,10 @@ export interface RecentDocument {
   title: string;
   updatedAt: Date;
   publishedAt?: Date | null;
+  strapi_stage?: {
+    color?: string;
+    name: string;
+  };
 }
 
 export declare namespace GetRecentDocuments {

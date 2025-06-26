@@ -6,10 +6,8 @@
 
 export { buildValidParams } from './utils/api';
 
-// export { RelativeTime } from './components/RelativeTime';
+export { RelativeTime } from './components/RelativeTime';
 export { DocumentStatus } from './pages/EditView/components/DocumentStatus';
-// export { useGetRecentDocumentsQuery } from './services/homepage';
-// export type { RecentDocument } from '../../shared/contracts/homepage';
 export {
   useDocument as unstable_useDocument,
   useContentManagerContext as unstable_useContentManagerContext,

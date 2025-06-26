@@ -1,3 +1,5 @@
+import * as Homepage from '../../../shared/contracts/homepage';
+
 /* eslint-disable check-file/filename-naming-convention */
 import { reviewWorkflowsApi } from './api';
 
@@ -16,106 +18,121 @@ interface ContentTypes {
 
 const SINGLE_TYPES = 'single-types';
 
-const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getStages: builder.query<
-      {
-        stages: NonNullable<GetStages.Response['data']>;
-        meta: NonNullable<GetStages.Response['meta']>;
-      },
-      GetStages.Params & { slug: string; params?: object }
-    >({
-      query: ({ model, slug, id, params }) => ({
-        url: `/review-workflows/content-manager/${slug}/${model}/${id}/stages`,
-        method: 'GET',
-        config: {
-          params,
+const contentManagerApi = reviewWorkflowsApi
+  .enhanceEndpoints({
+    addTagTypes: ['RecentDocumentList'],
+  })
+  .injectEndpoints({
+    endpoints: (builder) => ({
+      getStages: builder.query<
+        {
+          stages: NonNullable<GetStages.Response['data']>;
+          meta: NonNullable<GetStages.Response['meta']>;
         },
-      }),
-      transformResponse: (res: GetStages.Response) => {
-        return {
-          meta: res.meta ?? { workflowCount: 0 },
-          stages: res.data ?? [],
-        };
-      },
-      providesTags: ['ReviewWorkflowStages'],
-    }),
-    updateStage: builder.mutation<
-      UpdateStage.Response['data'],
-      UpdateStage.Request['body'] & UpdateStage.Params & { slug: string; params?: object }
-    >({
-      query: ({ model, slug, id, params, ...data }) => ({
-        url: `/review-workflows/content-manager/${slug}/${model}/${id}/stage`,
-        method: 'PUT',
-        data,
-        config: {
-          params,
-        },
-      }),
-      transformResponse: (res: UpdateStage.Response) => res.data,
-      invalidatesTags: (_result, _error, { slug, id, model }) => {
-        return [
-          {
-            type: 'Document',
-            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+        GetStages.Params & { slug: string; params?: object }
+      >({
+        query: ({ model, slug, id, params }) => ({
+          url: `/review-workflows/content-manager/${slug}/${model}/${id}/stages`,
+          method: 'GET',
+          config: {
+            params,
           },
-          { type: 'Document', id: `${model}_LIST` },
-          'ReviewWorkflowStages',
-        ];
-      },
-    }),
-    updateAssignee: builder.mutation<
-      UpdateAssignee.Response['data'],
-      UpdateAssignee.Request['body'] & UpdateAssignee.Params & { slug: string; params?: object }
-    >({
-      query: ({ model, slug, id, params, ...data }) => ({
-        url: `/review-workflows/content-manager/${slug}/${model}/${id}/assignee`,
-        method: 'PUT',
-        data,
-        config: {
-          params,
+        }),
+        transformResponse: (res: GetStages.Response) => {
+          return {
+            meta: res.meta ?? { workflowCount: 0 },
+            stages: res.data ?? [],
+          };
+        },
+        providesTags: ['ReviewWorkflowStages'],
+      }),
+      updateStage: builder.mutation<
+        UpdateStage.Response['data'],
+        UpdateStage.Request['body'] & UpdateStage.Params & { slug: string; params?: object }
+      >({
+        query: ({ model, slug, id, params, ...data }) => ({
+          url: `/review-workflows/content-manager/${slug}/${model}/${id}/stage`,
+          method: 'PUT',
+          data,
+          config: {
+            params,
+          },
+        }),
+        transformResponse: (res: UpdateStage.Response) => res.data,
+        invalidatesTags: (_result, _error, { slug, id, model }) => {
+          return [
+            {
+              type: 'Document',
+              id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+            },
+            { type: 'Document', id: `${model}_LIST` },
+            'ReviewWorkflowStages',
+          ];
         },
       }),
-      transformResponse: (res: UpdateAssignee.Response) => res.data,
-      invalidatesTags: (_result, _error, { slug, id, model }) => {
-        return [
-          {
-            type: 'Document',
-            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+      updateAssignee: builder.mutation<
+        UpdateAssignee.Response['data'],
+        UpdateAssignee.Request['body'] & UpdateAssignee.Params & { slug: string; params?: object }
+      >({
+        query: ({ model, slug, id, params, ...data }) => ({
+          url: `/review-workflows/content-manager/${slug}/${model}/${id}/assignee`,
+          method: 'PUT',
+          data,
+          config: {
+            params,
           },
-          { type: 'Document', id: `${model}_LIST` },
-        ];
-      },
-    }),
-    getContentTypes: builder.query<ContentTypes, void>({
-      query: () => ({
-        url: `/content-manager/content-types`,
-        method: 'GET',
+        }),
+        transformResponse: (res: UpdateAssignee.Response) => res.data,
+        invalidatesTags: (_result, _error, { slug, id, model }) => {
+          return [
+            {
+              type: 'Document',
+              id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+            },
+            { type: 'Document', id: `${model}_LIST` },
+          ];
+        },
       }),
-      transformResponse: (res: { data: Contracts.ContentTypes.ContentType[] }) => {
-        return res.data.reduce<ContentTypes>(
-          (acc, curr) => {
-            if (curr.isDisplayed) {
-              acc[curr.kind].push(curr);
+      getContentTypes: builder.query<ContentTypes, void>({
+        query: () => ({
+          url: `/content-manager/content-types`,
+          method: 'GET',
+        }),
+        transformResponse: (res: { data: Contracts.ContentTypes.ContentType[] }) => {
+          return res.data.reduce<ContentTypes>(
+            (acc, curr) => {
+              if (curr.isDisplayed) {
+                acc[curr.kind].push(curr);
+              }
+              return acc;
+            },
+            {
+              collectionType: [],
+              singleType: [],
             }
-            return acc;
-          },
-          {
-            collectionType: [],
-            singleType: [],
-          }
-        );
-      },
+          );
+        },
+      }),
+      getRecentDocuments: builder.query<
+        Homepage.GetRecentDocuments.Response['data'],
+        Homepage.GetRecentDocuments.Request['query']
+      >({
+        query: (params) => `/content-manager/homepage/recent-documents?action=${params.action}`,
+        transformResponse: (response: Homepage.GetRecentDocuments.Response) => response.data,
+        providesTags: (res, _err, { action }) => [
+          { type: 'RecentDocumentList' as const, id: action },
+        ],
+      }),
     }),
-  }),
-  overrideExisting: true,
-});
+    overrideExisting: true,
+  });
 
 const {
   useGetStagesQuery,
   useUpdateStageMutation,
   useUpdateAssigneeMutation,
   useGetContentTypesQuery,
+  useGetRecentDocumentsQuery,
 } = contentManagerApi;
 
 export {
@@ -123,5 +140,6 @@ export {
   useUpdateStageMutation,
   useUpdateAssigneeMutation,
   useGetContentTypesQuery,
+  useGetRecentDocumentsQuery,
 };
 export type { ContentTypes, ContentType };
