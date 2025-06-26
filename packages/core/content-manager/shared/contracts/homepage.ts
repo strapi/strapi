@@ -12,13 +12,14 @@ export interface RecentDocument {
   title: string;
   updatedAt: Date;
   publishedAt?: Date | null;
+  [key: string]: any;
 }
 
 export declare namespace GetRecentDocuments {
   export interface Request {
     body: {};
     query: {
-      action: 'update' | 'publish';
+      action: 'update' | 'publish' | 'assigned';
     };
   }
 

@@ -9,7 +9,7 @@ const createHomepageController = () => {
   const recentDocumentParamsSchema = yup.object().shape({
     action: yup
       .mixed<GetRecentDocuments.Request['query']['action']>()
-      .oneOf(['update', 'publish'])
+      .oneOf(['update', 'publish', 'assigned'])
       .required(),
   });
 
@@ -28,6 +28,9 @@ const createHomepageController = () => {
 
       if (action === 'publish') {
         return { data: await homepageService.getRecentlyPublishedDocuments() };
+      }
+      if (action === 'assigned') {
+        return { data: await homepageService.getRecentlyAssignedDocuments() };
       }
 
       return { data: await homepageService.getRecentlyUpdatedDocuments() };

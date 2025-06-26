@@ -149,6 +149,7 @@ class StrapiApp {
         },
         pluginId: 'admin.widget.profile',
         id: 'profile-info',
+        size: 12,
       },
     ]);
   }
