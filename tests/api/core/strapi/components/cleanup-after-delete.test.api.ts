@@ -1,9 +1,7 @@
-'use strict';
-
-const { createAuthRequest } = require('api-tests/request');
-const { createStrapiInstance } = require('api-tests/strapi');
-const { createTestBuilder } = require('api-tests/builder');
-const pluralize = require('pluralize');
+import { createAuthRequest } from 'api-tests/request';
+import { createStrapiInstance } from 'api-tests/strapi';
+import { createTestBuilder } from 'api-tests/builder';
+import pluralize from 'pluralize';
 
 let strapi;
 let rq;
@@ -78,6 +76,25 @@ describe('Component Deletion and Cleanup Test', () => {
   });
 
   afterAll(async () => {
+    // Clean up tables created during the test
+    // Not sure why this is necessary; it could be a bug in builder.cleanup
+    try {
+      // Drop the content type tables
+      await strapi.db.connection.schema.dropTableIfExists(`${contentType.pluralName}_cmps`);
+      await strapi.db.connection.schema.dropTableIfExists(contentType.pluralName);
+
+      // Drop the component tables
+      await strapi.db.connection.schema.dropTableIfExists(
+        `components_${compoKeepSchema.category}_${pluralize(compoKeepSchema.displayName)}`
+      );
+      await strapi.db.connection.schema.dropTableIfExists(
+        `components_${compoSchema.category}_${pluralize(compoSchema.displayName)}`
+      );
+    } catch (error) {
+      // Ignore errors if tables don't exist
+      console.warn('Cleanup warning:', error.message);
+    }
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -173,6 +190,9 @@ describe('Component Deletion and Cleanup Test', () => {
     // Ensure data related to the deleted component is no longer in the database
     const dbResult = await strapi.db.connection.raw(`SELECT * FROM ${contentType.pluralName}_cmps`);
 
+    // Handle different database drivers: PostgreSQL returns { rows: [...] }, others return rows directly
+    const rows = dbResult.rows || dbResult;
+
     // Ensure table for the deleted component no longer exists
     const tempComponentTableExists = await strapi.db.connection.schema.hasTable(
       `components_${compoSchema.category}_${pluralize(compoSchema.displayName)}`
@@ -186,7 +206,7 @@ describe('Component Deletion and Cleanup Test', () => {
     expect(keepComponentTableExists).toBe(true);
 
     // Verify our content type has no references to the deleted component
-    const hasDeletedComponentData = dbResult.some((row) => row.component_type === componentUID);
+    const hasDeletedComponentData = rows.some((row) => row.component_type === componentUID);
     expect(hasDeletedComponentData).toBe(false);
 
     // Recreate the component
