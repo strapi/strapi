@@ -1,11 +1,16 @@
 import { useAuth } from '@strapi/admin/strapi-admin';
 import { Avatar, Badge, Flex, Typography } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
 import { getDisplayName } from '../utils/users';
 
 /* -------------------------------------------------------------------------------------------------
  * ProfileWidget
  * -----------------------------------------------------------------------------------------------*/
+
+const DisplayNameTypography = styled(Typography)`
+  font-size: 2.4rem;
+`;
 
 const ProfileWidget = () => {
   const user = useAuth('User', (state) => state.user);
@@ -23,9 +28,9 @@ const ProfileWidget = () => {
     <Flex direction="column" gap={3} height="100%" justifyContent="center">
       <Avatar.Item delayMs={0} fallback={initials} />
       {userDisplayName && (
-        <Typography variant="beta" fontWeight="bold" textTransform="none">
+        <DisplayNameTypography fontWeight="bold" textTransform="none">
           {userDisplayName}
-        </Typography>
+        </DisplayNameTypography>
       )}
       {user?.email && (
         <Typography variant="omega" textColor="neutral600">
