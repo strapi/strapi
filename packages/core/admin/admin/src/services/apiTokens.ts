@@ -4,7 +4,7 @@ import { adminApi } from './api';
 
 const apiTokensService = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ApiToken'],
+    addTagTypes: ['ApiToken', 'GuidedTourMeta'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -31,7 +31,7 @@ const apiTokensService = adminApi
           data: body,
         }),
         transformResponse: (response: ApiToken.Create.Response) => response.data,
-        invalidatesTags: [{ type: 'ApiToken' as const, id: 'LIST' }],
+        invalidatesTags: [{ type: 'ApiToken' as const, id: 'LIST' }, 'GuidedTourMeta'],
       }),
       deleteAPIToken: builder.mutation<
         ApiToken.Revoke.Response['data'],
