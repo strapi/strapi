@@ -3,8 +3,6 @@ import * as React from 'react';
 import { Box, Popover } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { useAuth } from '../../features/Auth';
-
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
 import { Step, createStepComponents } from './Step';
 
