@@ -144,16 +144,21 @@ const UnstableGuidedTourTooltip = ({
   tourName: ValidTourName;
   step: number;
 }) => {
+  const disabledUnstableGuidedTour = !window.strapi.future.isEnabled('unstableGuidedTour');
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
-  const isCurrentStep = state.tours[tourName].currentStep === step;
-  const isPopoverOpen = isCurrentStep && !state.tours[tourName].isCompleted;
+  const isCurrentStep = disabledUnstableGuidedTour
+    ? undefined
+    : state.tours[tourName].currentStep === step;
+  const isPopoverOpen = disabledUnstableGuidedTour
+    ? undefined
+    : isCurrentStep && !state.tours[tourName].isCompleted;
 
   // Lock the scroll
   React.useEffect(() => {
-    if (!isPopoverOpen) return;
+    if (!isPopoverOpen || disabledUnstableGuidedTour) return;
 
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -161,7 +166,11 @@ const UnstableGuidedTourTooltip = ({
     return () => {
       document.body.style.overflow = originalStyle;
     };
-  }, [isPopoverOpen]);
+  }, [disabledUnstableGuidedTour, isPopoverOpen]);
+
+  if (disabledUnstableGuidedTour) {
+    return children;
+  }
 
   return (
     <>
