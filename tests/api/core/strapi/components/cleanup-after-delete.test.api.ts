@@ -188,7 +188,7 @@ describe('Component Deletion and Cleanup Test', () => {
     });
 
     // Ensure data related to the deleted component is no longer in the database
-    const rows = await strapi.db.connection.select('*').from(`${contentType.pluralName}_cmps`);
+    const dbResult = await strapi.db.connection.select('*').from(`${contentType.pluralName}_cmps`);
 
     // Ensure table for the deleted component no longer exists
     const tempComponentTableExists = await strapi.db.connection.schema.hasTable(
@@ -203,7 +203,7 @@ describe('Component Deletion and Cleanup Test', () => {
     expect(keepComponentTableExists).toBe(true);
 
     // Verify our content type has no references to the deleted component
-    const hasDeletedComponentData = rows.some((row) => row.component_type === componentUID);
+    const hasDeletedComponentData = dbResult.some((row) => row.component_type === componentUID);
     expect(hasDeletedComponentData).toBe(false);
 
     // Recreate the component
