@@ -129,5 +129,53 @@ describe('Document Service', () => {
 
       expect(article).toBeNull();
     });
+
+    testInTransaction(
+      'Preserves non-localized fields when updating localized content for new locale',
+      async () => {
+        // This test covers the fix for bug #21594: https://github.com/strapi/strapi/issues/21594
+        // When updating a content type with both localized and non-localized fields,
+        // updating only the localized field for a new locale should preserve the non-localized fields
+
+        const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
+
+        // Create a document with both localized and non-localized fields
+        const originalDoc = await strapi.documents(MIXED_CONTENT_UID).create({
+          data: {
+            localizedText: 'Original Text',
+            sharedText: 'Shared Content',
+          },
+          locale: 'en',
+        });
+
+        const updatedDoc = await strapi.documents(MIXED_CONTENT_UID).update({
+          documentId: originalDoc.documentId,
+          locale: 'es',
+          data: {
+            localizedText: 'Texto Español',
+          },
+        });
+
+        expect(updatedDoc).toMatchObject({
+          documentId: originalDoc.documentId,
+          locale: 'es',
+          localizedText: 'Texto Español',
+          // Non-localized field should remain unchanged
+          sharedText: 'Shared Content',
+        });
+
+        const originalEnDoc = await strapi.documents(MIXED_CONTENT_UID).findOne({
+          documentId: originalDoc.documentId,
+          locale: 'en',
+        });
+
+        expect(originalEnDoc).toMatchObject({
+          documentId: originalDoc.documentId,
+          locale: 'en',
+          localizedText: 'Original Text',
+          sharedText: 'Shared Content',
+        });
+      }
+    );
   });
 });
