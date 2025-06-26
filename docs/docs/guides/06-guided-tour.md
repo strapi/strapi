@@ -6,9 +6,16 @@ This document explains how to create and use Guided Tours in the Strapi CMS.
 
 ## Creating tours
 
-To create a tour use the `createTour` factory function. The function takes the name of the tour and an array of steps.
+To create a tour use the `createTour` factory function. The function takes the following arguments:
 
-The `content` key of a step is a render prop that receives `Step` and an object with `state` and `dispatch`.
+- `tourName`: The name of the tour
+- `steps`: An array of steps
+
+Each `step` is an object with the following properties:
+
+- `name`: The name of the step
+- `requiredActions` (optional): An array of actions that must be completed before the step should be displayed.
+- `content`: A render prop that receives `Step` and an object with `state` and `dispatch`.
 
 `Step` has the following composable parts:
 
@@ -24,6 +31,7 @@ const tours = {
   contentManager: createTour('contentManager', [
     {
       name: 'TheFeatureStepName',
+      requiredActions: ['didDoSomethingImportant'],
       content: (Step) => (
         <Step.Root side="right">
           <Step.Title
