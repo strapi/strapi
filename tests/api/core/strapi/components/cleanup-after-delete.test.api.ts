@@ -188,10 +188,7 @@ describe('Component Deletion and Cleanup Test', () => {
     });
 
     // Ensure data related to the deleted component is no longer in the database
-    const dbResult = await strapi.db.connection.raw(`SELECT * FROM ${contentType.pluralName}_cmps`);
-
-    // Handle different database drivers: PostgreSQL returns { rows: [...] }, others return rows directly
-    const rows = dbResult.rows || dbResult;
+    const rows = await strapi.db.connection.select('*').from(`${contentType.pluralName}_cmps`);
 
     // Ensure table for the deleted component no longer exists
     const tempComponentTableExists = await strapi.db.connection.schema.hasTable(
