@@ -133,9 +133,7 @@ describe('Document Service', () => {
     testInTransaction(
       'Preserves non-localized fields when updating localized content for new locale',
       async () => {
-        // This test covers the fix for bug #21594: https://github.com/strapi/strapi/issues/21594
-        // When updating a content type with both localized and non-localized fields,
-        // updating only the localized field for a new locale should preserve the non-localized fields
+        // Covers issue https://github.com/strapi/strapi/issues/21594
 
         const MIXED_CONTENT_UID = 'api::mixed-content.mixed-content';
 
