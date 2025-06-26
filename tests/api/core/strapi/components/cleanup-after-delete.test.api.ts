@@ -186,9 +186,7 @@ describe('Component Deletion and Cleanup Test', () => {
     expect(keepComponentTableExists).toBe(true);
 
     // Verify our content type has no references to the deleted component
-    const hasDeletedComponentData = dbResult.some(
-      (row) => row.component_type === componentUID
-    );
+    const hasDeletedComponentData = dbResult.some((row) => row.component_type === componentUID);
     expect(hasDeletedComponentData).toBe(false);
 
     // Recreate the component
