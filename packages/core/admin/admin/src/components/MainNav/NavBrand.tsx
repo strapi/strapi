@@ -2,7 +2,7 @@ import { Box, Flex, type FlexComponent, VisuallyHidden } from '@strapi/design-sy
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { useConfiguration } from '../../features/Configuration';
+import { useInitQuery } from '../../services/admin';
 
 const BrandIconWrapper = styled<FlexComponent>(Flex)`
   svg,
@@ -16,21 +16,21 @@ const BrandIconWrapper = styled<FlexComponent>(Flex)`
 
 export const NavBrand = () => {
   const { formatMessage } = useIntl();
-  const {
-    logos: { menu },
-  } = useConfiguration('LeftMenu');
+  const { data: { menuLogo } = {} } = useInitQuery();
   return (
     <Box padding={3}>
       <BrandIconWrapper direction="column" justifyContent="center" width="3.2rem" height="3.2rem">
-        <img
-          src={menu.custom?.url || menu.default}
-          alt={formatMessage({
-            id: 'app.components.LeftMenu.logo.alt',
-            defaultMessage: 'Application logo',
-          })}
-          width="100%"
-          height="100%"
-        />
+        {menuLogo && (
+          <img
+            src={menuLogo}
+            alt={formatMessage({
+              id: 'app.components.LeftMenu.logo.alt',
+              defaultMessage: 'Application logo',
+            })}
+            width="100%"
+            height="100%"
+          />
+        )}
         <VisuallyHidden>
           <span>
             {formatMessage({

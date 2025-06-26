@@ -33,6 +33,7 @@ const admin = adminApi
         transformResponse(res: Init.Response) {
           return res.data;
         },
+        providesTags: ['ProjectSettings'],
       }),
       information: builder.query<Information.Response['data'], void>({
         query: () => ({

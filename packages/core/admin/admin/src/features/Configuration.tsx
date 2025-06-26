@@ -3,7 +3,7 @@ import * as React from 'react';
 import { createContext } from '@radix-ui/react-context';
 import { useIntl } from 'react-intl';
 
-import { Logo, UpdateProjectSettings } from '../../../shared/contracts/admin';
+import { UpdateProjectSettings } from '../../../shared/contracts/admin';
 import { Page } from '../components/PageHelpers';
 import { useTypedSelector } from '../core/store/hooks';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
@@ -67,8 +67,6 @@ const ConfigurationProvider = ({
   defaultMenuLogo,
   showReleaseNotification = false,
 }: ConfigurationProviderProps) => {
-  const [authLogoUpdated, setAuthLogoUpdated] = React.useState<Partial<Logo> | null>(null);
-  const [menuLogoUpdated, setMenuLogoUpdated] = React.useState<Partial<Logo> | null>(null);
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -123,8 +121,6 @@ const ConfigurationProvider = ({
       const res = await updateProjectSettingsMutation(formData);
 
       if ('data' in res) {
-        setAuthLogoUpdated(res.data.authLogo);
-        setMenuLogoUpdated(res.data.menuLogo);
         const updatedMenuLogo = !!res.data.menuLogo && !!body.menuLogo?.rawFile;
         const updatedAuthLogo = !!res.data.authLogo && !!body.authLogo?.rawFile;
 
@@ -163,23 +159,19 @@ const ConfigurationProvider = ({
       showReleaseNotification={showReleaseNotification}
       logos={{
         menu: {
-          custom: menuLogoUpdated
-            ? menuLogoUpdated
-            : isSuccess
-              ? data?.menuLogo
-              : {
-                  url: customMenuLogo ?? '',
-                },
+          custom: isSuccess
+            ? data?.menuLogo
+            : {
+                url: customMenuLogo ?? '',
+              },
           default: defaultMenuLogo,
         },
         auth: {
-          custom: authLogoUpdated
-            ? authLogoUpdated
-            : isSuccess
-              ? data?.authLogo
-              : {
-                  url: customAuthLogo ?? '',
-                },
+          custom: isSuccess
+            ? data?.authLogo
+            : {
+                url: customAuthLogo ?? '',
+              },
           default: defaultAuthLogo,
         },
       }}
