@@ -89,11 +89,9 @@ const createDefaultAPITokensIfNeeded = async () => {
   const apiTokenCount = await apiTokenService.count();
 
   if (usersCount === 0 && apiTokenCount === 0) {
-    await Promise.all(
-      Object.values(constants.DEFAULT_API_TOKENS).map((token) => {
-        return apiTokenService.create(token);
-      })
-    );
+    for (const token of constants.DEFAULT_API_TOKENS) {
+      await apiTokenService.create(token);
+    }
   }
 };
 

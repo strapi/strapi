@@ -29,12 +29,11 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
     const didCreateContent = didCreateContentTypeSchema && hasContent;
 
     // Check if any api tokens have been created besides the default ones
-    const defaultTokens = Object.values(constants.DEFAULT_API_TOKENS);
     const createdApiTokens = await strapi
       .documents('admin::api-token')
       .findMany({ fields: ['name', 'description'] });
     const didCreateApiToken = createdApiTokens.some((doc) =>
-      defaultTokens.every(
+      constants.DEFAULT_API_TOKENS.every(
         (token) => token.name !== doc.name && token.description !== doc.description
       )
     );
