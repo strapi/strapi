@@ -69,16 +69,28 @@ const UnstableGuidedTourTooltip = ({
   tourName: ValidTourName;
   step: number;
 }) => {
+  // TODO: To remove when the future is ready to be released
+  const disabledUnstableGuidedTour = !window.strapi.future.isEnabled('unstableGuidedTour');
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
-  const isCurrentStep = state.tours[tourName].currentStep === step;
-  const isPopoverOpen = isCurrentStep && !state.tours[tourName].isCompleted;
+  // TODO: Condition to remove when the future is ready to be released
+  const isCurrentStep = disabledUnstableGuidedTour
+    ? undefined
+    : state.tours[tourName].currentStep === step;
+  // TODO: Condition to remove when the future is ready to be released
+  const isPopoverOpen = disabledUnstableGuidedTour
+    ? undefined
+    : isCurrentStep && !state.tours[tourName].isCompleted;
 
   // Lock the scroll
   React.useEffect(() => {
-    if (!isPopoverOpen) return;
+    /**
+     *  TODO: replace with if (!isPopoverOpen) return;
+     *  when the guided tour is ready to be released
+     */
+    if (!isPopoverOpen || disabledUnstableGuidedTour) return;
 
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -86,7 +98,12 @@ const UnstableGuidedTourTooltip = ({
     return () => {
       document.body.style.overflow = originalStyle;
     };
-  }, [isPopoverOpen]);
+  }, [disabledUnstableGuidedTour, isPopoverOpen]);
+
+  // TODO: To remove when the future is ready to be released
+  if (disabledUnstableGuidedTour) {
+    return children;
+  }
 
   return (
     <>

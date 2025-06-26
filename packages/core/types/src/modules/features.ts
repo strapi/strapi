@@ -9,5 +9,6 @@ export interface FeaturesService {
   config: FeaturesConfig | undefined;
   future: {
     isEnabled: (futureFlagName: string) => boolean;
+    unstableGuidedTour?: boolean;
   };
 }
