@@ -157,7 +157,7 @@ const HomePageCE = () => {
           <Grid.Root gap={5}>
             {getAllWidgets().map((widget) => {
               return (
-                <Grid.Item col={widget.size || 6} s={12} key={widget.uid}>
+                <Grid.Item col={6} s={12} key={widget.uid}>
                   <WidgetRoot
                     title={widget.title}
                     icon={widget.icon}
