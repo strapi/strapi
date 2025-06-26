@@ -4,7 +4,7 @@
  * and to safely register and create schemas within Zod's global registry.
  */
 
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
 /**
  * Conditionally makes a Zod schema optional based on the `required` parameter.

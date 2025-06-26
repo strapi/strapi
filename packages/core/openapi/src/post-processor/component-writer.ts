@@ -1,5 +1,5 @@
 import { OpenAPIV3_1 } from 'openapi-types';
-import { z } from 'zod';
+import * as z from 'zod/v4';
 import type { DocumentContext } from '../types';
 import { toComponentsPath } from '../utils/zod';
 import type { PostProcessor } from './types';

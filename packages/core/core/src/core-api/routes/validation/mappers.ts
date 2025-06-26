@@ -4,7 +4,7 @@
  */
 
 import type { Schema } from '@strapi/types';
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
 // eslint-disable-next-line import/no-cycle
 import * as attributes from './attributes';
@@ -89,7 +89,7 @@ export const createAttributesInputSchema = (
  *
  * @todo: Move to @strapi/utils if needed for other validation
  */
-export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): z.Schema => {
+export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): z.ZodTypeAny => {
   switch (attribute.type) {
     case 'biginteger':
       return attributes.bigIntegerToSchema(attribute);
@@ -181,7 +181,9 @@ export const mapAttributeToSchema = (attribute: Schema.Attribute.AnyAttribute): 
  *
  * @todo: Move to @strapi/utils if needed for other validation
  */
-export const mapAttributeToInputSchema = (attribute: Schema.Attribute.AnyAttribute): z.Schema => {
+export const mapAttributeToInputSchema = (
+  attribute: Schema.Attribute.AnyAttribute
+): z.ZodTypeAny => {
   switch (attribute.type) {
     case 'biginteger':
       return attributes.bigIntegerToInputSchema(attribute);

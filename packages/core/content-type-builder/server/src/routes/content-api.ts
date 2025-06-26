@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import { z } from 'zod';
+import * as z from 'zod/v4';
 
 const formattedContentTypeSchema = z.any();
 const formattedComponentSchema = z.any();

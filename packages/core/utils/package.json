@@ -56,7 +56,7 @@
     "p-map": "4.0.0",
     "preferred-pm": "3.1.2",
     "yup": "0.32.9",
-    "zod": "^4.0.0-beta"
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@types/http-errors": "2.0.4",

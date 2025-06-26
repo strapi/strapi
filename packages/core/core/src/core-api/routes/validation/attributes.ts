@@ -8,7 +8,7 @@
 import { type Schema, UID } from '@strapi/types';
 
 import { relations } from '@strapi/utils';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import { BOOLEAN_LITERAL_VALUES } from './constants';
 

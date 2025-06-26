@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 import type { OpenAPIV3_1 } from 'openapi-types';
 
@@ -18,7 +18,7 @@ import type { OpenAPIV3_1 } from 'openapi-types';
  *
  * @example
  * ```typescript
- * import { z } from 'zod';
+ * import * as z from 'zod/v4';
  *
  * // Create a Zod schema
  * const userSchema = z.object({

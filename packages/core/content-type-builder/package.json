@@ -79,7 +79,7 @@
     "react-intl": "6.6.2",
     "react-redux": "8.1.3",
     "yup": "0.32.9",
-    "zod": "^4.0.0-beta"
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@strapi/admin": "5.16.1",
