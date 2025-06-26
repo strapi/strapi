@@ -25,7 +25,6 @@ import merge from 'lodash/merge';
 import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate, useParams } from 'react-router-dom';
-import { DefaultTheme, styled } from 'styled-components';
 
 import { Create, Publish } from '../../../../../shared/contracts/collection-types';
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
@@ -282,13 +281,6 @@ interface DocumentActionsMenuProps {
   variant?: 'ghost' | 'tertiary';
 }
 
-const MenuItem = styled(Menu.Item)<{ isVariantDanger?: boolean; isDisabled?: boolean }>`
-  &:hover {
-    background: ${({ theme, isVariantDanger, isDisabled }) =>
-      isVariantDanger && !isDisabled ? theme.colors.danger100 : 'neutral'};
-  }
-`;
-
 const DocumentActionsMenu = ({
   actions,
   children,
@@ -352,33 +344,21 @@ const DocumentActionsMenu = ({
       <Menu.Content maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
-            <MenuItem
+            <Menu.Item
               disabled={action.disabled}
               /* @ts-expect-error – TODO: this is an error in the DS where it is most likely a synthetic event, not regular. */
               onSelect={handleClick(action)}
               display="block"
               key={action.id}
-              isVariantDanger={action.variant === 'danger'}
-              isDisabled={action.disabled}
+              variant={action.variant === 'danger' ? action.variant : 'default'}
+              startIcon={action.icon}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex
-                  color={!action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'}
-                  gap={2}
-                  tag="span"
-                >
-                  <Flex
-                    tag="span"
-                    color={
-                      !action.disabled ? convertActionVariantToIconColor(action.variant) : 'inherit'
-                    }
-                  >
-                    {action.icon}
-                  </Flex>
+                <Flex gap={2} tag="span">
                   {action.label}
                 </Flex>
               </Flex>
-            </MenuItem>
+            </Menu.Item>
           );
         })}
         {children}
@@ -406,36 +386,6 @@ const DocumentActionsMenu = ({
       })}
     </Menu.Root>
   );
-};
-
-const convertActionVariantToColor = (
-  variant: DocumentActionDescription['variant'] = 'secondary'
-): keyof DefaultTheme['colors'] | undefined => {
-  switch (variant) {
-    case 'danger':
-      return 'danger600';
-    case 'secondary':
-      return undefined;
-    case 'success':
-      return 'success600';
-    default:
-      return 'primary600';
-  }
-};
-
-const convertActionVariantToIconColor = (
-  variant: DocumentActionDescription['variant'] = 'secondary'
-): keyof DefaultTheme['colors'] | undefined => {
-  switch (variant) {
-    case 'danger':
-      return 'danger600';
-    case 'secondary':
-      return 'neutral500';
-    case 'success':
-      return 'success600';
-    default:
-      return 'primary600';
-  }
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -583,7 +533,10 @@ const PublishAction: DocumentActionComponent = ({
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { id } = useParams();
   const { formatMessage } = useIntl();
-  const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
+  const { canPublish, canReadFields } = useDocumentRBAC(
+    'PublishAction',
+    ({ canPublish, canReadFields }) => ({ canPublish, canReadFields })
+  );
   const { publish, isLoading } = useDocumentActions();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
   const [
@@ -742,14 +695,31 @@ const PublishAction: DocumentActionComponent = ({
         status: 'published',
       });
       if (errors) {
-        toggleNotification({
-          type: 'danger',
-          message: formatMessage({
-            id: 'content-manager.validation.error',
-            defaultMessage:
-              'There are validation errors in your document. Please fix them before saving.',
-          }),
+        const hasUnreadableRequiredField = Object.keys(schema.attributes).some((fieldName) => {
+          const attribute = schema.attributes[fieldName];
+
+          return attribute?.required && !(canReadFields ?? []).includes(fieldName);
         });
+
+        if (hasUnreadableRequiredField) {
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: 'content-manager.validation.error.unreadable-required-field',
+              defaultMessage:
+                'Your current permissions prevent access to certain required fields. Please request access from an administrator to proceed.',
+            }),
+          });
+        } else {
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: 'content-manager.validation.error',
+              defaultMessage:
+                'There are validation errors in your document. Please fix them before saving.',
+            }),
+          });
+        }
         return;
       }
       const res = await publish(

@@ -1,5 +1,5 @@
-import { get } from 'lodash/fp';
-import { async, errors } from '@strapi/utils';
+import { get, merge } from 'lodash/fp';
+import { async, contentTypes, errors } from '@strapi/utils';
 import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
@@ -57,9 +57,25 @@ export default ({ strapi }: Context) => {
             auth,
           }
         );
+        const transformedQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
 
-        const dbQuery = strapi.get('query-params').transform(targetUID, sanitizedQuery);
+        const isTargetDraftAndPublishContentType =
+          contentTypes.hasDraftAndPublish(targetContentType);
+        const defaultFilters = isTargetDraftAndPublishContentType
+          ? {
+              where: {
+                publishedAt: {
+                  $notNull: context.rootQueryArgs?.status
+                    ? // Filter by the same status as the root query if the argument is present
+                      context.rootQueryArgs?.status === 'published'
+                    : // Otherwise fallback to the published version
+                      true,
+                },
+              },
+            }
+          : {};
 
+        const dbQuery = merge(defaultFilters, transformedQuery);
         const data = await strapi.db?.query(contentTypeUID).load(parent, attributeName, dbQuery);
 
         const info = {

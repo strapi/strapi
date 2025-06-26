@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.13.1",
+  "version": "5.16.1",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -61,19 +61,22 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-rc.24",
-    "@strapi/icons": "2.0.0-rc.24",
-    "@strapi/types": "5.13.1",
-    "@strapi/utils": "5.13.1",
+    "@strapi/design-system": "2.0.0-rc.27",
+    "@strapi/icons": "2.0.0-rc.27",
+    "@strapi/types": "5.16.1",
+    "@strapi/utils": "5.16.1",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
     "highlight.js": "^10.4.1",
     "immer": "9.0.21",
-    "koa": "2.15.4",
+    "koa": "2.16.1",
     "lodash": "4.17.21",
     "markdown-it": "^13.0.2",
     "markdown-it-abbr": "^1.0.4",
@@ -102,8 +105,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.13.1",
-    "@strapi/database": "5.13.1",
+    "@strapi/admin": "5.16.1",
+    "@strapi/database": "5.16.1",
     "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
