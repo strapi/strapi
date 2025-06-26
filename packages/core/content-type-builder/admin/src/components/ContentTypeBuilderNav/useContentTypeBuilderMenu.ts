@@ -25,7 +25,7 @@ type SubSection = {
   links: Link[];
 };
 
-type MenuSection = {
+export type MenuSection = {
   name: string;
   title: {
     id: string;

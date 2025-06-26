@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Popover } from '@strapi/design-system';
+import { Box, Popover, Portal } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
@@ -14,36 +14,84 @@ import { Step, createStepComponents } from './Step';
  * -----------------------------------------------------------------------------------------------*/
 
 const tours = {
-  TEST: createTour('TEST', [
+  contentTypeBuilder: createTour('contentTypeBuilder', [
     {
       name: 'Introduction',
       content: (Step) => (
-        <Step.Root sideOffset={-36}>
+        <Step.Root side="bottom">
           <Step.Title
-            id="tours.contentManager.Introduction.title"
-            defaultMessage="Content manager"
+            id="tours.contentTypeBuilder.Introduction.title"
+            defaultMessage="Content-Type Builder"
           />
           <Step.Content
-            id="tours.contentManager.Introduction.content"
-            defaultMessage="Create and manage content from your collection types and single types."
+            id="tours.contentTypeBuilder.Introduction.content"
+            defaultMessage="Create and manage your content structure with collection types, single types and components."
           />
           <Step.Actions showSkip />
         </Step.Root>
       ),
     },
     {
-      name: 'Done',
-      requiredActions: ['didCreateApiToken'],
+      name: 'CollectionTypes',
       content: (Step) => (
-        <Step.Root align="start">
-          <Step.Title id="tours.contentManager.CreateEntry.title" defaultMessage="Create entry" />
+        <Step.Root side="right" sideOffset={26}>
+          <Step.Title
+            id="tours.contentTypeBuilder.CollectionTypes.title"
+            defaultMessage="Collection Types"
+          />
           <Step.Content
-            id="tours.contentManager.CreateEntry.content"
-            defaultMessage="Click this button to create an entry"
+            id="tours.contentTypeBuilder.CollectionTypes.content"
+            defaultMessage="Create and manage your content structure with collection types, single types and components."
           />
           <Step.Actions />
         </Step.Root>
       ),
+    },
+    {
+      name: 'SingleTypes',
+      content: (Step) => (
+        <Step.Root side="right" sideOffset={26}>
+          <Step.Title
+            id="tours.contentTypeBuilder.SingleTypes.title"
+            defaultMessage="Single Types"
+          />
+          <Step.Content
+            id="tours.contentTypeBuilder.SingleTypes.content"
+            defaultMessage="A content structure that can manage a single entry, such as a homepage or a header."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Components',
+      content: (Step) => (
+        <Step.Root side="right" sideOffset={26}>
+          <Step.Title id="tours.contentTypeBuilder.Components.title" defaultMessage="Components" />
+          <Step.Content
+            id="tours.contentTypeBuilder.Components.content"
+            defaultMessage="A reusable content structure that can be used across multiple content types, such as buttons, sliders or cards."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Finish',
+      content: (Step) => (
+        <Step.Root side="right" sideOffset={32}>
+          <Step.Title
+            id="tours.contentTypeBuilder.Finish.title"
+            defaultMessage="It’s time to create content!"
+          />
+          <Step.Content
+            id="tours.contentTypeBuilder.Finish.content"
+            defaultMessage="Now that you created content types, you’ll be able to create content in the content manager."
+          />
+          <Step.Actions showStepCount={false} to="/content-manager" />
+        </Step.Root>
+      ),
+      when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
     },
   ]),
 } as const;
@@ -65,9 +113,12 @@ type Content = (
   }
 ) => React.ReactNode;
 
-export const GuidedTourOverlay = styled(Box)`
+const GuidedTourOverlay = styled(Box)`
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(50, 50, 77, 0.2);
   z-index: 10;
 `;
@@ -77,13 +128,13 @@ const UnstableGuidedTourTooltip = ({
   content,
   tourName,
   step,
-  requiredActions,
+  when,
 }: {
   children: React.ReactNode;
   content: Content;
   tourName: ValidTourName;
   step: number;
-  requiredActions?: GetGuidedTourMeta.Response['data']['completedActions'];
+  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
 }) => {
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
 
@@ -93,17 +144,14 @@ const UnstableGuidedTourTooltip = ({
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
-  const hasCompletedRequiredActions =
-    requiredActions?.every((action) => {
-      return guidedTourMeta?.data?.completedActions.includes(action);
-    }) ?? true;
   const hasFutureFlag = window.strapi.future.isEnabled('unstableGuidedTour');
   const isEnabled =
     guidedTourMeta?.data?.isFirstSuperAdminUser &&
     !state.tours[tourName].isCompleted &&
     hasFutureFlag;
+  const isStepConditionMet = when ? when(guidedTourMeta?.data?.completedActions ?? []) : true;
 
-  const isPopoverOpen = isEnabled && isCurrentStep && hasCompletedRequiredActions;
+  const isPopoverOpen = isEnabled && isCurrentStep && isStepConditionMet;
 
   // Lock the scroll
   React.useEffect(() => {
@@ -119,7 +167,11 @@ const UnstableGuidedTourTooltip = ({
 
   return (
     <>
-      {isPopoverOpen && <GuidedTourOverlay />}
+      {isPopoverOpen && (
+        <Portal>
+          <GuidedTourOverlay />
+        </Portal>
+      )}
       <Popover.Root open={isPopoverOpen}>
         <Popover.Anchor>{children}</Popover.Anchor>
         {content(Step, { state, dispatch })}
@@ -135,7 +187,7 @@ const UnstableGuidedTourTooltip = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
-  requiredActions?: GetGuidedTourMeta.Response['data']['completedActions'];
+  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {
@@ -153,7 +205,7 @@ function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: s
         tourName={tourName as ValidTourName}
         step={index}
         content={step.content}
-        requiredActions={step.requiredActions}
+        when={step.when}
       >
         {children}
       </UnstableGuidedTourTooltip>

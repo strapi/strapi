@@ -7,8 +7,10 @@ import {
   BadgeProps,
   AccessibleIcon,
 } from '@strapi/design-system';
-import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
+import { NavLink as RouterLink, LinkProps, To } from 'react-router-dom';
 import { styled } from 'styled-components';
+
+import { unstable_tours } from '../../index';
 
 /* -------------------------------------------------------------------------------------------------
  * Link
@@ -39,8 +41,25 @@ const MainNavLinkWrapper = styled(RouterLink)`
   }
 `;
 
+const getGuidedTourTooltip = (to: To) => {
+  const normalizedTo = to.toString().replace(/\//g, '');
+
+  switch (normalizedTo) {
+    case 'content-manager':
+      return unstable_tours.contentTypeBuilder.Finish;
+    default:
+      break;
+  }
+};
+
 const LinkImpl = ({ children, ...props }: LinkProps) => {
-  return <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>;
+  const GuidedTourTooltip = getGuidedTourTooltip(props.to) ?? React.Fragment;
+
+  return (
+    <GuidedTourTooltip>
+      <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>
+    </GuidedTourTooltip>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------
