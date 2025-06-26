@@ -84,37 +84,10 @@ export const EditFolderContent = ({
 
   const formRef = React.useRef<HTMLFormElement>(null);
 
-  const handleTabChange = (event: React.KeyboardEvent<HTMLFormElement>) => {
-    const focusableElements = (formRef.current?.querySelectorAll(
-      'button, [href], input:not([type=hidden]), select, textarea, [tabindex]:not([tabindex="-1"]):not(:disabled)'
-    ) || []) as NodeListOf<HTMLElement>;
-
-    const locationInput = Array.prototype.find.call(
-      focusableElements,
-      (el) => el.id === 'folder-parent'
-    );
-
-    if (document.activeElement !== locationInput) {
-      return;
-    }
-
-    const direction = event.shiftKey ? -1 : 1;
-    const index = Array.prototype.indexOf.call(focusableElements, document.activeElement);
-    const nextElement = focusableElements?.[index + direction];
-
-    if (nextElement) {
-      nextElement.focus();
-    }
-
-    event.preventDefault();
-  };
-
   const handleKeyDown =
     (handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void) =>
     (event: React.KeyboardEvent<HTMLFormElement>) => {
-      if (event.key === 'Tab') {
-        handleTabChange(event);
-      } else if (event.key === 'Enter') {
+      if (event.key === 'Enter') {
         if (event.target instanceof HTMLInputElement) {
           handleSubmit(event);
           event.preventDefault();
