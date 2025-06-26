@@ -19,18 +19,13 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
     const hasContent = await (async () => {
       for (const name of contentTypeSchemaNames) {
         const count = await strapi.documents(name as Internal.UID.ContentType).count({});
-        const res = await strapi.documents(name as Internal.UID.ContentType).findMany({});
-        console.dir({ res, count }, { depth: null });
+
         if (count > 0) return true;
       }
 
       return false;
     })();
     const didCreateContent = didCreateContentTypeSchema && hasContent;
-    console.dir(
-      { contentTypeSchemaNames, didCreateContentTypeSchema, hasContent },
-      { depth: null }
-    );
 
     // Check if any api tokens have been created besides the default ones
     const DEFAULT_API_TOKENS = ['Read Only', 'Full Access'];

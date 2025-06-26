@@ -48,7 +48,7 @@ describe('Guided Tour Meta', () => {
   describe('GET /admin/guided-tour-meta', () => {
     /**
      * TODO:
-     * clean-after-delete.test.api.ts leaks data causing the app 
+     * clean-after-delete.test.api.ts leaks data causing the app
      * to intialize withe a schema and content. We need to ensure that test cleans up after itself
      * Skipping for now.
      */
