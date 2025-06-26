@@ -1,4 +1,4 @@
-import { CheckCircle, Feather, Pencil } from '@strapi/icons';
+import { CheckCircle, Feather, Pencil, SealCheck } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
@@ -76,6 +76,25 @@ export default {
         permissions: [{ action: 'plugin::content-manager.explorer.read' }],
       },
     ]);
+
+    if (window.strapi.features.isEnabled('review-workflows')) {
+      app.widgets.register([
+        {
+          icon: SealCheck,
+          title: {
+            id: `${PLUGIN_ID}.widget.assigned.title`,
+            defaultMessage: 'Assigned to me',
+          },
+          component: async () => {
+            const { AssignedWidget } = await import('./components/Widgets');
+            return AssignedWidget;
+          },
+          pluginId: PLUGIN_ID,
+          id: 'assigned',
+          size: 12,
+        },
+      ]);
+    }
   },
   bootstrap(app: any) {
     if (typeof historyAdmin.bootstrap === 'function') {

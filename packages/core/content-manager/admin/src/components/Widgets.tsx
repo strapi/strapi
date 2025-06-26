@@ -1,5 +1,5 @@
 import { Widget, useTracking } from '@strapi/admin/strapi-admin';
-import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
@@ -37,8 +37,10 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
     navigate(link);
   };
 
+  const stageInDocuments = 'strapi_stage' in documents?.[0];
+
   return (
-    <Table colCount={5} rowCount={documents?.length ?? 0}>
+    <Table colCount={stageInDocuments ? 6 : 5} rowCount={documents?.length ?? 0}>
       <Tbody>
         {documents?.map((document) => (
           <Tr onClick={handleRowClick(document)} cursor="pointer" key={document.documentId}>
@@ -76,6 +78,23 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
                 <RelativeTime timestamp={new Date(document.updatedAt)} />
               </Typography>
             </Td>
+            {'strapi_stage' in document && (
+              <Td>
+                <Flex alignItems="center" gap={2} maxWidth="30rem">
+                  <Box
+                    height={2}
+                    background={document['strapi_stage'].color}
+                    hasRadius
+                    shrink={0}
+                    width={2}
+                  />
+
+                  <Typography fontWeight="regular" textColor="neutral700" ellipsis>
+                    {document['strapi_stage'].name}
+                  </Typography>
+                </Flex>
+              </Td>
+            )}
             <Td onClick={(e) => e.stopPropagation()}>
               <Box display="inline-block">
                 <IconButton
@@ -159,4 +178,34 @@ const LastPublishedWidget = () => {
   return <RecentDocumentsTable documents={data} />;
 };
 
-export { LastEditedWidget, LastPublishedWidget };
+/* -------------------------------------------------------------------------------------------------
+ * AssignedWidget
+ * -----------------------------------------------------------------------------------------------*/
+
+const AssignedWidget = () => {
+  const { formatMessage } = useIntl();
+  const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'assigned' });
+
+  if (isLoading) {
+    return <Widget.Loading />;
+  }
+
+  if (error || !data) {
+    return <Widget.Error />;
+  }
+
+  if (data.length === 0) {
+    return (
+      <Widget.NoData>
+        {formatMessage({
+          id: 'content-manager.widget.last-published.no-data',
+          defaultMessage: 'No entries',
+        })}
+      </Widget.NoData>
+    );
+  }
+
+  return <RecentDocumentsTable documents={data} />;
+};
+
+export { LastEditedWidget, LastPublishedWidget, AssignedWidget };

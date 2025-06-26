@@ -25,6 +25,7 @@ type WidgetArgs = {
   pluginId?: string;
   id: string;
   permissions?: Permission[];
+  size?: number;
 };
 
 type Widget = Omit<WidgetArgs, 'id' | 'pluginId'> & { uid: WidgetUID };

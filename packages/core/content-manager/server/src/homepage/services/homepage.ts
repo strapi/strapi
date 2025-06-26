@@ -93,8 +93,20 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  const formatDocuments = (documents: Modules.Documents.AnyDocument[], meta: ContentTypeMeta) => {
+  const formatDocuments = (
+    documents: Modules.Documents.AnyDocument[],
+    meta: ContentTypeMeta,
+    populate?: string[]
+  ) => {
     return documents.map((document) => {
+      const additionalFields =
+        populate?.reduce(
+          (acc, key) => {
+            acc[key] = document[key];
+            return acc;
+          },
+          {} as Record<string, any>
+        ) || {};
       return {
         documentId: document.documentId,
         locale: document.locale ?? null,
@@ -105,6 +117,7 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
         contentTypeUid: meta.uid,
         contentTypeDisplayName: meta.contentType.info.displayName,
         kind: meta.contentType.kind,
+        ...additionalFields,
       };
     });
   };
@@ -147,72 +160,68 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       model: uid,
     });
 
+  const queryLastDocuments = async (additionalQueryParams?: Record<string, unknown>) => {
+    const permittedContentTypes = await getPermittedContentTypes();
+    const allowedContentTypeUids = permittedContentTypes.filter((uid) => {
+      return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+    });
+    // Fetch the configuration for each content type in a single query
+    const configurations = await getConfiguration(allowedContentTypeUids);
+    // Get the necessary metadata for the documents
+    const contentTypesMeta = getContentTypesMeta(allowedContentTypeUids, configurations);
+
+    const recentDocuments = await Promise.all(
+      contentTypesMeta.map(async (meta) => {
+        const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
+          limit: MAX_DOCUMENTS,
+          sort: 'publishedAt:desc',
+          fields: meta.fields,
+          ...additionalQueryParams,
+        });
+
+        const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
+        const populate = additionalQueryParams?.populate as string[];
+
+        return formatDocuments(docs, meta, populate);
+      })
+    );
+
+    return recentDocuments
+      .flat()
+      .sort((a, b) => {
+        if (!a.publishedAt || !b.publishedAt) return 0;
+        return b.publishedAt.valueOf() - a.publishedAt.valueOf();
+      })
+      .slice(0, MAX_DOCUMENTS);
+  };
+
   return {
-    async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
-      const permittedContentTypes = await getPermittedContentTypes();
-      const allowedContentTypeUids = permittedContentTypes.filter((uid) => {
-        return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+    async getRecentlyAssignedDocuments(): Promise<GetRecentDocuments.Response['data']> {
+      const userId = strapi.requestContext.get()?.state?.user.id;
+      const recentlyAssignedDocuments = await queryLastDocuments({
+        populate: ['strapi_stage'],
+        filters: {
+          strapi_assignee: {
+            id: userId,
+          },
+        },
       });
-      // Fetch the configuration for each content type in a single query
-      const configurations = await getConfiguration(allowedContentTypeUids);
-      // Get the necessary metadata for the documents
-      const contentTypesMeta = getContentTypesMeta(allowedContentTypeUids, configurations);
-      // Now actually fetch and format the documents
-      const recentDocuments = await Promise.all(
-        contentTypesMeta.map(async (meta) => {
-          const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
-            limit: MAX_DOCUMENTS,
-            sort: 'publishedAt:desc',
-            fields: meta.fields,
-            status: 'published',
-          });
 
-          const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
+      return addStatusToDocuments(recentlyAssignedDocuments);
+    },
 
-          return formatDocuments(docs, meta);
-        })
-      );
+    async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
+      const recentlyPublishedDocuments = await queryLastDocuments({
+        status: 'published',
+      });
 
-      const overallRecentDocuments = recentDocuments
-        .flat()
-        .sort((a, b) => {
-          if (!a.publishedAt || !b.publishedAt) return 0;
-          return b.publishedAt.valueOf() - a.publishedAt.valueOf();
-        })
-        .slice(0, MAX_DOCUMENTS);
-
-      return addStatusToDocuments(overallRecentDocuments);
+      return addStatusToDocuments(recentlyPublishedDocuments);
     },
 
     async getRecentlyUpdatedDocuments(): Promise<GetRecentDocuments.Response['data']> {
-      const allowedContentTypeUids = await getPermittedContentTypes();
-      // Fetch the configuration for each content type in a single query
-      const configurations = await getConfiguration(allowedContentTypeUids);
-      // Get the necessary metadata for the documents
-      const contentTypesMeta = getContentTypesMeta(allowedContentTypeUids, configurations);
-      // Now actually fetch and format the documents
-      const recentDocuments = await Promise.all(
-        contentTypesMeta.map(async (meta) => {
-          const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
-            limit: MAX_DOCUMENTS,
-            sort: 'updatedAt:desc',
-            fields: meta.fields,
-          });
+      const recentlyUpdatedDocuments = await queryLastDocuments();
 
-          const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
-
-          return formatDocuments(docs, meta);
-        })
-      );
-
-      const overallRecentDocuments = recentDocuments
-        .flat()
-        .sort((a, b) => {
-          return b.updatedAt.valueOf() - a.updatedAt.valueOf();
-        })
-        .slice(0, MAX_DOCUMENTS);
-
-      return addStatusToDocuments(overallRecentDocuments);
+      return addStatusToDocuments(recentlyUpdatedDocuments);
     },
   };
 };
