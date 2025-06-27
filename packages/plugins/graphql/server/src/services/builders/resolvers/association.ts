@@ -80,7 +80,7 @@ export default ({ strapi }: Context) => {
 
         // Sign media URLs if upload plugin is available and using private provider
         let signedData = data;
-        if (strapi.plugin('upload')) {
+        if (isMediaAttribute && strapi.plugin('upload')) {
           const { signEntityMedia } = strapi.plugin('upload').service('extensions.utils');
 
           if (Array.isArray(data)) {
