@@ -5,6 +5,7 @@ import fse from 'fs-extra';
 import _ from 'lodash';
 import { extension } from 'mime-types';
 import {
+  async,
   sanitize,
   contentTypes as contentTypesUtils,
   errors,
@@ -45,6 +46,8 @@ const { ApplicationError, NotFoundError } = errors;
 const { bytesToKbytes } = fileUtils;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
+  const fileService = getService('file');
+
   const sendMediaMetrics = (data: Pick<File, 'caption' | 'alternativeText'>) => {
     if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
       strapi.telemetry.send('didSaveMediaWithCaption');
@@ -462,27 +465,45 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return res;
   }
 
-  function findOne(id: ID, populate = {}) {
+  async function findOne(id: ID, populate = {}) {
     const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
     });
 
-    return strapi.db.query(FILE_MODEL_UID).findOne({
+    const file = await strapi.db.query(FILE_MODEL_UID).findOne({
       where: { id },
       ...query,
     });
+
+    if (!file) return file;
+
+    // Sign file URLs if using private provider
+    return fileService.signFileUrls(file);
   }
 
-  function findMany(query: any = {}): Promise<File[]> {
-    return strapi.db
+  async function findMany(query: any = {}): Promise<File[]> {
+    const files = await strapi.db
       .query(FILE_MODEL_UID)
       .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+
+    // Sign file URLs if using private provider
+    return async.map(files, (file: File) => fileService.signFileUrls(file));
   }
 
-  function findPage(query: any = {}) {
-    return strapi.db
+  async function findPage(query: any = {}) {
+    const result = await strapi.db
       .query(FILE_MODEL_UID)
       .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
+
+    // Sign file URLs if using private provider
+    const signedResults = await async.map(result.results, (file: File) =>
+      fileService.signFileUrls(file)
+    );
+
+    return {
+      ...result,
+      results: signedResults,
+    };
   }
 
   async function remove(file: File) {

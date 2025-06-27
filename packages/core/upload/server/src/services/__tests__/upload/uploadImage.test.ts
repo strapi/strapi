@@ -5,6 +5,18 @@ import _ from 'lodash';
 import createUploadService from '../../upload';
 import imageManipulation from '../../image-manipulation';
 
+// Set up initial mock before service creation
+global.strapi = {
+  plugins: {
+    upload: {
+      services: {
+        'image-manipulation': imageManipulation,
+      },
+    },
+  },
+  plugin: (name: string) => global.strapi.plugins[name],
+} as any;
+
 const uploadService = createUploadService({} as any);
 
 const imageFilePath = path.join(__dirname, './image.png');
