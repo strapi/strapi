@@ -92,6 +92,40 @@ const localeToData: Transform = (contentType, params) => {
   return params;
 };
 
+/**
+ * Copy non-localized fields from an existing entry to a new entry being created
+ * for a different locale of the same document. Returns a new object with the merged data.
+ */
+const copyNonLocalizedFields = async (
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  documentId: string,
+  dataToCreate: Record<string, any>
+): Promise<Record<string, any>> => {
+  // Check if this is a localized content type and if i18n plugin is available
+  const i18nService = strapi.plugin('i18n')?.service('content-types');
+  if (!i18nService?.isLocalizedContentType(contentType)) {
+    return dataToCreate;
+  }
+
+  // Find an existing entry for the same document to copy unlocalized fields from
+  const existingEntry = await strapi.db.query(contentType.uid).findOne({
+    where: { documentId },
+    // Prefer published entry, but fall back to any entry
+    orderBy: { publishedAt: 'desc' },
+  });
+
+  // If an entry exists in another locale, copy its non-localized fields
+  if (existingEntry) {
+    const mergedData = { ...dataToCreate };
+    i18nService.fillNonLocalizedAttributes(mergedData, existingEntry, {
+      model: contentType.uid,
+    });
+    return mergedData;
+  }
+
+  return dataToCreate;
+};
+
 const defaultLocaleCurry = curry(defaultLocale);
 const localeToLookupCurry = curry(localeToLookup);
 const multiLocaleToLookupCurry = curry(multiLocaleToLookup);
@@ -102,4 +136,5 @@ export {
   localeToLookupCurry as localeToLookup,
   localeToDataCurry as localeToData,
   multiLocaleToLookupCurry as multiLocaleToLookup,
+  copyNonLocalizedFields,
 };

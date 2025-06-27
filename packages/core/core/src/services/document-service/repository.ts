@@ -6,6 +6,7 @@ import type { UID } from '@strapi/types';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
+import { copyNonLocalizedFields } from './internationalization';
 import * as components from './components';
 
 import { createEntriesService } from './entries';
@@ -240,29 +241,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        const dataToCreate = { ...queryParams.data, documentId };
-
-        // Check if this is a localized content type and if i18n plugin is available
-        const i18nService = strapi.plugin('i18n')?.service('content-types');
-        if (i18nService?.isLocalizedContentType(contentType)) {
-          // Find an existing entry for the same document to copy unlocalized fields from
-          const existingEntry = await strapi.db.query(contentType.uid).findOne({
-            where: { documentId },
-            // Prefer published entry, but fall back to any entry
-            orderBy: { publishedAt: 'desc' },
-          });
-
-          // If an entry exists in another locale, copy its non-localized fields
-          if (existingEntry) {
-            i18nService.fillNonLocalizedAttributes(dataToCreate, existingEntry, {
-              model: contentType.uid,
-            });
-          }
-        }
+        const mergedData = await copyNonLocalizedFields(contentType, documentId, {
+          ...queryParams.data,
+          documentId,
+        });
 
         updatedDraft = await entries.create({
           ...queryParams,
-          data: dataToCreate,
+          data: mergedData,
         });
         emitEvent('entry.create', updatedDraft);
       }
