@@ -82,21 +82,24 @@ const UseCasePage = () => {
   const handleSubmit = async (event: React.FormEvent, skipPersona: boolean) => {
     event.preventDefault();
     try {
-      await fetch('https://analytics.strapi.io/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          username: firstname,
-          firstAdmin: Boolean(!hasAdmin),
-          persona: {
-            role: skipPersona ? undefined : role,
-            otherRole: skipPersona ? undefined : otherRole,
+      await fetch(
+        `${process.env.STRAPI_ADMIN_ANALYTICS_URL || 'https://analytics.strapi.io'}/register`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-      });
+          body: JSON.stringify({
+            email,
+            username: firstname,
+            firstAdmin: Boolean(!hasAdmin),
+            persona: {
+              role: skipPersona ? undefined : role,
+              otherRole: skipPersona ? undefined : otherRole,
+            },
+          }),
+        }
+      );
 
       toggleNotification({
         type: 'success',
