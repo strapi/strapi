@@ -34,12 +34,8 @@ const getInitials = (user: Partial<User> = {}): string => {
         .split(' ')
         .map((name) => name.substring(0, 1))
         .join('')
-<<<<<<< HEAD
-        .substring(0, 2)
+        .substring(0, 1)
         .toUpperCase();
-=======
-        .substring(0, 2);
->>>>>>> 1ea0148ab5 (fix: moved widget in review-workflows)
 };
 
 /* -------------------------------------------------------------------------------------------------
