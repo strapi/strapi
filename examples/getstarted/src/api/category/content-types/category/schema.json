@@ -38,20 +38,20 @@
       "mappedBy": "categories"
     },
     "datetime": {
+      "type": "datetime",
       "pluginOptions": {
         "i18n": {
           "localized": false
         }
-      },
-      "type": "datetime"
+      }
     },
     "date": {
+      "type": "date",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      },
-      "type": "date"
+      }
     },
     "relation_locales": {
       "type": "relation",
@@ -64,6 +64,12 @@
       "relation": "oneToOne",
       "target": "api::relation-locale.relation-locale",
       "mappedBy": "category"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product",
+      "inversedBy": "categories"
     }
   }
 }

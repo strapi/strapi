@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_product_dzs",
+  "info": {
+    "displayName": "dz"
+  },
+  "options": {},
+  "attributes": {
+    "dztext": {
+      "type": "string"
+    },
+    "address": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::address.address"
+    }
+  },
+  "config": {}
+}

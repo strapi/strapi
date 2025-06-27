@@ -51,6 +51,12 @@
     },
     "visible": {
       "type": "boolean"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "countries"
     }
   }
 }
