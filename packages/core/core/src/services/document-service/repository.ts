@@ -254,14 +254,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (
 
           // If an entry exists in another locale, copy its non-localized fields
           if (existingEntry) {
-            const nonLocalizedAttributes = i18nService.getNonLocalizedAttributes(contentType);
-
-            // Don't override provided data
-            for (const attr of nonLocalizedAttributes) {
-              if (existingEntry[attr] !== undefined && dataToCreate[attr] === undefined) {
-                dataToCreate[attr] = existingEntry[attr];
-              }
-            }
+            i18nService.fillNonLocalizedAttributes(dataToCreate, existingEntry, {
+              model: contentType.uid,
+            });
           }
         }
 
