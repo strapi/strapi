@@ -97,9 +97,12 @@ const UnstableGuidedTourTooltip = ({
     requiredActions?.every((action) => {
       return guidedTourMeta?.data?.completedActions.includes(action);
     }) ?? true;
-
+  const hasFutureFlag = window.strapi.future.isEnabled('unstableGuidedTour');
   const isEnabled =
-    guidedTourMeta?.data?.isFirstSuperAdminUser && !state.tours[tourName].isCompleted;
+    guidedTourMeta?.data?.isFirstSuperAdminUser &&
+    !state.tours[tourName].isCompleted &&
+    hasFutureFlag;
+
   const isPopoverOpen = isEnabled && isCurrentStep && hasCompletedRequiredActions;
 
   // Lock the scroll
