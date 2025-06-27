@@ -7,6 +7,39 @@
 import * as z from 'zod/v4';
 
 /**
+ * Transforms a Strapi UID into an OpenAPI-compliant component name.
+ *
+ * @param uid - The Strapi UID to transform (e.g., "basic.seo", "api::category.category", "plugin::upload.file")
+ * @returns The OpenAPI-compliant component name (e.g., "BasicSeoEntry", "ApiCategoryCategoryDocument", "PluginUploadFileDocument")
+ */
+export const transformUidToValidOpenApiName = (uid: string): string => {
+  const capitalize = (str: string): string => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  const toPascalCase = (str: string): string => {
+    return str.split(/[-_]/).map(capitalize).join('');
+  };
+
+  // Check if it contains double colons (other namespaced UIDs)
+  if (uid.includes('::')) {
+    const [namespace, ...rest] = uid.split('::');
+    const namespacePart = toPascalCase(namespace);
+    const restParts = rest.join('.').split('.').map(toPascalCase).map(capitalize);
+    return `${capitalize(namespacePart)}${restParts.join('')}Document`;
+  }
+
+  if (uid.includes('.')) {
+    // basic.seo -> BasicSeoEntry
+    const parts = uid.split('.');
+    const transformedParts = parts.map(toPascalCase).map(capitalize);
+    return `${transformedParts.join('')}Entry`;
+  }
+
+  return `${toPascalCase(capitalize(uid))}Schema`;
+};
+
+/**
  * Conditionally makes a Zod schema optional based on the `required` parameter.
  *
  * @param required - If `false` or `undefined`, the schema will be made optional. If `true`, the schema becomes non-optional.
@@ -116,12 +149,14 @@ export const augmentSchema = <T extends z.Schema>(
 export const safeGlobalRegistrySet = (id: string, schema: z.ZodType) => {
   const { _idmap: idMap } = z.globalRegistry;
 
+  const transformedId = transformUidToValidOpenApiName(id);
+
   // Allow safe overrides in the ID map
-  if (idMap.has(id)) {
-    idMap.delete(id);
+  if (idMap.has(transformedId)) {
+    idMap.delete(transformedId);
   }
 
-  z.globalRegistry.add(schema, { id });
+  z.globalRegistry.add(schema, { id: transformedId });
 };
 
 /**
@@ -155,10 +190,12 @@ export const safeGlobalRegistrySet = (id: string, schema: z.ZodType) => {
 export const safeSchemaCreation = (id: string, callback: () => z.ZodType) => {
   const { _idmap: idMap } = z.globalRegistry;
 
-  const existsInGlobalRegistry = idMap.has(id);
+  const transformedId = transformUidToValidOpenApiName(id);
+
+  const existsInGlobalRegistry = idMap.has(transformedId);
 
   if (existsInGlobalRegistry) {
-    return idMap.get(id) as z.ZodType;
+    return idMap.get(transformedId) as z.ZodType;
   }
 
   // Temporary any placeholder before replacing with the actual schema type
