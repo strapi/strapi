@@ -329,7 +329,7 @@ class StrapiApp {
           const { ProfileWidget } = await import('./components/Widgets');
           return ProfileWidget;
         },
-        pluginId: 'admin.widget.profile',
+        pluginId: 'admin',
         id: 'profile-info',
       },
     ]);
