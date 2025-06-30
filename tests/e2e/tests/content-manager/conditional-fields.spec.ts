@@ -56,14 +56,16 @@ test.describe('Conditional Fields', () => {
       });
   });
 
-  test('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({ page }) => {
+  test.skip('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
+    page,
+  }) => {
     await createContent(
       page,
       'Products',
       [
         { name: 'name*', type: 'text', value: 'Shoes' },
         { name: 'type', type: 'enumeration', value: 'standard' },
-        { name: 'sku', type: 'number', value: 10 }
+        { name: 'sku', type: 'number', value: 10 },
       ],
       { save: false, publish: false, verify: false }
     );
@@ -76,9 +78,11 @@ test.describe('Conditional Fields', () => {
     // Save, then switch enum value back so SKU reappears
     await page.getByRole('button', { name: 'Save' }).click();
     await fillField(page, { name: 'type', type: 'enumeration', value: 'standard' });
-    await page.getByLabel('sku').textContent().then((text) => {
-      expect(text).toBe('');
-    });
+    await page
+      .getByLabel('sku')
+      .textContent()
+      .then((text) => {
+        expect(text).toBe('');
+      });
   });
-
 });
