@@ -162,11 +162,14 @@ export const forms = {
             ...rest,
           });
 
+          let injected = false;
+
           const sections = baseForm.reduce((acc: Array<any>, current: any) => {
-            if (current.sectionTitle === null) {
+            if (current.sectionTitle === null || injected) {
               acc.push(current);
             } else {
               acc.push({ ...current, items: [...current.items, ...itemsToAdd] });
+              injected = true;
             }
 
             return acc;

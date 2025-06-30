@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "conditions",
+  "info": {
+    "singularName": "condition",
+    "pluralName": "conditions",
+    "displayName": "Condition"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "isActive": {
+      "type": "boolean"
+    },
+    "country": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::country.country",
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "isActive"
+            },
+            true
+          ]
+        }
+      }
+    }
+  }
+}

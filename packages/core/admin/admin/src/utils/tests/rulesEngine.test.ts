@@ -1,4 +1,4 @@
-import { createRulesEngine, Condition } from '../rules-engine';
+import { createRulesEngine, Condition } from '../rulesEngine';
 
 describe('RulesEngine with is & isNot operator', () => {
   const engine = createRulesEngine();
