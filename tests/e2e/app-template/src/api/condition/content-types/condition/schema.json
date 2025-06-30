@@ -28,6 +28,28 @@
           ]
         }
       }
+    },
+    "roles": {
+      "type": "enumeration",
+      "enum": [
+        "tank",
+        "dps",
+        "heal"
+      ]
+    },
+    "Author": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::article.article",
+      "mappedBy": "Article",
+      "conditions": {
+        "visible": {
+          "==": [
+            {"var": "roles"},
+            "tank"
+          ]
+        }
+      }
     }
   }
 }

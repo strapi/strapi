@@ -55,4 +55,61 @@ test.describe('Conditional Fields', () => {
         expect(text).toBe('');
       });
   });
+
+  test('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
+    page,
+  }) => {
+    await createContent(
+      page,
+      'Condition',
+      [
+        {
+          name: 'isActive',
+          type: 'boolean',
+          value: true,
+        },
+      ],
+      { save: false, publish: false, verify: false }
+    );
+
+    await expect(page.getByLabel('country')).toBeVisible();
+
+    await fillField(page, {
+      name: 'isActive',
+      type: 'boolean',
+      value: false,
+    });
+
+    await expect(page.getByLabel('country')).toBeHidden();
+  });
+
+  test('As a user if I change an enum field that affects a conditional relation field, the field should be hidden', async ({
+    page,
+  }) => {
+    await createContent(
+      page,
+      'Condition',
+      [
+        {
+          name: 'roles',
+          type: 'enumeration',
+          value: 'tank', // Start with tank to show Author relation
+        },
+      ],
+      { save: false, publish: false, verify: false }
+    );
+
+    await expect(page.getByLabel('Author')).toBeVisible();
+
+    await fillField(page, {
+      name: 'roles',
+      type: 'enumeration',
+      value: 'dps',
+    });
+
+    // Wait for conditional logic to process
+    await page.waitForTimeout(500);
+
+    await expect(page.getByLabel('Author')).toBeHidden();
+  });
 });
