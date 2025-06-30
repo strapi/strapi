@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SchemaChange, SchemaChangeAnnotation, ToolAnnotation } from '../types/annotations';
-import { AssistantMessage, MarkerContent, Message, Status, UserMessage } from '../types/messages';
-
+import type { SchemaChange, ToolAnnotation } from '../types/annotations';
+import type {
+  AssistantMessage,
+  MarkerContent,
+  Message,
+  Status,
+  UserMessage,
+} from '../types/messages';
 import type { UIMessage as RawMessage, ToolInvocation } from 'ai';
 
 export type TransformOptions = {
@@ -25,10 +30,10 @@ function transformToolCall(
 
   if (toolName === 'schemaGenerationTool') {
     let schemaChanges = [];
-    if (toolCall.state === 'result' && toolCall.result && Array.isArray(toolCall.result.schemas)) {
-      // Prefer schemas from toolInvocation result
-      schemaChanges = toolCall.result.schemas.map((schema: any) => ({
-        // revisionId is not present in result, so use uid or name as fallback
+    if (toolCall.state === 'result' && toolCall.output && Array.isArray(toolCall.output.schemas)) {
+      // Prefer schemas from toolInvocation output
+      schemaChanges = toolCall.output.schemas.map((schema: any) => ({
+        // revisionId is not present in output, so use uid or name as fallback
         revisionId: `${toolCall.toolCallId}-${schema.uid || schema.name}`,
         schema,
         type: schema.action || 'update',
