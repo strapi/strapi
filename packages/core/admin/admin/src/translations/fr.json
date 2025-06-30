@@ -504,6 +504,7 @@
   "global.password": "Mot de passe",
   "global.plugins": "Plugins",
   "global.profile": "Profil",
+  "global.profile.settings": "Paramètres du profil",
   "global.reset-password": "Réinitialiser le mot de passe",
   "global.roles": "Rôles",
   "global.save": "Enregistrer",

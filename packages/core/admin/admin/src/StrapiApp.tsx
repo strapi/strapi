@@ -331,6 +331,13 @@ class StrapiApp {
         },
         pluginId: 'admin',
         id: 'profile-info',
+        link: {
+          label: {
+            id: 'global.profile.settings',
+            defaultMessage: 'Profile settings',
+          },
+          href: '/me',
+        },
       },
     ]);
 
