@@ -82,7 +82,6 @@ export const BaseChatProvider = ({
 
   const chat = useAIChat({
     id: chatId?.toString(),
-    sendExtraMessageFields: true,
     experimental_throttle: 100,
     body: {
       schemas,
