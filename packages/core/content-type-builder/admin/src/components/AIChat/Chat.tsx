@@ -26,7 +26,7 @@ import { useTranslations } from './hooks/useTranslations';
 import { Message } from './lib/types/messages';
 import { useStrapiChat } from './providers/ChatProvider';
 import { useUploadProjectToChat } from './UploadCodeModal';
-import { UploadFigmaModal, useUploadFigmaToChat } from './UploadFigmaModal';
+import { useUploadFigmaToChat } from './UploadFigmaModal';
 
 /* -------------------------------------------------------------------------------------------------
  * Chat Message Suggestions

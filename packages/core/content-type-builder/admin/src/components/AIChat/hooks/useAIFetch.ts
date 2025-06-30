@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 
-import { Message, useChat } from '@ai-sdk/react';
+import { UIMessage, useChat } from '@ai-sdk/react';
 import { useAppInfo } from '@strapi/admin/strapi-admin';
 
 import { STRAPI_AI_CHAT_URL, STRAPI_AI_TOKEN, STRAPI_AI_URL } from '../lib/constants';
@@ -74,7 +74,7 @@ namespace SendFeedback {
       feedback?: string;
       reasons?: FeedbackReasonIds[];
       messageId: string;
-      messages: Message[];
+      messages: UIMessage[];
       schemas: Schema[];
     };
   }

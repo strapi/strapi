@@ -2,7 +2,7 @@
 import { SchemaChange, SchemaChangeAnnotation, ToolAnnotation } from '../types/annotations';
 import { AssistantMessage, MarkerContent, Message, Status, UserMessage } from '../types/messages';
 
-import type { Message as RawMessage, ToolInvocation } from 'ai';
+import type { UIMessage as RawMessage, ToolInvocation } from 'ai';
 
 export type TransformOptions = {
   isLoading?: boolean;
@@ -123,13 +123,17 @@ function transformAssistantMessage(
 }
 
 function transformUserMessage(message: RawMessage): UserMessage {
+  // Extract text from parts array
+  const textPart = message.parts?.find((part) => part.type === 'text');
+  const text = textPart?.type === 'text' ? textPart.text : '';
+
   return {
     id: message.id,
     role: 'user',
     contents: [
       {
         type: 'text',
-        text: message.content,
+        text,
       },
     ],
     attachments: message.experimental_attachments || [],
