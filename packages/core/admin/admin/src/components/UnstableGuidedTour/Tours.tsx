@@ -4,6 +4,9 @@ import { Box, Popover, Flex, Button } from '@strapi/design-system';
 import { FormattedMessage } from 'react-intl';
 import { styled } from 'styled-components';
 
+import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
+import { useGetGuidedTourMetaQuery } from '../../services/admin';
+
 import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
 import { Step, createStepComponents } from './Step';
 
@@ -12,7 +15,7 @@ import { Step, createStepComponents } from './Step';
  * -----------------------------------------------------------------------------------------------*/
 
 const tours = {
-  contentManager: createTour('contentManager', [
+  TEST: createTour('TEST', [
     {
       name: 'Introduction',
       content: (Step) => (
@@ -26,6 +29,20 @@ const tours = {
             defaultMessage="Create and manage content from your collection types and single types."
           />
           <Step.Actions showSkip />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'Done',
+      requiredActions: ['didCreateApiToken'],
+      content: (Step) => (
+        <Step.Root align="start">
+          <Step.Title id="tours.contentManager.CreateEntry.title" defaultMessage="Create entry" />
+          <Step.Content
+            id="tours.contentManager.CreateEntry.content"
+            defaultMessage="Click this button to create an entry"
+          />
+          <Step.Actions />
         </Step.Root>
       ),
     },
@@ -130,7 +147,6 @@ export const GuidedTourOverlay = styled(Box)`
   inset: 0;
   background-color: rgba(50, 50, 77, 0.2);
   z-index: 10;
-  pointer-events: none;
 `;
 
 const UnstableGuidedTourTooltip = ({
@@ -138,27 +154,37 @@ const UnstableGuidedTourTooltip = ({
   content,
   tourName,
   step,
+  requiredActions,
 }: {
   children: React.ReactNode;
   content: Content;
   tourName: ValidTourName;
   step: number;
+  requiredActions?: GetGuidedTourMeta.Response['data']['completedActions'];
 }) => {
-  const disabledUnstableGuidedTour = !window.strapi.future.isEnabled('unstableGuidedTour');
+  const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
+
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
+
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
-  const isCurrentStep = disabledUnstableGuidedTour
-    ? undefined
-    : state.tours[tourName].currentStep === step;
-  const isPopoverOpen = disabledUnstableGuidedTour
-    ? undefined
-    : isCurrentStep && !state.tours[tourName].isCompleted;
+  const isCurrentStep = state.tours[tourName].currentStep === step;
+  const hasCompletedRequiredActions =
+    requiredActions?.every((action) => {
+      return guidedTourMeta?.data?.completedActions.includes(action);
+    }) ?? true;
+  const hasFutureFlag = window.strapi.future.isEnabled('unstableGuidedTour');
+  const isEnabled =
+    guidedTourMeta?.data?.isFirstSuperAdminUser &&
+    !state.tours[tourName].isCompleted &&
+    hasFutureFlag;
+
+  const isPopoverOpen = isEnabled && isCurrentStep && hasCompletedRequiredActions;
 
   // Lock the scroll
   React.useEffect(() => {
-    if (!isPopoverOpen || disabledUnstableGuidedTour) return;
+    if (!isPopoverOpen) return;
 
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
@@ -166,11 +192,7 @@ const UnstableGuidedTourTooltip = ({
     return () => {
       document.body.style.overflow = originalStyle;
     };
-  }, [disabledUnstableGuidedTour, isPopoverOpen]);
-
-  if (disabledUnstableGuidedTour) {
-    return children;
-  }
+  }, [isPopoverOpen]);
 
   return (
     <>
@@ -190,6 +212,7 @@ const UnstableGuidedTourTooltip = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
+  requiredActions?: GetGuidedTourMeta.Response['data']['completedActions'];
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {
@@ -207,6 +230,7 @@ function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: s
         tourName={tourName as ValidTourName}
         step={index}
         content={step.content}
+        requiredActions={step.requiredActions}
       >
         {children}
       </UnstableGuidedTourTooltip>

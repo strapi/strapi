@@ -285,7 +285,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       const otherStatus = await this.getManyAvailableStatus(uid, document.localizations);
 
       document.localizations = document.localizations.map((d) => {
-        const status = otherStatus.find((s) => s.documentId === d.documentId);
+        const status = otherStatus.find(
+          (s) => s.documentId === d.documentId && s.locale === d.locale
+        );
         return {
           ...d,
           status: this.getStatus(d, status ? [status] : []),
