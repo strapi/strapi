@@ -59,7 +59,7 @@ const LeftMenu = () => {
           /**
            * Filter by the search value
            */
-          .filter((link) => startsWith(link.title, search))
+          .filter((link) => startsWith(link.title, search.trim()))
           /**
            * Sort correctly using the language
            */
@@ -83,11 +83,6 @@ const LeftMenu = () => {
 
   const handleChangeSearch = ({ target: { value } }: { target: { value: string } }) => {
     setSearch(value);
-
-    const clearBtn = document.getElementById('search-clear-btn');
-    if (clearBtn) {
-      clearBtn.style.display = value.trim() === '' ? 'none' : 'inline-block';
-    }
   };
 
   const label = formatMessage({
