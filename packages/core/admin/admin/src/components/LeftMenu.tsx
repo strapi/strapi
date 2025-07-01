@@ -92,38 +92,46 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                   : undefined;
 
               const labelValue = formatMessage(link.intlLabel);
+              const LinkContent = (
+                <NavLink.Link
+                  to={link.to}
+                  onClick={() => handleClickOnLink(link.to)}
+                  aria-label={labelValue}
+                >
+                  <NavLink.Icon label={labelValue}>
+                    <LinkIcon width="20" height="20" fill="neutral500" />
+                  </NavLink.Icon>
+                  {badgeContentLock ? (
+                    <NavLinkBadgeLock
+                      label="locked"
+                      textColor="neutral500"
+                      paddingLeft={0}
+                      paddingRight={0}
+                    >
+                      {badgeContentLock}
+                    </NavLinkBadgeLock>
+                  ) : badgeContentNumeric ? (
+                    <NavLinkBadgeCounter
+                      label={badgeContentNumeric}
+                      backgroundColor="primary600"
+                      width="2.3rem"
+                      color="neutral0"
+                    >
+                      {badgeContentNumeric}
+                    </NavLinkBadgeCounter>
+                  ) : null}
+                </NavLink.Link>
+              );
+
+              // Wrap with tourComponent if present
+              const WrappedLink = link.tourComponent ? (
+                <link.tourComponent>{LinkContent}</link.tourComponent>
+              ) : (
+                LinkContent
+              );
               return (
                 <Flex tag="li" key={link.to}>
-                  <NavLink.Tooltip label={labelValue}>
-                    <NavLink.Link
-                      to={link.to}
-                      onClick={() => handleClickOnLink(link.to)}
-                      aria-label={labelValue}
-                    >
-                      <NavLink.Icon label={labelValue}>
-                        <LinkIcon width="20" height="20" fill="neutral500" />
-                      </NavLink.Icon>
-                      {badgeContentLock ? (
-                        <NavLinkBadgeLock
-                          label="locked"
-                          textColor="neutral500"
-                          paddingLeft={0}
-                          paddingRight={0}
-                        >
-                          {badgeContentLock}
-                        </NavLinkBadgeLock>
-                      ) : badgeContentNumeric ? (
-                        <NavLinkBadgeCounter
-                          label={badgeContentNumeric}
-                          backgroundColor="primary600"
-                          width="2.3rem"
-                          color="neutral0"
-                        >
-                          {badgeContentNumeric}
-                        </NavLinkBadgeCounter>
-                      ) : null}
-                    </NavLink.Link>
-                  </NavLink.Tooltip>
+                  <NavLink.Tooltip label={labelValue}>{WrappedLink}</NavLink.Tooltip>
                 </Flex>
               );
             })

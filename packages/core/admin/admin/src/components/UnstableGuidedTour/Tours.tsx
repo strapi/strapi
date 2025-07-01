@@ -94,11 +94,11 @@ const tours = {
       ),
     },
     {
-      name: 'FinalStep',
+      name: 'Done',
       content: (Step) => {
         const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
         return (
-          <Step.Root side="bottom" align="start" sideOffset={-10}>
+          <Step.Root side="right" align="start" sideOffset={32}>
             <Step.Title
               id="tours.apiTokens.FinalStep.title"
               defaultMessage="It’s time to deploy your application!"
@@ -108,7 +108,7 @@ const tours = {
               defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
             />
             <Step.Actions showStepCount={false}>
-              <Flex>
+              <Flex justifyContent="end" width={'100%'}>
                 <Button
                   onClick={() => {
                     dispatch({ type: 'next_step', payload: 'apiTokens' });
