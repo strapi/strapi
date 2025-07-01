@@ -4,7 +4,7 @@ import { produce } from 'immer';
 
 import { createContext } from '../Context';
 
-import type { Tours } from './Tours';
+import { type Tours, tours as guidedTours } from './Tours';
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourProvider
@@ -46,30 +46,21 @@ function reducer(state: State, action: Action): State {
   });
 }
 
-const UnstableGuidedTourContext = ({
-  children,
-  tours: registeredTours,
-}: {
-  children: React.ReactNode;
-  // NOTE: Maybe we just import this directly instead of a prop?
-  tours: Tours;
-}) => {
-  const initialState = React.useMemo(() => {
-    const stored = getTourStateFromLocalStorage();
-    if (stored) return stored;
-
-    const tours = Object.keys(registeredTours).reduce((acc, tourName) => {
-      const tourLength = Object.keys(registeredTours[tourName as ValidTourName]).length;
-      acc[tourName as ValidTourName] = {
-        currentStep: 0,
-        length: tourLength,
-        isCompleted: false,
+const UnstableGuidedTourContext = ({ children }: { children: React.ReactNode }) => {
+  const stored = getTourStateFromLocalStorage();
+  const initialState = stored
+    ? stored
+    : {
+        tours: Object.keys(guidedTours).reduce((acc, tourName) => {
+          const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
+          acc[tourName as ValidTourName] = {
+            currentStep: 0,
+            length: tourLength,
+            isCompleted: false,
+          };
+          return acc;
+        }, {} as Tour),
       };
-      return acc;
-    }, {} as Tour);
-
-    return { tours };
-  }, [registeredTours]);
 
   const [state, dispatch] = React.useReducer(reducer, initialState);
 

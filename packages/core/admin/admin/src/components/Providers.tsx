@@ -59,7 +59,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                   <NotificationsProvider>
                     <TrackingProvider>
                       <GuidedTourProvider>
-                        <UnstableGuidedTourContext tours={tours}>
+                        <UnstableGuidedTourContext>
                           <ConfigurationProvider
                             defaultAuthLogo={strapi.configurations.authLogo}
                             defaultMenuLogo={strapi.configurations.menuLogo}

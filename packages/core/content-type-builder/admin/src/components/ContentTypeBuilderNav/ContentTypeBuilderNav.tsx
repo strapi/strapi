@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from 'react';
 
-import { ConfirmDialog, SubNav, unstable_tours } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, SubNav } from '@strapi/admin/strapi-admin';
 import {
   Box,
   TextInput,
@@ -34,21 +34,6 @@ const DiscardAllMenuItem = styled(Menu.Item)`
     background: ${({ theme, disabled }) => !disabled && theme.colors.danger100};
   }
 `;
-
-const getGuidedTourForSection = (
-  sectionName: string
-): React.ComponentType<{ children: React.ReactNode }> | undefined => {
-  switch (sectionName) {
-    case 'models':
-      return unstable_tours.contentTypeBuilder.CollectionTypes;
-    case 'singleTypes':
-      return unstable_tours.contentTypeBuilder.SingleTypes;
-    case 'components':
-      return unstable_tours.contentTypeBuilder.Components;
-    default:
-      return undefined;
-  }
-};
 
 export const ContentTypeBuilderNav = () => {
   const { menu, search } = useContentTypeBuilderMenu();
