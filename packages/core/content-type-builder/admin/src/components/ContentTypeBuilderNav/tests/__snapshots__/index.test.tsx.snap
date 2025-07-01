@@ -651,32 +651,30 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </span>
                     </div>
                   </div>
-                  <div>
-                    <button
-                      aria-disabled="false"
-                      class="c24 c25 c33"
-                      data-state="closed"
+                  <button
+                    aria-disabled="false"
+                    class="c24 c25 c33"
+                    data-state="closed"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      fill="currentColor"
+                      focusable="false"
+                      height="16"
+                      viewBox="0 0 32 32"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-hidden="true"
-                        fill="currentColor"
-                        focusable="false"
-                        height="16"
-                        viewBox="0 0 32 32"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                        />
-                      </svg>
-                      <span
-                        class="c18"
-                      >
-                        Create new collection type
-                      </span>
-                    </button>
-                  </div>
+                      <path
+                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                      />
+                    </svg>
+                    <span
+                      class="c18"
+                    >
+                      Create new collection type
+                    </span>
+                  </button>
                 </div>
               </div>
               <ol
@@ -765,37 +763,35 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </span>
                     </div>
                   </div>
-                  <div>
-                    <button
-                      aria-disabled="false"
-                      class="c24 c25 c33"
-                      data-state="closed"
+                  <button
+                    aria-disabled="false"
+                    class="c24 c25 c33"
+                    data-state="closed"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      fill="currentColor"
+                      focusable="false"
+                      height="16"
+                      viewBox="0 0 32 32"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-hidden="true"
-                        fill="currentColor"
-                        focusable="false"
-                        height="16"
-                        viewBox="0 0 32 32"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                        />
-                      </svg>
-                      <span
-                        class="c18"
-                      >
-                        Create new single type
-                      </span>
-                    </button>
-                  </div>
+                      <path
+                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                      />
+                    </svg>
+                    <span
+                      class="c18"
+                    >
+                      Create new single type
+                    </span>
+                  </button>
                 </div>
               </div>
               <ol
                 class="c34 c35"
-                id=":r6:"
+                id=":r5:"
               >
                 <li>
                   <a
@@ -851,37 +847,35 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       </span>
                     </div>
                   </div>
-                  <div>
-                    <button
-                      aria-disabled="false"
-                      class="c24 c25 c33"
-                      data-state="closed"
+                  <button
+                    aria-disabled="false"
+                    class="c24 c25 c33"
+                    data-state="closed"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      fill="currentColor"
+                      focusable="false"
+                      height="16"
+                      viewBox="0 0 32 32"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      <svg
-                        aria-hidden="true"
-                        fill="currentColor"
-                        focusable="false"
-                        height="16"
-                        viewBox="0 0 32 32"
-                        width="16"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
-                        />
-                      </svg>
-                      <span
-                        class="c18"
-                      >
-                        Create a new component
-                      </span>
-                    </button>
-                  </div>
+                      <path
+                        d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5h-9.5V27a1.5 1.5 0 1 1-3 0v-9.5H5a1.5 1.5 0 1 1 0-3h9.5V5a1.5 1.5 0 1 1 3 0v9.5H27a1.5 1.5 0 0 1 1.5 1.5"
+                      />
+                    </svg>
+                    <span
+                      class="c18"
+                    >
+                      Create a new component
+                    </span>
+                  </button>
                 </div>
               </div>
               <ol
                 class="c34 c35"
-                id=":r9:"
+                id=":r7:"
               >
                 <li>
                   <div
@@ -891,7 +885,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       class="c31"
                     >
                       <button
-                        aria-controls=":rc:"
+                        aria-controls=":r9:"
                         aria-expanded="true"
                         class="c44"
                       >
@@ -921,7 +915,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     </div>
                     <ul
                       class="c35"
-                      id=":rc:"
+                      id=":r9:"
                       style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
                     >
                       <li
@@ -965,7 +959,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                       class="c31"
                     >
                       <button
-                        aria-controls=":rd:"
+                        aria-controls=":ra:"
                         aria-expanded="true"
                         class="c44"
                       >
@@ -995,7 +989,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     </div>
                     <ul
                       class="c35"
-                      id=":rd:"
+                      id=":ra:"
                       style="max-height: 1000px; overflow: hidden; transition: max-height 1s ease-in-out;"
                     >
                       <li
