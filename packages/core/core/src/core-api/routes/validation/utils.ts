@@ -195,7 +195,7 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
 
   const mapItem = idMap.get(transformedId);
   if (mapItem) {
-    return mapItem as z.ZodType;
+    return mapItem;
   }
 
   strapi.log.warn(
