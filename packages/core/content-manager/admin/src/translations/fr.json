@@ -206,6 +206,7 @@
   "history.restore.confirm.message": "{isDraft, select, true {Le contenu restauré écrasera votre brouillon.} other {Le contenu restauré ne sera pas publié, il écrasera le brouillon et sera sauvegardé en tant que changement en attente de publication. Vous pourrez publier les changements à tout moment.}}",
   "history.restore.success.title": "Version restaurée.",
   "history.restore.success.message": "Le contenu de la version restaurée n'a pas encore été publié.",
+  "widget.chart-entries.title": "Entrées",
   "widget.last-edited.title": "Dernières entrées éditées",
   "widget.last-edited.single-type": "Types uniques",
   "widget.last-edited.no-data": "Aucune entrée éditée",
