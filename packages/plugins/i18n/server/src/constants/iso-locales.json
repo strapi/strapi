@@ -2442,5 +2442,25 @@
   {
     "code": "zu-ZA",
     "name": "Zulu (South Africa) (zu-ZA)"
+  },
+  {
+    "code": "ny",
+    "name": "Chichewa"
+  },
+  {
+    "code": "dwr",
+    "name": "Dawro"
+  },
+  {
+    "code": "gmv",
+    "name": "Gamo"
+  },
+  {
+    "code": "gof",
+    "name": "Gofa"
+  },
+  {
+    "code": "ht",
+    "name": "Haitian"
   }
 ]
