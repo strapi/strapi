@@ -81,12 +81,12 @@ export default ({ strapi }: Context) => {
         // Sign media URLs if upload plugin is available and using private provider
         let signedData = data;
         if (isMediaAttribute && strapi.plugin('upload')) {
-          const { signEntityMedia } = strapi.plugin('upload').service('extensions.utils');
+          const { signFileUrls } = strapi.plugin('upload').service('file');
 
           if (Array.isArray(data)) {
-            signedData = await async.map(data, (item: any) => signEntityMedia(item, targetUID));
+            signedData = await async.map(data, (item: any) => signFileUrls(item));
           } else if (data) {
-            signedData = await signEntityMedia(data, targetUID);
+            signedData = await signFileUrls(data);
           }
         }
 
