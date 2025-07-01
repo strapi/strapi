@@ -1,12 +1,12 @@
 import { Widget, useTracking } from '@strapi/admin/strapi-admin';
-import { Box, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
-import { useGetRecentDocumentsQuery } from '../services/homepage';
+import { useGetRecentDocumentsQuery, useGetCountDocumentsQuery } from '../services/homepage';
 
 import { RelativeTime } from './RelativeTime';
 
@@ -159,4 +159,54 @@ const LastPublishedWidget = () => {
   return <RecentDocumentsTable documents={data} />;
 };
 
-export { LastEditedWidget, LastPublishedWidget };
+/* -------------------------------------------------------------------------------------------------
+ * ChartEntriesWidget
+ * -----------------------------------------------------------------------------------------------*/
+
+const ChartEntriesWidget = () => {
+  const { formatMessage } = useIntl();
+  const { data: countDocuments, isLoading, error } = useGetCountDocumentsQuery();
+
+  if (isLoading) {
+    return <Widget.Loading />;
+  }
+
+  if (error) {
+    return <Widget.Error />;
+  }
+
+  if (!countDocuments) {
+    return (
+      <Widget.NoData>
+        {formatMessage({
+          id: 'content-manager.widget.last-published.no-data',
+          defaultMessage: 'No published entries',
+        })}
+      </Widget.NoData>
+    );
+  }
+
+  const { draft, published, modified } = countDocuments;
+
+  return (
+    <>
+      Draft: {draft} - Published: {published} - Modified: {modified}
+      <Flex gap={4} justifyContent="center">
+        <Flex gap={1}>
+          <Box background="secondary500" padding={2} borderRadius={1} />
+          <Typography>Draft</Typography>
+        </Flex>
+        <Flex gap={1}>
+          <Box background="alternative600" padding={2} borderRadius={1} />
+          <Typography>Modified</Typography>
+        </Flex>
+        <Flex gap={1}>
+          <Box background="success600" padding={2} borderRadius={1} />
+          <Typography>Published</Typography>
+        </Flex>
+      </Flex>
+    </>
+  );
+};
+
+export { ChartEntriesWidget, LastEditedWidget, LastPublishedWidget };
