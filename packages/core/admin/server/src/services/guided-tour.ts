@@ -4,7 +4,7 @@ import constants from './constants';
 export type GuidedTourRequiredActions = {
   didCreateContentTypeSchema: boolean;
   didCreateContent: boolean;
-  didCreateApiToken: boolean;
+  didCopyApiToken: boolean;
 };
 export type GuidedTourCompletedActions = keyof GuidedTourRequiredActions;
 
@@ -32,7 +32,7 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
     const createdApiTokens = await strapi
       .documents('admin::api-token')
       .findMany({ fields: ['name', 'description'] });
-    const didCreateApiToken = createdApiTokens.some((doc) =>
+    const didCopyApiToken = createdApiTokens.some((doc) =>
       constants.DEFAULT_API_TOKENS.every(
         (token) => token.name !== doc.name && token.description !== doc.description
       )
@@ -42,7 +42,7 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
     const requiredActions = {
       didCreateContentTypeSchema,
       didCreateContent,
-      didCreateApiToken,
+      didCopyApiToken,
     };
     const requiredActionNames = Object.keys(requiredActions) as Array<GuidedTourCompletedActions>;
     const completedActions = requiredActionNames.filter((key) => requiredActions[key]);

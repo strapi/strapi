@@ -34,7 +34,7 @@ const tours = {
     },
     {
       name: 'Done',
-      requiredActions: ['didCreateApiToken'],
+      requiredActions: ['didCopyApiToken'],
       content: (Step) => (
         <Step.Root align="start">
           <Step.Title id="tours.contentManager.CreateEntry.title" defaultMessage="Create entry" />
@@ -95,6 +95,7 @@ const tours = {
     },
     {
       name: 'Done',
+      requiredActions: ['didCopyApiToken'],
       content: (Step) => {
         const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
         return (
