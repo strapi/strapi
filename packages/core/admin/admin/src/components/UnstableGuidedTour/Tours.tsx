@@ -170,7 +170,7 @@ const UnstableGuidedTourTooltip = ({
 
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
-  const isCurrentStep = state.tours[tourName].currentStep === step;
+  const isCurrentStep = state?.tours[tourName].currentStep === step;
   const hasCompletedRequiredActions =
     requiredActions?.every((action) => {
       return guidedTourMeta?.data?.completedActions.includes(action);
@@ -178,7 +178,7 @@ const UnstableGuidedTourTooltip = ({
   const hasFutureFlag = window.strapi.future.isEnabled('unstableGuidedTour');
   const isEnabled =
     guidedTourMeta?.data?.isFirstSuperAdminUser &&
-    !state.tours[tourName].isCompleted &&
+    !state?.tours[tourName].isCompleted &&
     hasFutureFlag;
 
   const isPopoverOpen = isEnabled && isCurrentStep && hasCompletedRequiredActions;
