@@ -48,12 +48,12 @@ const getGuidedTourTooltip = (to: To) => {
     case 'content-manager':
       return unstable_tours.contentTypeBuilder.Finish;
     default:
-      break;
+      return React.Fragment;
   }
 };
 
 const LinkImpl = ({ children, ...props }: LinkProps) => {
-  const GuidedTourTooltip = getGuidedTourTooltip(props.to) ?? React.Fragment;
+  const GuidedTourTooltip = getGuidedTourTooltip(props.to);
 
   return (
     <GuidedTourTooltip>

@@ -120,9 +120,7 @@ const Sections = ({ children, ...props }: { children: React.ReactNode[]; [key: s
  * This would be better in the content-type-builder package directly but currently
  * the SubNav API does not expose a way to wrap the link, instead it wraps the link and the list
  */
-const getGuidedTourForSection = (
-  sectionName: string
-): React.ComponentType<{ children: React.ReactNode }> | undefined => {
+const getGuidedTourTooltip = (sectionName: string) => {
   switch (sectionName) {
     case 'Collection Types':
       return unstable_tours.contentTypeBuilder.CollectionTypes;
@@ -131,7 +129,7 @@ const getGuidedTourForSection = (
     case 'Components':
       return unstable_tours.contentTypeBuilder.Components;
     default:
-      return undefined;
+      return Fragment;
   }
 };
 
@@ -145,7 +143,7 @@ const Section = ({
   link?: { label: string; onClik: () => void };
 }) => {
   const listId = useId();
-  const GuidedTourForSection = getGuidedTourForSection(label) ?? Fragment;
+  const GuidedTourTooltip = getGuidedTourTooltip(label);
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
@@ -159,7 +157,7 @@ const Section = ({
             </Box>
           </Flex>
           {link && (
-            <GuidedTourForSection>
+            <GuidedTourTooltip>
               <IconButton
                 label={link.label}
                 variant="ghost"
@@ -169,7 +167,7 @@ const Section = ({
               >
                 <Plus />
               </IconButton>
-            </GuidedTourForSection>
+            </GuidedTourTooltip>
           )}
         </Flex>
       </Box>
