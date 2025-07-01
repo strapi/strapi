@@ -9,7 +9,7 @@ import { styled } from 'styled-components';
 import { useAuth } from '../features/Auth';
 import { useTracking } from '../features/Tracking';
 import { Menu, MenuItem } from '../hooks/useMenu';
-import { getDisplayName } from '../utils/users';
+import { getDisplayName, getInitials } from '../utils/users';
 
 import { MainNav } from './MainNav/MainNav';
 import { NavBrand } from './MainNav/NavBrand';
@@ -57,11 +57,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     sensitivity: 'base',
   });
 
-  const initials = userDisplayName
-    .split(' ')
-    .map((name) => name.substring(0, 1))
-    .join('')
-    .substring(0, 2);
+  const initials = getInitials(user);
 
   const handleClickOnLink = (destination: string) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
