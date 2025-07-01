@@ -81,7 +81,12 @@
         }
       },
       "type": "integer",
-      "unique": true
+      "unique": true,
+      "conditions": {
+        "visible": {
+          "==": [{ "var": "isAvailable" }, true]
+        }
+      }
     },
     "variations": {
       "type": "component",
