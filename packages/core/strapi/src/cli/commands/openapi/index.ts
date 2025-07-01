@@ -16,6 +16,7 @@ const command: StrapiCommand = () => {
   openapi
     .command('generate')
     .description('Generate an OpenAPI specification for the current Strapi application')
+    .option('-o, --output <path>', 'Output file path for the OpenAPI specification')
     .action(runAction('openapi:generate', generate));
 
   return openapi;

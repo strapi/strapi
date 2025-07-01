@@ -58,7 +58,7 @@ const createStrapiApp = async (): Promise<Core.Strapi> => {
 };
 
 const writeDocumentToFile = (document: unknown, filePath: string): void => {
-  fse.writeFileSync(filePath, JSON.stringify(document, null, 2));
+  fse.outputFileSync(filePath, JSON.stringify(document, null, 2));
 };
 
 const teardownStrapiApp = async (app: Core.Strapi) => {
