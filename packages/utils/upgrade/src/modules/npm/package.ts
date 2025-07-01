@@ -1,11 +1,15 @@
 import assert from 'node:assert';
 import semver from 'semver';
 
+import { fetch, ProxyAgent } from 'undici';
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
 import type { Package as PackageInterface, NPMPackage, NPMPackageVersion } from './types';
 import type { Version } from '../version';
+
+const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
+const agent = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
 
 export class Package implements PackageInterface {
   name: string;
@@ -61,12 +65,12 @@ export class Package implements PackageInterface {
   }
 
   async refresh() {
-    const response = await fetch(this.packageURL);
+    const response = await fetch(this.packageURL, { dispatcher: agent });
 
     // TODO: Use a validation library to make sure the response structure is correct
     assert(response.ok, `Request failed for ${this.packageURL}`);
 
-    this.npmPackage = await response.json();
+    this.npmPackage = (await response.json()) as NPMPackage;
 
     return this;
   }
