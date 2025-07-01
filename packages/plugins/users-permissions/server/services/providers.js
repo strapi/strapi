@@ -86,9 +86,28 @@ module.exports = ({ strapi }) => {
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: advancedSettings.default_role } });
 
+    let username = email.split('@')[0];
+
+    // Get all users with the same username
+    const usersWithUsername = await strapi.db
+      .query("plugin::users-permissions.user")
+      .findMany({
+        where: { username },
+      });
+
+    // If there are users with the same username, append a number to the username
+    if (usersWithUsername.length > 0) {
+      let counter = 1;
+      while (usersWithUsername.some(user => user.username === username)) {
+        username = `${email.split('@')[0]}${counter}`;
+        counter++;
+      }
+    }
+
     // Create the new user.
     const newUser = {
       ...profile,
+      username, // use the generated or provided username
       email, // overwrite with lowercased email
       provider,
       role: defaultRole.id,
