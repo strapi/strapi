@@ -56,9 +56,6 @@ const UnstableGuidedTourContext = ({
   // NOTE: Maybe we just import this directly instead of a prop?
   tours: Tours;
 }) => {
-  if (!window.strapi.future.isEnabled('unstableGuidedTour')) {
-    return children;
-  }
   // TODO: Get local storage to init state
   // Derive the tour state from the tours object
   const tours = Object.keys(registeredTours).reduce((acc, tourName) => {
@@ -76,6 +73,10 @@ const UnstableGuidedTourContext = ({
   const [state, dispatch] = React.useReducer(reducer, {
     tours,
   });
+
+  if (!window.strapi.future.isEnabled('unstableGuidedTour')) {
+    return children;
+  }
 
   return (
     <GuidedTourProviderImpl state={state} dispatch={dispatch}>
