@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import semver from 'semver';
 
-import { fetch, ProxyAgent } from 'undici';
+import { ProxyAgent } from 'undici';
 import * as constants from './constants';
 import { isLiteralSemVer } from '../version';
 
@@ -65,7 +65,10 @@ export class Package implements PackageInterface {
   }
 
   async refresh() {
-    const response = await fetch(this.packageURL, { dispatcher: agent });
+    const response = await fetch(this.packageURL, {
+      // @ts-expect-error Node.js fetch supports dispatcher (undici extension)
+      dispatcher: agent,
+    });
 
     // TODO: Use a validation library to make sure the response structure is correct
     assert(response.ok, `Request failed for ${this.packageURL}`);
