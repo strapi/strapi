@@ -22,8 +22,9 @@ type Action =
       payload: ValidTourName;
     };
 
+type Tour = Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
 type State = {
-  tours: Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
+  tours: Tour;
 };
 
 const [GuidedTourProviderImpl, unstableUseGuidedTour] = createContext<{
@@ -55,19 +56,20 @@ const UnstableGuidedTourContext = ({
   // NOTE: Maybe we just import this directly instead of a prop?
   tours: Tours;
 }) => {
+  // TODO: Get local storage to init state
   // Derive the tour state from the tours object
-  const tours = Object.keys(registeredTours).reduce(
-    (acc, tourName) => {
-      const tourLength = Object.keys(registeredTours[tourName as ValidTourName]).length;
-      acc[tourName as ValidTourName] = {
-        currentStep: 0,
-        length: tourLength,
-        isCompleted: false,
-      };
-      return acc;
-    },
-    {} as Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>
-  );
+  const tours = Object.keys(registeredTours).reduce((acc, tourName) => {
+    const tourLength = Object.keys(registeredTours[tourName as ValidTourName]).length;
+
+    acc[tourName as ValidTourName] = {
+      currentStep: 0,
+      length: tourLength,
+      isCompleted: false,
+    };
+
+    return acc;
+  }, {} as Tour);
+
   const [state, dispatch] = React.useReducer(reducer, {
     tours,
   });
