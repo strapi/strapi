@@ -193,11 +193,14 @@ export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.Zo
 
   const transformedId = transformUidToValidOpenApiName(id);
 
-  const existsInGlobalRegistry = idMap.has(transformedId);
-
-  if (existsInGlobalRegistry) {
-    return idMap.get(transformedId) as z.ZodType;
+  const mapItem = idMap.get(transformedId);
+  if (mapItem) {
+    return mapItem as z.ZodType;
   }
+
+  strapi.log.warn(
+    `Schema ${transformedId} not found in global registry, creating an any placeholder`
+  );
 
   // Temporary any placeholder before replacing with the actual schema type
   // Used to prevent infinite loops in cyclical data structures
