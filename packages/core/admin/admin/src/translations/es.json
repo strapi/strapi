@@ -555,6 +555,7 @@
   "global.plugins.users-permissions": "Roles & Permisos",
   "global.plugins.users-permissions.description": "Proteja su API con un proceso de autenticación completo basado en JWT. Este complemento también viene con una estrategia ACL que le permite administrar los permisos entre los grupos de usuarios.",
   "global.profile": "Perfil",
+  "global.profile.settings": "Ajustes del perfil",
   "global.reset-password": "Resetear contraseña",
   "global.roles": "Roles",
   "global.save": "Guardar",

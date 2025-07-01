@@ -21,6 +21,24 @@ const getDisplayName = ({ firstname, lastname, username, email }: Partial<User> 
 };
 
 /* -------------------------------------------------------------------------------------------------
+ * getInitials
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * Retrieves the initials of the user (based on their firstname / lastname or their display name)
+ */
+const getInitials = (user: Partial<User> = {}): string => {
+  return user?.firstname && user?.lastname
+    ? `${user.firstname.substring(0, 1)}${user.lastname.substring(0, 1)}`
+    : getDisplayName(user)
+        .split(' ')
+        .map((name) => name.substring(0, 1))
+        .join('')
+        .substring(0, 2)
+        .toUpperCase();
+};
+
+/* -------------------------------------------------------------------------------------------------
  * hashAdminUserEmail
  * -----------------------------------------------------------------------------------------------*/
 
@@ -46,4 +64,4 @@ const digestMessage = async (message: string) => {
   return bufferToHex(hashBuffer);
 };
 
-export { getDisplayName, hashAdminUserEmail };
+export { getDisplayName, getInitials, hashAdminUserEmail };
