@@ -6,17 +6,44 @@ This document explains how to create and use Guided Tours in the Strapi CMS.
 
 ## Creating tours
 
-To create a tour use the `createTour` factory function.
+To create a tour use the `createTour` factory function. The function takes the following arguments:
+
+- `tourName`: The name of the tour
+- `steps`: An array of steps
+
+Each `step` is an object with the following properties:
+
+- `name`: The name of the step
+- `requiredActions` (optional): An array of actions that must be completed before the step should be displayed.
+- `content`: A render prop that receives `Step` and an object with `state` and `dispatch`.
+
+`Step` has the following composable parts:
+
+| Component      | Description                                                                                                                                                           |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Step.Root`    | A wrapper of Popover.Content to allow full customization of the popover placement                                                                                     |
+| `Step.Title`   | For simple use cases you can provide the translation props `id` and `defaultMessage`, otherwise completely replace the default implementation by providing `children` |
+| `Step.Content` | For simple use cases you can provide the translation props `id` and `defaultMessage`, otherwise completely replace the default implementation by providing `children` |
+| `Step.Actions` | For simple use cases you can specify the `showSkip` and `showStepCount` props, otherwise completely replace the default implementation by providing `children`        |
 
 ```tsx
 const tours = {
   contentManager: createTour('contentManager', [
     {
       name: 'TheFeatureStepName',
-      content: () => (
-        <>
-          <div>This is the content for Step 1 of some feature</div>
-        </>
+      requiredActions: ['didDoSomethingImportant'],
+      content: (Step) => (
+        <Step.Root side="right">
+          <Step.Title
+            id="tours.contentManager.TheFeatureStepName.title"
+            defaultMessage="The Feature"
+          />
+          <Step.Content
+            id="tours.contentManager.TheFeatureStepName.content"
+            defaultMessage="This is the content for Step 1 of some feature"
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
       ),
     },
   ]),
@@ -40,13 +67,15 @@ function App() {
 }
 ```
 
-The provider derives the tour state from the tours object to create an object where each tour's name points to its current step index.
-
-Continuing our example from above the intial tour state would be:
+The provider derives the tour state. Continuing our example from above, the initial tour state would be:
 
 ```ts
 {
-  contentManager: 0;
+  contentManager: {
+    currentStep: 0,
+    length: 1,
+    isCompleted: false,
+  };
 }
 ```
 

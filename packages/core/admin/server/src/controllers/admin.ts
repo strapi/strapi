@@ -5,7 +5,6 @@ import path from 'path';
 import { map, values, sumBy, pipe, flatMap, propEq } from 'lodash/fp';
 import _ from 'lodash';
 import { exists } from 'fs-extra';
-import '@strapi/types';
 import { env } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
 import {
@@ -22,6 +21,7 @@ import type {
   Plugins,
   TelemetryProperties,
   UpdateProjectSettings,
+  GetGuidedTourMeta,
 } from '../../../shared/contracts/admin';
 
 const { isUsingTypeScript } = tsUtils;
@@ -186,5 +186,19 @@ export default {
     });
 
     return data;
+  },
+
+  async getGuidedTourMeta(ctx: Context) {
+    const [isFirstSuperAdminUser, completedActions] = await Promise.all([
+      getService('user').isFirstSuperAdminUser(ctx.state.user.id),
+      getService('guided-tour').getCompletedActions(),
+    ]);
+
+    return {
+      data: {
+        isFirstSuperAdminUser,
+        completedActions,
+      },
+    } satisfies GetGuidedTourMeta.Response;
   },
 };
