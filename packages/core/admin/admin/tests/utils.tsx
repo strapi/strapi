@@ -1,4 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
@@ -159,7 +160,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                       >
                         <NotificationsProvider>
                           <GuidedTourProvider>
-                            <UnstableGuidedTourContext>
+                            <UnstableGuidedTourContext enabled={false}>
                               <ConfigurationContextProvider
                                 showReleaseNotification={false}
                                 logos={{

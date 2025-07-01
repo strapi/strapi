@@ -25,6 +25,7 @@ type Action =
 type Tour = Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
 type State = {
   tours: Tour;
+  enabled?: boolean;
 };
 
 const [GuidedTourProviderImpl, unstableUseGuidedTour] = createContext<{
@@ -46,7 +47,13 @@ function reducer(state: State, action: Action): State {
   });
 }
 
-const UnstableGuidedTourContext = ({ children }: { children: React.ReactNode }) => {
+const UnstableGuidedTourContext = ({
+  children,
+  enabled = true,
+}: {
+  children: React.ReactNode;
+  enabled?: boolean;
+}) => {
   const stored = getTourStateFromLocalStorage();
   const initialState = stored
     ? stored
@@ -62,7 +69,7 @@ const UnstableGuidedTourContext = ({ children }: { children: React.ReactNode }) 
         }, {} as Tour),
       };
 
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const [state, dispatch] = React.useReducer(reducer, { ...initialState, enabled });
 
   // Sync local storage
   React.useEffect(() => {

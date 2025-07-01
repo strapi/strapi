@@ -113,6 +113,29 @@ type Content = (
   }
 ) => React.ReactNode;
 
+type GuidedTourTooltipProps = {
+  children: React.ReactNode;
+  content: Content;
+  tourName: ValidTourName;
+  step: number;
+  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
+};
+
+const UnstableGuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
+  const state = unstableUseGuidedTour('TooltipWrapper', (s) => s.state);
+  const hasFutureFlag = window.strapi.future.isEnabled('unstableGuidedTour');
+
+  if (!state.enabled) {
+    return <>{children}</>;
+  }
+
+  if (!hasFutureFlag) {
+    return <>{children}</>;
+  }
+
+  return <GuidedTourTooltipImpl {...props}>{children}</GuidedTourTooltipImpl>;
+};
+
 const GuidedTourOverlay = styled(Box)`
   position: fixed;
   top: 0;
@@ -123,35 +146,25 @@ const GuidedTourOverlay = styled(Box)`
   z-index: 10;
 `;
 
-const UnstableGuidedTourTooltip = ({
+const GuidedTourTooltipImpl = ({
   children,
   content,
   tourName,
   step,
   when,
-}: {
-  children: React.ReactNode;
-  content: Content;
-  tourName: ValidTourName;
-  step: number;
-  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
-}) => {
+}: GuidedTourTooltipProps) => {
   const { data: guidedTourMeta } = useGetGuidedTourMetaQuery();
 
   const state = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.state);
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
 
-  const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
-
   const isCurrentStep = state.tours[tourName].currentStep === step;
-  const hasFutureFlag = window.strapi.future.isEnabled('unstableGuidedTour');
-  const isEnabled =
+  const isStepConditionMet = when ? when(guidedTourMeta?.data?.completedActions ?? []) : true;
+  const isPopoverOpen =
     guidedTourMeta?.data?.isFirstSuperAdminUser &&
     !state.tours[tourName].isCompleted &&
-    hasFutureFlag;
-  const isStepConditionMet = when ? when(guidedTourMeta?.data?.completedActions ?? []) : true;
-
-  const isPopoverOpen = isEnabled && isCurrentStep && isStepConditionMet;
+    isCurrentStep &&
+    isStepConditionMet;
 
   // Lock the scroll
   React.useEffect(() => {
@@ -164,6 +177,8 @@ const UnstableGuidedTourTooltip = ({
       document.body.style.overflow = originalStyle;
     };
   }, [isPopoverOpen]);
+
+  const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
   return (
     <>
@@ -201,15 +216,6 @@ function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: s
     }
 
     acc[step.name as keyof Components] = ({ children }: { children: React.ReactNode }) => {
-      /**
-       * TODO
-       * Find a way to mock the tours and provide a passthrough to children for the tooltip.
-       * I've tried everything I can think of and can't get it to work.
-       */
-      if (process.env.NODE_ENV === 'test') {
-        return children;
-      }
-
       return (
         <UnstableGuidedTourTooltip
           tourName={tourName as ValidTourName}
