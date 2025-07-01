@@ -20,8 +20,6 @@ import { UploadFigmaToChatProvider } from '../UploadFigmaModal';
 
 import { SchemaChatProvider } from './SchemaProvider';
 
-type AttachmentType = 'code' | 'figma' | 'image' | 'none';
-
 interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   isChatEnabled: boolean;
   title?: string;
@@ -37,9 +35,6 @@ interface ChatContextType extends Omit<ReturnType<typeof useChat>, 'messages'> {
   // Attachments
   attachments: Attachment[];
   setAttachments: React.Dispatch<React.SetStateAction<Attachment[]>>;
-  // Attachment type tracking
-  currentAttachmentType: AttachmentType;
-  setCurrentAttachmentType: (type: AttachmentType) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -61,9 +56,6 @@ export const BaseChatProvider = ({
 
   // Files
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-
-  // Attachment type tracking - set by providers
-  const [currentAttachmentType, setCurrentAttachmentType] = useState<AttachmentType>('none');
 
   const { trackUsage } = useTracking();
 
@@ -111,26 +103,7 @@ export const BaseChatProvider = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat.messages]);
 
-  // Reset attachment type when attachments change
-  useEffect(() => {
-    if (attachments.length === 0) {
-      setCurrentAttachmentType('none');
-    }
-  }, [attachments]);
-
-  const getTokenCount = (text: string): number => {
-    // TODO: Implement token counting
-    return text.length;
-  };
-
   const handleSubmit = async (event: Parameters<typeof chat.handleSubmit>[0]) => {
-    const tokenCount = getTokenCount(chat.input || '');
-
-    trackUsage('didUserSendMessage', {
-      'attachment-type': currentAttachmentType,
-      'number-of-input-tokens': tokenCount,
-    });
-
     chat.handleSubmit(event, {
       experimental_attachments: attachments
         // Transform to ai/sdk format and remove any attachments that are not yet ready
@@ -209,9 +182,6 @@ export const BaseChatProvider = ({
         // Attachments
         attachments,
         setAttachments,
-        // Attachment type tracking
-        currentAttachmentType,
-        setCurrentAttachmentType,
       }}
     >
       {children}

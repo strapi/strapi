@@ -11,7 +11,7 @@ import { useFetchUploadMedia } from './useAIFetch';
 import type { Attachment } from '../lib/types/attachments';
 
 export function useAttachments() {
-  const { setAttachments, attachments, id: chatId, setCurrentAttachmentType } = useStrapiChat();
+  const { setAttachments, attachments, id: chatId } = useStrapiChat();
   const { toggleNotification } = useNotification();
 
   const { fetch: fetchUploadMedia } = useFetchUploadMedia();
@@ -85,10 +85,6 @@ export function useAttachments() {
         }
       }
 
-      if (limitedFiles.length > 0) {
-        setCurrentAttachmentType('image');
-      }
-
       // Upload
       for (const file of limitedFiles) {
         const pendingAttachment: Attachment = {
@@ -149,7 +145,6 @@ export function useAttachments() {
       fetchUploadMedia,
       removeAttachment,
       updateAttachment,
-      setCurrentAttachmentType,
     ]
   );
 
