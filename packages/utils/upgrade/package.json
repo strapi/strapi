@@ -74,7 +74,8 @@
     "ora": "5.4.1",
     "prompts": "2.4.2",
     "semver": "7.5.4",
-    "simple-git": "3.21.0"
+    "simple-git": "3.21.0",
+    "undici": "6.21.2"
   },
   "devDependencies": {
     "@strapi/types": "5.17.0",

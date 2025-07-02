@@ -9865,6 +9865,7 @@ __metadata:
     rimraf: "npm:5.0.5"
     semver: "npm:7.5.4"
     simple-git: "npm:3.21.0"
+    undici: "npm:6.21.2"
   bin:
     upgrade: ./bin/upgrade.js
   languageName: unknown
