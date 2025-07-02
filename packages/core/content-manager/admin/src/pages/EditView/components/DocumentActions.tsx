@@ -42,7 +42,7 @@ import {
 } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
-import { AnyData } from '../utils/data';
+import { AnyData, handleInvisibleAttributes } from '../utils/data';
 
 import { useRelationModal } from './FormInputs/Relations/RelationModal';
 
@@ -559,6 +559,9 @@ const PublishAction: DocumentActionComponent = ({
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
   const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
+  const {
+    currentDocument: { components },
+  } = useDocumentContext('PublishAction');
 
   // need to discriminate if the publish is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('PublishAction', () => true, false);
@@ -726,6 +729,10 @@ const PublishAction: DocumentActionComponent = ({
         }
         return;
       }
+      const { data } = handleInvisibleAttributes(transformData(formValues), {
+        schema,
+        components,
+      });
       const res = await publish(
         {
           collectionType,
@@ -733,7 +740,7 @@ const PublishAction: DocumentActionComponent = ({
           documentId,
           params: currentDocumentMeta.params,
         },
-        transformData(formValues)
+        data
       );
 
       // Reset form if successful
@@ -913,6 +920,9 @@ const UpdateAction: DocumentActionComponent = ({
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
   const { create, update, clone, isLoading } = useDocumentActions();
+  const {
+    currentDocument: { components },
+  } = useDocumentContext('UpdateAction');
   const [{ rawQuery }] = useQueryParams();
   const onPreview = usePreviewContext('UpdateAction', (state) => state.onPreview, false);
   const { getInitialFormValues } = useDoc();
@@ -920,6 +930,7 @@ const UpdateAction: DocumentActionComponent = ({
   const isSubmitting = useForm('UpdateAction', ({ isSubmitting }) => isSubmitting);
   const modified = useForm('UpdateAction', ({ modified }) => modified);
   const setSubmitting = useForm('UpdateAction', ({ setSubmitting }) => setSubmitting);
+  const initialValues = useForm('UpdateAction', ({ initialValues }) => initialValues);
   const document = useForm('UpdateAction', ({ values }) => values);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
@@ -929,6 +940,11 @@ const UpdateAction: DocumentActionComponent = ({
 
   // need to discriminate if the update is coming from a relation modal or in the edit view
   const relationContext = useRelationModal('UpdateAction', () => true, false);
+  const relationalModalSchema = useRelationModal(
+    'UpdateAction',
+    (state) => state.currentDocument.schema,
+    false
+  );
   const fieldToConnect = useRelationModal(
     'UpdateAction',
     (state) => state.state.fieldToConnect,
@@ -960,6 +976,7 @@ const UpdateAction: DocumentActionComponent = ({
     },
     { skip: !parentDocumentMetaToUpdate }
   );
+  const { schema } = useDoc();
 
   const handleUpdate = React.useCallback(async () => {
     setSubmitting(true);
@@ -985,7 +1002,6 @@ const UpdateAction: DocumentActionComponent = ({
 
         return;
       }
-
       if (isCloning) {
         const res = await clone(
           {
@@ -1012,6 +1028,11 @@ const UpdateAction: DocumentActionComponent = ({
           setErrors(formatValidationErrors(res.error));
         }
       } else if (documentId || collectionType === SINGLE_TYPES) {
+        const { data } = handleInvisibleAttributes(transformData(document), {
+          schema: fromRelationModal ? relationalModalSchema : schema,
+          initialValues,
+          components,
+        });
         const res = await update(
           {
             collectionType,
@@ -1019,7 +1040,7 @@ const UpdateAction: DocumentActionComponent = ({
             documentId,
             params: currentDocumentMeta.params,
           },
-          transformData(document)
+          data
         );
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
@@ -1028,12 +1049,17 @@ const UpdateAction: DocumentActionComponent = ({
           resetForm();
         }
       } else {
+        const { data } = handleInvisibleAttributes(transformData(document), {
+          schema: fromRelationModal ? relationalModalSchema : schema,
+          initialValues,
+          components,
+        });
         const res = await create(
           {
             model,
             params: currentDocumentMeta.params,
           },
-          transformData(document)
+          data
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
@@ -1156,6 +1182,10 @@ const UpdateAction: DocumentActionComponent = ({
     updateDocumentMutation,
     formatAPIError,
     onPreview,
+    initialValues,
+    schema,
+    components,
+    relationalModalSchema,
   ]);
 
   // Auto-save on CMD+S or CMD+Enter on macOS, and CTRL+S or CTRL+Enter on Windows/Linux

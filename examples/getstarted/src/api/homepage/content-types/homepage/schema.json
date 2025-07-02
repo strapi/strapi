@@ -4,7 +4,8 @@
   "info": {
     "displayName": "Homepage",
     "singularName": "homepage",
-    "pluralName": "homepages"
+    "pluralName": "homepages",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -34,16 +35,43 @@
         }
       }
     },
+    "mediaType": {
+      "type": "enumeration",
+      "enum": ["multiple", "single"],
+      "default": "multiple",
+      "required": true
+    },
     "single": {
       "type": "media",
-      "allowedTypes": ["images", "files", "videos"],
-      "required": false
+      "multiple": false,
+      "required": false,
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "mediaType"
+            },
+            "single"
+          ]
+        }
+      },
+      "allowedTypes": ["images", "files", "videos"]
     },
     "multiple": {
       "type": "media",
       "multiple": true,
-      "allowedTypes": ["images", "videos"],
-      "required": false
+      "required": false,
+      "conditions": {
+        "visible": {
+          "==": [
+            {
+              "var": "mediaType"
+            },
+            "multiple"
+          ]
+        }
+      },
+      "allowedTypes": ["images", "videos"]
     }
   }
 }
