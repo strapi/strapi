@@ -10,7 +10,7 @@ import {
 import { NavLink as RouterLink, LinkProps, To } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { unstable_tours } from '../../index';
+import { tours as unstable_tours } from '../UnstableGuidedTour/Tours';
 
 /* -------------------------------------------------------------------------------------------------
  * Link

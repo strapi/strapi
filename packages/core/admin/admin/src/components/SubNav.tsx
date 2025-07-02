@@ -5,7 +5,7 @@ import { ChevronDown, Plus } from '@strapi/icons';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { unstable_tours } from '../index';
+import { tours as unstable_tours } from './UnstableGuidedTour/Tours';
 
 const Main = styled(DSSubNav)`
   background-color: ${({ theme }) => theme.colors.neutral0};
