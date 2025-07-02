@@ -81,7 +81,7 @@ export const componentToSchema = (
   const componentSchema = safeSchemaCreation(
     component,
     () => new CoreComponentRouteValidator(strapi, component).entry
-  );
+  ) as z.ZodType;
 
   const baseSchema = repeatable ? z.array(componentSchema) : componentSchema;
 
@@ -278,7 +278,7 @@ export const mediaToSchema = (
   const mediaSchema = safeSchemaCreation(
     fileSchema.uid,
     () => new CoreContentTypeRouteValidator(strapi, fileSchema.uid).document
-  );
+  ) as z.ZodType;
 
   const baseSchema = multiple ? z.array(mediaSchema) : mediaSchema;
 
@@ -302,7 +302,7 @@ export const relationToSchema = (attribute: Schema.Attribute.Relation): z.Schema
   const targetSchema = safeSchemaCreation(
     target,
     () => new CoreContentTypeRouteValidator(strapi, target).document
-  );
+  ) as z.ZodType;
 
   const baseSchema = relations.isAnyToMany(attribute) ? z.array(targetSchema) : targetSchema;
 
