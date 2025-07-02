@@ -14,7 +14,6 @@ import { GuidedTourProvider } from './GuidedTour/Provider';
 import { LanguageProvider } from './LanguageProvider';
 import { Theme } from './Theme';
 import { UnstableGuidedTourContext } from './UnstableGuidedTour/Context';
-import { tours } from './UnstableGuidedTour/Tours';
 
 import type { Store } from '../core/store/configure';
 import type { StrapiApp } from '../StrapiApp';
