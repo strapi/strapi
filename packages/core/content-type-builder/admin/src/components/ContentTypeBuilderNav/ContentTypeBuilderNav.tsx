@@ -203,69 +203,68 @@ export const ContentTypeBuilderNav = () => {
         />
       </Flex>
       <SubNav.Sections>
-        {menu.map((section) => {
-          return (
-            <Fragment key={section.name}>
-              <SubNav.Section
-                label={formatMessage({
-                  id: section.title.id,
-                  defaultMessage: section.title.defaultMessage,
-                })}
-                link={
-                  section.customLink && {
-                    label: formatMessage({
-                      id: section.customLink?.id,
-                      defaultMessage: section.customLink?.defaultMessage,
-                    }),
-                    onClik: section.customLink?.onClick,
-                  }
+        {menu.map((section) => (
+          <Fragment key={section.name}>
+            <SubNav.Section
+              label={formatMessage({
+                id: section.title.id,
+                defaultMessage: section.title.defaultMessage,
+              })}
+              link={
+                section.customLink && {
+                  label: formatMessage({
+                    id: section.customLink?.id,
+                    defaultMessage: section.customLink?.defaultMessage,
+                  }),
+                  onClik: section.customLink?.onClick,
                 }
-              >
-                {section.links.map((link) => {
-                  const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });
-                  if ('links' in link) {
-                    return (
-                      <SubNav.SubSection key={link.name} label={link.title}>
-                        {link.links.map((subLink) => {
-                          const label = formatMessage({
-                            id: subLink.name,
-                            defaultMessage: subLink.title,
-                          });
+              }
+            >
+              {section.links.map((link) => {
+                const linkLabel = formatMessage({ id: link.name, defaultMessage: link.title });
 
-                          return (
-                            <SubNav.Link
-                              to={subLink.to}
-                              key={subLink.name}
-                              label={label}
-                              endAction={
-                                <Box tag="span" textAlign="center" width={'24px'}>
-                                  <Status status={subLink.status} />
-                                </Box>
-                              }
-                            />
-                          );
-                        })}
-                      </SubNav.SubSection>
-                    );
-                  }
-
+                if ('links' in link) {
                   return (
-                    <SubNav.Link
-                      to={link.to}
-                      key={link.name}
-                      label={linkLabel}
-                      endAction={
-                        <Box tag="span" textAlign="center" width={'24px'}>
-                          <Status status={link.status} />
-                        </Box>
-                      }
-                    />
+                    <SubNav.SubSection key={link.name} label={link.title}>
+                      {link.links.map((subLink) => {
+                        const label = formatMessage({
+                          id: subLink.name,
+                          defaultMessage: subLink.title,
+                        });
+
+                        return (
+                          <SubNav.Link
+                            to={subLink.to}
+                            key={subLink.name}
+                            label={label}
+                            endAction={
+                              <Box tag="span" textAlign="center" width={'24px'}>
+                                <Status status={subLink.status} />
+                              </Box>
+                            }
+                          />
+                        );
+                      })}
+                    </SubNav.SubSection>
                   );
-                })}
-              </SubNav.Section>
-            </Fragment>
-          );
-        })}
+                }
+
+                return (
+                  <SubNav.Link
+                    to={link.to}
+                    key={link.name}
+                    label={linkLabel}
+                    endAction={
+                      <Box tag="span" textAlign="center" width={'24px'}>
+                        <Status status={link.status} />
+                      </Box>
+                    }
+                  />
+                );
+              })}
+            </SubNav.Section>
+          </Fragment>
+        ))}
       </SubNav.Sections>
       <Dialog.Root
         open={discardConfirmationModalIsOpen}
