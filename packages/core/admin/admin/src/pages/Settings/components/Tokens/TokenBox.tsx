@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { IconButton } from '@strapi/design-system';
 import { Duplicate, Key } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -36,60 +38,67 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
     }
   };
 
-  const contentBox = (
-    <ContentBox
-      endAction={
-        token && (
-          <span style={{ alignSelf: 'start' }}>
-            <IconButton
-              label={formatMessage({
-                id: 'app.component.CopyToClipboard.label',
-                defaultMessage: 'Copy to clipboard',
-              })}
-              onClick={handleClick(token)}
-              variant="ghost"
-              type="button"
-              style={{ padding: 0, height: '1.6rem' }}
-            >
-              <Duplicate />
-            </IconButton>
-          </span>
-        )
-      }
-      title={
-        token ||
-        formatMessage({
-          id: 'Settings.tokens.copy.editTitle',
-          defaultMessage: "This token isn't accessible anymore.",
-        })
-      }
-      subtitle={
-        token
-          ? formatMessage(
-              tokenType === 'api-token'
-                ? {
-                    id: 'Settings.tokens.copy.subtitle',
-                    defaultMessage: 'Copy this token for use elsewhere',
-                  }
-                : {
-                    id: 'Settings.tokens.copy.lastWarning',
-                    defaultMessage:
-                      "Make sure to copy this token, you won't be able to see it again!",
-                  }
-            )
-          : formatMessage({
-              id: 'Settings.tokens.copy.editMessage',
-              defaultMessage: 'For security reasons, you can only see your token once.',
-            })
-      }
-      icon={<Key />}
-      iconBackground="neutral100"
-    />
-  );
+  const getGuidedTourTooltip = (tokenType: string) => {
+    switch (tokenType) {
+      case 'api-token':
+        return unstable_tours.apiTokens.CopyAPIToken;
+      default:
+        return React.Fragment;
+    }
+  };
 
-  return tokenType === 'api-token' ? (
-    <unstable_tours.apiTokens.CopyAPIToken>{contentBox}</unstable_tours.apiTokens.CopyAPIToken>
-  ) : (
-    contentBox
+  const GuidedTourTooltip = getGuidedTourTooltip(tokenType);
+
+  return (
+    <GuidedTourTooltip>
+      <ContentBox
+        endAction={
+          token && (
+            <span style={{ alignSelf: 'start' }}>
+              <IconButton
+                label={formatMessage({
+                  id: 'app.component.CopyToClipboard.label',
+                  defaultMessage: 'Copy to clipboard',
+                })}
+                onClick={handleClick(token)}
+                variant="ghost"
+                type="button"
+                style={{ padding: 0, height: '1.6rem' }}
+              >
+                <Duplicate />
+              </IconButton>
+            </span>
+          )
+        }
+        title={
+          token ||
+          formatMessage({
+            id: 'Settings.tokens.copy.editTitle',
+            defaultMessage: 'This token isn’t accessible anymore.',
+          })
+        }
+        subtitle={
+          token
+            ? formatMessage(
+                tokenType === 'api-token'
+                  ? {
+                      id: 'Settings.tokens.copy.subtitle',
+                      defaultMessage: 'Copy this token for use elsewhere',
+                    }
+                  : {
+                      id: 'Settings.tokens.copy.lastWarning',
+                      defaultMessage:
+                        'Make sure to copy this token, you won’t be able to see it again!',
+                    }
+              )
+            : formatMessage({
+                id: 'Settings.tokens.copy.editMessage',
+                defaultMessage: 'For security reasons, you can only see your token once.',
+              })
+        }
+        icon={<Key />}
+        iconBackground="neutral100"
+      />
+    </GuidedTourTooltip>
   );
 };

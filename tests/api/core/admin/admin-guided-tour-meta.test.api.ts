@@ -132,9 +132,7 @@ describe('Guided Tour Meta', () => {
       });
     });
 
-    // TODO: To adjust to check if the required action is triggered
-    // when the API token is copied
-    test.skip('Detects copied custom API tokens', async () => {
+    test('Detects created custom API tokens', async () => {
       // Create a custom API token
       const createdToken = await strapi.documents('admin::api-token').create({
         data: {

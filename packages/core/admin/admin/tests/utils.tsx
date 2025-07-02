@@ -1,4 +1,5 @@
 /* eslint-disable check-file/filename-naming-convention */
+
 import * as React from 'react';
 
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
@@ -27,6 +28,7 @@ import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-rou
 import { GuidedTourProvider } from '../src/components/GuidedTour/Provider';
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
+import { UnstableGuidedTourContext } from '../src/components/UnstableGuidedTour/Context';
 import { RBAC } from '../src/core/apis/rbac';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
@@ -158,28 +160,30 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                       >
                         <NotificationsProvider>
                           <GuidedTourProvider>
-                            <ConfigurationContextProvider
-                              showReleaseNotification={false}
-                              logos={{
-                                auth: { default: 'default' },
-                                menu: { default: 'default' },
-                              }}
-                              updateProjectSettings={jest.fn()}
-                            >
-                              <AppInfoProvider
-                                autoReload
-                                useYarn
-                                dependencies={{
-                                  '@strapi/plugin-documentation': '4.2.0',
-                                  '@strapi/provider-upload-cloudinary': '4.2.0',
+                            <UnstableGuidedTourContext enabled={false}>
+                              <ConfigurationContextProvider
+                                showReleaseNotification={false}
+                                logos={{
+                                  auth: { default: 'default' },
+                                  menu: { default: 'default' },
                                 }}
-                                strapiVersion="4.1.0"
-                                communityEdition
-                                shouldUpdateStrapi={false}
+                                updateProjectSettings={jest.fn()}
                               >
-                                {children}
-                              </AppInfoProvider>
-                            </ConfigurationContextProvider>
+                                <AppInfoProvider
+                                  autoReload
+                                  useYarn
+                                  dependencies={{
+                                    '@strapi/plugin-documentation': '4.2.0',
+                                    '@strapi/provider-upload-cloudinary': '4.2.0',
+                                  }}
+                                  strapiVersion="4.1.0"
+                                  communityEdition
+                                  shouldUpdateStrapi={false}
+                                >
+                                  {children}
+                                </AppInfoProvider>
+                              </ConfigurationContextProvider>
+                            </UnstableGuidedTourContext>
                           </GuidedTourProvider>
                         </NotificationsProvider>
                       </Theme>

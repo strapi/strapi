@@ -4,17 +4,38 @@ import constants from './constants';
 export type GuidedTourRequiredActions = {
   didCreateContentTypeSchema: boolean;
   didCreateContent: boolean;
-  didCopyApiToken: boolean;
+  didCreateApiToken: boolean;
 };
 export type GuidedTourCompletedActions = keyof GuidedTourRequiredActions;
 
+const DEFAULT_ATTIBUTES = [
+  'createdAt',
+  'updatedAt',
+  'publishedAt',
+  'createdBy',
+  'updatedBy',
+  'locale',
+  'localizations',
+];
+
 export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => {
   const getCompletedActions = async () => {
-    // Check if any content-type schemas have been create on the api:: namespace
+    // Check if any content-type schemas have been created on the api:: namespace
     const contentTypeSchemaNames = Object.keys(strapi.contentTypes).filter((contentTypeUid) =>
       contentTypeUid.startsWith('api::')
     );
-    const didCreateContentTypeSchema = contentTypeSchemaNames.length > 0;
+    const contentTypeSchemaAttributes = contentTypeSchemaNames.map((uid) => {
+      const attributes = Object.keys(
+        strapi.contentType(uid as Internal.UID.ContentType).attributes
+      );
+      return attributes.filter((attribute) => !DEFAULT_ATTIBUTES.includes(attribute));
+    });
+    const didCreateContentTypeSchema = (() => {
+      if (contentTypeSchemaNames.length === 0) {
+        return false;
+      }
+      return contentTypeSchemaAttributes.some((attributes) => attributes.length > 0);
+    })();
 
     // Check if any content has been created for content-types on the api:: namespace
     const hasContent = await (async () => {
@@ -32,7 +53,7 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
     const createdApiTokens = await strapi
       .documents('admin::api-token')
       .findMany({ fields: ['name', 'description'] });
-    const didCopyApiToken = createdApiTokens.some((doc) =>
+    const didCreateApiToken = createdApiTokens.some((doc) =>
       constants.DEFAULT_API_TOKENS.every(
         (token) => token.name !== doc.name && token.description !== doc.description
       )
@@ -42,7 +63,7 @@ export const createGuidedTourService = ({ strapi }: { strapi: Core.Strapi }) => 
     const requiredActions = {
       didCreateContentTypeSchema,
       didCreateContent,
-      didCopyApiToken,
+      didCreateApiToken,
     };
     const requiredActionNames = Object.keys(requiredActions) as Array<GuidedTourCompletedActions>;
     const completedActions = requiredActionNames.filter((key) => requiredActions[key]);

@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Cog, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 
-import { tours as unstable_tours } from '../components/UnstableGuidedTour/Tours';
 import { useTypedSelector } from '../core/store/hooks';
 import { useAuth, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
@@ -12,9 +11,7 @@ import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
  * useMenu
  * -----------------------------------------------------------------------------------------------*/
 
-export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'> & {
-  tourComponent?: React.ComponentType<{ children: React.ReactNode }>;
-};
+export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
 
 export interface Menu {
   generalSectionLinks: MenuItem[];
@@ -37,7 +34,6 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         to: '/',
         permissions: [],
         position: 0,
-        tourComponent: unstable_tours.apiTokens.Done,
       },
       {
         icon: ShoppingCart,
