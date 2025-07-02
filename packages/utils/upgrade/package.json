@@ -1,6 +1,6 @@
 {
   "name": "@strapi/upgrade",
-  "version": "5.15.1",
+  "version": "5.16.1",
   "description": "CLI to upgrade Strapi applications effortless",
   "keywords": [
     "strapi",
@@ -61,7 +61,7 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/utils": "5.15.1",
+    "@strapi/utils": "5.16.1",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
@@ -77,10 +77,10 @@
     "simple-git": "3.21.0"
   },
   "devDependencies": {
-    "@strapi/types": "5.15.1",
+    "@strapi/types": "5.16.1",
     "@types/fs-extra": "11.0.4",
     "@types/jscodeshift": "0.12.0",
-    "eslint-config-custom": "5.15.1",
+    "eslint-config-custom": "5.16.1",
     "rimraf": "5.0.5"
   },
   "engines": {

@@ -730,6 +730,9 @@
   "global.enabled": "Enabled",
   "global.error": "Something went wrong",
   "global.finish": "Finish",
+  "global.last-change.redo": "Redo last change",
+  "global.last-change.undo": "Undo last change",
+  "global.last-changes.discard": "Discard last changes",
   "global.marketplace": "Marketplace",
   "global.more": "More",
   "global.name": "Name",
@@ -755,7 +758,8 @@
   "global.plugins.upload.description": "Media file management.",
   "global.plugins.users-permissions": "Roles & Permissions",
   "global.plugins.users-permissions.description": "Protect your API with a full authentication process based on JWT. This plugin comes also with an ACL strategy that allows you to manage the permissions between the groups of users.",
-  "global.profile": "Profile settings",
+  "global.profile": "Profile",
+  "global.profile.settings": "Profile settings",
   "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost",
   "global.reset-password": "Reset password",
   "global.roles": "Roles",
@@ -796,5 +800,11 @@
   "request.error.model.unknown": "This model doesn't exist",
   "selectButtonTitle": "Select",
   "skipToContent": "Skip to content",
-  "submit": "Submit"
+  "submit": "Submit",
+  "tours.contentManager.Introduction.title": "Content manager",
+  "tours.contentManager.Introduction.content": "Create and manage content from your collection types and single types.",
+  "tours.stepCount": "Step {currentStep} of {tourLength}",
+  "tours.skip": "Skip",
+  "tours.next": "Next",
+  "widget.profile.title": "Profile"
 }

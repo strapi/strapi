@@ -47,3 +47,6 @@ export const ADMIN_PASSWORD = 'Testing123!';
 
 export const EDITOR_EMAIL_ADDRESS = 'editor@testing.com';
 export const EDITOR_PASSWORD = 'Testing123!';
+
+export const AUTHOR_EMAIL_ADDRESS = 'author@testing.com';
+export const AUTHOR_PASSWORD = 'Testing123!';

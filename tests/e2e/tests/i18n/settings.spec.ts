@@ -22,7 +22,7 @@ test.describe('Settings', () => {
     /**
      * Get to the settings page
      */
-    await clickAndWait(page, page.getByRole('link', { name: 'Settings' }));
+    await clickAndWait(page, page.getByRole('link', { name: 'Settings', exact: true }));
     await clickAndWait(page, page.getByRole('link', { name: 'Internationalization' }));
 
     /**
@@ -152,7 +152,7 @@ test.describe('Settings', () => {
     /**
      * Next, we'll delete the french locale
      */
-    await page.getByRole('link', { name: 'Settings' }).click();
+    await page.getByRole('link', { name: 'Settings', exact: true }).click();
     await page.getByRole('link', { name: 'Internationalization' }).click();
     await expect(page.getByRole('heading', { name: 'Internationalization' })).toBeVisible();
     await page.getByRole('button', { name: 'Delete French (fr) locale' }).click();
@@ -200,7 +200,7 @@ test.describe('Settings', () => {
     /**
      * Next, change the display name of our default locale – "English (en)" to "UK English"
      */
-    await page.getByRole('link', { name: 'Settings' }).click();
+    await page.getByRole('link', { name: 'Settings', exact: true }).click();
     await page.getByRole('link', { name: 'Internationalization' }).click();
     await expect(page.getByRole('heading', { name: 'Internationalization' })).toBeVisible();
     await page.getByRole('gridcell', { name: 'English (en)', exact: true }).click();
@@ -212,7 +212,10 @@ test.describe('Settings', () => {
      * Lets go back to the list view and assert that the changes are reflected.
      */
     await navToHeader(page, ['Content Manager', 'Products'], 'Products');
-    expect(await page.getByRole('row').all()).toHaveLength(2);
+    /**
+     * It is 3 because it contains also the header row
+     */
+    expect(await page.getByRole('row').all()).toHaveLength(3);
     await expect(page.getByRole('combobox', { name: 'Select a locale' })).toHaveText('UK English');
     await page.getByRole('combobox', { name: 'Select a locale' }).click();
     for (const locale of ['UK English', ...LOCALES].filter((locale) => locale !== 'English (en)')) {

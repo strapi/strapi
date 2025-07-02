@@ -26,6 +26,7 @@ export * from './components/SubNav';
 export * from './components/GradientBadge';
 
 export { useGuidedTour } from './components/GuidedTour/Provider';
+export { tours as unstable_tours } from './components/UnstableGuidedTour/Tours';
 
 /**
  * Features
@@ -78,6 +79,7 @@ export type { Widget as WidgetType } from './core/apis/Widgets';
 export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
+export * from './utils/rulesEngine';
 export * from './services/api';
 export type { CMAdminConfiguration } from './types/adminConfiguration';
 
