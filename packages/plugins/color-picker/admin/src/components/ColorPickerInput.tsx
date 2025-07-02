@@ -83,7 +83,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
     const colorPickerButtonRef = React.useRef<HTMLButtonElement>(null!);
     const { formatMessage } = useIntl();
     const field = useField(name);
-    const color = field.value ?? '#000000';
+    const color = field.value ?? props.placeholder ?? '#000000';
 
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
@@ -111,7 +111,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                   <ColorPreview color={color} />
                   <Typography
                     style={{ textTransform: 'uppercase' }}
-                    textColor={field.value ? undefined : 'neutral600'}
+                    textColor={field.value ? undefined : 'neutral500'}
                     variant="omega"
                   >
                     {color}
@@ -139,7 +139,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     })}
                     style={{ textTransform: 'uppercase' }}
                     name={name}
-                    defaultValue={color}
+                    defaultValue={field.value}
                     placeholder="#000000"
                     onChange={field.onChange}
                     {...props}
