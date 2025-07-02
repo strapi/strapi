@@ -4,7 +4,41 @@
  * and to safely register and create schemas within Zod's global registry.
  */
 
+import { Internal } from '@strapi/types';
 import * as z from 'zod/v4';
+
+/**
+ * Transforms a Strapi UID into an OpenAPI-compliant component name.
+ *
+ * @param uid - The Strapi UID to transform (e.g., "basic.seo", "api::category.category", "plugin::upload.file")
+ * @returns The OpenAPI-compliant component name (e.g., "BasicSeoEntry", "ApiCategoryCategoryDocument", "PluginUploadFileDocument")
+ */
+export const transformUidToValidOpenApiName = (uid: Internal.UID.Schema): string => {
+  const capitalize = (str: string): string => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
+  const toPascalCase = (str: string): string => {
+    return str.split(/[-_]/).map(capitalize).join('');
+  };
+
+  // Check if it contains double colons (other namespaced UIDs)
+  if (uid.includes('::')) {
+    const [namespace, ...rest] = uid.split('::');
+    const namespacePart = toPascalCase(namespace);
+    const restParts = rest.join('.').split('.').map(toPascalCase).map(capitalize);
+    return `${capitalize(namespacePart)}${restParts.join('')}Document`;
+  }
+
+  if (uid.includes('.')) {
+    // basic.seo -> BasicSeoEntry
+    const parts = uid.split('.');
+    const transformedParts = parts.map(toPascalCase).map(capitalize);
+    return `${transformedParts.join('')}Entry`;
+  }
+
+  return `${toPascalCase(capitalize(uid))}Schema`;
+};
 
 /**
  * Conditionally makes a Zod schema optional based on the `required` parameter.
@@ -113,15 +147,17 @@ export const augmentSchema = <T extends z.Schema>(
  * safeGlobalRegistrySet("mySchema", z.object({ name: z.string() }));
  * ```
  */
-export const safeGlobalRegistrySet = (id: string, schema: z.ZodType) => {
+export const safeGlobalRegistrySet = (id: Internal.UID.Schema, schema: z.ZodType) => {
   const { _idmap: idMap } = z.globalRegistry;
 
+  const transformedId = transformUidToValidOpenApiName(id);
+
   // Allow safe overrides in the ID map
-  if (idMap.has(id)) {
-    idMap.delete(id);
+  if (idMap.has(transformedId)) {
+    idMap.delete(transformedId);
   }
 
-  z.globalRegistry.add(schema, { id });
+  z.globalRegistry.add(schema, { id: transformedId });
 };
 
 /**
@@ -152,14 +188,19 @@ export const safeGlobalRegistrySet = (id: string, schema: z.ZodType) => {
  * );
  * ```
  */
-export const safeSchemaCreation = (id: string, callback: () => z.ZodType) => {
+export const safeSchemaCreation = (id: Internal.UID.Schema, callback: () => z.ZodType) => {
   const { _idmap: idMap } = z.globalRegistry;
 
-  const existsInGlobalRegistry = idMap.has(id);
+  const transformedId = transformUidToValidOpenApiName(id);
 
-  if (existsInGlobalRegistry) {
-    return idMap.get(id) as z.ZodType;
+  const mapItem = idMap.get(transformedId);
+  if (mapItem) {
+    return mapItem;
   }
+
+  strapi.log.warn(
+    `Schema ${transformedId} not found in global registry, creating an any placeholder`
+  );
 
   // Temporary any placeholder before replacing with the actual schema type
   // Used to prevent infinite loops in cyclical data structures

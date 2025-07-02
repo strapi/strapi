@@ -1,6 +1,6 @@
 {
   "name": "@strapi/openapi",
-  "version": "5.13.1",
+  "version": "5.16.1",
   "description": "A tool set to help generate and validate API documentation for Strapi projects",
   "homepage": "https://strapi.io",
   "bugs": {
