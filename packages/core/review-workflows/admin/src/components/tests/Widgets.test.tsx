@@ -3,9 +3,9 @@ import { render, screen } from '@tests/utils';
 import * as contentManager from '../../services/content-manager';
 import { AssignedWidget } from '../Widgets';
 
-// Mock the useGetRecentDocumentsQuery hook
+// Mock the useGetRecentlyAssignedDocumentsQuery hook
 jest.mock('../../services/content-manager', () => ({
-  useGetRecentDocumentsQuery: jest.fn(),
+  useGetRecentlyAssignedDocumentsQuery: jest.fn(),
 }));
 
 const mockDocuments = [
@@ -24,7 +24,7 @@ const mockDocuments = [
 
 describe('AssignedWidget', () => {
   it('renders a table with assigned documents', () => {
-    (contentManager.useGetRecentDocumentsQuery as jest.Mock).mockReturnValue({
+    (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
       data: mockDocuments,
       isLoading: false,
       error: null,
@@ -42,7 +42,7 @@ describe('AssignedWidget', () => {
   });
 
   it('shows loading state', () => {
-    (contentManager.useGetRecentDocumentsQuery as jest.Mock).mockReturnValue({
+    (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
@@ -53,7 +53,7 @@ describe('AssignedWidget', () => {
   });
 
   it('shows error state', () => {
-    (contentManager.useGetRecentDocumentsQuery as jest.Mock).mockReturnValue({
+    (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: new Error('Failed'),
@@ -65,7 +65,7 @@ describe('AssignedWidget', () => {
   });
 
   it('shows no data state', () => {
-    (contentManager.useGetRecentDocumentsQuery as jest.Mock).mockReturnValue({
+    (contentManager.useGetRecentlyAssignedDocumentsQuery as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
       error: null,

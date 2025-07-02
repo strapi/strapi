@@ -378,7 +378,6 @@ const documentApi = contentManagerApi.injectEndpoints({
           'Relations',
           { type: 'UidAvailability', id: model },
           'RecentDocumentList',
-          'RecentDocumentList',
         ];
       },
       async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {

@@ -18,12 +18,9 @@ export interface RecentDocument {
   };
 }
 
-export declare namespace GetRecentDocuments {
+export declare namespace GetRecentlyAssignedDocuments {
   export interface Request {
     body: {};
-    query: {
-      action: 'update' | 'publish' | 'assigned';
-    };
   }
 
   export interface Response {

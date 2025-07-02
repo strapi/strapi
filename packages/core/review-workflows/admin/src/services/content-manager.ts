@@ -20,7 +20,7 @@ const SINGLE_TYPES = 'single-types';
 
 const contentManagerApi = reviewWorkflowsApi
   .enhanceEndpoints({
-    addTagTypes: ['RecentDocumentList'],
+    addTagTypes: ['RecentlyAssignedList'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -90,7 +90,7 @@ const contentManagerApi = reviewWorkflowsApi
               id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
             },
             { type: 'Document', id: `${model}_LIST` },
-            'RecentDocumentList',
+            'RecentlyAssignedList',
           ];
         },
       }),
@@ -114,15 +114,14 @@ const contentManagerApi = reviewWorkflowsApi
           );
         },
       }),
-      getRecentDocuments: builder.query<
-        Homepage.GetRecentDocuments.Response['data'],
-        Homepage.GetRecentDocuments.Request['query']
+      getRecentlyAssignedDocuments: builder.query<
+        Homepage.GetRecentlyAssignedDocuments.Response['data'],
+        void
       >({
-        query: (params) => `/content-manager/homepage/recent-documents?action=${params.action}`,
-        transformResponse: (response: Homepage.GetRecentDocuments.Response) => response.data,
-        providesTags: (res, _err, { action }) => [
-          { type: 'RecentDocumentList' as const, id: action },
-        ],
+        query: () => '/review-workflows/homepage/recently-assigned-documents',
+        transformResponse: (response: Homepage.GetRecentlyAssignedDocuments.Response) =>
+          response.data,
+        providesTags: (_, _err) => ['RecentlyAssignedList'],
       }),
     }),
     overrideExisting: true,
@@ -133,7 +132,7 @@ const {
   useUpdateStageMutation,
   useUpdateAssigneeMutation,
   useGetContentTypesQuery,
-  useGetRecentDocumentsQuery,
+  useGetRecentlyAssignedDocumentsQuery,
 } = contentManagerApi;
 
 export {
@@ -141,6 +140,6 @@ export {
   useUpdateStageMutation,
   useUpdateAssigneeMutation,
   useGetContentTypesQuery,
-  useGetRecentDocumentsQuery,
+  useGetRecentlyAssignedDocumentsQuery,
 };
 export type { ContentTypes, ContentType };

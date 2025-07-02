@@ -1,16 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { clickAndWait, findAndClose, navToHeader } from '../../utils/shared';
+import { clickAndWait, describeOnCondition, findAndClose, navToHeader } from '../../utils/shared';
 
-test.describe('Home', () => {
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+describeOnCondition(edition === 'EE')('Home', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
     await login({ page });
   });
 
-  test.only('a user should see the last entries assigned to them', async ({ page }) => {
+  test('a user should see the last entries assigned to them', async ({ page }) => {
     const assignedWidget = page.getByLabel(/assigned to me/i);
     await expect(assignedWidget).toBeVisible();
 

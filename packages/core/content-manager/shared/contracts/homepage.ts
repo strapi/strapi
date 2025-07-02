@@ -18,7 +18,7 @@ export declare namespace GetRecentDocuments {
   export interface Request {
     body: {};
     query: {
-      action: 'update' | 'publish' | 'assigned';
+      action: 'update' | 'publish';
     };
   }
 

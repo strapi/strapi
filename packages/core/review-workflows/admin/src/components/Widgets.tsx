@@ -7,7 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { StageColumn } from '../routes/content-manager/model/components/TableColumns';
-import { useGetRecentDocumentsQuery } from '../services/content-manager';
+import { useGetRecentlyAssignedDocumentsQuery } from '../services/content-manager';
 
 import type { RecentDocument } from '../../../shared/contracts/homepage';
 
@@ -107,7 +107,7 @@ const RecentDocumentsTable = ({ documents }: { documents: RecentDocument[] }) =>
 
 const AssignedWidget = () => {
   const { formatMessage } = useIntl();
-  const { data, isLoading, error } = useGetRecentDocumentsQuery({ action: 'assigned' });
+  const { data, isLoading, error } = useGetRecentlyAssignedDocumentsQuery();
 
   if (isLoading) {
     return <Widget.Loading />;

@@ -122,37 +122,6 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
     });
   };
 
-  const addStatusToDocuments = async (documents: RecentDocument[]): Promise<RecentDocument[]> => {
-    return Promise.all(
-      documents.map(async (recentDocument) => {
-        const hasDraftAndPublish = contentTypes.hasDraftAndPublish(
-          strapi.contentType(recentDocument.contentTypeUid)
-        );
-        /**
-         * Tries to query the other version of the document if draft and publish is enabled,
-         * so that we know when to give the "modified" status.
-         */
-        const { availableStatus } = await metadataService.getMetadata(
-          recentDocument.contentTypeUid,
-          recentDocument,
-          {
-            availableStatus: hasDraftAndPublish,
-            availableLocales: false,
-          }
-        );
-        const status: RecentDocument['status'] = metadataService.getStatus(
-          recentDocument,
-          availableStatus
-        );
-
-        return {
-          ...recentDocument,
-          status: hasDraftAndPublish ? status : undefined,
-        };
-      })
-    );
-  };
-
   const permissionCheckerService = strapi.plugin('content-manager').service('permission-checker');
   const getPermissionChecker = (uid: string) =>
     permissionCheckerService.create({
@@ -160,68 +129,109 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
       model: uid,
     });
 
-  const queryLastDocuments = async (additionalQueryParams?: Record<string, unknown>) => {
-    const permittedContentTypes = await getPermittedContentTypes();
-    const allowedContentTypeUids = permittedContentTypes.filter((uid) => {
-      return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
-    });
-    // Fetch the configuration for each content type in a single query
-    const configurations = await getConfiguration(allowedContentTypeUids);
-    // Get the necessary metadata for the documents
-    const contentTypesMeta = getContentTypesMeta(allowedContentTypeUids, configurations);
-
-    const recentDocuments = await Promise.all(
-      contentTypesMeta.map(async (meta) => {
-        const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
-          limit: MAX_DOCUMENTS,
-          sort: 'publishedAt:desc',
-          fields: meta.fields,
-          ...additionalQueryParams,
-        });
-
-        const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
-        const populate = additionalQueryParams?.populate as string[];
-
-        return formatDocuments(docs, meta, populate);
-      })
-    );
-
-    return recentDocuments
-      .flat()
-      .sort((a, b) => {
-        if (!a.publishedAt || !b.publishedAt) return 0;
-        return b.publishedAt.valueOf() - a.publishedAt.valueOf();
-      })
-      .slice(0, MAX_DOCUMENTS);
-  };
-
   return {
-    async getRecentlyAssignedDocuments(): Promise<GetRecentDocuments.Response['data']> {
-      const userId = strapi.requestContext.get()?.state?.user.id;
-      const recentlyAssignedDocuments = await queryLastDocuments({
-        populate: ['strapi_stage'],
-        filters: {
-          strapi_assignee: {
-            id: userId,
-          },
-        },
-      });
+    async addStatusToDocuments(documents: RecentDocument[]): Promise<RecentDocument[]> {
+      return Promise.all(
+        documents.map(async (recentDocument) => {
+          const hasDraftAndPublish = contentTypes.hasDraftAndPublish(
+            strapi.contentType(recentDocument.contentTypeUid)
+          );
+          /**
+           * Tries to query the other version of the document if draft and publish is enabled,
+           * so that we know when to give the "modified" status.
+           */
+          const { availableStatus } = await metadataService.getMetadata(
+            recentDocument.contentTypeUid,
+            recentDocument,
+            {
+              availableStatus: hasDraftAndPublish,
+              availableLocales: false,
+            }
+          );
+          const status: RecentDocument['status'] = metadataService.getStatus(
+            recentDocument,
+            availableStatus
+          );
 
-      return addStatusToDocuments(recentlyAssignedDocuments);
+          return {
+            ...recentDocument,
+            status: hasDraftAndPublish ? status : undefined,
+          };
+        })
+      );
+    },
+
+    async queryLastDocuments(
+      additionalQueryParams?: Record<string, unknown>,
+      draftAndPublishOnly?: boolean
+    ): Promise<RecentDocument[]> {
+      const permittedContentTypes = await getPermittedContentTypes();
+      const allowedContentTypeUids = draftAndPublishOnly
+        ? permittedContentTypes.filter((uid) => {
+            return contentTypes.hasDraftAndPublish(strapi.contentType(uid));
+          })
+        : permittedContentTypes;
+      // Fetch the configuration for each content type in a single query
+      const configurations = await getConfiguration(allowedContentTypeUids);
+      // Get the necessary metadata for the documents
+      const contentTypesMeta = getContentTypesMeta(allowedContentTypeUids, configurations);
+
+      const recentDocuments = await Promise.all(
+        contentTypesMeta.map(async (meta) => {
+          const permissionQuery = await getPermissionChecker(meta.uid).sanitizedQuery.read({
+            limit: MAX_DOCUMENTS,
+            fields: meta.fields,
+            ...additionalQueryParams,
+          });
+
+          const docs = await strapi.documents(meta.uid).findMany(permissionQuery);
+          const populate = additionalQueryParams?.populate as string[];
+
+          return formatDocuments(docs, meta, populate);
+        })
+      );
+
+      return recentDocuments
+        .flat()
+        .sort((a, b) => {
+          switch (additionalQueryParams?.sort) {
+            case 'publishedAt:desc':
+              if (!a.publishedAt || !b.publishedAt) return 0;
+              return b.publishedAt.valueOf() - a.publishedAt.valueOf();
+            case 'publishedAt:asc':
+              if (!a.publishedAt || !b.publishedAt) return 0;
+              return a.publishedAt.valueOf() - b.publishedAt.valueOf();
+            case 'updatedAt:desc':
+              if (!a.updatedAt || !b.updatedAt) return 0;
+              return b.updatedAt.valueOf() - a.updatedAt.valueOf();
+            case 'updatedAt:asc':
+              if (!a.updatedAt || !b.updatedAt) return 0;
+              return a.updatedAt.valueOf() - b.updatedAt.valueOf();
+            default:
+              return 0;
+          }
+        })
+        .slice(0, MAX_DOCUMENTS);
     },
 
     async getRecentlyPublishedDocuments(): Promise<GetRecentDocuments.Response['data']> {
-      const recentlyPublishedDocuments = await queryLastDocuments({
-        status: 'published',
-      });
+      const recentlyPublishedDocuments = await this.queryLastDocuments(
+        {
+          sort: 'publishedAt:desc',
+          status: 'published',
+        },
+        true
+      );
 
-      return addStatusToDocuments(recentlyPublishedDocuments);
+      return this.addStatusToDocuments(recentlyPublishedDocuments);
     },
 
     async getRecentlyUpdatedDocuments(): Promise<GetRecentDocuments.Response['data']> {
-      const recentlyUpdatedDocuments = await queryLastDocuments();
+      const recentlyUpdatedDocuments = await this.queryLastDocuments({
+        sort: 'updatedAt:desc',
+      });
 
-      return addStatusToDocuments(recentlyUpdatedDocuments);
+      return this.addStatusToDocuments(recentlyUpdatedDocuments);
     },
   };
 };
