@@ -90,6 +90,7 @@ const contentManagerApi = reviewWorkflowsApi
               id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
             },
             { type: 'Document', id: `${model}_LIST` },
+            'RecentDocumentList',
           ];
         },
       }),
