@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Box, Popover } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
-import { useAuth } from '../../features/Auth';
 import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
