@@ -8,6 +8,7 @@ import {
   useAppInfo,
   useFetchClient,
   useAuth,
+  adminApi,
 } from '@strapi/admin/strapi-admin';
 import groupBy from 'lodash/groupBy';
 import isEqual from 'lodash/isEqual';
@@ -181,7 +182,9 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       // Make sure the server has restarted
       await serverRestartWatcher();
-
+      // Invalidate the guided tour meta query cache
+      // @ts-expect-error typescript is unable to infer the tag types defined on adminApi
+      dispatch(adminApi.util.invalidateTags(['GuidedTourMeta']));
       // refetch and update initial state after the data has been saved
       await getDataRef.current();
       // Update the app's permissions
