@@ -126,8 +126,8 @@ const LeftMenu = () => {
           size="S"
           // eslint-disable-next-line react/no-children-prop
           children={undefined}
-          name={''}
-          clearLabel={''}
+          name={'search'}
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
         />
       </Flex>
       <SubNav.Sections>
