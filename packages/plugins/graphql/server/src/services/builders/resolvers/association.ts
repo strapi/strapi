@@ -76,17 +76,16 @@ export default ({ strapi }: Context) => {
           : {};
 
         const dbQuery = merge(defaultFilters, transformedQuery);
-        const data = await strapi.db?.query(contentTypeUID).load(parent, attributeName, dbQuery);
+        let data = await strapi.db?.query(contentTypeUID).load(parent, attributeName, dbQuery);
 
         // Sign media URLs if upload plugin is available and using private provider
-        let signedData = data;
         if (isMediaAttribute && strapi.plugin('upload')) {
           const { signFileUrls } = strapi.plugin('upload').service('file');
 
           if (Array.isArray(data)) {
-            signedData = await async.map(data, (item: any) => signFileUrls(item));
+            data = await async.map(data, (item: any) => signFileUrls(item));
           } else if (data) {
-            signedData = await signFileUrls(data);
+            data = await signFileUrls(data);
           }
         }
 
@@ -109,18 +108,18 @@ export default ({ strapi }: Context) => {
           // Sanitizer definition
           const sanitizeMorphAttribute = async.pipe(wrapData, sanitizeData, unwrapData);
 
-          return sanitizeMorphAttribute(signedData);
+          return sanitizeMorphAttribute(data);
         }
 
         // If this is a to-many relation, it returns an object that
         // matches what the entity-response-collection's resolvers expect
         if (isToMany) {
-          return toEntityResponseCollection(signedData, info);
+          return toEntityResponseCollection(data, info);
         }
 
         // Else, it returns an object that matches
         // what the entity-response's resolvers expect
-        return toEntityResponse(signedData, info);
+        return toEntityResponse(data, info);
       };
     },
   };
