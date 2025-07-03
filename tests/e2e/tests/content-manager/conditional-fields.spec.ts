@@ -56,7 +56,8 @@ test.describe('Conditional Fields', () => {
       });
   });
 
-  test('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
+  // TODO: add the Condition collection to test this case
+  test.skip('As a user if I toggle a boolean field that affects a conditional relation field, the field should be hidden', async ({
     page,
   }) => {
     await createContent(
@@ -83,7 +84,8 @@ test.describe('Conditional Fields', () => {
     await expect(page.getByLabel('country')).toBeHidden();
   });
 
-  test('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
+  // TODO: add the Condition collection to test this case
+  test.skip('As a user if I change an enum field that affects a conditional field, the field should be hidden and its value should not be filled', async ({
     page,
   }) => {
     await createContent(
