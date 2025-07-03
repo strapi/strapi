@@ -218,11 +218,13 @@ const ListViewPage = () => {
         defaultMessage: 'Untitled',
       });
 
+  const linkSearch = query.plugins ? stringify({ plugins: query.plugins }) : undefined;
+
   const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
     navigate({
       pathname: id.toString(),
-      search: stringify({ plugins: query.plugins }),
+      search: linkSearch,
     });
   };
 
@@ -401,6 +403,7 @@ const ListViewPage = () => {
                             <CellContent
                               content={row[header.name.split('.')[0]]}
                               rowId={row.documentId}
+                              linkSearch={linkSearch}
                               {...header}
                             />
                           </Table.Cell>
