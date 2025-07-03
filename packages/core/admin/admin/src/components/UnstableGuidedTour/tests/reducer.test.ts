@@ -16,6 +16,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -36,6 +38,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -60,6 +64,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -85,6 +91,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -104,6 +112,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -124,6 +134,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -145,6 +157,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -165,6 +179,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -189,6 +205,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -214,6 +232,8 @@ describe('GuidedTour | reducer', () => {
             length: 3,
           },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
