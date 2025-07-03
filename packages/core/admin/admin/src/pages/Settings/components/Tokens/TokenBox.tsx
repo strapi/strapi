@@ -39,12 +39,10 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
   };
 
   const getGuidedTourTooltip = (tokenType: string) => {
-    switch (tokenType) {
-      case 'api-token':
-        return unstable_tours.apiTokens.CopyAPIToken;
-      default:
-        return React.Fragment;
+    if (tokenType === 'api-token') {
+      return unstable_tours.apiTokens.CopyAPIToken;
     }
+    return React.Fragment;
   };
 
   const GuidedTourTooltip = getGuidedTourTooltip(tokenType);
