@@ -83,7 +83,12 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
     const colorPickerButtonRef = React.useRef<HTMLButtonElement>(null!);
     const { formatMessage } = useIntl();
     const field = useField(name);
-    const color = field.value ?? props.placeholder ?? '#000000';
+
+    /**
+     * The color that will show in the field. We can't presume to show black or something
+     *   if no value is currently set (as `null` really corresponds to no color, not
+     *   black), so default to empty string if nothing else is available. */
+    const color = field.value ?? props.placeholder ?? '';
 
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
@@ -139,7 +144,10 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                     })}
                     style={{ textTransform: 'uppercase' }}
                     name={name}
-                    defaultValue={field.value}
+                    // No default value. If nothing is selected, the input will be empty.
+                    defaultValue={field.value ?? ''}
+                    // Here we default to #000000 as the placeholder, because, absent a
+                    //   user defined placeholder, we want to indicate the desired format.
                     placeholder="#000000"
                     onChange={field.onChange}
                     {...props}
