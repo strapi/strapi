@@ -1,33 +1,33 @@
 import { Box, Button, Flex, Link, ProgressBar, Typography } from '@strapi/design-system';
 import { ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 import { styled, useTheme } from 'styled-components';
 
 import { type ValidTourName, unstableUseGuidedTour } from './Context';
 
 const getTourTask = (tourName: ValidTourName) => {
-  const defaultActions = {
-    start: {
-      label: {
-        id: 'tours.overview.tour.link',
-        defaultMessage: 'Start',
-      },
-      href: '/admin/plugins/content-type-builder',
-    },
-    done: {
-      id: 'tours.overview.tour.done',
-      defaultMessage: 'Done',
-    },
+  const startLabel = {
+    id: 'tours.overview.tour.link',
+    defaultMessage: 'Start',
+  };
+  const doneLabel = {
+    id: 'tours.overview.tour.done',
+    defaultMessage: 'Done',
   };
 
   switch (tourName) {
     case 'contentTypeBuilder':
       return {
-        ...defaultActions,
+        start: {
+          label: startLabel,
+          to: '/plugins/content-type-builder',
+        },
         title: {
           id: 'tours.overview.contentTypeBuilder.label',
           defaultMessage: 'Create your schema',
         },
+        done: doneLabel,
       };
   }
 };
@@ -149,7 +149,7 @@ export const UnstableGuidedTourOverview = () => {
                 ) : (
                   <>
                     <Typography>{formatMessage(task.title)}</Typography>
-                    <Link endIcon={<ChevronRight />} href={task.start.href}>
+                    <Link tag={NavLink} endIcon={<ChevronRight />} to={task.start.to}>
                       {formatMessage(task.start.label)}
                     </Link>
                   </>
