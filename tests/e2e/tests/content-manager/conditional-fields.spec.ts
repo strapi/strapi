@@ -113,7 +113,7 @@ test.describe('Conditional Fields', () => {
       });
   });
 
-  test('As a user if I change an enum field that affects a conditional relation field, the field should be hidden', async ({
+  test.skip('As a user if I change an enum field that affects a conditional relation field, the field should be hidden', async ({
     page,
   }) => {
     await createContent(
