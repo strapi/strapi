@@ -265,6 +265,7 @@
   "Settings.tokens.RegenerateDialog.title": "Regenerate token",
   "Settings.tokens.copy.editMessage": "For security reasons, you can only see your token once.",
   "Settings.tokens.copy.editTitle": "This token isn’t accessible anymore.",
+  "Settings.tokens.copy.title": "Token",
   "Settings.tokens.copy.lastWarning": "Make sure to copy this token, you won’t be able to see it again!",
   "Settings.tokens.duration.30-days": "30 days",
   "Settings.tokens.duration.7-days": "7 days",
@@ -803,8 +804,15 @@
   "submit": "Submit",
   "tours.contentManager.Introduction.title": "Content manager",
   "tours.contentManager.Introduction.content": "Create and manage content from your collection types and single types.",
+  "tours.apiTokens.Introduction.title": "API tokens",
+  "tours.apiTokens.Introduction.content": "Create and manage API tokens with highly customizable permissions.",
+  "tours.apiTokens.CreateAnAPIToken.title": "Create an API token",
+  "tours.apiTokens.CreateAnAPIToken.content": "Create a new API token. Choose a name, duration and type.",
+  "tours.apiTokens.CopyAPIToken.title": "Copy your new API token",
+  "tours.apiTokens.CopyAPIToken.content": "Make sure to do it now, you won’t be able to see it again. You’ll need to generate a new one if you lose it.",
   "tours.stepCount": "Step {currentStep} of {tourLength}",
   "tours.skip": "Skip",
   "tours.next": "Next",
-  "widget.profile.title": "Profile"
+  "widget.profile.title": "Profile",
+  "tours.gotIt": "Got it"
 }

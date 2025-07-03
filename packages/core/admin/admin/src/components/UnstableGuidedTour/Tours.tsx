@@ -1,12 +1,20 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal } from '@strapi/design-system';
+import { Box, Popover, Portal, Flex, LinkButton } from '@strapi/design-system';
+import { FormattedMessage } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
-import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
+import {
+  type State,
+  type Action,
+  unstableUseGuidedTour,
+  ValidTourName,
+  ExtendedCompletedActions,
+} from './Context';
 import { Step, createStepComponents } from './Step';
 
 /* -------------------------------------------------------------------------------------------------
@@ -94,6 +102,87 @@ const tours = {
       when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
     },
   ]),
+  apiTokens: createTour('apiTokens', [
+    {
+      name: 'Introduction',
+      content: (Step) => (
+        <Step.Root sideOffset={-36}>
+          <Step.Title id="tours.apiTokens.Introduction.title" defaultMessage="API tokens" />
+          <Step.Content
+            id="tours.apiTokens.Introduction.content"
+            defaultMessage="Create and manage API tokens with highly customizable permissions."
+          />
+          <Step.Actions showSkip />
+        </Step.Root>
+      ),
+      when: (completedActions) => !completedActions.includes('didCreateApiToken'),
+    },
+    {
+      name: 'CreateAnAPIToken',
+      content: (Step) => (
+        <Step.Root side="bottom" sideOffset={20} align="end">
+          <Step.Title
+            id="tours.apiTokens.CreateAnAPIToken.title"
+            defaultMessage="Create an API token"
+          />
+          <Step.Content
+            id="tours.apiTokens.CreateAnAPIToken.content"
+            defaultMessage="Create a new API token. Choose a name, duration and type."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+    },
+    {
+      name: 'CopyAPIToken',
+      content: (Step) => (
+        <Step.Root side="bottom" align="start">
+          <Step.Title
+            id="tours.apiTokens.CopyAPIToken.title"
+            defaultMessage="Copy your new API token"
+          />
+          <Step.Content
+            id="tours.apiTokens.CopyAPIToken.content"
+            defaultMessage="Make sure to do it now, you won’t be able to see it again. You’ll need to generate a new one if you lose it."
+          />
+          <Step.Actions />
+        </Step.Root>
+      ),
+      when: (completedActions) => completedActions.includes('didCreateApiToken'),
+    },
+    {
+      name: 'Finish',
+      content: (Step) => {
+        const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
+        return (
+          <Step.Root side="right" align="start" sideOffset={32}>
+            <Step.Title
+              id="tours.apiTokens.FinalStep.title"
+              defaultMessage="It’s time to deploy your application!"
+            />
+            <Step.Content
+              id="tours.apiTokens.FinalStep.content"
+              defaultMessage="Your application is ready to be deployed and its content to be shared with the world!"
+            />
+            <Step.Actions showStepCount={false}>
+              <Flex justifyContent="end" width={'100%'}>
+                <LinkButton
+                  onClick={() => {
+                    dispatch({ type: 'next_step', payload: 'apiTokens' });
+                  }}
+                  tag={NavLink}
+                  to="/"
+                >
+                  <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
+                </LinkButton>
+              </Flex>
+            </Step.Actions>
+          </Step.Root>
+        );
+      },
+      when: (completedActions) => completedActions.includes('didCopyApiToken'),
+    },
+  ]),
 } as const;
 
 type Tours = typeof tours;
@@ -118,7 +207,7 @@ type GuidedTourTooltipProps = {
   content: Content;
   tourName: ValidTourName;
   step: number;
-  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
+  when?: (completedActions: ExtendedCompletedActions) => boolean;
 };
 
 const UnstableGuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
@@ -159,7 +248,7 @@ const GuidedTourTooltipImpl = ({
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
-  const isStepConditionMet = when ? when(guidedTourMeta?.data?.completedActions ?? []) : true;
+  const isStepConditionMet = when ? when(state.completedActions) : true;
   const isPopoverOpen =
     guidedTourMeta?.data?.isFirstSuperAdminUser &&
     !state.tours[tourName].isCompleted &&
@@ -177,6 +266,14 @@ const GuidedTourTooltipImpl = ({
       document.body.style.overflow = originalStyle;
     };
   }, [isPopoverOpen]);
+
+  // TODO: This isn't great but the only solution for syncing the completed actions
+  React.useEffect(() => {
+    dispatch({
+      type: 'set_completed_actions',
+      payload: guidedTourMeta?.data?.completedActions ?? [],
+    });
+  }, [dispatch, guidedTourMeta?.data?.completedActions]);
 
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
@@ -202,7 +299,7 @@ const GuidedTourTooltipImpl = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
-  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
+  when?: (completedActions: ExtendedCompletedActions) => boolean;
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {

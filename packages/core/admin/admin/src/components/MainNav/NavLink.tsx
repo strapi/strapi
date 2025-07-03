@@ -47,6 +47,8 @@ const getGuidedTourTooltip = (to: To) => {
   switch (normalizedTo) {
     case 'content-manager':
       return unstable_tours.contentTypeBuilder.Finish;
+    case '':
+      return unstable_tours.apiTokens.Finish;
     default:
       return React.Fragment;
   }

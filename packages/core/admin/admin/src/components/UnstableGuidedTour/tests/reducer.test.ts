@@ -10,6 +10,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 2,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
       };
 
@@ -24,6 +29,11 @@ describe('GuidedTour | reducer', () => {
             currentStep: 1,
             isCompleted: false,
             length: 2,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
           },
         },
       };
@@ -44,6 +54,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 1,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
       };
 
@@ -64,6 +79,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 1,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
       };
 
@@ -77,6 +97,11 @@ describe('GuidedTour | reducer', () => {
             currentStep: 0,
             isCompleted: false,
             length: 1,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
           },
         },
       };
@@ -92,6 +117,11 @@ describe('GuidedTour | reducer', () => {
             currentStep: 1,
             isCompleted: true,
             length: 1,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
           },
         },
       };
@@ -109,6 +139,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 3,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
       };
 
@@ -122,6 +157,11 @@ describe('GuidedTour | reducer', () => {
           contentTypeBuilder: {
             currentStep: 0,
             isCompleted: true,
+            length: 3,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
             length: 3,
           },
         },
@@ -143,6 +183,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 2,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
       };
 
@@ -162,6 +207,11 @@ describe('GuidedTour | reducer', () => {
             currentStep: 1,
             isCompleted: false,
             length: 2,
+          },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
           },
         },
       };
