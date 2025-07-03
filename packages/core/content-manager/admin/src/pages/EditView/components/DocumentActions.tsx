@@ -179,9 +179,13 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
       <Flex gap={2}>
-        <unstable_tours.contentManager.Publish>
+        {primaryAction.label === 'Publish' ? (
+          <unstable_tours.contentManager.Publish>
+            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+          </unstable_tours.contentManager.Publish>
+        ) : (
           <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-        </unstable_tours.contentManager.Publish>
+        )}
 
         {restActions.length > 0 ? (
           <DocumentActionsMenu
@@ -194,10 +198,19 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
         ) : null}
       </Flex>
       {secondaryAction ? (
-        <DocumentActionButton
-          {...secondaryAction}
-          variant={secondaryAction.variant || 'secondary'}
-        />
+        secondaryAction.label === 'Publish' ? (
+          <unstable_tours.contentManager.Publish>
+            <DocumentActionButton
+              {...secondaryAction}
+              variant={secondaryAction.variant || 'secondary'}
+            />
+          </unstable_tours.contentManager.Publish>
+        ) : (
+          <DocumentActionButton
+            {...secondaryAction}
+            variant={secondaryAction.variant || 'secondary'}
+          />
+        )
       ) : null}
     </Flex>
   );

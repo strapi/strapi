@@ -5,7 +5,7 @@ describe('GuidedTour | reducer', () => {
     it('should increment the step count for the specified tour', () => {
       const initialState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
             length: 2,
@@ -15,13 +15,12 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'next_step',
-        // @ts-expect-error Remove once actual tours are in place
-        payload: 'contentManager',
+        payload: 'contentTypeBuilder',
       };
 
       const expectedState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
             length: 2,
@@ -29,19 +28,18 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
-      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
     it('should preserve other tour states when advancing a specific tour', () => {
       const initialState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 1,
             isCompleted: false,
             length: 1,
           },
-          contentTypeBuilder: {
+          contentManager: {
             currentStep: 2,
             isCompleted: false,
             length: 1,
@@ -51,18 +49,17 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'next_step',
-        // @ts-expect-error Remove once actual tours are in place
-        payload: 'contentManager',
+        payload: 'contentTypeBuilder',
       };
 
       const expectedState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 2,
             isCompleted: false,
             length: 1,
           },
-          contentTypeBuilder: {
+          contentManager: {
             currentStep: 2,
             isCompleted: false,
             length: 1,
@@ -70,14 +67,13 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
-      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
     it('should mark tour as completed when reaching the last step', () => {
       const initialState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
             length: 1,
@@ -87,13 +83,12 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'next_step',
-        // @ts-expect-error Remove once actual tours are in place
-        payload: 'contentManager',
+        payload: 'contentTypeBuilder',
       };
 
       const expectedState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 1,
             isCompleted: true,
             length: 1,
@@ -101,7 +96,6 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
-      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
   });
@@ -110,7 +104,7 @@ describe('GuidedTour | reducer', () => {
     it('should mark the tour as completed', () => {
       const initialState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
             length: 3,
@@ -120,13 +114,12 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'skip_tour',
-        // @ts-expect-error Remove once actual tours are in place
-        payload: 'contentManager',
+        payload: 'contentTypeBuilder',
       };
 
       const expectedState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 0,
             isCompleted: true,
             length: 3,
@@ -134,19 +127,18 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
-      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
 
     it('should preserve other tour states when skipping a specific tour', () => {
       const initialState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 0,
             isCompleted: false,
             length: 3,
           },
-          contentTypeBuilder: {
+          contentManager: {
             currentStep: 1,
             isCompleted: false,
             length: 2,
@@ -156,18 +148,17 @@ describe('GuidedTour | reducer', () => {
 
       const action: Action = {
         type: 'skip_tour',
-        // @ts-expect-error Remove once actual tours are in place
-        payload: 'contentManager',
+        payload: 'contentTypeBuilder',
       };
 
       const expectedState = {
         tours: {
-          contentManager: {
+          contentTypeBuilder: {
             currentStep: 0,
             isCompleted: true,
             length: 3,
           },
-          contentTypeBuilder: {
+          contentManager: {
             currentStep: 1,
             isCompleted: false,
             length: 2,
@@ -175,7 +166,6 @@ describe('GuidedTour | reducer', () => {
         },
       };
 
-      //@ts-expect-error Remove once actual tours are in place
       expect(reducer(initialState, action)).toEqual(expectedState);
     });
   });

@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { Popover, Box, Flex, Button, Typography } from '@strapi/design-system';
+import { Popover, Box, Flex, Button, Typography, LinkButton } from '@strapi/design-system';
 import { FormattedMessage, type MessageDescriptor } from 'react-intl';
+import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { unstableUseGuidedTour, ValidTourName } from './Context';
@@ -41,7 +42,7 @@ type Step = {
   Root: React.ForwardRefExoticComponent<React.ComponentProps<typeof Popover.Content>>;
   Title: (props: StepProps) => React.ReactNode;
   Content: (props: StepProps) => React.ReactNode;
-  Actions: (props: ActionsProps) => React.ReactNode;
+  Actions: (props: ActionsProps & { to?: string }) => React.ReactNode;
 };
 
 const ActionsContainer = styled(Flex)`
@@ -50,7 +51,7 @@ const ActionsContainer = styled(Flex)`
 
 const createStepComponents = (tourName: ValidTourName): Step => ({
   Root: React.forwardRef((props, ref) => (
-    <Popover.Content ref={ref} side="top" align="center" {...props}>
+    <Popover.Content ref={ref} side="top" align="center" style={{ border: 'none' }} {...props}>
       <Flex width="360px" direction="column" alignItems="start">
         {props.children}
       </Flex>
@@ -83,11 +84,13 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
     </Box>
   ),
 
-  Actions: ({ showStepCount = true, showSkip = false, ...props }) => {
+  Actions: ({ showStepCount = true, showSkip = false, to, ...props }) => {
+    const navigate = useNavigate();
     const dispatch = unstableUseGuidedTour('GuidedTourPopover', (s) => s.dispatch);
     const state = unstableUseGuidedTour('GuidedTourPopover', (s) => s.state);
     const currentStep = state.tours[tourName].currentStep + 1;
-    const tourLength = state.tours[tourName].length - 1;
+    // TODO: Currently all tours do not count their last step, but we should find a way to make this more smart
+    const displayedLength = state.tours[tourName].length - 1;
 
     return (
       <ActionsContainer width="100%" padding={3} paddingLeft={5}>
@@ -100,7 +103,7 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
                 <FormattedMessage
                   id="tours.stepCount"
                   defaultMessage="Step {currentStep} of {tourLength}"
-                  values={{ currentStep, tourLength }}
+                  values={{ currentStep, tourLength: displayedLength }}
                 />
               </Typography>
             )}
@@ -113,9 +116,20 @@ const createStepComponents = (tourName: ValidTourName): Step => ({
                   <FormattedMessage id="tours.skip" defaultMessage="Skip" />
                 </Button>
               )}
-              <Button onClick={() => dispatch({ type: 'next_step', payload: tourName })}>
-                <FormattedMessage id="tours.next" defaultMessage="Next" />
-              </Button>
+              {to ? (
+                <LinkButton
+                  onClick={() => {
+                    dispatch({ type: 'next_step', payload: tourName });
+                    navigate(to);
+                  }}
+                >
+                  <FormattedMessage id="tours.next" defaultMessage="Next" />
+                </LinkButton>
+              ) : (
+                <Button onClick={() => dispatch({ type: 'next_step', payload: tourName })}>
+                  <FormattedMessage id="tours.next" defaultMessage="Next" />
+                </Button>
+              )}
             </Flex>
           </Flex>
         )}
