@@ -220,13 +220,13 @@ const useFieldHint = (
     {
       id: 'content-manager.form.Input.hint.text',
       defaultMessage:
-        '{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}',
+        '{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}',
     },
     {
       min: minimum,
       max: maximum,
-      description: hint,
-      unit: units,
+      // description: hint,
+      // unit: units,
       divider: hasMinAndMax
         ? formatMessage({
             id: 'content-manager.form.Input.hint.minMaxDivider',
