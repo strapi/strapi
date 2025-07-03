@@ -60,6 +60,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "11.0.4",
+    "@types/minimatch": "^6.0.0",
     "eslint-config-custom": "5.17.0",
     "tsconfig": "5.17.0"
   },
