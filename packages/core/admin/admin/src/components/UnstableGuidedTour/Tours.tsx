@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Popover, Portal, Flex, Button } from '@strapi/design-system';
+import { Box, Popover, Portal, Flex, Button, LinkButton } from '@strapi/design-system';
 import { FormattedMessage } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -157,13 +157,14 @@ const tours = {
             />
             <Step.Actions showStepCount={false}>
               <Flex justifyContent="end" width={'100%'}>
-                <Button
+                <LinkButton
                   onClick={() => {
                     dispatch({ type: 'next_step', payload: 'apiTokens' });
                   }}
+                  href="/"
                 >
                   <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
-                </Button>
+                </LinkButton>
               </Flex>
             </Step.Actions>
           </Step.Root>

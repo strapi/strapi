@@ -38,17 +38,8 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
     }
   };
 
-  const getGuidedTourTooltip = (tokenType: string) => {
-    if (tokenType === 'api-token') {
-      return unstable_tours.apiTokens.CopyAPIToken;
-    }
-    return React.Fragment;
-  };
-
-  const GuidedTourTooltip = getGuidedTourTooltip(tokenType);
-
   return (
-    <GuidedTourTooltip>
+    <unstable_tours.apiTokens.CopyAPIToken>
       <ContentBox
         endAction={
           token && (
@@ -97,6 +88,6 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
         icon={<Key />}
         iconBackground="neutral100"
       />
-    </GuidedTourTooltip>
+    </unstable_tours.apiTokens.CopyAPIToken>
   );
 };
