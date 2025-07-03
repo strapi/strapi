@@ -2,12 +2,19 @@ import * as React from 'react';
 
 import { Box, Popover, Portal, Flex, LinkButton } from '@strapi/design-system';
 import { FormattedMessage } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { type GetGuidedTourMeta } from '../../../../shared/contracts/admin';
 import { useGetGuidedTourMetaQuery } from '../../services/admin';
 
-import { type State, type Action, unstableUseGuidedTour, ValidTourName } from './Context';
+import {
+  type State,
+  type Action,
+  unstableUseGuidedTour,
+  ValidTourName,
+  ExtendedCompletedActions,
+} from './Context';
 import { Step, createStepComponents } from './Step';
 
 /* -------------------------------------------------------------------------------------------------
@@ -108,6 +115,7 @@ const tours = {
           <Step.Actions showSkip />
         </Step.Root>
       ),
+      when: (completedActions) => !completedActions.includes('didCreateApiToken'),
     },
     {
       name: 'CreateAnAPIToken',
@@ -128,7 +136,7 @@ const tours = {
     {
       name: 'CopyAPIToken',
       content: (Step) => (
-        <Step.Root side="bottom" align="start" sideOffset={-10}>
+        <Step.Root side="bottom" align="start">
           <Step.Title
             id="tours.apiTokens.CopyAPIToken.title"
             defaultMessage="Copy your new API token"
@@ -140,6 +148,7 @@ const tours = {
           <Step.Actions />
         </Step.Root>
       ),
+      when: (completedActions) => completedActions.includes('didCreateApiToken'),
     },
     {
       name: 'Finish',
@@ -161,7 +170,8 @@ const tours = {
                   onClick={() => {
                     dispatch({ type: 'next_step', payload: 'apiTokens' });
                   }}
-                  href="/"
+                  tag={NavLink}
+                  to="/"
                 >
                   <FormattedMessage id="tours.gotIt" defaultMessage="Got it" />
                 </LinkButton>
@@ -170,7 +180,7 @@ const tours = {
           </Step.Root>
         );
       },
-      when: (completedActions) => completedActions.includes('didCreateContentTypeSchema'),
+      when: (completedActions) => completedActions.includes('didCopyApiToken'),
     },
   ]),
 } as const;
@@ -197,7 +207,7 @@ type GuidedTourTooltipProps = {
   content: Content;
   tourName: ValidTourName;
   step: number;
-  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
+  when?: (completedActions: ExtendedCompletedActions) => boolean;
 };
 
 const UnstableGuidedTourTooltip = ({ children, ...props }: GuidedTourTooltipProps) => {
@@ -238,7 +248,7 @@ const GuidedTourTooltipImpl = ({
   const dispatch = unstableUseGuidedTour('UnstableGuidedTourTooltip', (s) => s.dispatch);
 
   const isCurrentStep = state.tours[tourName].currentStep === step;
-  const isStepConditionMet = when ? when(guidedTourMeta?.data?.completedActions ?? []) : true;
+  const isStepConditionMet = when ? when(state.completedActions) : true;
   const isPopoverOpen =
     guidedTourMeta?.data?.isFirstSuperAdminUser &&
     !state.tours[tourName].isCompleted &&
@@ -256,6 +266,14 @@ const GuidedTourTooltipImpl = ({
       document.body.style.overflow = originalStyle;
     };
   }, [isPopoverOpen]);
+
+  // TODO: This isn't great but the only solution for syncing the completed actions
+  React.useEffect(() => {
+    dispatch({
+      type: 'set_completed_actions',
+      payload: guidedTourMeta?.data?.completedActions ?? [],
+    });
+  }, [dispatch, guidedTourMeta?.data?.completedActions]);
 
   const Step = React.useMemo(() => createStepComponents(tourName), [tourName]);
 
@@ -281,7 +299,7 @@ const GuidedTourTooltipImpl = ({
 type TourStep<P extends string> = {
   name: P;
   content: Content;
-  when?: (completedActions: GetGuidedTourMeta.Response['data']['completedActions']) => boolean;
+  when?: (completedActions: ExtendedCompletedActions) => boolean;
 };
 
 function createTour<const T extends ReadonlyArray<TourStep<string>>>(tourName: string, steps: T) {
