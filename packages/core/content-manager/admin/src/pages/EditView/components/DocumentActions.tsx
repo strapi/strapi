@@ -178,25 +178,25 @@ const DocumentActions = ({ actions }: DocumentActionsProps) => {
 
   return (
     <Flex direction="column" gap={2} alignItems="stretch" width="100%">
-      <Flex gap={2}>
-        {primaryAction.label === 'Publish' ? (
-          <unstable_tours.contentManager.Publish>
+      <unstable_tours.contentManager.Publish>
+        <Flex gap={2}>
+          {primaryAction.label === 'Publish' ? (
             <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-          </unstable_tours.contentManager.Publish>
-        ) : (
-          <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
-        )}
+          ) : (
+            <DocumentActionButton {...primaryAction} variant={primaryAction.variant || 'default'} />
+          )}
 
-        {restActions.length > 0 ? (
-          <DocumentActionsMenu
-            actions={restActions}
-            label={formatMessage({
-              id: 'content-manager.containers.edit.panels.default.more-actions',
-              defaultMessage: 'More document actions',
-            })}
-          />
-        ) : null}
-      </Flex>
+          {restActions.length > 0 ? (
+            <DocumentActionsMenu
+              actions={restActions}
+              label={formatMessage({
+                id: 'content-manager.containers.edit.panels.default.more-actions',
+                defaultMessage: 'More document actions',
+              })}
+            />
+          ) : null}
+        </Flex>
+      </unstable_tours.contentManager.Publish>
       {secondaryAction ? (
         secondaryAction.label === 'Publish' ? (
           <unstable_tours.contentManager.Publish>

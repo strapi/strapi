@@ -127,7 +127,7 @@ const tours = {
     {
       name: 'Publish',
       content: (Step) => (
-        <Step.Root side={'left'} align="center" sideOffset={20}>
+        <Step.Root side="left" align="center" sideOffset={20}>
           <Step.Title id="tours.contentManager.Publish.title" defaultMessage="Publish" />
           <Step.Content
             id="tours.contentManager.Publish.content"
@@ -149,7 +149,7 @@ const tours = {
             id="tours.contentManager.FinalStep.content"
             defaultMessage="Now that you’ve created and published content, time to create API tokens and set up permissions."
           />
-          <Step.Actions showStepCount={false} to="/settings" />
+          <Step.Actions showStepCount={false} to="/settings/api-tokens" />
         </Step.Root>
       ),
       when: (completedActions) => completedActions.includes('didCreateContent'),
