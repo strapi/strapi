@@ -105,12 +105,7 @@
           "localized": true
         }
       },
-      "enum": [
-        "standard",
-        "custom",
-        "cheap",
-        "fancy"
-      ]
+      "enum": ["standard", "custom", "cheap", "fancy"]
     },
     "countries": {
       "type": "relation",

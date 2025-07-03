@@ -31,11 +31,7 @@
     },
     "roles": {
       "type": "enumeration",
-      "enum": [
-        "tank",
-        "dps",
-        "heal"
-      ]
+      "enum": ["tank", "dps", "heal"]
     },
     "Author": {
       "type": "relation",
@@ -44,10 +40,7 @@
       "mappedBy": "Article",
       "conditions": {
         "visible": {
-          "==": [
-            {"var": "roles"},
-            "tank"
-          ]
+          "==": [{ "var": "roles" }, "tank"]
         }
       }
     }

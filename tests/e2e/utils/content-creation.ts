@@ -100,12 +100,12 @@ export const fillField = async (page: Page, field: FieldValue): Promise<void> =>
       // Click the combobox to open the dropdown
       const combobox = page.getByLabel(name).last();
       await combobox.click();
-      
+
       // Wait for the dropdown to be visible and click the option
       const option = page.getByRole('option', { name: String(value), exact: true });
       await option.waitFor({ state: 'visible' });
       await option.click();
-      
+
       // Wait for the dropdown to close
       await page.waitForTimeout(100);
       break;
