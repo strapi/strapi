@@ -3,7 +3,6 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
-import { useGetGuidedTourMetaQuery } from '../../services/admin';
 import { createContext } from '../Context';
 
 import { type Tours, tours as guidedTours } from './Tours';
@@ -31,6 +30,9 @@ type Action =
   | {
       type: 'set_completed_actions';
       payload: ExtendedCompletedActions;
+    }
+  | {
+      type: 'skip_all_tours';
     };
 
 type Tour = Record<ValidTourName, { currentStep: number; length: number; isCompleted: boolean }>;
@@ -59,6 +61,10 @@ function reducer(state: State, action: Action): State {
 
     if (action.type === 'set_completed_actions') {
       draft.completedActions = [...new Set([...draft.completedActions, ...action.payload])];
+    }
+
+    if (action.type === 'skip_all_tours') {
+      draft.enabled = false;
     }
   });
 }
