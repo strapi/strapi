@@ -85,7 +85,8 @@
     "@types/koa": "2.13.4",
     "@babel/core": "7.26.10",
     "@babel/runtime": "7.26.10",
-    "@babel/runtime-corejs3": "7.26.10"
+    "@babel/runtime-corejs3": "7.26.10",
+    "@types/minimatch": "3.0.5"
   },
   "devDependencies": {
     "@babel/core": "7.26.10",
@@ -143,7 +144,7 @@
     "find-up": "5.0.0",
     "fs-extra": "11.2.0",
     "get-port": "5.1.1",
-    "glob": "10.3.16",
+    "glob": "11.0.3",
     "husky": "8.0.3",
     "inquirer": "8.2.5",
     "jest": "29.6.0",

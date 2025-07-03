@@ -133,7 +133,7 @@
     "tsconfig": "5.17.0"
   },
   "resolutions": {
-    "minimatch": "^3.0.0"
+    "@types/minimatch": "3.0.5"
   },
   "engines": {
     "node": ">=18.0.0 <=22.x.x",
