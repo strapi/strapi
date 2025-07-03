@@ -301,7 +301,6 @@
   "validation.error": "There are validation errors in your document. Please fix them before saving.",
   "validation.error.unreadable-required-field": "Your current permissions prevent access to certain required fields. Please request access from an administrator to proceed.",
   "bulk-publish.edit": "Edit",
-  "widget.assigned.title": "Assigned to me",
   "widget.last-edited.title": "Last edited entries",
   "widget.last-edited.single-type": "Single-Type",
   "widget.last-edited.no-data": "No edited entries",

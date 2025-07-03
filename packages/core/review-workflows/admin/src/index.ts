@@ -50,6 +50,7 @@ const admin: Plugin.Config.AdminInput = {
           },
           pluginId: PLUGIN_ID,
           id: 'assigned',
+          permissions: [{ action: 'plugin::content-manager.explorer.read' }],
         },
       ]);
     } else if (!window.strapi.features.isEnabled(FEATURE_ID) && window.strapi?.flags?.promoteEE) {

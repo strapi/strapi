@@ -1,4 +1,4 @@
-import { CheckCircle, Feather, Pencil, SealCheck } from '@strapi/icons';
+import { CheckCircle, Feather, Pencil } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';

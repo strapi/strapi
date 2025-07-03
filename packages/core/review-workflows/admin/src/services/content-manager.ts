@@ -20,7 +20,7 @@ const SINGLE_TYPES = 'single-types';
 
 const contentManagerApi = reviewWorkflowsApi
   .enhanceEndpoints({
-    addTagTypes: ['RecentlyAssignedList'],
+    addTagTypes: ['RecentlyAssignedList', 'RecentDocumentList'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -121,7 +121,7 @@ const contentManagerApi = reviewWorkflowsApi
         query: () => '/review-workflows/homepage/recently-assigned-documents',
         transformResponse: (response: Homepage.GetRecentlyAssignedDocuments.Response) =>
           response.data,
-        providesTags: (_, _err) => ['RecentlyAssignedList'],
+        providesTags: (_, _err) => ['RecentlyAssignedList', 'RecentDocumentList'],
       }),
     }),
     overrideExisting: true,

@@ -6,22 +6,20 @@ const createHomepageService = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async getRecentlyAssignedDocuments(): Promise<GetRecentlyAssignedDocuments.Response['data']> {
       const userId = strapi.requestContext.get()?.state?.user.id;
-      const recentlyAssignedDocuments = await strapi
+      const { queryLastDocuments, addStatusToDocuments } = strapi
         .plugin('content-manager')
-        .service('homepage')
-        .queryLastDocuments({
-          populate: ['strapi_stage'],
-          filters: {
-            strapi_assignee: {
-              id: userId,
-            },
-          },
-        });
+        .service('homepage');
 
-      return strapi
-        .plugin('content-manager')
-        .service('homepage')
-        .addStatusToDocuments(recentlyAssignedDocuments);
+      const recentlyAssignedDocuments = await queryLastDocuments({
+        populate: ['strapi_stage'],
+        filters: {
+          strapi_assignee: {
+            id: userId,
+          },
+        },
+      });
+
+      return addStatusToDocuments(recentlyAssignedDocuments);
     },
   };
 };
