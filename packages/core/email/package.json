@@ -64,7 +64,8 @@
     "lodash": "4.17.21",
     "react-intl": "6.6.2",
     "react-query": "3.39.3",
-    "yup": "0.32.9"
+    "yup": "0.32.9",
+    "zod": "3.25.67"
   },
   "devDependencies": {
     "@strapi/admin": "5.16.1",
