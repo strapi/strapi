@@ -10,6 +10,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 2,
           },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
+          },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
@@ -29,6 +34,11 @@ describe('GuidedTour | reducer', () => {
         tours: {
           contentTypeBuilder: {
             currentStep: 1,
+            isCompleted: false,
+            length: 2,
+          },
+          contentManager: {
+            currentStep: 0,
             isCompleted: false,
             length: 2,
           },
@@ -106,6 +116,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 1,
           },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
+          },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
@@ -127,6 +142,11 @@ describe('GuidedTour | reducer', () => {
             currentStep: 1,
             isCompleted: true,
             length: 1,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
           },
           apiTokens: {
             currentStep: 0,
@@ -151,6 +171,11 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 3,
           },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
+          },
           apiTokens: {
             currentStep: 0,
             isCompleted: false,
@@ -172,6 +197,11 @@ describe('GuidedTour | reducer', () => {
             currentStep: 0,
             isCompleted: true,
             length: 3,
+          },
+          contentManager: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 2,
           },
           apiTokens: {
             currentStep: 0,
