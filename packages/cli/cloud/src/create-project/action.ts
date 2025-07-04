@@ -1,7 +1,14 @@
 import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
-import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
+import {
+  CLIContext,
+  CloudApiService,
+  CloudCliConfig,
+  CreateProjectResponse,
+  ProjectAnswers,
+  ProjectInput,
+} from '../types';
 import { cloudApiFactory, local, tokenServiceFactory } from '../services';
 import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
 import { promptLogin } from '../login/action';
@@ -10,6 +17,12 @@ import {
   getProjectNodeVersionDefault,
   questionDefaultValuesMapper,
 } from './utils/project-questions.utils';
+import { apiConfig } from '../config/api';
+import { notificationServiceFactory } from '../services/notification';
+import {
+  environmentCreationErrorFactory,
+  environmentErrorMessageFactory,
+} from '../utils/error-message-factories';
 
 async function handleError(ctx: CLIContext, error: Error) {
   const { logger } = ctx;
@@ -17,14 +30,14 @@ async function handleError(ctx: CLIContext, error: Error) {
   if (error instanceof AxiosError) {
     const errorMessage = typeof error.response?.data === 'string' ? error.response.data : null;
     switch (error.response?.status) {
+      case 400:
+        logger.error(errorMessage || 'Invalid input. Please check your inputs and try again.');
+        return;
       case 403:
         logger.error(
           errorMessage ||
             'You do not have permission to create a project. Please contact support for assistance.'
         );
-        return;
-      case 400:
-        logger.error(errorMessage || 'Invalid input. Please check your inputs and try again.');
         return;
       case 503:
         logger.error(
@@ -44,18 +57,50 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-async function createProject(ctx: CLIContext, cloudApi: any, projectInput: ProjectInput) {
+async function createProject(
+  ctx: CLIContext,
+  cloudApi: CloudApiService,
+  projectInput: ProjectInput,
+  token: string,
+  config: CloudCliConfig
+) {
   const { logger } = ctx;
-  const spinner = logger.spinner('Setting up your project...').start();
+  const spinnerProject = logger.spinner('Setting up your project...').start();
+  const notificationService = notificationServiceFactory(ctx);
+  const { waitForEnvironmentCreation } = notificationService(
+    `${apiConfig.apiBaseUrl}/v1/notifications`,
+    token,
+    config
+  );
+  let projectData: CreateProjectResponse;
   try {
     const { data } = await cloudApi.createProject(projectInput);
+    projectData = data;
     await local.save({ project: data });
-    spinner.succeed('Project created successfully!');
-    return data;
+    spinnerProject.succeed('Project created successfully!');
   } catch (e: Error | unknown) {
-    spinner.fail('An error occurred while creating the project on Strapi Cloud.');
+    spinnerProject.fail(`An error occurred while creating the project on Strapi Cloud.`);
     throw e;
   }
+  if (config.featureFlags.asyncProjectCreationEnabled) {
+    const spinnerEnvironment = logger.spinner('Setting up your environment...').start();
+    try {
+      await waitForEnvironmentCreation(projectData.environmentInternalName);
+      spinnerEnvironment.succeed('Environment created successfully!');
+    } catch (e: Error | unknown) {
+      spinnerEnvironment.fail(
+        `An error occurred while creating the environment on Strapi Cloud.\n`
+      );
+      const environmentErrorMessage = environmentErrorMessageFactory({
+        projectName: projectData.name,
+        firstLine: config.projectCreation.errors.environmentCreationFailed.firstLine,
+        secondLine: config.projectCreation.errors.environmentCreationFailed.secondLine,
+      });
+      logger.log(environmentCreationErrorFactory(environmentErrorMessage));
+      return;
+    }
+  }
+  return projectData;
 }
 
 export default async (ctx: CLIContext) => {
@@ -87,13 +132,13 @@ export default async (ctx: CLIContext) => {
   const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
 
   try {
-    return await createProject(ctx, cloudApi, projectInput);
+    return await createProject(ctx, cloudApi, projectInput, token, config);
   } catch (e: Error | unknown) {
     if (e instanceof AxiosError && e.response?.status === 401) {
       logger.warn('Oops! Your session has expired. Please log in again to retry.');
       await eraseToken();
       if (await promptLogin(ctx)) {
-        return await createProject(ctx, cloudApi, projectInput);
+        return await createProject(ctx, cloudApi, projectInput, token, config);
       }
     } else {
       await handleError(ctx, e as Error);

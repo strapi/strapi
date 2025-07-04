@@ -22,6 +22,10 @@ import { loadPkg } from '../utils/pkg';
 import { buildLogsServiceFactory } from '../services/build-logs';
 import { promptLogin } from '../login/action';
 import { trackEvent } from '../utils/analytics';
+import {
+  environmentCreationErrorFactory,
+  environmentErrorMessageFactory,
+} from '../utils/error-message-factories';
 
 type PackageJson = {
   name: string;
@@ -64,7 +68,8 @@ async function promptForEnvironment(environments: string[]): Promise<string> {
 
 async function upload(
   ctx: CLIContext,
-  project: ProjectInfo,
+  project: Omit<ProjectInfo, 'id'>,
+  cliConfig: CloudCliConfig,
   token: string,
   maxProjectFileSize: number
 ) {
@@ -118,8 +123,8 @@ async function upload(
       return;
     }
 
-    ctx.logger.info('🚀 Uploading project...');
-    const progressBar = ctx.logger.progressBar(100, 'Upload Progress');
+    ctx.logger.log(' 🚀 Uploading project...');
+    const progressBar = ctx.logger.progressBar(100, '🚀 Upload Progress');
 
     try {
       const { data } = await cloudApi.deploy(
@@ -135,11 +140,20 @@ async function upload(
 
       progressBar.update(100);
       progressBar.stop();
-      ctx.logger.success('✨ Upload finished!');
+      ctx.logger.log('✨ Upload finished!');
       return data.build_id;
     } catch (e: any) {
       progressBar.stop();
-      ctx.logger.error('An error occurred while deploying the project. Please try again later.');
+      if (e.response?.status === 405) {
+        const environmentErrorMessage = environmentErrorMessageFactory({
+          projectName: project.name,
+          firstLine: cliConfig.projectDeployment.errors.environmentNotReady.firstLine,
+          secondLine: cliConfig.projectDeployment.errors.environmentNotReady.secondLine,
+        });
+        ctx.logger.log(environmentCreationErrorFactory(environmentErrorMessage));
+      } else {
+        ctx.logger.error('An error occurred while deploying the project. Please try again later.');
+      }
       ctx.logger.debug(e);
     } finally {
       await fse.remove(tarFilePath);
@@ -156,7 +170,11 @@ async function getProject(ctx: CLIContext) {
   const { project } = await local.retrieve();
   if (!project) {
     try {
-      return await createProjectAction(ctx);
+      const projectResponse = await createProjectAction(ctx);
+      if (projectResponse) {
+        const { project: projectSaved } = await local.retrieve();
+        return projectSaved;
+      }
     } catch (e: any) {
       ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       ctx.logger.debug(e);
@@ -192,7 +210,7 @@ function validateEnvironment(ctx: CLIContext, environment: string, environments:
 async function getTargetEnvironment(
   ctx: CLIContext,
   opts: CmdOptions,
-  project: ProjectInfo,
+  project: Omit<ProjectInfo, 'id'>,
   environments: string[]
 ): Promise<string> {
   if (opts.env) {
@@ -320,7 +338,7 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
     }
   }
 
-  const buildId = await upload(ctx, project, token, maxSize);
+  const buildId = await upload(ctx, project, cliConfig, token, maxSize);
 
   if (!buildId) {
     return;
@@ -330,8 +348,8 @@ export default async (ctx: CLIContext, opts: CmdOptions) => {
     ctx.logger.log(
       `🚀 Deploying project to ${chalk.cyan(project.targetEnvironment ?? `production`)} environment...`
     );
-    notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
-    await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
+    notificationService(`${apiConfig.apiBaseUrl}/v1/notifications`, token, cliConfig);
+    await buildLogsService(`${apiConfig.apiBaseUrl}/v2/logs/${buildId}`, token, cliConfig);
 
     ctx.logger.log(
       'Visit the following URL for deployment logs. Your deployment will be available here shortly.'
