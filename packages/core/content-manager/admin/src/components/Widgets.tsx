@@ -3,7 +3,7 @@ import { Box, Flex, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
 import { useGetRecentDocumentsQuery, useGetCountDocumentsQuery } from '../services/homepage';
@@ -162,6 +162,85 @@ const LastPublishedWidget = () => {
 /* -------------------------------------------------------------------------------------------------
  * ChartEntriesWidget
  * -----------------------------------------------------------------------------------------------*/
+const RADIUS = 64;
+const STROKE = 16;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+type ThemeColor = keyof DefaultTheme['colors'];
+
+const ArcChart = styled.circle<{ arcColor: ThemeColor }>`
+  stroke: ${({ theme, arcColor }) => theme.colors[arcColor]};
+`;
+
+const TextChart = styled.text<{ textColor: ThemeColor }>`
+  fill: ${({ theme, textColor }) => theme.colors[textColor]};
+`;
+
+const DonutChartSVG = ({
+  data,
+}: {
+  data: { label: string; count: number; color: ThemeColor }[];
+}) => {
+  const total = data.reduce((acc, curr) => acc + curr.count, 0);
+
+  let cumulativePercent = 0;
+
+  return (
+    <Flex direction="column" gap={4}>
+      <svg width="160" height="160" viewBox="0 0 160 160">
+        <g transform="rotate(-90 80 80)">
+          {data.map((value) => {
+            const percent = (value.count / total) * 100;
+            const arcLength = (percent / 100) * CIRCUMFERENCE;
+            const dashArray = `${arcLength} ${CIRCUMFERENCE - arcLength}`;
+            const dashOffset = CIRCUMFERENCE * (1 - cumulativePercent / 100);
+            const el = (
+              <ArcChart
+                key={value.label}
+                cx="80"
+                cy="80"
+                r={RADIUS}
+                fill="none"
+                arcColor={value.color}
+                strokeWidth={STROKE}
+                strokeDasharray={dashArray}
+                strokeDashoffset={dashOffset}
+                style={{ transition: 'stroke-dashoffset 0.3s' }}
+              />
+            );
+            cumulativePercent += percent;
+            return el;
+          })}
+        </g>
+        <TextChart
+          x="80"
+          y="80"
+          textAnchor="middle"
+          dy="0.3em"
+          fontSize="2.4rem"
+          textColor="neutral800"
+          fontWeight="bold"
+        >
+          {total}
+        </TextChart>
+        <TextChart x="80" y="100" textAnchor="middle" fontSize="1rem" textColor="neutral600">
+          entries
+        </TextChart>
+      </svg>
+      <Flex gap={4} justifyContent="center">
+        {data.map(
+          (value) =>
+            value.count > 0 && (
+              <Flex gap={1} key={value.label}>
+                <Box background={value.color} padding={2} borderRadius={1} />
+                <Typography variant="pi">{value.label}</Typography>
+              </Flex>
+            )
+        )}
+      </Flex>
+    </Flex>
+  );
+};
 
 const ChartEntriesWidget = () => {
   const { formatMessage } = useIntl();
@@ -175,7 +254,15 @@ const ChartEntriesWidget = () => {
     return <Widget.Error />;
   }
 
-  if (!countDocuments) {
+  const { draft, published, modified } = countDocuments ?? {
+    draft: 0,
+    published: 0,
+    modified: 0,
+  };
+
+  const total = draft + published + modified;
+
+  if (!total) {
     return (
       <Widget.NoData>
         {formatMessage({
@@ -186,26 +273,28 @@ const ChartEntriesWidget = () => {
     );
   }
 
-  const { draft, published, modified } = countDocuments;
-
   return (
-    <>
-      Draft: {draft} - Published: {published} - Modified: {modified}
-      <Flex gap={4} justifyContent="center">
-        <Flex gap={1}>
-          <Box background="secondary500" padding={2} borderRadius={1} />
-          <Typography>Draft</Typography>
-        </Flex>
-        <Flex gap={1}>
-          <Box background="alternative600" padding={2} borderRadius={1} />
-          <Typography>Modified</Typography>
-        </Flex>
-        <Flex gap={1}>
-          <Box background="success600" padding={2} borderRadius={1} />
-          <Typography>Published</Typography>
-        </Flex>
-      </Flex>
-    </>
+    <Flex minHeight="100%" justifyContent="center">
+      <DonutChartSVG
+        data={[
+          {
+            label: 'Draft',
+            count: draft,
+            color: 'secondary500',
+          },
+          {
+            label: 'Modified',
+            count: modified,
+            color: 'alternative500',
+          },
+          {
+            label: 'Published',
+            count: published,
+            color: 'success500',
+          },
+        ]}
+      />
+    </Flex>
   );
 };
 
