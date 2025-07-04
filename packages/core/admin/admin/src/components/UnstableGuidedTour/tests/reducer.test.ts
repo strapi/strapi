@@ -10,7 +10,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 2,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -25,7 +32,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 2,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -44,7 +58,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 1,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -64,7 +85,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 1,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -78,7 +106,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 1,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -93,7 +128,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: true,
             length: 1,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -109,7 +151,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 3,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -124,7 +173,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: true,
             length: 3,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
@@ -143,7 +199,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 2,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       const action: Action = {
@@ -163,7 +226,14 @@ describe('GuidedTour | reducer', () => {
             isCompleted: false,
             length: 2,
           },
+          apiTokens: {
+            currentStep: 0,
+            isCompleted: false,
+            length: 3,
+          },
         },
+        enabled: true,
+        completedActions: [],
       };
 
       expect(reducer(initialState, action)).toEqual(expectedState);
