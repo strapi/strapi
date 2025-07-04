@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 
 import { Layouts } from '../../../components/Layouts/Layout';
 import { useTypedSelector } from '../../../core/store/hooks';
-import darkIllustration from '../assets/purchase-page-content-history-illustration-dark.svg';
-import lightIllustration from '../assets/purchase-page-content-history-illustration-light.svg';
+import darkIllustration from '../assets/purchase-page-content-history-illustration-dark.png';
+import lightIllustration from '../assets/purchase-page-content-history-illustration-light.png';
 
 const PurchaseContentHistory = () => {
   const { formatMessage } = useIntl();
