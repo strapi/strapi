@@ -3,6 +3,7 @@ import * as React from 'react';
 import { produce } from 'immer';
 
 import { GetGuidedTourMeta } from '../../../../shared/contracts/admin';
+import { usePersistentState } from '../../hooks/usePersistentState';
 import { createContext } from '../Context';
 
 import { type Tours, tours as guidedTours } from './Tours';
@@ -69,6 +70,8 @@ function reducer(state: State, action: Action): State {
   });
 }
 
+const STORAGE_KEY = 'STRAPI_GUIDED_TOUR';
+
 const UnstableGuidedTourContext = ({
   children,
   enabled = true,
@@ -76,31 +79,30 @@ const UnstableGuidedTourContext = ({
   children: React.ReactNode;
   enabled?: boolean;
 }) => {
-  const stored = getTourStateFromLocalStorage();
-  const initialState = stored
-    ? stored
-    : {
-        tours: Object.keys(guidedTours).reduce((acc, tourName) => {
-          const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
-          acc[tourName as ValidTourName] = {
-            currentStep: 0,
-            length: tourLength,
-            isCompleted: false,
-          };
-          return acc;
-        }, {} as Tour),
-        enabled,
-        completedActions: [],
+  const getInitialTours = () => {
+    return Object.keys(guidedTours).reduce((acc, tourName) => {
+      const tourLength = Object.keys(guidedTours[tourName as ValidTourName]).length;
+      acc[tourName as ValidTourName] = {
+        currentStep: 0,
+        length: tourLength,
+        isCompleted: false,
       };
-
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+      return acc;
+    }, {} as Tour);
+  };
+  const [tours, setTours] = usePersistentState<State>(STORAGE_KEY, {
+    tours: getInitialTours(),
+    enabled,
+    completedActions: [],
+  });
+  const [state, dispatch] = React.useReducer(reducer, tours);
 
   // Sync local storage
   React.useEffect(() => {
     if (window.strapi.future.isEnabled('unstableGuidedTour')) {
-      saveTourStateToLocalStorage(state);
+      setTours(state);
     }
-  }, [state]);
+  }, [state, setTours]);
 
   return (
     <GuidedTourProviderImpl state={state} dispatch={dispatch}>
@@ -108,20 +110,6 @@ const UnstableGuidedTourContext = ({
     </GuidedTourProviderImpl>
   );
 };
-
-/* -------------------------------------------------------------------------------------------------
- * Local Storage
- * -----------------------------------------------------------------------------------------------*/
-
-const STORAGE_KEY = 'STRAPI_GUIDED_TOUR';
-function getTourStateFromLocalStorage(): State | null {
-  const tourState = localStorage.getItem(STORAGE_KEY);
-  return tourState ? JSON.parse(tourState) : null;
-}
-
-function saveTourStateToLocalStorage(state: State) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
 
 export type { Action, State, ValidTourName };
 export { UnstableGuidedTourContext, unstableUseGuidedTour, reducer };
