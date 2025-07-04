@@ -48,8 +48,8 @@
     "watch": "run -T rollup -c -w"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-rc.27",
-    "@strapi/icons": "2.0.0-rc.27",
+    "@strapi/design-system": "2.0.0-rc.28",
+    "@strapi/icons": "2.0.0-rc.28",
     "@strapi/utils": "5.17.0",
     "bcryptjs": "2.4.3",
     "formik": "2.4.5",
