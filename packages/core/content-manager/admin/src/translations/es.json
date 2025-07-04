@@ -182,5 +182,6 @@
   "success.record.unpublish": "Sin publicar",
   "utils.data-loaded": "{number, plural, =1 {La entrada se ha cargado correctamente} other {Las entradas se han cargado correctamente}}",
   "popUpWarning.warning.publish-question": "¿Aún quieres publicarlo?",
-  "popUpwarning.warning.has-draft-relations.button-confirm": "Si, publicar"
+  "popUpwarning.warning.has-draft-relations.button-confirm": "Si, publicar",
+  "widget.chart-entries.title": "Entradas"
 }

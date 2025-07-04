@@ -1,9 +1,21 @@
+import * as React from 'react';
+
 import { Widget, useTracking } from '@strapi/admin/strapi-admin';
-import { Box, Flex, IconButton, Table, Tbody, Td, Tr, Typography } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  IconButton,
+  Table,
+  Tbody,
+  Td,
+  Tr,
+  Typography,
+  Portal,
+} from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 import { DocumentStatus } from '../pages/EditView/components/DocumentStatus';
 import { useGetRecentDocumentsQuery, useGetCountDocumentsQuery } from '../services/homepage';
@@ -162,6 +174,141 @@ const LastPublishedWidget = () => {
 /* -------------------------------------------------------------------------------------------------
  * ChartEntriesWidget
  * -----------------------------------------------------------------------------------------------*/
+const RADIUS = 80;
+const STROKE = 10;
+const CIRCUMFERENCE = 2 * Math.PI * (RADIUS - STROKE / 2);
+
+type ThemeColor = keyof DefaultTheme['colors'];
+
+const ArcChart = styled.circle<{ $arcColor: ThemeColor }>`
+  stroke: ${({ theme, $arcColor }) => theme.colors[$arcColor]};
+`;
+
+const TextChart = styled.tspan<{ $textColor: ThemeColor }>`
+  text-transform: lowercase;
+  fill: ${({ theme, $textColor }) => theme.colors[$textColor]};
+`;
+
+const KeyChartItem = styled(Flex)`
+  width: 100%;
+
+  ${({ theme }) => theme.breakpoints.small} {
+    width: auto;
+  }
+`;
+
+interface ChartData {
+  label: string;
+  count: number;
+  color: ThemeColor;
+}
+
+const DonutChartSVG = ({ data }: { data: ChartData[] }) => {
+  const { formatMessage } = useIntl();
+  const total = data.reduce((acc, curr) => acc + curr.count, 0);
+  const [tooltip, setTooltip] = React.useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    value: ChartData | null;
+    isTouch?: boolean;
+  }>({ visible: false, x: 0, y: 0, value: null });
+
+  let cumulativePercent = 0;
+
+  const handleMouseOver = (e: React.MouseEvent<SVGCircleElement>, value: ChartData) => {
+    setTooltip({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      value,
+    });
+  };
+  const handleMouseOut = () => {
+    setTooltip((t) => ({ ...t, visible: false }));
+  };
+
+  return (
+    <Flex direction="column" gap={6} margin="auto">
+      <svg
+        width={RADIUS * 2}
+        height={RADIUS * 2}
+        viewBox={`0 0 ${RADIUS * 2} ${RADIUS * 2}`}
+        style={{ position: 'relative', zIndex: 1 }}
+      >
+        <g transform={`rotate(-90 ${RADIUS} ${RADIUS})`}>
+          {data.map((value) => {
+            const percent = (value.count / total) * 100;
+            const arcLength = (percent / 100) * CIRCUMFERENCE;
+            const dashArray = `${arcLength} ${CIRCUMFERENCE - arcLength}`;
+            const dashOffset = CIRCUMFERENCE * (1 - cumulativePercent / 100);
+            const el = (
+              <ArcChart
+                key={value.label}
+                cx={RADIUS}
+                cy={RADIUS}
+                r={RADIUS - STROKE / 2}
+                fill="none"
+                strokeWidth={STROKE}
+                strokeDasharray={dashArray}
+                strokeDashoffset={dashOffset}
+                style={{ transition: 'stroke-dashoffset 0.3s', cursor: 'pointer' }}
+                onMouseMove={(e) => handleMouseOver(e, value)}
+                onMouseLeave={handleMouseOut}
+                $arcColor={value.color}
+              />
+            );
+            cumulativePercent += percent;
+            return el;
+          })}
+        </g>
+        <text x={RADIUS} y={RADIUS} textAnchor="middle" fontSize="2.4rem" fontWeight="bold">
+          <TextChart x={RADIUS} dy="0" $textColor="neutral800">
+            {total}
+          </TextChart>
+          <TextChart
+            x={RADIUS}
+            dy="1.4em"
+            fontSize="1rem"
+            fontWeight="normal"
+            $textColor="neutral600"
+          >
+            {formatMessage({
+              id: 'content-manager.widget.chart-entries.title',
+              defaultMessage: 'entries',
+            })}
+          </TextChart>
+        </text>
+      </svg>
+      {tooltip.visible && tooltip.value && (
+        <Portal style={{ position: 'fixed', left: tooltip.x + 16, top: tooltip.y - 16, zIndex: 2 }}>
+          <Box
+            background="neutral900"
+            padding={2}
+            borderRadius={1}
+            minWidth={120}
+            textAlign="center"
+          >
+            <Typography textColor="neutral0">
+              {tooltip.value.count} {tooltip.value.label}
+            </Typography>
+          </Box>
+        </Portal>
+      )}
+      <Flex gap={4} wrap="wrap">
+        {data.map(
+          (value) =>
+            value.count > 0 && (
+              <KeyChartItem gap={1} key={value.label}>
+                <Box background={value.color} padding={2} borderRadius={1} />
+                <Typography variant="pi">{value.label}</Typography>
+              </KeyChartItem>
+            )
+        )}
+      </Flex>
+    </Flex>
+  );
+};
 
 const ChartEntriesWidget = () => {
   const { formatMessage } = useIntl();
@@ -175,7 +322,15 @@ const ChartEntriesWidget = () => {
     return <Widget.Error />;
   }
 
-  if (!countDocuments) {
+  const { draft, published, modified } = countDocuments ?? {
+    draft: 0,
+    published: 0,
+    modified: 0,
+  };
+
+  const total = draft + published + modified;
+
+  if (!total) {
     return (
       <Widget.NoData>
         {formatMessage({
@@ -186,26 +341,28 @@ const ChartEntriesWidget = () => {
     );
   }
 
-  const { draft, published, modified } = countDocuments;
-
   return (
-    <>
-      Draft: {draft} - Published: {published} - Modified: {modified}
-      <Flex gap={4} justifyContent="center">
-        <Flex gap={1}>
-          <Box background="secondary500" padding={2} borderRadius={1} />
-          <Typography>Draft</Typography>
-        </Flex>
-        <Flex gap={1}>
-          <Box background="alternative600" padding={2} borderRadius={1} />
-          <Typography>Modified</Typography>
-        </Flex>
-        <Flex gap={1}>
-          <Box background="success600" padding={2} borderRadius={1} />
-          <Typography>Published</Typography>
-        </Flex>
-      </Flex>
-    </>
+    <Flex minHeight="100%">
+      <DonutChartSVG
+        data={[
+          {
+            label: 'Draft',
+            count: draft,
+            color: 'secondary500',
+          },
+          {
+            label: 'Modified',
+            count: modified,
+            color: 'alternative500',
+          },
+          {
+            label: 'Published',
+            count: published,
+            color: 'success500',
+          },
+        ]}
+      />
+    </Flex>
   );
 };
 
