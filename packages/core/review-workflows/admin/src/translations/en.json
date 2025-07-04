@@ -11,5 +11,6 @@
   "settings.page.purchase.description": "Manage your content review process",
   "settings.page.purchase.perks1": "Customizable review stages",
   "settings.page.purchase.perks2": "Manage user permissions",
-  "settings.page.purchase.perks3": "Support for webhooks"
+  "settings.page.purchase.perks3": "Support for webhooks",
+  "widget.assigned.title": "Assigned to me"
 }

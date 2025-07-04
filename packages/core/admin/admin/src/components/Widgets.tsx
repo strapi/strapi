@@ -21,7 +21,7 @@ const ProfileWidget = () => {
     <Flex direction="column" gap={3} height="100%" justifyContent="center">
       <Avatar.Item delayMs={0} fallback={initials} />
       {userDisplayName && (
-        <DisplayNameTypography fontWeight="bold" textTransform="none">
+        <DisplayNameTypography fontWeight="bold" textTransform="none" textAlign="center">
           {userDisplayName}
         </DisplayNameTypography>
       )}

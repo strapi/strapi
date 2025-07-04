@@ -1,7 +1,8 @@
+import { SealCheck } from '@strapi/icons';
+
 import { PLUGIN_ID, FEATURE_ID } from './constants';
 import { Header } from './routes/content-manager/model/id/components/Header';
 import { Panel } from './routes/content-manager/model/id/components/Panel';
-import { StageSelect } from './routes/content-manager/model/id/components/StageSelect';
 import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
@@ -35,6 +36,23 @@ const admin: Plugin.Config.AdminInput = {
           return { default: Router };
         },
       });
+
+      app.widgets.register([
+        {
+          icon: SealCheck,
+          title: {
+            id: `${PLUGIN_ID}.widget.assigned.title`,
+            defaultMessage: 'Assigned to me',
+          },
+          component: async () => {
+            const { AssignedWidget } = await import('./components/Widgets');
+            return AssignedWidget;
+          },
+          pluginId: PLUGIN_ID,
+          id: 'assigned',
+          permissions: [{ action: 'plugin::content-manager.explorer.read' }],
+        },
+      ]);
     } else if (!window.strapi.features.isEnabled(FEATURE_ID) && window.strapi?.flags?.promoteEE) {
       app.addSettingsLink('global', {
         id: PLUGIN_ID,

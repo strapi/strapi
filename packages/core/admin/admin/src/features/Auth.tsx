@@ -45,7 +45,7 @@ interface AuthContextValue {
    * empty, the user does not have any of those permissions.
    */
   checkUserHasPermissions: (
-    permissions?: Permission[],
+    permissions?: Array<Pick<Permission, 'action'> & Partial<Omit<Permission, 'action'>>>,
     passedPermissions?: Permission[],
     rawQueryContext?: string
   ) => Promise<Permission[]>;
