@@ -94,15 +94,24 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
     },
 
     convertAttribute(attribute: any) {
-      const { configurable, private: isPrivate } = attribute;
+      const { configurable, private: isPrivate, conditions } = attribute;
 
       const baseProperties = {
         private: isPrivate === true ? true : undefined,
         configurable: configurable === false ? false : undefined,
+        // IMPORTANT: Preserve conditions only if they exist and are not undefined/null
+        ...(conditions !== undefined && conditions !== null && { conditions }),
       };
 
       if (attribute.type === 'relation') {
-        const { target, relation, targetAttribute, dominant, ...restOfProperties } = attribute;
+        const {
+          target,
+          relation,
+          targetAttribute,
+          dominant,
+          conditions: _conditions,
+          ...restOfProperties
+        } = attribute;
 
         const attr = {
           type: 'relation',
@@ -120,6 +129,9 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
         if (_.isNil(targetAttribute)) {
           return attr;
         }
+        // if (targetAttribute === null || targetAttribute === undefined) {
+        //   return attr;
+        // }
 
         if (['oneToOne', 'manyToMany'].includes(relation) && dominant === true) {
           attr.inversedBy = targetAttribute;
