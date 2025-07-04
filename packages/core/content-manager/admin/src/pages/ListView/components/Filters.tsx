@@ -32,7 +32,7 @@ const NOT_ALLOWED_FILTERS = [
   'blocks',
 ];
 const DEFAULT_ALLOWED_FILTERS = ['createdAt', 'updatedAt'];
-const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee'];
+const USER_FILTER_ATTRIBUTES = [...CREATOR_FIELDS, 'strapi_assignee', 'admin_user'];
 
 /* -------------------------------------------------------------------------------------------------
  * Filters
